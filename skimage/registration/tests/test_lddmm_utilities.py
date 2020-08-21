@@ -138,6 +138,13 @@ if size is provided."
         with pytest.raises(expected_exception, match=match):
             _validate_scalar_to_multi(**kwargs)
 
+    def test_reject_nans(self):
+        kwargs = dict(value=[1, 2, None], size=3, dtype=int)
+        expected_exception = ValueError
+        match = "value contains np.nan elements."
+        with pytest.raises(expected_exception, match=match):
+            _validate_scalar_to_multi(**kwargs)
+
 
 """
 Test _validate_ndarray.

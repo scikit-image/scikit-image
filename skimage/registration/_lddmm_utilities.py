@@ -6,7 +6,7 @@ from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
 
-def _validate_scalar_to_multi(value, size=None, dtype=None):
+def _validate_scalar_to_multi(value, size=None, dtype=None, reject_nans=True):
     """
     If value's length is 1, upcast it to match size.
     Otherwise, if it does not match size, raise error.
@@ -22,7 +22,7 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
             size = int(size)
         except (TypeError, ValueError) as exception:
             raise TypeError(
-                f"size must be either None or interpretable as an integer.\n"
+                "size must be either None or interpretable as an integer.\n"
                 f"type(size): {type(size)}."
             ) from exception
 
@@ -34,7 +34,8 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
         value = np.array(value, dtype=dtype)
     except ValueError as exception:
         raise ValueError(
-            f"value and dtype are incompatible with one another."
+            "value and dtype are incompatible with one another.\n"
+            f"type(value): {type(value}, dtype: {dtype}."
         ) from exception
 
     # Validate value's dimensionality and length.
@@ -58,17 +59,9 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
             f"value.ndim: {value.ndim}."
         )
 
-    # Check for np.nan values if the dtype is not object.
-    if value.dtype != "object" and np.any(np.isnan(value)):
-        raise NotImplementedError(
-            "np.nan values encountered for a value not cast to dtype object."
-            "What input led to this result?\n"
-            "Write in an exception as appropriate."
-        )
-        raise ValueError(
-            f"value contains inappropriate values for the chosen dtype "
-            f"and thus contains np.nan values."
-        )
+    # Check for np.nan values.
+    if reject_nans and np.any(np.isnan(value)):
+        raise ValueError("value contains np.nan elements.")
 
     return value
 
