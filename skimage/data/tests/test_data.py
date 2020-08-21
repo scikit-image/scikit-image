@@ -68,6 +68,13 @@ def test_coffee():
     data.coffee()
 
 
+def test_eagle():
+    """ Test that "eagle" image can be loaded. """
+    eagle = data.eagle()
+    assert_equal(eagle.ndim, 2)
+    assert_equal(eagle.dtype, np.dtype('uint8'))
+
+
 def test_horse():
     """ Test that "horse" image can be loaded. """
     horse = data.horse()

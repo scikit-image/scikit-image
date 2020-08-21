@@ -31,6 +31,7 @@ __all__ = ['data_dir',
            'coffee',
            'coins',
            'colorwheel',
+           'eagle',
            'grass',
            'gravel',
            'horse',
@@ -345,6 +346,25 @@ def camera():
         Camera image.
     """
     return _load("data/camera.png")
+
+
+
+def eagle():
+    """A golden eagle.
+
+    Suitable for examples on segmentation, Hough transforms, and corner
+    detection.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Dayane Machado).
+
+    Returns
+    -------
+    eagle : (2019, 1826) uint8 ndarray
+        Eagle image.
+    """
+    return _load("data/eagle.png")
 
 
 def astronaut():

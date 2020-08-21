@@ -1,8 +1,9 @@
 scikit-image Code of Conduct
 ============================
 
-scikit-image adopts the `SciPy code of conduct
-<https://github.com/scipy/scipy/blob/master/doc/source/dev/conduct/code_of_conduct.rst>`__.
+scikit-image adopts the [SciPy code of conduct][scipy_coc].
+
+[scipy_coc]: https://github.com/scipy/scipy/blob/master/doc/source/dev/conduct/code_of_conduct.rst
 
 Introduction
 ------------
@@ -58,17 +59,17 @@ We strive to:
    others. Do not insult or put down other participants.  We will not accept
    harassment or other exclusionary behaviour, such as:
 
-  - Violent threats or language directed against another person.
-  - Sexist, racist, or otherwise discriminatory jokes and language.
-  - Posting sexually explicit or violent material.
-  - Posting (or threatening to post) other people's personally identifying information ("doxing").
-  - Sharing private content, such as emails sent privately or non-publicly,
-    or unlogged forums such as IRC channel history, without the sender's consent.
-  - Personal insults, especially those using racist or sexist terms.
-  - Unwelcome sexual attention.
-  - Excessive profanity. Please avoid swearwords; people differ greatly in their sensitivity to swearing.
-  - Repeated harassment of others. In general, if someone asks you to stop, then stop.
-  - Advocating for, or encouraging, any of the above behaviour.
+   - Violent threats or language directed against another person.
+   - Sexist, racist, or otherwise discriminatory jokes and language.
+   - Posting sexually explicit or violent material.
+   - Posting (or threatening to post) other people's personally identifying information ("doxing").
+   - Sharing private content, such as emails sent privately or non-publicly,
+     or unlogged forums such as IRC channel history, without the sender's consent.
+   - Personal insults, especially those using racist or sexist terms.
+   - Unwelcome sexual attention.
+   - Excessive profanity. Please avoid swearwords; people differ greatly in their sensitivity to swearing.
+   - Repeated harassment of others. In general, if someone asks you to stop, then stop.
+   - Advocating for, or encouraging, any of the above behaviour.
 
 
 Diversity Statement
@@ -112,7 +113,7 @@ report to the Code of Conduct Committee directly, or ask the Committee for
 advice, in confidence.
 
 You can report issues to the scikit-image Code of Conduct committee, at
-skimage-conduct@groups.io. Currently, the committee consists of:
+<skimage-conduct@groups.io>. Currently, the committee consists of:
 
 - Emmanuelle Gouillart <emmanuelle.gouillard@normalesup.org> (chair)
 - Carol Willing <willingc@gmail.com>
@@ -124,15 +125,16 @@ a conflict of interest in handling it, then they will recuse themselves from
 considering your report. Alternatively, if for any reason you feel
 uncomfortable making a report to the committee, then you can also contact:
 
-- Any member of the :doc:`scikit-image Steering Council <../skips/1-governance>`, or
-- Senior `NumFOCUS staff <https://numfocus.org/code-of-conduct#persons-responsible>`__: conduct@numfocus.org.
+- Any member of the {ref}`scikit-image Steering Council <governance>`, or
+- Senior [NumFOCUS staff](https://numfocus.org/code-of-conduct#persons-responsible): 
+  <conduct@numfocus.org>.
 
 
 Incident reporting resolution & Code of Conduct enforcement
 -----------------------------------------------------------
 
 *This section summarizes the most important points, more details can be found
-in the* :ref:`reporting manual <CoC_reporting_manual>`.
+in the* {ref}`reporting manual <CoC_reporting_manual>`.
 
 We will investigate and respond to all complaints. The scikit-image Code of Conduct
 Committee and the scikit-image Steering Committee (if involved) will protect the
@@ -150,7 +152,7 @@ report will be:
 1. acknowledge report is received
 2. reasonable discussion/feedback
 3. mediation (if feedback didn't help, and only if both reporter and reportee agree to this)
-4. enforcement via transparent decision (see :ref:`CoC_resolutions`) by the
+4. enforcement via transparent decision (see {ref}`CoC_resolutions`) by the
    Code of Conduct Committee
 
 The committee will respond to any report as soon as possible, and at most
@@ -163,8 +165,8 @@ Endnotes
 We are thankful to the groups behind the following documents, from which we
 drew content and inspiration:
 
-- `The SciPy project <https://www.scipy.org/>`__
-- `The Apache Foundation Code of Conduct <https://www.apache.org/foundation/policies/conduct.html>`__
-- `The Contributor Covenant <https://www.contributor-covenant.org/version/1/4/code-of-conduct/>`__
-- `Jupyter Code of Conduct <https://github.com/jupyter/governance/tree/master/conduct>`__
-- `Open Source Guides - Code of Conduct <https://opensource.guide/code-of-conduct/>`__
+- [The SciPy project](https://www.scipy.org/)
+- [The Apache Foundation Code of Conduct](https://www.apache.org/foundation/policies/conduct.html)
+- [The Contributor Covenant](https://www.contributor-covenant.org/version/1/4/code-of-conduct)
+- [Jupyter Code of Conduct](https://github.com/jupyter/governance/tree/master/conduct)
+- [Open Source Guides - Code of Conduct](https://opensource.guide/code-of-conduct/)

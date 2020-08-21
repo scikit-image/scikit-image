@@ -43,7 +43,8 @@ extensions = ['sphinx_copybutton',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery'
+              'sphinx_gallery.gen_gallery',
+              'myst_parser',
               ]
 
 autosummary_generate = True
