@@ -107,7 +107,7 @@ class RollingBall(object):
     time_rollingball_nan.params = [25, 50, 75, 100, 150, 200]
     time_rollingball_nan.param_names = ["radius"]
 
-    def time_ndim_rollingball(self):
+    def time_rollingball_ndim(self):
         # would be nice to use cells()
         # how can I load it here from skimage.data?
         image = np.stack([data.coins()] * 20)
