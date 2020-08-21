@@ -53,9 +53,8 @@ def check_M_matrix_pdf(M):
 		return False
 	# get indices for all nonzero (1) elements in M
 	row_indices, col_indices = np.nonzero(M)
-	m, n = M.shape
-	for i in range(n):
-		r = row_indices[i]
+	n, m = M.shape
+	for i in range(m):
 		c = col_indices[i]
 		# check the top-left to bottom-right structure
 		if (c != i):
