@@ -2,6 +2,7 @@ import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
 from cython.parallel cimport prange
+cimport openmp
 
 from .._shared.fused_numerics cimport np_floats
 
@@ -12,7 +13,8 @@ ctypedef np_floats DTYPE_FLOAT
 def apply_kernel_nan(DTYPE_FLOAT[:,:,:] windows,
                      DTYPE_FLOAT[:,::1] kernel,
                      DTYPE_FLOAT[:,::1] cap_height,
-                     Py_ssize_t[::1] offsets):
+                     Py_ssize_t[::1] offsets,
+                     num_threads=None):
     """
     apply_kernel_nan(windows, kernel, cap_height)
 
@@ -51,7 +53,14 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:] windows,
     cdef DTYPE_FLOAT min_value, tmp
     offsets_size = offsets.size
 
-    for offset_idx in prange(offsets_size, nogil=True):
+    cdef int max_threads
+
+    if num_threads is None:
+        max_threads = openmp.omp_get_max_threads()
+    else:
+        max_threads = <int> num_threads
+
+    for offset_idx in prange(offsets_size, nogil=True, num_threads=max_threads):
         offset = offsets[offset_idx]
         min_value = INFINITY
         for kern_y in range(kernel.shape[0]):
@@ -73,7 +82,8 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:] windows,
 def apply_kernel(DTYPE_FLOAT[:,:,:] windows,
                  DTYPE_FLOAT[:, ::1] kernel,
                  DTYPE_FLOAT[:, ::1] cap_height,
-                 Py_ssize_t[::1] offsets):
+                 Py_ssize_t[::1] offsets,
+                 num_threads=None):
     """
     apply_kernel_flat(windows, kernel, cap_height)
 
@@ -116,8 +126,14 @@ def apply_kernel(DTYPE_FLOAT[:,:,:] windows,
     cdef Py_ssize_t offset, offset_idx, offsets_size, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
     offsets_size = offsets.size
+    cdef int max_threads
 
-    for offset_idx in prange(offsets_size, nogil=True):
+    if num_threads is None:
+        max_threads = openmp.omp_get_max_threads()
+    else:
+        max_threads = <int> num_threads
+
+    for offset_idx in prange(offsets_size, num_threads=max_threads, nogil=True):
         offset = offsets[offset_idx]
         min_value = INFINITY
         for kern_y in range(kernel.shape[0]):

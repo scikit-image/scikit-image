@@ -112,3 +112,8 @@ class RollingBall(object):
         # how can I load it here from skimage.data?
         image = np.stack([data.coins()] * 20)
         morphology.rolling_ball(image, radius=100)
+
+    def time_rollingball_threads(self, threads):
+        morphology.rolling_ball(data.coins(), radius=100, num_threads=threads)
+    time_rollingball_threads.params = range(1, 32)
+    time_rollingball_threads.param_names = ["threads"]

@@ -72,3 +72,11 @@ def test_preserve_peaks(radius):
     expected_img = img - 10
     background = rolling_ball(img, radius)
     assert np.allclose(img - background, expected_img)
+
+@pytest.mark.parametrize("num_threads", [None, 1, 2])
+def test_threads(num_threads):
+    # not testing if we use multiple threads
+    # just checking if the API throws an exception
+    img = 23 * np.ones((100, 100), dtype=np.uint8)
+    background = rolling_ball(img, 10)
+    background = rolling_ball(img, 10, has_nan=True)

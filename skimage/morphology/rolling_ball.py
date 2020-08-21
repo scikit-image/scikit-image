@@ -6,7 +6,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
-                      has_nan=False):
+                      has_nan=False, num_threads=None):
     """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
@@ -25,6 +25,11 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     has_nan: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
+    num_threads: int, optional
+        The maximum number of threads to use. If ``None`` use the OpenMP 
+        default value; typically equal to the maximum number of virtual cores.
+        Note: This is an upper limit to the number of threads. The exact number
+        is determined by the system's OpenMP library.
 
     Returns
     -------
@@ -117,9 +122,11 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     offsets = as_strided(offsets, image.shape, offsets.strides).ravel()
 
     if has_nan:
-        background = apply_kernel_nan(windowed, kernel, cap_height, offsets)
+        background = apply_kernel_nan(
+            windowed, kernel, cap_height, offsets, num_threads)
     else:
-        background = apply_kernel(windowed, kernel, cap_height, offsets)
+        background = apply_kernel(
+            windowed, kernel, cap_height, offsets, num_threads)
 
     background = background.reshape(image.shape)
     background = background.astype(image.dtype)
@@ -142,9 +149,6 @@ def rolling_ball(image, radius=50, **kwargs):
         The gray image to be filtered.
     radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
-    has_nan: bool, optional
-        If ``False`` (default) assumes that none of the values in ``image``
-        are ``np.nan``, and uses a faster implementation.
 
     Returns
     -------
