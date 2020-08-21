@@ -87,8 +87,6 @@ Version 1.0
 
 Other
 -----
-* Remove custom fused type in ``skimage/morphology/_max_tree.pyx`` once
-  #3486 fused types is merged.
 * Remove the conditional import and function call when ``numpy`` is set
   to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Check whether imread wheels are available, then re-enable testing imread
