@@ -145,7 +145,7 @@ install:
     # This is problematic because the version of numpy of that virtual environment
     # may be higher than the version we want to test with.
     - if [[ $INSTALL_FROM_SDIST ]]; then
-        pip uninstall cython -y;
+        pip uninstall numpy cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
         pip install -vv --no-build-isolation -e .;
