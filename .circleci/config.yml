@@ -13,7 +13,7 @@ jobs:
               python -m pip install -r requirements/default.txt
               python -m pip install -r requirements/build.txt
               python -m pip install -r requirements/docs.txt
-              python -m pip install -e .
+              python -m pip install -e . --no-build-isolation
               export
       - run:
           name: build doc
