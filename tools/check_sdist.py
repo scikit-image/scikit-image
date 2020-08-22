@@ -31,7 +31,7 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
                 './.codecov.yml',
                 './skimage/filters/rank/README.rst',
-                '_pyproject.toml']
+                'pyproject.toml']
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
