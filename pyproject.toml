@@ -1,10 +1,3 @@
-# This file is purposefully not named pyproject.toml
-# To enable a better development experience for contributors using the
-# git repository as their source tree.
-# During the sdist phase, this file is copied into the release tree
-# under the name pyproject.toml
-# See discussion in: https://github.com/scikit-image/scikit-image/pull/4920
-# For a longer description of the usage scenerios.
 [build-system]
 requires = [
     "wheel",

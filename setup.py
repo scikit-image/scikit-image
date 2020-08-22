@@ -9,7 +9,7 @@ import textwrap
 
 import setuptools
 from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist as _sdist
+from distutils.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
 
 
@@ -152,17 +152,6 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('skimage')
 
     return config
-
-
-class sdist(_sdist):
-    def make_release_tree(self, base_dir, files, *args, **kwargs):
-        super().make_release_tree(base_dir, files, *args, **kwargs)
-        dest = os.path.join(base_dir, 'pyproject.toml')
-        if hasattr(os, 'link'):        # can make hard links on this system
-            link = 'hard'
-        else:
-            link = None
-        self.copy_file('_pyproject.toml', dest, link=link)
 
 
 if __name__ == "__main__":

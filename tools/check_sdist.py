@@ -19,7 +19,6 @@ top_parent = Path(members[0].name)
 
 filenames = ['./' + str(Path(m.name).relative_to(top_parent))
              for m in members[1:]]
-filenames.append('./pyproject.toml')
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
 ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
@@ -30,8 +29,7 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.mailmap', './.coveragerc', './azure-pipelines.yml',
                 './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
                 './.codecov.yml',
-                './skimage/filters/rank/README.rst',
-                'pyproject.toml']
+                './skimage/filters/rank/README.rst']
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
