@@ -120,8 +120,5 @@ Other
   when texlive 2020 is available.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
-* Once numpydoc > 0.9.x (ie https://github.com/numpy/numpydoc/pull/256) is
-  released, remove `strip_signature_backslash = True` in
-  ``doc/source/conf.py``.
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).
