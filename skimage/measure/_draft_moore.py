@@ -38,7 +38,7 @@ def moore(array):
     result.append(start)
     current = next_moore_neighbor(start, backtrack, max_x, max_y)
     last_border = start
-    while current[0] != start[0] and current[1] != start[1]:
+    while current[0] != start[0] or current[1] != start[1]:
         if array[current[0], current[1]] == 1:
             result.append(current)
             backtrack = last_border
@@ -49,14 +49,17 @@ def moore(array):
 
     return result
 
-example = np.array(
+
+example = np.array([[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0],])
+print(moore(example))
+
+example_2 = np.array(
     [
         [0, 0, 0, 0, 0, 0],
         [0, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 0],
         [0, 0, 1, 1, 1, 0],
         [0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0],
     ]
 )
-moore(example)
+print(moore(example_2))
