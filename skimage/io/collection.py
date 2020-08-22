@@ -8,11 +8,11 @@ from collections.abc import Sequence
 from copy import copy
 
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
 
 # Check CVE-2020-10379
 from distutils.version import LooseVersion
-if LooseVersion(PIL.__version__) < LooseVersion('7.1.0'):
+if LooseVersion(pil_version) < LooseVersion('7.1.0'):
     from warnings import warn
     warn('Your installed pillow version is < 7.1.0. '
          'Several security issues (CVE-2020-11538, '
