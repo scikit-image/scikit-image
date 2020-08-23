@@ -6,8 +6,8 @@ from .._shared.fused_numerics cimport np_floats
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def _correlate_sparse_offsets(np_floats[:] input, Py_ssize_t[:] indices, 
-                                Py_ssize_t[:] offsets, np_floats[:] values, 
-                                np_floats[:] output):
+                              Py_ssize_t[:] offsets, np_floats[:] values, 
+                              np_floats[:] output):
     cdef Py_ssize_t i
     cdef Py_ssize_t indices_len = indices.shape[0]
     cdef Py_ssize_t value_len = values.shape[0]

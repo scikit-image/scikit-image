@@ -1,6 +1,26 @@
 import numpy as np
 from ._sparse_cy import _correlate_sparse_offsets
+from collections.abc import Iterable
 
+
+def _validate_window_size(axis_sizes):
+    """Ensure all sizes in ``axis_sizes`` are odd.
+
+    Parameters
+    ----------
+    axis_sizes : iterable of int
+
+    Raises
+    ------
+    ValueError
+        If any given axis size is even.
+    """
+    for axis_size in axis_sizes:
+        if axis_size % 2 == 0:
+            msg = ('Window size for `threshold_sauvola` or '
+                   '`threshold_niblack` must not be even on any dimension. '
+                   'Got {}'.format(axis_sizes))
+            raise ValueError(msg)
 
 def correlate_sparse(image, kernel, mode='reflect'):
     """Compute valid cross-correlation of `padded_array` and `kernel`.
@@ -31,9 +51,14 @@ def correlate_sparse(image, kernel, mode='reflect'):
         The result of cross-correlating `image` with `kernel`. If mode
         'valid' is used, the resulting shape is (M-Q+1, N-R+1,[ ...,] P-S+1).
     """
+    if not isinstance(kernel, np.ndarray):
+        msg = '`correlate_sparse` Kernal must be an numpy array object.'
+        raise ValueError(msg)
+
     if mode == 'valid':
         padded_image = image
     else:
+        _validate_window_size(kernel.shape)
         padded_image = np.pad(
             image,
             [(w//2, w//2) for w in kernel.shape],
