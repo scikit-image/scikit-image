@@ -103,6 +103,8 @@ Other
 * Remove pillow version related warning for MPO file format in
   `io._plugins.pil_plugin.imread` when upgrading pillow min version to
   6.0.0
+* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 * When ``numpy`` is set to >= 1.16, remove the warning assertion in
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``invalid value encountered in reduce``.
