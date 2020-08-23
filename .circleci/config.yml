@@ -20,6 +20,7 @@ jobs:
       - run:
           name: build doc
           command: |
+              source skimage_venv/bin/activate
               cd doc
               make clean
               make html
