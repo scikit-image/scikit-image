@@ -53,7 +53,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
             semi_vertex = intensity_vertex / 2
             np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
 
-    - This algorithm assums that dark pixels correspond to the background. If
+    - This algorithm assumes that dark pixels correspond to the background. If
       you have a bright background, invert the image before passing it to the
       function, e.g., using `utils.invert`.
     - This algorithm is sensitive to noise (in particular salt-and-pepper
@@ -87,7 +87,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     if not intensity_vertex.shape == tuple():
         raise ValueError("Intensity_vertex must be a scalar.")
     if np.any(intensity_vertex <= 0):
-        raise ValueError("Intensity_vertex must be greater zero.")
+        raise ValueError("Intensity_vertex must be greater than zero.")
     intensity_vertex = intensity_vertex / 2
 
     image = np.asarray(image)
@@ -139,7 +139,7 @@ def rolling_ball(image, radius=50, **kwargs):
     Estimate background intensity using a rolling ball.
 
     This is a convenience function for the frequently used special case of
-    ``rolling_ellipsoid`` where the spacial vertices and intensity vertex
+    ``rolling_ellipsoid`` where the spatial vertices and intensity vertex
     have the same value resulting in a spherical kernel. For details see
     ``rolling_ellipsoid``.
 
@@ -166,7 +166,7 @@ def rolling_ball(image, radius=50, **kwargs):
     -----
     - If you are using images with a dtype other than `image.dtype == np.uint8`
       you may want to consider using `skimage.morphology.rolling_ellipsoid`
-      instead. It allows you to specify different parameters for the spacial
+      instead. It allows you to specify different parameters for the spatial
       and intensity dimensions.
 
     Examples
@@ -180,9 +180,9 @@ def rolling_ball(image, radius=50, **kwargs):
     """
 
     if not np.issubdtype(np.asarray(radius).dtype, np.number):
-        raise ValueError("Radius must be a numeric type.")
+        raise ValueError("Radius must be of numeric type.")
     if radius <= 0:
-        raise ValueError("Radius must be greater zero.")
+        raise ValueError("Radius must be greater than zero.")
 
     kernel = [radius * 2] * len(image.shape)
     intensity_vertex = radius * 2
