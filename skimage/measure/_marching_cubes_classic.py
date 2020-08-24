@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 import scipy.ndimage as ndi
-from . import _marching_cubes_classic_cy
+from . import _marching_cubes_classic_cy  # type: ignore
 
 
 def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),

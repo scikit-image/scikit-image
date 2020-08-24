@@ -56,7 +56,7 @@ def start_qtapp(app=None):
 class RequiredAttr(object):
     """A class attribute that must be set before use."""
 
-    instances = dict()
+    instances = dict()  # type: ignore
 
     def __init__(self, init_val=None):
         self.instances[self, None] = init_val

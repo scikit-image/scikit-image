@@ -23,6 +23,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('transform')
     config.add_subpackage('util')
     config.add_subpackage('segmentation')
+    config.add_subpackage('typing')
 
     return config
 

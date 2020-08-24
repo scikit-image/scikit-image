@@ -27,11 +27,13 @@ Original author: Lee Kamentsky
 import numpy as np
 from scipy import ndimage as ndi
 
-from . import _watershed_cy
+from . import _watershed_cy  # type: ignore
 from ..morphology.extrema import local_minima
 from ..morphology._util import (_validate_connectivity,
                                 _offsets_to_raveled_neighbors)
 from ..util import crop, regular_seeds
+from ..typing import Image, Labels, Mask, _SupportsArray
+from typing import Optional, Union
 
 
 def _validate_inputs(image, markers, mask, connectivity):
@@ -91,8 +93,15 @@ def _validate_inputs(image, markers, mask, connectivity):
             mask.astype(np.int8))
 
 
-def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
-              compactness=0, watershed_line=False):
+def watershed(
+    image: Image,
+    markers: Optional[Union[int, Labels]] = None,
+    connectivity: Union[int, _SupportsArray] = 1,
+    offset: Optional[np.ndarray] = None,
+    mask: Optional[Mask] = None,
+    compactness: float = 0,
+    watershed_line: bool = False,
+    ) -> Labels:
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters

@@ -2,7 +2,7 @@ _qt_version = None
 has_qt = True
 
 try:
-    from matplotlib.backends.qt_compat import QtGui, QtCore, QtWidgets, QT_RC_MAJOR_VERSION as _qt_version
+    from matplotlib.backends.qt_compat import QtGui, QtCore, QtWidgets, QT_RC_MAJOR_VERSION as _qt_version  # type: ignore
 except ImportError:
     try:
         from matplotlib.backends.qt4_compat import QtGui, QtCore

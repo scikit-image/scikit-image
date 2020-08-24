@@ -6,13 +6,15 @@ from skimage._shared import testing
 from skimage._shared.testing import xfail, arch32
 import scipy
 from distutils.version import LooseVersion as Version
-
+from typing import Optional
 
 # older versions of scipy raise a warning with new NumPy because they use
 # numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.
 SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
+
+NUMPY_MATRIX_WARNING: Optional[str]
 
 if Version(scipy.__version__) < '1.3':
     NUMPY_MATRIX_WARNING = 'matrix subclass'

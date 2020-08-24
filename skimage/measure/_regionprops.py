@@ -267,12 +267,12 @@ class RegionProperties:
                 f"'{type(self)}' object has no attribute '{attr}'"
             )
 
-    @property
+    @property # type: ignore
     @_cached
     def area(self):
         return np.sum(self.image)
 
-    @property
+    @property  # type: ignore
     def bbox(self):
         """
         Returns
@@ -283,32 +283,32 @@ class RegionProperties:
         return tuple([self.slice[i].start for i in range(self._ndim)] +
                      [self.slice[i].stop for i in range(self._ndim)])
 
-    @property
+    @property  # type: ignore
     def bbox_area(self):
         return self.image.size
 
-    @property
+    @property  # type: ignore
     def centroid(self):
         return tuple(self.coords.mean(axis=0))
 
-    @property
+    @property  # type: ignore
     @_cached
     def convex_area(self):
         return np.sum(self.convex_image)
 
-    @property
+    @property  # type: ignore
     @_cached
     def convex_image(self):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
-    @property
+    @property  # type: ignore
     def coords(self):
         indices = np.nonzero(self.image)
         return np.vstack([indices[i] + self.slice[i].start
                           for i in range(self._ndim)]).T
 
-    @property
+    @property  # type: ignore
     @only2d
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
@@ -316,22 +316,22 @@ class RegionProperties:
             return 0
         return sqrt(1 - l2 / l1)
 
-    @property
+    @property  # type: ignore
     def equivalent_diameter(self):
         return (2 * self._ndim * self.area / PI) ** (1 / self._ndim)
 
-    @property
+    @property  # type: ignore
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = label(euler_array, connectivity=self._ndim, return_num=True,
                        background=0)
         return -num + 1
 
-    @property
+    @property  # type: ignore
     def extent(self):
         return self.area / self.image.size
 
-    @property
+    @property  # type: ignore
     def feret_diameter_max(self):
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
@@ -347,30 +347,30 @@ class RegionProperties:
     def filled_area(self):
         return np.sum(self.filled_image)
 
-    @property
+    @property  # type: ignore
     @_cached
     def filled_image(self):
         structure = np.ones((3,) * self._ndim)
         return ndi.binary_fill_holes(self.image, structure)
 
-    @property
+    @property  # type: ignore
     @_cached
     def image(self):
         return self._label_image[self.slice] == self.label
 
-    @property
+    @property  # type: ignore
     @_cached
     def inertia_tensor(self):
         mu = self.moments_central
         return _moments.inertia_tensor(self.image, mu)
 
-    @property
+    @property  # type: ignore
     @_cached
     def inertia_tensor_eigvals(self):
         return _moments.inertia_tensor_eigvals(self.image,
                                                T=self.inertia_tensor)
 
-    @property
+    @property  # type: ignore
     @_cached
     def intensity_image(self):
         if self._intensity_image is None:
@@ -380,58 +380,58 @@ class RegionProperties:
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @property
+    @property  # type: ignore
     def local_centroid(self):
         M = self.moments
         return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
                      M[(0,) * self._ndim])
 
-    @property
+    @property  # type: ignore
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
 
-    @property
+    @property  # type: ignore
     def mean_intensity(self):
         return np.mean(self.intensity_image[self.image])
 
-    @property
+    @property  # type: ignore
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @property
+    @property  # type: ignore
     def major_axis_length(self):
         l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
-    @property
+    @property  # type: ignore
     def minor_axis_length(self):
         l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
-    @property
+    @property  # type: ignore
     @_cached
     def moments(self):
         M = _moments.moments(self.image.astype(np.uint8), 3)
         return M
 
-    @property
+    @property  # type: ignore
     @_cached
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
                                       self.local_centroid, order=3)
         return mu
 
-    @property
+    @property  # type: ignore
     @only2d
     def moments_hu(self):
         return _moments.moments_hu(self.moments_normalized)
 
-    @property
+    @property  # type: ignore
     @_cached
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
-    @property
+    @property  # type: ignore
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
@@ -443,45 +443,45 @@ class RegionProperties:
         else:
             return 0.5 * atan2(-2 * b, c - a)
 
-    @property
+    @property  # type: ignore
     @only2d
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @property
+    @property  # type: ignore
     def solidity(self):
         return self.area / self.convex_area
 
-    @property
+    @property  # type: ignore
     def weighted_centroid(self):
         ctr = self.weighted_local_centroid
         return tuple(idx + slc.start
                      for idx, slc in zip(ctr, self.slice))
 
-    @property
+    @property  # type: ignore
     def weighted_local_centroid(self):
         M = self.weighted_moments
         return (M[tuple(np.eye(self._ndim, dtype=int))] /
                 M[(0,) * self._ndim])
 
-    @property
+    @property  # type: ignore
     @_cached
     def weighted_moments(self):
         return _moments.moments(self._intensity_image_double(), 3)
 
-    @property
+    @property  # type: ignore
     @_cached
     def weighted_moments_central(self):
         ctr = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double(),
                                         center=ctr, order=3)
 
-    @property
+    @property  # type: ignore
     @only2d
     def weighted_moments_hu(self):
         return _moments.moments_hu(self.weighted_moments_normalized)
 
-    @property
+    @property  # type: ignore
     @_cached
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)

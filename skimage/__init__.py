@@ -108,7 +108,7 @@ try:
     # This variable is injected in the __builtins__ by the build
     # process. It used to enable importing subpackages of skimage when
     # the binaries are not built
-    __SKIMAGE_SETUP__
+    __SKIMAGE_SETUP__  # type: ignore
 except NameError:
     __SKIMAGE_SETUP__ = False
 
@@ -118,7 +118,7 @@ if __SKIMAGE_SETUP__:
     # process, as it may not be compiled yet
 else:
     try:
-        from ._shared import geometry
+        from ._shared import geometry  # type: ignore
         del geometry
     except ImportError as e:
         _raise_build_error(e)

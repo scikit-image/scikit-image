@@ -55,7 +55,7 @@ from scipy import ndimage as ndi
 from ...util import img_as_ubyte
 from ..._shared.utils import check_nD, warn
 
-from . import generic_cy
+from . import generic_cy  # type: ignore
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',

@@ -1,6 +1,7 @@
 from ._ccomp import label_cython as clabel
 
-def label(input, neighbors=None, background=None, return_num=False,
+
+def label(image, neighbors=None, background=None, return_num=False,
           connectivity=None):
     r"""Label connected regions of an integer array.
 
@@ -89,4 +90,4 @@ def label(input, neighbors=None, background=None, return_num=False,
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, neighbors, background, return_num, connectivity)
+    return clabel(image, neighbors, background, return_num, connectivity)
