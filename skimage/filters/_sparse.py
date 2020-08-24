@@ -52,7 +52,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
         'valid' is used, the resulting shape is (M-Q+1, N-R+1,[ ...,] P-S+1).
     """
     if not isinstance(kernel, np.ndarray):
-        msg = '`correlate_sparse` Kernal must be an numpy array object.'
+        msg = '`correlate_sparse` kernel must be an numpy array object.'
         raise ValueError(msg)
 
     if mode == 'valid':
