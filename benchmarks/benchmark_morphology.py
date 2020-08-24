@@ -118,8 +118,6 @@ class RollingBall(object):
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
-        # would be nice to use cells()
-        # how can I load it here from skimage.data?
         path = data.image_fetcher.fetch('data/cells.tif')
         image = io.imread(path)
         morphology.rolling_ellipsoid(
