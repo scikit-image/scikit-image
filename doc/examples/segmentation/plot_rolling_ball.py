@@ -8,20 +8,21 @@ image in case of uneven exposure. It is frequently used in biomedical
 image processing and was first proposed by Stanley R. Sternberg in
 1983 [1]_.
 
-The idea of the algorithm is quite intuitive. We think of the image as a
-surface that has unit-sized blocks stacked on top of each other in place of each
-pixel. The number of blocks, and hence surface height, is determined by the
-intensity of the pixel. To get
-the intensity of the background at a desired (pixel) position, we imagine
-submerging a ball under the surface at the desired position. Once it is completely
-covered by the blocks, the height of the ball determines the intensity of the
-background at that position. We can then *roll* this ball around below the
-surface to get the background values for the entire image.
+The algorithm works as a filter and is quite intuitive. We think of the image
+as a surface that has unit-sized blocks stacked on top of each other in place
+of each pixel. The number of blocks, and hence surface height, is determined
+by the intensity of the pixel. To get the intensity of the background at a
+desired (pixel) position, we imagine submerging a ball under the surface at the
+desired position. Once it is completely covered by the blocks, the height of
+the ball determines the intensity of the background at that position. We can
+then *roll* this ball around below the surface to get the background values for
+the entire image.
 
 Scikit-image implements this rolling-ball algorithm, as well as
-a generalized version which allows you to "roll" arbitrary ellipsoids. The
+a generalized version which allows you to "roll" arbitrary ellipsoids. This
 generalized version is useful if you want to use different values for the
-radius of the filter (``kernel_size``) and the amount (``intensity_vertex``).
+spatial radius (``kernel_size``) and the intensity amount
+(``intensity_vertex``).
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
@@ -41,7 +42,7 @@ import numpy as np
 import time
 
 from skimage import (
-    data, morphology, util
+    data, morphology, util, io
 )
 
 
@@ -75,7 +76,7 @@ plt.show()
 # ----------------
 #
 # If you have dark features on a bright background, you need to invert
-# the image before you pass it into the function, and then invert the
+# the image before you pass it into the algorithm, and then invert the
 # result. This can be accomplished via:
 
 image = data.page()
@@ -226,4 +227,44 @@ background = morphology.rolling_ellipsoid(
     intensity_vertex=255 * 2
 )
 plot_result(image, background)
+plt.show()
+
+######################################################################
+# Higher Dimensions
+# -----------------
+#
+# Another feature of ``rolling_ellipsoid`` is that you can directly
+# apply it to higher dimensional images, e.g., a z-stack of images
+# obtained during confocal microscopy.
+
+path = data.image_fetcher.fetch('data/cells.tif')
+image = io.imread(path)
+background = morphology.rolling_ellipsoid(
+    image,
+    kernel_size=(1, 100, 100),
+    intensity_vertex=0.1
+)
+
+plot_result(image[30, ...], background[30, ...])
+plt.show()
+
+######################################################################
+# A kernel size of 1 in the leading dimension (planes) constrains the
+# filter to a single image. In other words, the filter is applied to
+# each image in the stack individually.
+#
+# However, it is also possible to filter using a 3D ellipsoid and
+# consider the adjacent images in the background estimation. For
+# example, you can estimate a pixel-wise background intensity along
+# the z-stack only
+
+path = data.image_fetcher.fetch('data/cells.tif')
+image = io.imread(path)
+background = morphology.rolling_ellipsoid(
+    image,
+    kernel_size=(120, 1, 1),
+    intensity_vertex=0.1
+)
+
+plot_result(image[30, ...], background[30, ...])
 plt.show()
