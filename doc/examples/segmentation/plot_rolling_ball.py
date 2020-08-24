@@ -1,32 +1,33 @@
 """
 ================================================================
-Use the Rolling Ball Method for Background Intensity Estimation
+Use rolling-ball algorithm for estimating background intensity
 ================================================================
 
-The rolling ball algorithm estimates background intensity of a grayscale
+The rolling-ball algorithm estimates the background intensity of a grayscale
 image in case of uneven exposure. It is frequently used in biomedical
-image processing and was first proposed by Stanley R. Sternberg (1983) in
-the paper Biomedical Image Processing [1]_.
+image processing and was first proposed by Stanley R. Sternberg in
+1983 [1]_.
 
 The idea of the algorithm is quite intuitive. We think of the image as a
-surface that has unit-sized blocks stacked on top of each other for each
-pixel. The number of blocks is determined by the intensity of a pixel. To get
-the intensity of the background at a desired position, we imagine submerging a
-ball into the blocks at the desired pixel position. Once it is completely
+surface that has unit-sized blocks stacked on top of each other in place of each
+pixel. The number of blocks, and hence surface height, is determined by the
+intensity of the pixel. To get
+the intensity of the background at a desired (pixel) position, we imagine
+submerging a ball under the surface at the desired position. Once it is completely
 covered by the blocks, the height of the ball determines the intensity of the
 background at that position. We can then *roll* this ball around below the
 surface to get the background values for the entire image.
 
-Scikit-image gives you convenient access to this algorithm, and also implements
+Scikit-image implements this rolling-ball algorithm, as well as
 a generalized version which allows you to "roll" arbitrary ellipsoids. The
-general version is useful when you want to use a different values for the
+generalized version is useful if you want to use different values for the
 radius of the filter (``kernel_size``) and the amount (``intensity_vertex``).
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
 
 
-The Classic Rolling Ball Method
+Classic rolling ball
 -------------------------------
 
 In scikit-image, the rolling ball algorithm assumes that your background has
@@ -39,9 +40,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-from skimage import morphology
-from skimage import data
-from skimage import util
+from skimage import (
+    data, morphology, util
+)
 
 
 def plot_result(image, background):
@@ -104,7 +105,7 @@ fig.tight_layout()
 plt.show()
 
 ######################################################################
-# Take care to not fall victim to an integer underflow when subtracting
+# Be careful not to fall victim to an integer underflow when subtracting
 # a bright background. For example, this code looks correct, but may
 # suffer from an underflow leading to unwanted artifacts. You can see
 # this in the top right corner of the visualization.
@@ -188,7 +189,7 @@ plt.show()
 # In ``rolling_ellipsoid`` you are specifying an ellipsoid instead of
 # a ball/sphere - sidenote: a ball is a special case of an ellipsoid
 # where each vertex has the same length. To fully specify an ellipsoid
-# in 3D, you need to supply three parameters. Two for the two spacial
+# in 3D, you need to supply three parameters. Two for the two spatial
 # dimensions of the image (via ``kernel_size``), and one for the
 # intensity dimension (via ``intensity_vertex``).
 #

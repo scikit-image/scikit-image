@@ -79,7 +79,7 @@ class Skeletonize3d(object):
 
 
 class RollingBall(object):
-    """Benchmark for Rolling Ball algorithm in scikit-image."""
+    """Benchmark Rolling Ball algorithm."""
 
     timeout = 120
 
