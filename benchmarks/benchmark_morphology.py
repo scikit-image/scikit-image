@@ -4,7 +4,7 @@ import numpy as np
 from numpy.lib import NumpyVersion as Version
 
 import skimage
-from skimage import data, filters, morphology, util
+from skimage import data, filters, morphology, util, io
 
 
 class Watershed(object):
@@ -120,8 +120,10 @@ class RollingBall(object):
     def time_rollingball_ndim(self):
         # would be nice to use cells()
         # how can I load it here from skimage.data?
-        image = np.stack([data.coins()] * 20)
-        morphology.rolling_ball(image, radius=100)
+        path = data.image_fetcher.fetch('data/cells.tif')
+        image = io.imread(path)
+        morphology.rolling_ellipsoid(
+            image, kernel_size=(1, 100, 100), intensity_vertex=100)
 
     def time_rollingball_threads(self, threads):
         morphology.rolling_ball(data.coins(), radius=100, num_threads=threads)
