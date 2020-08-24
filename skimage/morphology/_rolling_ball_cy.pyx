@@ -103,7 +103,8 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img,
     rolling_ellipsoid
     """
     
-    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base), dtype=img.base.dtype)
+    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base),
+                                              dtype=img.base.dtype)
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
     out_data_size = out_data.size
@@ -119,13 +120,17 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img,
     else:
         max_threads = <int> num_threads
 
-    for offset_idx in prange(out_data_size, num_threads=max_threads, nogil=True):
+    for offset_idx in prange(
+            out_data_size,
+            num_threads=max_threads,
+            nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
 
         for ker_idx_outer in range(kernel_outer):
             ker_idx_outer = ker_idx_outer * kernel_inner
-            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape, padded_img_shape)
+            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape, 
+                              padded_img_shape)
             for ker_idx_inner in range(kernel_inner):
                 ker_idx = ker_idx_outer + ker_idx_inner
                 tmp = (img[img_idx+ker_idx_inner] + ellipsoid_intensity[ker_idx]) * kernel[ker_idx]
@@ -189,7 +194,8 @@ def apply_kernel(DTYPE_FLOAT[::1] img,
     assumption allows for faster code (better compiler optimization).
     """
     
-    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base), dtype=img.base.dtype)
+    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base),
+                                              dtype=img.base.dtype)
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
     out_data_size = out_data.size
@@ -205,7 +211,10 @@ def apply_kernel(DTYPE_FLOAT[::1] img,
     else:
         max_threads = <int> num_threads
 
-    for offset_idx in prange(out_data_size, num_threads=max_threads, nogil=True):
+    for offset_idx in prange(
+            out_data_size,
+            num_threads=max_threads,
+            nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
 
@@ -213,7 +222,8 @@ def apply_kernel(DTYPE_FLOAT[::1] img,
         # (the inner loop is contiguous in memory)
         for ker_idx_outer in range(kernel_outer):
             ker_idx_outer = ker_idx_outer * kernel_inner
-            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape, padded_img_shape)
+            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape,
+                              padded_img_shape)
             for ker_idx_inner in range(kernel_inner):
                 ker_idx = ker_idx_outer + ker_idx_inner
                 tmp = (img[img_idx+ker_idx_inner] + ellipsoid_intensity[ker_idx]) * kernel[ker_idx]
