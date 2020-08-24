@@ -22,6 +22,17 @@ def _validate_window_size(axis_sizes):
                    'Got {}'.format(axis_sizes))
             raise ValueError(msg)
 
+
+def _to_np_mode(mode):
+    """Convert from `scipy.ndimage.correlate` mode name 
+    to the corresponding numpy.pad  mode."""
+    mode_translation_dict = dict(nearest = 'edge', reflect='symmetric',
+                                 mirror='reflect')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
+
+
 def correlate_sparse(image, kernel, mode='reflect'):
     """Compute valid cross-correlation of `padded_array` and `kernel`.
 
@@ -31,16 +42,16 @@ def correlate_sparse(image, kernel, mode='reflect'):
 
     Parameters
     ----------
-    image : array of float, shape (M, N,[ ...,] P)
+    image : ndarray, dtype float, shape (M, N,[ ...,] P)
         The input array. If mode is 'valid', this array should already be
         padded, as a margin of the same shape as kernel will be stripped
         off.
-    kernel : ndarray, shape (Q, R,[ ...,] S)
+    kernel : ndarray, dtype float shape (Q, R,[ ...,] S)
         The kernel to be correlated. Must have the same number of
         dimensions as `padded_array`. For high performance, it should
         be sparse (few nonzero entries).
     mode : string, optional
-        See `np.pad` for valid modes. Additionally, mode 'valid' is
+        See `scipy.ndimage.correlate` for valid modes. Additionally, mode 'valid' is
         accepted, in which case no padding is applied and the result is
         the result for the smaller image for which the kernel is entirely
         inside the original data.
@@ -58,11 +69,12 @@ def correlate_sparse(image, kernel, mode='reflect'):
     if mode == 'valid':
         padded_image = image
     else:
+        np_mode = _to_np_mode(mode)
         _validate_window_size(kernel.shape)
         padded_image = np.pad(
             image,
             [(w//2, w//2) for w in kernel.shape],
-            mode=mode,
+            mode=np_mode,
         )
     indices = np.nonzero(kernel)
     offsets = np.ravel_multi_index(indices, padded_image.shape).astype(np.intp)
