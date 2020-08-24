@@ -18,15 +18,16 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     image : ndarray
         The last two dimensions are treated as the columns and rows of the
         image. The operation is broadcasted along the remaining ones.
-    kernel_size: two-element tuple, numeric, optional
-        The length of the spatial vertices of the ellipsoid.
+    kernel_size: ndarray, optional
+        The length of the non-intensity vertices of the ellipsoid.
+        ``kernel_size`` must have the same dimensions as ``image``.
     intensity_vertex : scalar, numeric, optional
         The length of the intensity vertex of the ellipsoid.
     has_nan: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
     num_threads: int, optional
-        The maximum number of threads to use. If ``None`` use the OpenMP 
+        The maximum number of threads to use. If ``None`` use the OpenMP
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
@@ -78,12 +79,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(
             "kernel_size must be convertible to a numeric array.")
-    if not kernel_size.shape == (2,):
-        raise ValueError(
-            "kernel_size must be a two element tuple.")
     if np.any(kernel_size <= 0):
         raise ValueError("All elements of kernel_size must be greater zero.")
-    kernel_size = kernel_size / 2
+    kernel_shape_int = np.asarray(kernel_size//2*2+1, dtype=np.intp)
 
     intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
     if not intensity_vertex.shape == tuple():
@@ -95,40 +93,38 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     image = np.asarray(image)
     img = image.astype(np.float_)
 
-    kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
+    ellipsoid_coords = np.array([x for x in np.ndindex(*kernel_shape_int)]) - (kernel_size // 2)
+    tmp = np.sum((ellipsoid_coords / (kernel_size[np.newaxis, :]/2)) ** 2, axis=1)
+    ellipsoid_intensity = intensity_vertex - intensity_vertex * np.sqrt(np.clip(1 - tmp, 0, None))
+    ellipsoid_intensity = ellipsoid_intensity.astype(np.float_)
 
-    pad_amount = [[0]] * (image.ndim - 2) + [[kernel_size_y], [kernel_size_x]]
-    img = np.pad(img, pad_amount, constant_values=np.Inf, mode="constant")
-
-    tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
-    tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
-    x, y = np.meshgrid(tmp_x, tmp_y)
-
-    kernel_size_y, kernel_size_x = kernel_size
-    tmp = (x / kernel_size_x) ** 2 + (y / kernel_size_y) ** 2
-    cap_height = intensity_vertex - intensity_vertex * \
-        np.sqrt(np.clip(1 - tmp, 0, None))
-    cap_height = cap_height.astype(np.float_)
+    pad_amount = np.round(kernel_size / 2).astype(int)
+    img = np.pad(img, pad_amount[:, np.newaxis], constant_values=np.Inf, mode="constant")
 
     kernel = np.asarray(tmp <= 1, dtype=np.float_)
     kernel[kernel == 0] = np.Inf
 
-    strides = (img.itemsize, img.strides[-2], img.itemsize)
-    shape = (img.size - (kernel.shape[0] - 1) *
-             img.shape[-1] - (kernel.shape[1] - 1), *kernel.shape)
-    windowed = as_strided(img, shape, strides)
-
-    offsets = np.arange(img.size, dtype=np.intp).reshape(img.shape)
-    offsets = as_strided(offsets, image.shape, offsets.strides).ravel()
-
     if has_nan:
         background = apply_kernel_nan(
-            windowed, kernel, cap_height, offsets, num_threads)
+            img.ravel(),
+            kernel,
+            ellipsoid_intensity,
+            np.array(image.shape, dtype=np.intp),
+            np.array(img.shape, dtype=np.intp),
+            kernel_shape_int,
+            num_threads
+        )
     else:
         background = apply_kernel(
-            windowed, kernel, cap_height, offsets, num_threads)
+            img.ravel(),
+            kernel,
+            ellipsoid_intensity,
+            np.array(image.shape, dtype=np.intp),
+            np.array(img.shape, dtype=np.intp),
+            kernel_shape_int,
+            num_threads
+        )
 
-    background = background.reshape(image.shape)
     background = background.astype(image.dtype)
 
     return background
@@ -184,6 +180,6 @@ def rolling_ball(image, radius=50, **kwargs):
     if radius <= 0:
         raise ValueError("Radius must be greater zero.")
 
-    kernel = (radius * 2, radius * 2)
+    kernel = [radius * 2] * len(image.shape)
     intensity_vertex = radius * 2
     return rolling_ellipsoid(image, kernel, intensity_vertex, **kwargs)

@@ -6,7 +6,7 @@ Tests for Rolling Ball Filter
 import numpy as np
 import pytest
 
-from skimage import data
+from skimage import data, io
 from skimage.morphology import rolling_ball, rolling_ellipsoid
 
 
@@ -80,3 +80,9 @@ def test_threads(num_threads):
     img = 23 * np.ones((100, 100), dtype=np.uint8)
     background = rolling_ball(img, 10)
     background = rolling_ball(img, 10, has_nan=True)
+
+
+def test_ndim():
+    path = data.image_fetcher.fetch('data/cells.tif')
+    image = io.imread(path)[:5, ...]
+    rolling_ellipsoid(image, kernel_size=(3, 100, 100), intensity_vertex=100)
