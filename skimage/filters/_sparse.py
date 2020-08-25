@@ -26,7 +26,7 @@ def _validate_window_size(axis_sizes):
 def _to_np_mode(mode):
     """Convert from `scipy.ndimage.correlate` mode name 
     to the corresponding numpy.pad  mode."""
-    mode_translation_dict = dict(nearest = 'edge', reflect='symmetric',
+    mode_translation_dict = dict(nearest='edge', reflect='symmetric',
                                  mirror='reflect')
     if mode in mode_translation_dict:
         mode = mode_translation_dict[mode]
