@@ -5,7 +5,7 @@ from skimage.util import invert, view_as_windows
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
+def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
                       has_nan=False, num_threads=None):
     """Estimate background intensity using a rolling ellipsoid.
 
@@ -18,9 +18,12 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     image : ndarray
         The last two dimensions are treated as the columns and rows of the
         image. The operation is broadcasted along the remaining ones.
-    kernel_size: ndarray, optional
-        The length of the non-intensity vertices of the ellipsoid.
-        ``kernel_size`` must have the same dimensions as ``image``.
+    kernel_size: ndarray or scalar, optional
+        The length of the non-intensity vertices of the ellipsoid. If
+        ``kernel_size`` is a ndarray, it must have the same dimensions as
+        ``image``. If ``kernel_size`` is a scalar it will be extended to
+        have the same dimension via
+        ``kernel_size = kernel_size * np.ones_like(image.shape)``.
     intensity_vertex : scalar, numeric, optional
         The length of the intensity vertex of the ellipsoid.
     has_nan: bool, optional
@@ -81,6 +84,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
             "kernel_size must be convertible to a numeric array.")
     if np.any(kernel_size <= 0):
         raise ValueError("All elements of kernel_size must be greater zero.")
+
+    if kernel_size.ndim == 0:
+        kernel_size = kernel_size * np.ones_like(image.shape)
+
     kernel_shape_int = np.asarray(kernel_size//2*2+1, dtype=np.intp)
 
     intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
@@ -187,6 +194,6 @@ def rolling_ball(image, radius=50, **kwargs):
     if radius <= 0:
         raise ValueError("Radius must be greater than zero.")
 
-    kernel = [radius * 2] * image.ndim
+    kernel = radius * 2
     intensity_vertex = radius * 2
     return rolling_ellipsoid(image, kernel, intensity_vertex, **kwargs)
