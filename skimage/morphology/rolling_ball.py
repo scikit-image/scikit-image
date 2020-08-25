@@ -16,8 +16,7 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
     Parameters
     ----------
     image : ndarray
-        The last two dimensions are treated as the columns and rows of the
-        image. The operation is broadcasted along the remaining ones.
+        The image to be filtered.
     kernel_size: ndarray or scalar, optional
         The length of the non-intensity vertices of the ellipsoid. If
         ``kernel_size`` is a ndarray, it must have the same dimensions as
@@ -155,14 +154,14 @@ def rolling_ball(image, radius=50, **kwargs):
 
     Parameters
     ----------
-    image : (N, M) ndarray
-        The gray image to be filtered.
+    image : ndarray
+        The image to be filtered.
     radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
 
     Returns
     -------
-    filtered_image : ndarray
+    background : ndarray
         The estimated background of the image.
 
     See Also
@@ -178,6 +177,12 @@ def rolling_ball(image, radius=50, **kwargs):
       you may want to consider using `skimage.morphology.rolling_ellipsoid`
       instead. It allows you to specify different parameters for the spatial
       and intensity dimensions.
+    - The ball has the same dimensionality as the input image. If you
+      want to apply the filter plane-wise to a 3D image use ::
+        kernel_size = (1, 2 * radius, 2 * radius)
+        intensity_vertex = 2 * radius
+        rolling_ellipsoid(image, kernel_size, intensity_vertex)``
+      instead.
 
     Examples
     --------
