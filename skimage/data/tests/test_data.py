@@ -158,6 +158,6 @@ def test_kidney_3d_multichannel():
 
     Needs internet connection.
     """
-    path = fetch('data/kidney-tissue-fluorescence.tif')
+    path = fetch('data/kidney.tif')
     image = io.imread(path)
     assert image.shape == (16, 512, 512, 3)
