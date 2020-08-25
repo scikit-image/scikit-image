@@ -93,9 +93,12 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     image = np.asarray(image)
     img = image.astype(np.float_)
 
-    ellipsoid_coords = np.array(
-        np.meshgrid(*[range(x) for x in kernel_shape_int],
-            indexing='ij').reshape((-1, len(kernel_shape))) - (kernel_size // 2)
+    ellipsoid_coords = np.stack(
+        np.meshgrid(
+            *[range(-x, x+1) for x in kernel_shape_int//2],
+            indexing='ij'
+        ),
+        axis=-1).reshape(-1, len(kernel_size))
     tmp = np.sum(
         (ellipsoid_coords / (kernel_size[np.newaxis, :]/2)) ** 2, axis=1)
     ellipsoid_intensity = intensity_vertex - \
