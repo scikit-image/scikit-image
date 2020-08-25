@@ -1,7 +1,6 @@
 import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
-from libc.stdlib cimport malloc, free
 from cython.parallel cimport prange
 cimport openmp
 

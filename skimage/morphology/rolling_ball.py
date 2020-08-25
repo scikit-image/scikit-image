@@ -34,7 +34,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
 
     Returns
     -------
-    filtered_image : ndarray
+    background : ndarray
         The estimated background of the image.
 
     Notes
@@ -94,7 +94,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     img = image.astype(np.float_)
 
     ellipsoid_coords = np.array(
-        [x for x in np.ndindex(*kernel_shape_int)]) - (kernel_size // 2)
+        np.meshgrid(*[range(x) for x in kernel_shape_int],
+            indexing='ij').reshape((-1, len(kernel_shape))) - (kernel_size // 2)
     tmp = np.sum(
         (ellipsoid_coords / (kernel_size[np.newaxis, :]/2)) ** 2, axis=1)
     ellipsoid_intensity = intensity_vertex - \
@@ -105,8 +106,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     img = np.pad(img, pad_amount[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
 
-    kernel = np.asarray(tmp <= 1, dtype=np.float_)
-    kernel[kernel == 0] = np.Inf
+    kernel = np.where(tmp <= 1, 1, np.inf)
 
     if has_nan:
         background = apply_kernel_nan(
@@ -184,6 +184,6 @@ def rolling_ball(image, radius=50, **kwargs):
     if radius <= 0:
         raise ValueError("Radius must be greater than zero.")
 
-    kernel = [radius * 2] * len(image.shape)
+    kernel = [radius * 2] * image.ndim
     intensity_vertex = radius * 2
     return rolling_ellipsoid(image, kernel, intensity_vertex, **kwargs)
