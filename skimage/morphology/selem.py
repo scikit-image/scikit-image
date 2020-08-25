@@ -3,6 +3,7 @@ from scipy import ndimage as ndi
 import warnings
 
 from .. import draw
+from .._shared.utils import deprecate_kwarg
 
 
 def square(width, dtype=np.uint8):
@@ -31,9 +32,9 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(nrows=None, ncols=None, dtype=np.uint8,
-              *,
-              height=None, width=None):
+@deprecate_kwarg({"height": "ncols", "width": "nrows"},
+                 removed_version="0.20.0")
+def rectangle(nrows=None, ncols=None, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -50,10 +51,10 @@ def rectangle(nrows=None, ncols=None, dtype=np.uint8,
     ----------------
     dtype : data-type
         The data type of the structuring element.
-    width : int, depreciated
-        The number of rows of the rectangle.
     height : int, depreciated
         The number of columns of the rectangle.
+    width : int, depreciated
+        The number of rows of the rectangle.
 
     Returns
     -------
@@ -69,27 +70,6 @@ def rectangle(nrows=None, ncols=None, dtype=np.uint8,
     otherwise.
 
     """
-
-    if width is not None:
-        nrows = width
-        warnings.warn("The usage of width is depreciated and the argument will"
-                      " be removed in a future version. Use"
-                      " `rectangle(nrows, ncols)` instead.",
-                      FutureWarning)
-
-    if height is not None:
-        ncols = height
-
-        warnings.warn("The usage of height is depreciated and the argument"
-                      "will be removed in a future version. Use"
-                      " `rectangle(nrows, ncols)` instead.",
-                      FutureWarning)
-
-    if nrows is None:
-        raise ValueError("You must specify a value for nrows.")
-
-    if ncols is None:
-        raise ValueError("You must specify a value for ncols.")
 
     return np.ones((nrows, ncols), dtype=dtype)
 
