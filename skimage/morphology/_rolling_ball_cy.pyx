@@ -57,12 +57,12 @@ cdef Py_ssize_t ind2ind(Py_ssize_t from_index, Py_ssize_t offset, Py_ssize_t[::1
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def apply_kernel_nan(DTYPE_FLOAT[::1] img,
-                     DTYPE_FLOAT[::1] kernel,
-                     DTYPE_FLOAT[::1] ellipsoid_intensity,
-                     Py_ssize_t[::1] img_shape,
-                     Py_ssize_t[::1] padded_img_shape,
-                     Py_ssize_t[::1] kernel_shape,
+def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
+                     DTYPE_FLOAT[::1] kernel not None,
+                     DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                     Py_ssize_t[::1] img_shape not None,
+                     Py_ssize_t[::1] padded_img_shape not None,
+                     Py_ssize_t[::1] kernel_shape not None,
                      num_threads=None):
     """
     apply_kernel_nan(img, kernel, ellipsoid_intensity, img_shape,
@@ -143,12 +143,12 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img,
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def apply_kernel(DTYPE_FLOAT[::1] img,
-                 DTYPE_FLOAT[::1] kernel,
-                 DTYPE_FLOAT[::1] ellipsoid_intensity,
-                 Py_ssize_t[::1] img_shape,
-                 Py_ssize_t[::1] padded_img_shape,
-                 Py_ssize_t[::1] kernel_shape,
+def apply_kernel(DTYPE_FLOAT[::1] img not None,
+                 DTYPE_FLOAT[::1] kernel not None,
+                 DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                 Py_ssize_t[::1] img_shape not None,
+                 Py_ssize_t[::1] padded_img_shape not None,
+                 Py_ssize_t[::1] kernel_shape not None,
                  num_threads=None):
     """
     apply_kernel(img, kernel, ellipsoid_intensity, img_shape, padded_img_shape,
