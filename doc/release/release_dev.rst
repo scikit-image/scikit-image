@@ -48,7 +48,7 @@ Deprecations
   removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
   instead.
 - In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
-  ``height`` have been depreciated. Use ``nrow`` and ``ncol`` instead.
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release

@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import ndimage as ndi
-import warnings
 
 from .. import draw
 from .._shared.utils import deprecate_kwarg
@@ -34,7 +33,7 @@ def square(width, dtype=np.uint8):
 
 @deprecate_kwarg({"height": "ncols", "width": "nrows"},
                  removed_version="0.20.0")
-def rectangle(nrows=None, ncols=None, dtype=np.uint8):
+def rectangle(nrows, ncols, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -61,13 +60,6 @@ def rectangle(nrows=None, ncols=None, dtype=np.uint8):
     selem : ndarray
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
-
-    Notes
-    -----
-    ``nrows`` and ``ncols`` have None specified as a default value. This exists
-    for backwards compatibility with scikit-image v0.18 and older. You must
-    specify values for both variables, and an exception will be raised
-    otherwise.
 
     """
 
