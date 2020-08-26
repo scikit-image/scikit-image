@@ -1,5 +1,6 @@
 from ._ccomp import label_cython as clabel
 
+
 def label(input, background=None, return_num=False,
           connectivity=None):
     r"""Label connected regions of an integer array.
