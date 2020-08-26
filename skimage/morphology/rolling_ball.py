@@ -82,7 +82,7 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
 
     kernel_shape = np.asarray(kernel_shape)
     if kernel_shape.ndim == 0:
-        kernel_shape = kernel_shape * np.ones_like(image.shape)
+        kernel_shape = np.full_like(image.shape, kernel_shape)
 
     kernel_shape_int = np.asarray(kernel_shape//2*2+1, dtype=np.intp)
 
