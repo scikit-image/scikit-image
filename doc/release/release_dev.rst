@@ -30,7 +30,7 @@ API Changes
 Bugfixes
 --------
 
-
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
