@@ -23,8 +23,10 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
         ``image``. If ``kernel_size`` is a scalar it will be extended to
         have the same dimension via
         ``kernel_size = kernel_size * np.ones_like(image.shape)``.
-    intensity_vertex : scalar, numeric, optional
-        The length of the intensity vertex of the ellipsoid.
+        All elements must be greater than 0.
+    intensity_vertex : scalar, optional
+        The length of the intensity vertex of the ellipsoid. Must be greater
+        than 0.
     has_nan: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
@@ -81,22 +83,12 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
         num_threads = 0
 
     kernel_size = np.asarray(kernel_size)
-    if not np.issubdtype(kernel_size.dtype, np.number):
-        raise ValueError(
-            "kernel_size must be convertible to a numeric array.")
-    if np.any(kernel_size <= 0):
-        raise ValueError("All elements of kernel_size must be greater zero.")
-
     if kernel_size.ndim == 0:
         kernel_size = kernel_size * np.ones_like(image.shape)
 
     kernel_shape_int = np.asarray(kernel_size//2*2+1, dtype=np.intp)
 
     intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
-    if not intensity_vertex.shape == tuple():
-        raise ValueError("Intensity_vertex must be a scalar.")
-    if np.any(intensity_vertex <= 0):
-        raise ValueError("Intensity_vertex must be greater than zero.")
     intensity_vertex = intensity_vertex / 2
 
     image = np.asarray(image)
@@ -160,7 +152,8 @@ def rolling_ball(image, radius=50, **kwargs):
     image : ndarray
         The image to be filtered.
     radius: scalar, numeric, optional
-        The radius of the ball/sphere rolled in the image.
+        The radius of the ball/sphere rolled in the image. Must be greater
+        than 0.
 
     Returns
     -------
@@ -196,11 +189,6 @@ def rolling_ball(image, radius=50, **kwargs):
     >>> background = rolling_ball(image, radius=200)
     >>> filtered_image = image - background
     """
-
-    if not np.issubdtype(np.asarray(radius).dtype, np.number):
-        raise ValueError("Radius must be of numeric type.")
-    if radius <= 0:
-        raise ValueError("Radius must be greater than zero.")
 
     kernel = radius * 2
     intensity_vertex = radius * 2
