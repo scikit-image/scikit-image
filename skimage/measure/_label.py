@@ -1,6 +1,6 @@
 from ._ccomp import label_cython as clabel
 
-def label(input, neighbors=None, background=None, return_num=False,
+def label(input, background=None, return_num=False,
           connectivity=None):
     r"""Label connected regions of an integer array.
 
@@ -21,11 +21,6 @@ def label(input, neighbors=None, background=None, return_num=False,
     ----------
     input : ndarray of dtype int
         Image to label.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-"connectivity".
-        In 3D, 4-"connectivity" means connected pixels have to share face,
-        whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use** ``connectivity`` **instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as 0. By default, 0-valued pixels are considered as background
@@ -89,4 +84,4 @@ def label(input, neighbors=None, background=None, return_num=False,
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, neighbors, background, return_num, connectivity)
+    return clabel(input, background, return_num, connectivity)
