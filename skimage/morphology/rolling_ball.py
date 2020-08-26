@@ -5,7 +5,7 @@ from skimage.util import invert, view_as_windows
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
+def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
                       has_nan=False, num_threads=None):
     """Estimate background intensity using a rolling ellipsoid.
 
@@ -17,12 +17,12 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
     ----------
     image : ndarray
         The image to be filtered.
-    kernel_size: ndarray or scalar, optional
+    kernel_shape: ndarray or scalar, optional
         The length of the non-intensity vertices of the ellipsoid. If
-        ``kernel_size`` is a ndarray, it must have the same dimensions as
-        ``image``. If ``kernel_size`` is a scalar it will be extended to
+        ``kernel_shape`` is a ndarray, it must have the same dimensions as
+        ``image``. If ``kernel_shape`` is a scalar it will be extended to
         have the same dimension via
-        ``kernel_size = kernel_size * np.ones_like(image.shape)``.
+        ``kernel_shape = kernel_shape * np.ones_like(image.shape)``.
         All elements must be greater than 0.
     intensity_vertex : scalar, optional
         The length of the intensity vertex of the ellipsoid. Must be greater
@@ -53,7 +53,7 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
       ``pos``. The surface intensity of the ellipsoid is computed using the
       canonical ellipsis equation::
 
-            semi_spatial = kernel_size / 2
+            semi_spatial = kernel_shape / 2
             semi_vertex = intensity_vertex / 2
             np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
 
@@ -82,11 +82,11 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
     if num_threads is None:
         num_threads = 0
 
-    kernel_size = np.asarray(kernel_size)
-    if kernel_size.ndim == 0:
-        kernel_size = kernel_size * np.ones_like(image.shape)
+    kernel_shape = np.asarray(kernel_shape)
+    if kernel_shape.ndim == 0:
+        kernel_shape = kernel_shape * np.ones_like(image.shape)
 
-    kernel_shape_int = np.asarray(kernel_size//2*2+1, dtype=np.intp)
+    kernel_shape_int = np.asarray(kernel_shape//2*2+1, dtype=np.intp)
 
     intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
     intensity_vertex = intensity_vertex / 2
@@ -99,14 +99,14 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
             *[range(-x, x+1) for x in kernel_shape_int//2],
             indexing='ij'
         ),
-        axis=-1).reshape(-1, len(kernel_size))
+        axis=-1).reshape(-1, len(kernel_shape))
     tmp = np.sum(
-        (ellipsoid_coords / (kernel_size[np.newaxis, :]/2)) ** 2, axis=1)
+        (ellipsoid_coords / (kernel_shape[np.newaxis, :]/2)) ** 2, axis=1)
     ellipsoid_intensity = intensity_vertex - \
         intensity_vertex * np.sqrt(np.clip(1 - tmp, 0, None))
     ellipsoid_intensity = ellipsoid_intensity.astype(np.float_)
 
-    pad_amount = np.round(kernel_size / 2).astype(int)
+    pad_amount = np.round(kernel_shape / 2).astype(int)
     img = np.pad(img, pad_amount[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
 
@@ -175,9 +175,9 @@ def rolling_ball(image, radius=50, **kwargs):
       and intensity dimensions.
     - The ball has the same dimensionality as the input image. If you
       want to apply the filter plane-wise to a 3D image use ::
-        kernel_size = (1, 2 * radius, 2 * radius)
+        kernel_shape = (1, 2 * radius, 2 * radius)
         intensity_vertex = 2 * radius
-        rolling_ellipsoid(image, kernel_size, intensity_vertex)``
+        rolling_ellipsoid(image, kernel_shape, intensity_vertex)``
       instead.
 
     Examples
@@ -190,6 +190,6 @@ def rolling_ball(image, radius=50, **kwargs):
     >>> filtered_image = image - background
     """
 
-    kernel = radius * 2
+    kernel_shape = radius * 2
     intensity_vertex = radius * 2
-    return rolling_ellipsoid(image, kernel, intensity_vertex, **kwargs)
+    return rolling_ellipsoid(image, kernel_shape, intensity_vertex, **kwargs)

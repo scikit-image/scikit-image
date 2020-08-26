@@ -12,7 +12,7 @@ from skimage.morphology import rolling_ball, rolling_ellipsoid
 
 def test_ellipsoid_const():
     img = 155 * np.ones((100, 100), dtype=np.uint8)
-    background = rolling_ellipsoid(img, kernel_size=(25, 53))
+    background = rolling_ellipsoid(img, kernel_shape=(25, 53))
     assert np.allclose(img - background, np.zeros_like(img))
 
 
@@ -21,13 +21,13 @@ def test_nan_const():
     img[20, 20] = np.nan
     img[50, 53] = np.nan
 
-    kernel_size = (10, 10)
-    x = np.arange(-kernel_size[1] // 2, kernel_size[1] // 2 + 1)[np.newaxis, :]
-    y = np.arange(-kernel_size[0] // 2, kernel_size[0] // 2 + 1)[:, np.newaxis]
+    kernel_shape = (10, 10)
+    x = np.arange(-kernel_shape[1] // 2, kernel_shape[1] // 2 + 1)[np.newaxis, :]
+    y = np.arange(-kernel_shape[0] // 2, kernel_shape[0] // 2 + 1)[:, np.newaxis]
     expected_img = np.zeros_like(img)
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
-    background = rolling_ellipsoid(img, kernel_size, has_nan=True)
+    background = rolling_ellipsoid(img, kernel_shape, has_nan=True)
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
@@ -86,4 +86,4 @@ def test_threads(num_threads):
 def test_ndim():
     path = data.image_fetcher.fetch('data/cells.tif')
     image = io.imread(path)[:5, ...]
-    rolling_ellipsoid(image, kernel_size=(3, 100, 100), intensity_vertex=100)
+    rolling_ellipsoid(image, kernel_shape=(3, 100, 100), intensity_vertex=100)

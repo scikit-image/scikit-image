@@ -21,7 +21,7 @@ the entire image.
 Scikit-image implements this rolling-ball algorithm, as well as
 a generalized version which allows you to "roll" arbitrary ellipsoids. This
 generalized version is useful if you want to use different values for the
-spatial radius (``kernel_size``) and the intensity amount
+spatial radius (``kernel_shape``) and the intensity amount
 (``intensity_vertex``).
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
@@ -177,7 +177,7 @@ image = util.img_as_float(data.coins())
 normalized_radius = 70.5 / 255
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_size=(70.5 * 2, 70.5 * 2),
+    kernel_shape=(70.5 * 2, 70.5 * 2),
     intensity_vertex=normalized_radius * 2
 )
 plot_result(image, background)
@@ -191,7 +191,7 @@ plt.show()
 # a ball/sphere - sidenote: a ball is a special case of an ellipsoid
 # where each vertex has the same length. To fully specify an ellipsoid
 # in 3D, you need to supply three parameters. Two for the two spatial
-# dimensions of the image (via ``kernel_size``), and one for the
+# dimensions of the image (via ``kernel_shape``), and one for the
 # intensity dimension (via ``intensity_vertex``).
 #
 # As mentioned above, a sphere is just a special ellipsoid, and hence
@@ -208,7 +208,7 @@ image = data.coins()
 
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_size=(70.5 * 2, 70.5 * 2),
+    kernel_shape=(70.5 * 2, 70.5 * 2),
     intensity_vertex=70.5 * 2
 )
 plot_result(image, background)
@@ -223,7 +223,7 @@ image = data.coins()
 
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_size=(10 * 2, 10 * 2),
+    kernel_shape=(10 * 2, 10 * 2),
     intensity_vertex=255 * 2
 )
 plot_result(image, background)
@@ -241,7 +241,7 @@ path = data.image_fetcher.fetch('data/cells.tif')
 image = io.imread(path)
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_size=(1, 100, 100),
+    kernel_shape=(1, 100, 100),
     intensity_vertex=0.1
 )
 
@@ -262,7 +262,7 @@ path = data.image_fetcher.fetch('data/cells.tif')
 image = io.imread(path)
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_size=(120, 1, 1),
+    kernel_shape=(120, 1, 1),
     intensity_vertex=0.1
 )
 
