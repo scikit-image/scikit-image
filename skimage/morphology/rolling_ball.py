@@ -77,6 +77,9 @@ def rolling_ellipsoid(image, kernel_size=100, intensity_vertex=100,
     >>> filtered_image = image - background
     """
 
+    if num_threads is None:
+        num_threads = 0
+
     kernel_size = np.asarray(kernel_size)
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(

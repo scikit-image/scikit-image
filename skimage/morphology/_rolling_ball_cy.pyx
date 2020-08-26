@@ -2,7 +2,6 @@ import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
 from cython.parallel cimport prange
-cimport openmp
 
 from .._shared.fused_numerics cimport np_floats
 
@@ -63,7 +62,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
                      Py_ssize_t[::1] img_shape not None,
                      Py_ssize_t[::1] padded_img_shape not None,
                      Py_ssize_t[::1] kernel_shape not None,
-                     num_threads=None):
+                     Py_ssize_t num_threads=0):
     """
     apply_kernel_nan(img, kernel, ellipsoid_intensity, img_shape,
                      padded_img_shape, kernel_shape, num_threads)
@@ -107,21 +106,15 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
     out_data_size = out_data.size
-    cdef int max_threads
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
     cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
     cdef Py_ssize_t kernel_inner = kernel_shape[ndim - 1]
     cdef Py_ssize_t ker_idx_outer, ker_idx_inner
 
-    if num_threads is None:
-        max_threads = openmp.omp_get_max_threads()
-    else:
-        max_threads = <int> num_threads
-
     for offset_idx in prange(
             out_data_size,
-            num_threads=max_threads,
+            num_threads=num_threads,
             nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
@@ -149,7 +142,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
                  Py_ssize_t[::1] img_shape not None,
                  Py_ssize_t[::1] padded_img_shape not None,
                  Py_ssize_t[::1] kernel_shape not None,
-                 num_threads=None):
+                 Py_ssize_t num_threads=0):
     """
     apply_kernel(img, kernel, ellipsoid_intensity, img_shape, padded_img_shape,
                  kernel_shape, num_threads)
@@ -198,21 +191,15 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
     out_data_size = out_data.size
-    cdef int max_threads
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
     cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
     cdef Py_ssize_t kernel_inner = kernel_shape[ndim - 1]
     cdef Py_ssize_t ker_idx_outer, ker_idx_inner
 
-    if num_threads is None:
-        max_threads = openmp.omp_get_max_threads()
-    else:
-        max_threads = <int> num_threads
-
     for offset_idx in prange(
             out_data_size,
-            num_threads=max_threads,
+            num_threads=num_threads,
             nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
