@@ -1,4 +1,6 @@
 import numpy as np
+from skimage._shared.utils import deprecate_kwarg
+
 from ._find_contours_cy import _get_contour_segments
 
 from collections import deque
@@ -6,7 +8,8 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-def find_contours(array, level,
+@deprecate_kwarg({'array': 'image'}, removed_version="0.20")
+def find_contours(image, level=None,
                   fully_connected='low', positive_orientation='low',
                   *,
                   mask=None):
@@ -18,10 +21,14 @@ def find_contours(array, level,
 
     Parameters
     ----------
-    array : 2D ndarray of double
-        Input data in which to find contours.
-    level : float
-        Value along which to find contours in the array.
+    image : 2D ndarray of double
+        Input image in which to find contours.
+    level : float, optional
+        Value along which to find contours in the array. By default, the level
+        is set to (max(image) - min(image)) / 2
+
+        .. versionchanged:: 0.18
+            This parameter is now optional.
     fully_connected : str, {'low', 'high'}
          Indicates whether array elements below the given level value are to be
          considered fully-connected (and hence elements above the value will
@@ -125,19 +132,21 @@ def find_contours(array, level,
     if positive_orientation not in _param_options:
         raise ValueError('Parameters "positive_orientation" must be either '
                          '"high" or "low".')
-    if array.shape[0] < 2 or array.shape[1] < 2:
+    if image.shape[0] < 2 or image.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
-    if array.ndim != 2:
+    if image.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     if mask is not None:
-        if mask.shape != array.shape:
+        if mask.shape != image.shape:
             raise ValueError('Parameters "array" and "mask"'
                              ' must have same shape.')
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
+    if level is None:
+        level = (np.nanmax(image) - np.nanmin(image)) / 2.0
 
-    segments = _get_contour_segments(array.astype(np.double), float(level),
+    segments = _get_contour_segments(image.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
     contours = _assemble_contours(segments)
     if positive_orientation == 'high':

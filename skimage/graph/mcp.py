@@ -67,7 +67,7 @@ def route_through_array(array, start, end, fully_connected=True,
            [30, 31, 32, 33, 34, 35]])
     >>> # Find the path with lowest cost
     >>> indices, weight = route_through_array(image, (0, 0), (5, 5))
-    >>> indices = np.array(indices).T
+    >>> indices = np.stack(indices, axis=-1)
     >>> path = np.zeros_like(image)
     >>> path[indices[0], indices[1]] = 1
     >>> path

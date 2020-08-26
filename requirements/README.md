@@ -30,7 +30,7 @@ $ pip install -U -r requirements/default.txt
 $ pip install -U -r requirements/test.txt
 ```
 
-## Blacklist justification
+## Justification for blocked versions
 
 * Cython 0.28.2 was empircally found to fail tests while other patch-releases 0.28.x do not
 * Cython 0.29.0 erroneously sets the `__path__` to `None`. See https://github.com/cython/cython/issues/2662
@@ -38,4 +38,4 @@ $ pip install -U -r requirements/test.txt
 * matplotlib 3.0.0 is not used because of a bug that collapses 3D axes (see https://github.com/scikit-image/scikit-image/pull/3474 and https://github.com/matplotlib/matplotlib/issues/12239).
 * pillow 7.1.0 fails on png files, See https://github.com/scikit-image/scikit-image/issues/4548
 * pillow 7.1.1 fails due to https://github.com/python-pillow/Pillow/issues/4518
-* imread 0.7.2 is blacklisted due to bluid failure https://github.com/luispedro/imread/issues/36
+* imread 0.7.2 fails due to bluid failure https://github.com/luispedro/imread/issues/36

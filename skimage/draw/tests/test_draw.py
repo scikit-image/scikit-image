@@ -221,7 +221,7 @@ def test_polygon_0d_input():
 
 
 def test_circle_deprecated():
-    with expected_warnings(['circle is deprecated']):
+    with expected_warnings(['`draw.circle` is deprecated']):
         _ = circle(7, 7, 6)
 
 

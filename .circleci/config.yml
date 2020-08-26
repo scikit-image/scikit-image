@@ -1,0 +1,32 @@
+version: 2
+
+jobs:
+  doc:
+    docker:
+      - image: circleci/python:3.8.2
+    steps:
+      - checkout
+      - run:
+          name: install dependencies and package
+          command: |
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements/default.txt
+              python -m pip install -r requirements/build.txt
+              python -m pip install -r requirements/docs.txt
+              python -m pip install -e .
+              export
+      - run:
+          name: build doc
+          command: |
+              cd doc
+              make clean
+              make html
+      - store_artifacts:
+          path: doc/build/html
+          destination: doc/build/html
+
+workflows:
+  version: 2
+  build-doc:
+    jobs:
+      - doc

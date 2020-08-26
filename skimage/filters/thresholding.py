@@ -251,11 +251,6 @@ def threshold_otsu(image, nbins=256):
         Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
-    Raises
-    ------
-    ValueError
-         If ``image`` only contains a single grayscale value.
-
     References
     ----------
     .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
@@ -271,16 +266,15 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+    if image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
 
     # Check if the image is multi-colored or not
-    if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images "
-                         "having more than one color. The input image seems "
-                         "to have just one color {0}.".format(image.min()))
+    first_pixel = image.ravel()[0]
+    if np.all(image == first_pixel):
+        return first_pixel
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)

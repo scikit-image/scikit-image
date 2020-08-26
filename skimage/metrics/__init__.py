@@ -5,6 +5,7 @@ from .simple_metrics import (mean_squared_error,
                              normalized_root_mse,
                              peak_signal_noise_ratio)
 from ._structural_similarity import structural_similarity
+from .set_metrics import hausdorff_distance
 
 __all__ = ['adapted_rand_error',
            'variation_of_information',
@@ -12,5 +13,6 @@ __all__ = ['adapted_rand_error',
            'mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
-           'structural_similarity'
+           'structural_similarity',
+           'hausdorff_distance'
            ]
