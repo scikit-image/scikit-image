@@ -50,10 +50,6 @@ def rectangle(nrows, ncols, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the structuring element.
-    height : int, depreciated
-        The number of columns of the rectangle.
-    width : int, depreciated
-        The number of rows of the rectangle.
 
     Returns
     -------
@@ -61,6 +57,11 @@ def rectangle(nrows, ncols, dtype=np.uint8):
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
+
+    Notes
+    -----
+    - The use of ``width`` and ``height`` has been deprecated in
+      version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
 
     return np.ones((nrows, ncols), dtype=dtype)
