@@ -215,6 +215,7 @@ def test_polygon_exceed():
 
 
 def test_polygon_0d_input():
+    # Bug reported in #4938: 0d input causes segfault.
     rr, cc = polygon(0, 1)
 
     assert rr.size == cc.size == 0
