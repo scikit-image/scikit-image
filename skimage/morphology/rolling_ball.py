@@ -43,7 +43,6 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
 
     Notes
     -----
-
     - For the pixel that has its background intensity estimated (without loss
       of generality at ``(0,0)``) the rolling ellipsoid method places an
       ellipsoid under it and raises the ellipsoid until its surface touches the
@@ -52,7 +51,6 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
       difference of ``intensity_vertex`` and the surface of the ellipsoid at
       ``pos``. The surface intensity of the ellipsoid is computed using the
       canonical ellipsis equation::
-
             semi_spatial = kernel_shape / 2
             semi_vertex = intensity_vertex / 2
             np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
@@ -178,7 +176,6 @@ def rolling_ball(image, radius=50, **kwargs):
         kernel_shape = (1, 2 * radius, 2 * radius)
         intensity_vertex = 2 * radius
         rolling_ellipsoid(image, kernel_shape, intensity_vertex)``
-      instead.
 
     Examples
     --------
