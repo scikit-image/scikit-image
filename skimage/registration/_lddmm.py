@@ -1762,7 +1762,7 @@ def lddmm_register(
         Raised if multiscales is provided with values both above and below 1.
     """
 
-    # Verify kwargs.
+    # Validate kwargs.
     recognized_kwarg_keys = {
         "multiscales",
         "num_iterations",
@@ -1791,7 +1791,8 @@ def lddmm_register(
     }
     invalid_kwargs = list(
         filter(
-            lambda kwarg_key: kwarg_key not in recognized_kwarg_keys
+            lambda kwarg_key: kwarg_key not in recognized_kwarg_keys,
+            kwargs.keys(),
         )
     )
     if invalid_kwargs:
@@ -1799,6 +1800,10 @@ def lddmm_register(
             "One or more unexpected keyword arguments were encountered.\n"
             f"Unrecognized keyword arguments: {invalid_kwargs}."
         )
+    # Augment kwargs with None entries for unspecified arguments.
+    for kwarg_key in recognized_kwarg_keys:
+        if kwarg_key not in kwargs.keys():
+            kwargs[kwarg_key] = None
 
     # Validate images and spacings.
     # Images.
@@ -1909,7 +1914,10 @@ def lddmm_register(
         multiscale_lddmm_kwargs[
             multiscale_kwarg_name
         ] = _validate_scalar_to_multi(
-            multiscale_kwarg_value, size=len(multiscales), dtype=None
+            multiscale_kwarg_value,
+            size=len(multiscales),
+            dtype=None,
+            reject_nans=False,
         )
     # Each value in the multiscale_lddmm_kwargs dictionary is an array with
     # shape (len(multiscales),).
@@ -2055,7 +2063,7 @@ def lddmm_register(
 
     # If map_coordinates_ify, convert centered, physical-space position-fields
     # to voxel-space position-fields.
-    if kwargs["map_coordinates_ify"]:
+    if kwargs["map_coordinates_ify"] is None or kwargs["map_coordinates_ify"]:
         # resize to match the shape of the appropriate image,
         # subtract the identity coordinate vector at spatial indices 0,
         # (assuming centered coordinates)

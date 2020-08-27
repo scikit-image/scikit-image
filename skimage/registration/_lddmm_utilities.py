@@ -35,7 +35,7 @@ def _validate_scalar_to_multi(value, size=None, dtype=None, reject_nans=True):
     except ValueError as exception:
         raise ValueError(
             "value and dtype are incompatible with one another.\n"
-            f"type(value): {type(value}, dtype: {dtype}."
+            f"type(value): {type(value)}, dtype: {dtype}."
         ) from exception
 
     # Validate value's dimensionality and length.
