@@ -1818,8 +1818,11 @@ def lddmm_register(
         float,
     )
 
-    # Unpack multiscales kwarg.
+    # Unpack multiscale-relevant kwargs.
     multiscales = kwargs["multiscales"]
+    initial_affine = kwargs["initial_affine"]
+    initial_contrast_coefficients = kwargs["initial_contrast_coefficients"]
+    initial_velocity_fields = kwargs["initial_velocity_fields"]
 
     # Validate multiscales.
     # Note: aside from map_coordinates_ify, 
@@ -1895,10 +1898,9 @@ def lddmm_register(
         artifact_prior=kwargs["artifact_prior"],
         background_prior=kwargs["background_prior"],
         # # Initial values.
-        # initial_affine=kwargs["initial_affine"],
-        # initial_contrast_coefficients=
-        #   kwargs["initial_contrast_coefficients"],
-        # initial_velocity_fields=kwargs["initial_velocity_fields"],
+        # initial_affine=initial_affine,
+        # initial_contrast_coefficients=initial_contrast_coefficients,
+        # initial_velocity_fields=initial_velocity_fields,
     )
     for (
         multiscale_kwarg_name,
@@ -1963,10 +1965,9 @@ def lddmm_register(
             reference_image_spacing=scaled_reference_image_spacing,
             moving_image_spacing=scaled_moving_image_spacing,
             # Initial values.
-            initial_affine=kwargs["initial_affine"],
-            initial_contrast_coefficients=
-                kwargs["initial_contrast_coefficients"],
-            initial_velocity_fields=kwargs["initial_velocity_fields"],
+            initial_affine=initial_affine,
+            initial_contrast_coefficients=initial_contrast_coefficients,
+            initial_velocity_fields=initial_velocity_fields,
             # Diagnostic accumulators.
             affines=affines,
             maximum_velocities=maximum_velocities,
