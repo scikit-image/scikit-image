@@ -1822,7 +1822,8 @@ def lddmm_register(
     multiscales = kwargs["multiscales"]
 
     # Validate multiscales.
-    # Note: this is the only argument not passed to _Lddmm.
+    # Note: aside from map_coordinates_ify, 
+    # this is the only argument not passed to _Lddmm.
     if multiscales is None:
         multiscales = 1
     try:
@@ -2053,7 +2054,7 @@ def lddmm_register(
 
     # If map_coordinates_ify, convert centered, physical-space position-fields
     # to voxel-space position-fields.
-    if map_coordinates_ify:
+    if kwargs["map_coordinates_ify"]:
         # resize to match the shape of the appropriate image,
         # subtract the identity coordinate vector at spatial indices 0,
         # (assuming centered coordinates)
