@@ -29,22 +29,42 @@ This algorithm is appropriate for smooth grayscale images.
 
 
 import numpy as np
-
 from matplotlib import pyplot as plt
 from scipy.ndimage import map_coordinates
 from skimage.registration import lddmm_register
-from skimage.data import allen_mouse_brain_atlas, cleared_mouse_brain
 from skimage.transform import resize, rescale
 
+import requests
+from io import BytesIO
+import tifffile as tf
+import nrrd
 
-# Load images.
-reference_image = allen_mouse_brain_atlas()
-moving_image = cleared_mouse_brain()
+
+# Load reference_image.
+reference_image_url = 'http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_50.nrrd'
+request = requests.get(reference_image_url)
+byte_content = BytesIO(request.content)
+header = nrrd.read_header(byte_content)
+reference_image = nrrd.read_data(header, byte_content)
+reference_image = reference_image.astype(float)
+
+
+# Load moving_image.
+moving_image_url = 'https://open-neurodata.s3.amazonaws.com/ailey/thy1eyfp_preprocessed_50um.tif'
+request = requests.get(moving_image_url)
+byte_content = BytesIO(request.content)
+moving_image = tf.imread(byte_content)
+moving_image = moving_image.astype(float)
+
+
+# Reorient moving_image.
+moving_image = np.moveaxis(moving_image, source=[0,1,2], destination=[2,1,0])
+moving_image = np.flip(moving_image, 2) # This saggittal flip corrects inversion.
 
 
 # Specify spacings.
-reference_image_spacing = np.array([100, 100, 100])
-moving_image_spacing = np.array([100, 100, 100])
+reference_image_spacing = np.array([50, 50, 50])
+moving_image_spacing = np.array([50, 50, 50])
 
 
 # Learn registration from reference_image to moving_image.
@@ -53,7 +73,7 @@ lddmm_output = lddmm_register(
     moving_image=moving_image,
     reference_image_spacing=reference_image_spacing,
     moving_image_spacing=moving_image_spacing,
-    multiscales=[8, 4],
+    multiscales=[16, 8],
     affine_stepsize=0.3,
     deformative_stepsize=2e5,
     sigma_regularization=1e4,
