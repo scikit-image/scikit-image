@@ -221,8 +221,10 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
     if upsample_factor == 1:
         if return_error:
-            src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
-            target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+            src_amp /= src_freq.size
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
+            target_amp /= target_freq.size
             CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
@@ -232,14 +234,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         upsample_factor = np.array(upsample_factor, dtype=np.float64)
-        normalization = (src_freq.size * upsample_factor ** 2)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
                                            sample_region_offset).conj()
-        cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
         maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                                   cross_correlation.shape)
@@ -250,12 +250,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
         shifts = shifts + maxima / upsample_factor
 
         if return_error:
-            src_amp = _upsampled_dft(src_freq * src_freq.conj(),
-                                     1, upsample_factor)[0, 0]
-            src_amp /= normalization
-            target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                        1, upsample_factor)[0, 0]
-            target_amp /= normalization
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
 
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.

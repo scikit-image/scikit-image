@@ -29,10 +29,6 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # -- General configuration -----------------------------------------------------
 
-# Strip backslahes in function's signature
-# To be removed when numpydoc > 0.9.x
-strip_signature_backslash = True
-
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx_copybutton',
@@ -43,7 +39,8 @@ extensions = ['sphinx_copybutton',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery'
+              'sphinx_gallery.gen_gallery',
+              'myst_parser',
               ]
 
 autosummary_generate = True
@@ -192,6 +189,15 @@ sphinx_gallery_conf = {
     'remove_config_comments':True,
 }
 
+from sphinx_gallery.utils import _has_optipng
+if _has_optipng():
+    # This option requires optipng to compress images
+    # Optimization level between 0-7
+    # sphinx-gallery default: -o7
+    # optipng default: -o2
+    # We choose -o1 as it produces a sufficient optimization
+    # See #4800
+    sphinx_gallery_conf['compress_images'] = ('images', 'thumbnails', '-o1')
 
 
 # -- Options for HTML output ---------------------------------------------------
