@@ -116,7 +116,7 @@ print(f"Expected value for scaling difference: {scale}")
 print(f"Recovered value for scaling difference: {shift_scale}")
 
 ######################################################################
-# Register rotation and scaling on a translated image
+# Register rotation and scaling on a translated image - Part 1
 # =================================================================
 #
 # The above examples only work when the images to be registered share a
@@ -128,11 +128,7 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # the magnitude spectra of the Fourier-transformed images.
 #
 # In this next example, we first show how the above approaches fail when two
-# images differ by rotation, scaling, and translation. We next show how
-# rotation and scaling differences, but not translation differences, are
-# apparent in the frequency magnitude spectra of the images. These differences
-# can be recovered by treating the magnitude spectra as images themselves, and
-# applying the same log-polar + phase correlation approach taken above.
+# images differ by rotation, scaling, and translation.
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
@@ -179,7 +175,16 @@ print()
 print(f"Expected value for scaling difference: {scale}")
 print(f"Recovered value for scaling difference: {shift_scale}")
 
-# Now try working in frequency domain
+######################################################################
+# Register rotation and scaling on a translated image - Part 2
+# =================================================================
+#
+# We next show how rotation and scaling differences, but not translation
+# differences, are apparent in the frequency magnitude spectra of the images.
+# These differences can be recovered by treating the magnitude spectra as
+# images themselves, and applying the same log-polar + phase correlation
+# approach taken above.
+
 # First, band-pass filter both images
 image = difference_of_gaussians(image, 5, 20)
 rts_image = difference_of_gaussians(rts_image, 5, 20)
@@ -235,3 +240,42 @@ print(f"Recovered value for cc rotation: {recovered_angle}")
 print()
 print(f"Expected value for scaling difference: {scale}")
 print(f"Recovered value for scaling difference: {shift_scale}")
+
+######################################################################
+# Some notes on this approach
+# =================================================================
+#
+# It should be noted that this approach relies on a couple of parameters
+# that have to be chosen ahead of time, and for which there are no clearly
+# optimal choices:
+#
+# 1. The images should have some degree of bandpass filtering
+# applied, particularly to remove high frequencies, and different choices here
+# may impact outcome. The bandpass filter also complicates matters because,
+# since the images to be registered will differ in scale and these scale
+# differences are unknown, any bandpass filter will necessarily attenuate
+# different features between the images. For example, the log-polar transformed
+# magnitude spectra don't really look "alike" in the last example here. Yet if
+# you look closely, there are some common patterns in those spectra, and they
+# do end up aligning well by phase correlation as demonstrated.
+#
+# 2. Images must be windowed using windows with circular symmetry, to remove
+# the spectral leakage coming from image borders. There is no clearly optimal
+# choice of window.
+#
+# Finally, we note that large changes in scale will dramatically alter the
+# magnitude spectra, especially since a big change in scale will usually be
+# accompanied by some cropping and loss of information content. The literature
+# advises staying within 1.8-2x scale change [1]_ [2]_. This is fine for most
+# biological imaging applications.
+#
+# References
+# ----------
+#
+# .. [1] B.S. Reddy and B.N. Chatterji. An FFT-based technique for translation,
+#        rotation and scale- invariant image registration. IEEE Trans. Image
+#        Processing, 5(8):1266–1271, 1996. :DOI:`10.1109/83.506761`
+#
+# .. [2] Tzimiropoulos, Georgios, and Tania Stathaki. "Robust FFT-based
+#        scale-invariant image registration." In 4th SEAS DTC Technical
+#        Conference. 2009. :DOI:`10.1109/TPAMI.2010.107`

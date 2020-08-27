@@ -60,7 +60,9 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     -------
     verts : (V, 3) array
         Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
@@ -108,6 +110,11 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
       >> verts, faces, normals, values = marching_cubes(myvolume, 0.0)
       >> vv.mesh(np.fliplr(verts), faces, normals, values)
       >> vv.use().Run()
+
+    To reduce the number of triangles in the mesh for better performance,
+    see this `example
+    <https://docs.enthought.com/mayavi/mayavi/auto/example_julia_set_decimation.html#example-julia-set-decimation>`_
+    using the ``mayavi`` package.
 
     References
     ----------
@@ -201,7 +208,9 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     -------
     verts : (V, 3) array
         Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has

@@ -11,20 +11,32 @@ class FiltersSuite:
         self.image[:2000, :2000] += 1
         self.image[3000:, 3000] += 0.5
 
-        self.image3d = data.binary_blobs(length=256, n_dim=3).astype(float)
-
     def time_sobel(self):
         filters.sobel(self.image)
 
+
+class FiltersSobel3D:
+    """Benchmark for 3d sobel filters."""
+    def setup(self):
+        try:
+            filters.sobel(np.ones((8, 8, 8)))
+        except ValueError:
+            raise NotImplementedError("3d sobel unavailable")
+        self.image3d = data.binary_blobs(length=256, n_dim=3).astype(float)
+
     def time_sobel_3d(self):
         _ = filters.sobel(self.image3d)
+
 
 class MultiOtsu(object):
     """Benchmarks for MultiOtsu threshold."""
     param_names = ['classes']
     params = [3, 4, 5]
-
     def setup(self, *args):
+        try:
+            from skimage.filters import threshold_multiotsu
+        except ImportError:
+            raise NotImplementedError("threshold_multiotsu unavailable")
         self.image = data.camera()
 
     def time_threshold_multiotsu(self, classes):
