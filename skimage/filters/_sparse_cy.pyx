@@ -15,10 +15,11 @@ def _correlate_sparse_offsets(np_floats[:] input, Py_ssize_t[:] indices,
     cdef np_floats val
     cdef Py_ssize_t vindex
     
-    for vindex in range(value_len):
-        off = offsets[vindex]
-        val = values[vindex]
-        # this loop order optimises cache access, gives 10x speedup
-        for i in range(indices_len):
-            output[i] += input[indices[i] + off] * val
+    with nogil:
+        for vindex in range(value_len):
+            off = offsets[vindex]
+            val = values[vindex]    
+            # this loop order optimises cache access, gives 10x speedup
+            for i in range(indices_len):
+                output[i] += input[indices[i] + off] * val
 
