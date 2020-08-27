@@ -18,6 +18,7 @@ jobs:
           python-version: 3.7
       - name: Install dependencies
         run: |
+          sudo apt install optipng
           python -m pip install --upgrade pip
           python -m pip install -r requirements/build.txt
           python -m pip install -r requirements/default.txt
