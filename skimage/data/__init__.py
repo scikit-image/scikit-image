@@ -47,9 +47,7 @@ __all__ = ['data_dir',
            'rocket',
            'rough_wall',
            'shepp_logan_phantom',
-           'stereo_motorcycle',
-           'allen_mouse_brain_atlas',
-           'cleared_mouse_brain']
+           'stereo_motorcycle']
 
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
@@ -980,32 +978,3 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
-
-
-def allen_mouse_brain_atlas():
-    """
-    The Allen Institute's averaged mouse brain atlas at 100 micron isotropic resolution, grayscale, normalized to MAD, zero-padded by 5.
-    
-    Returns
-    -------
-    allen_mouse_brain_atlas : (142, 90, 124) float64 ndarray
-
-    Notes
-    -----
-    © 2015 Allen Institute for Brain Science. Allen Mouse Brain Atlas. 
-    Available from: http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/
-    """
-
-    return np.load(_fetch('data/allen_mouse_brain_atlas.npy'))
-
-
-def cleared_mouse_brain():
-    """
-    A clarity-cleared mouse brain at 100 micron isotropic resolution, grayscale, normalized to MAD, zero-padded by 5.
-    
-    Returns
-    -------
-    cleared_mouse_brain : (142, 83, 121) float64 ndarray
-    """
-    
-    return np.load(_fetch('data/cleared_mouse_brain.npy'))

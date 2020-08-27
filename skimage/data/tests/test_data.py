@@ -144,13 +144,3 @@ def test_cells_3d():
     path = fetch('data/cells.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
-
-
-def test_allen_mouse_brain_atlas():
-    """Test that "allen_mouse_brain_atlas" can be loaded."""
-    data.allen_mouse_brain_atlas()
-
-
-def test_cleared_mouse_brain():
-    """Test that "cleared_mouse_brain" can be loaded."""
-    data.cleared_mouse_brain()
