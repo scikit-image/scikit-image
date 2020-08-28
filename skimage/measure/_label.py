@@ -1,4 +1,30 @@
+from scipy import ndimage
 from ._ccomp import label_cython as clabel
+from ..morphology._util import _resolve_neighborhood
+
+
+def _label_bool(image, background=None, return_num=False, connectivity=None):
+    """
+    Faster implementation of clabel for boolean input.
+    """
+    if background == 1:
+        image = ~image
+
+    if connectivity is None:
+        connectivity = image.ndim
+
+    if not 1 <= connectivity <= image.ndim:
+        raise ValueError(
+            "Connectivity below 1 or above %d is illegal."
+            % image.ndim)
+
+    selem = _resolve_neighborhood(None, connectivity, image.ndim)
+    result = ndimage.label(image, structure=selem)
+
+    if return_num:
+        return result
+    else:
+        return result[0]
 
 
 def label(input, background=None, return_num=False, connectivity=None):
@@ -84,4 +110,8 @@ def label(input, background=None, return_num=False, connectivity=None):
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, background, return_num, connectivity)
+    if input.dtype == bool:
+        return _label_bool(input, background=background,
+                           return_num=return_num, connectivity=connectivity)
+    else:
+        return clabel(input, background, return_num, connectivity)
