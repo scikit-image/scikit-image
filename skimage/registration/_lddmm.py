@@ -783,26 +783,26 @@ class _Lddmm:
 
     def _compute_contrast_map(self):
         """
-            Compute contrast_coefficients mapping deformed_reference_image to
-            moving_image.
+        Compute contrast_coefficients mapping deformed_reference_image to
+        moving_image.
 
-            Accesses attributes:
-                moving_image
-                moving_image_spacing
-                deformed_reference_image
-                spatially_varying_contrast_map
-                sigma_matching
-                contrast_order
-                sigma_contrast
-                contrast_iterations
-                matching_weights
-                contrast_polynomial_basis
-                contrast_coefficients
+        Accesses attributes:
+            moving_image
+            moving_image_spacing
+            deformed_reference_image
+            spatially_varying_contrast_map
+            sigma_matching
+            contrast_order
+            sigma_contrast
+            contrast_iterations
+            matching_weights
+            contrast_polynomial_basis
+            contrast_coefficients
 
-            Updates attributes:
-                contrast_polynomial_basis
-                contrast_coefficients
-            """
+        Updates attributes:
+            contrast_polynomial_basis
+            contrast_coefficients
+        """
 
         # Update self.contrast_polynomial_basis.
         for power in range(self.contrast_order + 1):
@@ -946,7 +946,8 @@ class _Lddmm:
             moving_image_ravel = np.ravel(self.moving_image)
             matching_weights_ravel = np.ravel(self.matching_weights)
             contrast_polynomial_basis_semi_ravel = np.reshape(
-                self.contrast_polynomial_basis, (self.moving_image.size, -1),
+                self.contrast_polynomial_basis,
+                (self.moving_image.size, -1),
             )  # A view, not a copy.
 
             # Create intermediate composites.
@@ -1278,7 +1279,8 @@ class _Lddmm:
             # Apply affine by multiplication.
             # This transforms error in the moving_image space back to time t.
             self.affine_phi = _multiply_coords_by_affine(
-                self.affine, self.phi,
+                self.affine,
+                self.phi,
             )
 
             # Compute the determinant of the gradient of self.phi.
@@ -1328,10 +1330,13 @@ class _Lddmm:
 
             # To convert from derivative to gradient we smooth by applying a
             # physical-unit low-pass filter in the frequency domain.
-            matching_cost_at_t_gradient = np.fft.fftn(
-                d_matching_d_velocity_at_t,
-                axes=tuple(range(self.reference_image.ndim)),
-            ) * np.expand_dims(self.low_pass_filter, -1)
+            matching_cost_at_t_gradient = (
+                np.fft.fftn(
+                    d_matching_d_velocity_at_t,
+                    axes=tuple(range(self.reference_image.ndim)),
+                )
+                * np.expand_dims(self.low_pass_filter, -1)
+            )
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += (
                 np.fft.fftn(
@@ -1507,20 +1512,20 @@ def lddmm_register(
             than 1 if reference_image and moving_image are cross-modal.
             3 is generally good for histology. Overrides 0 input.
             By default 1.
-        **kwargs:
+        **kwargs
             The above parameters are sufficient for the majority of
             registrations; however, some require additional fine-tuning or
             modification. A number of additional keyword arguments are
             accessible via kwargs to provide a rich environment of options for
             tailoring a particular registration.
-            
+
             Among these options are
             parameters whose default values may be overridden such as
             num_iterations, and boolean flags that activate additional
             features including spatially_varying_contrast_map and
             artifact_and_background_classification. If set to True, these
             features are further parametrized by other kwargs.
-            
+
             It is important to note that some kwarg specifications will affect
             the validity of previously calibrated values for other parameters,
             most notably deformative_stepsize. Options include:
@@ -1568,7 +1573,7 @@ def lddmm_register(
                 num_iterations: int, optional
                     The total number of iterations. By default 300.
                 num_affine_only_iterations: int, optional
-                    The number of iterations at the start of the process 
+                    The number of iterations at the start of the process
                     without deformative adjustments. By default 100.
                 num_rigid_affine_iterations: int, optional
                     The number of iterations at the start of the process in
@@ -1669,7 +1674,8 @@ def lddmm_register(
                     If False, they are left centered and in physical units with
                     the exising in the last dimension. By default True.
 
-    Example:
+    Examples
+    --------
         >>> import numpy as np
         >>> from scipy.ndimage import rotate
         >>> from skimage.registration import lddmm_register
@@ -1755,9 +1761,11 @@ def lddmm_register(
                     total_energies: list
                         The sum of matching_energy and regularization_energy,
                         used as the overall cost function, at each iteration.
-    
+
     Raises
     ------
+    ValueError
+        Raised if an unrecognized keyword argument is provided.
     ValueError
         Raised if multiscales is provided with values both above and below 1.
     """
@@ -1830,7 +1838,7 @@ def lddmm_register(
     initial_velocity_fields = kwargs["initial_velocity_fields"]
 
     # Validate multiscales.
-    # Note: aside from map_coordinates_ify, 
+    # Note: aside from map_coordinates_ify,
     # this is the only argument not passed to _Lddmm.
     if multiscales is None:
         multiscales = 1
@@ -1881,23 +1889,27 @@ def lddmm_register(
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
         velocity_smooth_length=kwargs["velocity_smooth_length"],
-        preconditioner_velocity_smooth_length=
-            kwargs["preconditioner_velocity_smooth_length"],
-        maximum_velocity_fields_update=
-            kwargs["maximum_velocity_fields_update"],
+        preconditioner_velocity_smooth_length=kwargs[
+            "preconditioner_velocity_smooth_length"
+        ],
+        maximum_velocity_fields_update=kwargs[
+            "maximum_velocity_fields_update"
+        ],
         num_timesteps=kwargs["num_timesteps"],
         # Contrast map specifiers.
         contrast_order=contrast_order,
-        spatially_varying_contrast_map=
-            kwargs["spatially_varying_contrast_map"],
+        spatially_varying_contrast_map=kwargs[
+            "spatially_varying_contrast_map"
+        ],
         contrast_iterations=kwargs["contrast_iterations"],
         sigma_contrast=kwargs["sigma_contrast"],
         contrast_smooth_length=kwargs["contrast_smooth_length"],
         # # vs. accuracy tradeoff.
         sigma_matching=kwargs["sigma_matching"],
         # Classification specifiers.
-        artifact_and_background_classification=
-            kwargs["artifact_and_background_classification"],
+        artifact_and_background_classification=kwargs[
+            "artifact_and_background_classification"
+        ],
         sigma_artifact=kwargs["sigma_artifact"],
         sigma_background=kwargs["sigma_background"],
         artifact_prior=kwargs["artifact_prior"],
@@ -1958,9 +1970,7 @@ def lddmm_register(
             np.round(scale * moving_image.shape) / moving_image.shape
         )
         scaled_moving_image = rescale(moving_image, moving_image_scale)
-        scaled_moving_image_spacing = (
-            moving_image_spacing / moving_image_scale
-        )
+        scaled_moving_image_spacing = moving_image_spacing / moving_image_scale
 
         # Collect non-multiscale_lddmm_kwargs
         # Note: user arguments initial_affine, initial_contrast_coefficients,
