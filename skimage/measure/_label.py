@@ -1,12 +1,12 @@
 from scipy import ndimage
 from ._ccomp import label_cython as clabel
-from ..morphology._util import _resolve_neighborhood
 
 
 def _label_bool(image, background=None, return_num=False, connectivity=None):
     """
     Faster implementation of clabel for boolean input.
     """
+    from ..morphology._util import _resolve_neighborhood
     if background == 1:
         image = ~image
 
