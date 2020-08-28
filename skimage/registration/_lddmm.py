@@ -1691,7 +1691,7 @@ def lddmm_register(
         >>> # in the (1,2) plane.
         >>> #
         >>> reference_image = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2
-        >>> <= 1 for col in range(25)] for row in range(19)]]*2, float)
+        ... <= 1 for col in range(25)] for row in range(19)]]*2, float)
         >>> moving_image = rotate(reference_image, 30, (1,2))
         >>> #
         >>> # Register the reference_image to the moving_image,
@@ -1699,13 +1699,13 @@ def lddmm_register(
         >>> # to match the other.
         >>> #
         >>> lddmm_output = lddmm_register(reference_image, moving_image,
-        >>> deformative_stepsize=0.5)
+        ... deformative_stepsize=0.5)
         >>> #
         >>> deformed_moving_image = map_coordinates(moving_image,
-        >>> lddmm_output.moving_image_to_reference_image_transform)
+        ... lddmm_output.moving_image_to_reference_image_transform)
         >>> #
         >>> deformed_reference_image = map_coordinates(reference_image,
-        >>> lddmm_output.reference_image_to_moving_image_transform)
+        ... lddmm_output.reference_image_to_moving_image_transform)
 
     Returns
     -------
@@ -1765,7 +1765,7 @@ def lddmm_register(
     Raises
     ------
     ValueError
-        Raised if an unrecognized keyword argument is provided.
+        Raised if unrecognized keyword arguments are provided.
     ValueError
         Raised if multiscales is provided with values both above and below 1.
     """

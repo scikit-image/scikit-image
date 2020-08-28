@@ -73,7 +73,9 @@ class Test__validate_scalar_to_multi:
 
     def test_multi_value_with_size_None(self):
         kwargs = dict(
-            value=np.array([1, 2, 3], float), size=None, dtype=float,
+            value=np.array([1, 2, 3], float),
+            size=None,
+            dtype=float,
         )
         correct_output = np.array([1, 2, 3], float)
         assert np.array_equal(
@@ -91,7 +93,9 @@ class Test__validate_scalar_to_multi:
 
     def test_non_int_size(self):
         kwargs = dict(
-            value=[1, 2, 3, 4], size="size: not an int", dtype=float,
+            value=[1, 2, 3, 4],
+            size="size: not an int",
+            dtype=float,
         )
         expected_exception = TypeError
         match = "size must be either None or interpretable as an integer."
@@ -139,7 +143,9 @@ if size is provided."
             _validate_scalar_to_multi(**kwargs)
 
     def test_reject_nans(self):
-        kwargs = dict(value=[1, 2, None], size=3, dtype=int)
+        kwargs = dict(
+            value=[1, 2, np.nan], size=3, dtype=float, reject_nans=True
+        )
         expected_exception = ValueError
         match = "value contains np.nan elements."
         with pytest.raises(expected_exception, match=match):
@@ -369,7 +375,9 @@ class Test__compute_axes:
 
     def test_anisotropic_spacing(self):
         kwargs = dict(
-            shape=(2, 3, 4), spacing=[1, 1.5, 2], origin="center",
+            shape=(2, 3, 4),
+            spacing=[1, 1.5, 2],
+            origin="center",
         )
         correct_output = [
             np.arange(dim_size) * dim_res
@@ -500,7 +508,12 @@ class Test_resample:
 
     def test_zero_origin_upsample(self):
         kwargs = dict(
-            image=np.array([[0, 1, 2], [3, 4, 5],]),
+            image=np.array(
+                [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                ]
+            ),
             new_spacing=1 / 2,
             old_spacing=1,
             err_to_larger=True,
@@ -521,7 +534,12 @@ class Test_resample:
 
     def test_center_origin_upsample(self):
         kwargs = dict(
-            image=np.array([[0, 1, 2], [3, 4, 5],]),
+            image=np.array(
+                [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                ]
+            ),
             new_spacing=1 / 2,
             old_spacing=1,
             err_to_larger=True,
@@ -558,7 +576,12 @@ class Test_resample:
             method="linear",
             anti_aliasing=False,
         )
-        correct_output = np.array([[0, 2, 4], [10, 12, 14],])
+        correct_output = np.array(
+            [
+                [0, 2, 4],
+                [10, 12, 14],
+            ]
+        )
         assert np.array_equal(resample(**kwargs), correct_output)
 
     def test_center_origin_downsample(self):
@@ -579,12 +602,22 @@ class Test_resample:
             method="linear",
             anti_aliasing=False,
         )
-        correct_output = np.array([[2.5, 4.5, 6.5], [12.5, 14.5, 16.5],])
+        correct_output = np.array(
+            [
+                [2.5, 4.5, 6.5],
+                [12.5, 14.5, 16.5],
+            ]
+        )
         assert np.array_equal(resample(**kwargs), correct_output)
 
     def test_zero_origin_joint_upsample_and_downsample(self):
         kwargs = dict(
-            image=np.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9],]),
+            image=np.array(
+                [
+                    [0, 1, 2, 3, 4],
+                    [5, 6, 7, 8, 9],
+                ]
+            ),
             new_spacing=[1 / 2, 2],
             old_spacing=1,
             err_to_larger=True,
@@ -594,13 +627,23 @@ class Test_resample:
             anti_aliasing=False,
         )
         correct_output = np.array(
-            [[0, 2, 4], [2.5, 4.5, 6.5], [5.0, 7.0, 9.0], [7.5, 9.5, 11.5],]
+            [
+                [0, 2, 4],
+                [2.5, 4.5, 6.5],
+                [5.0, 7.0, 9.0],
+                [7.5, 9.5, 11.5],
+            ]
         )
         assert np.array_equal(resample(**kwargs), correct_output)
 
     def test_center_origin_joint_upsample_and_downsample(self):
         kwargs = dict(
-            image=np.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9],]),
+            image=np.array(
+                [
+                    [0, 1, 2, 3, 4],
+                    [5, 6, 7, 8, 9],
+                ]
+            ),
             new_spacing=[1 / 2, 2],
             old_spacing=1,
             err_to_larger=True,
@@ -624,7 +667,11 @@ class Test_resample:
     ):
         kwargs = dict(
             image=np.array(
-                [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],]
+                [
+                    [0, 1, 2, 3, 4],
+                    [5, 6, 7, 8, 9],
+                    [10, 11, 12, 13, 14],
+                ]
             ),
             new_spacing=[1 / 2, 2],
             old_spacing=1,
@@ -766,15 +813,12 @@ class Test_generate_position_field:
 
         if deform_to == "reference_image":
             expected_output = (
-                _compute_coords(
-                    reference_image_shape, reference_image_spacing
-                )
+                _compute_coords(reference_image_shape, reference_image_spacing)
                 + 1
             )
         elif deform_to == "moving_image":
             expected_output = (
-                _compute_coords(moving_image_shape, moving_image_spacing)
-                - 1
+                _compute_coords(moving_image_shape, moving_image_spacing) - 1
             )
 
         position_field = generate_position_field(
@@ -804,7 +848,12 @@ class Test_generate_position_field:
         velocity_field_spacing = 1
         # Indicates a 90 degree rotation to the right.
         affine = np.array(
-            [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1],]
+            [
+                [0, 1, 0, 0],
+                [-1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
         )
 
         if deform_to == "reference_image":
