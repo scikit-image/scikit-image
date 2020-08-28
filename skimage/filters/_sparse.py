@@ -92,7 +92,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
 
     corner_indices = np.ravel_multi_index(
         corner_multi_indices, padded_image.shape
-    ).ravel().astype(np.intp, copy=False)
+    ).astype(np.intp, copy=False).reshape(-1)
 
     _correlate_sparse_offsets(padded_image.ravel(), corner_indices,
                               offsets, values, result.ravel())
