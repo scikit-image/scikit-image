@@ -61,9 +61,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
         The result of cross-correlating `image` with `kernel`. If mode
         'valid' is used, the resulting shape is (M-Q+1, N-R+1,[ ...,] P-S+1).
     """
-    if not isinstance(kernel, np.ndarray):
-        msg = '`correlate_sparse` kernel must be an numpy array object.'
-        raise ValueError(msg)
+    kernel = np.asarray(kernel)
 
     if mode == 'valid':
         padded_image = image
