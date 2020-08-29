@@ -236,8 +236,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
 
     seed_point_as_array = np.asarray_chkfinite(seed_point)
     if not np.all(
-            (0 <= seed_point_as_array) &
-            (seed_point_as_array < image.shape)):
+            (0 <= seed_point_as_array) & (seed_point_as_array < image.shape)):
         raise IndexError("seed_point lies outside the image.")
 
     seed_value = image[seed_point]
