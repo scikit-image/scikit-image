@@ -219,7 +219,7 @@ def test_selem():
                          [0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
-                         [0,   0,   0,   0,   0,   0]], dtype=np.uint8)
+                         [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
 
     np.testing.assert_equal(output, expected)
 
@@ -230,11 +230,11 @@ def test_selem():
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
                         selem=selem)
 
-    expected = np.array([[  0,   0,   0,   0,   0,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0]], dtype=np.uint8)
+    expected = np.array([[0, 0, 0, 0, 0, 0],
+                         [255, 255, 255, 255, 255, 0],
+                         [255, 255, 255, 255, 255, 0],
+                         [255, 255, 255, 255, 255, 0],
+                         [255, 255, 255, 255, 255, 0]], dtype=np.uint8)
 
     np.testing.assert_equal(output, expected)
 
@@ -245,17 +245,17 @@ def test_basic_nd():
         hypercube = np.zeros(shape)
         slice_mid = tuple(slice(1, -1, None) for dim in range(dimension))
         hypercube[slice_mid] = 1  # sum is 3**dimension
-        filled = flood_fill(hypercube, (2,)*dimension, 2)
+        filled = flood_fill(hypercube, (2,) * dimension, 2)
 
         # Test that the middle sum is correct
         assert filled.sum() == 3**dimension * 2
 
         # Test that the entire array is as expected
         np.testing.assert_equal(
-            filled, np.pad(np.ones((3,)*dimension) * 2, 1, 'constant'))
+            filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant'))
 
 
-@pytest.mark.parametrize("tolerance", [None, 0])
+@ pytest.mark.parametrize("tolerance", [None, 0])
 def test_f_order(tolerance):
     image = np.array([
         [0, 0, 0, 0],
@@ -273,6 +273,18 @@ def test_f_order(tolerance):
 
     mask = flood(image, seed_point=(2, 1), tolerance=tolerance)
     np.testing.assert_array_equal(expected, mask)
+
+
+@pytest.mark.parametrize("seed_point", [(-1, -1), (-1, 4), (4, -1), (4, 4)])
+def test_out_of_bounds_seed_point(seed_point):
+    image = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ], order="F")
+
+    with raises(IndexError, match="seed_point lies outside the image."):
+        flood(image, seed_point)
 
 
 if __name__ == "__main__":
