@@ -224,14 +224,6 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
         image = np.ascontiguousarray(image)
         order = 'C'
 
-    seed_point_as_array = np.asarray_chkfinite(seed_point)
-    if not np.all(
-            (0 <= seed_point_as_array) &
-            (seed_point_as_array < image.shape)):
-        raise IndexError("seed_point lies outside the image.")
-
-    seed_value = image[seed_point]
-
     # Shortcut for rank zero
     if 0 in image.shape:
         return np.zeros(image.shape, dtype=np.bool)
@@ -241,6 +233,14 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
         iter(seed_point)
     except TypeError:
         seed_point = (seed_point,)
+
+    seed_point_as_array = np.asarray_chkfinite(seed_point)
+    if not np.all(
+            (0 <= seed_point_as_array) &
+            (seed_point_as_array < image.shape)):
+        raise IndexError("seed_point lies outside the image.")
+
+    seed_value = image[seed_point]
 
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
 
