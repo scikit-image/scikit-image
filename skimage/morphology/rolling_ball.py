@@ -7,7 +7,8 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
                       has_nan=False, num_threads=None):
-    """Estimate background intensity using a rolling ellipsoid.
+    """
+    Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
     grayscale image in case of uneven exposure. It is a generalization of the
@@ -50,10 +51,12 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
       using the image intensity at that position (``image[y, x]``) plus the
       difference of ``intensity_vertex`` and the surface of the ellipsoid at
       ``pos``. The surface intensity of the ellipsoid is computed using the
-      canonical ellipsis equation::
-            semi_spatial = kernel_shape / 2
-            semi_vertex = intensity_vertex / 2
-            np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
+      canonical ellipsis equation
+      .. code-block:: python
+
+        | semi_spatial = kernel_shape / 2
+        | semi_vertex = intensity_vertex / 2
+        | np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
 
     - This algorithm assumes that dark pixels correspond to the background. If
       you have a bright background, invert the image before passing it to the
@@ -172,10 +175,12 @@ def rolling_ball(image, radius=50, **kwargs):
       instead. It allows you to specify different parameters for the spatial
       and intensity dimensions.
     - The ball has the same dimensionality as the input image. If you
-      want to apply the filter plane-wise to a 3D image use ::
-        kernel_shape = (1, 2 * radius, 2 * radius)
-        intensity_vertex = 2 * radius
-        rolling_ellipsoid(image, kernel_shape, intensity_vertex)``
+      want to apply the filter plane-wise to a 3D image use
+      .. code-block:: python
+
+        | kernel_shape = (1, 2 * radius, 2 * radius)
+        | intensity_vertex = 2 * radius
+        | rolling_ellipsoid(image, kernel_shape, intensity_vertex)
 
     Examples
     --------
