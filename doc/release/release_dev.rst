@@ -40,6 +40,8 @@ Bugfixes
 - In ``skimage.morphology.selem.rectangle`` the ``height`` argument
   controlled the width and the ``width`` argument controlled the height.
   They have been replaced with ``nrow`` and ``ncol``.
+- ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
+  now always raise an error when the ``seed_point`` lies outside the image.
 
 
 Deprecations

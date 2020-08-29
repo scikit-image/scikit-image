@@ -224,6 +224,12 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
         image = np.ascontiguousarray(image)
         order = 'C'
 
+    seed_point_as_array = np.asarray_chkfinite(seed_point)
+    if not np.all(
+            (0 <= seed_point_as_array) &
+            (seed_point_as_array < image.shape)):
+        raise IndexError("seed_point lies outside the image.")
+
     seed_value = image[seed_point]
 
     # Shortcut for rank zero
@@ -242,7 +248,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     working_image = _fast_pad(image, image.min(), order=order)
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
-    ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
+    ravelled_seed_idx = np.ravel_multi_index([i + 1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
         working_image.shape, selem, center=((1,) * image.ndim), order=order)
