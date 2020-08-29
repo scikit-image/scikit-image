@@ -42,7 +42,7 @@ Bugfixes
   They have been replaced with ``nrow`` and ``ncol``.
 - ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
   now always raise an error when the ``seed_point`` lies outside the image.
-
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
