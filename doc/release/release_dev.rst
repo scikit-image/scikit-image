@@ -40,7 +40,7 @@ Bugfixes
 - In ``skimage.morphology.selem.rectangle`` the ``height`` argument
   controlled the width and the ``width`` argument controlled the height.
   They have been replaced with ``nrow`` and ``ncol``.
-
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------

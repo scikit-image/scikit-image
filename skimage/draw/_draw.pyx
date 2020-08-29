@@ -213,8 +213,8 @@ def _polygon(r, c, shape):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    r = np.asanyarray(r)
-    c = np.asanyarray(c)
+    r = np.atleast_1d(r)
+    c = np.atleast_1d(c)
 
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))
