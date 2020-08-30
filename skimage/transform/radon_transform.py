@@ -161,7 +161,7 @@ def _get_fourier_filter(size, filter_name):
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
 
-    omega = 2 * np.pi * fftfreq(size)
+    omega = 2 * np.pi * fft.fftfreq(size)
     kernel = 2 * np.real(fft(f))         # ramp filter
     if filter_name == "ramp":
         pass
@@ -171,13 +171,13 @@ def _get_fourier_filter(size, filter_name):
     elif filter_name == "cosine":
         freq = (0.5 * np.arange(0, size)
                 / size)
-        cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
+        cosine_filter = fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
         kernel *= cosine_filter
     elif filter_name == "hamming":
-        hamming_filter = np.fft.fftshift(np.hamming(size))
+        hamming_filter = fft.fftshift(np.hamming(size))
         kernel *= hamming_filter
     elif filter_name == "hann":
-        hanning_filter = np.fft.fftshift(np.hanning(size))
+        hanning_filter = fft.fftshift(np.hanning(size))
         kernel *= hanning_filter
     elif filter_name is None:
         kernel[:] = 1
