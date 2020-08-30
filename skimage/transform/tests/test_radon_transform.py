@@ -44,7 +44,7 @@ def _rescale_intensity(x):
     return x
 
 
- def test_iradon_bias_circular_phantom():
+def test_iradon_bias_circular_phantom():
     """
     test that a uniform circular phantom has a small reconstruction bias
     """
