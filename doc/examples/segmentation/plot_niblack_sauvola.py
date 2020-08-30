@@ -19,7 +19,7 @@ window that contains the surrounding pixels.
 .. [2] J. Sauvola and M. Pietikainen, "Adaptive document image
        binarization," Pattern Recognition 33(2),
        pp. 225-236, 2000.
-       DOI:10.1016/S0031-3203(99)00055-2
+       :DOI:`10.1016/S0031-3203(99)00055-2`
 """
 import matplotlib
 import matplotlib.pyplot as plt

@@ -1,14 +1,4 @@
-from math import ceil
-from multiprocessing import cpu_count
-
 __all__ = ['apply_parallel']
-
-
-try:
-    import dask.array as da
-    dask_available = True
-except ImportError:
-    dask_available = False
 
 
 def _get_chunks(shape, ncpu):
@@ -28,6 +18,10 @@ def _get_chunks(shape, ncpu):
     >>> _get_chunks((2, 4), 2)
     ((1, 1), (4,))
     """
+    # since apply_parallel is in the critical import path, we lazy import
+    # math just when we need it.
+    from math import ceil
+
     chunks = []
     nchunks_per_dim = int(ceil(ncpu ** (1./len(shape))))
 
@@ -51,6 +45,7 @@ def _get_chunks(shape, ncpu):
 
 
 def _ensure_dask_array(array, chunks=None):
+    import dask.array as da
     if isinstance(array, da.Array):
         return array
 
@@ -111,7 +106,11 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     to disk instead of loading in memory.
 
     """
-    if not dask_available:
+    try:
+        # Importing dask takes time. since apply_parallel is on the
+        # minimum import path of skimage, we lazy attempt to import dask
+        import dask.array as da
+    except ImportError:
         raise RuntimeError("Could not import 'dask'.  Please install "
                            "using 'pip install dask'")
 
@@ -121,6 +120,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     if chunks is None:
         shape = array.shape
         try:
+            # since apply_parallel is in the critical import path, we lazy
+            # import multiprocessing just when we need it.
+            from multiprocessing import cpu_count
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4

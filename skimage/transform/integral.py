@@ -5,7 +5,7 @@ from .._shared.utils import warn
 
 
 def integral_image(image):
-    """Integral image / summed area table.
+    r"""Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
     left of it, i.e.:
@@ -63,12 +63,12 @@ def integrate(ii, start, end):
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
     >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)
-    array([ 3.])
+    array([3.])
     >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum from (3, 3) to (4, 5)
-    array([ 6.])
+    array([6.])
     >>> # sum from (1, 0) to (1, 2) and from (3, 3) to (4, 5)
     >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])
-    array([ 3.,  6.])
+    array([3., 6.])
     """
     start = np.atleast_2d(np.array(start))
     end = np.atleast_2d(np.array(end))

@@ -7,7 +7,7 @@ from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
 from qtpy.QtGui import QImage, QPixmap
 from qtpy import QtCore
 
-# We try to aquire the gui lock first or else the gui import might
+# We try to acquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
 window_manager.acquire('qt')
 
@@ -28,7 +28,7 @@ class ImageLabel(QLabel):
         # the constructor, because we can't guarantee
         # that every row of the numpy data is
         # 4-byte aligned. Which Qt would require
-        # if we didnt pass the stride.
+        # if we didn't pass the stride.
         self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                           arr.strides[0], QImage.Format_RGB888)
         self.pm = QPixmap.fromImage(self.img)
@@ -68,6 +68,10 @@ def imread(filename):
     """
     Read an image using QT's QImage.load
     """
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     qtimg = QImage()
     if not qtimg.load(filename):
         # QImage.load() returns false on failure, so raise an exception
@@ -100,6 +104,10 @@ def imread(filename):
     return img
 
 def imshow(arr, fancy=False):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     global app
     if not app:
         app = QApplication([])
@@ -124,6 +132,10 @@ def _app_show():
 
 
 def imsave(filename, img, format_str=None):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     # we can add support for other than 3D uint8 here...
     img = prepare_for_display(img)
     qimg = QImage(img.data, img.shape[1], img.shape[0],

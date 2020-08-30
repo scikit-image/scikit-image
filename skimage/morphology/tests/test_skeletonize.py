@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from skimage.morphology import skeletonize, medial_axis, thin
 from skimage.morphology._skeletonize import (_generate_thin_luts,
@@ -6,10 +5,10 @@ from skimage.morphology._skeletonize import (_generate_thin_luts,
 from skimage import draw
 from scipy.ndimage import correlate
 from skimage.io import imread
-from skimage import data_dir
+from skimage import data
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import assert_array_equal, fetch
 
 
 class TestSkeletonize():
@@ -26,7 +25,7 @@ class TestSkeletonize():
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
         with testing.raises(ValueError):
-            skeletonize(im)
+            skeletonize(im, method='zhang')
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
@@ -60,13 +59,13 @@ class TestSkeletonize():
         assert_array_equal(result, im)
 
     def test_skeletonize_output(self):
-        im = imread(os.path.join(data_dir, "bw_text.png"), as_gray=True)
+        im = imread(fetch("data/bw_text.png"), as_gray=True)
 
         # make black the foreground
         im = (im == 0)
         result = skeletonize(im)
 
-        expected = np.load(os.path.join(data_dir, "bw_text_skeleton.npy"))
+        expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
     def test_skeletonize_num_neighbours(self):
@@ -180,6 +179,19 @@ class TestMedialAxis():
         result = medial_axis(np.zeros((10, 10), bool),
                              np.zeros((10, 10), bool))
         assert np.all(result == False)
+
+    def test_vertical_line(self):
+        '''Test a thick vertical line, issue #3861'''
+        img = np.zeros((9, 9))
+        img[:, 2] = 1
+        img[:, 3] = 1
+        img[:, 4] = 1
+
+        expected = np.full(img.shape, False)
+        expected[:, 3] = True
+
+        result = medial_axis(img)
+        assert_array_equal(result, expected)
 
     def test_01_01_rectangle(self):
         '''Test skeletonize on a rectangle'''

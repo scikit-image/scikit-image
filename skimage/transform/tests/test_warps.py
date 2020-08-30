@@ -1,19 +1,25 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import _stackcopy
-from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
-                               AffineTransform,
-                               ProjectiveTransform,
-                               SimilarityTransform,
-                               downscale_local_mean)
-from skimage import transform as tf, data, img_as_float
-from skimage.color import rgb2gray
-
+from skimage.data import checkerboard, astronaut
+from skimage.util.dtype import img_as_float
+from skimage.color.colorconv import rgb2gray
+from skimage.draw.draw import circle_perimeter_aa
+from skimage.feature.peak import peak_local_max
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel)
 from skimage._shared._warnings import expected_warnings
+
+from skimage.transform._warps import (_stackcopy,
+                                      _linear_polar_mapping,
+                                      _log_polar_mapping, warp,
+                                      warp_coords, rotate, resize,
+                                      rescale, warp_polar, swirl,
+                                      downscale_local_mean)
+from skimage.transform._geometric import (AffineTransform,
+                                          ProjectiveTransform,
+                                          SimilarityTransform)
 
 
 np.random.seed(0)
@@ -160,6 +166,11 @@ def test_rotate_resize_center():
     assert_equal(x45, ref_x45)
 
 
+def test_rotate_resize_90():
+    x90 = rotate(np.zeros((470, 230), dtype=np.double), 90, resize=True)
+    assert x90.shape == (230, 470)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
@@ -231,19 +242,13 @@ def test_rescale_multichannel_multiscale():
 
 
 def test_rescale_multichannel_defaults():
-    # ensure multichannel=None matches the previous default behaviour
-
-    # 2D: multichannel should default to False
     x = np.zeros((8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
-    # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 16, 3))
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    assert_equal(scaled.shape, (16, 16, 6))
 
 
 def test_resize2d():
@@ -334,22 +339,38 @@ def test_resize3d_bilinear():
     assert_almost_equal(resized, ref)
 
 
+def test_resize_dtype():
+    x = np.zeros((5, 5))
+    x_f32 = x.astype(np.float32)
+    x_u8 = x.astype(np.uint8)
+    x_b = x.astype(bool)
+
+    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
+    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
+    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+
+
 def test_swirl():
-    image = img_as_float(data.checkerboard())
+    image = img_as_float(checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
     swirl_params.pop('mode')
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
@@ -362,7 +383,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(data.astronaut()))
+    img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -376,7 +397,7 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
-    image = data.astronaut().astype(np.float32)
+    image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
@@ -401,6 +422,23 @@ def test_downsize_anti_aliasing():
     assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
+
+    sigma = 0.125
+    out_size = (5, 5)
+    resize(x, out_size, order=1, mode='constant',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='edge',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='symmetric',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='reflect',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='wrap',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+
+    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
+        resize(x, out_size, order=1, mode='non-existent',
+               anti_aliasing=True, anti_aliasing_sigma=sigma)
 
 
 def test_downsize_anti_aliasing_invalid_stddev():
@@ -477,17 +515,165 @@ def test_slow_warp_nonint_oshape():
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
     out = rescale(image, 2, preserve_range=False, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image, 2, preserve_range=True, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                  mode='constant', multichannel='False', anti_aliasing=False,
+                  mode='constant', multichannel=False, anti_aliasing=False,
                   clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
+
+
+def test_zero_image_size():
+    with testing.raises(ValueError):
+        warp(np.zeros(0),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((0, 10)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 0)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 10, 0)),
+             SimilarityTransform())
+
+
+def test_linear_polar_mapping():
+    output_coords = np.array([[0, 0],
+                             [0, 90],
+                             [0, 180],
+                             [0, 270],
+                             [99, 0],
+                             [99, 180],
+                             [99, 270],
+                             [99, 45]])
+    ground_truth = np.array([[100, 100],
+                             [100, 100],
+                             [100, 100],
+                             [100, 100],
+                             [199, 100],
+                             [1, 100],
+                             [100, 1],
+                             [170.00357134, 170.00357134]])
+    k_angle = 360 / (2 * np.pi)
+    k_radius = 1
+    center = (100, 100)
+    coords = _linear_polar_mapping(output_coords, k_angle, k_radius, center)
+    assert np.allclose(coords, ground_truth)
+
+
+def test_log_polar_mapping():
+    output_coords = np.array([[0, 0],
+                              [0, 90],
+                              [0, 180],
+                              [0, 270],
+                              [99, 0],
+                              [99, 180],
+                              [99, 270],
+                              [99, 45]])
+    ground_truth = np.array([[101, 100],
+                             [100, 101],
+                             [99, 100],
+                             [100, 99],
+                             [195.4992586, 100],
+                             [4.5007414, 100],
+                             [100, 4.5007414],
+                             [167.52817336, 167.52817336]])
+    k_angle = 360 / (2 * np.pi)
+    k_radius = 100 / np.log(100)
+    center = (100, 100)
+    coords = _log_polar_mapping(output_coords, k_angle, k_radius, center)
+    assert np.allclose(coords, ground_truth)
+
+
+def test_linear_warp_polar():
+    radii = [5, 10, 15, 20]
+    image = np.zeros([51, 51])
+    for rad in radii:
+        rr, cc, val = circle_perimeter_aa(25, 25, rad)
+        image[rr, cc] = val
+    warped = warp_polar(image, radius=25)
+    profile = warped.mean(axis=0)
+    peaks = peak_local_max(profile)
+    assert np.alltrue([peak in radii for peak in peaks])
+
+
+def test_log_warp_polar():
+    radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
+             np.exp(5)-1, np.exp(5)+1]
+    radii = [int(x) for x in radii]
+    image = np.zeros([301, 301])
+    for rad in radii:
+        rr, cc, val = circle_perimeter_aa(150, 150, rad)
+        image[rr, cc] = val
+    warped = warp_polar(image, radius=200, scaling='log')
+    profile = warped.mean(axis=0)
+    peaks_coord = peak_local_max(profile)
+    peaks_coord.sort(axis=0)
+    gaps = peaks_coord[1:] - peaks_coord[:-1]
+    assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
+
+
+def test_invalid_scaling_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling='invalid')
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling=None)
+
+
+def test_invalid_dimensions_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 3)), (5, 5))
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
+
+
+def test_bool_img_rescale():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = rescale(img, 0.5)
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_bool_img_resize():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = resize(img, (6, 9))
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_boll_array_warnings():
+    img = np.zeros((10, 10), dtype=bool)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        warp(img, np.eye(3), order=1)

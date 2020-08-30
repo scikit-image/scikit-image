@@ -1,4 +1,4 @@
-"""Image Processing SciKit (Toolbox for SciPy)
+"""Image Processing for Python
 
 ``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
@@ -26,11 +26,11 @@ graph
 io
     Reading, saving, and displaying images and video.
 measure
-    Measurement of image properties, e.g., similarity and contours.
+    Measurement of image properties, e.g., region properties and contours.
+metrics
+    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
 morphology
     Morphological operations, e.g., opening or skeletonization.
-novice
-    Simplified interface for teaching purposes.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
@@ -68,13 +68,10 @@ dtype_limits
 
 """
 
-import imp
-import functools
-import warnings
 import sys
 
 
-__version__ = '0.15.dev0'
+__version__ = '0.18.0.dev0'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
@@ -90,7 +87,7 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-http://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
@@ -105,6 +102,7 @@ def _raise_build_error(e):
     raise ImportError("""%s
 It seems that scikit-image has not been built correctly.
 %s""" % (e, msg))
+
 
 try:
     # This variable is injected in the __builtins__ by the build
@@ -137,4 +135,4 @@ else:
     from .data import data_dir
     from .util.lookfor import lookfor
 
-del warnings, functools, imp, sys
+del sys

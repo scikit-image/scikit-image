@@ -8,7 +8,7 @@ from skimage.viewer.canvastools import (
 from skimage.viewer.canvastools.base import CanvasToolBase
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal
+from skimage._shared.testing import assert_equal, parametrize
 
 try:
     from matplotlib.testing.decorators import cleanup
@@ -160,8 +160,8 @@ def test_rect_tool():
 
 @cleanup
 @testing.skipif(not has_qt, reason="Qt not installed")
-def test_paint_tool():
-    img = data.moon()
+@parametrize('img', [data.moon(), data.astronaut()])
+def test_paint_tool(img):
     viewer = ImageViewer(img)
 
     tool = PaintTool(viewer, img.shape)
@@ -170,7 +170,7 @@ def test_paint_tool():
     assert_equal(tool.radius, 10)
     tool.label = 2
     assert_equal(tool.label, 2)
-    assert_equal(tool.shape, img.shape)
+    assert_equal(tool.shape, img.shape[:2])
 
     do_event(viewer, 'mouse_press', xdata=100, ydata=100)
     do_event(viewer, 'move', xdata=110, ydata=110)
@@ -190,6 +190,7 @@ def test_paint_tool():
 
     tool.overlay = tool.overlay * 0
     assert_equal(tool.overlay.sum(), 0)
+    assert_equal(tool.cmap.N, tool._overlay_plot.norm.vmax)
 
 
 @cleanup

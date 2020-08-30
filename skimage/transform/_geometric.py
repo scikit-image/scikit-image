@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy import spatial
+import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 
@@ -89,7 +90,7 @@ def _umeyama(src, dst, estimate_scale):
     References
     ----------
     .. [1] "Least-squares estimation of transformation parameters between two
-            point patterns", Shinji Umeyama, PAMI 1991, DOI: 10.1109/34.88573
+            point patterns", Shinji Umeyama, PAMI 1991, :DOI:`10.1109/34.88573`
 
     """
 
@@ -304,8 +305,10 @@ class FundamentalMatrixTransform(GeometricTransform):
             coordinates.
 
         """
-        assert src.shape == dst.shape
-        assert src.shape[0] >= 8
+        if src.shape != dst.shape:
+            raise ValueError('src and dst shapes must be identical.')
+        if src.shape[0] < 8:
+            raise ValueError('src.shape[0] must be equal or larger than 8.')
 
         # Center and normalize image points for better numerical stability.
         try:
@@ -492,7 +495,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
 
 class ProjectiveTransform(GeometricTransform):
-    """Projective transformation.
+    r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
 
@@ -549,9 +552,12 @@ class ProjectiveTransform(GeometricTransform):
         src = np.vstack((x, y, np.ones_like(x)))
         dst = src.T @ matrix.T
 
+        # below, we will divide by the last dimension of the homogeneous
+        # coordinate matrix. In order to avoid division by zero,
+        # we replace exact zeros in this column with a very small number.
+        dst[dst[:, 2] == 0, 2] = np.finfo(float).eps
         # rescale to homogeneous coordinates
-        dst[:, 0] /= dst[:, 2]
-        dst[:, 1] /= dst[:, 2]
+        dst[:, :2] /= dst[:, 2:3]
 
         return dst[:, :2]
 
@@ -676,6 +682,12 @@ class ProjectiveTransform(GeometricTransform):
         A = A[:, list(self._coeffs) + [8]]
 
         _, _, V = np.linalg.svd(A)
+        # if the last element of the vector corresponding to the smallest
+        # singular value is close to zero, this implies a degenerate case
+        # because it is a rank-defective transform, which would map points
+        # to a line rather than a plane.
+        if np.isclose(V[-1, -1], 0):
+            return False
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
@@ -710,6 +722,26 @@ class ProjectiveTransform(GeometricTransform):
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
 
+    def __nice__(self):
+        """common 'paramstr' used by __str__ and __repr__"""
+        npstring = np.array2string(self.params, separator=', ')
+        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
+        return paramstr
+
+    def __repr__(self):
+        """Add standard repr formatting around a __nice__ string"""
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
+
+    def __str__(self):
+        """Add standard str formatting around a __nice__ string"""
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        return '<{}({})>'.format(classstr, paramstr)
+
 
 class AffineTransform(ProjectiveTransform):
     """2D affine transformation.
@@ -733,8 +765,12 @@ class AffineTransform(ProjectiveTransform):
     ----------
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
-    scale : (sx, sy) as array, list or tuple, optional
-        Scale factors.
+    scale : {s as float or (sx, sy) as array, list or tuple}, optional
+        Scale factor(s). If a single value, it will be assigned to both
+        sx and sy.
+
+        .. versionadded:: 0.17
+           Added support for supplying a single scalar value.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
@@ -773,7 +809,11 @@ class AffineTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            sx, sy = scale
+            if np.isscalar(scale):
+                sx = sy = scale
+            else:
+                sx, sy = scale
+
             self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
@@ -1135,12 +1175,8 @@ class SimilarityTransform(EuclideanTransform):
 
     @property
     def scale(self):
-        if abs(math.cos(self.rotation)) < np.spacing(1):
-            # sin(self.rotation) == 1
-            scale = self.params[1, 0]
-        else:
-            scale = self.params[0, 0] / math.cos(self.rotation)
-        return scale
+        # det = scale**(# of dimensions), therefore scale = det**(1/2)
+        return np.sqrt(np.linalg.det(self.params))
 
 
 class PolynomialTransform(GeometricTransform):
@@ -1339,13 +1375,13 @@ def estimate_transform(ttype, src, dst, **kwargs):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import transform as tf
+    >>> from skimage import transform
 
     >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
 
-    >>> tform = tf.estimate_transform('similarity', src, dst)
+    >>> tform = transform.estimate_transform('similarity', src, dst)
 
     >>> np.allclose(tform.inverse(tform(src)), src)
     True
@@ -1357,7 +1393,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
     >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
+    >>> tform2 = transform.SimilarityTransform(scale=1.1, rotation=1,
     ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right

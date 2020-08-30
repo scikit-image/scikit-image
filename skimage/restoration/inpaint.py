@@ -23,7 +23,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     mask_i = np.ravel_multi_index(np.where(mask), mask.shape)
 
     # Find masked points and prepare them to be easily enumerate over
-    mask_pts = np.array(np.where(mask)).T
+    mask_pts = np.stack(np.where(mask), axis=-1)
 
     # Iterate over masked points
     for mask_pt_n, mask_pt_idx in enumerate(mask_pts):
@@ -97,11 +97,11 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     ----------
     .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
             by biharmonic functions: numerical aspects",
-            https://arxiv.org/abs/1707.06567
+            :arXiv:`1707.06567`
     .. [2]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
             Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
             28 (2010), 104-113,
-            DOI: 10.1016/j.acha.2009.04.004
+            :DOI:`10.1016/j.acha.2009.04.004`
 
     Examples
     --------

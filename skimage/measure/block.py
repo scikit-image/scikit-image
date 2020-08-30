@@ -2,8 +2,10 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0):
-    """Down-sample image by applying function to local blocks.
+def block_reduce(image, block_size, func=np.sum, cval=0, func_kwargs=None):
+    """Downsample image by applying function `func` to local blocks.
+
+    This function is useful for max and mean pooling, for example.
 
     Parameters
     ----------
@@ -13,11 +15,16 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
         Array containing down-sampling integer factor along each axis.
     func : callable
         Function object which is used to calculate the return value for each
-        local block. This function must implement an ``axis`` parameter such
-        as ``numpy.sum`` or ``numpy.min``.
+        local block. This function must implement an ``axis`` parameter.
+        Primary functions are ``numpy.sum``, ``numpy.min``, ``numpy.max``,
+        ``numpy.mean`` and ``numpy.median``.  See also `func_kwargs`.
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
+    func_kwargs : dict
+        Keyword arguments passed to `func`. Notably useful for passing dtype
+        argument to ``np.mean``. Takes dictionary of inputs, e.g.:
+        ``func_kwargs={'dtype': np.float16})``.
 
     Returns
     -------
@@ -39,7 +46,7 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
             [28, 29, 30, 31],
             [32, 33, 34, 35]]])
     >>> block_reduce(image, block_size=(3, 3, 1), func=np.mean)
-    array([[[ 16.,  17.,  18.,  19.]]])
+    array([[[16., 17., 18., 19.]]])
     >>> image_max1 = block_reduce(image, block_size=(1, 3, 4), func=np.max)
     >>> image_max1 # doctest: +NORMALIZE_WHITESPACE
     array([[[11]],
@@ -56,6 +63,9 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
         raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
 
+    if func_kwargs is None:
+        func_kwargs = {}
+
     pad_width = []
     for i in range(len(block_size)):
         if block_size[i] < 1:
@@ -71,9 +81,7 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
     image = np.pad(image, pad_width=pad_width, mode='constant',
                    constant_values=cval)
 
-    out = view_as_blocks(image, block_size)
+    blocked = view_as_blocks(image, block_size)
 
-    for i in range(len(out.shape) // 2):
-        out = func(out, axis=-1)
-
-    return out
+    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)),
+                **func_kwargs)

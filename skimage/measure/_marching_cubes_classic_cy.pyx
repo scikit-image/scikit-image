@@ -4,6 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
+cnp.import_array()
 
 
 cdef inline double _get_fraction(double from_value, double to_value,

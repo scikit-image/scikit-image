@@ -16,7 +16,7 @@ def temporary_file(suffix=''):
     >>> import numpy as np
     >>> from skimage import io
     >>> with temporary_file('.tif') as tempfile:
-    ...     im = np.zeros((5, 5), np.uint8)
+    ...     im = np.arange(25, dtype=np.uint8).reshape((5, 5))
     ...     io.imsave(tempfile, im)
     ...     assert np.all(io.imread(tempfile) == im)
     """

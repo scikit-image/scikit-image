@@ -9,85 +9,49 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
-
+https://scikit-image.org
 
 
 New Features
 ------------
 
-- unsharp mask filtering (#2772)
-- New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
-
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------
 
-- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
-  improved with a new Cython-based implementation. #3022
-- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
-  new optional dependency).
-- Performance is now monitored by
-  `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
-  results will appear at https://pandas.pydata.org/speed/
-
+- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+  single-precision when the input image is single-precision. This can give a
+  substantial performance improvement when working with single precision data.
 
 API Changes
 -----------
-- imageio is now the preferred plugin for reading and writing images.
-- imageio is now a dependency of scikit-image.
 
-- ``rectangular_grid`` now returns a tuple instead of a list for compatiblity
-  with numpy 1.15
-- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
-  base10 instead of the natural logarithm as discussed in issue #2995.
-- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to ``False``.
-- Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to ``True``.
-- Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to ``True``.
-- Default value of ``mode`` parameter in ``skimage.transform.swirl``
-  has been set to ``reflect``.
-- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters.threshold_local`` instead.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
-- Default value of ``mode`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``reflect``.
-- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``True``.
-- Removed the ``skimage.test`` function. This functionality can be achieved
-  by calling ``pytest`` directly.
-
+- ``skimage.restoration.richardson_lucy`` returns a single-precision output
+  when the input is single-precision. Prior to this release, double-precision
+  was always used.
 
 Bugfixes
 --------
 
-
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
 
-- Python 2 support has been dropped in the development version. Users of the
-  development version should have Python >= 3.5.
-- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
-- ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
-  ``anti_aliasing`` has been enabled by default.
-- ``regionprops`` will use row-column coordinates in 0.16. You can start
-  using them now with ``regionprops(..., coordinates='rc')``. You can silence
-  warning messages, and retain the old behavior, with
-  ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error. This change has a number of consequences.
-  Specifically, the "orientation" region property will measure the
-  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
-  row-column coordinates.
-- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
-  and will be removed in 0.16. Use ``area_threshold`` instead.
+- In ``skimage.feature.structure_tensor``, an ``order`` argument has been
+  introduced which will default to 'rc' starting in version 0.20.
+- ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
+  removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
+  instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release
