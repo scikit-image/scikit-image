@@ -44,10 +44,9 @@ def _rescale_intensity(x):
     return x
 
 
-def test_iradon_rampfilter_bias_circular_phantom():
+ def test_iradon_bias_circular_phantom():
     """
-    test that a uniform circular phantom has a small reconstruction bias using
-    the ramp filter
+    test that a uniform circular phantom has a small reconstruction bias
     """
     pixels = 128
     xy = np.arange(-pixels / 2, pixels / 2) + 0.5
@@ -59,6 +58,7 @@ def test_iradon_rampfilter_bias_circular_phantom():
 
     reconstruction_fbp = iradon(sinogram, theta=theta)
     error = reconstruction_fbp - image
+
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
     assert roi_err < tol
