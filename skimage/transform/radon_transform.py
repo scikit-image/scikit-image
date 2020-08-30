@@ -12,11 +12,12 @@ from functools import partial
 if fftmodule is np.fft:
     # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
     # (fftpack preserves single precision while numpy.fft does not)
-    from scipy.fftpack import fft, ifft, fftshift
+    from scipy.fftpack import fft, ifft, fftshift, fftfreq
 else:
     fft = fftmodule.fft
     ifft = fftmodule.ifft
     fftshift = fftmodule.fftshift
+    fftfreq = fftmodule.fftfreq
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
@@ -162,7 +163,7 @@ def _get_fourier_filter(size, filter_name):
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
 
-    omega = 2 * np.pi * fft.fftfreq(size)
+    omega = 2 * np.pi * fftfreq(size)
     kernel = 2 * np.real(fft(f))         # ramp filter
     if filter_name == "ramp":
         pass
