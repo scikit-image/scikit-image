@@ -22,13 +22,11 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import (
-    color, feature, filters, io, measure, morphology, segmentation, util
+    color, feature, filters, measure, morphology, segmentation, util
 )
-from skimage.data import image_fetcher
+from skimage.data import human_mitosis
 
-
-path = image_fetcher.fetch('data/mitosis.tif')
-image = io.imread(path)
+image = human_mitosis()
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
