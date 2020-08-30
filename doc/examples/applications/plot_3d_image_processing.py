@@ -344,6 +344,7 @@ fig = px.density_heatmap(
     z='value',
     animation_frame='plane',
     color_continuous_scale='gray',
+    range_color=[0.0, 1.0],
     nbinsx=n_row,
     nbinsy=n_col
 )
