@@ -323,7 +323,7 @@ display(clipped_data)
 
 # Create `[row, column]` coordinates
 coords = np.indices((n_row, n_col))
-x_coords = coords[0].ravel()
+x_coords = coords[0].ravel()[::-1]
 y_coords = coords[1].ravel()
 # Convert images (slices) into coordinate (long) format
 df = pd.DataFrame(columns=['x', 'y', 'value', 'plane'])
