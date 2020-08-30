@@ -70,6 +70,9 @@ def test_coffee():
 
 def test_eagle():
     """ Test that "eagle" image can be loaded. """
+    # Fetching the data through the testing module will
+    # cause the test to skip if pooch isn't installed.
+    fetch('data/eagle.png')
     eagle = data.eagle()
     assert_equal(eagle.ndim, 2)
     assert_equal(eagle.dtype, np.dtype('uint8'))
