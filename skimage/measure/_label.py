@@ -15,9 +15,9 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
 
     if not 1 <= connectivity <= image.ndim:
         raise ValueError(
-            f'Connectivity for {image.ndim}D image should be in [1, ..., {image.ndim}]. '
-            f'Got {connectivity}.'
-            )
+            f'Connectivity for {image.ndim}D image should '
+            f'be in [1, ..., {image.ndim}]. Got {connectivity}.'
+        )
 
     selem = _resolve_neighborhood(None, connectivity, image.ndim)
     result = ndimage.label(image, structure=selem)
