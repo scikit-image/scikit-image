@@ -4,7 +4,7 @@ from ._ccomp import label_cython as clabel
 
 def _label_bool(image, background=None, return_num=False, connectivity=None):
     """Faster implementation of clabel for boolean input.
-    
+
     See context: https://github.com/scikit-image/scikit-image/issues/4833
     """
     from ..morphology._util import _resolve_neighborhood
