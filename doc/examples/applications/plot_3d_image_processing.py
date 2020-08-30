@@ -343,8 +343,18 @@ fig = px.density_heatmap(
     y='y',
     z='value',
     animation_frame='plane',
+    color_continuous_scale='gray',
     nbinsx=n_row,
     nbinsy=n_col
 )
-fig['layout'].pop('updatemenus')  # drop animation buttons
+fig.update_xaxes(showticklabels=False)
+fig.update_yaxes(showticklabels=False)
+fig.update_layout(
+    autosize=False,
+    width=500,
+    height=500,
+    coloraxis_showscale=False
+)
+# Drop animation buttons
+fig['layout'].pop('updatemenus')
 fig
