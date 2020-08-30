@@ -339,8 +339,8 @@ for p in range(n_plane):
 
 fig = px.density_heatmap(
     df,
-    x='x',
-    y='y',
+    x='y',
+    y='x',
     z='value',
     animation_frame='plane',
     color_continuous_scale='gray',
