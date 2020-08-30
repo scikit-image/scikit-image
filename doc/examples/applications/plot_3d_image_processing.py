@@ -42,9 +42,8 @@ information was reported by the microscope used to image the cells.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
-from scipy import ndimage as ndi
 
-from skimage import exposure
+from skimage import exposure, io
 from skimage.data import cells3D
 
 
