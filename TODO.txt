@@ -75,6 +75,8 @@ Version 0.20
   `structure_tensor`.
 * In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
   function.
+* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
+  `skivi.py` in `skimage/io/_plugins`.
 
 Version 1.0
 -----------
