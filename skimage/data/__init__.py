@@ -617,10 +617,9 @@ def cells3D():
 
     The microscope reports the following voxel spacing
 
-        >>> original_spacing = np.asarray([0.2900000, 0.0650000, 0.0650000])
-        >>> rescaled_spacing = original_spacing * [1, 4, 4]
-        >>> print("after rescaling images: {}\n".format(rescaled_spacing))
-        after rescaling images: [0.29 0.26 0.26]
+        * Original voxel size is ``(0.290, 0.065, 0.065)``.
+        * Scaling factor is ``(1, 4, 4)`` in each dimension.
+        * After rescaling the voxel size is ``(0.29 0.26 0.26)``.
 
     The returned data is a 3D array with the physical dimensions provided in
     ``(z, y, x)`` order.
