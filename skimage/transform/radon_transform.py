@@ -165,16 +165,14 @@ def iradon_filter(filter_name, size):
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
 
-    omega = 2 * np.pi * fftfreq(size)
     kernel = 2 * np.real(fft(f))         # ramp filter
     if filter_name == "ramp":
         pass
     elif filter_name == "shepp-logan":
         # Start from first element to avoid divide by zero
-        kernel[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
+        kernel *= np.sinc(fftfreq(size))
     elif filter_name == "cosine":
-        freq = (0.5 * np.arange(0, size)
-                / size)
+        freq = (0.5 * np.arange(0, size) / size)
         cosine_filter = fftshift(np.sin(2 * np.pi * np.abs(freq)))
         kernel *= cosine_filter
     elif filter_name == "hamming":
