@@ -42,8 +42,10 @@ information was reported by the microscope used to image the cells.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
+import pandas as pd
 from scipy import ndimage as ndi
 
+import plotly.express as px
 from skimage import (
     exposure, io
 )
@@ -313,3 +315,36 @@ clipped_data = exposure.rescale_intensity(
 )
 
 display(clipped_data)
+
+#####################################################################
+# Alternatively, we can explore these planes (slices) interactively using
+# `Plotly Express <https://plotly.com/python/sliders/>`_.
+# Note that this works in a static HTML page!
+
+# Create `[row, column]` coordinates
+coords = np.indices((n_row, n_col))
+x_coords = coords[0].ravel()
+y_coords = coords[1].ravel()
+# Convert images (slices) into coordinate (long) format
+df = pd.DataFrame(columns=['x', 'y', 'value', 'plane'])
+for p in range(n_plane):
+    df = df.append(
+        pd.DataFrame({
+            'x': x_coords,
+            'y': y_coords,
+            'value': data[p].ravel(),
+            'plane': [p] * n_row * n_col
+        })
+    )
+
+fig = px.density_heatmap(
+    df,
+    x='x',
+    y='y',
+    z='value',
+    animation_frame='plane',
+    nbinsx=n_row,
+    nbinsy=n_col
+)
+fig['layout'].pop('updatemenus')  # drop animation buttons
+fig
