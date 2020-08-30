@@ -12,10 +12,11 @@ from functools import partial
 if fftmodule is np.fft:
     # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
     # (fftpack preserves single precision while numpy.fft does not)
-    from scipy.fftpack import fft, ifft
+    from scipy.fftpack import fft, ifft, fftshift
 else:
     fft = fftmodule.fft
     ifft = fftmodule.ifft
+    fftshift = fftmodule.fftshift
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
@@ -171,13 +172,13 @@ def _get_fourier_filter(size, filter_name):
     elif filter_name == "cosine":
         freq = (0.5 * np.arange(0, size)
                 / size)
-        cosine_filter = fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
+        cosine_filter = fftshift(np.sin(2 * np.pi * np.abs(freq)))
         kernel *= cosine_filter
     elif filter_name == "hamming":
-        hamming_filter = fft.fftshift(np.hamming(size))
+        hamming_filter = fftshift(np.hamming(size))
         kernel *= hamming_filter
     elif filter_name == "hann":
-        hanning_filter = fft.fftshift(np.hanning(size))
+        hanning_filter = fftshift(np.hanning(size))
         kernel *= hanning_filter
     elif filter_name is None:
         kernel[:] = 1
