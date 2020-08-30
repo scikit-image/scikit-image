@@ -20,7 +20,8 @@ else:
     fftfreq = fftmodule.fftfreq
 
 
-__all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
+__all__ = ['radon', 'order_angles_golden_ratio',
+           'iradon', 'iradon_sart', 'iradon_filter']
 
 
 def radon(image, theta=None, circle=True, *, preserve_range=False):
@@ -127,20 +128,21 @@ def _sinogram_circle_to_square(sinogram):
     return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
-def _get_fourier_filter(size, filter_name):
-    """Construct the Fourier filter.
+def iradon_filter(filter_name, size):
+    """Construct the Fourier filter for the inverse radon transform.
 
     This computation lessens artifacts and removes a small bias as
     explained in [1], Chap 3. Equation 61.
 
     Parameters
     ----------
-    size: int
-        filter size. Must be even.
     filter_name: str
         Filter used in frequency domain filtering. Filters available:
         ramp, shepp-logan, cosine, hamming, hann. Assign None to use
         no filter.
+
+    size: int
+        filter size. Must be even.
 
     Returns
     -------
@@ -287,7 +289,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Apply filter in Fourier domain
-    fourier_filter = _get_fourier_filter(projection_size_padded, filter_name)
+    fourier_filter = iradon_filter(filter_name, projection_size_padded)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
