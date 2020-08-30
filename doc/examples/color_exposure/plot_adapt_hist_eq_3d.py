@@ -24,16 +24,9 @@ import imageio as io
 
 # Prepare data and apply histogram equalization
 
-# Try using skimage.data.image_fetcher for cached data loading,
-# otherwise fall back to reading the data from url
-from skimage.data import image_fetcher
-try:
-    path = image_fetcher.fetch('data/cells.tif')
-    im_orig = io.volread(path)
-except:
-    im_orig = io.volread('https://github.com/scikit-image/'
-                         'skimage-tutorials/blob/master/'
-                         'images/cells.tif?raw=True')
+from skimage.data import cells3D
+
+im_orig = cells3D()
 
 # Reorder axis order from (z, y, x) to (x, y, z)
 im_orig = im_orig.transpose()

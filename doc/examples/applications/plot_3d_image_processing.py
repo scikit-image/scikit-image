@@ -44,19 +44,17 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import (
-    exposure, io
-)
-from skimage.data import image_fetcher
+from skimage import exposure
+from skimage.data import cells3D
 
 
 #####################################################################
 # Load and display 3D images
-# ==========================
-# Three-dimensional data can be loaded with `io.imread`.
+#
+# The optional dependecy, pooch is required to obtain the dataset.
+#####################################################################
 
-path = image_fetcher.fetch('data/cells.tif')
-data = io.imread(path)
+data = cells3D()
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))
