@@ -49,9 +49,7 @@ from skimage.data import cells3D
 
 #####################################################################
 # Load and display 3D images
-#
-# The optional dependency, pooch is required to obtain the dataset.
-#####################################################################
+# ==========================
 
 data = cells3D()
 
