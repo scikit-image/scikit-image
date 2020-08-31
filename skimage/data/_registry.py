@@ -148,8 +148,6 @@ registry_urls = {
     "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/master/kidney-tissue-fluorescence.tif",
     "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/master/lily-of-the-valley-fluorescence.tif",
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
-    "data/cells3D.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
-    "data/human_mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
 }
 
