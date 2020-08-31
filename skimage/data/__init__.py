@@ -38,6 +38,7 @@ __all__ = ['data_dir',
            'hubble_deep_field',
            'immunohistochemistry',
            'lbp_frontal_face_cascade_filename',
+           'lily',
            'lfw_subset',
            'logo',
            'microaneurysms',
@@ -646,6 +647,19 @@ def coins():
         Coins image.
     """
     return _load("data/coins.png")
+
+
+def lily():
+    """Microscopy image of a lily of the valley.
+    See `lily-of-the-valley-fluorescence.tif` entry at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data
+
+    Returns
+    -------
+    lily : (922, 922, 4) uint16 ndarray
+        Lily image.
+    """
+    return _load("data/lily.tif")
 
 
 def logo():
