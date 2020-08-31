@@ -619,11 +619,11 @@ def cells3D():
     -------
     cells3D: (60, 256, 256) float64 ndarray
         The volumetric images of cells taken with an optical microscope.
-        
+
     Notes
     -----
     The data for this was provided by the Allen Institute for Cell Science.
-    
+
     It has been downsampled by a factor of 4 in the row and column dimensions
     to reduce computational time.
 
