@@ -662,7 +662,7 @@ def human_mitosis():
            https://github.com/CellProfiler/examples/issues/41
 
     """
-    return _load('data/human_mitosis.tif')
+    return _load('data/mitosis.tif')
 
 
 def cell():
