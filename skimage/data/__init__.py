@@ -611,23 +611,27 @@ def checkerboard():
 def cells3D():
     """3D microscopy images of cells.
 
-    The data for this was provided by the Allen Institute for Cell Science.  It
-    has been downsampled by a factor of 4 in the row and column dimensions to
-    reduce computational time.
+    The returned data is a 3D array with the physical dimensions provided in
+    ``(z, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
+    micrometer.
+
+    Returns
+    -------
+    cells3D: (60, 256, 256) float64 ndarray
+        The volumetric images of cells taken with an optical microscope.
+        
+    Notes
+    -----
+    The data for this was provided by the Allen Institute for Cell Science.
+    
+    It has been downsampled by a factor of 4 in the row and column dimensions
+    to reduce computational time.
 
     The microscope reports the following voxel spacing
 
         * Original voxel size is ``(0.290, 0.065, 0.065)``.
         * Scaling factor is ``(1, 4, 4)`` in each dimension.
         * After rescaling the voxel size is ``(0.29 0.26 0.26)``.
-
-    The returned data is a 3D array with the physical dimensions provided in
-    ``(z, y, x)`` order.
-
-    Returns
-    -------
-    cells3D: (60, 256, 256) float64 ndarray
-        The volumetric images of cells taken with an optical microscope.
     """
 
     return _load("data/cells.tif")
