@@ -636,7 +636,6 @@ def cells3D():
 def human_mitosis():
     """A dataset containing an image of human cells undergoing mitosis.
 
-
     Returns
     -------
     human_mitosis: (512, 512) uint8 ndimage
@@ -646,7 +645,6 @@ def human_mitosis():
     -----
 
     Copyright David Root. Licensed under CC-0[2]_.
-
 
     References
     ----------
