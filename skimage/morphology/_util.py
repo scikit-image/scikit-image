@@ -95,7 +95,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
             "center index does not match"
         )
 
-    selem_indices = np.array(np.nonzero(selem)).T
+    selem_indices = np.stack(np.nonzero(selem), axis=-1)
     offsets = selem_indices - center
 
     if order == 'F':

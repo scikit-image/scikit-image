@@ -64,7 +64,8 @@ class LineProfile(PlotPlugin):
         self.line_tool.end_points = np.transpose([x, y])
 
         scan_data = measure.profile_line(image,
-                                         *self.line_tool.end_points[:, ::-1])
+                                         *self.line_tool.end_points[:, ::-1],
+                                         mode='reflect')
         self.scan_data = scan_data
         if scan_data.ndim == 1:
             scan_data = scan_data[:, np.newaxis]
@@ -111,7 +112,8 @@ class LineProfile(PlotPlugin):
     def _update_data(self):
         scan = measure.profile_line(self.image_viewer.image,
                                     *self.line_tool.end_points[:, ::-1],
-                                    linewidth=self.line_tool.linewidth)
+                                    linewidth=self.line_tool.linewidth,
+                                    mode='reflect')
         self.scan_data = scan
         if scan.ndim == 1:
             scan = scan[:, np.newaxis]

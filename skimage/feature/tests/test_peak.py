@@ -172,7 +172,7 @@ class TestPeakLocalMax():
             for jmin, jmax in ((0, 30), (30, 60)):
                 expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
                     image[imin:imax, jmin:jmax], footprint=footprint)
-        expected = np.transpose(np.nonzero(expected == image))
+        expected = np.stack(np.nonzero(expected == image), axis=-1)
         expected = expected[np.argsort(image[tuple(expected.T)])[::-1]]
         result = peak.peak_local_max(image, labels=labels, min_distance=1,
                                      threshold_rel=0, footprint=footprint,

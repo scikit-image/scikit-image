@@ -242,8 +242,12 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
-        threshold_otsu(img)
+    assert threshold_otsu(img) == 1
+
+
+def test_otsu_one_color_image_3d():
+    img = np.ones((10, 10, 10), dtype=np.uint8)
+    assert threshold_otsu(img) == 1
 
 
 def test_li_camera_image():
@@ -329,7 +333,9 @@ def test_li_pathological_arrays():
     e = np.array([1, 1])
     f = np.array([1, 2])
     arrays = [a, b, c, d, e, f]
-    thresholds = [threshold_li(arr) for arr in arrays]
+    with np.errstate(divide='ignore'):
+        # ignoring "divide by zero encountered in log" error from np.log(0)
+        thresholds = [threshold_li(arr) for arr in arrays]
     assert np.all(np.isfinite(thresholds))
 
 
