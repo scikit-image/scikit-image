@@ -37,6 +37,7 @@ __all__ = ['data_dir',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
+           'kidney',
            'lbp_frontal_face_cascade_filename',
            'lily',
            'lfw_subset',
@@ -647,6 +648,19 @@ def coins():
         Coins image.
     """
     return _load("data/coins.png")
+
+
+def kidney():
+    """Microscopy image of kidney tissue.
+    See `kidney-tissue-fluorescence.tif` entry at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data
+
+    Returns
+    -------
+    kidney : (16, 512, 512, 3) uint16 ndarray
+        Kidney image.
+    """
+    return _load("data/kidney.tif")
 
 
 def lily():

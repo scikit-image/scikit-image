@@ -158,9 +158,9 @@ def test_kidney_3d_multichannel():
 
     Needs internet connection.
     """
-    path = fetch('data/kidney.tif')
-    image = io.imread(path)
-    assert image.shape == (16, 512, 512, 3)
+    fetch('data/kidney.tif')
+    kidney = data.kidney()
+    assert kidney.shape == (16, 512, 512, 3)
 
 
 def test_lily_multichannel():
