@@ -161,3 +161,13 @@ def test_kidney_3d_multichannel():
     path = fetch('data/kidney.tif')
     image = io.imread(path)
     assert image.shape == (16, 512, 512, 3)
+
+
+def test_lily_multichannel():
+    """Test that microscopy image of lily of the valley can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/lily.tif')
+    lily = data.lily()
+    assert lily.shape == (922, 922, 4)
