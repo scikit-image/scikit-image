@@ -651,27 +651,50 @@ def coins():
 
 
 def kidney():
-    """Microscopy image of kidney tissue.
-    See `kidney-tissue-fluorescence.tif` entry at
-    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data
+    """Mouse kidney tissue.
+
+    This biological tissue on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (16, 512, 512, 3). That is 512x512 pixels in X-Y,
+    16 image slices in Z, and 3 color channels
+    (emission wavelengths 450nm, 515nm, and 605nm, respectively).
+    Real-space voxel size is 1.24 microns in X-Y, and 1.25 microns in Z.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
 
     Returns
     -------
     kidney : (16, 512, 512, 3) uint16 ndarray
-        Kidney image.
+        Kidney 3D multichannel image.
     """
     return _load("data/kidney.tif")
 
 
 def lily():
-    """Microscopy image of a lily of the valley.
-    See `lily-of-the-valley-fluorescence.tif` entry at
-    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data
+    """Lily of the valley plant stem.
+
+    This plant stem on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (922, 922, 4). That is 922x922 pixels in X-Y,
+    with 4 color channels.
+    Real-space voxel size is 1.24 microns in X-Y.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
 
     Returns
     -------
     lily : (922, 922, 4) uint16 ndarray
-        Lily image.
+        Lily 2D multichannel image.
     """
     return _load("data/lily.tif")
 
