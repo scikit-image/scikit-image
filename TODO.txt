@@ -77,6 +77,9 @@ Version 0.20
   function.
 * Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
   `skivi.py` in `skimage/io/_plugins`.
+* Remove enrirely the folder skimage/scripts containing skivi app.
+  Remove scripts related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
+  setup.py
 
 Version 1.0
 -----------
