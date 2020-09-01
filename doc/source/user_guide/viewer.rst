@@ -3,8 +3,7 @@ Image Viewer
 
 .. warning::
    The scikit-image viewer is deprecated since 0.18 and will be removed in 0.20.
-   Please, refer to <https://scikit-image.org/docs/stable/user_guide/visualization.html>
-   for alternatives.
+   Please, refer to the visualization_ software page for alternatives.
 
 
 Quick Start
@@ -100,4 +99,4 @@ filtered image for the last used setting of ``weight``.
 
 
 .. _matplotlib: https://matplotlib.org/
-
+.. _visualization: https://scikit-image.org/docs/stable/user_guide/visualization.html
