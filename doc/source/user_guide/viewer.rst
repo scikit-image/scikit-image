@@ -1,6 +1,11 @@
 Image Viewer
 ============
 
+.. warning::
+   The scikit-image viewer is deprecated since 0.18 and will be removed in 0.20.
+   Please, refer to <https://scikit-image.org/docs/stable/user_guide/visualization.html>
+   for alternatives.
+
 
 Quick Start
 -----------
