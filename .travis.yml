@@ -123,7 +123,7 @@ before_install:
         apt-key adv --list-public-keys --with-colons | grep '^pub' | cut -d':' -f 5 | egrep -o '.{8}$' | grep -wo 762E3157 > /dev/null 2>&1 || sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
       fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        travis_wait 20 source tools/travis/osx_install.sh;
+        source tools/travis/osx_install.sh;
       else
         virtualenv -p python ~/venv;
         source ~/venv/bin/activate;
