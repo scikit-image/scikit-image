@@ -41,26 +41,27 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
 
     Notes
     -----
-    - For the pixel that has its background intensity estimated (without loss
-      of generality at ``(0,0)``) the rolling ellipsoid method places an
-      ellipsoid under it and raises the ellipsoid until its surface touches the
-      image umbra at ``pos=(y,x)``. The background intensity is then estimated
-      using the image intensity at that position (``image[y, x]``) plus the
-      difference of ``intensity_vertex`` and the surface of the ellipsoid at
-      ``pos``. The surface intensity of the ellipsoid is computed using the
-      canonical ellipsis equation
-      .. code-block:: python
+    For the pixel that has its background intensity estimated (without loss
+    of generality at ``(0,0)``) the rolling ellipsoid method places an
+    ellipsoid under it and raises the ellipsoid until its surface touches the
+    image umbra at ``pos=(y,x)``. The background intensity is then estimated
+    using the image intensity at that position (``image[y, x]``) plus the
+    difference of ``intensity_vertex`` and the surface of the ellipsoid at
+    ``pos``. The surface intensity of the ellipsoid is computed using the
+    canonical ellipsis equation
+    .. code-block:: python
 
         | semi_spatial = kernel_shape / 2
         | semi_vertex = intensity_vertex / 2
         | np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
 
-    - This algorithm assumes that dark pixels correspond to the background. If
-      you have a bright background, invert the image before passing it to the
-      function, e.g., using `utils.invert`.
-    - This algorithm is sensitive to noise (in particular salt-and-pepper
-      noise). If this is a problem in your image, you can apply mild
-      gaussian smoothing before passing the image to this function.
+    This algorithm assumes that dark pixels correspond to the background. If
+    you have a bright background, invert the image before passing it to the
+    function, e.g., using `utils.invert`.
+    
+    This algorithm is sensitive to noise (in particular salt-and-pepper
+    noise). If this is a problem in your image, you can apply mild
+    gaussian smoothing before passing the image to this function.
 
     References
     ----------
@@ -126,7 +127,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     return background
 
 
-def rolling_ball(image, radius=50, **kwargs):
+def rolling_ball(image, radius=50, has_nan=False, num_threads=None):
     """Estimate background intensity using a rolling ball.
 
     This is a convenience function for the frequently used special case of
@@ -156,13 +157,14 @@ def rolling_ball(image, radius=50, **kwargs):
 
     Notes
     -----
-    - If you are using images with a dtype other than `image.dtype == np.uint8`
-      you may want to consider using `skimage.morphology.rolling_ellipsoid`
-      instead. It allows you to specify different parameters for the spatial
-      and intensity dimensions.
-    - The ball has the same dimensionality as the input image. If you
-      want to apply the filter plane-wise to a 3D image use
-      .. code-block:: python
+    If you are using images with a dtype other than `image.dtype == np.uint8`
+    you may want to consider using `skimage.morphology.rolling_ellipsoid`
+    instead. It allows you to specify different parameters for the spatial
+    and intensity dimensions.
+
+    The ball has the same dimensionality as the input image. If you
+    want to apply the filter plane-wise to a 3D image use
+    .. code-block:: python
 
         | kernel_shape = (1, 2 * radius, 2 * radius)
         | intensity_vertex = 2 * radius
@@ -184,5 +186,6 @@ def rolling_ball(image, radius=50, **kwargs):
         image,
         kernel_shape=kernel_shape,
         intensity_vertex=intensity_vertex,
-        **kwargs
+        has_nan=False,
+        num_threads=None
     )
