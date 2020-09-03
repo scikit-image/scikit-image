@@ -10,13 +10,11 @@ ctypedef np_floats DTYPE_FLOAT
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef Py_ssize_t ind2ind(Py_ssize_t from_index, Py_ssize_t offset, Py_ssize_t[::1] from_shape, Py_ssize_t[::1] to_shape) nogil:
-    """ 
-    Convert the flat index of one array to a flat index of another array
+    """Convert the flat index of one array to a flat index of another array.
 
     The primary use case for this is if one array is a view into the other
     array and the dimensions are unknown at compile time (and, hence, typed
     memoryviews can't be used).
-
 
     Parameters
     ----------
@@ -63,11 +61,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
                      Py_ssize_t[::1] padded_img_shape not None,
                      Py_ssize_t[::1] kernel_shape not None,
                      Py_ssize_t num_threads=0):
-    """
-    apply_kernel_nan(img, kernel, ellipsoid_intensity, img_shape,
-                     padded_img_shape, kernel_shape, num_threads)
-
-    Apply a ND kernel to an ND image.
+    """Apply a ND kernel to an ND image.
 
     This function is the critical piece of code for 
     `morphology.rolling_ellipsoid`. It was moved to cython for speed.
@@ -143,11 +137,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
                  Py_ssize_t[::1] padded_img_shape not None,
                  Py_ssize_t[::1] kernel_shape not None,
                  Py_ssize_t num_threads=0):
-    """
-    apply_kernel(img, kernel, ellipsoid_intensity, img_shape, padded_img_shape,
-                 kernel_shape, num_threads)
-
-    Apply a ND kernel to an ND image.
+    """Apply a ND kernel to an ND image.
 
     This function is the critical piece of code for 
     `morphology.rolling_ellipsoid`. It was moved to cython for speed.

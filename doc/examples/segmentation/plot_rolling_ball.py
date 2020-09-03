@@ -39,7 +39,6 @@ this is the case for your image, you can directly use the filter like:
 
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 from skimage import (
     data, morphology, util, io
@@ -197,7 +196,7 @@ plt.show()
 # As mentioned above, a sphere is just a special ellipsoid, and hence
 # you can get the same behavior as ``rolling_ball`` if you set all
 # vertices to the respective values. In fact, ``rolling_ball``
-# internally calls ``rolling_spheroid`` in the way shown below.
+# internally calls ``rolling_ellipsoid`` in the way shown below.
 #
 # Note: The radius is equal to the length of a semi-vertex of a
 # sphere, which is *half* a full vertex. Hence, you need to multiply
@@ -216,7 +215,7 @@ plt.show()
 
 ######################################################################
 # You can also use ``rolling_ellipsoid`` to recreate the previous,
-# unexpected result and see that the effective (spacial) filter size
+# unexpected result and see that the effective (spatial) filter size
 # was reduced.
 
 image = data.coins()

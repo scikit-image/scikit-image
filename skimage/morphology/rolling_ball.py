@@ -1,14 +1,11 @@
 import numpy as np
-from numpy.lib.stride_tricks import as_strided
 
-from skimage.util import invert, view_as_windows
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
+def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
                       has_nan=False, num_threads=None):
-    """
-    Estimate background intensity using a rolling ellipsoid.
+    """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
     grayscale image in case of uneven exposure. It is a generalization of the
@@ -97,10 +94,10 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
 
     ellipsoid_coords = np.stack(
         np.meshgrid(
-            *[range(-x, x + 1) for x in kernel_shape_int // 2],
+            *[np.arange(-x, x + 1) for x in kernel_shape_int // 2],
             indexing='ij'
         ),
-        axis=-1).reshape(-1, len(kernel_shape))
+        axis=-1).reshape(-1, image.ndim)
     tmp = np.sum(
         (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2, axis=1)
     ellipsoid_intensity = intensity_vertex - \
@@ -113,26 +110,16 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
 
     kernel = np.where(tmp <= 1, 1, np.inf)
 
-    if has_nan:
-        background = apply_kernel_nan(
-            img.ravel(),
-            kernel,
-            ellipsoid_intensity,
-            np.array(image.shape, dtype=np.intp),
-            np.array(img.shape, dtype=np.intp),
-            kernel_shape_int,
-            num_threads
-        )
-    else:
-        background = apply_kernel(
-            img.ravel(),
-            kernel,
-            ellipsoid_intensity,
-            np.array(image.shape, dtype=np.intp),
-            np.array(img.shape, dtype=np.intp),
-            kernel_shape_int,
-            num_threads
-        )
+    apply_kernel_func = apply_kernel_nan if has_nan else apply_kernel
+    background = apply_kernel_func(
+        img.ravel(),
+        kernel,
+        ellipsoid_intensity,
+        np.array(image.shape, dtype=np.intp),
+        np.array(img.shape, dtype=np.intp),
+        kernel_shape_int,
+        num_threads
+    )
 
     background = background.astype(image.dtype)
 
@@ -140,8 +127,7 @@ def rolling_ellipsoid(image, kernel_shape=100, intensity_vertex=100,
 
 
 def rolling_ball(image, radius=50, **kwargs):
-    """
-    Estimate background intensity using a rolling ball.
+    """Estimate background intensity using a rolling ball.
 
     This is a convenience function for the frequently used special case of
     ``rolling_ellipsoid`` where the spatial vertices and intensity vertex
