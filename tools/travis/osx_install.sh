@@ -7,8 +7,8 @@ brew tap homebrew/homebrew-cask
 brew cask install basictex
 
 export PATH="$PATH:/Library/TeX/texbin"
-travis_wait 20 sudo tlmgr --verify-repo=none update --self
-travis_wait 20 sudo tlmgr --verify-repo=none install ucs dvipng anyfontsize
+sudo tlmgr -v --verify-repo=none update --self
+sudo tlmgr -v --verify-repo=none install ucs dvipng anyfontsize
 
 # Set up virtualenv on OSX
 git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild
