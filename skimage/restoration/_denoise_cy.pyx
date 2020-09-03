@@ -10,6 +10,7 @@ from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
 from .._shared.fused_numerics cimport np_floats
 
+cnp.import_array()
 
 cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
     if value1 < value2:
@@ -48,7 +49,6 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
         raise ValueError("Invalid mode specified.  Please use `constant`, "
                          "`edge`, `wrap`, `symmetric` or `reflect`.")
     cdef char cmode = ord(mode[0].upper())
-
 
     dist_scale = bins / dims / max_value
     values = empty_dims.copy()

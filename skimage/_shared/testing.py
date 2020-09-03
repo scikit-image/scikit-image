@@ -22,6 +22,7 @@ import warnings
 from .. import data, io
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
+from ._warnings import expected_warnings
 
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
@@ -127,7 +128,7 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -159,7 +160,7 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -209,7 +210,15 @@ def teardown_test():
     warnings.simplefilter('default')
 
 
-def test_parallel(num_threads=2):
+def fetch(data_filename):
+    """Attempt to fetch data, but if unavailable, skip the tests."""
+    try:
+        return data._fetch(data_filename)
+    except (ConnectionError, ModuleNotFoundError):
+        pytest.skip(f'Unable to download {data_filename}')
+
+
+def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -220,6 +229,12 @@ def test_parallel(num_threads=2):
     num_threads : int, optional
         The number of times the function is run in parallel.
 
+    warnings_matching: list or None
+        This parameter is passed on to `expected_warnings` so as not to have
+        race conditions with the warnings filters. A single
+        `expected_warnings` context manager is used for all threads.
+        If None, then no warnings are checked.
+
     """
 
     assert num_threads > 0
@@ -227,20 +242,21 @@ def test_parallel(num_threads=2):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            threads = []
-            for i in range(num_threads - 1):
-                thread = threading.Thread(target=func, args=args,
-                                          kwargs=kwargs)
-                threads.append(thread)
-            for thread in threads:
-                thread.start()
+            with expected_warnings(warnings_matching):
+                threads = []
+                for i in range(num_threads - 1):
+                    thread = threading.Thread(target=func, args=args,
+                                              kwargs=kwargs)
+                    threads.append(thread)
+                for thread in threads:
+                    thread.start()
 
-            result = func(*args, **kwargs)
+                result = func(*args, **kwargs)
 
-            for thread in threads:
-                thread.join()
+                for thread in threads:
+                    thread.join()
 
-            return result
+                return result
 
         return inner
 

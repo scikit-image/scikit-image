@@ -9,6 +9,8 @@ cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
 
+cnp.import_array()
+
 
 def _coords_inside_image(rr, cc, shape, val=None):
     """
@@ -20,7 +22,8 @@ def _coords_inside_image(rr, cc, shape, val=None):
         Indices of pixels.
     shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates.  Must be at least length 2. Only the first two values
+        are used to determine the extent of the input image.
     val : (N, D) ndarray of float, optional
         Values of pixels at coordinates ``[rr, cc]``.
 
@@ -210,8 +213,8 @@ def _polygon(r, c, shape):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    r = np.asanyarray(r)
-    c = np.asanyarray(c)
+    r = np.atleast_1d(r)
+    c = np.atleast_1d(c)
 
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))

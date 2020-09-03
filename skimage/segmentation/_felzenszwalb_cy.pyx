@@ -11,6 +11,8 @@ from ..measure._ccomp cimport find_root, join_trees
 from ..util import img_as_float64
 from .._shared.utils import warn
 
+cnp.import_array()
+
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
@@ -42,9 +44,11 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     """
 
     if image.shape[2] > 3:
-        warn(RuntimeWarning("Got image with third dimension of %s. This image "
-                            "will be interpreted as a multichannel 2d image, "
-                            "which may not be intended." % str(image.shape[2])))
+        warn(RuntimeWarning(
+            "Got image with third dimension of %s. This image "
+            "will be interpreted as a multichannel 2d image, "
+            "which may not be intended." % str(image.shape[2])),
+            stacklevel=3)
 
     image = img_as_float64(image)
 

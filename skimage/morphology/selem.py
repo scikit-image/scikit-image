@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import ndimage as ndi
+
 from .. import draw
+from .._shared.utils import deprecate_kwarg
 
 
 def square(width, dtype=np.uint8):
@@ -29,7 +31,9 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(width, height, dtype=np.uint8):
+@deprecate_kwarg({"height": "ncols", "width": "nrows"},
+                 removed_version="0.20.0")
+def rectangle(nrows, ncols, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -37,10 +41,10 @@ def rectangle(width, height, dtype=np.uint8):
 
     Parameters
     ----------
-    width : int
-        The width of the rectangle.
-    height : int
-        The height of the rectangle.
+    nrows : int
+        The number of rows of the rectangle.
+    ncols : int
+        The number of columns of the rectangle.
 
     Other Parameters
     ----------------
@@ -53,8 +57,14 @@ def rectangle(width, height, dtype=np.uint8):
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
+
+    Notes
+    -----
+    - The use of ``width`` and ``height`` has been deprecated in
+      version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
-    return np.ones((width, height), dtype=dtype)
+
+    return np.ones((nrows, ncols), dtype=dtype)
 
 
 def diamond(radius, dtype=np.uint8):

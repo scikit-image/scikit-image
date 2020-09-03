@@ -103,9 +103,9 @@ def _star_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
-    feature_mask[(Axx + Ayy) ** 2
-                 > line_threshold * (Axx * Ayy - Axy ** 2)] = False
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
+    feature_mask[(Arr + Acc) ** 2
+                 > line_threshold * (Arr * Acc - Arc ** 2)] = False
 
 
 class CENSURE(FeatureDetector):
@@ -190,7 +190,8 @@ class CENSURE(FeatureDetector):
            [155, 151],
            [184,  63]])
     >>> censure.scales
-    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2,
+           2])
 
     """
 

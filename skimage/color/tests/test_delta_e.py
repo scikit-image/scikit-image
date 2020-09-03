@@ -2,12 +2,12 @@
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from skimage._shared.testing import assert_allclose
-
-from skimage.color import (deltaE_cie76,
-                           deltaE_ciede94,
-                           deltaE_ciede2000,
-                           deltaE_cmc)
+from skimage._shared.testing import (
+    assert_allclose, assert_equal, assert_almost_equal, fetch
+)
+from skimage.color.delta_e import (
+    deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, deltaE_cmc
+)
 
 
 def test_ciede2000_dE():
@@ -55,7 +55,7 @@ def load_ciede2000_data():
              ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = pjoin(dirname(abspath(__file__)), 'ciede2000_test_data.txt')
+    path = fetch('color/tests/ciede2000_test_data.txt')
     return np.loadtxt(path, dtype=dtype)
 
 
@@ -136,6 +136,23 @@ def test_cmc():
     ])
 
     assert_allclose(dE2, oracle, rtol=1.e-8)
+
+    # Equal or close colors make `delta_e.get_dH2` function to return
+    # negative values resulting in NaNs when passed to sqrt (see #1908
+    # issue on Github):
+    lab1 = lab2
+    expected = np.zeros_like(oracle)
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+
+    lab2[0, 0] += np.finfo(float).eps
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+
+    # Single item case:
+    lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
+    assert_equal(deltaE_cmc(lab1, lab2), 0)
+
+    lab2[0] += np.finfo(float).eps
+    assert_equal(deltaE_cmc(lab1, lab2), 0)
 
 
 def test_single_color_cie76():

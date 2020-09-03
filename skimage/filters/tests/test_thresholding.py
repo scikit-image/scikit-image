@@ -4,8 +4,10 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
-from skimage.draw import circle
+from skimage.color import rgb2gray
+from skimage.draw import disk
 from skimage._shared._warnings import expected_warnings
+from skimage.exposure import histogram
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -20,6 +22,8 @@ from skimage.filters.thresholding import (threshold_local,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
+from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
+                                        _get_multiotsu_thresh_indices)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_equal
@@ -238,8 +242,12 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
-        threshold_otsu(img)
+    assert threshold_otsu(img) == 1
+
+
+def test_otsu_one_color_image_3d():
+    img = np.ones((10, 10, 10), dtype=np.uint8)
+    assert threshold_otsu(img) == 1
 
 
 def test_li_camera_image():
@@ -314,6 +322,21 @@ def test_li_negative_inital_guess():
     coins = data.coins()
     with testing.raises(ValueError):
         result = threshold_li(coins, initial_guess=-5)
+
+
+def test_li_pathological_arrays():
+    # See https://github.com/scikit-image/scikit-image/issues/4140
+    a = np.array([0, 0, 1, 0, 0, 1, 0, 1])
+    b = np.array([0, 0, 0.1, 0, 0, 0.1, 0, 0.1])
+    c = np.array([0, 0, 0.1, 0, 0, 0.1, 0.01, 0.1])
+    d = np.array([0, 0, 1, 0, 0, 1, 0.5, 1])
+    e = np.array([1, 1])
+    f = np.array([1, 2])
+    arrays = [a, b, c, d, e, f]
+    with np.errstate(divide='ignore'):
+        # ignoring "divide by zero encountered in log" error from np.log(0)
+        thresholds = [threshold_li(arr) for arr in arrays]
+    assert np.all(np.isfinite(thresholds))
 
 
 def test_yen_camera_image():
@@ -522,10 +545,13 @@ def test_niblack_sauvola_pathological_image():
 
 
 def test_bimodal_multiotsu_hist():
-    image = data.camera()
-    thr_otsu = threshold_otsu(image)
-    thr_multi = threshold_multiotsu(image, classes=2)
-    assert thr_otsu == thr_multi
+    for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+        img = getattr(data, name)()
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
+
+    for name in ['chelsea', 'coffee', 'astronaut', 'rocket']:
+        img = rgb2gray(getattr(data, name)())
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
 
 
 def test_check_multiotsu_results():
@@ -545,10 +571,28 @@ def test_multiotsu_output():
     coords = [(25, 25), (50, 50), (75, 75)]
     values = [64, 128, 192]
     for coor, val in zip(coords, values):
-        rr, cc = circle(coor[1], coor[0], 20)
+        rr, cc = disk(coor, 20)
         image[rr, cc] = val
-    thresholds = [64, 128]
-    assert np.array_equal(thresholds, threshold_multiotsu(image))
+    thresholds = [0, 64, 128]
+    assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
+
+
+def test_multiotsu_astro_image():
+    img = util.img_as_ubyte(data.astronaut())
+    with expected_warnings(['grayscale']):
+        assert_almost_equal(threshold_multiotsu(img), [58, 149])
+
+
+def test_multiotsu_more_classes_then_values():
+    img = np.ones((10, 10), dtype=np.uint8)
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=2)
+    img[:, 3:] = 2
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=3)
+    img[:, 6:] = 3
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=4)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
@@ -564,3 +608,19 @@ def test_thresholds_dask_compatibility(thresholding, lower, upper):
     import dask.array as da
     dask_camera = da.from_array(data.camera(), chunks=(256, 256))
     assert lower < float(thresholding(dask_camera)) < upper
+
+
+def test_multiotsu_lut():
+    for classes in [2, 3, 4]:
+        for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+            img = getattr(data, name)()
+            prob, bin_centers = histogram(img.ravel(),
+                                          nbins=256,
+                                          source_range='image',
+                                          normalize=True)
+            prob = prob.astype('float32')
+
+            result_lut = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
+            result = _get_multiotsu_thresh_indices(prob, classes - 1)
+
+            assert np.array_equal(result_lut, result)

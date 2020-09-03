@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 from numpy import array
+
+from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
@@ -25,6 +27,10 @@ SAMPLE = np.array(
 )
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
+
+SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
+SAMPLE_MULTIPLE[3:5, 7:8] = 2
+INTENSITY_SAMPLE_MULTIPLE = SAMPLE_MULTIPLE.copy() * 2.0
 
 SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
 SAMPLE_3D[1:3, 1:3, 1:3] = 1
@@ -57,6 +63,8 @@ def test_dtype():
         regionprops(np.zeros((10, 10), dtype=np.float))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.bool))
 
 
 def test_ndim():
@@ -67,6 +75,26 @@ def test_ndim():
     regionprops(np.zeros((1, 1, 1), dtype=np.int))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
+
+
+def test_feret_diameter_max():
+    # comparator result is based on SAMPLE from manually-inspected computations
+    comparator_result = 18
+    test_result = regionprops(SAMPLE)[0].feret_diameter_max
+    assert np.abs(test_result - comparator_result) < 1
+    # square, test that maximum Feret diameter is sqrt(2) * square side
+    img = np.zeros((20, 20), dtype=np.uint8)
+    img[2:-2, 2:-2] = 1
+    feret_diameter_max = regionprops(img)[0].feret_diameter_max
+    assert np.abs(feret_diameter_max - 16 * np.sqrt(2)) < 1
+
+
+def test_feret_diameter_max_3d():
+    img = np.zeros((20, 20), dtype=np.uint8)
+    img[2:-2, 2:-2] = 1
+    img_3d = np.dstack((img,) * 3)
+    feret_diameter_max = regionprops(img_3d)[0].feret_diameter_max
+    assert np.abs(feret_diameter_max - 16 * np.sqrt(2)) < 1
 
 
 def test_area():
@@ -451,7 +479,8 @@ def test_iterate_all_props():
 
 
 def test_cache():
-    region = regionprops(SAMPLE)[0]
+    SAMPLE_mod = SAMPLE.copy()
+    region = regionprops(SAMPLE_mod)[0]
     f0 = region.filled_image
     region._label_image[:10] = 1
     f1 = region.filled_image
@@ -498,7 +527,7 @@ def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -511,9 +540,22 @@ def test_regionprops_table():
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_regionprops_table_no_regions():
+    out = regionprops_table(np.zeros((2, 2), dtype=int),
+                            properties=('label', 'area', 'bbox'),
+                            separator='+')
+    assert len(out) == 6
+    assert len(out['label']) == 0
+    assert len(out['area']) == 0
+    assert len(out['bbox+0']) == 0
+    assert len(out['bbox+1']) == 0
+    assert len(out['bbox+2']) == 0
+    assert len(out['bbox+3']) == 0
 
 
 def test_props_dict_complete():
@@ -524,3 +566,99 @@ def test_props_dict_complete():
 
 def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+
+
+def test_column_dtypes_correct():
+    msg = 'mismatch with expected type,'
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    for col in COL_DTYPES:
+        r = region[col]
+
+        if col in OBJECT_COLUMNS:
+            assert COL_DTYPES[col] == object
+            continue
+
+        t = type(np.ravel(r)[0])
+
+        if np.issubdtype(t, np.floating):
+            assert COL_DTYPES[col] == float, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
+        elif np.issubdtype(t, np.integer):
+            assert COL_DTYPES[col] == int, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
+        else:
+            assert False, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
+
+
+def test_deprecated_coords_argument():
+    with expected_warnings(['coordinates keyword argument']):
+        region = regionprops(SAMPLE, coordinates='rc')
+    with testing.raises(ValueError):
+        region = regionprops(SAMPLE, coordinates='xy')
+
+
+def pixelcount(regionmask):
+    """a short test for an extra property"""
+    return np.sum(regionmask)
+
+
+def median_intensity(regionmask, intensity_image):
+    return np.median(intensity_image[regionmask])
+
+
+def too_many_args(regionmask, intensity_image, superfluous):
+    return 1
+
+
+def too_few_args():
+    return 1
+
+
+def test_extra_properties():
+    region = regionprops(SAMPLE, extra_properties=(pixelcount,))[0]
+    assert region.pixelcount == np.sum(SAMPLE == 1)
+
+
+def test_extra_properties_intensity():
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity,)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+
+
+def test_extra_properties_no_intensity_provided():
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(median_intensity,))[0]
+        _ = region.median_intensity
+
+
+def test_extra_properties_nr_args():
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(too_few_args,))[0]
+        _ = region.too_few_args
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(too_many_args,))[0]
+        _ = region.too_many_args
+
+
+def test_extra_properties_mixed():
+    # mixed properties, with and without intensity
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity, pixelcount)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.pixelcount == np.sum(SAMPLE == 1)
+
+
+def test_extra_properties_table():
+    out = regionprops_table(SAMPLE_MULTIPLE,
+                            intensity_image=INTENSITY_SAMPLE_MULTIPLE,
+                            properties=('label',),
+                            extra_properties=(median_intensity, pixelcount)
+                            )
+    assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
+    assert_array_equal(out['pixelcount'], array([10, 2]))

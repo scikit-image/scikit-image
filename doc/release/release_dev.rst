@@ -12,54 +12,46 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 
-
 New Features
 ------------
-- Added majority rank filter - ``filters.rank.majority``.
 
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------
 
+- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+  single-precision when the input image is single-precision. This can give a
+  substantial performance improvement when working with single precision data.
 
 API Changes
 -----------
-- Deprecated subpackage ``skimage.novice`` has been removed.
-- Default value of ``multichannel`` parameters has been set to False in
-  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``, and
-  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
-  anymore, so, please, make sure that the parameter is fixed to a proper value.
-- Deprecated argument ``visualise`` has been removed from
-  ``skimage.feature.hog``. Use ``visualize`` instead.¨
-- ``skimage.transform.seam_carve`` has been completely removed from the
-  library due to licensing restrictions.
-- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
-  ``skimage.io.imread``. Use ``as_gray`` instead.
-- Parameter ``min_size`` has been removed from
-  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
-- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
-  removed.
-- ``skimage.measure._regionprops`` has been completely switched to using
-  row-column coordinates. Old x-y interface is not longer available.
-- Default value of ``behavior`` parameter has been set to ``ndimage`` in
-  ``skimage.filters.median``.
-- Parameter ``flatten`` in `skimage.io.imread` has been removed in
-  favor of ``as_gray``.
-- Parameters ``Hxx, Hxy, Hyy`` have been removed from
-  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
-- Default value of ``order`` parameter has been set to ``rc`` in
-  ``skimage.feature.hessian_matrix``.
-- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
 
+- ``skimage.restoration.richardson_lucy`` returns a single-precision output
+  when the input is single-precision. Prior to this release, double-precision
+  was always used.
 
 Bugfixes
 --------
 
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
+
+- In ``skimage.feature.structure_tensor``, an ``order`` argument has been
+  introduced which will default to 'rc' starting in version 0.20.
+- ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
+  removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
+  instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release

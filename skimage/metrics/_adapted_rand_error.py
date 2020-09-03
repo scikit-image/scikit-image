@@ -4,32 +4,28 @@ from ._contingency_table import contingency_table
 __all__ = ['adapted_rand_error']
 
 
-def adapted_rand_error(im_true=None, im_test=None, *, table=None,
-                       ignore_labels=None, normalize=False):
-    r"""
-    Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
+def adapted_rand_error(image_true=None, image_test=None, *, table=None,
+                       ignore_labels=(0,)):
+    r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
     ----------
-    im_true : ndarray of int
+    image_true : ndarray of int
         Ground-truth label image, same shape as im_test.
-    im_test : ndarray of int
+    image_test : ndarray of int
         Test image.
     table : scipy.sparse array in crs format, optional
         A contingency table built with skimage.evaluate.contingency_table.
         If None, it will be computed on the fly.
-    ignore_labels : list of int, optional
+    ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
-    normalize : bool, optional
-        If True, normalizes contigency table by the number of pixels of
-        each value.
 
     Returns
     -------
     are : float
-        The adapted Rand error; equal to $1 - \frac{2pr}{p + r}$,
-        where $p$ and $r$ are the precision and recall described below.
+        The adapted Rand error; equal to :math:`1 - \frac{2pr}{p + r}`,
+        where ``p`` and ``r`` are the precision and recall described below.
     prec : float
         The adapted Rand precision: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,
@@ -50,11 +46,12 @@ def adapted_rand_error(im_true=None, im_test=None, *, table=None,
            for connectomics. Front. Neuroanat. 9:142.
            :DOI:`10.3389/fnana.2015.00142`
     """
-    check_shape_equality(im_true, im_test)
+    if image_test is not None and image_true is not None:
+        check_shape_equality(image_true, image_test)
 
     if table is None:
-        p_ij = contingency_table(im_true, im_test, ignore_labels=[
-                                 0], normalize=normalize)
+        p_ij = contingency_table(image_true, image_test,
+                                 ignore_labels=ignore_labels, normalize=False)
     else:
         p_ij = table
 
