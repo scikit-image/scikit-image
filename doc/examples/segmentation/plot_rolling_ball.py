@@ -37,11 +37,12 @@ this is the case for your image, you can directly use the filter like:
 
 """
 
+import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import (
-    data, morphology, util, io
+    data, morphology, util
 )
 
 
@@ -237,7 +238,7 @@ plt.show()
 # obtained during confocal microscopy.
 
 path = data.image_fetcher.fetch('data/cells.tif')
-image = io.imread(path)
+image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(1, 100, 100),
@@ -258,7 +259,7 @@ plt.show()
 # the z-stack only
 
 path = data.image_fetcher.fetch('data/cells.tif')
-image = io.imread(path)
+image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(120, 1, 1),

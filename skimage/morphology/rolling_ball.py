@@ -58,7 +58,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     This algorithm assumes that dark pixels correspond to the background. If
     you have a bright background, invert the image before passing it to the
     function, e.g., using `utils.invert`.
-    
+
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
     gaussian smoothing before passing the image to this function.
