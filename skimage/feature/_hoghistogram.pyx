@@ -6,6 +6,37 @@ import numpy as np
 cimport numpy as cnp
 cnp.import_array()
 
+cdef float cell_hog_fast(double[:, ::1] magnitude,
+                    double[:, ::1] orientation,
+                    int r_i, int c_i,
+                    int cell_columns, int cell_rows,
+                    int column_index, int row_index,
+                    int size_columns, int size_rows,
+                    int range_rows_start, int range_rows_stop,
+                    int range_columns_start, int range_columns_stop,
+                    int number_of_orientations,
+                    float number_of_orientations_per_180,
+                    cnp.float64_t[:, :, :] orientation_histogram) nogil:
+    cdef int cell_column, cell_row, cell_row_index, cell_column_index
+    cdef float total = 0.
+    cdef int idx
+
+    for cell_row in range(range_rows_start, range_rows_stop):
+        cell_row_index = row_index + cell_row
+        if (cell_row_index < 0 or cell_row_index >= size_rows):
+            continue
+
+        for cell_column in range(range_columns_start, range_columns_stop):
+            cell_column_index = column_index + cell_column
+            if (cell_column_index < 0 or cell_column_index >= size_columns):
+                continue
+            idx = <int>(orientation[cell_row_index, cell_column_index] / number_of_orientations_per_180)
+            orientation_histogram[r_i, c_i, idx] += magnitude[cell_row_index, cell_column_index]
+    for idx in range(number_of_orientations):
+        orientation_histogram[r_i, c_i, idx] =  orientation_histogram[r_i, c_i, idx] / (cell_rows * cell_columns)
+    return total / (cell_rows * cell_columns)
+
+
 cdef float cell_hog(double[:, ::1] magnitude,
                     double[:, ::1] orientation,
                     float orientation_start, float orientation_end,
@@ -80,7 +111,8 @@ def hog_histograms(double[:, ::1] gradient_columns,
                    int size_columns, int size_rows,
                    int number_of_cells_columns, int number_of_cells_rows,
                    int number_of_orientations,
-                   cnp.float64_t[:, :, :] orientation_histogram):
+                   cnp.float64_t[:, :, :] orientation_histogram,
+                   int fast):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
@@ -114,8 +146,8 @@ def hog_histograms(double[:, ::1] gradient_columns,
     cdef int i, c, r, o, r_i, c_i, cc, cr, c_0, r_0, \
         range_rows_start, range_rows_stop, \
         range_columns_start, range_columns_stop
-    cdef float orientation_start, orientation_end, \
-        number_of_orientations_per_180
+    cdef float number_of_orientations_per_180
+    cdef float orientation_start, orientation_end
 
     r_0 = cell_rows / 2
     c_0 = cell_columns / 2
@@ -127,12 +159,13 @@ def hog_histograms(double[:, ::1] gradient_columns,
     range_columns_start = -range_columns_stop
     number_of_orientations_per_180 = 180. / number_of_orientations
 
-    with nogil:
-        # compute orientations integral images
-        for i in range(number_of_orientations):
+    if fast == 1:
+        print("use fast")  
+    else:
+        print("use original")
+    if fast == 1:
+        with nogil:
             # isolate orientations in this range
-            orientation_start = number_of_orientations_per_180 * (i + 1)
-            orientation_end = number_of_orientations_per_180 * i
             c = c_0
             r = r_0
             r_i = 0
@@ -143,15 +176,45 @@ def hog_histograms(double[:, ::1] gradient_columns,
                 c = c_0
 
                 while c < cr:
-                    orientation_histogram[r_i, c_i, i] = \
-                        cell_hog(magnitude, orientation,
-                                 orientation_start, orientation_end,
+                    cell_hog_fast(magnitude, orientation,
+                                 r_i, c_i,
                                  cell_columns, cell_rows, c, r,
                                  size_columns, size_rows,
                                  range_rows_start, range_rows_stop,
-                                 range_columns_start, range_columns_stop)
+                                 range_columns_start, range_columns_stop,
+                                 number_of_orientations, number_of_orientations_per_180,
+                                 orientation_histogram)
                     c_i += 1
                     c += cell_columns
 
                 r_i += 1
                 r += cell_rows
+    else:
+        with nogil:
+            # compute orientations integral images
+            for i in range(number_of_orientations):
+                # isolate orientations in this range
+                orientation_start = number_of_orientations_per_180 * (i + 1)
+                orientation_end = number_of_orientations_per_180 * i
+                c = c_0
+                r = r_0
+                r_i = 0
+                c_i = 0
+
+                while r < cc:
+                    c_i = 0
+                    c = c_0
+
+                    while c < cr:
+                        orientation_histogram[r_i, c_i, i] = \
+                            cell_hog(magnitude, orientation,
+                                     orientation_start, orientation_end,
+                                     cell_columns, cell_rows, c, r,
+                                     size_columns, size_rows,
+                                     range_rows_start, range_rows_stop,
+                                     range_columns_start, range_columns_stop)
+                        c_i += 1
+                        c += cell_columns
+
+                    r_i += 1
+                    r += cell_rows
