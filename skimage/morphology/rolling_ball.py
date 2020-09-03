@@ -99,21 +99,21 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
         ),
         axis=-1).reshape(-1, image.ndim)
     tmp = np.sum(
-        (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2, axis=1)
+        (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2,
+        axis=1)
     ellipsoid_intensity = intensity_vertex - \
         intensity_vertex * np.sqrt(np.clip(1 - tmp, 0, None))
-    ellipsoid_intensity = ellipsoid_intensity.astype(np.float_)
+    ellipsoid_intensity = ellipsoid_intensity.astype(img.dtype)
 
     pad_amount = np.round(kernel_shape / 2).astype(int)
     img = np.pad(img, pad_amount[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
 
-    kernel = np.where(tmp <= 1, 1, np.inf)
+    ellipsoid_intensity[tmp > 1] = np.Inf
 
-    apply_kernel_func = apply_kernel_nan if has_nan else apply_kernel
-    background = apply_kernel_func(
+    func = apply_kernel_nan if has_nan else apply_kernel
+    background = func(
         img.ravel(),
-        kernel,
         ellipsoid_intensity,
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
