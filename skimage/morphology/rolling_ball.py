@@ -180,4 +180,9 @@ def rolling_ball(image, radius=50, **kwargs):
 
     kernel_shape = radius * 2
     intensity_vertex = radius * 2
-    return rolling_ellipsoid(image, kernel_shape, intensity_vertex, **kwargs)
+    return rolling_ellipsoid(
+        image,
+        kernel_shape=kernel_shape,
+        intensity_vertex=intensity_vertex,
+        **kwargs
+    )

@@ -29,7 +29,11 @@ def test_nan_const():
     expected_img = np.zeros_like(img)
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
-    background = rolling_ellipsoid(img, kernel_shape, has_nan=True)
+    background = rolling_ellipsoid(
+        img,
+        kernel_shape=kernel_shape,
+        has_nan=True
+    )
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
