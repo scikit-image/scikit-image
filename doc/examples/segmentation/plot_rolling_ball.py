@@ -117,7 +117,9 @@ image_inverted = util.invert(image)
 background_inverted = morphology.rolling_ball(image_inverted, radius=45)
 background = util.invert(background_inverted)
 underflow_image = image - background  # integer underflow occurs here
-correct_image = util.invert(background - image)  # correct subtraction
+
+# correct subtraction
+correct_image = util.invert(image_inverted - background_inverted)
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
 
