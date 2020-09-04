@@ -7,6 +7,7 @@ brew tap homebrew/homebrew-cask
 brew cask install basictex
 
 export PATH="$PATH:/Library/TeX/texbin"
+# Add verbosity (-v) to avoid a timeout on travis
 sudo tlmgr -v --verify-repo=none update --self
 sudo tlmgr -v --verify-repo=none install ucs dvipng anyfontsize
 
