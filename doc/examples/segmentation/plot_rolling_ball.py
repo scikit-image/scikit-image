@@ -173,6 +173,11 @@ plt.show()
 # strength of the algorithm. In particular, it has different
 # parameters for the spatial dimensions and the intensity dimension of
 # the image.
+#
+# Note: The radius is equal to the length of a semi-axis of a
+# sphere, which is *half* a full axis. Hence, you need to multiply
+# the inputs by two if you want to get the same result as
+# ``rolling_ball``.
 
 image = util.img_as_float(data.coins())
 
@@ -191,20 +196,15 @@ plt.show()
 #
 # In ``rolling_ellipsoid`` you are specifying an ellipsoid instead of
 # a ball/sphere - sidenote: a ball is a special case of an ellipsoid
-# where each vertex has the same length. To fully specify an ellipsoid
+# where each axis has the same length. To fully specify an ellipsoid
 # in 3D, you need to supply three parameters. Two for the two spatial
 # dimensions of the image (via ``kernel_shape``), and one for the
 # intensity dimension (via ``intensity_vertex``).
 #
 # As mentioned above, a sphere is just a special ellipsoid, and hence
 # you can get the same behavior as ``rolling_ball`` if you set all
-# vertices to the respective values. In fact, ``rolling_ball``
+# axis to the same values. In fact, ``rolling_ball``
 # internally calls ``rolling_ellipsoid`` in the way shown below.
-#
-# Note: The radius is equal to the length of a semi-vertex of a
-# sphere, which is *half* a full vertex. Hence, you need to multiply
-# the inputs by two if you want to get the same result as
-# ``rolling_ball``.
 
 image = data.coins()
 
@@ -237,7 +237,9 @@ plt.show()
 #
 # Another feature of ``rolling_ellipsoid`` is that you can directly
 # apply it to higher dimensional images, e.g., a z-stack of images
-# obtained during confocal microscopy.
+# obtained during confocal microscopy. As the ellipsoid is now 4D
+# (``[pln, row, col]`` + ``intensity``) you need to specify 4
+# parameters of which 3 describe the spatial shape of the ellipsoid.
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
@@ -252,13 +254,26 @@ plt.show()
 
 ######################################################################
 # A kernel size of 1 in the leading dimension (planes) constrains the
-# filter to a single image. In other words, the filter is applied to
+# filter to a single image. In other words, above filter is applied to
 # each image in the stack individually.
 #
-# However, it is also possible to filter using a 3D ellipsoid and
-# consider the adjacent images in the background estimation. For
-# example, you can estimate a pixel-wise background intensity along
-# the z-stack only
+# However, you can also filter along all 3 dimensions at the same
+# time by specifying a value other than 1.
+
+path = data.image_fetcher.fetch('data/cells.tif')
+image = imageio.volread(path)
+background = morphology.rolling_ellipsoid(
+    image,
+    kernel_shape=(120, 50, 50),
+    intensity_vertex=0.1
+)
+
+plot_result(image[30, ...], background[30, ...])
+plt.show()
+
+######################################################################
+# Another possibility is to filter individual pixels along the
+# planar axis (z-stack axis).
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
