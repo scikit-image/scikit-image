@@ -373,8 +373,9 @@ def label_cython(input_, background=None, return_num=False,
 
     if not 1 <= connectivity <= ndim:
         raise ValueError(
-            "Connectivity below 1 or above %d is illegal."
-            % ndim)
+            f'Connectivity for {input_.ndim}D image should '
+            f'be in [1, ..., {input_.ndim}]. Got {connectivity}.'
+        )
 
     cdef DTYPE_t conn = connectivity
     # Label output
