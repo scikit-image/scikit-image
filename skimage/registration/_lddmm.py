@@ -1674,6 +1674,94 @@ def lddmm_register(
                     If False, they are left centered and in physical units with
                     the exising in the last dimension. By default True.
 
+    Examples
+    --------
+        >>> import numpy as np
+        >>> from scipy.ndimage import rotate
+        >>> from skimage.registration import lddmm_register
+        >>> from scipy.ndimage import map_coordinates
+        >>> #
+        >>> # Define images.
+        >>> # The reference_image is registered to the moving_image image
+        >>> # but both transformations are returned.
+        >>> #
+        >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
+        >>> # dimensions 0 and 1. The overall shape is (19, 25).
+        >>> # moving_image is a 30 degree rotation of reference_image
+        >>> # in the (1,2) plane.
+        >>> #
+        >>> reference_image = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2
+        ... <= 1 for col in range(25)] for row in range(19)]]*2, float)
+        >>> moving_image = rotate(reference_image, 30, (1,2))
+        >>> #
+        >>> # Register the reference_image to the moving_image,
+        >>> # then deform the reference_image and moving_image
+        >>> # to match the other.
+        >>> #
+        >>> lddmm_output = lddmm_register(reference_image, moving_image,
+        ... deformative_stepsize=0.5)
+        >>> #
+        >>> deformed_moving_image = map_coordinates(moving_image,
+        ... lddmm_output.moving_image_to_reference_image_transform)
+        >>> #
+        >>> deformed_reference_image = map_coordinates(reference_image,
+        ... lddmm_output.reference_image_to_moving_image_transform)
+
+    Returns
+    -------
+    namedtuple
+        A namedtuple object containing 4 elements:
+
+            moving_image_to_reference_image_transform: ndarray
+                The position-field for transforming an image from the
+                moving_image-space to the reference_image-space.
+            reference_image_to_moving_image_transform: ndarray
+                The position-field for transforming an image from the
+                reference_image-space to the moving_image-space.
+            internals: namedtuple
+                A namedtuple object containing internal components of the
+                above transforms, or ultimate position-fields, that may be of
+                interest.
+
+                    affine: ndarray
+                        The affine component of
+                        reference_image_to_moving_image_transform in
+                        homogenous coordinates.
+                    contrast_coefficients: ndarray
+                        The weights for the polynomial used to map the
+                        contrast from the reference_image to the moving_image.
+                    velocity_fields: ndarray
+                        The flow-fields whose integral across time is the
+                        deformative component of the ultimate position-field
+                        transform.
+                    reference_image_deformation: ndarray
+                        The deformative component of
+                        reference_image_to_moving_image_transform.
+                    reference_image_deformation_inverse: ndarray
+                        The inverse of reference_image_deformation and the
+                        deformative component of
+                        moving_image_to_reference_image_transform.
+
+            diagnostics: namedtuple
+                A namedtuple containing values accumulated across all
+                iterations including across multiple scales, highly useful
+                for visualizing the progression of the registration and
+                calibrating parameters.
+
+                    affines: list
+                        The affine arrays computed at each iteration.
+                    maximum_velocities: list
+                        The greatest norm of velocity_fields at each
+                        iteration.
+                    matching_energies: list
+                        The sum of square error penalty at each iteration.
+                    regularization_energies: list
+                        The roughness penalty on velocity_fields at each
+                        iteration.
+                    total_energies: list
+                        The sum of matching_energy and regularization_energy,
+                        used as the overall cost function, at each iteration.
+
     Raises
     ------
     ValueError
