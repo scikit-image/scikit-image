@@ -91,9 +91,12 @@ install packages and are using a
 <https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_\
 ).
 
-Nothing will stop you from using pip without a virtual environment,
-but `it's a bad idea that will bite you later \
-<https://en.wikipedia.org/wiki/Dependency_hell>`_.
+While it is possible to use pip without a virtual environment, it is not advised: 
+virtual environments create a clean Python environment that does not interfere 
+with any existing system installation, can be easily removed, and contains only 
+the packages versions your application need. They help avoid a common
+challenge known as 
+`dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
 To install the current ``scikit-image`` you'll need at least Python 3.6. If
 your Python is older, pip will find the most recent compatible version.
@@ -105,8 +108,9 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
-To include a selection of other scientific python packages as well,
-replace the last line with
+To include a selection of other scientific python packages that expand 
+scikit-image's capabilities to include, e.g., parallel processing, you
+can install the package ``scikit-image[optional]``
 
 .. code-block:: sh
 
@@ -127,6 +131,12 @@ Python and provides virtual environments.
 - `conda-forge <https://conda-forge.org>`_, a conda channel maintained
   with the latest ``scikit-image`` package
 
+Once you have your conda environments setup, you can install ``scikit-image``
+with the command
+
+.. code-block:: sh
+
+    conda install scikit-image
 
 .. _system-package-manager:
 
