@@ -116,6 +116,11 @@ can install the package ``scikit-image[optional]``
 
     python -m pip install -U scikit-image[optional]
 
+.. warning::
+
+    Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
+    overwrite critical system libraries which may require you to reinstall your
+    operating system.
 
 .. _install-via-conda:
 
