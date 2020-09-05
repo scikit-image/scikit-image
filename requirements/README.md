@@ -39,3 +39,4 @@ $ pip install -U -r requirements/test.txt
 * pillow 7.1.0 fails on png files, See https://github.com/scikit-image/scikit-image/issues/4548
 * pillow 7.1.1 fails due to https://github.com/python-pillow/Pillow/issues/4518
 * imread 0.7.2 fails due to bluid failure https://github.com/luispedro/imread/issues/36
+* sphinx-gallery 0.8.0 is banned due to bug introduced on binder: https://github.com/scikit-image/scikit-image/pull/4959#issuecomment-687653537
