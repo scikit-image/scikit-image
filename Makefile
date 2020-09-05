@@ -24,4 +24,4 @@ coverage:
 
 html:
 	pip install -q -r requirements/docs.txt
-	SPHINXOPTS="-W -v" make -C doc html
+	SPHINXOPTS="-W -vvv -j1" make -C doc html
