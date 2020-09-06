@@ -1479,200 +1479,200 @@ def lddmm_register(
 
     Parameters
     ----------
-        reference_image: np.ndarray
-            The ideally clean reference_image image being registered to the
-            moving_image.
-        moving_image: np.ndarray
-            The potentially messier moving_image image being registered to.
-        reference_image_spacing: float, seq, optional
-            A scalar or list of scalars indicating the spacing of the
-            reference_image. Overrides 0 input. By default 1.
-        moving_image_spacing: float, seq, optional
-            A scalar or list of scalars indicating the spacing of the
-            moving_image. Overrides 0 input. By default 1.
-        deformative_stepsize: float, optional
-            The stepsize for deformative adjustments. Optimal values are
-            problem-specific. Setting preconditioner_velocity_smooth_length
-            increases the appropriate value of deformative_stepsize.
-            If equal to 0 then the result is affine-only registration.
-            By default 0.
-        sigma_regularization: float, optional
-            A scalar indicating the freedom to deform. Small values put
-            harsher constraints on the smoothness of a deformation.
-            With sufficiently large values, the registration will overfit any
-            noise in the moving_image, leading to unrealistic deformations.
-            However, this may still be appropriate with a small
-            num_iterations.
-            Note that if deformative_stepsize / sigma_regularization**2 is not
-            much less than 1, an error may occur.
-            Overrides 0 input. By default np.inf.
-        contrast_order: int, optional
-            The order of the polynomial fit between the contrasts of the
-            reference_image and moving_image. This is important to set greater
-            than 1 if reference_image and moving_image are cross-modal.
-            3 is generally good for histology. Overrides 0 input.
-            By default 1.
-        **kwargs
-            The above parameters are sufficient for the majority of
-            registrations; however, some require additional fine-tuning or
-            modification. A number of additional keyword arguments are
-            accessible via kwargs to provide a rich environment of options for
-            tailoring a particular registration.
+    reference_image: np.ndarray
+        The ideally clean reference_image image being registered to the
+        moving_image.
+    moving_image: np.ndarray
+        The potentially messier moving_image image being registered to.
+    reference_image_spacing: float, seq, optional
+        A scalar or list of scalars indicating the spacing of the
+        reference_image. Overrides 0 input. By default 1.
+    moving_image_spacing: float, seq, optional
+        A scalar or list of scalars indicating the spacing of the
+        moving_image. Overrides 0 input. By default 1.
+    deformative_stepsize: float, optional
+        The stepsize for deformative adjustments. Optimal values are
+        problem-specific. Setting preconditioner_velocity_smooth_length
+        increases the appropriate value of deformative_stepsize.
+        If equal to 0 then the result is affine-only registration.
+        By default 0.
+    sigma_regularization: float, optional
+        A scalar indicating the freedom to deform. Small values put
+        harsher constraints on the smoothness of a deformation.
+        With sufficiently large values, the registration will overfit any
+        noise in the moving_image, leading to unrealistic deformations.
+        However, this may still be appropriate with a small
+        num_iterations.
+        Note that if deformative_stepsize / sigma_regularization**2 is not
+        much less than 1, an error may occur.
+        Overrides 0 input. By default np.inf.
+    contrast_order: int, optional
+        The order of the polynomial fit between the contrasts of the
+        reference_image and moving_image. This is important to set greater
+        than 1 if reference_image and moving_image are cross-modal.
+        3 is generally good for histology. Overrides 0 input.
+        By default 1.
+    **kwargs
+        The above parameters are sufficient for the majority of
+        registrations; however, some require additional fine-tuning or
+        modification. A number of additional keyword arguments are
+        accessible via kwargs to provide a rich environment of options for
+        tailoring a particular registration.
 
-            Among these options are
-            parameters whose default values may be overridden such as
-            num_iterations, and boolean flags that activate additional
-            features including spatially_varying_contrast_map and
-            artifact_and_background_classification. If set to True, these
-            features are further parametrized by other kwargs.
+        Among these options are
+        parameters whose default values may be overridden such as
+        num_iterations, and boolean flags that activate additional
+        features including spatially_varying_contrast_map and
+        artifact_and_background_classification. If set to True, these
+        features are further parametrized by other kwargs.
 
-            It is important to note that some kwarg specifications will affect
-            the validity of previously calibrated values for other parameters,
-            most notably deformative_stepsize. Options include:
+        It is important to note that some kwarg specifications will affect
+        the validity of previously calibrated values for other parameters,
+        most notably deformative_stepsize. Options include:
 
-                multiscales: float, seq, optional
-                    A scalar, list of scalars, or list of lists or np.ndarray
-                    of scalars, determining the levels of downsampling at
-                    which the registration should be performed before moving
-                    on to the next.
+            multiscales: float, seq, optional
+                A scalar, list of scalars, or list of lists or np.ndarray
+                of scalars, determining the levels of downsampling at
+                which the registration should be performed before moving
+                on to the next.
 
-                    Values must be either all at least 1, or all at most 1.
-                    Both options are interpreted as downsampling. For example,
-                    multiscales=[10, 3, 1] will result in the reference_image
-                    and moving_image being downsampled by a factor of 10 and
-                    registered. This registration will be upsampled and used
-                    to initialize another registration of the reference_image
-                    and moving_image downsampled by 3, and then again on the
-                    undownsampled data (downsampled by 1).
-                    multiscales=[1/10, 1/3, 1] is equivalent.
+                Values must be either all at least 1, or all at most 1.
+                Both options are interpreted as downsampling. For example,
+                multiscales=[10, 3, 1] will result in the reference_image
+                and moving_image being downsampled by a factor of 10 and
+                registered. This registration will be upsampled and used
+                to initialize another registration of the reference_image
+                and moving_image downsampled by 3, and then again on the
+                undownsampled data (downsampled by 1).
+                multiscales=[1/10, 1/3, 1] is equivalent.
 
-                    Further, the scale for each dimension can be specified,
-                    e.g. multiscales=[ [10, 5, 5], [3, 3, 3], 1] for a 3D
-                    registration will result in the reference_image and
-                    moving_image downsampled by [10, 5, 5], then [3, 3, 3],
-                    then [1, 1, 1].
+                Further, the scale for each dimension can be specified,
+                e.g. multiscales=[ [10, 5, 5], [3, 3, 3], 1] for a 3D
+                registration will result in the reference_image and
+                moving_image downsampled by [10, 5, 5], then [3, 3, 3],
+                then [1, 1, 1].
 
-                    If multiscales is provided with more than 1 value, all
-                    other arguments with the exceptions of reference_image,
-                    moving_image, reference_image_spacing,
-                    moving_image_spacing, initial_affine,
-                    initial_velocity_fields, and
-                    initial_contrast_coefficients, which may be provided for
-                    the first value in multiscales, may optionally be provided
-                    as sequences with length equal to the number of values
-                    provided to multiscales. Each such value is used at the
-                    corresponding scale.
+                If multiscales is provided with more than 1 value, all
+                other arguments with the exceptions of reference_image,
+                moving_image, reference_image_spacing,
+                moving_image_spacing, initial_affine,
+                initial_velocity_fields, and
+                initial_contrast_coefficients, which may be provided for
+                the first value in multiscales, may optionally be provided
+                as sequences with length equal to the number of values
+                provided to multiscales. Each such value is used at the
+                corresponding scale.
 
-                    reference_image_spacing and moving_image_spacing are given
-                    once to indicate the spacing of the reference_image and
-                    moving_image as provided, but will be internally adjusted
-                    at each scale.
+                reference_image_spacing and moving_image_spacing are given
+                once to indicate the spacing of the reference_image and
+                moving_image as provided, but will be internally adjusted
+                at each scale.
 
-                    multiscales should be provided as descending values.
-                    By default 1.
-                num_iterations: int, optional
-                    The total number of iterations. By default 300.
-                num_affine_only_iterations: int, optional
-                    The number of iterations at the start of the process
-                    without deformative adjustments. By default 100.
-                num_rigid_affine_iterations: int, optional
-                    The number of iterations at the start of the process in
-                    which the affine is kept rigid. By default 50.
-                affine_stepsize: float, optional
-                    The unitless stepsize for affine adjustments. Should be
-                    between 0 and 1. By default 0.3.
-                fixed_affine_scale: float, optional
-                    The scale to impose on the affine at all iterations. If
-                    None, no scale is imposed. Otherwise, this has the effect
-                    of making the affine always rigid. By default None.
-                velocity_smooth_length: float, optional
-                    The length scale of smoothing of the velocity_fields in
-                    physical units. Affects the optimum velocity_fields
-                    smoothness.
-                    By default 2 * np.max(self.reference_image_spacing).
-                preconditioner_velocity_smooth_length: float, optional
-                    The length of preconditioner smoothing of the
-                    velocity_fields in physical units. Affects the
-                    optimization of the velocity_fields, but not the optimum.
-                    By default 0.
-                maximum_velocity_fields_update: float, optional
-                    The maximum allowed update to the velocity_fields in
-                    physical units. Affects the optimization of the
-                    velocity_fields, but not the optimum. Overrides 0 input.
-                    By default np.max(self.reference_image.shape
-                    * self.reference_image_spacing).
-                num_timesteps: int, optional
-                    The number of composed sub-transformations in the
-                    diffeomorphism. Overrides 0 input. By default 5.
-                spatially_varying_contrast_map: bool, optional
-                    If True, uses a polynomial per voxel to compute the
-                    contrast map rather than a single polynomial.
-                    By default False.
-                contrast_iterations: int, optional
-                    The number of iterations of gradient descent to converge
-                    toward the optimal contrast_coefficients if
-                    spatially_varying_contrast_map == True. Overrides 0 input.
-                    By default 5.
-                sigma_contrast: float, optional
-                    The scale of variation in the contrast_coefficients if
-                    spatially_varying_contrast_map == True. Overrides 0 input.
-                    By default 1.
-                contrast_smooth_length: float, optional
-                    The length scale of smoothing of the contrast_coefficients
-                    if spatially_varying_contrast_map == True.
-                    Overrides 0 input.
-                    By default 2 * np.max(self.moving_image_spacing).
-                sigma_matching: float, optional
-                    An estimate of the spread of the noise in the moving_image,
-                    representing the tradeoff between the regularity and
-                    accuracy of the registration, where a smaller value should
-                    result in a less smooth, more accurate result. Typically it
-                    should be set to an estimate of the standard deviation of
-                    the noise in the image, particularly with artifacts.
-                    Overrides 0 input.
-                    By default the standard deviation of the moving_image.
-                artifact_and_background_classification: bool, optional
-                    If True, artifacts and background are jointly classified
-                    with registration using sigma_artifact, artifact_prior,
-                    sigma_background, and background_prior.
-                    Artifacts refer to excessively bright voxels while
-                    background refers to excessively dim voxels.
-                    By default False.
-                sigma_artifact: float, optional
-                    The level of expected variation between artifact and
-                    non-artifact intensities. Overrides 0 input.
-                    By default 5 * sigma_matching.
-                sigma_background: float, optional
-                    The level of expected variation between background and
-                    non-background intensities. Overrides 0 input.
-                    By default 2 * sigma_matching.
-                artifact_prior: float, optional
-                    The prior probability at which we expect to find that any
-                    given voxel is artifact. By default 1/3.
-                background_prior: float, optional
-                    The prior probability at which we expect to find that any
-                    given voxel is background. By default 1/3.
-                initial_affine: np.ndarray, optional
-                    The affine array that the registration will begin with.
-                    By default np.eye(reference_image.ndim + 1).
-                initial_contrast_coefficients: np.ndarray, optional
-                    The contrast coefficients that the registration will begin
-                    with. If None, the 0th order coefficient(s) are set to
-                    np.mean(self.moving_image) - np.mean(self.reference_image)
-                    * np.std(self.moving_image) / np.std(self.reference_image),
-                    if self.contrast_order > 1, the 1st order coefficient(s)
-                    are set to
-                    np.std(self.moving_image) / np.std(self.reference_image),
-                    and all others are set to zero. By default None.
-                initial_velocity_fields: np.ndarray, optional
-                    The velocity fields that the registration will begin with.
-                    By default all zeros.
-                map_coordinates_ify: bool, optional
-                    If True, the position fields encoding the transformation
-                    will be converted to units of voxels in the expected format
-                    of scipy.ndimage.map_coordinates.
-                    If False, they are left centered and in physical units with
-                    the exising in the last dimension. By default True.
+                multiscales should be provided as descending values.
+                By default 1.
+            num_iterations: int, optional
+                The total number of iterations. By default 300.
+            num_affine_only_iterations: int, optional
+                The number of iterations at the start of the process
+                without deformative adjustments. By default 100.
+            num_rigid_affine_iterations: int, optional
+                The number of iterations at the start of the process in
+                which the affine is kept rigid. By default 50.
+            affine_stepsize: float, optional
+                The unitless stepsize for affine adjustments. Should be
+                between 0 and 1. By default 0.3.
+            fixed_affine_scale: float, optional
+                The scale to impose on the affine at all iterations. If
+                None, no scale is imposed. Otherwise, this has the effect
+                of making the affine always rigid. By default None.
+            velocity_smooth_length: float, optional
+                The length scale of smoothing of the velocity_fields in
+                physical units. Affects the optimum velocity_fields
+                smoothness.
+                By default 2 * np.max(self.reference_image_spacing).
+            preconditioner_velocity_smooth_length: float, optional
+                The length of preconditioner smoothing of the
+                velocity_fields in physical units. Affects the
+                optimization of the velocity_fields, but not the optimum.
+                By default 0.
+            maximum_velocity_fields_update: float, optional
+                The maximum allowed update to the velocity_fields in
+                physical units. Affects the optimization of the
+                velocity_fields, but not the optimum. Overrides 0 input.
+                By default np.max(self.reference_image.shape
+                * self.reference_image_spacing).
+            num_timesteps: int, optional
+                The number of composed sub-transformations in the
+                diffeomorphism. Overrides 0 input. By default 5.
+            spatially_varying_contrast_map: bool, optional
+                If True, uses a polynomial per voxel to compute the
+                contrast map rather than a single polynomial.
+                By default False.
+            contrast_iterations: int, optional
+                The number of iterations of gradient descent to converge
+                toward the optimal contrast_coefficients if
+                spatially_varying_contrast_map == True. Overrides 0 input.
+                By default 5.
+            sigma_contrast: float, optional
+                The scale of variation in the contrast_coefficients if
+                spatially_varying_contrast_map == True. Overrides 0 input.
+                By default 1.
+            contrast_smooth_length: float, optional
+                The length scale of smoothing of the contrast_coefficients
+                if spatially_varying_contrast_map == True.
+                Overrides 0 input.
+                By default 2 * np.max(self.moving_image_spacing).
+            sigma_matching: float, optional
+                An estimate of the spread of the noise in the moving_image,
+                representing the tradeoff between the regularity and
+                accuracy of the registration, where a smaller value should
+                result in a less smooth, more accurate result. Typically it
+                should be set to an estimate of the standard deviation of
+                the noise in the image, particularly with artifacts.
+                Overrides 0 input.
+                By default the standard deviation of the moving_image.
+            artifact_and_background_classification: bool, optional
+                If True, artifacts and background are jointly classified
+                with registration using sigma_artifact, artifact_prior,
+                sigma_background, and background_prior.
+                Artifacts refer to excessively bright voxels while
+                background refers to excessively dim voxels.
+                By default False.
+            sigma_artifact: float, optional
+                The level of expected variation between artifact and
+                non-artifact intensities. Overrides 0 input.
+                By default 5 * sigma_matching.
+            sigma_background: float, optional
+                The level of expected variation between background and
+                non-background intensities. Overrides 0 input.
+                By default 2 * sigma_matching.
+            artifact_prior: float, optional
+                The prior probability at which we expect to find that any
+                given voxel is artifact. By default 1/3.
+            background_prior: float, optional
+                The prior probability at which we expect to find that any
+                given voxel is background. By default 1/3.
+            initial_affine: np.ndarray, optional
+                The affine array that the registration will begin with.
+                By default np.eye(reference_image.ndim + 1).
+            initial_contrast_coefficients: np.ndarray, optional
+                The contrast coefficients that the registration will begin
+                with. If None, the 0th order coefficient(s) are set to
+                np.mean(self.moving_image) - np.mean(self.reference_image)
+                * np.std(self.moving_image) / np.std(self.reference_image),
+                if self.contrast_order > 1, the 1st order coefficient(s)
+                are set to
+                np.std(self.moving_image) / np.std(self.reference_image),
+                and all others are set to zero. By default None.
+            initial_velocity_fields: np.ndarray, optional
+                The velocity fields that the registration will begin with.
+                By default all zeros.
+            map_coordinates_ify: bool, optional
+                If True, the position fields encoding the transformation
+                will be converted to units of voxels in the expected format
+                of scipy.ndimage.map_coordinates.
+                If False, they are left centered and in physical units with
+                the exising in the last dimension. By default True.
 
     Examples
     --------

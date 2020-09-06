@@ -384,30 +384,30 @@ def resample(
 
     Parameters
     ----------
-        image: np.ndarray
-            The image to be resampled
-        new_spacing: float, seq
-            The spacing of the resampled image.
-        old_spacing: float, seq, optional
-            The spacing of the input image. By default 1.
-        err_to_larger: bool, optional
-            Determines whether to round the new shape up or down.
-            By default True.
-        extrapolation_fill_value: float, optional
-            The fill_value kwarg passed to interpn. By default None.
-        origin: str, optional
-            The origin to use for the image axes and coordinates used
-            internally. By default 'center'.
-        method: str, optional
-            The method of interpolation, passed as the method kwarg in
-            interpn. By default 'linear'.
-        image_is_coords: bool, optional
-            If True, this implies that the last dimension of image is not a
-            spatial dimension and not subject to interpolation.
-            By default False.
-        anti_aliasing: bool, optional
-            If True, applies a gaussian filter across dimensions to be
-            downsampled before interpolating. By default True.
+    image: np.ndarray
+        The image to be resampled
+    new_spacing: float, seq
+        The spacing of the resampled image.
+    old_spacing: float, seq, optional
+        The spacing of the input image. By default 1.
+    err_to_larger: bool, optional
+        Determines whether to round the new shape up or down.
+        By default True.
+    extrapolation_fill_value: float, optional
+        The fill_value kwarg passed to interpn. By default None.
+    origin: str, optional
+        The origin to use for the image axes and coordinates used
+        internally. By default 'center'.
+    method: str, optional
+        The method of interpolation, passed as the method kwarg in
+        interpn. By default 'linear'.
+    image_is_coords: bool, optional
+        If True, this implies that the last dimension of image is not a
+        spatial dimension and not subject to interpolation.
+        By default False.
+    anti_aliasing: bool, optional
+        If True, applies a gaussian filter across dimensions to be
+        downsampled before interpolating. By default True.
 
     Returns
     -------
