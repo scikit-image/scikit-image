@@ -413,6 +413,7 @@ def resample(
     -------
     np.ndarray
         The result of resampling image at new_spacing.
+
     """
 
     # Validate inputs and define ndim & old_shape based on image_is_coords.

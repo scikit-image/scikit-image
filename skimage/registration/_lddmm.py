@@ -1768,6 +1768,7 @@ def lddmm_register(
         Raised if unrecognized keyword arguments are provided.
     ValueError
         Raised if multiscales is provided with values both above and below 1.
+
     """
 
     # Validate kwargs.
