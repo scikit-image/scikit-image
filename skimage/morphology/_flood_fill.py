@@ -234,12 +234,8 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     except TypeError:
         seed_point = (seed_point,)
 
-    seed_point_as_array = np.asarray_chkfinite(seed_point)
-    if not np.all(
-            (0 <= seed_point_as_array) & (seed_point_as_array < image.shape)):
-        raise IndexError("seed_point lies outside the image.")
-
     seed_value = image[seed_point]
+    seed_point = tuple(np.asarray(seed_point) % image.shape)
 
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
 

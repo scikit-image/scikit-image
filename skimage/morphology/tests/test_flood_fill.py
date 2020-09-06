@@ -275,16 +275,22 @@ def test_f_order(tolerance):
     np.testing.assert_array_equal(expected, mask)
 
 
-@pytest.mark.parametrize("seed_point", [(-1, -1), (-1, 4), (4, -1), (4, 4)])
-def test_out_of_bounds_seed_point(seed_point):
-    image = np.array([
-        [0, 0, 0, 0],
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-    ], order="F")
+def test_out_of_bounds_seed_point():
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
 
-    with raises(IndexError, match="seed_point lies outside the image."):
-        flood(image, seed_point)
+    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [1., 5., 5., 5., 5., 5., 3.],
+                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
+
+    image = flood_fill(image, (0, -1), 5)
+
+    np.testing.assert_allclose(image, expected)
 
 
 if __name__ == "__main__":
