@@ -1687,12 +1687,11 @@ def lddmm_register(
         >>> #
         >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
         >>> # dimensions 0 and 1. The overall shape is (19, 25).
-        >>> # moving_image is a 30 degree rotation of reference_image
-        >>> # in the (1,2) plane.
+        >>> # moving_image is a 30 degree rotation of reference_image.
         >>> #
-        >>> reference_image = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2
-        ... <= 1 for col in range(25)] for row in range(19)]]*2, float)
-        >>> moving_image = rotate(reference_image, 30, (1,2))
+        >>> reference_image = np.array([[(col-12)**2/8**2 + (row-9)**2/5**2
+        ... <= 1 for col in range(25)] for row in range(19)], float)
+        >>> moving_image = rotate(reference_image, 30)
         >>> #
         >>> # Register the reference_image to the moving_image,
         >>> # then deform the reference_image and moving_image
