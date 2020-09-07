@@ -44,14 +44,14 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 
 from skimage import exposure, io
-from skimage.data import cells3D
+from skimage.data import cells3d
 
 
 #####################################################################
 # Load and display 3D images
 # ==========================
 
-data = cells3D()
+data = cells3d()
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))

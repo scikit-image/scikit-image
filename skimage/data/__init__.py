@@ -608,7 +608,7 @@ def checkerboard():
     return _load("data/chessboard_GRAY.png")
 
 
-def cells3D():
+def cells3d():
     """3D microscopy images of cells.
 
     The returned data is a 3D array with the physical dimensions provided in

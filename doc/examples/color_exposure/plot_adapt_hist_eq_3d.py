@@ -24,9 +24,9 @@ import imageio as io
 
 # Prepare data and apply histogram equalization
 
-from skimage.data import cells3D
+from skimage.data import cells3d
 
-im_orig = cells3D()
+im_orig = cells3d()
 
 # Reorder axis order from (z, y, x) to (x, y, z)
 im_orig = im_orig.transpose()
