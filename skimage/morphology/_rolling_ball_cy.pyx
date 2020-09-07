@@ -9,6 +9,7 @@ ctypedef np_floats DTYPE_FLOAT
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+@cython.cdivision(True)
 cdef inline Py_ssize_t ind2ind(
     Py_ssize_t from_index,
     Py_ssize_t offset,
@@ -72,6 +73,7 @@ cdef inline Py_ssize_t ind2ind(
 @cython.wraparound(False)
 def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
                      DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                     DTYPE_FLOAT[::1] out not None,
                      Py_ssize_t[::1] img_shape not None,
                      Py_ssize_t[::1] padded_img_shape not None,
                      Py_ssize_t[::1] kernel_shape not None,
@@ -90,6 +92,9 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
         ``numpy.ravel()``. Indicates the difference between the 
         height/intensity of the ellipsoid at position ``(x,y)`` and
         the height/intensity at the center of the kernel.
+    out : (I) ndarray
+        A flat view into the output image. Note: does NOT support inplace
+        modification of img.
     img_shape : (N) ndarray
         The shape of the unflattened, unpadded image.
     padded_img_shape : (N) ndarray
@@ -111,11 +116,9 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     rolling_ellipsoid
     """
 
-    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base),
-                                              dtype=img.base.dtype)
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
-    out_data_size = out_data.size
+    out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
     cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
@@ -143,14 +146,15 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
                     min_value = tmp
             if isnan(min_value):
                 break
-        out_data[offset_idx] = min_value
+        out[offset_idx] = min_value
 
-    return out_data.base.reshape(img_shape)
+    return out.base.reshape(img_shape)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def apply_kernel(DTYPE_FLOAT[::1] img not None,
                  DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                 DTYPE_FLOAT[::1] out not None,
                  Py_ssize_t[::1] img_shape not None,
                  Py_ssize_t[::1] padded_img_shape not None,
                  Py_ssize_t[::1] kernel_shape not None,
@@ -169,6 +173,9 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
         ``numpy.ravel()``. Indicates the difference between the 
         height/intensity of the ellipsoid at position ``(x,y)`` and
         the height/intensity at the center of the kernel.
+    out : (I) ndarray
+        A flat view into the output image. Note: does NOT support inplace
+        modification of img.
     img_shape : (N) ndarray
         The shape of the unflattened, unpadded image.
     padded_img_shape : (N) ndarray
@@ -195,11 +202,9 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     assumption allows for faster code (better compiler optimization).
     """
 
-    cdef DTYPE_FLOAT[::1] out_data = np.zeros(np.prod(img_shape.base),
-                                              dtype=img.base.dtype)
     cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
     cdef DTYPE_FLOAT min_value, tmp
-    out_data_size = out_data.size
+    out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
     cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
@@ -224,6 +229,6 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
                 tmp = (img[img_idx+ker_idx_inner] + ellipsoid_intensity[ker_idx])
                 if min_value > tmp:
                     min_value = tmp
-        out_data[offset_idx] = min_value
+        out[offset_idx] = min_value
 
-    return out_data.base.reshape(img_shape)
+    return out.base.reshape(img_shape)
