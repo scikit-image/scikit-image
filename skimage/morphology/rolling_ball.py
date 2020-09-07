@@ -99,18 +99,18 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
             indexing='ij'
         ),
         axis=-1).reshape(-1, image.ndim)
-    tmp = np.sum(
+    non_intensity_factors = np.sum(
         (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2,
         axis=1)
     ellipsoid_intensity = intensity_vertex - \
-        intensity_vertex * np.sqrt(np.clip(1 - tmp, 0, None))
+        intensity_vertex * np.sqrt(np.clip(1 - non_intensity_factors, 0, None))
     ellipsoid_intensity = ellipsoid_intensity.astype(img.dtype)
 
     pad_amount = np.round(kernel_shape / 2).astype(int)
     img = np.pad(img, pad_amount[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
 
-    ellipsoid_intensity[tmp > 1] = np.Inf
+    ellipsoid_intensity[non_intensity_factors > 1] = np.Inf
 
     func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
