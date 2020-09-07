@@ -113,7 +113,7 @@ class RollingBall(object):
         image = data.coins().astype(np.float_)
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.NaN
-        morphology.rolling_ball(image, radius=radius, has_nan=True)
+        morphology.rolling_ball(image, radius=radius, nansafe=True)
     time_rollingball_nan.params = [25, 50, 75, 100, 150, 200]
     time_rollingball_nan.param_names = ["radius"]
 
