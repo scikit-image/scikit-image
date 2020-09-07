@@ -188,5 +188,5 @@ def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
         kernel_shape=kernel_shape,
         intensity_axis=intensity_axis,
         nansafe=False,
-        num_threads=None
+        num_threads=num_threads
     )
