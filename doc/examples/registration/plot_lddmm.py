@@ -1,14 +1,15 @@
 """
 ==============================================================================
-lddmm_register - Nonlinear Registration of Smooth Images
+diffeomorphic_metric_mapping - Nonlinear Registration of Smooth Images
 ==============================================================================
 
 LDDMM is an image registration algorithm in which one image is optimally
 deformed, or flowed, until it aligns with another. This implementation
-(``lddmm_register``) has been enhanced with the ability to jointly learn the
-contrast of different types of images--allowing it to perform across image
-modalities--and its ability to predict and correct for artifacts--that would
-otherwise distort a registration--and a few other more experimental features.
+(``diffeomorphic_metric_mapping``) has been enhanced with the ability to
+jointly learn the contrast of different types of images--allowing it to perform
+across image modalities--and its ability to predict and correct for artifacts--
+that would otherwise distort a registration--and a few other more experimental
+features.
 
 This algorithm is appropriate for smooth grayscale images.
 """
@@ -31,7 +32,7 @@ This algorithm is appropriate for smooth grayscale images.
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.ndimage import map_coordinates
-from skimage.registration import lddmm_register
+from skimage.registration import diffeomorphic_metric_mapping
 from skimage.transform import resize, rescale
 
 import requests
@@ -41,7 +42,7 @@ import nrrd
 
 
 # Load reference_image.
-reference_image_url = 'http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_50.nrrd'
+reference_image_url = "http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/average_template_50.nrrd"
 request = requests.get(reference_image_url)
 byte_content = BytesIO(request.content)
 header = nrrd.read_header(byte_content)
@@ -50,7 +51,7 @@ reference_image = reference_image.astype(float)
 
 
 # Load moving_image.
-moving_image_url = 'https://open-neurodata.s3.amazonaws.com/ailey/thy1eyfp_preprocessed_50um.tif'
+moving_image_url = "https://open-neurodata.s3.amazonaws.com/ailey/thy1eyfp_preprocessed_50um.tif"
 request = requests.get(moving_image_url)
 byte_content = BytesIO(request.content)
 moving_image = tf.imread(byte_content)
@@ -58,8 +59,12 @@ moving_image = moving_image.astype(float)
 
 
 # Reorient moving_image.
-moving_image = np.moveaxis(moving_image, source=[0,1,2], destination=[2,1,0])
-moving_image = np.flip(moving_image, 2) # This saggittal flip corrects inversion.
+moving_image = np.moveaxis(
+    moving_image, source=[0, 1, 2], destination=[2, 1, 0]
+)
+moving_image = np.flip(
+    moving_image, 2
+)  # This saggittal flip corrects inversion.
 
 
 # Specify spacings.
@@ -68,7 +73,7 @@ moving_image_spacing = np.array([50, 50, 50])
 
 
 # Learn registration from reference_image to moving_image.
-lddmm_output = lddmm_register(
+lddmm_output = diffeomorphic_metric_mapping(
     reference_image=reference_image,
     moving_image=moving_image,
     reference_image_spacing=reference_image_spacing,

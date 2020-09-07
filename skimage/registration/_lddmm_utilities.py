@@ -182,7 +182,10 @@ def _validate_ndarray(
     # Broadcast array if appropriate.
     if broadcast_to_shape is not None:
         array = np.copy(
-            np.broadcast_to(array=array, shape=broadcast_to_shape,)
+            np.broadcast_to(
+                array=array,
+                shape=broadcast_to_shape,
+            )
         )
 
     # Reshape array if appropriate.
@@ -193,7 +196,8 @@ def _validate_ndarray(
     if required_shape is not None:
         try:
             required_shape_satisfied = np.array_equal(
-                array.reshape(required_shape).shape, array.shape,
+                array.reshape(required_shape).shape,
+                array.shape,
             )
         except ValueError as exception:
             raise ValueError(
@@ -430,7 +434,7 @@ def resample(
     # Handle trivial case.
     if np.array_equal(new_spacing, old_spacing):
         # Note: this is a copy of the input image and is not the same object.
-        return image 
+        return image
 
     # Compute new_coords and old_axes.
     if err_to_larger:
@@ -581,7 +585,7 @@ def generate_position_field(
         required_ndim=2,
         reshape_to_shape=(
             len(reference_image_shape) + 1,
-            len(reference_image_shape) + 1
+            len(reference_image_shape) + 1,
         ),
     )
     # Verify deform_to.
@@ -591,8 +595,9 @@ def generate_position_field(
             f"type(deform_to): {type(deform_to)}."
         )
     elif deform_to not in ["reference_image", "moving_image"]:
-        raise ValueError("deform_to must be either 'reference_image'"
-            "or 'moving_image'.")
+        raise ValueError(
+            "deform_to must be either 'reference_image'" "or 'moving_image'."
+        )
 
     # Compute intermediates.
     num_timesteps = velocity_fields.shape[-2]
@@ -628,8 +633,8 @@ def generate_position_field(
     ):
         if deform_to == "reference_image":
             sample_coords = (
-                reference_image_coords + velocity_fields[..., timestep, :]
-                * delta_t
+                reference_image_coords
+                + velocity_fields[..., timestep, :] * delta_t
             )
             phi = (
                 interpn(
@@ -643,8 +648,8 @@ def generate_position_field(
             )
         elif deform_to == "moving_image":
             sample_coords = (
-                reference_image_coords - velocity_fields[..., timestep, :]
-                * delta_t
+                reference_image_coords
+                - velocity_fields[..., timestep, :] * delta_t
             )
             phi_inv = (
                 interpn(

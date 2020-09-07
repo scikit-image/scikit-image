@@ -26,9 +26,7 @@ from collections import namedtuple
 
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det, svd
-from scipy.sparse.linalg import cg, LinearOperator
 from skimage.transform import resize, rescale
-from matplotlib import pyplot as plt
 
 from ._lddmm_utilities import _validate_scalar_to_multi
 from ._lddmm_utilities import _validate_ndarray
@@ -1158,8 +1156,7 @@ class _Lddmm:
         If iteration < self.num_rigid_affine_iterations, project self.affine
         to a rigid affine.
 
-        If self.fixed_affine_scale
-         is provided, it is imposed on self.affine.
+        If self.fixed_affine_scale is provided, it is imposed on self.affine.
 
         Appends the current self.affine to self.affines.
 
@@ -1355,7 +1352,11 @@ class _Lddmm:
                 axes=tuple(range(self.reference_image.ndim)),
             ).real
 
-            d_matching_d_velocities.insert(0, d_matching_d_velocity_at_t)
+            # Naturally this should be inserting at the front because we are
+            # looping backwards through time. However, for efficiency we append
+            # and reverse the list after the loop.
+            d_matching_d_velocities.append(d_matching_d_velocity_at_t)
+        d_matching_d_velocities.reverse()
 
         return d_matching_d_velocities
 
@@ -1463,7 +1464,7 @@ class _Lddmm:
     # End _Lddmm.
 
 
-def lddmm_register(
+def diffeomorphic_metric_mapping(
     reference_image,
     moving_image,
     reference_image_spacing=None,
@@ -1674,38 +1675,6 @@ def lddmm_register(
                 If False, they are left centered and in physical units with
                 the exising in the last dimension. By default True.
 
-    Examples
-    --------
-        >>> import numpy as np
-        >>> from scipy.ndimage import rotate
-        >>> from skimage.registration import lddmm_register
-        >>> from scipy.ndimage import map_coordinates
-        >>> #
-        >>> # Define images.
-        >>> # The reference_image is registered to the moving_image image
-        >>> # but both transformations are returned.
-        >>> #
-        >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
-        >>> # dimensions 0 and 1. The overall shape is (19, 25).
-        >>> # moving_image is a 30 degree rotation of reference_image.
-        >>> #
-        >>> reference_image = np.array([[(col-12)**2/8**2 + (row-9)**2/5**2
-        ... <= 1 for col in range(25)] for row in range(19)], float)
-        >>> moving_image = rotate(reference_image, 30)
-        >>> #
-        >>> # Register the reference_image to the moving_image,
-        >>> # then deform the reference_image and moving_image
-        >>> # to match the other.
-        >>> #
-        >>> lddmm_output = lddmm_register(reference_image, moving_image,
-        ... deformative_stepsize=0.5)
-        >>> #
-        >>> deformed_moving_image = map_coordinates(moving_image,
-        ... lddmm_output.moving_image_to_reference_image_transform)
-        >>> #
-        >>> deformed_reference_image = map_coordinates(reference_image,
-        ... lddmm_output.reference_image_to_moving_image_transform)
-
     Returns
     -------
     namedtuple
@@ -1767,6 +1736,49 @@ def lddmm_register(
         Raised if unrecognized keyword arguments are provided.
     ValueError
         Raised if multiscales is provided with values both above and below 1.
+
+    References
+    ----------
+    .. [1] Tward, Daniel J. et al. "Diffeomorphic registration with intensity
+        transformation and missing data: Application to 3D digital pathology of
+        Alzheimer's disease." Frontiers in neuroscience 14 (2020).
+        :DOI:`10.3389/fnins.2020.00052`
+    .. [2] Beg, M. Faisal, et al. "Computing large deformation metric mappings
+        via geodesic flows of diffeomorphisms." International journal of
+        computer vision 61.2 (2005): 139-157.
+        :DOI:`10.1023/B:VISI.0000043755.93987.aa`
+
+    Examples
+    --------
+        >>> import numpy as np
+        >>> from scipy.ndimage import rotate
+        >>> from skimage.registration import diffeomorphic_metric_mapping
+        >>> from scipy.ndimage import map_coordinates
+        >>> #
+        >>> # Define images.
+        >>> # The reference_image is registered to the moving_image image
+        >>> # but both transformations are returned.
+        >>> #
+        >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
+        >>> # dimensions 0 and 1. The overall shape is (19, 25).
+        >>> # moving_image is a 30 degree rotation of reference_image.
+        >>> #
+        >>> reference_image = np.array([[(col-12)**2/8**2 + (row-9)**2/5**2
+        ... <= 1 for col in range(25)] for row in range(19)], float)
+        >>> moving_image = rotate(reference_image, 30)
+        >>> #
+        >>> # Register the reference_image to the moving_image,
+        >>> # then deform the reference_image and moving_image
+        >>> # to match the other.
+        >>> #
+        >>> lddmm_output = diffeomorphic_metric_mapping(
+        ... reference_image, moving_image, deformative_stepsize=0.5)
+        >>> #
+        >>> deformed_moving_image = map_coordinates(moving_image,
+        ... lddmm_output.moving_image_to_reference_image_transform)
+        >>> #
+        >>> deformed_reference_image = map_coordinates(reference_image,
+        ... lddmm_output.reference_image_to_moving_image_transform)
 
     """
 

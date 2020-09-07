@@ -7,36 +7,42 @@ from scipy.ndimage import map_coordinates
 
 from skimage.registration import _lddmm_utilities
 
-from skimage.registration._lddmm import lddmm_register
+from skimage.registration._lddmm import diffeomorphic_metric_mapping
 
 """
-Test lddmm_register.
+Test diffeomorphic_metric_mapping.
 """
 
 
-class Test_lddmm_register:
-    def _test_lddmm_register(
-        self, rtol=0, atol=1 - 1e-9, **lddmm_register_kwargs
+class Test_diffeomorphic_metric_mapping:
+    def _test_diffeomorphic_metric_mapping(
+        self, rtol=0, atol=1 - 1e-9, **diffeomorphic_metric_mapping_kwargs
     ):
         """
         A helper method for this class to verify registrations once they are
         computed.
         """
 
-        lddmm_output = lddmm_register(**lddmm_register_kwargs)
-
-        reference_image = lddmm_register_kwargs["reference_image"].astype(
-            float
+        lddmm_output = diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
         )
-        moving_image = lddmm_register_kwargs["moving_image"].astype(float)
+
+        reference_image = diffeomorphic_metric_mapping_kwargs[
+            "reference_image"
+        ].astype(float)
+        moving_image = diffeomorphic_metric_mapping_kwargs[
+            "moving_image"
+        ].astype(float)
         reference_image_spacing = (
-            lddmm_register_kwargs["reference_image_spacing"]
-            if "reference_image_spacing" in lddmm_register_kwargs.keys()
+            diffeomorphic_metric_mapping_kwargs["reference_image_spacing"]
+            if "reference_image_spacing"
+            in diffeomorphic_metric_mapping_kwargs.keys()
             else 1
         )
         moving_image_spacing = (
-            lddmm_register_kwargs["moving_image_spacing"]
-            if "moving_image_spacing" in lddmm_register_kwargs.keys()
+            diffeomorphic_metric_mapping_kwargs["moving_image_spacing"]
+            if "moving_image_spacing"
+            in diffeomorphic_metric_mapping_kwargs.keys()
             else 1
         )
 
@@ -91,13 +97,15 @@ class Test_lddmm_register:
                 reference_image[tuple(indices)] = 1
         moving_image = np.copy(reference_image)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=1,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_3D_identity_registration(self):
 
@@ -126,13 +134,15 @@ class Test_lddmm_register:
                 reference_image[tuple(indices)] = 1
         moving_image = np.copy(reference_image)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=1,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_4D_identity_registration(self):
 
@@ -161,13 +171,15 @@ class Test_lddmm_register:
                 reference_image[tuple(indices)] = 1
         moving_image = np.copy(reference_image)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=1,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_identity_disk_to_disk_registration(self):
 
@@ -180,13 +192,15 @@ class Test_lddmm_register:
         )
         moving_image = np.copy(reference_image)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_affine_only_iterations=0,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
@@ -207,7 +221,7 @@ class Test_lddmm_register:
         moving_image = rotate(reference_image, 45 / 2)
         reference_image = rotate(reference_image, -45 / 2)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=50,
@@ -215,7 +229,9 @@ class Test_lddmm_register:
             num_rigid_affine_iterations=50,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_non_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
@@ -234,7 +250,7 @@ class Test_lddmm_register:
         # moving_image is a rotation of reference_image.
         moving_image = rotate(reference_image, 30)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=50,
@@ -242,7 +258,9 @@ class Test_lddmm_register:
             num_rigid_affine_iterations=0,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_partially_rigid_affine_only_ellipsoid_to_ellipsoid_registration(
         self,
@@ -263,7 +281,7 @@ class Test_lddmm_register:
         # moving_image is a rotation of reference_image.
         moving_image = rotate(reference_image, 30)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=100,
@@ -271,7 +289,9 @@ class Test_lddmm_register:
             num_rigid_affine_iterations=50,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_deformative_only_disk_to_ellipsoid_registration(self):
 
@@ -298,7 +318,7 @@ class Test_lddmm_register:
             int,
         )
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=150,
@@ -307,7 +327,9 @@ class Test_lddmm_register:
             deformative_stepsize=0.5,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_general_ellipsoid_to_ellipsoid_registration(self):
 
@@ -325,13 +347,15 @@ class Test_lddmm_register:
         # moving_image has shape (21, 29) and semi-radii 6 and 10.
         moving_image = rotate(reference_image, 30)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             deformative_stepsize=0.5,
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
 
     def test_identity_multiscale_registration(self):
 
@@ -348,11 +372,13 @@ class Test_lddmm_register:
         )
         moving_image = np.copy(reference_image)
 
-        lddmm_register_kwargs = dict(
+        diffeomorphic_metric_mapping_kwargs = dict(
             reference_image=reference_image,
             moving_image=moving_image,
             num_iterations=1,
             multiscales=[5, (2, 3), [3, 2], 1],
         )
 
-        self._test_lddmm_register(**lddmm_register_kwargs)
+        self._test_diffeomorphic_metric_mapping(
+            **diffeomorphic_metric_mapping_kwargs
+        )
