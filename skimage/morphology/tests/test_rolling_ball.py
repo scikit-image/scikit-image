@@ -32,7 +32,7 @@ def test_nan_const():
     background = rolling_ellipsoid(
         img,
         kernel_shape=kernel_shape,
-        has_nan=True
+        nansafe=True
     )
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
@@ -86,7 +86,7 @@ def test_threads(num_threads):
     # just checking if the API throws an exception
     img = 23 * np.ones((100, 100), dtype=np.uint8)
     background = rolling_ball(img, 10, num_threads=num_threads)
-    background = rolling_ball(img, 10, has_nan=True, num_threads=num_threads)
+    background = rolling_ball(img, 10, nansafe=True, num_threads=num_threads)
 
 
 def test_ndim():

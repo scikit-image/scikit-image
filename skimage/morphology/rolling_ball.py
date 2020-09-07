@@ -116,6 +116,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     background = func(
         img.ravel(),
         ellipsoid_intensity,
+        np.zeros_like(image, dtype=img.dtype).ravel(),
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape_int,
@@ -186,6 +187,6 @@ def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
         image,
         kernel_shape=kernel_shape,
         intensity_vertex=intensity_vertex,
-        has_nan=False,
+        nansafe=False,
         num_threads=None
     )
