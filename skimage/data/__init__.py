@@ -643,7 +643,8 @@ def human_mitosis():
     Returns
     -------
     human_mitosis: (512, 512) uint8 ndimage
-        Data of human cells undergoing mitosis taken from [1]_.
+        Data of human cells undergoing mitosis taken during the preperation
+        of the manuscript in [1]_.
 
     Notes
     -----
