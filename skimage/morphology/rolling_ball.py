@@ -3,7 +3,7 @@ import numpy as np
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
+def rolling_ellipsoid(image, *, kernel_shape=100, intensity_axis=100,
                       nansafe=False, num_threads=None):
     """Estimate background intensity using a rolling ellipsoid.
 
@@ -16,14 +16,14 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     image : ndarray
         The image to be filtered.
     kernel_shape: ndarray or scalar, optional
-        The length of the non-intensity vertices of the ellipsoid. If
+        The length of the non-intensity axes of the ellipsoid. If
         ``kernel_shape`` is a ndarray, it must have the same dimensions as
         ``image``. If ``kernel_shape`` is a scalar it will be extended to
         have the same dimension via
         ``kernel_shape = kernel_shape * np.ones_like(image.shape)``.
         All elements must be greater than 0.
-    intensity_vertex : scalar, optional
-        The length of the intensity vertex of the ellipsoid. Must be greater
+    intensity_axis : scalar, optional
+        The length of the intensity axis of the ellipsoid. Must be greater
         than 0.
     nansafe: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
@@ -46,14 +46,14 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     ellipsoid under it and raises the ellipsoid until its surface touches the
     image umbra at ``pos=(y,x)``. The background intensity is then estimated
     using the image intensity at that position (``image[y, x]``) plus the
-    difference of ``intensity_vertex`` and the surface of the ellipsoid at
+    difference of ``intensity_axis`` and the surface of the ellipsoid at
     ``pos``. The surface intensity of the ellipsoid is computed using the
     canonical ellipsis equation
     .. code-block:: python
 
         | semi_spatial = kernel_shape / 2
-        | semi_vertex = intensity_vertex / 2
-        | np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
+        | semi_axis = intensity_axis / 2
+        | np.sum((pos/semi_spatial)**2) + (intensity/semi_axis)**2 = 1
 
     This algorithm assumes that dark pixels correspond to the background. If
     you have a bright background, invert the image before passing it to the
@@ -87,8 +87,8 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
 
     kernel_shape_int = np.asarray(kernel_shape // 2 * 2 + 1, dtype=np.intp)
 
-    intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
-    intensity_vertex = intensity_vertex / 2
+    intensity_axis = np.asarray(intensity_axis, dtype=np.float_)
+    intensity_axis = intensity_axis / 2
 
     image = np.asarray(image)
     img = image.astype(np.float_)
@@ -102,8 +102,8 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     non_intensity_factors = np.sum(
         (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2,
         axis=1)
-    ellipsoid_intensity = intensity_vertex - \
-        intensity_vertex * np.sqrt(np.clip(1 - non_intensity_factors, 0, None))
+    ellipsoid_intensity = intensity_axis - \
+        intensity_axis * np.sqrt(np.clip(1 - non_intensity_factors, 0, None))
     ellipsoid_intensity = ellipsoid_intensity.astype(img.dtype)
 
     pad_amount = np.round(kernel_shape / 2).astype(int)
@@ -132,7 +132,7 @@ def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
     """Estimate background intensity using a rolling ball.
 
     This is a convenience function for the frequently used special case of
-    ``rolling_ellipsoid`` where the spatial vertices and intensity vertex
+    ``rolling_ellipsoid`` where the spatial axes and intensity axis
     have the same value resulting in a spherical kernel. For details see
     ``rolling_ellipsoid``.
 
@@ -168,8 +168,8 @@ def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
     .. code-block:: python
 
         | kernel_shape = (1, 2 * radius, 2 * radius)
-        | intensity_vertex = 2 * radius
-        | rolling_ellipsoid(image, kernel_shape, intensity_vertex)
+        | intensity_axis = 2 * radius
+        | rolling_ellipsoid(image, kernel_shape, intensity_axis)
 
     Examples
     --------
@@ -182,11 +182,11 @@ def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
     """
 
     kernel_shape = radius * 2
-    intensity_vertex = radius * 2
+    intensity_axis = radius * 2
     return rolling_ellipsoid(
         image,
         kernel_shape=kernel_shape,
-        intensity_vertex=intensity_vertex,
+        intensity_axis=intensity_axis,
         nansafe=False,
         num_threads=None
     )

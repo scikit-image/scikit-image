@@ -92,4 +92,4 @@ def test_threads(num_threads):
 def test_ndim():
     path = data.image_fetcher.fetch('data/cells.tif')
     image = io.imread(path)[:5, ...]
-    rolling_ellipsoid(image, kernel_shape=(3, 100, 100), intensity_vertex=100)
+    rolling_ellipsoid(image, kernel_shape=(3, 100, 100), intensity_axis=100)

@@ -22,7 +22,7 @@ Scikit-image implements this rolling-ball algorithm, as well as
 a generalized version which allows you to "roll" arbitrary ellipsoids. This
 generalized version is useful if you want to use different values for the
 spatial radius (``kernel_shape``) and the intensity amount
-(``intensity_vertex``).
+(``intensity_axis``).
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
@@ -185,7 +185,7 @@ normalized_radius = 70.5 / 255
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(70.5 * 2, 70.5 * 2),
-    intensity_vertex=normalized_radius * 2
+    intensity_axis=normalized_radius * 2
 )
 plot_result(image, background)
 plt.show()
@@ -199,7 +199,7 @@ plt.show()
 # where each axis has the same length. To fully specify an ellipsoid
 # in 3D, you need to supply three parameters. Two for the two spatial
 # dimensions of the image (via ``kernel_shape``), and one for the
-# intensity dimension (via ``intensity_vertex``).
+# intensity dimension (via ``intensity_axis``).
 #
 # As mentioned above, a sphere is just a special ellipsoid, and hence
 # you can get the same behavior as ``rolling_ball`` if you set all
@@ -211,7 +211,7 @@ image = data.coins()
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(70.5 * 2, 70.5 * 2),
-    intensity_vertex=70.5 * 2
+    intensity_axis=70.5 * 2
 )
 plot_result(image, background)
 plt.show()
@@ -226,7 +226,7 @@ image = data.coins()
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(10 * 2, 10 * 2),
-    intensity_vertex=255 * 2
+    intensity_axis=255 * 2
 )
 plot_result(image, background)
 plt.show()
@@ -246,7 +246,7 @@ image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(1, 21, 21),
-    intensity_vertex=0.1
+    intensity_axis=0.1
 )
 
 plot_result(image[30, ...], background[30, ...])
@@ -265,7 +265,7 @@ image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(10, 21, 21),
-    intensity_vertex=0.1
+    intensity_axis=0.1
 )
 
 plot_result(image[30, ...], background[30, ...])
@@ -280,7 +280,7 @@ image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
     kernel_shape=(120, 1, 1),
-    intensity_vertex=0.1
+    intensity_axis=0.1
 )
 
 plot_result(image[30, ...], background[30, ...])

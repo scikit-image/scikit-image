@@ -121,7 +121,7 @@ class RollingBall(object):
         path = data.image_fetcher.fetch('data/cells.tif')
         image = io.imread(path)
         morphology.rolling_ellipsoid(
-            image, kernel_shape=(1, 100, 100), intensity_vertex=100)
+            image, kernel_shape=(1, 100, 100), intensity_axis=100)
 
     def time_rollingball_threads(self, threads):
         morphology.rolling_ball(data.coins(), radius=100, num_threads=threads)
