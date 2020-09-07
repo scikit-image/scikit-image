@@ -219,7 +219,7 @@ def test_selem():
                          [0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
-                         [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                         [0,   0,   0,   0,   0,   0]], dtype=np.uint8)
 
     np.testing.assert_equal(output, expected)
 
@@ -230,7 +230,7 @@ def test_selem():
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
                         selem=selem)
 
-    expected = np.array([[0, 0, 0, 0, 0, 0],
+    expected = np.array([[  0,   0,   0,   0,   0, 0],
                          [255, 255, 255, 255, 255, 0],
                          [255, 255, 255, 255, 255, 0],
                          [255, 255, 255, 255, 255, 0],
@@ -275,7 +275,7 @@ def test_f_order(tolerance):
     np.testing.assert_array_equal(expected, mask)
 
 
-def test_out_of_bounds_seed_point():
+def test_negative_indexing_seed_point():
     image = np.array([[0, 0, 0, 0, 0, 0, 0],
                       [0, 1, 1, 0, 2, 2, 0],
                       [0, 1, 1, 0, 2, 2, 0],
