@@ -24,6 +24,7 @@ __all__ = ['data_dir',
            'binary_blobs',
            'brick',
            'camera',
+           'cat',
            'cell',
            'checkerboard',
            'chelsea',
@@ -835,6 +836,10 @@ def chelsea():
         Chelsea image.
     """
     return _load("data/chelsea.png")
+
+
+# Define an alias for chelsea that is more descriptive.
+cat = chelsea
 
 
 def coffee():
