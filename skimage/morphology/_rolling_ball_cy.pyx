@@ -116,14 +116,14 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     rolling_ellipsoid
     """
 
-    cdef Py_ssize_t offset, offset_idx, out_data_size, ker_idx, img_idx
+    cdef Py_ssize_t offset, offset_idx, out_data_size, img_idx
     cdef DTYPE_FLOAT min_value, tmp
     out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
-    cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
-    cdef Py_ssize_t kernel_inner = kernel_shape[ndim - 1]
-    cdef Py_ssize_t ker_idx_outer, ker_idx_inner
+    cdef Py_ssize_t kernel_leading_dims = np.prod(kernel_shape[0:(ndim - 1)])
+    cdef Py_ssize_t kernel_last_dim = kernel_shape[ndim - 1]
+    cdef Py_ssize_t ker_idx_leading, ker_idx_last
 
     for offset_idx in prange(
             out_data_size,
@@ -132,16 +132,16 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
 
-        for ker_idx_outer in range(kernel_outer):
-            ker_idx_outer = ker_idx_outer * kernel_inner
-            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape,
+        for ker_idx_leading in range(kernel_leading_dims):
+            ker_idx_leading = ker_idx_leading * kernel_last_dim
+            img_idx = ind2ind(ker_idx_leading, offset, kernel_shape,
                               padded_img_shape)
 
             # split into outer and inner loop for vectorization
             # (the inner loop is contiguous in memory)
-            for ker_idx_inner in range(kernel_inner):
-                ker_idx = ker_idx_outer + ker_idx_inner
-                tmp = (img[img_idx+ker_idx_inner] + ellipsoid_intensity[ker_idx])
+            for ker_idx_last in range(kernel_last_dim):
+                tmp = (img[img_idx+ker_idx_last] + 
+                       ellipsoid_intensity[ker_idx_leading + ker_idx_last])
                 if min_value > tmp or isnan(tmp):
                     min_value = tmp
             if isnan(min_value):
@@ -207,9 +207,9 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
-    cdef Py_ssize_t kernel_outer = np.prod(kernel_shape[0:(ndim - 1)])
-    cdef Py_ssize_t kernel_inner = kernel_shape[ndim - 1]
-    cdef Py_ssize_t ker_idx_outer, ker_idx_inner
+    cdef Py_ssize_t kernel_leading_dims = np.prod(kernel_shape[0:(ndim - 1)])
+    cdef Py_ssize_t kernel_last_dim = kernel_shape[ndim - 1]
+    cdef Py_ssize_t ker_idx_leading, ker_idx_last
 
     for offset_idx in prange(
             out_data_size,
@@ -220,13 +220,13 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
 
         # split into outer and inner loop for vectorization
         # (the inner loop is contiguous in memory)
-        for ker_idx_outer in range(kernel_outer):
-            ker_idx_outer = ker_idx_outer * kernel_inner
-            img_idx = ind2ind(ker_idx_outer, offset, kernel_shape,
+        for ker_idx_leading in range(kernel_leading_dims):
+            ker_idx_leading = ker_idx_leading * kernel_last_dim
+            img_idx = ind2ind(ker_idx_leading, offset, kernel_shape,
                               padded_img_shape)
-            for ker_idx_inner in range(kernel_inner):
-                ker_idx = ker_idx_outer + ker_idx_inner
-                tmp = (img[img_idx+ker_idx_inner] + ellipsoid_intensity[ker_idx])
+            for ker_idx_last in range(kernel_last_dim):
+                ker_idx = ker_idx_leading + ker_idx_last
+                tmp = (img[img_idx+ker_idx_last] + ellipsoid_intensity[ker_idx])
                 if min_value > tmp:
                     min_value = tmp
         out[offset_idx] = min_value
