@@ -4,7 +4,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
-                      has_nan=False, num_threads=None):
+                      nansafe=False, num_threads=None):
     """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
@@ -25,7 +25,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     intensity_vertex : scalar, optional
         The length of the intensity vertex of the ellipsoid. Must be greater
         than 0.
-    has_nan: bool, optional
+    nansafe: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
     num_threads: int, optional
@@ -112,7 +112,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
 
     ellipsoid_intensity[tmp > 1] = np.Inf
 
-    func = apply_kernel_nan if has_nan else apply_kernel
+    func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
         img.ravel(),
         ellipsoid_intensity,
@@ -127,7 +127,7 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_vertex=100,
     return background
 
 
-def rolling_ball(image, radius=50, has_nan=False, num_threads=None):
+def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
     """Estimate background intensity using a rolling ball.
 
     This is a convenience function for the frequently used special case of
