@@ -230,11 +230,11 @@ def test_selem():
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
                         selem=selem)
 
-    expected = np.array([[  0,   0,   0,   0,   0, 0],
-                         [255, 255, 255, 255, 255, 0],
-                         [255, 255, 255, 255, 255, 0],
-                         [255, 255, 255, 255, 255, 0],
-                         [255, 255, 255, 255, 255, 0]], dtype=np.uint8)
+    expected = np.array([[  0,   0,   0,   0,   0,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0]], dtype=np.uint8)
 
     np.testing.assert_equal(output, expected)
 
@@ -255,7 +255,7 @@ def test_basic_nd():
             filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant'))
 
 
-@ pytest.mark.parametrize("tolerance", [None, 0])
+@pytest.mark.parametrize("tolerance", [None, 0])
 def test_f_order(tolerance):
     image = np.array([
         [0, 0, 0, 0],
