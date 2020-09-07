@@ -245,7 +245,7 @@ path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_shape=(1, 100, 100),
+    kernel_shape=(1, 21, 21),
     intensity_vertex=0.1
 )
 
@@ -264,7 +264,7 @@ path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
 background = morphology.rolling_ellipsoid(
     image,
-    kernel_shape=(120, 50, 50),
+    kernel_shape=(10, 21, 21),
     intensity_vertex=0.1
 )
 
