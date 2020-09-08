@@ -22,6 +22,7 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+    - optipng
     # this became necessary to use matplotlib and qt5.12
     # https://github.com/matplotlib/matplotlib/pull/13412
     - qtbase5-dev
@@ -57,7 +58,7 @@ matrix:
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
-      env: PYTHONOPTIMIZE=2
+      env: PYTHONOPTIMIZE=2 BUILD_DOCS=0 TEST_EXAMPLES=0
     - os: linux
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
@@ -180,4 +181,3 @@ after_success:
     - codecov
     # Prepare.release
     - doc/release/contribs.py HEAD~10
-    - bash tools/travis/deploy_docs.sh

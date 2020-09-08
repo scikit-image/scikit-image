@@ -65,9 +65,12 @@ access), specifically to:
 - On the master branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
-  ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``.  
-  
+  ``0.20.0.dev0`` with the period between ``0`` and ``dev`` and a trailing
+  ``0`` immediately after ``dev``. The final ``0`` is necessary to ensure
+  that 
+  `NumpyVersion <https://github.com/scikit-image/scikit-image/pull/4947>`_
+  correctly interprets the version number.
+
  - On the master branch, edit ``doc/source/_static/docversions.js``,
   add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
   change back to the release branch.
@@ -90,40 +93,40 @@ access), specifically to:
 
         git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-	(If you do not have a GPG key, follow the tutorial to set it up:
-	https://help.github.com/articles/signing-commits-with-gpg/)
+        (If you do not have a GPG key, follow the tutorial to set it up:
+        https://help.github.com/articles/signing-commits-with-gpg/)
 
     3. Push the new tag to GitHub::
 
-	git push upstream v<major>.<minor>.0<rcversion>
+        git push upstream v<major>.<minor>.0<rcversion>
 
         (where ``upstream`` is the name of the
-	``github.com:scikit-image/scikit-image`` repository.)
+        ``github.com:scikit-image/scikit-image`` repository.)
 
 
     4. Build the package wheels (pre-compiled binaries) for various platforms:
 
         - Clone https://github.com/scikit-image/scikit-image-wheels.
-	- If making a patch release, switch to the appropriate v<major>.<minor>.x
-	  branch. Otherwise, create that branch.
-	- Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
-	  release tag (e.g. ``v0.14.0``).
-	- Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
-	  this release tag.
-	- Commit and push.
-	- Monitor the builds at
-	    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
-	    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
-	- If they fail, fix them through self-merging pull requests.
-	    - Remove any build with none-supported Python versions if necessary.
-	    - Add builds for new python version if necessary.
-	- When all is green, spot-check a couple of builds to make sure that the
-	  wheels have correctly uploaded. You should see a message like:
-	  ``python -m wheelhouse_uploader upload --local-folder``, with output:
-	  ``Wheelhouse successfully published at:
-	    http://[crazyrandomstring].rackcdn.com``
-	- Open that URL and check for the wheels as
-	  ``scikit_image-<versiontag>-<platforminfo>.whl``
+        - If making a patch release, switch to the appropriate v<major>.<minor>.x
+          branch. Otherwise, create that branch.
+        - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
+          release tag (e.g. ``v0.14.0``).
+        - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
+          this release tag.
+        - Commit and push.
+        - Monitor the builds at
+            https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
+            https://travis-ci.org/scikit-image/scikit-image-wheels/branches
+        - If they fail, fix them through self-merging pull requests.
+            - Remove any build with none-supported Python versions if necessary.
+            - Add builds for new python version if necessary.
+        - When all is green, spot-check a couple of builds to make sure that the
+          wheels have correctly uploaded. You should see a message like:
+          ``python -m wheelhouse_uploader upload --local-folder``, with output:
+          ``Wheelhouse successfully published at:
+            http://[crazyrandomstring].rackcdn.com``
+        - Open that URL and check for the wheels as
+          ``scikit_image-<versiontag>-<platforminfo>.whl``
 
 - If you have performed a release candidate, redo the previous steps with the
   final release.
@@ -188,20 +191,13 @@ access), specifically to:
       - Upload the docs: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Update the web frontpage:
-  The webpage source is kept in a separate repo: scikit-image-web. The
-  live webpage lives in a second repo, scikit-image.github.com, that you only
-  interact with via the ``make`` command within scikit-image-web.
 
-  - Sync your branch with the remote repo: ``git pull``.
-    If you try to ``make gh-pages`` when your branch is out of sync, it
-    creates headaches.
+  The webpage source is kept in a separate repo: `scikit-image-web`.
+
   - Add release date to ``index.rst`` under "News".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
-  - Commit and push back to master. (Nothing is being served at this stage.)
-  - Build using ``make gh-pages``. (This checks out a copy of the
-    scikit-image.github.com repository in the ``gh-pages`` directory.)
-  - Push the built site: ``cd gh-pages`` and ``git push origin master``.
+  - Commit and push (this will also build and update the website).
 
 - Post release notes on mailing lists, blog, Twitter, etc.
 
