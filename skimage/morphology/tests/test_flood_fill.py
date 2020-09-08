@@ -245,14 +245,14 @@ def test_basic_nd():
         hypercube = np.zeros(shape)
         slice_mid = tuple(slice(1, -1, None) for dim in range(dimension))
         hypercube[slice_mid] = 1  # sum is 3**dimension
-        filled = flood_fill(hypercube, (2,)*dimension, 2)
+        filled = flood_fill(hypercube, (2,) * dimension, 2)
 
         # Test that the middle sum is correct
         assert filled.sum() == 3**dimension * 2
 
         # Test that the entire array is as expected
         np.testing.assert_equal(
-            filled, np.pad(np.ones((3,)*dimension) * 2, 1, 'constant'))
+            filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant'))
 
 
 @pytest.mark.parametrize("tolerance", [None, 0])
@@ -273,6 +273,24 @@ def test_f_order(tolerance):
 
     mask = flood(image, seed_point=(2, 1), tolerance=tolerance)
     np.testing.assert_array_equal(expected, mask)
+
+
+def test_negative_indexing_seed_point():
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
+
+    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [1., 5., 5., 5., 5., 5., 3.],
+                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
+
+    image = flood_fill(image, (0, -1), 5)
+
+    np.testing.assert_allclose(image, expected)
 
 
 if __name__ == "__main__":
