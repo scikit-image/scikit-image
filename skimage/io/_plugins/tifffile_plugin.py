@@ -9,7 +9,7 @@ def imread(fname, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     kwargs : keyword pairs, optional
         Additional keyword arguments to pass through (see ``tifffile``'s
         ``imread`` function).

@@ -24,6 +24,7 @@ __all__ = ['data_dir',
            'binary_blobs',
            'brick',
            'camera',
+           'cat',
            'cell',
            'checkerboard',
            'chelsea',
@@ -31,12 +32,15 @@ __all__ = ['data_dir',
            'coffee',
            'coins',
            'colorwheel',
+           'eagle',
            'grass',
            'gravel',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
+           'kidney',
            'lbp_frontal_face_cascade_filename',
+           'lily',
            'lfw_subset',
            'logo',
            'microaneurysms',
@@ -347,6 +351,25 @@ def camera():
     return _load("data/camera.png")
 
 
+
+def eagle():
+    """A golden eagle.
+
+    Suitable for examples on segmentation, Hough transforms, and corner
+    detection.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Dayane Machado).
+
+    Returns
+    -------
+    eagle : (2019, 1826) uint8 ndarray
+        Eagle image.
+    """
+    return _load("data/eagle.png")
+
+
 def astronaut():
     """Color image of the astronaut Eileen Collins.
 
@@ -628,6 +651,55 @@ def coins():
     return _load("data/coins.png")
 
 
+def kidney():
+    """Mouse kidney tissue.
+
+    This biological tissue on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (16, 512, 512, 3). That is 512x512 pixels in X-Y,
+    16 image slices in Z, and 3 color channels
+    (emission wavelengths 450nm, 515nm, and 605nm, respectively).
+    Real-space voxel size is 1.24 microns in X-Y, and 1.25 microns in Z.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
+
+    Returns
+    -------
+    kidney : (16, 512, 512, 3) uint16 ndarray
+        Kidney 3D multichannel image.
+    """
+    return _load("data/kidney.tif")
+
+
+def lily():
+    """Lily of the valley plant stem.
+
+    This plant stem on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (922, 922, 4). That is 922x922 pixels in X-Y,
+    with 4 color channels.
+    Real-space voxel size is 1.24 microns in X-Y.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
+
+    Returns
+    -------
+    lily : (922, 922, 4) uint16 ndarray
+        Lily 2D multichannel image.
+    """
+    return _load("data/lily.tif")
+
+
 def logo():
     """Scikit-image logo, a RGBA image.
 
@@ -764,6 +836,10 @@ def chelsea():
         Chelsea image.
     """
     return _load("data/chelsea.png")
+
+
+# Define an alias for chelsea that is more descriptive.
+cat = chelsea
 
 
 def coffee():

@@ -83,7 +83,7 @@ def imread_collection(load_pattern, conserve_memory=True,
     ic : ImageCollection
         Collection of images.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -110,7 +110,7 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -148,7 +148,7 @@ def imshow(arr, plugin=None, **plugin_args):
         tried (starting with imageio) until a suitable
         candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -170,7 +170,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
         Name of plugin to use.  By default, the different plugins are
         tried until a suitable candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.

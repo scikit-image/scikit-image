@@ -26,7 +26,9 @@ graph
 io
     Reading, saving, and displaying images and video.
 measure
-    Measurement of image properties, e.g., similarity and contours.
+    Measurement of image properties, e.g., region properties and contours.
+metrics
+    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
 morphology
     Morphological operations, e.g., opening or skeletonization.
 restoration
@@ -69,7 +71,7 @@ dtype_limits
 import sys
 
 
-__version__ = '0.18.dev0'
+__version__ = '0.18.0.dev0'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
