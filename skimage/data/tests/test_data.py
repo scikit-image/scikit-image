@@ -153,4 +153,21 @@ def test_cells_3d():
     assert image.shape == (60, 256, 256)
 
 
+def test_kidney_3d_multichannel():
+    """Test that 3D multichannel image of kidney tissue can be loaded.
 
+    Needs internet connection.
+    """
+    fetch('data/kidney.tif')
+    kidney = data.kidney()
+    assert kidney.shape == (16, 512, 512, 3)
+
+
+def test_lily_multichannel():
+    """Test that microscopy image of lily of the valley can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/lily.tif')
+    lily = data.lily()
+    assert lily.shape == (922, 922, 4)
