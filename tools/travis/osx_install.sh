@@ -1,15 +1,14 @@
 #!/bin/bash
 set -ex
 
-brew update
+travis-wait-improved --timeout 30m brew update
 brew install ccache
 brew tap homebrew/homebrew-cask
 brew cask install basictex
 
 export PATH="$PATH:/Library/TeX/texbin"
-# Add verbosity (-v) to avoid a timeout on travis
-sudo tlmgr -v --verify-repo=none update --self
-sudo tlmgr -v --verify-repo=none install ucs dvipng anyfontsize
+travis-wait-improved --timeout 30m sudo tlmgr --verify-repo=none update --self
+travis-wait-improved --timeout 30m sudo tlmgr --verify-repo=none install ucs dvipng anyfontsize
 
 # Set up virtualenv on OSX
 git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild
