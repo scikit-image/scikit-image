@@ -7,6 +7,9 @@ touch $MPL_DIR/matplotlibrc
 
 if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
+    IMAGEIO_CACHE=/Users/travis/Library/Application\ Support
+else
+    IMAGEIO_CACHE=$HOME
 fi
 
 section "List.installed.dependencies"
@@ -15,6 +18,12 @@ tools/build_versions.py
 section_end "List.installed.dependencies"
 
 section "Test"
+# Preload immunohistochemistry.png from imageio to prevent doctest
+# failure
+mkdir -p "$IMAGEIO_CACHE/.imageio/images"
+cd "$IMAGEIO_CACHE/.imageio/images"
+wget https://github.com/imageio/imageio-binaries/raw/master/images/immunohistochemistry.png
+cd -
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
 # in there. pytest will crawl that instead of the module we installed and want to test
