@@ -440,10 +440,8 @@ def _adjust_gamma_u8(image, gamma, gain):
     """LUT based implmentation of gamma adjustement.
 
     """
-    lut_size = image.max() + 1
-    # lut = (255 * gain * (np.linspace(0, 1, lut_size) ** gamma))
-    lut = (255 * gain * ((np.arange(0, lut_size) / 255) ** gamma))
-    return lut.astype('uint8')[image]
+    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma)).astype('uint8')
+    return lut[image]
 
 
 def adjust_gamma(image, gamma=1, gain=1):
