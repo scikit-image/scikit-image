@@ -5,7 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
-from warnings import warn
+import imageio
 import numpy as np
 import shutil
 
@@ -388,8 +388,7 @@ def astronaut():
     astronaut : (512, 512, 3) uint8 ndarray
         Astronaut image.
     """
-
-    return _load("data/astronaut.png")
+    return imageio.imread("imageio:astronaut.png")
 
 
 def brick():
@@ -576,8 +575,7 @@ def text():
     text : (172, 448) uint8 ndarray
         Text image.
     """
-
-    return _load("data/text.png")
+    return imageio.imread("imageio:text.png")
 
 
 def checkerboard():
@@ -592,7 +590,7 @@ def checkerboard():
     checkerboard : (200, 200) uint8 ndarray
         Checkerboard image.
     """
-    return _load("data/chessboard_GRAY.png")
+    return imageio.imread("imageio:checkerboard.png")
 
 
 def cell():
@@ -648,7 +646,7 @@ def coins():
     coins : (303, 384) uint8 ndarray
         Coins image.
     """
-    return _load("data/coins.png")
+    return imageio.imread("imageio:coins.png")
 
 
 def kidney():
@@ -750,7 +748,7 @@ def moon():
     moon : (512, 512) uint8 ndarray
         Moon image.
     """
-    return _load("data/moon.png")
+    return imageio.imread("imageio:moon.png")
 
 
 def page():
@@ -764,7 +762,7 @@ def page():
     page : (191, 384) uint8 ndarray
         Page image.
     """
-    return _load("data/page.png")
+    return imageio.imread("imageio:page.png")
 
 
 def horse():
@@ -780,7 +778,7 @@ def horse():
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    return img_as_bool(_load("data/horse.png", as_gray=True))
+    return img_as_bool(imageio.imread("imageio:horse.png", as_gray=True))
 
 
 def clock():
@@ -797,7 +795,7 @@ def clock():
     clock : (300, 400) uint8 ndarray
         Clock image.
     """
-    return _load("data/clock_motion.png")
+    return imageio.imread("imageio:clock.png")
 
 
 def immunohistochemistry():
@@ -817,7 +815,7 @@ def immunohistochemistry():
     immunohistochemistry : (512, 512, 3) uint8 ndarray
         Immunohistochemistry image.
     """
-    return _load("data/ihc.png")
+    return imageio.imread("imageio:immunohistochemistry.png")
 
 
 def chelsea():
@@ -835,7 +833,7 @@ def chelsea():
     chelsea : (300, 451, 3) uint8 ndarray
         Chelsea image.
     """
-    return _load("data/chelsea.png")
+    return imageio.imread("imageio:chelsea.png")
 
 
 # Define an alias for chelsea that is more descriptive.
@@ -858,7 +856,7 @@ def coffee():
     coffee : (400, 600, 3) uint8 ndarray
         Coffee image.
     """
-    return _load("data/coffee.png")
+    return imageio.imread("imageio:coffee.png")
 
 
 def hubble_deep_field():
@@ -882,7 +880,7 @@ def hubble_deep_field():
     hubble_deep_field : (872, 1000, 3) uint8 ndarray
         Hubble deep field image.
     """
-    return _load("data/hubble_deep_field.jpg")
+    return imageio.imread("imageio:hubble_deep_field.png")
 
 
 def retina():
