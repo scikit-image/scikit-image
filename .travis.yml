@@ -15,6 +15,7 @@ cache:
     - $HOME/.cache/pip
     - $HOME/.cache/sphinx
     - $HOME/.ccache
+    - $HOME/.imageio/images
 addons:
   apt:
     packages:
