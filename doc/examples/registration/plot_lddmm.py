@@ -109,29 +109,29 @@ def generate_calibration_plots(
     components as functions of the number of iterations.
     """
 
-    fig, axes = plt.subplots(2, 2, figsize=(6, 6))
+    fig, axs = plt.subplots(2, 2, figsize=(6, 6))
 
     # Plot matching, regularization, and total energies.
-    ax = axes[0, 0]
+    ax = axs[0, 0]
     ax.plot(
         list(zip(matching_energies, regularization_energies, total_energies))
     )
     ax.set_title("Energies")
 
     # Plot the maximum velocity.
-    ax = axes[0, 1]
+    ax = axs[0, 1]
     ax.plot(maximum_velocities)
     ax.set_title("Maximum\nvelocity")
 
     # Plot affine[:, :-1], the translation components.
     translations = [affine[:-1, -1] for affine in affines]
-    ax = axes[1, 0]
+    ax = axs[1, 0]
     ax.plot(translations)
     ax.set_title("Translation\ncomponents")
 
     # Plot self.affine[:-1, :-1], the linear transformation components.
     linear_components = [affine[:-1, :-1].ravel() for affine in affines]
-    ax = axes[1, 1]
+    ax = axs[1, 1]
     ax.plot(linear_components)
     ax.set_title("Linear\ncomponents")
 
@@ -313,19 +313,19 @@ def scale_data(data, quantile_threshold=0.001):
 
 
 def imshow_on_ax(
-    axes, dim, column, image, overlaid_image=None, quantile_threshold=0.001
+    axs, dim, column, image, overlaid_image=None, quantile_threshold=0.001
 ):
     """
     Rescales image using scale_data and displays a central slice of it across
-    the given dimension on the specified element of axes.
+    the given dimension on the specified element of axs.
 
     If an overlaid_image is provided, it is likewise rescaled and an RGB
     display is produced using image as the Red and Blue channels and
     overlaid_image as the Green channel.
     """
 
-    ax = axes[dim, column]
-    ax.axis(False)
+    ax = axs[dim, column]
+    ax.axis("off")
 
     scaled_image = scale_data(image, quantile_threshold)
 
@@ -354,23 +354,23 @@ def imshow_on_ax(
 # Column 4: reference_image deformed to moving_image.
 # Column 5: raw moving_image.
 
-fig, axes = plt.subplots(3, 6, figsize=(16, 8))
+fig, axs = plt.subplots(3, 6, figsize=(16, 8))
 
 fig.suptitle("Registration: Before & After")
 
-# Call imshow for each subplot axes.
+# Call imshow for each subplot axs.
 for dim in range(3):
     # vmin and vmax are set to saturate the top and bottom 0.1% extrema.
 
     # Column 0: raw reference_image.
-    imshow_on_ax(axes=axes, dim=dim, column=0, image=reference_image_vis)
+    imshow_on_ax(axs=axs, dim=dim, column=0, image=reference_image_vis)
 
     # Column 1: deformed_moving_image.
-    imshow_on_ax(axes=axes, dim=dim, column=1, image=deformed_moving_image)
+    imshow_on_ax(axs=axs, dim=dim, column=1, image=deformed_moving_image)
 
     # Column 2: deformed_moving_image overlaid with reference_image.
     imshow_on_ax(
-        axes=axes,
+        axs=axs,
         dim=dim,
         column=2,
         image=deformed_moving_image,
@@ -379,7 +379,7 @@ for dim in range(3):
 
     # Column 3: deformed_reference_image overlaid with moving_image.
     imshow_on_ax(
-        axes=axes,
+        axs=axs,
         dim=dim,
         column=3,
         image=deformed_reference_image,
@@ -387,15 +387,15 @@ for dim in range(3):
     )
 
     # Column 4: deformed_reference_image.
-    imshow_on_ax(axes=axes, dim=dim, column=4, image=deformed_reference_image)
+    imshow_on_ax(axs=axs, dim=dim, column=4, image=deformed_reference_image)
 
     # Column 5: raw moving_image.
-    imshow_on_ax(axes=axes, dim=dim, column=5, image=moving_image_vis)
+    imshow_on_ax(axs=axs, dim=dim, column=5, image=moving_image_vis)
 
 
 # Set column labels.
 for ax, column_label in zip(
-    axes[0],
+    axs[0],
     [
         "reference_image",
         "deformed_moving_image",
@@ -409,6 +409,6 @@ for ax, column_label in zip(
 
 
 # Set row labels.
-for ax, row_index in zip(axes[:, 0], range(len(axes))):
+for ax, row_index in zip(axs[:, 0], range(len(axs))):
     row_label = f"Dimension {row_index}"
     ax.set_ylabel(row_label, rotation="vertical")
