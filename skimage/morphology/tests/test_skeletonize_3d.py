@@ -1,10 +1,7 @@
-
-import os
-
 import numpy as np
 import scipy.ndimage as ndi
 
-from skimage import io, draw, data
+from skimage import io, draw
 from skimage.data import binary_blobs
 from skimage.util import img_as_ubyte
 from skimage.morphology import skeletonize, skeletonize_3d

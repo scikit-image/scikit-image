@@ -1,5 +1,4 @@
 import warnings
-import functools
 from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
