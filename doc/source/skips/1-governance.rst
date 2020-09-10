@@ -65,7 +65,7 @@ all are encouraged to do so. By contributing to the project, community members
 can directly help to shape its future.
 
 Contributors are encouraged to read the
-:ref:`contributing guide <howto_contribute>`.
+:doc:`contributing guide <../contribute>`.
 
 Core developers
 ---------------
@@ -107,7 +107,7 @@ van der Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
 Zachary Pincus. The SC membership is revisited every January. SC members who do
 not actively engage with the SC duties are expected to resign. New members are
 added by nomination by a core developer. Nominees should have demonstrated
-long-term, continued commitment to the project and its :ref:`values <values>`. A
+long-term, continued commitment to the project and its :doc:`values <../values>`. A
 nomination will result in discussion that cannot take more than a month and
 then admission to the SC by consensus.
 
@@ -124,8 +124,8 @@ place on the project
 and the `issue tracker <https://github.com/scikit-image/scikit-image/issues>`_.
 Occasionally, sensitive discussion may occur on a private list.
 
-Decisions should be made in accordance with the :ref:`mission, vision and
-values <values>` of the scikit-image project.
+Decisions should be made in accordance with the :doc:`mission, vision and
+values <../values>` of the scikit-image project.
 
 Scikit-image uses a “consensus seeking” process for making decisions. The group
 tries to find a resolution that has no open objections among core developers.

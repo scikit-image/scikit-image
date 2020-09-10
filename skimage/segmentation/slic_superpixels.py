@@ -1,5 +1,4 @@
 import warnings
-import functools
 from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
@@ -139,10 +138,16 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
     start_label: int, optional
         The labels' index start. Should be 0 or 1.
+
+        .. versionadded:: 0.17
+           ``start_label`` was introduced in 0.17
     mask : 2D ndarray, optional
         If provided, superpixels are computed only where mask is True,
         and seed points are homogeneously distributed over the mask
         using a K-means clustering strategy.
+
+        .. versionadded:: 0.17
+           ``mask`` was introduced in 0.17
 
     Returns
     -------
