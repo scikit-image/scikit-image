@@ -11,7 +11,7 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def _get_mask_centroids(mask, n_centroids):
+def _get_mask_centroids(mask, n_centroids, multichannel):
     """Find regularly spaced centroids on a mask.
 
     Parameters
@@ -34,10 +34,30 @@ def _get_mask_centroids(mask, n_centroids):
     coord = np.array(np.nonzero(mask), dtype=float).T
     # Fix random seed to ensure repeatability
     rnd = random.RandomState(123)
-    idx = np.sort(rnd.choice(np.arange(len(coord), dtype=int),
+
+    # select n_centroids randomly distributed points from within the mask
+    idx_full = np.arange(len(coord), dtype=int)
+    idx = np.sort(rnd.choice(idx_full,
                              min(n_centroids, len(coord)),
                              replace=False))
-    centroids, _ = kmeans2(coord, coord[idx])
+
+    # To save time, when n_centroids << len(coords), use only a subset of the
+    # coordinates when calling k-means. Rather than the full set of coords,
+    # we will use a substantially larger subset than n_centroids. Here we
+    # somewhat arbitrarily choose dense_factor=10 to make the samples
+    # 10 times closer together along each axis than the n_centroids samples.
+    dense_factor = 10
+    ndim_spatial = mask.ndim - 1 if multichannel else mask.ndim
+    n_dense = int((dense_factor ** ndim_spatial) * n_centroids)
+    if len(coord) > n_dense:
+        # subset of points to use for the k-means calculation
+        # (much denser than idx, but less than the full set)
+        idx_dense = np.sort(rnd.choice(idx_full,
+                                       n_dense,
+                                       replace=False))
+    else:
+        idx_dense = Ellipsis
+    centroids, _ = kmeans2(coord[idx_dense], coord[idx], iter=5)
 
     # Compute the minimum distance of each centroid to the others
     dist = squareform(pdist(centroids))
@@ -254,7 +274,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
-        centroids, steps = _get_mask_centroids(mask, n_segments)
+        centroids, steps = _get_mask_centroids(mask, n_segments, multichannel)
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
