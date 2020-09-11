@@ -158,9 +158,20 @@ def test_structural_similarity_multichannel_chelsea():
 
 
 def test_gaussian_structural_similarity_vs_IPOL():
-    # Tests vs. imdiff result from the following IPOL article and code:
-    # https://www.ipol.im/pub/art/2011/g_lmii/
-    mssim_IPOL = 0.327309966087341
+    """ Tests vs. imdiff result from the following IPOL article and code:
+    https://www.ipol.im/pub/art/2011/g_lmii/.
+
+    Notes
+    -----
+    To generate mssim_IPOL, we need a local copy of cam_noisy:
+
+    >>> from skimage import io
+    >>> io.imsave('/tmp/cam_noisy.png', cam_noisy)
+
+    Then, we use the following command:
+    $ ./imdiff -m mssim <path to camera.png>/camera.png /tmp/cam_noisy.png
+    """
+    mssim_IPOL = 0.350132882595062
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
@@ -203,9 +214,9 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
 
 def test_mssim_vs_legacy():
     # check that ssim with default options matches skimage 0.11 result
-    mssim_skimage_0pt11 = 0.34192589699605191
+    mssim_skimage_0pt17 = 0.3561711557677345
     mssim = structural_similarity(cam, cam_noisy)
-    assert_almost_equal(mssim, mssim_skimage_0pt11)
+    assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
 def test_mssim_mixed_dtype():
