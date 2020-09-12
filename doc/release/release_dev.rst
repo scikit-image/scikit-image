@@ -31,7 +31,6 @@ Bugfixes
 --------
 
 
-
 Deprecations
 ------------
 
