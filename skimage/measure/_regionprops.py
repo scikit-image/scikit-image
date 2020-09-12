@@ -1038,6 +1038,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     (22.72987986048314, 81.91228523446583)
 
     Add custom measurements by passing functions as ``extra_properties``
+
     >>> from skimage import data, util
     >>> from skimage.measure import label, regionprops
     >>> import numpy as np

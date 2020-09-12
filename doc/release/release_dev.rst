@@ -14,7 +14,7 @@ https://scikit-image.org
 
 New Features
 ------------
-- Added majority rank filter - ``filters.rank.majority``.
+
 - Added a new perimeter function - ``measure.perimeter_crofton``.
 
 - A new doc tutorial presenting a cell biology example has been added to the
@@ -25,10 +25,21 @@ New Features
 Improvements
 ------------
 
+- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+  single-precision when the input image is single-precision. This can give a
+  substantial performance improvement when working with single precision data.
 
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
 
 API Changes
 -----------
+
+- ``skimage.restoration.richardson_lucy`` returns a single-precision output
+  when the input is single-precision. Prior to this release, double-precision
+  was always used.
 
 
 Bugfixes
@@ -36,7 +47,12 @@ Bugfixes
 
 - Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
   The bug is corrected. It is defined for 2D and 3D objects.
-
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
+- ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
+  now consistently handle negative values for ``seed_point``.
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
@@ -46,6 +62,8 @@ Deprecations
 - ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
   removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
   instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release

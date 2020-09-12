@@ -1,3 +1,6 @@
+import numpy
+
+
 __all__ = ['apply_parallel']
 
 
@@ -53,7 +56,8 @@ def _ensure_dask_array(array, chunks=None):
 
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords={}, *, compute=None):
+                   extra_arguments=(), extra_keywords={}, *, dtype=None,
+                   multichannel=False, compute=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -84,6 +88,25 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
+    dtype : data-type or None, optional
+        The data-type of the `function` output. If None, Dask will attempt to
+        infer this by calling the function on data of shape ``(1,) * ndim``.
+        For functions expecting RGB or multichannel data this may be
+        problematic. In such cases, the user should manually specify this dtype
+        argument instead.
+
+        .. versionadded:: 0.18
+           ``dtype`` was added in 0.18.
+    multichannel : bool, optional
+        If `chunks` is None and `multichannel` is True, this function will keep
+        only a single chunk along the channels axis. When `depth` is specified
+        as a scalar value, that depth will be applied only to the non-channels
+        axes (a depth of 0 will be used along the channels axis). If the user
+        manually specified both `chunks` and a `depth` tuple, then this
+        argument will have no effect.
+
+        .. versionadded:: 0.18
+           ``multichannel`` was added in 0.18.
     compute : bool, optional
         If ``True``, compute eagerly returning a NumPy Array.
         If ``False``, compute lazily returning a Dask Array.
@@ -126,7 +149,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4
-        chunks = _get_chunks(shape, ncpu)
+        if multichannel:
+            chunks = _get_chunks(shape[:-1], ncpu) + (shape[-1],)
+        else:
+            chunks = _get_chunks(shape, ncpu)
 
     if mode == 'wrap':
         mode = 'periodic'
@@ -135,12 +161,16 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     elif mode == 'edge':
         mode = 'nearest'
 
+    if multichannel and numpy.isscalar(depth):
+        # depth is only used along the non-channel axes
+        depth = (depth,) * (len(array.shape) - 1) + (0,)
+
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
     if compute:
         res = res.compute()
 

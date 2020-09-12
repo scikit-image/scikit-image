@@ -1,4 +1,4 @@
-.. _core_dev:
+(core_dev)=
 
 Core Developer Guide
 ====================
@@ -10,8 +10,7 @@ so far.
 
 This document offers guidelines for your new role.  First and
 foremost, you should familiarize yourself with the project's
-`mission, vision, and values
-<https://scikit-image.org/docs/dev/values.html>`__.  When in
+{doc}`mission, vision, and values <values>`.  When in
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
@@ -23,23 +22,25 @@ All Contributors Are Treated The Same
 
 You now have the ability to push changes directly to the master
 branch, but should never do so; instead, continue making pull requests
-as before and in accordance with the `general contributor guide
-<https://scikit-image.org/docs/dev/contribute.html>`__.
+as before and in accordance with the 
+{doc}`general contributor guide <contribute>`.
 
 As a core contributor, you gain the ability to merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
 is a shared power: you must merge *only after* another core has
 approved the pull request, *and* after you yourself have carefully
-reviewed it.  (See `Reviewing`_ and especially `Merge Only Changes You
-Understand`_ below.) To ensure a clean git history, use GitHub's
-`Squash and Merge <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/merging-a-pull-request#merging-a-pull-request-on-github>`__
+reviewed it.  (See {ref}`sec:reviewing` and especially
+{ref}`sec:understand` below.) To ensure a clean git history,
+use GitHub's [Squash and Merge][gh_sqmrg]
 feature to merge, unless you have a good reason not to do so.
 
+[gh_sqmrg]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/merging-a-pull-request#merging-a-pull-request-on-github
+
+(sec:reviewing)=
 Reviewing
 ---------
 
-How to Conduct A Good Review
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### How to Conduct A Good Review
 
 *Always* be kind to contributors. Nearly all of `scikit-image` is
 volunteer work, for which we are tremendously grateful. Provide
@@ -61,18 +62,17 @@ When reviewing, focus on the following:
 
 1. **API:** The API is what users see when they first use
    `scikit-image`. APIs are difficult to change once released, so
-   should be simple, `functional
-   <https://en.wikipedia.org/wiki/Functional_programming>`__ (i.e. not
+   should be simple, [functional][wiki_functional] (i.e. not
    carry state), consistent with other parts of the library, and
    should avoid modifying input variables.  Please familiarize
-   yourself with the project's `deprecation policy <https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle>`__.
+   yourself with the project's [deprecation policy][dep_pol]
 
 2. **Documentation:** Any new feature should have a gallery
    example, that not only illustrates but explains it.
 
 3. **The algorithm:** You should understand the code being modified or
-   added before approving it.  (See `Merge Only Changes You
-   Understand`_ below.) Implementations should do what they claim,
+   added before approving it.  (See {ref}`sec:understand`
+   below.) Implementations should do what they claim,
    and be simple, readable, and efficient.
 
 4. **Tests:** All contributions to the library *must* be tested, and
@@ -80,16 +80,19 @@ When reviewing, focus on the following:
    tests not only execute the code, but explores corner cases.  It is tempting
    not to review tests, but please do so.
 
+[wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
+[dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
+
 Other changes may be *nitpicky*: spelling mistakes, formatting,
 etc. Do not ask contributors to make these changes, and instead
-make the changes by `pushing to their branch
-<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork>`__,
-or using GitHub’s `suggestion
-<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request>`__
-`feature
-<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request>`__.
+make the changes by [pushing to their branch][gh_push]
+or using GitHub’s [suggestion][gh_suggest] [feature][gh_feedback].
 (The latter is preferred because it gives the contributor a choice in
 whether to accept the changes.)
+
+[gh_push]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork
+[gh_suggest]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request
+[gh_feedback]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request
 
 Our default merge policy is to squash all PR commits into a single
 commit. Users who wish to bring the latest changes from ``master``
@@ -105,8 +108,8 @@ throwing the contributor's work away!
 Please add a note to a pull request after you push new changes; GitHub
 does not send out notifications for these.
 
-Merge Only Changes You Understand
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(sec:understand)=
+### Merge Only Changes You Understand
 
 *Long-term maintainability* is an important concern.  Code doesn't
 merely have to *work*, but should be *understood* by multiple core
@@ -171,23 +174,21 @@ Further resources
 As a core member, you should be familiar with community and developer
 resources such as:
 
--  Our `contributor
-   guide <https://scikit-image.org/docs/stable/contribute.html>`__
--  Our `community
-   guidelines <https://scikit-image.org/community_guidelines.html>`__
--  `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ for Python style
--  `PEP257 <https://www.python.org/dev/peps/pep-0257/>`__ and the `NumPy
-   documentation
-   guide <https://docs.scipy.org/doc/numpy/docs/howto_document.html>`__
+-  Our {doc}`contributor guide <contribute>`
+-  Our [community guidelines](https://scikit-image.org/community_guidelines.html)
+-  [PEP8](https://www.python.org/dev/peps/pep-0008/) for Python style
+-  [PEP257](https://www.python.org/dev/peps/pep-0257/) and the
+   [NumPy documentation guide][numpydoc]
    for docstrings. (NumPy docstrings are a superset of PEP257. You
    should read both.)
--  The scikit-image `tag on
-   StackOverflow <https://stackoverflow.com/questions/tagged/scikit-image>`__
--  The scikit-image `tag on
-   forum.image.sc <https://forum.image.sc/tags/scikit-image>`__
--  Our `mailing
-   list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`__
--  Our `chat room <https://skimage.zulipchat.com/>`__
+-  The scikit-image [tag on StackOverflow][so_tag]
+-  The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
+-  Our [mailing list][ml]
+-  Our [chat room](https://skimage.zulipchat.com/)
+
+[numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
+[so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
+[ml]: https://mail.python.org/mailman3/lists/scikit-image.python.org/
 
 You are not required to monitor all of the social resources.
 
@@ -196,7 +197,7 @@ Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
-skimage-core@python.org. As of this writing, there is no hard-and-fast
+<skimage-core@python.org>. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have: been
 part of the project for at least six months, contributed
 significant changes of their own, contributed to the discussion and

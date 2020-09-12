@@ -13,6 +13,7 @@ from ..utils import (dialogs, init_qtapp, figimage, start_qtapp,
 from ..utils.canvas import BlitManager, EventManager
 from ..plugins.base import Plugin
 
+from warnings import warn
 
 __all__ = ['ImageViewer', 'CollectionViewer']
 
@@ -89,6 +90,12 @@ class ImageViewer(QtWidgets.QMainWindow):
     original_image_changed = Signal(np.ndarray)
 
     def __init__(self, image, useblit=True):
+
+        warn('`viewer` is deprecated and will be removed in 0.20. '
+             'For alternatives, refer to '
+             'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+             FutureWarning, stacklevel=2)
+
         # Start main loop
         init_qtapp()
         super(ImageViewer, self).__init__()
@@ -347,6 +354,11 @@ class CollectionViewer(ImageViewer):
     """
 
     def __init__(self, image_collection, update_on='move', **kwargs):
+        warn('`CollectionViewer` is deprecated and will be removed in 0.20. '
+             'For alternatives, refer to '
+             'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+             FutureWarning, stacklevel=2)
+
         self.image_collection = image_collection
         self.index = 0
         self.num_images = len(self.image_collection)
