@@ -65,8 +65,11 @@ access), specifically to:
 - On the master branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
-  ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``.
+  ``0.20.0.dev0`` with the period between ``0`` and ``dev`` and a trailing
+  ``0`` immediately after ``dev``. The final ``0`` is necessary to ensure
+  that 
+  `NumpyVersion <https://github.com/scikit-image/scikit-image/pull/4947>`_
+  correctly interprets the version number.
 
  - On the master branch, edit ``doc/source/_static/docversions.js``,
   add the release, e.g., `0.15.x`, and commit.  Cherry-pick this

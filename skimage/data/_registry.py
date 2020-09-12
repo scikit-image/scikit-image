@@ -73,6 +73,7 @@ registry = {
     "data/coffee.png": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7",
     "data/coins.png": "f8d773fc9cfa6f4d8e5942dc34d0a0788fcaed2a4fefbbed0aef5398d7ef4cba",
     "data/color.png": "7d2df993de2b4fa2a78e04e5df8050f49a9c511aa75e59ab3bd56ac9c98aef7e",
+    "data/eagle.png": "baba13e43e566c711023c0646ec614924a1ad854b57e70807f7e89d7ba86a9cf",
     "data/horse.png": "c7fb60789fe394c485f842291ea3b21e50d140f39d6dcb5fb9917cc178225455",
     "data/grass.png": "b6b6022426b38936c43a4ac09635cd78af074e90f42ffa8227ac8b7452d39f89",
     "data/hubble_deep_field.jpg": "3a19c5dd8a927a9334bb1229a6d63711b1c0c767fb27e2286e7c84a3e2c2f5f4",
@@ -130,12 +131,17 @@ registry = {
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
     "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
+    "data/kidney.tif": "80c0799bc58b08cf6eaa53ecd202305eb42fd7bc73746cb6c5064dbeae7e8476",
+    "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
 }
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
     "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/master/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
+    "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/master/eagle.png",
+    "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/master/kidney-tissue-fluorescence.tif",
+    "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/master/lily-of-the-valley-fluorescence.tif",
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
 }

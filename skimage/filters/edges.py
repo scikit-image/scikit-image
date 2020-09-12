@@ -175,7 +175,7 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
         smooth_axes = list(set(range(ndim)) - {edge_dim})
         for smooth_dim in smooth_axes:
             kernel = kernel * _reshape_nd(smooth_weights, ndim, smooth_dim)
-        ax_output = ndi.convolve(image, kernel, mode='reflect')
+        ax_output = ndi.convolve(image, kernel, mode=mode)
         if return_magnitude:
             ax_output *= ax_output
         output += ax_output
