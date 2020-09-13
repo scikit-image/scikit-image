@@ -1,12 +1,10 @@
 import pytest
 from functools import partial
 import numpy as np
-from skimage.segmentation import (
-    fit_segmenter,
-    predict_segmenter,
-    multiscale_basic_features,
-)
+from skimage.segmentation import fit_segmenter, predict_segmenter
+from skimage.feature import multiscale_basic_features
 from scipy import spatial
+
 
 class DummyNNClassifier(object):
     def fit(self, X, labels):
@@ -83,30 +81,3 @@ def test_trainable_segmentation_predict():
     with pytest.raises(ValueError) as err:
         _ = predict_segmenter(test_features, clf)
         assert 'type of features' in str(err.value)
-
-
-@pytest.mark.parametrize('edges', (False, True))
-@pytest.mark.parametrize('texture', (False, True))
-def test_multiscale_basic_features(edges, texture):
-    img = np.zeros((20, 20, 3))
-    img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
-    features = multiscale_basic_features(img, edges=edges, texture=texture)
-    n_sigmas = 6
-    intensity = True
-    assert len(features) == 3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
-    assert features.shape[1:] == img.shape[:-1]
-
-
-def test_multiscale_basic_features_channel():
-    img = np.zeros((10, 10, 5))
-    img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
-    n_sigmas = 2
-    features = multiscale_basic_features(img, sigma_min=1, sigma_max=2)
-    assert len(features) == 5 * n_sigmas * 4
-    assert features.shape[1:] == img.shape[:-1]
-    # Consider last axis as spatial dimension
-    features = multiscale_basic_features(img, sigma_min=1, sigma_max=2, multichannel=False)
-    assert len(features) == n_sigmas * 5
-    assert features.shape[1:] == img.shape
