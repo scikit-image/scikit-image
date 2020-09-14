@@ -496,14 +496,16 @@ def adjust_gamma(image, gamma=1, gain=1):
     dtype = image.dtype.type
 
     if dtype is np.uint8:
-        return _adjust_gamma_u8(image, gamma, gain)
+        out = _adjust_gamma_u8(image, gamma, gain)
+    else:
+        _assert_non_negative(image)
 
-    _assert_non_negative(image)
+        scale = float(dtype_limits(image, True)[1]
+                      - dtype_limits(image, True)[0])
 
-    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+        out = (((image / scale) ** gamma) * scale * gain).astype(dtype)
 
-    out = ((image / scale) ** gamma) * scale * gain
-    return out.astype(dtype)
+    return out
 
 
 def adjust_log(image, gain=1, inv=False):
