@@ -23,7 +23,7 @@ cdef inline void _count_attack_border_elements(char[:, :, ::1] selem,
                                                Py_ssize_t [::1] num_se,
                                                Py_ssize_t splanes,
                                                Py_ssize_t srows,
-                                               Py_ssize_t scols, 
+                                               Py_ssize_t scols,
                                                Py_ssize_t centre_p,
                                                Py_ssize_t centre_r,
                                                Py_ssize_t centre_c):
@@ -74,10 +74,10 @@ cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] i
                                                             Py_ssize_t p,
                                                             Py_ssize_t planes,
                                                             Py_ssize_t rows,
-                                                            Py_ssize_t cols, 
+                                                            Py_ssize_t cols,
                                                             Py_ssize_t splanes,
                                                             Py_ssize_t srows,
-                                                            Py_ssize_t scols, 
+                                                            Py_ssize_t scols,
                                                             Py_ssize_t centre_p,
                                                             Py_ssize_t centre_r,
                                                             Py_ssize_t centre_c):
@@ -89,7 +89,7 @@ cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] i
                 cc = c - centre_c
 
                 if selem[j, r, c]:
-                    if is_in_mask_3D(rows, cols, planes, rr, cc, pp,
+                    if is_in_mask_3D(planes, rows, cols, pp, rr, cc,
                                      mask_data):
                         # histogram_increment(histo, pop, image[pp, rr, cc])
                         histo[image[pp, rr, cc]] += 1
@@ -110,8 +110,7 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
         pp = p + se[axis_inc, 0, j]
         rr = r + se[axis_inc, 1, j]
         cc = c + se[axis_inc, 2, j]
-        if is_in_mask_3D(rows, cols, planes, rr, cc, pp,
-                         mask_data):
+        if is_in_mask_3D(planes, rows, cols, pp, rr, cc, mask_data):
             histo[image[pp, rr, cc]] += 1
             pop[0] += 1
 
@@ -127,16 +126,14 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
             rr -= 1
         elif axis_dec == 0:
             cc += 1
-        if is_in_mask_3D(rows, cols, planes, rr, cc, pp,
-                         mask_data):
+        if is_in_mask_3D(planes, rows, cols, pp, rr, cc, mask_data):
             histo[image[pp, rr, cc]] -= 1
             pop[0] -= 1
 
 
 cdef inline char is_in_mask_3D(Py_ssize_t planes, Py_ssize_t rows,
-                               Py_ssize_t cols, Py_ssize_t r,
-                               Py_ssize_t c, Py_ssize_t p,
-                               char* mask) nogil:
+                               Py_ssize_t cols, Py_ssize_t p, Py_ssize_t r,
+                               Py_ssize_t c, char* mask) nogil:
     """Check whether given coordinate is within image and mask is true."""
     if (r < 0 or r > rows - 1 or c < 0 or c > cols - 1 or
             p < 0 or p > planes - 1):
@@ -204,8 +201,8 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
 
     # number of element in each attack border in 4 directions
     cdef Py_ssize_t [::1] num_se = np.zeros(4, dtype=np.intp)
-    
-    _count_attack_border_elements(selem, se, num_se, splanes, srows, scols, 
+
+    _count_attack_border_elements(selem, se, num_se, splanes, srows, scols,
                                   centre_p, centre_r, centre_c)
 
     for p in range(planes):
