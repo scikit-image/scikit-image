@@ -159,28 +159,19 @@ def multiscale_basic_features(
                 "At least one of ``intensity``, ``edges`` or ``textures``"
                 "must be True for features to be computed."
                 )
-    if image.ndim >= 3 and multichannel:
-        all_results = (
-            _mutiscale_basic_features_singlechannel(
-                image[..., dim],
-                intensity=intensity,
-                edges=edges,
-                texture=texture,
-                sigma_min=sigma_min,
-                sigma_max=sigma_max,
-                num_workers=num_workers,
-            )
-            for dim in range(image.shape[-1])
-        )
-        features = list(itertools.chain.from_iterable(all_results))
-    else:
-        features = list(_mutiscale_basic_features_singlechannel(
-            image,
+    if not multichannel:
+        image = image[..., np.newaxis]
+    all_results = (
+        _mutiscale_basic_features_singlechannel(
+            image[..., dim],
             intensity=intensity,
             edges=edges,
             texture=texture,
             sigma_min=sigma_min,
             sigma_max=sigma_max,
             num_workers=num_workers,
-        ))
-    return np.array(features, dtype=np.float32)
+        )
+        for dim in range(image.shape[-1])
+    )
+    features = list(itertools.chain.from_iterable(all_results))
+    return np.squeeze(np.array(features, dtype=np.float32))
