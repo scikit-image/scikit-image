@@ -168,3 +168,4 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 
 # prevent overlap of y-axis labels
 fig.tight_layout()
+plt.show()
