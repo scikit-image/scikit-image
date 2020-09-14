@@ -43,6 +43,7 @@ def _mutiscale_basic_features_singlechannel(
     texture=True,
     sigma_min=0.5,
     sigma_max=16,
+    num_sigma=None,
     num_workers=None,
 ):
     """Features for a single channel nd image.
@@ -66,6 +67,9 @@ def _mutiscale_basic_features_singlechannel(
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
         neighbourhoods before extracting features.
+    num_sigma : int, optional
+        Number of values of the Gaussian kernel between sigma_min and sigma_max.
+        If None, sigma_min multiplied by powers of 2 are used.
     num_workers : int or None, optional
         The number of parallel threads to use. If set to ``None``, the full
         set of available cores are used
@@ -77,6 +81,8 @@ def _mutiscale_basic_features_singlechannel(
     """
     # computations are faster as float32
     img = np.ascontiguousarray(img_as_float32(img))
+    if num_sigma is None:
+        num_sigma = int(np.log2(sigma_max) - np.log2(sigma_min) + 1)
     sigmas = np.logspace(
         np.log2(sigma_min),
         np.log2(sigma_max),
@@ -116,6 +122,7 @@ def multiscale_basic_features(
     texture=True,
     sigma_min=0.5,
     sigma_max=16,
+    num_sigma=None,
     num_workers=None,
 ):
     """Local features for a single- or multi-channel nd image.
@@ -144,6 +151,9 @@ def multiscale_basic_features(
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
         neighbourhoods before extracting features.
+    num_sigma : int, optional
+        Number of values of the Gaussian kernel between sigma_min and sigma_max.
+        If None, sigma_min multiplied by powers of 2 are used.
     num_workers : int or None, optional
         The number of parallel threads to use. If set to ``None``, the full
         set of available cores are used
@@ -169,6 +179,7 @@ def multiscale_basic_features(
             texture=texture,
             sigma_min=sigma_min,
             sigma_max=sigma_max,
+            num_sigma=num_sigma,
             num_workers=num_workers,
         )
         for dim in range(image.shape[-1])
