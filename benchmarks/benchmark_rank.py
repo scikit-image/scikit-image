@@ -2,7 +2,7 @@ import numpy as np
 from skimage import img_as_ubyte
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
-from skimage.filters.rank import __3Dfilters__ as all_3d_rank_filters
+from skimage.filters.rank import __3Dfilters as all_3d_rank_filters
 from skimage.morphology import grey, disk, ball
 
 
