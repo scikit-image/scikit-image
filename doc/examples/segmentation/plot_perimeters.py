@@ -30,6 +30,9 @@ disk = (X-50*scale)**2+(Y-50*scale)**2 <= R**2
 fig, axes = plt.subplots(1, 2, figsize=(8, 5))
 ax = axes.flatten()
 
+dX = X[0, 1] - X[0, 0]
+true_perimeters = [80 * scale, 2 * np.pi * R / dX]
+
 # for each type of objects, the different perimeters are evaluated
 for index, obj in enumerate([square, disk]):
 
@@ -53,9 +56,11 @@ for index, obj in enumerate([square, disk]):
             p.append(perimeter_crofton(rotated, d))
         ax[index].plot(angles, p)
 
+    ax[index].axhline(true_perimeters[index], linestyle='--', color='k')
     ax[index].set_xlabel('Rotation angle')
     ax[index].legend(['N4 perimeter', 'N8 perimeter',
-                      'Crofton 2 directions', 'Crofton 4 directions'],
+                      'Crofton 2 directions', 'Crofton 4 directions',
+                      'Ground truth'],
                       loc='best')
     ax[index].set_ylabel('Perimeter of the rotated object')
 

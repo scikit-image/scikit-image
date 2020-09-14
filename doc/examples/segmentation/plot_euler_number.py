@@ -3,7 +3,7 @@
 Euler number
 =========================
 
-This example shows an illustration of the computation of the Euler number
+This example shows an illustration of the computation of the Euler number [1]_
 in 2D and 3D objects.
 
 For 2D objects, the Euler number is the number of objects minus the number of
@@ -18,6 +18,7 @@ object is 26-connected, its complementary set is 6-connected, and conversely.
 The voxels are actually represented with blue transparent surfaces.
 Inner porosities are represented in red.
 
+.. [1] https://en.wikipedia.org/wiki/Euler_characteristic 
 """
 from mpl_toolkits.mplot3d import Axes3D
 from skimage.measure import euler_number, label
