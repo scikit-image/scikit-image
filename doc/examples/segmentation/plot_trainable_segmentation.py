@@ -18,7 +18,7 @@ segmentation").
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data, segmentation
+from skimage import data, segmentation, feature
 from sklearn.ensemble import RandomForestClassifier
 from functools import partial
 
@@ -39,7 +39,7 @@ training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
 sigma_max = 16
-features_func = partial(segmentation.multiscale_basic_features,
+features_func = partial(feature.multiscale_basic_features,
                         intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max)
 features = features_func(img)
