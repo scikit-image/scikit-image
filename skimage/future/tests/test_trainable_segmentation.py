@@ -1,7 +1,7 @@
 import pytest
 from functools import partial
 import numpy as np
-from skimage.segmentation import fit_segmenter, predict_segmenter
+from skimage.future import fit_segmenter, predict_segmenter
 from skimage.feature import multiscale_basic_features
 from scipy import spatial
 

@@ -18,7 +18,7 @@ segmentation").
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data, segmentation, feature
+from skimage import data, segmentation, feature, future
 from sklearn.ensemble import RandomForestClassifier
 from functools import partial
 
@@ -45,7 +45,7 @@ features_func = partial(feature.multiscale_basic_features,
 features = features_func(img)
 clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
                              max_depth=10, max_samples=0.05)
-result, clf = segmentation.fit_segmenter(
+result, clf = future.fit_segmenter(
         training_labels, features, clf,
         )
 
@@ -101,7 +101,7 @@ fig.tight_layout()
 img_new = full_img[:700, 900:]
 
 features_new = features_func(img_new)
-result_new = segmentation.predict_segmenter(features_new, clf)
+result_new = future.predict_segmenter(features_new, clf)
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(6, 4))
 ax[0].imshow(segmentation.mark_boundaries(img_new, result_new, mode='thick'))
 ax[0].set_title('Image')
