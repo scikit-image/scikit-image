@@ -815,14 +815,6 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         raise ValueError("convert2ycbcr requires multichannel == True")
 
     if rescale_sigma is None:
-        msg = (
-            "As of scikit-image 0.16, automated rescaling of sigma to match "
-            "any internal rescaling of the image is performed. Setting "
-            "rescale_sigma to False, will disable this new behaviour. To "
-            "avoid this warning the user should explicitly set rescale_sigma "
-            "to True or False."
-        )
-        warn(msg, FutureWarning, stacklevel=2)
         rescale_sigma = True
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,
