@@ -169,6 +169,8 @@ def multiscale_basic_features(
                 "At least one of ``intensity``, ``edges`` or ``textures``"
                 "must be True for features to be computed."
                 )
+    if image.ndim < 3:
+        multichannel = False
     if not multichannel:
         image = image[..., np.newaxis]
     all_results = (
