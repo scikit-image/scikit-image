@@ -83,8 +83,6 @@ Version 0.20
 * Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
   Remove `viewer_examples` occurences in `tools/check_sdist.py` and
   `tools/travis/script.sh`
-* In ``skimage/feature/peak.py``, remove the deprecation warnings in
-  `peak_local_max` and replace them by a ValueError.
 
 Version 1.0
 -----------

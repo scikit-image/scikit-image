@@ -174,18 +174,14 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     threshold_abs = threshold_abs if threshold_abs is not None else image.min()
 
     if min_distance < 1:
-        warn("min_distance lower than 1 is deprecated. "
-             "In this case, peak_local_max acts as finding "
-             "image > max(threshold_abs, threshold_rel). In version 0.20 "
-             "this warning will be replaced by a ValueError.",
-             FutureWarning, stacklevel=2)
+        warn("When min_distance < 1, peak_local_max acts as finding "
+             "image > max(threshold_abs, threshold_rel).",
+             RuntimeWarning, stacklevel=2)
 
     if footprint is not None and footprint.size == 1:
-        warn("footprint.size lower than 2 is deprecated. "
-             "In this cases, peak_local_max acts as finding "
-             "image > max(threshold_abs, threshold_rel). In version 0.20 "
-             "this warning will be replaced by a ValueError.",
-             FutureWarning, stacklevel=2)
+        warn("When footprint.size < 2, peak_local_max acts as finding "
+             "image > max(threshold_abs, threshold_rel).",
+             RuntimeWarning, stacklevel=2)
 
     if isinstance(exclude_border, bool):
         exclude_border = (min_distance if exclude_border else 0,) * image.ndim
