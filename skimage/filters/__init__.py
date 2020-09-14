@@ -1,5 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
-from ._gaussian import gaussian, _guess_spatial_dimensions
+from ._gaussian import (gaussian, _guess_spatial_dimensions,
+                        difference_of_gaussians)
 from .edges import (sobel, sobel_h, sobel_v,
                     scharr, scharr_h, scharr_v,
                     prewitt, prewitt_h, prewitt_v,
@@ -17,13 +18,17 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
 from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from ._median import median
+from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
+from ._window import window
 
 
 __all__ = ['inverse',
+           'correlate_sparse',
            'wiener',
            'LPIFilter2D',
            'gaussian',
+           'difference_of_gaussians',
            'median',
            'sobel',
            'sobel_h',
@@ -59,4 +64,5 @@ __all__ = ['inverse',
            'threshold_multiotsu',
            'apply_hysteresis_threshold',
            'rank',
-           'unsharp_mask']
+           'unsharp_mask',
+           'window']

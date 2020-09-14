@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
 
+cnp.import_array()
 
 cdef inline dtype_t _max(dtype_t a, dtype_t b) nogil:
     return a if a >= b else b
@@ -36,7 +37,9 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
     else:
-        if mask[r * cols + c]:
+        if not mask:
+            return 1
+        elif mask[r * cols + c]:
             return 1
         else:
             return 0
@@ -67,15 +70,17 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
-    assert centre_r >= 0
-    assert centre_c >= 0
-    assert centre_r < srows
-    assert centre_c < scols
+    assert centre_r >= 0, f'centre_r {centre_r} < 0'
+    assert centre_c >= 0, f'centre_c {centre_c} < 0'
+    assert centre_r < srows, f'centre_r {centre_r} >= srows {srows}'
+    assert centre_c < scols, f'centre_c {centre_c} >= scols {scols}'
 
     cdef Py_ssize_t mid_bin = n_bins / 2
 
     # define pointers to the data
-    cdef char* mask_data = &mask[0, 0]
+    cdef char * mask_data = NULL
+    if mask is not None:
+        mask_data = &mask[0, 0]
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row

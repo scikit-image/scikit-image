@@ -2,6 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from .. import measure
 from ..filters import rank_order
+from .._shared.utils import remove_arg
 
 
 def _get_high_intensity_peaks(image, mask, num_peaks):
@@ -10,15 +11,14 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     """
     # get coordinates of peaks
     coord = np.nonzero(mask)
-    # select num_peaks peaks
-    if len(coord[0]) > num_peaks:
-        intensities = image[coord]
-        idx_maxsort = np.argsort(intensities)
-        coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
-    else:
-        coord = np.column_stack(coord)
+    intensities = image[coord]
     # Highest peak first
-    return coord[::-1]
+    idx_maxsort = np.argsort(-intensities)
+    coord = np.stack(coord, axis=-1)[idx_maxsort]
+    # select num_peaks peaks
+    if len(coord) > num_peaks:
+        coord = coord[:num_peaks]
+    return coord
 
 
 def _get_peak_mask(image, min_distance, footprint, threshold_abs,
@@ -54,6 +54,7 @@ def _exclude_border(mask, exclude_border):
     return mask
 
 
+@remove_arg("indices", changed_version="0.20")
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None,
@@ -96,8 +97,13 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         from the border.
     indices : bool, optional
         If True, the output will be an array representing peak
-        coordinates.  If False, the output will be a boolean array shaped as
-        `image.shape` with peaks present at True elements.
+        coordinates. The coordinates are sorted according to peaks
+        values (Larger first). If False, the output will be a boolean
+        array shaped as `image.shape` with peaks present at True
+        elements. ``indices`` is deprecated and will be removed in
+        version 0.20. Default behavior will be to always return peak
+        coordinates. You can obtain a mask as shown in the example
+        below.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
@@ -146,16 +152,20 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
            [0. , 0. , 0. , 0. , 0. , 0. , 0. ]])
 
     >>> peak_local_max(img1, min_distance=1)
-    array([[3, 4],
-           [3, 2]])
+    array([[3, 2],
+           [3, 4]])
 
     >>> peak_local_max(img1, min_distance=2)
     array([[3, 2]])
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
-    >>> peak_local_max(img2, exclude_border=0)
+    >>> peak_idx = peak_local_max(img2, exclude_border=0)
+    >>> peak_idx
     array([[10, 10, 10]])
+
+    >>> peak_mask = np.zeros_like(img2, dtype=bool)
+    >>> peak_mask[peak_idx] = True
 
     """
     out = np.zeros_like(image, dtype=np.bool)

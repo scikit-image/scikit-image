@@ -1,20 +1,21 @@
 import os
 
 import numpy as np
-from skimage import data_dir
 from skimage.io import use_plugin, reset_plugins
 from skimage.io.collection import MultiImage, ImageCollection
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose, TestCase
+from skimage._shared.testing import assert_equal, assert_allclose
 
+import pytest
 from pytest import fixture
 
 @fixture
 def imgs():
     use_plugin('pil')
-    paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
-             os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
+
+    paths = [testing.fetch('data/multipage_rgb.tif'),
+             testing.fetch('data/no_time_for_that_tiny.gif')]
     imgs = [MultiImage(paths[0]),
             MultiImage(paths[0], conserve_memory=False),
             MultiImage(paths[1]),

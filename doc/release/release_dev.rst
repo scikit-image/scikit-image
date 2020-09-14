@@ -11,69 +11,54 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
-Starting from this release, scikit-image will follow the spirit of the recently
-introduced numpy deprecation policy -- NEP 29
-(https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
-Accordingly, scikit-image 0.16 drops the support for Python 3.5.
-This release of scikit-image officially supports Python 3.6 and 3.7.
 
 New Features
 ------------
-- Added majority rank filter - ``filters.rank.majority``.
 
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------
 
+- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+  single-precision when the input image is single-precision. This can give a
+  substantial performance improvement when working with single precision data.
+
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
 
 API Changes
 -----------
-- Deprecated subpackage ``skimage.novice`` has been removed.
-- Default value of ``multichannel`` parameters has been set to False in
-  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``, and
-  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
-  anymore, so, please, make sure that the parameter is fixed to a proper value.
-- Deprecated argument ``visualise`` has been removed from
-  ``skimage.feature.hog``. Use ``visualize`` instead.¨
-- ``skimage.transform.seam_carve`` has been completely removed from the
-  library due to licensing restrictions.
-- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
-  ``skimage.io.imread``. Use ``as_gray`` instead.
-- Parameter ``min_size`` has been removed from
-  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
-- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
-  removed.
-- ``skimage.measure._regionprops`` has been completely switched to using
-  row-column coordinates. Old x-y interface is not longer available.
-- Default value of ``behavior`` parameter has been set to ``ndimage`` in
-  ``skimage.filters.median``.
-- Parameter ``flatten`` in `skimage.io.imread` has been removed in
-  favor of ``as_gray``.
-- Parameters ``Hxx, Hxy, Hyy`` have been removed from
-  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
-- Default value of ``order`` parameter has been set to ``rc`` in
-  ``skimage.feature.hessian_matrix``.
-- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
-- When used with floating point inputs, ``denoise_wavelet`` no longer rescales
-  the range of the data or clips the output to the range [0, 1] or [-1, 1].
-  For non-float inputs, rescaling and clipping still occurs as in prior
-  releases (although with a bugfix related to the scaling of ``sigma``).
 
+- ``skimage.restoration.richardson_lucy`` returns a single-precision output
+  when the input is single-precision. Prior to this release, double-precision
+  was always used.
 
 Bugfixes
 --------
-- ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
-  rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
-  preserve the relative scale of the noise estimate. To restore the old,
-  behaviour, the user can manually specify ``rescale_sigma=False``.
 
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
+- ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
+  now consistently handle negative values for ``seed_point``.
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
 
 Deprecations
 ------------
-- Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
-  deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+
+- In ``skimage.feature.structure_tensor``, an ``order`` argument has been
+  introduced which will default to 'rc' starting in version 0.20.
+- ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
+  removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
+  instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release

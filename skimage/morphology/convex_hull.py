@@ -93,7 +93,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     return mask
 
 
-def convex_hull_object(image, neighbors=None, *, connectivity=None):
+def convex_hull_object(image, *, connectivity=2):
     r"""Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -103,13 +103,10 @@ def convex_hull_object(image, neighbors=None, *, connectivity=None):
     ----------
     image : (M, N) ndarray
         Binary input image.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4 or 8 adjacent pixels as neighbors.
-        If ``None``, set to 8. **Deprecated, use** ``connectivity`` **instead.**
     connectivity : {1, 2}, int, optional
         Determines the neighbors of each pixel. Adjacent elements
         within a squared distance of ``connectivity`` from pixel center
-        are considered neighbors. If ``None``, set to 2::
+        are considered neighbors.::
 
             1-connectivity      2-connectivity
                   [ ]           [ ]  [ ]  [ ]
@@ -134,24 +131,8 @@ def convex_hull_object(image, neighbors=None, *, connectivity=None):
     if image.ndim > 2:
         raise ValueError("Input must be a 2D image")
 
-    if neighbors is None and connectivity is None:
-        connectivity = 2
-    elif neighbors is not None:
-        # Backward-compatibility
-        if neighbors == 4:
-            connectivity = 1
-        elif neighbors == 8:
-            connectivity = 2
-        else:
-            raise ValueError('`neighbors` must be either 4 or 8.')
-        warn("The argument `neighbors` is deprecated and will be removed in "
-             "scikit-image 0.18, use `connectivity` instead. "
-             "For neighbors={neighbors}, use connectivity={connectivity}"
-             "".format(neighbors=neighbors, connectivity=connectivity),
-             stacklevel=2)
-    else:
-        if connectivity not in (1, 2):
-            raise ValueError('`connectivity` must be either 1 or 2.')
+    if connectivity not in (1, 2):
+        raise ValueError('`connectivity` must be either 1 or 2.')
 
     labeled_im = label(image, connectivity=connectivity, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)

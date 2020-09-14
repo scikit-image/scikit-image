@@ -9,6 +9,7 @@ from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
 from ._cycle_spin import cycle_spin
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
+from .j_invariant import calibrate_denoiser
 
 
 __all__ = ['wiener',
@@ -22,4 +23,6 @@ __all__ = ['wiener',
            'denoise_nl_means',
            'estimate_sigma',
            'inpaint_biharmonic',
-           'cycle_spin']
+           'cycle_spin',
+           'calibrate_denoiser',
+           ]

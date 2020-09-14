@@ -5,7 +5,7 @@ from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
-from .._shared.utils import convert_to_float
+from .._shared.utils import deprecate_kwarg, convert_to_float
 from warnings import warn
 from functools import partial
 
@@ -21,7 +21,7 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, *, preserve_range=None):
+def radon(image, theta=None, circle=True, *, preserve_range=False):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -69,22 +69,14 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
     if theta is None:
         theta = np.arange(180)
 
-    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. By default radon will assume '
-             'you want to preserve the range of your image '
-             '(preserve_range=True). In scikit-image 0.18 this behavior will '
-             'change to preserve_range=False. To avoid this warning, '
-             'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
-        preserve_range = True
-
     image = convert_to_float(image, preserve_range)
 
     if circle:
         shape_min = min(image.shape)
         radius = shape_min // 2
         img_shape = np.array(image.shape)
-        coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]])
+        coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]],
+                          dtype=object)
         dist = ((coords - img_shape // 2) ** 2).sum(0)
         outside_reconstruction_circle = dist > radius ** 2
         if np.any(image[outside_reconstruction_circle]):
@@ -189,8 +181,10 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
+@deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
+                 removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=True):
+           filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -209,7 +203,7 @@ def iradon(radon_image, theta=None, output_size=None,
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int, optional
         Number of rows and columns in the reconstruction.
-    filter : str, optional
+    filter_name : str, optional
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
         Assign None to use no filter.
@@ -227,6 +221,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Reconstructed image. The rotation axis will be located in the pixel
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+
+    .. versionchanged :: 0.19
+        In ``iradon``, ``filter`` argument is deprecated in favor of
+        ``filter_name``.
 
     References
     ----------
@@ -259,8 +257,8 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
     filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
-    if filter not in filter_types:
-        raise ValueError("Unknown filter: %s" % filter)
+    if filter_name not in filter_types:
+        raise ValueError("Unknown filter: %s" % filter_name)
 
     img_shape = radon_image.shape[0]
     if output_size is None:
@@ -281,7 +279,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Apply filter in Fourier domain
-    fourier_filter = _get_fourier_filter(projection_size_padded, filter)
+    fourier_filter = _get_fourier_filter(projection_size_padded, filter_name)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
