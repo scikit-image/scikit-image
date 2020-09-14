@@ -1185,7 +1185,7 @@ def euler_number(image, connectivity=None):
 
     # as image can be a label image, transform it to binary
     image = (image > 0).astype(np.int)
-    image = np.pad(image, ((1, 1),), mode='constant')
+    image = np.pad(image, pad_width=1, mode='constant')
 
     # check connectivity
     if connectivity is None:
