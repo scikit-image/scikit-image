@@ -214,8 +214,15 @@ def test_polygon_exceed():
     assert_array_equal(img, img_)
 
 
+def test_polygon_0d_input():
+    # Bug reported in #4938: 0d input causes segfault.
+    rr, cc = polygon(0, 1)
+
+    assert rr.size == cc.size == 0
+
+
 def test_circle_deprecated():
-    with expected_warnings(['circle is deprecated']):
+    with expected_warnings(['`draw.circle` is deprecated']):
         _ = circle(7, 7, 6)
 
 

@@ -122,6 +122,7 @@ jobs:
       pip list
 
       # Build the documentation
+      sudo apt install optipng
       export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
       make html
     condition: eq(variables['BUILD_DOCS'], 'true')

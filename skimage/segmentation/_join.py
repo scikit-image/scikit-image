@@ -1,5 +1,4 @@
 import numpy as np
-from .._shared.utils import deprecated
 from ..util._map_array import map_array, ArrayMap
 
 
