@@ -166,11 +166,11 @@ def test_3d_linearity():
 
 def test_2d_cropped_camera_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(camera(), ((50, 145), (50, 227)))
     a_white = invert(a_black)
 
-    zeros = np.zeros((100, 100))
-    ones = np.ones((100, 100))
+    zeros = np.zeros((50, 50))
+    ones = np.ones((50, 50))
 
     assert_allclose(meijering(a_black, black_ridges=True),
                     meijering(a_white, black_ridges=False))
@@ -189,12 +189,12 @@ def test_2d_cropped_camera_image():
 
 def test_3d_cropped_camera_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(camera(), ((50, 145), (50, 227)))
     a_black = np.dstack([a_black, a_black, a_black])
     a_white = invert(a_black)
 
-    zeros = np.zeros((100, 100, 3))
-    ones = np.ones((100, 100, 3))
+    zeros = np.zeros((50, 50, 3))
+    ones = np.ones((50, 50, 3))
 
     assert_allclose(meijering(a_black, black_ridges=True),
                     meijering(a_white, black_ridges=False))

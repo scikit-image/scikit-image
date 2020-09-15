@@ -368,7 +368,7 @@ def test_isodata_camera_image():
                      camera[camera > threshold].mean()) / 2.0) == threshold
     assert threshold == 91
 
-    assert threshold_isodata(camera, return_all=True) == [87]
+    assert threshold_isodata(camera, return_all=True) == [91]
 
 
 def test_isodata_coins_image():
@@ -596,12 +596,12 @@ def test_multiotsu_more_classes_then_values():
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
-    (threshold_otsu, 86, 88),
-    (threshold_yen, 197, 199),
-    (threshold_isodata, 86, 88),
+    (threshold_otsu, 90, 92),
+    (threshold_yen, 198, 200),
+    (threshold_isodata, 90, 92),
     (threshold_mean, 117, 119),
-    (threshold_triangle, 21, 23),
-    (threshold_minimum, 75, 77),
+    (threshold_triangle, 36, 38),
+    (threshold_minimum, 68, 70),
 ])
 def test_thresholds_dask_compatibility(thresholding, lower, upper):
     pytest.importorskip('dask', reason="dask python library is not installed")
