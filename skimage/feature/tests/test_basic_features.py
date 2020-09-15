@@ -12,8 +12,8 @@ def test_multiscale_basic_features(edges, texture):
     features = multiscale_basic_features(img, edges=edges, texture=texture)
     n_sigmas = 6
     intensity = True
-    assert len(features) == 3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
-    assert features.shape[1:] == img.shape[:-1]
+    assert features.shape[-1] == 3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
+    assert features.shape[:-1] == img.shape[:-1]
 
 
 def test_multiscale_basic_features_channel():
@@ -22,9 +22,9 @@ def test_multiscale_basic_features_channel():
     img += 0.05 * np.random.randn(*img.shape)
     n_sigmas = 2
     features = multiscale_basic_features(img, sigma_min=1, sigma_max=2)
-    assert len(features) == 5 * n_sigmas * 4
-    assert features.shape[1:] == img.shape[:-1]
+    assert features.shape[-1] == 5 * n_sigmas * 4
+    assert features.shape[:-1] == img.shape[:-1]
     # Consider last axis as spatial dimension
     features = multiscale_basic_features(img, sigma_min=1, sigma_max=2, multichannel=False)
-    assert len(features) == n_sigmas * 5
-    assert features.shape[1:] == img.shape
+    assert features.shape[-1] == n_sigmas * 5
+    assert features.shape[:-1] == img.shape

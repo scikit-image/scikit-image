@@ -121,7 +121,7 @@ def fit_segmenter(labels, features, clf):
     ------
     NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
     """
-    training_data = features[:, labels > 0].T
+    training_data = features[labels > 0]
     training_labels = labels[labels > 0].ravel()
     clf.fit(training_data, training_labels)
     return clf
@@ -134,9 +134,9 @@ def predict_segmenter(features, clf):
     Parameters
     ----------
     features : ndarray
-        Array of features, with the first dimension corresponding to the number
+        Array of features, with the last dimension corresponding to the number
         of features, and the other dimensions are compatible with the shape of
-        the image to segment.
+        the image to segment, or a flattened image.
     clf : classifier object
         trained classifier object, exposing a ``predict`` method as in
         scikit-learn's API, for example an instance of
@@ -146,7 +146,7 @@ def predict_segmenter(features, clf):
     features_func : function, optional
         function computing features on all pixels of the image, to be passed
         to the classifier. The output should be of shape
-        ``(m_features, *labels.shape)``. If None,
+        ``(*labels.shape, n_features)``. If None,
         :func:`skimage.segmentation.multiscale_basic_features` is used.
 
     Returns
@@ -155,7 +155,9 @@ def predict_segmenter(features, clf):
         Labeled array, built from the prediction of the classifier.
     """
     sh = features.shape
-    features = features.reshape((sh[0], np.prod(sh[1:]))).T
+    if features.ndim > 2:
+        features = features.reshape((np.prod(sh[:-1]), sh[-1]))
+
     try:
         predicted_labels = clf.predict(features)
     except NotFittedError:
@@ -169,5 +171,5 @@ def predict_segmenter(features, clf):
                 err.args[0] + '\n' +
                 "Maybe you did not use the same type of features for training the classifier."
                 )
-    output = predicted_labels.reshape(sh[1:])
+    output = predicted_labels.reshape(sh[:-1])
     return output

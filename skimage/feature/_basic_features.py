@@ -162,7 +162,7 @@ def multiscale_basic_features(
     Returns
     -------
     features : np.ndarray
-        Array of shape ``(n_features,) + image.shape``
+        Array of shape ``image.shape + (n_features,)``
     """
     if not any([intensity, edges, texture]):
         raise ValueError(
@@ -187,4 +187,4 @@ def multiscale_basic_features(
         for dim in range(image.shape[-1])
     )
     features = list(itertools.chain.from_iterable(all_results))
-    return np.squeeze(np.array(features, dtype=np.float32))
+    return np.stack(features, axis=-1)
