@@ -177,41 +177,6 @@ def test_gaussian_structural_similarity_vs_IPOL():
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
 
 
-def test_gaussian_mssim_vs_author_ref():
-    """
-    test vs. result from original author's Matlab implementation available at
-    https://ece.uwaterloo.ca/~z70wang/research/ssim/
-
-    Matlab test code:
-       img1 = imread('camera.png')
-       img2 = imread('camera_noisy.png')
-       mssim = structural_similarity_index(img1, img2)
-    """
-    mssim_matlab = 0.327314295673357
-    mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_matlab, decimal=10)
-
-
-def test_gaussian_mssim_and_gradient_vs_Matlab():
-    # comparison to Matlab implementation of N. Avanaki:
-    # https://ece.uwaterloo.ca/~nnikvand/Coderep/SHINE%20TOOLBOX/SHINEtoolbox/
-    # Note: final line of ssim_sens.m was modified to discard image borders
-
-    ref = np.load(fetch('data/mssim_matlab_output.npz'))
-    grad_matlab = ref['grad_matlab']
-    mssim_matlab = float(ref['mssim_matlab'])
-
-    mssim, grad = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                                        gradient=True,
-                                        use_sample_covariance=False)
-
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
-
-    # check almost equal aside from object borders
-    assert_array_almost_equal(grad_matlab[5:-5], grad[5:-5])
-
-
 def test_mssim_vs_legacy():
     # check that ssim with default options matches skimage 0.11 result
     mssim_skimage_0pt17 = 0.3561711557677345
