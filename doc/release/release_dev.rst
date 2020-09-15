@@ -46,7 +46,8 @@ Bugfixes
 --------
 
 - Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
-  The bug is corrected. It is defined for 2D and 3D objects.
+  for 3D objects, since it not take tunnels into accounts. A new implementation
+  based on integral geometry fixes this bug.
 - In ``skimage.morphology.selem.rectangle`` the ``height`` argument
   controlled the width and the ``width`` argument controlled the height.
   They have been replaced with ``nrow`` and ``ncol``.
