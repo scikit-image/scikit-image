@@ -121,6 +121,52 @@ COL_DTYPES = {
 PROP_VALS = set(PROPS.values())
 
 
+# Coefficients from
+# Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of Discretized Sets
+# - On the Choice of Adjacency in Homogeneous Lattices.
+# In: Mecke K., Stoyan D. (eds) Morphology of Condensed Matter. Lecture Notes
+# in Physics, vol 600. Springer, Berlin, Heidelberg.
+# The value of coefficients correspond to the contributions to the Euler number
+# of specific voxel configurations, which are themselves encoded thanks to a
+# LUT. Computing the Euler number from the addition of the contributions of
+# local configurations is possible thanks to an integral geometry formula
+# (see the paper by Ohser et al. for more details).
+EULER_COEFS2D_4 = [0, 1, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0]
+EULER_COEFS2D_8 = [0, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, -1, 0]
+EULER_COEFS3D_26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
+                            1, -2, 0, -1, 0, -1, -1, 0,
+                            1, 0, -2, -1, -2, -1, -1, -2,
+                            -6, -3, -3, -2, -3, -2, 0, -1,
+                            1, -2, 0, -1, -6, -3, -3, -2,
+                            -2, -1, -1, -2, -3, 0, -2, -1,
+                            0, -1, -1, 0, -3, -2, 0, -1,
+                            -3, 0, -2, -1, 0, 1, 1, 0,
+                            1, -2, -6, -3, 0, -1, -3, -2,
+                            -2, -1, -3, 0, -1, -2, -2, -1,
+                            0, -1, -3, -2, -1, 0, 0, -1,
+                            -3, 0, 0, 1, -2, -1, 1, 0,
+                            -2, -1, -3, 0, -3, 0, 0, 1,
+                            -1, 4, 0, 3, 0, 3, 1, 2,
+                            -1, -2, -2, -1, -2, -1, 1,
+                            0, 0, 3, 1, 2, 1, 2, 2, 1,
+                            1, -6, -2, -3, -2, -3, -1, 0,
+                            0, -3, -1, -2, -1, -2, -2, -1,
+                            -2, -3, -1, 0, -1, 0, 4, 3,
+                            -3, 0, 0, 1, 0, 1, 3, 2,
+                            0, -3, -1, -2, -3, 0, 0, 1,
+                            -1, 0, 0, -1, -2, 1, -1, 0,
+                            -1, -2, -2, -1, 0, 1, 3, 2,
+                            -2, 1, -1, 0, 1, 2, 2, 1,
+                            0, -3, -3, 0, -1, -2, 0, 1,
+                            -1, 0, -2, 1, 0, -1, -1, 0,
+                            -1, -2, 0, 1, -2, -1, 3, 2,
+                            -2, 1, 1, 2, -1, 0, 2, 1,
+                            -1, 0, -2, 1, -2, 1, 1, 2,
+                            -2, 3, -1, 2, -1, 2, 0, 1,
+                            0, -1, -1, 0, -1, 0, 2, 1,
+                            -1, 2, 0, 1, 0, 1, 1, 0, ])
+
+
 def _infer_number_of_required_args(func):
     """Infer the number of required arguments for a function
 
@@ -1198,11 +1244,9 @@ def euler_number(image, connectivity=None):
 
         config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
         if connectivity == 1:
-            coefs = [0, 1, 0, 0, 0, 0, 0,
-                     -1, 0, 1, 0, 0, 0, 0, 0, 0]
+            coefs = EULER_COEFS2D_4
         else:
-            coefs = [0, 0, 0, 0, 0, 0, -1,
-                     0, 1, 0, 0, 0, 0, 0, -1, 0]
+            coefs = EULER_COEFS2D_8
         bins = 16
     else:  # 3D images
         if connectivity == 2:
@@ -1213,45 +1257,15 @@ def euler_number(image, connectivity=None):
         config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                            [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
                            [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
-        coefs26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
-                            1, -2, 0, -1, 0, -1, -1, 0,
-                            1, 0, -2, -1, -2, -1, -1, -2,
-                            -6, -3, -3, -2, -3, -2, 0, -1,
-                            1, -2, 0, -1, -6, -3, -3, -2,
-                            -2, -1, -1, -2, -3, 0, -2, -1,
-                            0, -1, -1, 0, -3, -2, 0, -1,
-                            -3, 0, -2, -1, 0, 1, 1, 0,
-                            1, -2, -6, -3, 0, -1, -3, -2,
-                            -2, -1, -3, 0, -1, -2, -2, -1,
-                            0, -1, -3, -2, -1, 0, 0, -1,
-                            -3, 0, 0, 1, -2, -1, 1, 0,
-                            -2, -1, -3, 0, -3, 0, 0, 1,
-                            -1, 4, 0, 3, 0, 3, 1, 2,
-                            -1, -2, -2, -1, -2, -1, 1,
-                            0, 0, 3, 1, 2, 1, 2, 2, 1,
-                            1, -6, -2, -3, -2, -3, -1, 0,
-                            0, -3, -1, -2, -1, -2, -2, -1,
-                            -2, -3, -1, 0, -1, 0, 4, 3,
-                            -3, 0, 0, 1, 0, 1, 3, 2,
-                            0, -3, -1, -2, -3, 0, 0, 1,
-                            -1, 0, 0, -1, -2, 1, -1, 0,
-                            -1, -2, -2, -1, 0, 1, 3, 2,
-                            -2, 1, -1, 0, 1, 2, 2, 1,
-                            0, -3, -3, 0, -1, -2, 0, 1,
-                            -1, 0, -2, 1, 0, -1, -1, 0,
-                            -1, -2, 0, 1, -2, -1, 3, 2,
-                            -2, 1, 1, 2, -1, 0, 2, 1,
-                            -1, 0, -2, 1, -2, 1, 1, 2,
-                            -2, 3, -1, 2, -1, 2, 0, 1,
-                            0, -1, -1, 0, -1, 0, 2, 1,
-                            -1, 2, 0, 1, 0, 1, 1, 0, ])
-
         if connectivity == 1:
-            coefs = coefs26[::-1]
+            coefs = EULER_COEFS3D_26[::-1]
         else:
-            coefs = coefs26
+            coefs = EULER_COEFS3D_26
         bins = 256
 
+    # XF has values in the 0-255 range in 3D, and in the 0-15 range in 2D,
+    # with one unique value for each binary configuration of the
+    # 27-voxel cube in 3D / 8-pixel square in 2D, up to symmetries
     XF = ndi.convolve(image, config, mode='constant', cval=0)
     h = np.bincount(XF.ravel(), minlength=bins)
 
