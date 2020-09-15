@@ -120,7 +120,7 @@ registry = {
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "b0da68043b4767618e785a5e916cbb5c192154569900d4cba00cf4cd013ee10d",
     "restoration/tests/camera_unsup.npy": "3a88ea918480523852428466b76ca8197eb2938e6e2718d5708827f08524d9ea",
-    "restoration/tests/camera_unsup2.npy": "30e81718f3cac0fc00d84518ca75a3c0fb9b246bb7748a9e20ec0b44da33734d",
+    "restoration/tests/camera_unsup2.npy": "f0b8f46ae5054c57408b5a23204f06b7d6d3cbc674a0d6f4b5dbc12736009ab1",
     "restoration/tests/camera_wiener.npy": "424926bbd859df8999b463e8bcbf2176e7e680a888f41e82ec54444c622b40c0",
     "registration/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
     "registration/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
