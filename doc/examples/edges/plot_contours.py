@@ -32,7 +32,7 @@ contours = measure.find_contours(r, 0.8)
 fig, ax = plt.subplots()
 ax.imshow(r, cmap=plt.cm.gray)
 
-for n, contour in enumerate(contours):
+for contour in contours:
     ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
 
 ax.axis('image')

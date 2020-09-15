@@ -27,6 +27,11 @@ Improvements
   single-precision when the input image is single-precision. This can give a
   substantial performance improvement when working with single precision data.
 
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
+
 API Changes
 -----------
 
