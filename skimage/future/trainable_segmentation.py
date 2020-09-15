@@ -114,9 +114,6 @@ def fit_segmenter(labels, features, clf):
 
     Returns
     -------
-    output : ndarray
-        Labeled array, built from the prediction of the classifier trained on
-        ``labels``.
     clf : classifier object
         classifier trained on ``labels``
 
@@ -127,11 +124,7 @@ def fit_segmenter(labels, features, clf):
     training_data = features[:, labels > 0].T
     training_labels = labels[labels > 0].ravel()
     clf.fit(training_data, training_labels)
-    data = features[:, labels == 0].T
-    predicted_labels = clf.predict(data)
-    output = np.copy(labels)
-    output[labels == 0] = predicted_labels
-    return output, clf
+    return clf
 
 
 def predict_segmenter(features, clf):

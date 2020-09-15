@@ -45,9 +45,8 @@ features_func = partial(feature.multiscale_basic_features,
 features = features_func(img)
 clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
                              max_depth=10, max_samples=0.05)
-result, clf = future.fit_segmenter(
-        training_labels, features, clf,
-        )
+clf = future.fit_segmenter(training_labels, features, clf)
+result = future.predict_segmenter(features, clf)
 
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(9, 4))
 ax[0].imshow(segmentation.mark_boundaries(img, result, mode='thick'))

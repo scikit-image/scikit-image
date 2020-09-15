@@ -33,7 +33,8 @@ def test_trainable_segmentation_singlechannel():
         sigma_max=2,
     )
     features = features_func(img)
-    out, clf = fit_segmenter(labels, features, clf)
+    clf = fit_segmenter(labels, features, clf)
+    out = predict_segmenter(features, clf)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
@@ -54,7 +55,8 @@ def test_trainable_segmentation_multichannel():
         sigma_max=2,
     )
     features = features_func(img)
-    out, clf = fit_segmenter(labels, features, clf)
+    clf = fit_segmenter(labels, features, clf)
+    out = predict_segmenter(features, clf)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
@@ -75,7 +77,7 @@ def test_trainable_segmentation_predict():
         sigma_max=2,
     )
     features = features_func(img)
-    out, clf = fit_segmenter(labels, features, clf)
+    clf = fit_segmenter(labels, features, clf)
 
     test_features = np.random.random((5, 20, 20))
     with pytest.raises(ValueError) as err:
