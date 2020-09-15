@@ -73,6 +73,9 @@ def make_ax(grid=False):
 
 def explode(data):
     """visualization to separate voxels
+
+    Data voxels are separated by 0-valued ones so that they appear
+    separated in the matplotlib figure.
     """
     size = np.array(data.shape) * 2
     data_e = np.zeros(size - 1, dtype=data.dtype)
@@ -83,6 +86,10 @@ def explode(data):
 
 
 def expand_coordinates(indices):
+    """
+    This collapses together pairs of indices, so that
+    the gaps in the volume array will have a zero width.
+    """
     x, y, z = indices
     x[1::2, :, :] += 1
     y[:, 1::2, :] += 1
@@ -115,7 +122,6 @@ def display_voxels(volume):
     # Define 3D figure and place voxels
     ax = make_ax()
     ax.voxels(x, y, z, filled, facecolors=fcolors)
-
     # Compute Euler number in 6 and 26 neighbourhood configuration, that
     # correspond to 1 and 3 connectivity, respectively
     e26 = euler_number(volume, connectivity=3)
