@@ -204,10 +204,10 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
 
 
 def test_mssim_vs_legacy():
-    # check that ssim with default options matches skimage 0.11 result
-    mssim_skimage_0pt11 = 0.34192589699605191
+    # check that ssim with default options matches skimage 0.17 result
+    mssim_skimage_0pt17 = 0.3561711557677345
     mssim = structural_similarity(cam, cam_noisy)
-    assert_almost_equal(mssim, mssim_skimage_0pt11)
+    assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
 def test_mssim_mixed_dtype():
