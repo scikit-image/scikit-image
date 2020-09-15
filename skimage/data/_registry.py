@@ -118,10 +118,10 @@ registry = {
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
     "restoration/tests/astronaut_rl.npy":
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
-    "restoration/tests/camera_rl.npy": "d219834415dc7094580abd975abb28bc7a6fb5ab83366e92c61ccffa66ca54fd",
-    "restoration/tests/camera_unsup.npy": "6d911fd0028ee78add8c416553097f15c6c4e59723ea32bd828f71269b6ea240",
+    "restoration/tests/camera_rl.npy": "b0da68043b4767618e785a5e916cbb5c192154569900d4cba00cf4cd013ee10d",
+    "restoration/tests/camera_unsup.npy": "3a88ea918480523852428466b76ca8197eb2938e6e2718d5708827f08524d9ea",
     "restoration/tests/camera_unsup2.npy": "30e81718f3cac0fc00d84518ca75a3c0fb9b246bb7748a9e20ec0b44da33734d",
-    "restoration/tests/camera_wiener.npy": "71e7cab739d6d145a288ec85dd235a62ff34442ccd1488b08139bc809850772b",
+    "restoration/tests/camera_wiener.npy": "424926bbd859df8999b463e8bcbf2176e7e680a888f41e82ec54444c622b40c0",
     "registration/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
     "registration/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
     "registration/tests/data/OriginalX75Y75.png": "c5cd58893c93140df02896df80b13ecf432f5c86eeaaf8fb311aec52a65c7016",
