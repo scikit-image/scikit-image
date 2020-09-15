@@ -74,19 +74,15 @@ class TestCanny(unittest.TestCase):
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
-        correct_output = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+        correct_output = np.array([
+            [False, False, False, False, False, False, False],
+            [False,  True, False,  True, False, False, False],
+            [False,  True,  True,  True, False, False, False],
+            [False, False, False,  True, False, False, False],
+            [False, False, False, False, False, False, False]])
 
-        result = F.canny(image, low_threshold=0.6, high_threshold=0.8, use_quantiles=True)
+        result = F.canny(image, low_threshold=0.6, high_threshold=0.8,
+                         use_quantiles=True)
 
         assert_equal(result, correct_output)
 
