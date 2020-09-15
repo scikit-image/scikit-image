@@ -186,7 +186,7 @@ class _Lddmm:
         )
 
         # Contrast map specifiers.
-        self.contrast_order = int(contrast_order) if contrast_order else 1
+        self.contrast_order = int(contrast_order) if contrast_order is not None else 1
         if self.contrast_order < 1:
             raise ValueError(
                 "contrast_order must be at least 1.\n"
@@ -1511,7 +1511,7 @@ def diffeomorphic_metric_mapping(
         The order of the polynomial fit between the contrasts of the
         reference_image and moving_image. This is important to set greater
         than 1 if reference_image and moving_image are cross-modal.
-        3 is generally good for histology. Overrides 0 input.
+        3 is generally good for histology. Must be at least 1.
         By default 1.
     **kwargs
         The above parameters are sufficient for the majority of
