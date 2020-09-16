@@ -269,9 +269,9 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
     >>> from skimage.transform import rescale
     >>> image = data.camera()
     >>> rescale(image, 0.1).shape
-    (51, 51)
+    (24, 33)
     >>> rescale(image, 0.5).shape
-    (256, 256)
+    (122, 164)
 
     """
     scale = np.atleast_1d(scale)
@@ -354,11 +354,11 @@ def rotate(image, angle, resize=False, center=None, order=None,
     >>> from skimage.transform import rotate
     >>> image = data.camera()
     >>> rotate(image, 2).shape
-    (512, 512)
+    (245, 327)
     >>> rotate(image, 2, resize=True).shape
-    (530, 530)
+    (256, 335)
     >>> rotate(image, 90, resize=True).shape
-    (512, 512)
+    (327, 245)
 
     """
 
