@@ -1953,15 +1953,10 @@ def diffeomorphic_metric_mapping(
     for scale_index, scale in enumerate(multiscales):
 
         # Extract appropriate multiscale_lddmm_kwargs.
-        this_scale_lddmm_kwargs = dict(
-            map(
-                lambda kwarg_name: (
-                    kwarg_name,
-                    multiscale_lddmm_kwargs[kwarg_name][scale_index],
-                ),
-                multiscale_lddmm_kwargs.keys(),
-            )
-        )
+        this_scale_lddmm_kwargs = {
+            kwarg_name: multiscale_lddmm_kwargs[kwarg_name][scale_index]
+            for kwarg_name in multiscale_lddmm_kwargs
+        }
 
         # rescale images and spacings.
         # reference_image.
