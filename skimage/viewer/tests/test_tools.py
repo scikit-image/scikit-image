@@ -88,7 +88,7 @@ def test_line_tool():
     tool = LineTool(viewer, maxdist=10, line_props=dict(linewidth=3),
                     handle_props=dict(markersize=5))
     tool.end_points = get_end_points(img)
-    assert_equal(tool.end_points, np.array([[170, 256], [341, 256]]))
+    assert_equal(tool.end_points, np.array([[109, 122], [218, 122]]))
 
     # grab a handle and move it
     do_event(viewer, 'mouse_press', xdata=170, ydata=256)
