@@ -72,7 +72,7 @@ def _mutiscale_basic_features_singlechannel(
         If None, sigma_min multiplied by powers of 2 are used.
     num_workers : int or None, optional
         The number of parallel threads to use. If set to ``None``, the full
-        set of available cores are used
+        set of available cores are used.
 
     Returns
     -------
