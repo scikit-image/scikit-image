@@ -35,7 +35,6 @@ from ._lddmm_utilities import _compute_axes
 from ._lddmm_utilities import _compute_coords
 from ._lddmm_utilities import _multiply_coords_by_affine
 from ._lddmm_utilities import _compute_tail_determinant
-from ._lddmm_utilities import resample
 from ._lddmm_utilities import sinc_resample
 
 r"""
