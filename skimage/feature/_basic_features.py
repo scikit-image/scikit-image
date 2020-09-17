@@ -116,7 +116,7 @@ def _mutiscale_basic_features_singlechannel(
 
 def multiscale_basic_features(
     image,
-    multichannel=True,
+    multichannel=False,
     intensity=True,
     edges=True,
     texture=True,

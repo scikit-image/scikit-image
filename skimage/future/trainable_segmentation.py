@@ -143,11 +143,6 @@ def predict_segmenter(features, clf):
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier. The
         classifier must be already trained, for example with
         :func:`skimage.segmentation.fit_segmenter`.
-    features_func : function, optional
-        function computing features on all pixels of the image, to be passed
-        to the classifier. The output should be of shape
-        ``(*labels.shape, n_features)``. If None,
-        :func:`skimage.segmentation.multiscale_basic_features` is used.
 
     Returns
     -------
