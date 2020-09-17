@@ -1750,35 +1750,35 @@ def diffeomorphic_metric_mapping(
 
     Examples
     --------
-        >>> import numpy as np
-        >>> from scipy.ndimage import rotate
-        >>> from skimage.registration import diffeomorphic_metric_mapping
-        >>> from scipy.ndimage import map_coordinates
-        >>> #
-        >>> # Define images.
-        >>> # The reference_image is registered to the moving_image image
-        >>> # but both transformations are returned.
-        >>> #
-        >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
-        >>> # dimensions 0 and 1. The overall shape is (19, 25).
-        >>> # moving_image is a 30 degree rotation of reference_image.
-        >>> #
-        >>> reference_image = np.array([[(col-12)**2/8**2 + (row-9)**2/5**2
-        ... <= 1 for col in range(25)] for row in range(19)], float)
-        >>> moving_image = rotate(reference_image, 30)
-        >>> #
-        >>> # Register the reference_image to the moving_image,
-        >>> # then deform the reference_image and moving_image
-        >>> # to match the other.
-        >>> #
-        >>> lddmm_output = diffeomorphic_metric_mapping(
-        ... reference_image, moving_image, deformative_stepsize=0.5)
-        >>> #
-        >>> deformed_moving_image = map_coordinates(moving_image,
-        ... lddmm_output.moving_image_to_reference_image_transform)
-        >>> #
-        >>> deformed_reference_image = map_coordinates(reference_image,
-        ... lddmm_output.reference_image_to_moving_image_transform)
+    >>> import numpy as np
+    >>> from scipy.ndimage import rotate
+    >>> from skimage.registration import diffeomorphic_metric_mapping
+    >>> from scipy.ndimage import map_coordinates
+    >>> #
+    >>> # Define images.
+    >>> # The reference_image is registered to the moving_image image
+    >>> # but both transformations are returned.
+    >>> #
+    >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
+    >>> # dimensions 0 and 1. The overall shape is (19, 25).
+    >>> # moving_image is a 30 degree rotation of reference_image.
+    >>> #
+    >>> reference_image = np.array([[(col-12)**2/8**2 + (row-9)**2/5**2
+    ... <= 1 for col in range(25)] for row in range(19)], float)
+    >>> moving_image = rotate(reference_image, 30)
+    >>> #
+    >>> # Register the reference_image to the moving_image,
+    >>> # then deform the reference_image and moving_image
+    >>> # to match the other.
+    >>> #
+    >>> lddmm_output = diffeomorphic_metric_mapping(
+    ... reference_image, moving_image, deformative_stepsize=0.5)
+    >>> #
+    >>> deformed_moving_image = map_coordinates(moving_image,
+    ... lddmm_output.moving_image_to_reference_image_transform)
+    >>> #
+    >>> deformed_reference_image = map_coordinates(reference_image,
+    ... lddmm_output.reference_image_to_moving_image_transform)
 
     """
 
