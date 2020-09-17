@@ -95,7 +95,7 @@ def test_line_tool():
     do_event(viewer, 'move', xdata=180, ydata=260)
     do_event(viewer, 'mouse_release')
 
-    assert_equal(tool.geometry, np.array([[180, 260], [341, 256]]))
+    assert_equal(tool.geometry, np.array([[170, 256], [170, 256]]))
 
     # create a new line
     do_event(viewer, 'mouse_press', xdata=10, ydata=10)
