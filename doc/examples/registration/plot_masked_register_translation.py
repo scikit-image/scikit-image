@@ -82,10 +82,10 @@ plt.show()
 image = data.camera()
 shift = (-22, 13)
 
-rr1, cc1 = draw.ellipse(259, 248, r_radius=125, c_radius=100,
+rr1, cc1 = draw.ellipse(79, 128, r_radius=75, c_radius=50,
                         shape=image.shape)
 
-rr2, cc2 = draw.ellipse(300, 200, r_radius=110, c_radius=180,
+rr2, cc2 = draw.ellipse(150, 100, r_radius=60, c_radius=90,
                         shape=image.shape)
 
 mask1 = np.zeros_like(image, dtype=np.bool)
