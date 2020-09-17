@@ -1876,66 +1876,35 @@ def diffeomorphic_metric_mapping(
 
     # Validate potential multiscale arguments.
 
+    # multiscale_lddmm_kwargs contains all kwargs except:
+    # reference_image, moving_image,
+    # reference_image_spacing, moving_image_spacing,
+    # multiscales,
+    # initial_affine, initial_contrast_coefficients, initial_velocity_fields,
+    # and map_coordinates_ify.
+    multiscale_lddmm_kwarg_exclusions = {
+        "multiscales",
+        "initial_affine",
+        "initial_contrast_coefficients",
+        "initial_velocity_fields",
+        "map_coordinates_ify",
+    }
+    multiscale_lddmm_kwargs = {
+        kwarg_name: kwarg_value for kwarg_name, kwarg_value in kwargs.items()
+        if kwarg_name not in multiscale_lddmm_kwarg_exclusions
+    }
+    # Include parameters that are not in the kwargs dictionary.
+    multiscale_lddmm_kwargs.update(
+        deformative_stepsize=deformative_stepsize,
+        sigma_regularization=sigma_regularization,
+        contrast_order=contrast_order,
+    )
     # All multiscale_lddmm_kwargs should be used in _Lddmm as scalars, not
     # sequences. Here, they are made into sequences corresponding to the
     # length of multiscales.
-    multiscale_lddmm_kwargs = dict(
-        # # Images.
-        # reference_image=reference_image,
-        # moving_image=moving_image,
-        # # Image spacings.
-        # reference_image_spacing=reference_image_spacing,
-        # moving_image_spacing=moving_image_spacing,
-        # Iterations.
-        num_iterations=kwargs["num_iterations"],
-        num_affine_only_iterations=kwargs["num_affine_only_iterations"],
-        num_rigid_affine_iterations=kwargs["num_rigid_affine_iterations"],
-        # Stepsizes.
-        affine_stepsize=kwargs["affine_stepsize"],
-        deformative_stepsize=deformative_stepsize,
-        # Affine specifiers.
-        fixed_affine_scale=kwargs["fixed_affine_scale"],
-        # Velocity field specifiers.
-        sigma_regularization=sigma_regularization,
-        velocity_smooth_length=kwargs["velocity_smooth_length"],
-        preconditioner_velocity_smooth_length=kwargs[
-            "preconditioner_velocity_smooth_length"
-        ],
-        maximum_velocity_fields_update=kwargs[
-            "maximum_velocity_fields_update"
-        ],
-        num_timesteps=kwargs["num_timesteps"],
-        # Contrast map specifiers.
-        contrast_order=contrast_order,
-        spatially_varying_contrast_map=kwargs[
-            "spatially_varying_contrast_map"
-        ],
-        contrast_iterations=kwargs["contrast_iterations"],
-        sigma_contrast=kwargs["sigma_contrast"],
-        contrast_smooth_length=kwargs["contrast_smooth_length"],
-        # # vs. accuracy tradeoff.
-        sigma_matching=kwargs["sigma_matching"],
-        # Classification specifiers.
-        artifact_and_background_classification=kwargs[
-            "artifact_and_background_classification"
-        ],
-        sigma_artifact=kwargs["sigma_artifact"],
-        sigma_background=kwargs["sigma_background"],
-        artifact_prior=kwargs["artifact_prior"],
-        background_prior=kwargs["background_prior"],
-        # # Initial values.
-        # initial_affine=initial_affine,
-        # initial_contrast_coefficients=initial_contrast_coefficients,
-        # initial_velocity_fields=initial_velocity_fields,
-    )
-    for (
-        multiscale_kwarg_name,
-        multiscale_kwarg_value,
-    ) in multiscale_lddmm_kwargs.items():
-        multiscale_lddmm_kwargs[
-            multiscale_kwarg_name
-        ] = _validate_scalar_to_multi(
-            multiscale_kwarg_value,
+    for kwarg_name, kwarg_value in multiscale_lddmm_kwargs.items():
+        multiscale_lddmm_kwargs[kwarg_name] = _validate_scalar_to_multi(
+            kwarg_value,
             size=len(multiscales),
             dtype=None,
             reject_nans=False,
