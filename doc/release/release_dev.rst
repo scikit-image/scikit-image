@@ -38,6 +38,17 @@ API Changes
 - ``skimage.restoration.richardson_lucy`` returns a single-precision output
   when the input is single-precision. Prior to this release, double-precision
   was always used.
+- The explicit setting ``threshold_rel=0` was removed from the Examples of the
+  following docstrings: ``skimage.feature.BRIEF``,
+  ``skimage.feature.corner_harris``, ``skimage.feature.corner_shi_tomasi``,
+  ``skimage.feature.corner_foerstner``, ``skimage.feature.corner_fast``,
+  ``skimage.feature.corner_subpix``, ``skimage.feature.corner_peaks``,
+  ``skimage.feature.corner_orientations``, and
+  ``skimage.feature._detect_octave``.
+- In ``skimage.restoration._denoise``, the warning regarding
+  ``rescale_sigma=None`` was removed.
+- In ``skimage.restoration._cycle_spin``, the ``# doctest: +SKIP`` was removed.
+
 
 Bugfixes
 --------
@@ -59,7 +70,6 @@ Deprecations
   instead.
 - In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
   ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
-
 
 Contributors to this release
 ----------------------------
