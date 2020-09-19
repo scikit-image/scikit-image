@@ -1054,9 +1054,6 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
     array([[2, 2]])
 
     """
-    if threshold_rel is None:
-        threshold_rel = 0.1
-
     if np.isinf(num_peaks):
         num_peaks = None
 
