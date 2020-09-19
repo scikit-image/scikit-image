@@ -41,7 +41,8 @@ sigma_min = 1
 sigma_max = 16
 features_func = partial(feature.multiscale_basic_features,
                         intensity=True, edges=False, texture=True,
-                        sigma_min=sigma_min, sigma_max=sigma_max)
+                        sigma_min=sigma_min, sigma_max=sigma_max,
+                        multichannel=True)
 features = features_func(img)
 clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
                              max_depth=10, max_samples=0.05)
