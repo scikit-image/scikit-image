@@ -694,7 +694,7 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink',
-                    rescale_sigma=None):
+                    rescale_sigma=True):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -728,12 +728,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
         "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
-    rescale_sigma : bool or None, optional
+    rescale_sigma : bool, optional
         If False, no rescaling of the user-provided ``sigma`` will be
-        performed. The default of ``None`` rescales sigma appropriately if the
-        image is rescaled internally. A ``DeprecationWarning`` is raised to
-        warn the user about this new behaviour. This warning can be avoided
-        by setting ``rescale_sigma=True``.
+        performed. The default of ``True`` rescales sigma appropriately if the
+        image is rescaled internally.
 
         .. versionadded:: 0.16
            ``rescale_sigma`` was introduced in 0.16
@@ -814,8 +812,6 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     if convert2ycbcr and not multichannel:
         raise ValueError("convert2ycbcr requires multichannel == True")
 
-    if rescale_sigma is None:
-        rescale_sigma = True
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,
                                                        multichannel,
