@@ -11,22 +11,6 @@ Version 0.17
 Version 0.18
 ------------
 
-* In ``skimage.features.corner_peaks``, remove the warning.
-    * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
-        * ``skimage/feature/brief.py::BRIEF``
-        * `` skimage/feature/corner.py::corner_harris``
-        * `` skimage/feature/corner.py::corner_shi_tomasi``
-        * `` skimage/feature/corner.py::corner_foerstner``
-        * `` skimage/feature/corner.py::corner_fast``
-        * `` skimage/feature/corner.py::corner_subpix``
-        * `` skimage/feature/corner.py::corner_peaks``
-        * `` skimage/feature/corner.py::corner_orientations``
-    * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
-      ``threshold_rel=0``.
-* In ``skimage/restoration/_denoise.py`` remove warning regarding
-  ``rescale_sigma``.
-    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
-      now that the denoise warning is gone.
 
 Version 0.19
 ------------
