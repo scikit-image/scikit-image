@@ -1853,7 +1853,7 @@ def diffeomorphic_metric_mapping(
     # this is the only argument not passed to _Lddmm.
     if multiscales is None:
         multiscales = 1
-    multiscales = list(np.atleast_1d(multiscales))
+    multiscales = list(np.atleast_1d(np.array(multiscales, dtype=object)))
     # multiscales is a list.
     for index, scale in enumerate(multiscales):
         multiscales[index] = _validate_scalar_to_multi(
