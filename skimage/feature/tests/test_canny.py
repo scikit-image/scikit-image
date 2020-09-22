@@ -73,16 +73,17 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = img_as_float(data.camera()[::50, ::50])
+        image = img_as_float(data.camera()[::100, ::100])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
         correct_output = np.array([
-            [False, False, False, False, False, False, False],
-            [False,  True, False,  True, False, False, False],
-            [False,  True,  True,  True, False, False, False],
-            [False, False, False,  True, False, False, False],
-            [False, False, False, False, False, False, False]])
+            [False, False, False, False, False, False],
+            [False,  True, False,  True, False, False],
+            [False,  True,  True,  True,  True, False],
+            [False, False, False,  True,  True, False],
+            [False, False,  True, False, False, False],
+            [False, False, False, False, False, False]])
 
         result = feature.canny(image, low_threshold=0.6, high_threshold=0.8,
                          use_quantiles=True)
