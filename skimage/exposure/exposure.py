@@ -115,9 +115,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([30052, 50063]), array([0. , 0.5, 1. ]))
+    (array([115272, 146872]), array([0.        , 0.49803922, 0.99607843]))
     >>> exposure.histogram(image, nbins=2)
-    (array([30052, 50063]), array([0.25, 0.75]))
+    (array([115272, 146872]), array([0.24901961, 0.74705882]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
