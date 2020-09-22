@@ -179,7 +179,7 @@ def test_gaussian_structural_similarity_vs_IPOL():
 
 def test_mssim_vs_legacy():
     # check that ssim with default options matches skimage 0.11 result
-    mssim_skimage_0pt17 = 0.3561711557677345
+    mssim_skimage_0pt17 = 0.31299140502389766
     mssim = structural_similarity(cam, cam_noisy)
     assert_almost_equal(mssim, mssim_skimage_0pt17)
 
