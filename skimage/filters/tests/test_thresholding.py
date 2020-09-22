@@ -254,7 +254,7 @@ def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
-    assert 69 < threshold_li(image) < 70
+    assert 68 < threshold_li(image) < 69
     assert ce_actual < _cross_entropy(image, threshold + 1)
     assert ce_actual < _cross_entropy(image, threshold - 1)
 
@@ -341,7 +341,7 @@ def test_li_pathological_arrays():
 
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 198 < threshold_yen(camera) < 200
+    assert 201 < threshold_yen(camera) < 203
 
 
 def test_yen_coins_image():
@@ -429,7 +429,7 @@ def test_threshold_minimum():
     camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert_equal(threshold, 69)
+    assert_equal(threshold, 74)
 
     astronaut = util.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
@@ -597,11 +597,11 @@ def test_multiotsu_more_classes_then_values():
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
     (threshold_otsu, 90, 92),
-    (threshold_yen, 198, 200),
+    (threshold_yen, 201, 203),
     (threshold_isodata, 90, 92),
-    (threshold_mean, 117, 119),
-    (threshold_triangle, 36, 38),
-    (threshold_minimum, 68, 70),
+    (threshold_mean, 105, 107),
+    (threshold_triangle, 35, 37),
+    (threshold_minimum, 73, 75),
 ])
 def test_thresholds_dask_compatibility(thresholding, lower, upper):
     pytest.importorskip('dask', reason="dask python library is not installed")
