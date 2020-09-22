@@ -153,7 +153,7 @@ def test_equalize_float():
 def test_equalize_masked():
     img = util.img_as_float(test_img)
     mask = np.zeros(test_img.shape)
-    mask[100:200, 150:250] = 1
+    mask[150:350, 150:350] = 1
     img_mask_eq = exposure.equalize_hist(img, mask=mask)
     img_eq = exposure.equalize_hist(img)
 
