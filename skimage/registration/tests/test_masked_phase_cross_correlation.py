@@ -255,5 +255,4 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
 
     # Autocorrelation should have maximum in center of array
     testing.assert_almost_equal(xcorr.max(), 1)
-    arr_shape_adjust = np.array(arr1.shape) - 1  # data.camera() is not squared
-    testing.assert_array_equal(max_index, arr_shape_adjust / 2)
+    testing.assert_array_equal(max_index, np.array(arr1.shape) / 2)
