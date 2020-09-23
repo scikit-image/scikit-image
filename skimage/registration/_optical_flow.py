@@ -306,8 +306,8 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     The iterative Lucas-Kanade (iLK) solver is applied at each level
     of the image pyramid. iLK is a fast and robust algorithm
-    developped by Le Besnerais and Champagnat [4]_ and improved in
-    [5]_.
+    developped by Le Besnerais and Champagnat [1]_ and improved in
+    [2]_.
 
     Parameters
     ----------
@@ -341,11 +341,11 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     References
     ----------
-    .. [4] Le Besnerais, G., & Champagnat, F. (2005, September). Dense
+    .. [1] Le Besnerais, G., & Champagnat, F. (2005, September). Dense
        optical flow by iterative local window registration. In IEEE
        International Conference on Image Processing 2005 (Vol. 1,
        pp. I-137). IEEE. :DOI:`10.1109/ICIP.2005.1529706`
-    .. [5] Plyer, A., Le Besnerais, G., & Champagnat,
+    .. [2] Plyer, A., Le Besnerais, G., & Champagnat,
        F. (2016). Massively parallel Lucas Kanade optical flow for
        real-time video processing applications. Journal of Real-Time
        Image Processing, 11(4), 713-730. :DOI:`10.1007/s11554-014-0423-0`
