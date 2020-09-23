@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage._shared import testing
 from skimage.registration import optical_flow_ilk
 from skimage.transform import warp
@@ -32,24 +33,31 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     return gt_flow, image1
 
 
-def test_2d_motion():
+@pytest.mark.parametrize('gaussian', [True, False])
+@pytest.mark.parametrize('prefilter', [True, False])
+def test_2d_motion(gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
     image0 = rnd.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow
-    flow = optical_flow_ilk(image0, image1)
+    flow = optical_flow_ilk(image0, image1,
+                            gaussian=gaussian, prefilter=prefilter)
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow).mean() < 0.5
 
 
-def test_3d_motion():
+@pytest.mark.parametrize('gaussian', [True, False])
+@pytest.mark.parametrize('prefilter', [True, False])
+def test_3d_motion(gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
-    image0 = rnd.normal(size=(128, 128, 128))
-    gt_flow, image1 = _sin_flow_gen(image0)
+    image0 = rnd.normal(size=(64, 80, 96))
+    gt_flow, image1 = _sin_flow_gen(image0, npics=3)
     # Estimate the flow
-    flow = optical_flow_ilk(image0, image1)
+    flow = optical_flow_ilk(image0, image1, radius=5,
+                            gaussian=gaussian, prefilter=prefilter)
+
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow).mean() < 0.5
 
