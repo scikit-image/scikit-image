@@ -170,7 +170,9 @@ def optical_flow_tvl1(reference_image, moving_image,
         between two consecutive values of (u, v).
     prefilter : bool, optional
         Whether to prefilter the estimated optical flow before each
-        image warp. This helps to remove the potential outliers.
+        image warp. When True, a median filter with window size 3
+        along each axis is applied. This helps to remove potential
+        outliers.
     dtype : dtype, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
@@ -320,11 +322,13 @@ def optical_flow_ilk(reference_image, moving_image, *,
     num_warp : int, optional
         Number of times moving_image is warped.
     gaussian : bool, optional
-        if True, a gaussian kernel is used for the local
+        If True, a gaussian kernel is used for the local
         integration. Otherwise, a uniform kernel is used.
     prefilter : bool, optional
-        whether to prefilter the estimated optical flow before each
-        image warp. This helps to remove potential outliers.
+        Whether to prefilter the estimated optical flow before each
+        image warp. When True, a median filter with window size 3
+        along each axis is applied. This helps to remove potential
+        outliers.
     dtype : dtype, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
