@@ -53,6 +53,7 @@ def test_trainable_segmentation_multichannel():
         texture=False,
         sigma_min=0.5,
         sigma_max=2,
+        multichannel=True
     )
     features = features_func(img)
     clf = fit_segmenter(labels, features, clf)

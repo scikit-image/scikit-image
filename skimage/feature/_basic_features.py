@@ -5,13 +5,6 @@ from skimage import filters, feature
 from skimage import img_as_float32
 from concurrent.futures import ThreadPoolExecutor
 
-try:
-    import dask
-
-    has_dask = True
-except ImportError:
-    has_dask = False
-
 
 def _texture_filter(gaussian_filtered):
     H_elems = [
@@ -90,27 +83,16 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )[::-1]
-    if has_dask:
-        out_sigmas = [
-            dask.delayed(_singlescale_basic_features_singlechannel)(
-                img, s, intensity=intensity, edges=edges, texture=texture
+    with ThreadPoolExecutor(max_workers=num_workers) as ex:
+        out_sigmas = list(
+            ex.map(
+                lambda s: _singlescale_basic_features_singlechannel(
+                    img, s, intensity=intensity, edges=edges, texture=texture
+                ),
+                sigmas,
             )
-            for s in sigmas
-        ]
-        features = itertools.chain.from_iterable(
-            dask.compute(*out_sigmas, num_workers=num_workers)
         )
-    else:
-        with ThreadPoolExecutor(max_workers=num_workers) as ex:
-            out_sigmas = list(
-                ex.map(
-                    lambda s: _singlescale_basic_features_singlechannel(
-                        img, s, intensity=intensity, edges=edges, texture=texture
-                    ),
-                    sigmas,
-                )
-            )
-        features = itertools.chain.from_iterable(out_sigmas)
+    features = itertools.chain.from_iterable(out_sigmas)
     return features
 
 
