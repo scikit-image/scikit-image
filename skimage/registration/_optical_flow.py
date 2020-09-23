@@ -320,7 +320,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
     num_warp : int, optional
         Number of times moving_image is warped.
     gaussian : bool, optional
-        if True, a gaussian kernel is used for the local
+        If True, a Gaussian kernel is used for the local
         integration. Otherwise, a uniform kernel is used.
     prefilter : bool, optional
         whether to prefilter the estimated optical flow before each
