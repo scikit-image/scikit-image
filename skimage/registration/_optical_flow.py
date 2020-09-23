@@ -254,7 +254,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
     size = 2 * radius + 1
 
     if gaussian:
-        sigma = (0, ) + ndim * (size / 4, )
+        sigma = ndim * (size / 4, )
         filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
     else:
         filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
