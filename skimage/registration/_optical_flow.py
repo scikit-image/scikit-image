@@ -277,7 +277,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
                                  mode='nearest')
-        grad = np.array(np.gradient(moving_image_warp))
+        grad = np.stack(np.gradient(moving_image_warp), axis=0)
         It = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
         # Local linear systems creation
