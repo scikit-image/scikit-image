@@ -65,7 +65,7 @@ registry = {
     "data/astronaut.png": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
     "data/brick.png": "7966caf324f6ba843118d98f7a07746d22f6a343430add0233eca5f6eaaa8fcf",
     "data/cell.png": "8d23a7fb81f7cc877cd09f330357fc7f595651306e84e17252f6e0a1b3f61515",
-    "data/camera.png": "bf7986f0bb1ac1a5220f368b278b4fc8ccdc0fae78fcc6587625af26ac7db466",
+    "data/camera.png": "537b90880b56287e9e1564afbcfc8296f31e5e3617c9d2d4a8f738dfd9e40706",
     "data/chessboard_GRAY.png": "3e51870774515af4d07d820bd8827364c70839bf9b573c746e485095e893df90",
     "data/chessboard_RGB.png": "1ac01eff2d4e50f4eda55a2ddecdc28a6576623a58d7a7ef84513c5cc19a0331",
     "data/chelsea.png": "596aa1e7cb875eb79f437e310381d26b338a81c2da23439704a73c4651e8c4bb",
