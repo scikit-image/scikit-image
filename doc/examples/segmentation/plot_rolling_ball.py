@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import (
-    data, morphology, util
+    data, restoration, util
 )
 
 
@@ -66,7 +66,7 @@ def plot_result(image, background):
 
 image = data.coins()
 
-background = morphology.rolling_ball(image, radius=70.5)
+background = restoration.rolling_ball(image, radius=70.5)
 
 plot_result(image, background)
 plt.show()
@@ -82,7 +82,7 @@ plt.show()
 image = data.page()
 image_inverted = util.invert(image)
 
-background_inverted = morphology.rolling_ball(image_inverted, radius=45)
+background_inverted = restoration.rolling_ball(image_inverted, radius=45)
 filtered_image_inverted = image_inverted - background_inverted
 filtered_image = util.invert(filtered_image_inverted)
 background = util.invert(background_inverted)
@@ -114,7 +114,7 @@ plt.show()
 image = data.page()
 image_inverted = util.invert(image)
 
-background_inverted = morphology.rolling_ball(image_inverted, radius=45)
+background_inverted = restoration.rolling_ball(image_inverted, radius=45)
 background = util.invert(background_inverted)
 underflow_image = image - background  # integer underflow occurs here
 
@@ -144,7 +144,7 @@ plt.show()
 
 image = data.coins().astype(np.uint16)
 
-background = morphology.rolling_ball(image, radius=70.5)
+background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
 plt.show()
 
@@ -156,7 +156,7 @@ plt.show()
 
 image = util.img_as_float(data.coins())
 
-background = morphology.rolling_ball(image, radius=70.5)
+background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
 plt.show()
 
@@ -182,7 +182,7 @@ plt.show()
 image = util.img_as_float(data.coins())
 
 normalized_radius = 70.5 / 255
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(70.5 * 2, 70.5 * 2),
     intensity_axis=normalized_radius * 2
@@ -208,7 +208,7 @@ plt.show()
 
 image = data.coins()
 
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(70.5 * 2, 70.5 * 2),
     intensity_axis=70.5 * 2
@@ -223,7 +223,7 @@ plt.show()
 
 image = data.coins()
 
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(10 * 2, 10 * 2),
     intensity_axis=255 * 2
@@ -243,7 +243,7 @@ plt.show()
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(1, 21, 21),
     intensity_axis=0.1
@@ -262,7 +262,7 @@ plt.show()
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(10, 21, 21),
     intensity_axis=0.1
@@ -277,7 +277,7 @@ plt.show()
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = morphology.rolling_ellipsoid(
+background = restoration.rolling_ellipsoid(
     image,
     kernel_shape=(120, 1, 1),
     intensity_axis=0.1

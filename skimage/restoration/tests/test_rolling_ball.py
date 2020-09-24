@@ -1,13 +1,13 @@
 """
 Tests for Rolling Ball Filter
-(skimage.morphology.rolling_ball)
+(skimage.restoration.rolling_ball)
 """
 
 import numpy as np
 import pytest
 
 from skimage import data, io
-from skimage.morphology import rolling_ball, rolling_ellipsoid
+from skimage.restoration import rolling_ball, rolling_ellipsoid
 
 
 def test_ellipsoid_const():
