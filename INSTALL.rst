@@ -173,7 +173,7 @@ the entire dataset to be able to work offline, you can run this command:
 .. code-block:: sh
 
     python -c 'from skimage.data import download_all; download_all()'
-
+or call `download_all()` in your favourite interactive Python environment (IPython, Jupyter notebook, ...).
 
 Other platforms
 ------------------------------------------------------------------------------
