@@ -77,13 +77,13 @@ class TestCanny(unittest.TestCase):
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
-        correct_output = np.array([
-            [False, False, False, False, False, False],
-            [False,  True, False,  True, False, False],
-            [False,  True,  True,  True,  True, False],
-            [False, False, False,  True,  True, False],
-            [False, False,  True, False, False, False],
-            [False, False, False, False, False, False]])
+        correct_output = np.array(
+            [[False, False, False, False, False, False],
+             [False,  True,  True,  True, False, False],
+             [False, False, False,  True, False, False],
+             [False, False, False,  True, False, False],
+             [False, False,  True,  True, False, False],
+             [False, False, False, False, False, False]])
 
         result = feature.canny(image, low_threshold=0.6, high_threshold=0.8,
                          use_quantiles=True)
