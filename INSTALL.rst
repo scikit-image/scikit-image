@@ -161,6 +161,20 @@ or other Python packages is not your best option:
   make system-wide Python changes (installing as root or using sudo),
   you can break the operating system.
 
+
+Downloading the entire dataset
+------------------------------------------------------------------------------
+
+Part of our dataset used in our examples is hosted online and is not installed
+by default by the procedures explained above. Data are downloaded once, at the
+first call, but this requires an internet connection. If you prefer to download
+the entire dataset to be able to work offline, you can run this command:
+
+.. code-block:: sh
+
+    python -c 'from skimage.data import download_all; download_all()'
+
+
 Other platforms
 ------------------------------------------------------------------------------
 
