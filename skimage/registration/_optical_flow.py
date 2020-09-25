@@ -342,8 +342,8 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     Notes
     -----
-    The implemented algorithm is described in **Table2** of [1]_.
-    Color images are not supported.
+    - The implemented algorithm is described in **Table2** of [1]_.
+    - Color images are not supported.
 
     References
     ----------
