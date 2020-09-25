@@ -342,7 +342,7 @@ class TestRank():
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
         volume_uint = np.random.randint(0, high=256,
-                                        size=(10, 10, 10), dtype=np.uint8)
+                                        size=(10, 20, 30), dtype=np.uint8)
         volume_float = img_as_float(volume_uint)
 
         methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
@@ -387,7 +387,7 @@ class TestRank():
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
         volume_s = np.random.randint(0, high=127,
-                                     size=(10, 10, 10), dtype=np.int8)
+                                     size=(10, 20, 30), dtype=np.int8)
         volume_u = img_as_ubyte(volume_s)
         assert_equal(volume_u, img_as_ubyte(volume_s))
 
