@@ -106,6 +106,23 @@ def rolling_ball(image, *, radius=100, kernel=None,
 
 
 def _ball_kernel(radius, ndim):
+    """Create a ball kernel for restoration.rolling_ball.
+
+    Parameters
+    ----------
+    radius : int
+        Radius of the ball.
+    ndim : int
+        Number of dimensions of the ball. ``ndim`` should match the
+        dimensionality of the image the kernel will be applied to.
+
+    Returns
+    -------
+    kernel : ndarray
+        The kernel containing the surface intensity of the top half
+        of the ellipsoid.
+    """
+
     kernel_coords = np.stack(
         np.meshgrid(
             *[np.arange(-x, x + 1) for x in [np.ceil(radius)] * ndim],
@@ -123,6 +140,24 @@ def _ball_kernel(radius, ndim):
 
 
 def _ellipsoid_kernel(shape, intensity):
+    """Create an ellipoid kernel for restoration.rolling_ball.
+
+    Parameters
+    ----------
+    shape : arraylike
+        Length of the principal axis of the ellipsoid (excluding
+        the intensity axis). The length should match the
+        dimensionality of the image the kernel will be applied to.
+    intensity : int
+        Length of the intensity axis of the ellipsoid.
+
+    Returns
+    -------
+    kernel : ndarray
+        The kernel containing the surface intensity of the top half
+        of the ellipsoid.
+    """
+
     shape = np.asarray(shape)
     semi_axis = shape // 2
 
