@@ -5,6 +5,7 @@ requires = [
     "Cython>=0.29.18",
     # AIX is IBM's variant of UNIX; Scipy uses special handling for it.
     # Therefore we decided to handle it in the same way.
+    # https://github.com/scipy/scipy/pull/10431#issue-295816438
     "numpy==1.15.1; python_version=='3.6' and platform_system!='AIX'",
     "numpy==1.15.1; python_version=='3.7' and platform_system!='AIX'",
     "numpy==1.17.3; python_version>='3.8' and platform_system!='AIX'",
