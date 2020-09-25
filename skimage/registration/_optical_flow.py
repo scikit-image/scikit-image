@@ -280,14 +280,15 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
                                  mode='nearest')
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
-        It = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
+        error_image = ((grad * flow).sum(axis=0)
+                       + reference_image - moving_image_warp)
 
         # Local linear systems creation
         for i, j in combinations_with_replacement(range(ndim), 2):
             A[..., i, j] = A[..., j, i] = filter_func(grad[i] * grad[j])
 
         for i in range(ndim):
-            b[..., i] = filter_func(grad[i] * It)
+            b[..., i] = filter_func(grad[i] * error_image)
 
         # Don't consider badly conditioned linear systems
         idx = abs(np.linalg.det(A)) < 1e-14
