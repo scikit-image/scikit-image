@@ -26,6 +26,7 @@ Improvements
 - In ``skimage.restoration.richardson_lucy``, computations are now be done in
   single-precision when the input image is single-precision. This can give a
   substantial performance improvement when working with single precision data.
+- ``pyproject.toml`` has been added to the sdist.
 
 - The performance of the SLIC superpixels algorithm
   (``skimage.segmentation.slice``) was improved for the case where a mask
