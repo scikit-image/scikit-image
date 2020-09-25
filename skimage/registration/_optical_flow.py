@@ -279,7 +279,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
                                  mode='nearest')
-        grad = np.array(np.gradient(moving_image_warp))
+        grad = np.stack(np.gradient(moving_image_warp), axis=0)
         It = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
         # Local linear systems creation
@@ -322,7 +322,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
     num_warp : int, optional
         Number of times moving_image is warped.
     gaussian : bool, optional
-        If True, a gaussian kernel is used for the local
+        If True, a Gaussian kernel is used for the local
         integration. Otherwise, a uniform kernel is used.
     prefilter : bool, optional
         Whether to prefilter the estimated optical flow before each
