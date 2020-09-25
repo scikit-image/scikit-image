@@ -76,4 +76,3 @@ class Skeletonize3d(object):
 
     def peakmem_skeletonize_3d(self):
         self.skeletonize(self.image)
-

@@ -10,7 +10,7 @@ from ._cycle_spin import cycle_spin
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
 from .j_invariant import calibrate_denoiser
-from .rolling_ball import rolling_ball, rolling_ellipsoid
+from .rolling_ball import rolling_ball
 
 
 __all__ = ['wiener',
@@ -26,6 +26,5 @@ __all__ = ['wiener',
            'inpaint_biharmonic',
            'cycle_spin',
            'calibrate_denoiser',
-           'rolling_ellipsoid',
            'rolling_ball',
            ]

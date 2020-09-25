@@ -3,28 +3,25 @@ import numpy as np
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ellipsoid(image, *, kernel_shape=100, intensity_axis=100,
-                      nansafe=False, num_threads=None):
-    """Estimate background intensity using a rolling ellipsoid.
+def rolling_ball(image, *, radius=100, kernel=None,
+                 nansafe=False, num_threads=None):
+    """Estimate background intensity by rolling/translating a kernel.
 
-    The rolling ellipsoid algorithm estimates background intensity for a
-    grayscale image in case of uneven exposure. It is a generalization of the
+    This rolling ball algorithm estimates background intensity for a
+    ndimage in case of uneven exposure. It is a generalization of the
     frequently used rolling ball algorithm [1]_.
 
     Parameters
     ----------
     image : ndarray
         The image to be filtered.
-    kernel_shape: ndarray or scalar, optional
-        The length of the non-intensity axes of the ellipsoid. If
-        ``kernel_shape`` is a ndarray, it must have the same dimensions as
-        ``image``. If ``kernel_shape`` is a scalar it will be extended to
-        have the same dimension via
-        ``kernel_shape = kernel_shape * np.ones_like(image.shape)``.
-        All elements must be greater than 0.
-    intensity_axis : scalar, optional
-        The length of the intensity axis of the ellipsoid. Must be greater
-        than 0.
+    radius : int, optional
+        Radius of a ball shaped kernel to be rolled/translated in the image.
+        Used if ``kernel = None``.
+    kernel : ndarray, optional
+        The kernel to be rolled/translated in the image. It must have the
+        same number of dimensions as ``image``. Kernel is filled with the
+        intensity of the kernel at that position.
     nansafe: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
@@ -42,22 +39,15 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_axis=100,
     Notes
     -----
     For the pixel that has its background intensity estimated (without loss
-    of generality at ``(0,0)``) the rolling ellipsoid method places an
-    ellipsoid under it and raises the ellipsoid until its surface touches the
-    image umbra at ``pos=(y,x)``. The background intensity is then estimated
-    using the image intensity at that position (``image[y, x]``) plus the
-    difference of ``intensity_axis`` and the surface of the ellipsoid at
-    ``pos``. The surface intensity of the ellipsoid is computed using the
-    canonical ellipsis equation
-    .. code-block:: python
-
-        | semi_spatial = kernel_shape / 2
-        | semi_axis = intensity_axis / 2
-        | np.sum((pos/semi_spatial)**2) + (intensity/semi_axis)**2 = 1
+    of generality at ``midpoint``) the rolling ball method centers ``kernel``
+    under it and raises the kernel until its surface touches the image umbra
+    at some ``pos=(y,x)``. The background intensity is then estimated
+    using the image intensity at that position (``image[pos]``) plus the
+    difference of ``kernel[center] - kernel[pos]``.
 
     This algorithm assumes that dark pixels correspond to the background. If
     you have a bright background, invert the image before passing it to the
-    function, e.g., using `utils.invert`.
+    function, e.g., using `utils.invert`. See the gallery example for details.
 
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
@@ -78,48 +68,35 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_axis=100,
     >>> filtered_image = image - background
     """
 
-    if num_threads is None:
-        num_threads = 0
-
-    kernel_shape = np.asarray(kernel_shape)
-    if kernel_shape.ndim == 0:
-        kernel_shape = np.full_like(image.shape, kernel_shape)
-
-    kernel_shape_int = np.asarray(kernel_shape // 2 * 2 + 1, dtype=np.intp)
-
-    intensity_axis = np.asarray(intensity_axis, dtype=np.float_)
-    intensity_axis = intensity_axis / 2
-
     image = np.asarray(image)
     img = image.astype(np.float_)
 
-    ellipsoid_coords = np.stack(
-        np.meshgrid(
-            *[np.arange(-x, x + 1) for x in kernel_shape_int // 2],
-            indexing='ij'
-        ),
-        axis=-1).reshape(-1, image.ndim)
-    non_intensity_factors = np.sum(
-        (ellipsoid_coords / (kernel_shape[np.newaxis, :] / 2)) ** 2,
-        axis=1)
-    ellipsoid_intensity = intensity_axis - \
-        intensity_axis * np.sqrt(np.clip(1 - non_intensity_factors, 0, None))
-    ellipsoid_intensity = ellipsoid_intensity.astype(img.dtype)
+    if num_threads is None:
+        num_threads = 0
 
-    pad_amount = np.round(kernel_shape / 2).astype(int)
-    img = np.pad(img, pad_amount[:, np.newaxis],
+    if kernel is None:
+        kernel = _ball_kernel(radius, image.ndim)
+
+    kernel_shape = np.asarray(kernel.shape)
+    kernel_center = (kernel_shape // 2)
+    center_intensity = kernel[tuple(kernel_center)]
+
+    intensity_difference = center_intensity - kernel
+    intensity_difference[kernel == np.Inf] = np.Inf
+    intensity_difference = intensity_difference.astype(img.dtype)
+    intensity_difference = intensity_difference.ravel()
+
+    img = np.pad(img, kernel_center[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
-
-    ellipsoid_intensity[non_intensity_factors > 1] = np.Inf
 
     func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
         img.ravel(),
-        ellipsoid_intensity,
+        intensity_difference,
         np.zeros_like(image, dtype=img.dtype).ravel(),
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
-        kernel_shape_int,
+        kernel_shape.astype(np.intp),
         num_threads
     )
 
@@ -128,65 +105,36 @@ def rolling_ellipsoid(image, *, kernel_shape=100, intensity_axis=100,
     return background
 
 
-def rolling_ball(image, radius=50, nansafe=False, num_threads=None):
-    """Estimate background intensity using a rolling ball.
-
-    This is a convenience function for the frequently used special case of
-    ``rolling_ellipsoid`` where the spatial axes and intensity axis
-    have the same value resulting in a spherical kernel. For details see
-    ``rolling_ellipsoid``.
-
-    Parameters
-    ----------
-    image : ndarray
-        The image to be filtered.
-    radius: scalar, numeric, optional
-        The radius of the ball/sphere rolled in the image. Must be greater
-        than 0.
-
-    Returns
-    -------
-    background : ndarray
-        The estimated background of the image.
-
-    See Also
-    --------
-    rolling_ellipsoid :
-        additional keyword arguments
-        generalization to elliptical kernels; used internally
-
-
-    Notes
-    -----
-    If you are using images with a dtype other than `image.dtype == np.uint8`
-    you may want to consider using `skimage.morphology.rolling_ellipsoid`
-    instead. It allows you to specify different parameters for the spatial
-    and intensity dimensions.
-
-    The ball has the same dimensionality as the input image. If you
-    want to apply the filter plane-wise to a 3D image use
-    .. code-block:: python
-
-        | kernel_shape = (1, 2 * radius, 2 * radius)
-        | intensity_axis = 2 * radius
-        | rolling_ellipsoid(image, kernel_shape, intensity_axis)
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.morphology import rolling_ball
-    >>> image = data.coins()
-    >>> background = rolling_ball(image, radius=200)
-    >>> filtered_image = image - background
-    """
-
-    kernel_shape = radius * 2
-    intensity_axis = radius * 2
-    return rolling_ellipsoid(
-        image,
-        kernel_shape=kernel_shape,
-        intensity_axis=intensity_axis,
-        nansafe=False,
-        num_threads=num_threads
+def _ball_kernel(radius, ndim):
+    kernel_coords = np.stack(
+        np.meshgrid(
+            *[np.arange(-x, x + 1) for x in [np.ceil(radius)] * ndim],
+            indexing='ij'
+        ),
+        axis=-1
     )
+
+    sum_of_squares = np.sum(kernel_coords ** 2, axis=-1)
+    distance_from_center = np.sqrt(sum_of_squares)
+    kernel = np.sqrt(np.clip(radius ** 2 - sum_of_squares, 0, None))
+    kernel[distance_from_center > radius] = np.Inf
+
+    return kernel
+
+
+def _ellipsoid_kernel(shape, intensity):
+    shape = np.asarray(shape)
+    semi_axis = shape // 2
+
+    kernel_coords = np.stack(
+        np.meshgrid(
+            *[np.arange(-x, x + 1) for x in semi_axis],
+            indexing='ij'
+        ),
+        axis=-1)
+
+    intensity_scaling = 1 - np.sum((kernel_coords / semi_axis) ** 2, axis=-1)
+    kernel = intensity * np.sqrt(np.clip(intensity_scaling, 0, None))
+    kernel[intensity_scaling < 0] = np.Inf
+
+    return kernel
