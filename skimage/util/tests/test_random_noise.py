@@ -150,7 +150,7 @@ def test_poisson():
 
 def test_clip_poisson():
     seed = 42
-    data = camera()                             # 512x512 grayscale uint8
+    data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
@@ -184,7 +184,7 @@ def test_clip_gaussian():
     cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=False)
     cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
                               clip=False)
-    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.36)
+    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.35)
     assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.219)
 
 
