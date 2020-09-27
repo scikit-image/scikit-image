@@ -22,6 +22,7 @@ __all__ = ['data_dir',
            'download_all',
            'astronaut',
            'binary_blobs',
+           'brain',
            'brick',
            'camera',
            'cat',
@@ -1054,3 +1055,25 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+def brain():
+    """Subset of data from the University of North Carolina Volume Rendering
+    Test Data Set.
+
+    The full dataset is available at [1]_.
+
+    Returns
+    -------
+    image : (10, 256, 256) uint16 ndarray
+
+    Notes
+    -----
+    The 3D volume consists of 10 layers from the larger volume.
+
+    References
+    ----------
+    .. [1] https://graphics.stanford.edu/data/voldata/
+
+    """
+    return _load("data/brain.tiff")
