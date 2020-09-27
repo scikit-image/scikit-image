@@ -659,6 +659,8 @@ def regionprops_table(label_image, intensity_image=None,
     The table is a dictionary mapping column names to value arrays. See Notes
     section below for details.
 
+    .. versionadded:: 0.16
+
     Parameters
     ----------
     label_image : (N, M) ndarray

@@ -73,6 +73,7 @@ def label(input, background=None, return_num=False, connectivity=None):
     See Also
     --------
     regionprops
+    regionprops_table
 
     References
     ----------
