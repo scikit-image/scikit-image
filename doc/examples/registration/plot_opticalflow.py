@@ -87,7 +87,7 @@ fig.tight_layout()
 # In the following example, Iterative Lukas-Kanade algorithm (iLK) is
 # applied to images of particles in the context of particle image
 # velocimetry (PIV). The sequence is the Case B from the
-# [PIV chanllenge 2001](http://www.pivchallenge.org/)
+# `PIV challenge 2001 <http://www.pivchallenge.org/>`_
 
 image0 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_1.tif")
 image1 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_2.tif")
