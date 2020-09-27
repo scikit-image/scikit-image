@@ -85,7 +85,7 @@ fig.tight_layout()
 # quiver plot.
 #
 # In the following example, Iterative Lukas-Kanade algorithm (iLK) is
-# applyed to images of particles in the context of particle image
+# applied to images of particles in the context of particle image
 # velocimetry (PIV). The sequence is the Case B from the
 # [PIV chanllenge 2001](http://www.pivchallenge.org/)
 
