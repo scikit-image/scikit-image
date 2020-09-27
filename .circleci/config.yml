@@ -19,6 +19,7 @@ jobs:
               export
       - run:
           name: build doc
+          no_output_timeout: 50m
           command: |
               source skimage_venv/bin/activate
               cd doc
