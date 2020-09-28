@@ -62,10 +62,19 @@ def rolling_ball(image, *, radius=100, kernel=None,
     --------
     >>> import numpy as np
     >>> from skimage import data
-    >>> from skimage.morphology import rolling_ellipsoid
+    >>> from skimage.restoration import rolling_ball
     >>> image = data.coins()
-    >>> background = rolling_ellipsoid(data.coins())
+    >>> background = rolling_ball(data.coins())
     >>> filtered_image = image - background
+
+
+    >>> import numpy as np
+    >>> from skimage import data
+    >>> from skimage.restoration import rolling_ball, ellipsoid_kernel
+    >>> image = data.coins()
+    >>> kernel = ellipsoid_kernel((101, 101), 75)
+    >>> background = rolling_ball(data.coins())
+    >>> filtered_image = image - background   
     """
 
     image = np.asarray(image)
@@ -75,7 +84,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
         num_threads = 0
 
     if kernel is None:
-        kernel = _ball_kernel(radius, image.ndim)
+        kernel = ball_kernel(radius, image.ndim)
 
     kernel_shape = np.asarray(kernel.shape)
     kernel_center = (kernel_shape // 2)
@@ -105,7 +114,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
     return background
 
 
-def _ball_kernel(radius, ndim):
+def ball_kernel(radius, ndim):
     """Create a ball kernel for restoration.rolling_ball.
 
     Parameters
@@ -139,7 +148,7 @@ def _ball_kernel(radius, ndim):
     return kernel
 
 
-def _ellipsoid_kernel(shape, intensity):
+def ellipsoid_kernel(shape, intensity):
     """Create an ellipoid kernel for restoration.rolling_ball.
 
     Parameters
@@ -159,7 +168,7 @@ def _ellipsoid_kernel(shape, intensity):
     """
 
     shape = np.asarray(shape)
-    semi_axis = shape // 2
+    semi_axis = np.clip(shape // 2, 1, None)
 
     kernel_coords = np.stack(
         np.meshgrid(

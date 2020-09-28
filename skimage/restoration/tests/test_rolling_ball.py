@@ -8,12 +8,12 @@ import pytest
 
 from skimage import data, io
 from skimage.restoration import rolling_ball
-from skimage.restoration.rolling_ball import _ellipsoid_kernel
+from skimage.restoration.rolling_ball import ellipsoid_kernel
 
 
 def test_ellipsoid_const():
     img = 155 * np.ones((100, 100), dtype=np.uint8)
-    kernel = _ellipsoid_kernel((25, 53), 50)
+    kernel = ellipsoid_kernel((25, 53), 50)
     background = rolling_ball(img, kernel=kernel)
     assert np.allclose(img - background, np.zeros_like(img))
 
@@ -31,7 +31,7 @@ def test_nan_const():
     expected_img = np.zeros_like(img)
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
-    kernel = _ellipsoid_kernel(kernel_shape, 100)
+    kernel = ellipsoid_kernel(kernel_shape, 100)
     background = rolling_ball(
         img,
         kernel=kernel,
@@ -96,5 +96,5 @@ def test_threads(num_threads):
 def test_ndim():
     path = data.image_fetcher.fetch('data/cells.tif')
     image = io.imread(path)[:5, ...]
-    kernel = _ellipsoid_kernel((3, 100, 100), 100)
+    kernel = ellipsoid_kernel((3, 100, 100), 100)
     rolling_ball(image, kernel=kernel)

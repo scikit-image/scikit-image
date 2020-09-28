@@ -13,16 +13,15 @@ as a surface that has unit-sized blocks stacked on top of each other in place
 of each pixel. The number of blocks, and hence surface height, is determined
 by the intensity of the pixel. To get the intensity of the background at a
 desired (pixel) position, we imagine submerging a ball under the surface at the
-desired position. Once it is completely covered by the blocks, the height of
+desired position. Once it is completely covered by the blocks, the apex of
 the ball determines the intensity of the background at that position. We can
 then *roll* this ball around below the surface to get the background values for
 the entire image.
 
-Scikit-image implements this rolling-ball algorithm, as well as
-a generalized version which allows you to "roll" arbitrary ellipsoids. This
-generalized version is useful if you want to use different values for the
-spatial radius (``kernel_shape``) and the intensity amount
-(``intensity_axis``).
+Scikit-image implements a general version of this rolling-ball algorithm, which
+allows you to not just use balls, but arbitrary shapes as kernel and works on
+n-dimensional ndimages. This allows you to directly filter RGB images or filter
+image stacks along any (or all) spacial dimensions.
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
@@ -33,7 +32,7 @@ Classic rolling ball
 
 In scikit-image, the rolling ball algorithm assumes that your background has
 low intensity (black), whereas the features have high intensity (white). If
-this is the case for your image, you can directly use the filter like:
+this is the case for your image, you can directly use the filter like so:
 
 """
 
@@ -66,7 +65,7 @@ def plot_result(image, background):
 
 image = data.coins()
 
-background = restoration.rolling_ball(image, radius=70.5)
+background = restoration.rolling_ball(image)
 
 plot_result(image, background)
 plt.show()
@@ -165,68 +164,76 @@ plt.show()
 # the image, the effective kernel size is reduced significantly, i.e.,
 # only a small cap (approximately ``radius=10``) of the ball is rolled
 # around in the image. You can find a reproduction of this strange
-# effect in the ``rolling_ellipsoid`` section below.
+# effect in the ``Advanced Shapes`` section below.
 #
-# To get the expected result, you need to use the more flexible
-# ``rolling_ellipsoid`` function. It works just like ``rolling_ball``;
-# however, it gives you more control over the affected area and
-# strength of the algorithm. In particular, it has different
-# parameters for the spatial dimensions and the intensity dimension of
-# the image.
+# To get the expected result, you need to reduce the intensity of the
+# kernel. This is done by specifying the kernel manually using the
+# ``kernel`` argument.
 #
-# Note: The radius is equal to the length of a semi-axis of a
-# sphere, which is *half* a full axis. Hence, you need to multiply
-# the inputs by two if you want to get the same result as
-# ``rolling_ball``.
-
-image = util.img_as_float(data.coins())
+# Note: The radius is equal to the length of a semi-axis of an
+# ellipsis, which is *half* a full axis. Hence, the kernel shape is
+# multipled by two.
 
 normalized_radius = 70.5 / 255
-background = restoration.rolling_ellipsoid(
+image = util.img_as_float(data.coins())
+kernel = restoration.ellipsoid_kernel(
+    (70.5 * 2, 70.5 * 2),
+    normalized_radius * 2
+)
+
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(70.5 * 2, 70.5 * 2),
-    intensity_axis=normalized_radius * 2
+    kernel=kernel
 )
 plot_result(image, background)
 plt.show()
 
 ######################################################################
-# Rolling Ellipsoid
+# Advanced Shapes
 # -----------------
 #
-# In ``rolling_ellipsoid`` you are specifying an ellipsoid instead of
-# a ball/sphere - sidenote: a ball is a special case of an ellipsoid
-# where each axis has the same length. To fully specify an ellipsoid
-# in 3D, you need to supply three parameters. Two for the two spatial
-# dimensions of the image (via ``kernel_shape``), and one for the
-# intensity dimension (via ``intensity_axis``).
+# By default, ``rolling_ball`` uses a ball shaped kernel (surprise).
+# Sometimes, this can be too limiting - as in the example above -,
+# because the intensity dimension has a different scale compared to
+# the spatial dimensions, or because the image dimensions may have
+# different meanings - one could be a stack counter in an image stack.
 #
-# As mentioned above, a sphere is just a special ellipsoid, and hence
-# you can get the same behavior as ``rolling_ball`` if you set all
-# axis to the same values. In fact, ``rolling_ball``
-# internally calls ``rolling_ellipsoid`` in the way shown below.
+# To account for this, ``rolling_ball`` has a ``kernel`` argument
+# which allows you to specify the kernel to be used. A kernel must
+# have the same dimensionality as the image (Note: dimensionality,
+# not shape). To help with it's creation, two default kernels are
+# provided by ``skimage``. ``ball_kernel`` specifies a ball shaped
+# kernel and is used as the default kernel. ``ellipsoid_kernel``
+# specifies an ellipsoid shaped kernel.
 
 image = data.coins()
+kernel = restoration.ellipsoid_kernel(
+    (70.5 * 2, 70.5 * 2),
+    70.5 * 2
+)
 
-background = restoration.rolling_ellipsoid(
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(70.5 * 2, 70.5 * 2),
-    intensity_axis=70.5 * 2
+    kernel=kernel
 )
 plot_result(image, background)
 plt.show()
 
 ######################################################################
-# You can also use ``rolling_ellipsoid`` to recreate the previous,
+# You can also use ``ellipsoid_kernel`` to recreate the previous,
 # unexpected result and see that the effective (spatial) filter size
 # was reduced.
 
 image = data.coins()
 
-background = restoration.rolling_ellipsoid(
+kernel = restoration.ellipsoid_kernel(
+    (10 * 2, 10 * 2),
+    255 * 2
+)
+
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(10 * 2, 10 * 2),
-    intensity_axis=255 * 2
+    kernel=kernel
 )
 plot_result(image, background)
 plt.show()
@@ -235,37 +242,40 @@ plt.show()
 # Higher Dimensions
 # -----------------
 #
-# Another feature of ``rolling_ellipsoid`` is that you can directly
+# Another feature of ``rolling_ball`` is that you can directly
 # apply it to higher dimensional images, e.g., a z-stack of images
-# obtained during confocal microscopy. As the ellipsoid is now 4D
-# (``[pln, row, col]`` + ``intensity``) you need to specify 4
-# parameters of which 3 describe the spatial shape of the ellipsoid.
+# obtained during confocal microscopy. The number of kernel
+# dimensions must match the image dimensions, hence the kernel shape
+# is now 3 dimensional.
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = restoration.rolling_ellipsoid(
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(1, 21, 21),
-    intensity_axis=0.1
+    kernel=restoration.ellipsoid_kernel(
+        (1, 21, 21),
+        0.1
+    )
 )
 
 plot_result(image[30, ...], background[30, ...])
 plt.show()
 
 ######################################################################
-# A kernel size of 1 in the leading dimension (planes) constrains the
-# filter to a single image. In other words, above filter is applied to
-# each image in the stack individually.
+# A kernel size of 1 does not filter along this axis. In other words,
+# above filter is applied to each image in the stack individually.
 #
 # However, you can also filter along all 3 dimensions at the same
 # time by specifying a value other than 1.
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = restoration.rolling_ellipsoid(
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(10, 21, 21),
-    intensity_axis=0.1
+    kernel=restoration.ellipsoid_kernel(
+        (10, 21, 21),
+        0.1
+    )
 )
 
 plot_result(image[30, ...], background[30, ...])
@@ -277,10 +287,12 @@ plt.show()
 
 path = data.image_fetcher.fetch('data/cells.tif')
 image = imageio.volread(path)
-background = restoration.rolling_ellipsoid(
+background = restoration.rolling_ball(
     image,
-    kernel_shape=(120, 1, 1),
-    intensity_axis=0.1
+    kernel=restoration.ellipsoid_kernel(
+        (120, 1, 1),
+        0.1
+    )
 )
 
 plot_result(image[30, ...], background[30, ...])
