@@ -296,8 +296,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         b[idx] = 0
 
         # Solve the local linear systems
-        flow = np.transpose(np.linalg.solve(A, b),
-                            (ndim, ) + tuple(range(ndim)))
+        flow = np.moveaxis(np.linalg.solve(A, b), ndim, 0)
 
     return flow
 
