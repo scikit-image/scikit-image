@@ -140,7 +140,7 @@ def _pre_merge_mean_color(graph, src, dst):
 
 
 def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
-                                  in_place_merge=False):
+                                  in_place_merge=True):
     return graph.merge_hierarchical(labels, rag, thresh, rag_copy,
                                     in_place_merge, _pre_merge_mean_color,
                                     _weight_mean_color)
