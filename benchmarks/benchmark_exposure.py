@@ -10,7 +10,8 @@ from skimage import exposure
 class ExposureSuite:
     """Benchmark for exposure routines in scikit-image."""
     def setup(self):
-        self.image = img_as_float(data.moon())
+        self.image_u8 = data.moon()
+        self.image = img_as_float(self.image_u8)
         self.image = rescale(self.image, 2.0, anti_aliasing=False)
         # for Contrast stretching
         self.p2, self.p98 = np.percentile(self.image, (2, 98))
@@ -32,3 +33,7 @@ class ExposureSuite:
         # Running it 10 times to achieve significant performance time.
         for i in range(10):
             result = exposure.histogram(self.image)
+
+    def time_gamma_adjust_u8(self):
+        for i in range(10):
+            _ = exposure.adjust_gamma(self.image_u8)
