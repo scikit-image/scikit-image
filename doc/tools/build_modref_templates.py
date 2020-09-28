@@ -52,6 +52,7 @@ if __name__ == '__main__':
     docwriter.package_skip_patterns += [r'\.fixes$',
                                         r'\.externals$',
                                         r'filter$',
+                                        r'\.future.graph$',
                                         ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
