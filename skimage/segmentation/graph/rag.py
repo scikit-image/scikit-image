@@ -455,13 +455,11 @@ def rag_boundary(labels, edge_map, connectivity=2):
     data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
     graph_matrix = data_coo.tocsr()
     graph_matrix.data /= count_matrix.data
-
     rag = RAG()
     rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix),
                                 weight='weight')
-    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix),
-                                weight='count')
-
+    for (i, j, count) in _edge_generator_from_csr(count_matrix):
+        rag[i][j].update({'count': count})
     for n in rag.nodes():
         rag.nodes[n].update({'labels': [n]})
 
