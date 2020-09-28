@@ -275,8 +275,8 @@ def perimeter_crofton(image, directions=4):
     space, 2 or 4 directions give a quite good approximation, 4 being more
     accurate than 2 for more complex shapes.
 
-    As measure.perimeter, this function returns an approximation of the
-    perimeter in continuous space.
+    Similar to :func:`~.measure.perimeter`, this function returns an
+    approximation of the perimeter in continuous space.
 
     References
     ----------
