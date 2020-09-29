@@ -15,6 +15,7 @@ https://scikit-image.org
 New Features
 ------------
 
+- Added a new perimeter function - ``measure.perimeter_crofton``.
 - Added 3D support for many filters in skimage.filters.rank.
 
 - A new doc tutorial presenting a cell biology example has been added to the
@@ -46,9 +47,13 @@ API Changes
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
 
+
 Bugfixes
 --------
 
+- Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
+  for 3D objects, since it did not take tunnels into account. A new implementation
+  based on integral geometry fixes this bug.
 - In ``skimage.morphology.selem.rectangle`` the ``height`` argument
   controlled the width and the ``width`` argument controlled the height.
   They have been replaced with ``nrow`` and ``ncol``.
