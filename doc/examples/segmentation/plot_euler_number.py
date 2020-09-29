@@ -8,7 +8,7 @@ in 2D and 3D objects.
 
 For 2D objects, the Euler number is the number of objects minus the number of
 holes. Notice that if a neighbourhood of 8 connected pixels (2-connectivity)
-is considered for objects, then this amounts to considering a a neighborhood
+is considered for objects, then this amounts to considering a neighborhood
 of 4 connected pixels (1-connectivity) for the complementary set (holes,
 background) , and conversely. It is also possible to compute the number of
 objects using :func:`skimage.measure.label`, and to deduce the number of holes
@@ -17,9 +17,9 @@ from the difference between the two numbers.
 For 3D objects, the Euler number is obtained as the number of objects plus the
 number of holes, minus the number of tunnels, or loops. If one uses
 3-connectivity for an object (considering the 26 surrounding voxels as its
-neighbourhood), this corresponds to using 1-conectivity for the conplementaty set
-(holes, background), that is considering only 6 neighbours for a given voxel.
-The voxels are represented here with blue transparent surfaces.
+neighbourhood), this corresponds to using 1-connectivity for the complementary
+set (holes, background), that is considering only 6 neighbours for a given
+voxel. The voxels are represented here with blue transparent surfaces.
 Inner porosities are represented in red.
 
 .. [1] https://en.wikipedia.org/wiki/Euler_characteristic
