@@ -7,18 +7,22 @@ This example shows an illustration of the computation of the Euler number [1]_
 in 2D and 3D objects.
 
 For 2D objects, the Euler number is the number of objects minus the number of
-holes. Notice that if an object is 8-connected, its complementary set is
-4-connected, and conversely. It is also possible to compute the number of
+holes. Notice that if a neighbourhood of 8 connected pixels (2-connectivity)
+is considered for objects, then this amounts to considering a neighborhood
+of 4 connected pixels (1-connectivity) for the complementary set (holes,
+background) , and conversely. It is also possible to compute the number of
 objects using :func:`skimage.measure.label`, and to deduce the number of holes
 from the difference between the two numbers.
 
 For 3D objects, the Euler number is obtained as the number of objects plus the
-number of holes, minus the number of tunnels, or loops. If an
-object is 26-connected, its complementary set is 6-connected, and conversely.
-The voxels are actually represented with blue transparent surfaces.
+number of holes, minus the number of tunnels, or loops. If one uses
+3-connectivity for an object (considering the 26 surrounding voxels as its
+neighbourhood), this corresponds to using 1-connectivity for the complementary
+set (holes, background), that is considering only 6 neighbours for a given
+voxel. The voxels are represented here with blue transparent surfaces.
 Inner porosities are represented in red.
 
-.. [1] https://en.wikipedia.org/wiki/Euler_characteristic 
+.. [1] https://en.wikipedia.org/wiki/Euler_characteristic
 """
 from mpl_toolkits.mplot3d import Axes3D
 from skimage.measure import euler_number, label
@@ -133,15 +137,13 @@ def display_voxels(volume):
 # Define a volume of 7x7x7 voxels
 n = 7
 cube = np.ones((n, n, n), dtype=bool)
-# Add a hole
+# Add a tunnel
 c = int(n/2)
-cube[c, c, c] = False
-# Add a concavity that connects previous hole
 cube[c, :, c] = False
 # Add a new hole
 cube[int(3*n/4), c-1, c-1] = False
 # Add a hole in neighbourhood of previous one
 cube[int(3*n/4), c, c] = False
-# Add a tunnel
+# Add a second tunnel
 cube[:, c, int(3*n/4)] = False
 display_voxels(cube)
