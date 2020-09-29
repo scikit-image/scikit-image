@@ -170,8 +170,12 @@ def test_gaussian_structural_similarity_vs_IPOL():
 
     Then, we use the following command:
     $ ./imdiff -m mssim <path to camera.png>/camera.png /tmp/cam_noisy.png
+
+    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Available at:
+    https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
     """
-    mssim_IPOL = 0.350132882595062
+    mssim_IPOL = 0.357959091663361
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)

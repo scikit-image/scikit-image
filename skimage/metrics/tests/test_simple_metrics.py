@@ -28,8 +28,12 @@ def test_PSNR_vs_IPOL():
 
     Then, we use the following command:
     $ ./imdiff -m psnr <path to camera.png>/camera.png /tmp/cam_noisy.png
+
+    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Available at:
+    https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
     """
-    p_IPOL = 22.383828134978579
+    p_IPOL = 22.409353363576034
     p = peak_signal_noise_ratio(cam, cam_noisy)
     assert_almost_equal(p, p_IPOL, decimal=4)
 
