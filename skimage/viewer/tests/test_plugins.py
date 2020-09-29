@@ -32,7 +32,7 @@ def test_line_profile():
                 scan_data.size]:
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
-    assert_allclose(scan_data.max(), 0.941176, rtol=1e-3)
+    assert_allclose(scan_data.max(), 1., rtol=1e-3)
     assert_allclose(scan_data.mean(), 0.166279, rtol=1e-3)
 
 
@@ -98,7 +98,7 @@ def test_canny():
     canny_edges = viewer.show(False)
     viewer.close()
     edges = canny_edges[0][0]
-    assert edges.sum() == 2335
+    assert edges.sum() == 1958
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
