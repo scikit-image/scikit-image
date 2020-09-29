@@ -33,7 +33,7 @@ def test_line_profile():
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
     assert_allclose(scan_data.max(), 0.886275, rtol=1e-3)
-    assert_allclose(scan_data.mean(), 0.166279, rtol=1e-3)
+    assert_allclose(scan_data.mean(), 0.247834, rtol=1e-3)
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
