@@ -3,10 +3,10 @@
 Installing scikit-image
 ==============================================================================
 
-How you install ``scikit-image`` depends on your needs and skill:
+How you should install ``scikit-image`` depends on your needs and skills:
 
 - Simplest solution:
-  `a scientific Python distribution <#scientific-python-distributions>`_.\
+  `scientific Python distribution <#scientific-python-distributions>`_.
 
 - If you can install Python packages and work in virtual environments:
 
@@ -14,9 +14,9 @@ How you install ``scikit-image`` depends on your needs and skill:
 
   - `conda <#install-via-conda>`_
 
-- Easy but has pitfalls: `system package manager (yum, apt-get,...) <#system-package-manager>`_
+- Easy solution but with pitfalls: `system package manager <#system-package-managers>`_ (yum, apt, ...).
 
-- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_
+- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_.
 
 Supported platforms
 ------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ Supported platforms
 - Mac OS X on x86 processors
 - Linux 64-bit on x86 processors
 
-For information on other platforms, see `Other platforms <#other-platforms>`_.
+For information on other platforms, see `other platforms <#other-platforms>`_.
 
 Version check
 ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ worked, run the following in a Python shell or Jupyter notebook:
   import skimage
   print(skimage.__version__)
 
-or, from the command line
+or, from the command line:
 
 .. code-block:: sh
 
@@ -88,13 +88,13 @@ install packages and are using a
 <https://towardsdatascience.com/virtual-environments-104c62d48c54?gi=2532aa12906#ee81>`_
 (any of
 `several \
-<https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_\
+<https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_
 ).
 
 While it is possible to use pip without a virtual environment, it is not advised: 
 virtual environments create a clean Python environment that does not interfere 
-with any existing system installation, can be easily removed, and contains only 
-the packages versions your application need. They help avoid a common
+with any existing system installation, can be easily removed, and contain only
+the package versions your application needs. They help avoid a common
 challenge known as 
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
@@ -108,9 +108,9 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
-To include a selection of other scientific python packages that expand 
-scikit-image's capabilities to include, e.g., parallel processing, you
-can install the package ``scikit-image[optional]``
+To include a selection of other scientific Python packages that expand
+``scikit-image``'s capabilities to include, e.g., parallel processing, you
+can install the package ``scikit-image[optional]``:
 
 .. code-block:: sh
 
@@ -143,9 +143,7 @@ with the command
 
     conda install scikit-image
 
-.. _system-package-manager:
-
-Installing via the system package manager
+System package managers
 ------------------------------------------------------------------------------
 
 Using a package manager (``yum``, ``apt-get``, etc.) to install ``scikit-image``
@@ -153,8 +151,8 @@ or other Python packages is not your best option:
 
 - You're likely to get an older version.
 
-- You'll probably want to make updates and add new packages outside
-  the package manager, leaving you open to the same kind of
+- You'll probably want to make updates and add new packages outside of
+  the package manager, leaving you with the same kind of
   dependency conflicts you see when using pip without a virtual environment.
 
 - There's an added risk because operating systems use Python, so if you
@@ -167,8 +165,8 @@ Downloading all demo datasets
 
 Some of the data used in our examples is hosted online and is not installed
 by default by the procedures explained above. Data are downloaded once, at the
-first call, but this requires an internet connection. If you prefer to download
-the entire dataset to be able to work offline, you can run this command:
+first call, but this requires an internet connection. If you prefer downloading
+all the demo datasets to be able to work offline, you can run this command:
 
 .. code-block:: sh
 
@@ -235,14 +233,14 @@ To suggest a change in these instructions,
 Installing scikit-image for contributors
 ========================================
 
-We are assuming that you have default Python environment already configured on
-your computer and you intend to install ``scikit-image`` inside of it.
+We are assuming that you have a default Python environment already configured on
+your computer and that you intend to install ``scikit-image`` inside of it.
 
 We also make a few more assumptions about your system:
 
 - You have a C compiler set up.
 - You have a C++ compiler set up.
-- You are running a version of python compatible with our system as listed
+- You are running a version of Python compatible with our system as listed
   in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
   You have set up the `upstream` remote to point to our repository and `origin`
@@ -317,7 +315,7 @@ When using conda for development, we
 recommend adding the conda-forge channel for the most up-to-date version
 of many dependencies.
 Some dependencies we use (for testing and documentation) are not available
-from the default anaconda channel. Please follow the official
+from the default Anaconda channel. Please follow the official
 `conda-forge installation instructions <https://conda-forge.org/#about>`_
 before you get started.
 
@@ -328,7 +326,6 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install major development and runtime dependencies of scikit-image
-  # (the rest can be installed from conda-forge or pip, if needed)
   conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
   # Install scikit-image from source
   pip install -e . -vv
@@ -402,7 +399,7 @@ Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed.  This might cause
+that crucial warnings from dependencies are not missed. This might cause
 certain tests to fail if you are building scikit-image with versions of
 dependencies that were not tested at the time of the release. To disable
 failures on warnings, export the environment variable
@@ -484,7 +481,7 @@ functionality is only available with the following installed:
     A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <https://pyamg.org/>`__
-    The ``pyamg`` module is used for the fast `cg_mg` mode of random
+    The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
     walker segmentation.
 
 * `Dask <https://dask.org/>`__
@@ -498,8 +495,8 @@ functionality is only available with the following installed:
 **Extra Requirements**
 
 These requirements have been included as a convenience, but are not widely
-installable through pypi on our supported platforms.  As such, we keep them in
-a seperate list for more advanced members of our community to install.
+installable through PyPI on our supported platforms. As such, we keep them in
+a separate list for more advanced members of our community to install.
 
 * `imread <https://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
