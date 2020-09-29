@@ -162,7 +162,7 @@ or other Python packages is not your best option:
   you can break the operating system.
 
 
-Downloading the entire dataset
+Downloading all demo datasets
 ------------------------------------------------------------------------------
 
 Some of the data used in our examples is hosted online and is not installed
