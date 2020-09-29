@@ -32,7 +32,7 @@ def test_line_profile():
                 scan_data.size]:
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
-    assert_allclose(scan_data.max(), 1., rtol=1e-3)
+    assert_allclose(scan_data.max(), 0.886275, rtol=1e-3)
     assert_allclose(scan_data.mean(), 0.166279, rtol=1e-3)
 
 
