@@ -2,7 +2,8 @@ from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes_lewiner, marching_cubes
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
-from ._regionprops import regionprops, perimeter, regionprops_table
+from ._regionprops import (regionprops, perimeter,
+                           perimeter_crofton, euler_number, regionprops_table)
 from ._polygon import approximate_polygon, subdivide_polygon
 from .pnpoly import points_in_poly, grid_points_in_poly
 from ._moments import (moments, moments_central, moments_coords,
@@ -19,6 +20,8 @@ __all__ = ['find_contours',
            'regionprops',
            'regionprops_table',
            'perimeter',
+           'perimeter_crofton',
+           'euler_number',
            'approximate_polygon',
            'subdivide_polygon',
            'LineModelND',

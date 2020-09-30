@@ -1,5 +1,6 @@
 include setup*.py
 include MANIFEST.in
+include pyproject.toml
 include *.md
 include *.txt
 include *.rst

@@ -5,23 +5,17 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
 
-from ._label import label
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-
+from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
 
 from functools import wraps
 
 
-__all__ = ['regionprops', 'perimeter']
+__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
-STREL_4 = np.array([[0, 1, 0],
-                    [1, 1, 1],
-                    [0, 1, 0]], dtype=np.uint8)
-STREL_8 = np.ones((3, 3), dtype=np.uint8)
-STREL_26_3D = np.ones((3, 3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -56,6 +50,7 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
+    'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -106,6 +101,7 @@ COL_DTYPES = {
     'moments_normalized': float,
     'orientation': float,
     'perimeter': float,
+    'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -322,10 +318,10 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        euler_array = self.filled_image != self.image
-        _, num = label(euler_array, connectivity=self._ndim, return_num=True,
-                       background=0)
-        return -num + 1
+        if self._ndim not in [2, 3]:
+            raise NotImplementedError('Euler number is implemented for '
+                                      '2D or 3D images only')
+        return euler_number(self.image, self._ndim)
 
     @property
     def extent(self):
@@ -336,8 +332,8 @@ class RegionProperties:
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
-            coordinates = np.vstack(find_contours(identity_convex_hull, .5, 
-                                                  fully_connected = 'high'))
+            coordinates = np.vstack(find_contours(identity_convex_hull, .5,
+                                                  fully_connected='high'))
         elif self._ndim == 3:
             coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
         distances = pdist(coordinates, 'sqeuclidean')
@@ -447,6 +443,11 @@ class RegionProperties:
     @only2d
     def perimeter(self):
         return perimeter(self.image, 4)
+
+    @property
+    @only2d
+    def perimeter_crofton(self):
+        return perimeter_crofton(self.image, 4)
 
     @property
     def solidity(self):
@@ -658,6 +659,8 @@ def regionprops_table(label_image, intensity_image=None,
 
     The table is a dictionary mapping column names to value arrays. See Notes
     section below for details.
+
+    .. versionadded:: 0.16
 
     Parameters
     ----------
@@ -884,8 +887,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
-        Euler characteristic of region. Computed as number of objects (= 1)
-        subtracted by number of holes (8-connectivity).
+        Euler characteristic of the set of non-zero pixels.
+        Computed as number of connected components subtracted by number of
+        holes (input.ndim connectivity). In 3D, number of connected
+        components plus number of holes subtracted by number of tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -952,6 +957,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **perimeter_crofton** : float
+        Perimeter of object approximated by the Crofton formula in 4
+        directions.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -1087,72 +1095,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         regions.append(props)
 
     return regions
-
-
-def perimeter(image, neighbourhood=4):
-    """Calculate total perimeter of all objects in binary image.
-
-    Parameters
-    ----------
-    image : (N, M) ndarray
-        2D binary image.
-    neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination. It is used to
-        compute the contour. A higher neighbourhood widens the border on which
-        the perimeter is computed.
-
-    Returns
-    -------
-    perimeter : float
-        Total perimeter of all objects in binary image.
-
-    References
-    ----------
-    .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
-           a Perimeter Estimator. The Queen's University of Belfast.
-           http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
-
-    Examples
-    --------
-    >>> from skimage import data, util
-    >>> from skimage.measure import label
-    >>> # coins image (binary)
-    >>> img_coins = data.coins() > 110
-    >>> # total perimeter of all objects in the image
-    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
-    7796.867...
-    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
-    8806.268...
-
-    """
-    if image.ndim != 2:
-        raise NotImplementedError('`perimeter` supports 2D images only')
-
-    if neighbourhood == 4:
-        strel = STREL_4
-    else:
-        strel = STREL_8
-    image = image.astype(np.uint8)
-    eroded_image = ndi.binary_erosion(image, strel, border_value=0)
-    border_image = image - eroded_image
-
-    perimeter_weights = np.zeros(50, dtype=np.double)
-    perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
-    perimeter_weights[[21, 33]] = sqrt(2)
-    perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
-
-    perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
-                                                           [ 2, 1,  2],
-                                                           [10, 2, 10]]),
-                                   mode='constant', cval=0)
-
-    # You can also write
-    # return perimeter_weights[perimeter_image].sum()
-    # but that was measured as taking much longer than bincount + np.dot (5x
-    # as much time)
-    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = perimeter_histogram @ perimeter_weights
-    return total_perimeter
 
 
 def _parse_docs():
