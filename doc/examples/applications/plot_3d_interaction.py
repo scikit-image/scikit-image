@@ -4,7 +4,7 @@ Interact with 3D images (of kidney tissue)
 ==========================================
 
 In this tutorial, we explore interactively a biomedical image which has three
-spatial dimensions and four colour dimensions (channels).
+spatial dimensions and three colour dimensions (channels).
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
 The data we use here correspond to kidney tissue which Genevieve Buckley
@@ -19,37 +19,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
+import plotly.express as px
 from skimage import (
-    data, exposure
+    data, io
 )
 
 
 #####################################################################
 # Load image
 # ==========
+# This biomedical image is available through `scikit-image`'s data registry.
 
 data = data.kidney()
+
+#####################################################################
+# What exactly are the shape and size of our 3D multichannel image?
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))
 print("range: ({}, {})".format(data.min(), data.max()))
 
 #####################################################################
-# We can visualize a slice (2D plane) of the data with the `io.imshow`
-# function. By fixing one spatial axis, we can observe three different views.
-
-
-def show_plane(ax, plane, title=None):
-    ax.imshow(plane)
-    ax.axis('off')
-
-    if title:
-        ax.set_title(title)
-
+# First of all, we notice that the range of values is unusual: With images, we
+# typically expect a range of ``(0.0, 1.0)`` for float values and a range of
+# ``(0, 255)`` for integer values.
+# So let us consider only a slice (2D plane) of the data for now.
+# The `io.imshow` function can display both grayscale and RGB(A) 2D images.
 
 (n_plane, n_row, n_col, n_chan) = data.shape
-_, (a, b, c) = plt.subplots(ncols=3, figsize=(15, 5))
+(v_min, v_max) = (data.min(), data.max())
 
-show_plane(a, data[n_plane // 2], title=f'Plane = {n_plane // 2}')
-show_plane(b, data[:, n_row // 2, :, :], title=f'Row = {n_row // 2}')
-show_plane(c, data[:, :, n_col // 2, :], title=f'Column = {n_col // 2}')
+io.imshow(data[n_plane // 2])
+
+#####################################################################
+# The warning message echoes our concern, while the image rendering is clearly
+# not satisfactory colour-wise.
+# We turn to `plotly`'s implementation of the `imshow` function, for it lets
+# us specify the `value range
+# <https://plotly.com/python/imshow/#defining-the-data-range-covered-by-the-color-range-with-zmin-and-zmax>`_
+# to map to a colour range.
+
+px.imshow(data[n_plane // 2], zmin=v_min, zmax=v_max)
