@@ -20,17 +20,15 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import (
-    exposure, io
+    data, exposure
 )
-from skimage.data import image_fetcher
 
 
 #####################################################################
 # Load image
 # ==========
 
-path = image_fetcher.fetch('data/kidney.tif')
-data = io.imread(path)
+data = data.kidney()
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))
