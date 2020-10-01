@@ -84,11 +84,11 @@ pip
 
 Prerequisites to a pip install: You're able to use your system's command line to
 install packages and are using a
-`virtual environment \
+`virtual environment
 <https://towardsdatascience.com/virtual-environments-104c62d48c54?gi=2532aa12906#ee81>`_
 (any of
-`several \
-<https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_
+`several
+<https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_\
 ).
 
 While it is possible to use pip without a virtual environment, it is not advised: 
@@ -136,8 +136,8 @@ Python and provides virtual environments.
 - `conda-forge <https://conda-forge.org>`_, a conda channel maintained
   with the latest ``scikit-image`` package
 
-Once you have your conda environments setup, you can install ``scikit-image``
-with the command
+Once you have your conda environment set up, you can install ``scikit-image``
+with the command:
 
 .. code-block:: sh
 
@@ -172,7 +172,7 @@ all the demo datasets to be able to work offline, you can run this command:
 
     python -c 'from skimage.data import download_all; download_all()'
 
-or call `download_all()` in your favourite interactive Python environment 
+or call ``download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
 
 Other platforms
@@ -184,7 +184,7 @@ to Windows 64-bit.
 Unsupported platforms include:
 
 1. Linux on 32-bit x86 processors.
-2. Linux on 32-bit on ARM processors (Raspberry Pi running Rapsbian):
+2. Linux on 32-bit on ARM processors (Raspberry Pi running Raspbian):
 
    - While we do not officially support this distribution, we point users to
      `piwheels <https://wwww.piwheels.org>`_
@@ -196,10 +196,10 @@ Unsupported platforms include:
      See
      `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>`_.
 
-3. Linux on 64-bit ARM processors (NVidia Jetson):
+3. Linux on 64-bit ARM processors (Nvidia Jetson):
 
    - Follow the conversation on
-     `Issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
+     `issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
 
 Although these platforms lack official support, many of the core
 developers have experience with them and can help with questions.
@@ -227,7 +227,7 @@ If you still have questions, reach out through
 
 
 To suggest a change in these instructions,
-`please open an issue on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
+`please open an issue on GitHub <https://github.com/scikit-image/scikit-image/issues/new>`_.
 
 
 Installing scikit-image for contributors
@@ -294,8 +294,7 @@ When using ``venv``, you may find the following bash commands useful:
 
 .. code-block:: sh
 
-  # Create a virtualenv named ``skimage-dev`` that lives in the directory of
-  # the same name
+  # Create a virtualenv named ``skimage-dev``
   python -m venv skimage-dev
   # Activate it. On Linux and MacOS:
   source skimage-dev/bin/activate
