@@ -212,12 +212,12 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                                 acc.append(b)
 
                 if len(acc) > 0:
-                    bins = np.arange(0, np.max(acc) + bin_size, bin_size)
+                    bins = np.arange(np.floor(np.min(acc)), np.max(acc) + bin_size, bin_size)
                     hist, bin_edges = np.histogram(acc, bins=bins)
                     hist_max = np.max(hist)
                     if hist_max > threshold:
                         orientation = atan2(p1x - p2x, p1y - p2y)
-                        b = bin_edges[hist.argmax()]
+                        b = bin_edges[hist.argmax()] + (bin_size / 2)
                         # to keep ellipse_perimeter() convention
                         if orientation != 0:
                             orientation = M_PI - orientation
