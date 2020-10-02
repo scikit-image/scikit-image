@@ -186,7 +186,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
             dx = p1x - p2x
             dy = p1y - p2y
             a = 0.5 * sqrt(dx * dx + dy * dy)
-            if a > 0.5 * min_size:
+            if a >= min_size:
                 xc = 0.5 * (p1x + p2x)
                 yc = 0.5 * (p1y + p2y)
 
@@ -196,7 +196,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                     dx = p3x - xc
                     dy = p3y - yc
                     d = sqrt(dx * dx + dy * dy)
-                    if d > min_size:
+                    if (d <= a) and (d > 0):
                         dx = p3x - p1x
                         dy = p3y - p1y
                         cos_tau_squared = ((a*a + d*d - dx*dx - dy*dy)
