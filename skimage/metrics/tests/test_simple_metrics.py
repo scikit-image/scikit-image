@@ -16,9 +16,24 @@ cam_noisy = cam_noisy.astype(cam.dtype)
 
 
 def test_PSNR_vs_IPOL():
-    # Tests vs. imdiff result from the following IPOL article and code:
-    # https://www.ipol.im/pub/art/2011/g_lmii/
-    p_IPOL = 22.4497
+    """ Tests vs. imdiff result from the following IPOL article and code:
+    https://www.ipol.im/pub/art/2011/g_lmii/.
+
+    Notes
+    -----
+    To generate p_IPOL, we need a local copy of cam_noisy:
+
+    >>> from skimage import io
+    >>> io.imsave('/tmp/cam_noisy.png', cam_noisy)
+
+    Then, we use the following command:
+    $ ./imdiff -m psnr <path to camera.png>/camera.png /tmp/cam_noisy.png
+
+    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Available at:
+    https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
+    """
+    p_IPOL = 22.409353363576034
     p = peak_signal_noise_ratio(cam, cam_noisy)
     assert_almost_equal(p, p_IPOL, decimal=4)
 
