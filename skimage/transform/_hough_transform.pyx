@@ -216,17 +216,13 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                     hist, bin_edges = np.histogram(acc, bins=bins)
                     hist_max = np.max(hist)
                     if hist_max > threshold:
-                        orientation = atan2(p1x - p2x, p1y - p2y)
+                        orientation = atan2(p1y - p2y, p1x - p2x)
                         b = bin_edges[hist.argmax()] + (bin_size / 2)
                         # to keep ellipse_perimeter() convention
-                        if orientation != 0:
-                            orientation = M_PI - orientation
-                            # When orientation is not in [-pi:pi]
-                            # it would mean in ellipse_perimeter()
-                            # that a < b. But we keep a > b.
-                            if orientation > M_PI:
-                                orientation = orientation - M_PI / 2.
-                                a, b = b, a
+                        orientation += M_PI / 2
+                        # to keep orientation in [-pi/2 : pi/2]
+                        if orientation > M_PI/2:
+                            orientation -= M_PI
                         results.append((hist_max, # Accumulator
                                         yc, xc,
                                         a, b,
