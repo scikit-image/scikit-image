@@ -20,7 +20,6 @@ class SlicSegmentation:
             self.slic_kwargs = {}
 
     def time_slic_basic(self):
-
         segmentation.slic(self.image, enforce_connectivity=False,
                           multichannel=False, **self.slic_kwargs)
 

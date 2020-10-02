@@ -64,7 +64,7 @@ plt.tight_layout()
 # noise.
 
 from skimage.filters.rank import median
-from skimage.morphology import disk
+from skimage.morphology import disk, ball
 
 noise = np.random.random(noisy_image.shape)
 noisy_image = img_as_ubyte(data.camera())
@@ -353,6 +353,8 @@ plt.tight_layout()
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
 #
+# These algorithms can be used on both 2D and 3D images.
+#
 # The example compares the local threshold with the global threshold
 # :py:func:`skimage.filters.threshold_otsu`.
 #
@@ -366,6 +368,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu
+from skimage import exposure
 
 p8 = data.page()
 
@@ -400,6 +403,45 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
+
+######################################################################
+# The example compares the local threshold with the global threshold in 3D
+
+brain = exposure.rescale_intensity(data.brain().astype(float))
+
+radius = 5
+neighborhood = ball(radius)
+
+# t_loc_otsu is an image
+t_loc_otsu = rank.otsu(brain, neighborhood)
+loc_otsu = brain >= t_loc_otsu
+
+# t_glob_otsu is a scalar
+t_glob_otsu = threshold_otsu(brain)
+glob_otsu = brain >= t_glob_otsu
+
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
+                         sharex=True, sharey=True)
+ax = axes.ravel()
+
+slice_index = 3
+
+fig.colorbar(ax[0].imshow(brain[slice_index], cmap=plt.cm.gray), ax=ax[0])
+ax[0].set_title('Original')
+
+fig.colorbar(ax[1].imshow(t_loc_otsu[slice_index], cmap=plt.cm.gray), ax=ax[1])
+ax[1].set_title('Local Otsu ($r=%d$)' % radius)
+
+ax[2].imshow(brain[slice_index] >= t_loc_otsu[slice_index], cmap=plt.cm.gray)
+ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
+
+ax[3].imshow(glob_otsu[slice_index], cmap=plt.cm.gray)
+ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+
+for a in ax:
+    a.axis('off')
+
+fig.tight_layout()
 
 ######################################################################
 # The following example shows how local Otsu thresholding handles a global
