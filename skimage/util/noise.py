@@ -27,7 +27,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                       `low_val` is 0 for unsigned images or -1 for signed
                       images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
-                      n is uniform noise with specified mean & variance.
+                      n is gaussian noise with specified mean & variance.
     seed : int, optional
         If provided, this will set the random seed before generating noise,
         for valid pseudo-random comparisons.
