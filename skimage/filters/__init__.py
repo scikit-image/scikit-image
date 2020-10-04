@@ -9,7 +9,7 @@ from .edges import (sobel, sobel_h, sobel_v,
                     farid, farid_h, farid_v)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
-from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
+from .thresholding import (threshold_local, threshold_otsu, threshold_otsu_from_histogram, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
@@ -52,6 +52,7 @@ __all__ = ['inverse',
            'frangi',
            'hessian',
            'threshold_otsu',
+           'threshold_otsu_from_histogram',
            'threshold_yen',
            'threshold_isodata',
            'threshold_li',

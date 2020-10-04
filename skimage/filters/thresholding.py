@@ -279,6 +279,42 @@ def threshold_otsu(image, nbins=256):
         return first_pixel
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    return threshold_otsu_from_histogram(hist, bin_centers)
+
+def threshold_otsu_from_histogram(hist, bin_centers):
+    """Return threshold value based on Otsu's method dermined from a histogram.
+
+    Parameters
+    ----------
+    hist : optional
+        Histogram to determine the threshold from.
+    bin_centers : optional
+        Intensity values for each histogram bin, corresponding to the given
+        histogram
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> from skimage.exposure import histogram
+    >>> from skimage.filters import threshold_otsu_from_histogram
+    >>> image = camera()
+    >>> nbins = 256
+    >>> hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    >>> thresh = threshold_otsu_from_histogram(hist, bin_centers)
+    >>> binary = image <= thresh
+    """
+
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
