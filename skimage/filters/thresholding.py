@@ -236,16 +236,23 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     return thresh_image - offset
 
 
-def threshold_otsu(image, nbins=256):
+def threshold_otsu(image=None, nbins=256, hist=None, bin_centers=None):
     """Return threshold value based on Otsu's method.
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M) ndarray, optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    hist : optional
+        Histogram to determine the threshold from.
+    bin_centers : optional
+        Intensity values for each histogram bin, corresponding to the given
+        histogram
 
     Returns
     -------
@@ -268,52 +275,21 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+    if image is None and hist is None:
+        raise Exception("Either name or hist must be provided.")
 
-    # Check if the image is multi-colored or not
-    first_pixel = image.ravel()[0]
-    if np.all(image == first_pixel):
-        return first_pixel
+    if hist is None:
+        if image.ndim > 2 and image.shape[-1] in (3, 4):
+            msg = "threshold_otsu is expected to work correctly only for " \
+                  "grayscale images; image shape {0} looks like an RGB image"
+            warn(msg.format(image.shape))
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+        # Check if the image is multi-colored or not
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
 
-    return threshold_otsu_from_histogram(hist, bin_centers)
-
-def threshold_otsu_from_histogram(hist, bin_centers):
-    """Return threshold value based on Otsu's method dermined from a histogram.
-
-    Parameters
-    ----------
-    hist : optional
-        Histogram to determine the threshold from.
-    bin_centers : optional
-        Intensity values for each histogram bin, corresponding to the given
-        histogram
-
-    Returns
-    -------
-    threshold : float
-        Upper threshold value. All pixels with an intensity higher than
-        this value are assumed to be foreground.
-
-    References
-    ----------
-    .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
-
-    Examples
-    --------
-    >>> from skimage.data import camera
-    >>> from skimage.exposure import histogram
-    >>> from skimage.filters import threshold_otsu_from_histogram
-    >>> image = camera()
-    >>> nbins = 256
-    >>> hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
-    >>> thresh = threshold_otsu_from_histogram(hist, bin_centers)
-    >>> binary = image <= thresh
-    """
+        hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     hist = hist.astype(float)
 
@@ -330,7 +306,12 @@ def threshold_otsu_from_histogram(hist, bin_centers):
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
-    threshold = bin_centers[:-1][idx]
+
+    if bin_centers is None:
+        threshold = idx
+    else :
+        threshold = bin_centers[:-1][idx]
+
     return threshold
 
 
