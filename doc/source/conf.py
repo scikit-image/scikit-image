@@ -149,6 +149,9 @@ else:
     major, minor = v.release[:2]
     binder_branch = 'v{}.{}.x'.format(major, minor)
 
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery'
 
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
