@@ -22,6 +22,7 @@ __all__ = ['data_dir',
            'download_all',
            'astronaut',
            'binary_blobs',
+           'brain',
            'brick',
            'camera',
            'cat',
@@ -341,12 +342,24 @@ def _load(f, as_gray=False):
 def camera():
     """Gray-level "camera" image.
 
-    Often used for segmentation and denoising examples.
+    Can be used for segmentation and denoising examples.
 
     Returns
     -------
     camera : (512, 512) uint8 ndarray
         Camera image.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Lav Varshney).
+
+    .. versionchanged:: 0.18
+        This image was replaced due to copyright restrictions. For more
+        information, please see [1]_.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/3927
     """
     return _load("data/camera.png")
 
@@ -1054,3 +1067,25 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+def brain():
+    """Subset of data from the University of North Carolina Volume Rendering
+    Test Data Set.
+
+    The full dataset is available at [1]_.
+
+    Returns
+    -------
+    image : (10, 256, 256) uint16 ndarray
+
+    Notes
+    -----
+    The 3D volume consists of 10 layers from the larger volume.
+
+    References
+    ----------
+    .. [1] https://graphics.stanford.edu/data/voldata/
+
+    """
+    return _load("data/brain.tiff")
