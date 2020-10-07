@@ -5,7 +5,7 @@ Measure region properties
 
 This example shows how to measure properties of labelled image regions. We
 first analyze an image with two ellipses. Below we show how to explore
-inteactively the properties of labelled objects.
+interactively the properties of labelled objects.
 """
 import math
 import matplotlib.pyplot as plt
