@@ -221,8 +221,9 @@ class TestPeakLocalMax():
                                     exclude_border=0, indices=False),
                 expectedNoBorder,
             )
-        expectedNoBorder[2, 2, 2] = True
-        assert_equal(
+
+            expectedNoBorder[2, 2, 2] = True
+            assert_equal(
                 peak.peak_local_max(nd_image,
                                     exclude_border=False, indices=False),
                 expectedNoBorder,
