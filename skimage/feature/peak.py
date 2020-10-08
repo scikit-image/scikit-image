@@ -63,7 +63,8 @@ def _exclude_border(label, border_width):
 
 
 def _get_threshold(image, threshold_abs, threshold_rel):
-    """
+    """Set the threshold value according to an absolute and a relative
+    value.
 
     """
     threshold = threshold_abs if threshold_abs is not None else image.min()
