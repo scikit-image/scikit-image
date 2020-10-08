@@ -49,17 +49,17 @@ def _get_peak_mask(image, footprint, threshold, mask=None):
     return out
 
 
-def _exclude_border(mask, border_width):
-    """
-    Remove peaks near the borders
+def _exclude_border(label, border_width):
+    """Set label border values to 0.
+
     """
     # zero out the image borders
     for i, excluded in enumerate(border_width):
         if excluded == 0:
             continue
-        mask[(slice(None),) * i + (slice(None, excluded),)] = False
-        mask[(slice(None),) * i + (slice(-excluded, None),)] = False
-    return mask
+        label[(slice(None),) * i + (slice(None, excluded),)] = 0
+        label[(slice(None),) * i + (slice(-excluded, None),)] = 0
+    return label
 
 
 def _get_threshold(image, threshold_abs, threshold_rel):
