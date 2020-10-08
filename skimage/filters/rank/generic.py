@@ -1,4 +1,4 @@
-r"""
+"""
 
 General Description
 -------------------
@@ -113,6 +113,10 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
+
     image = np.ascontiguousarray(image)
 
     if mask is not None:
@@ -146,6 +150,91 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     return image, selem, out, mask, n_bins
 
 
+def _handle_input_3D(image, selem=None, out=None, mask=None, out_dtype=None,
+                      pixel_size=1):
+    """Preprocess and verify input for filters.rank methods.
+
+    Parameters
+    ----------
+    image : 3-D array (integer or float)
+        Input image.
+    selem : 3-D array (integer or float), optional
+        The neighborhood expressed as a 3-D array of 1's and 0's.
+    out : 3-D array (integer or float), optional
+        If None, a new array is allocated.
+    mask : ndarray (integer or float), optional
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    out_dtype : data-type, optional
+        Desired output data-type. Default is None, which means we cast output
+        in input dtype.
+    pixel_size : int, optional
+        Dimension of each pixel. Default value is 1.
+
+    Returns
+    -------
+    image : 3-D array (np.uint8 or np.uint16)
+    selem : 3-D array (np.uint8)
+        The neighborhood expressed as a binary 3-D array.
+    out : 3-D array (same dtype out_dtype or as input)
+        Output array. The two first dimensions are the spatial ones, the third
+        one is the pixel vector (length 1 by default).
+    mask : 3-D array (np.uint8)
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood.
+    n_bins : int
+        Number of histogram bins.
+
+    """
+    check_nD(image, 3)
+    if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
+        image = img_as_ubyte(image)
+
+    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
+    image = np.ascontiguousarray(image)
+
+    if mask is None:
+        mask = np.ones(image.shape, dtype=np.uint8)
+    else:
+        mask = img_as_ubyte(mask)
+        mask = np.ascontiguousarray(mask)
+
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
+    if out is None:
+        if out_dtype is None:
+            out_dtype = image.dtype
+        out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
+    else:
+        out = out.reshape(out.shape + (pixel_size,))
+
+    is_8bit = image.dtype in (np.uint8, np.int8)
+
+    if is_8bit:
+        n_bins = 256
+    else:
+        # Convert to a Python int to avoid the potential overflow when we add
+        # 1 to the maximum of the image.
+        n_bins = int(max(3, image.max())) + 1
+
+    if n_bins > 2**10:
+        warn("Bad rank filter performance is expected due to a "
+             "large number of bins ({}), equivalent to an approximate "
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
+
+    return image, selem, out, mask, n_bins
+
+
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
     """Process the specific cython function to the image.
@@ -171,11 +260,6 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
 
-    Returns
-    -------
-    out : 2-D array (same dtype as out_dtype or same as input image)
-        Output image.
-
     """
     # preprocess and verify the input
     image, selem, out, mask, n_bins = _preprocess_input(image, selem,
@@ -187,6 +271,18 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, n_bins=n_bins)
 
     return np.squeeze(out, axis=-1)
+
+
+def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
+                               shift_z, out_dtype=None):
+
+    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
+                                                       out_dtype)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
+         mask=mask, out=out, n_bins=n_bins)
+
+    return out.reshape(out.shape[:3])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -239,9 +335,8 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     return out
 
-
-def autolevel(image, selem, out=None, mask=None, shift_x=False,
-              shift_y=False):
+def autolevel(image, selem, out=None, mask=None,
+              shift_x=False, shift_y=False, shift_z=False):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of gray values to cover the
@@ -249,38 +344,48 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import autolevel
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> auto = autolevel(img, disk(5))
+    >>> auto_vol = autolevel(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False,
@@ -339,108 +444,129 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def equalize(image, selem, out=None, mask=None,
+             shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import equalize
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> equ = equalize(img, disk(5))
+    >>> equ_vol = equalize(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def gradient(image, selem, out=None, mask=None, shift_x=False,
-             shift_y=False):
+def gradient(image, selem, out=None, mask=None,
+             shift_x=False, shift_y=False, shift_z=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import gradient
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = gradient(img, disk(5))
+    >>> out_vol = gradient(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._gradient, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._gradient, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._gradient_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def maximum(image, selem, out=None, mask=None, shift_x=False,
-            shift_y=False):
+def maximum(image, selem, out=None, mask=None,
+            shift_x=False, shift_y=False, shift_z=False):
     """Return local maximum of an image.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     See also
@@ -455,88 +581,113 @@ def maximum(image, selem, out=None, mask=None, shift_x=False,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import maximum
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = maximum(img, disk(5))
+    >>> out_vol = maximum(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._maximum, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._maximum, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._maximum_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def mean(image, selem, out=None, mask=None,
+         shift_x=False, shift_y=False, shift_z=False):
     """Return local mean of an image.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import mean
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = mean(img, disk(5))
+    >>> avg_vol = mean(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._mean, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._mean, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._mean_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def geometric_mean(image, selem, out=None, mask=None,
-                   shift_x=False, shift_y=False):
+                   shift_x=False, shift_y=False, shift_z=False):
     """Return local geometric mean of an image.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import mean
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = geometric_mean(img, disk(5))
+    >>> avg_vol = geometric_mean(volume, ball(5))
 
     References
     ----------
@@ -545,34 +696,41 @@ def geometric_mean(image, selem, out=None, mask=None,
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem,
-                                   out=out, mask=mask, shift_x=shift_x,
-                                   shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._geometric_mean_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
-                  shift_y=False):
+def subtract_mean(image, selem, out=None, mask=None,
+                  shift_x=False, shift_y=False, shift_z=False):
     """Return image subtracted from its local mean.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Notes
@@ -586,42 +744,52 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import subtract_mean
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = subtract_mean(img, disk(5))
+    >>> out_vol = subtract_mean(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._subtract_mean_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def median(image, selem=None, out=None, mask=None,
-           shift_x=False, shift_y=False):
+           shift_x=False, shift_y=False, shift_z=False):
     """Return local median of an image.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float), optional
-        The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's. If None, a
         full square of size 3 is used.
-    out : 2-D array (integer or float), optional
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     See also
@@ -632,43 +800,53 @@ def median(image, selem=None, out=None, mask=None,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import median
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> med = median(img, disk(5))
+    >>> med_vol = median(volume, ball(5))
 
     """
 
+    np_image = np.asanyarray(image)
     if selem is None:
         selem = ndi.generate_binary_structure(image.ndim, image.ndim)
-    return _apply_scalar_per_pixel(generic_cy._median, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._median, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._median_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def minimum(image, selem, out=None, mask=None, shift_x=False,
-            shift_y=False):
+def minimum(image, selem, out=None, mask=None,
+            shift_x=False, shift_y=False, shift_z=False):
     """Return local minimum of an image.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     See also
@@ -683,62 +861,82 @@ def minimum(image, selem, out=None, mask=None, shift_x=False,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import minimum
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = minimum(img, disk(5))
+    >>> out_vol = minimum(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._minimum, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._minimum, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._minimum_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def modal(image, selem, out=None, mask=None, shift_x=False,
-          shift_y=False):
+def modal(image, selem, out=None, mask=None,
+          shift_x=False, shift_y=False, shift_z=False):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import modal
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = modal(img, disk(5))
+    >>> out_vol = modal(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._modal, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._modal, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._modal_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
-                     shift_y=False):
+def enhance_contrast(image, selem, out=None, mask=None,
+                     shift_x=False, shift_y=False, shift_z=False):
     """Enhance contrast of an image.
 
     This replaces each pixel by the local maximum if the pixel gray value is
@@ -747,41 +945,52 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import enhance_contrast
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = enhance_contrast(img, disk(5))
+    >>> out_vol = enhance_contrast(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image,
+                                       selem, out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._enhance_contrast_3D,
+                                          image, selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def pop(image, selem, out=None, mask=None,
+        shift_x=False, shift_y=False, shift_z=False):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
@@ -789,28 +998,28 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import square, cube # Need to add 3D example
     >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -826,12 +1035,20 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._pop, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x,
-                                   shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._pop, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._pop_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def sum(image, selem, out=None, mask=None,
+        shift_x=False, shift_y=False, shift_z=False):
     """Return the local sum of pixels.
 
     Note that the sum may overflow depending on the data type of the input
@@ -839,30 +1056,30 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
-    >>> from skimage.morphology import square
-    >>> import skimage.filters.rank as rank
-    >>> img = np.array([[0, 0, 0, 0, 0],
+    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> import skimage.filters.rank as rank         # Cube seems to fail but
+    >>> img = np.array([[0, 0, 0, 0, 0],            # Ball can pass
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
@@ -876,13 +1093,20 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._sum, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x,
-                                   shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._sum, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._sum_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def threshold(image, selem, out=None, mask=None, shift_x=False,
-              shift_y=False):
+def threshold(image, selem, out=None, mask=None,
+              shift_x=False, shift_y=False, shift_z=False):
     """Local threshold of an image.
 
     The resulting binary mask is True if the gray value of the center pixel is
@@ -890,28 +1114,28 @@ def threshold(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import square, cube # Need to add 3D example
     >>> from skimage.filters.rank import threshold
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -927,9 +1151,16 @@ def threshold(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._threshold, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._threshold, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._threshold_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def tophat(image, selem, out=None, mask=None, shift_x=False,
@@ -987,22 +1218,22 @@ def tophat(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def noise_filter(image, selem, out=None, mask=None, shift_x=False,
-                 shift_y=False):
+def noise_filter(image, selem, out=None, mask=None,
+                 shift_x=False, shift_y=False, shift_z=False):
     """Noise feature.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1014,33 +1245,51 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import noise_filter
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = noise_filter(img, disk(5))
+    >>> out_vol = noise_filter(volume, ball(5))
 
     """
 
-    # ensure that the central pixel in the structuring element is empty
-    centre_r = int(selem.shape[0] / 2) + shift_y
-    centre_c = int(selem.shape[1] / 2) + shift_x
-    # make a local copy
-    selem_cpy = selem.copy()
-    selem_cpy[centre_r, centre_c] = 0
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        # ensure that the central pixel in the structuring element is empty
+        centre_r = int(selem.shape[0] / 2) + shift_y
+        centre_c = int(selem.shape[1] / 2) + shift_x
+        # make a local copy
+        selem_cpy = selem.copy()
+        selem_cpy[centre_r, centre_c] = 0
 
-    return _apply_scalar_per_pixel(generic_cy._noise_filter, image, selem_cpy,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(generic_cy._noise_filter, image,
+                                       selem_cpy, out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        # ensure that the central pixel in the structuring element is empty
+        centre_r = int(selem.shape[0] / 2) + shift_y
+        centre_c = int(selem.shape[1] / 2) + shift_x
+        centre_z = int(selem.shape[2] / 2) + shift_z
+        # make a local copy
+        selem_cpy = selem.copy()
+        selem_cpy[centre_r, centre_c, centre_z] = 0
+
+        return _apply_scalar_per_pixel_3D(generic_cy._noise_filter_3D,
+                                          image, selem_cpy, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
-def entropy(image, selem, out=None, mask=None, shift_x=False,
-            shift_y=False):
+def entropy(image, selem, out=None, mask=None,
+            shift_x=False, shift_y=False, shift_z=False):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
@@ -1049,23 +1298,23 @@ def entropy(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : ndarray (float)
+    out : ([P,] M, N) ndarray (float)
         Output image.
 
     References
@@ -1076,40 +1325,51 @@ def entropy(image, selem, out=None, mask=None, shift_x=False,
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import entropy
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> ent = entropy(img, disk(5))
+    >>> ent_vol = entropy(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._entropy, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y,
-                                   out_dtype=np.double)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._entropy, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y,
+                                       out_dtype=np.double)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z, out_dtype=np.double)
 
 
-def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def otsu(image, selem, out=None, mask=None,
+         shift_x=False, shift_y=False, shift_z=False):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
 
     References
@@ -1120,16 +1380,27 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import otsu
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> local_otsu = otsu(img, disk(5))
     >>> thresh_image = img >= local_otsu
+    >>> local_otsu_vol = otsu(volume, ball(5))
+    >>> thresh_image_vol = volume >= local_otsu_vol
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._otsu, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x,
-                                   shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._otsu, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def windowed_histogram(image, selem, out=None, mask=None,
@@ -1169,8 +1440,10 @@ def windowed_histogram(image, selem, out=None, mask=None,
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import windowed_histogram
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> hist_img = windowed_histogram(img, disk(5))
 
     """
@@ -1185,9 +1458,8 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority(image, selem,
-             *,
-             out=None, mask=None, shift_x=False, shift_y=False):
+def majority(image, selem, *, out=None, mask=None,
+             shift_x=False, shift_y=False, shift_z=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
 
@@ -1216,12 +1488,22 @@ def majority(image, selem,
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import majority
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
+    >>> import numpy as np
     >>> img = data.camera()
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> maj_img = majority(img, disk(5))
+    >>> maj_img_vol = majority(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._majority, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._majority, image,
+                                       selem, out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._majority_3D,
+                                          image, selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)

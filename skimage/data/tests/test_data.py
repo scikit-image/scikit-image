@@ -68,6 +68,13 @@ def test_coffee():
     data.coffee()
 
 
+def test_eagle():
+    """ Test that "eagle" image can be loaded. """
+    eagle = data.eagle()
+    assert_equal(eagle.ndim, 2)
+    assert_equal(eagle.dtype, np.dtype('uint8'))
+
+
 def test_horse():
     """ Test that "horse" image can be loaded. """
     horse = data.horse()
@@ -146,4 +153,28 @@ def test_cells_3d():
     assert image.shape == (60, 256, 256)
 
 
+def test_brain_3d():
+    """Needs internet connection."""
+    path = fetch('data/brain.tiff')
+    image = io.imread(path)
+    assert image.shape == (10, 256, 256)
 
+
+def test_kidney_3d_multichannel():
+    """Test that 3D multichannel image of kidney tissue can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/kidney.tif')
+    kidney = data.kidney()
+    assert kidney.shape == (16, 512, 512, 3)
+
+
+def test_lily_multichannel():
+    """Test that microscopy image of lily of the valley can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/lily.tif')
+    lily = data.lily()
+    assert lily.shape == (922, 922, 4)

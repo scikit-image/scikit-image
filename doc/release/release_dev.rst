@@ -20,6 +20,8 @@ New Features
 - It is now possible to pass extra measurement functions to
   `measure.regionprops` and `regionprops_table`
   ([#4810](https://github.com/scikit-image/scikit-image/pull/4810))
+- Added a new perimeter function - ``measure.perimeter_crofton``.
+- Added 3D support for many filters in skimage.filters.rank.
 
 Documentation
 -------------
@@ -40,7 +42,15 @@ Documentation
 Improvements
 ------------
 
+- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+  single-precision when the input image is single-precision. This can give a
+  substantial performance improvement when working with single precision data.
+- ``pyproject.toml`` has been added to the sdist.
 
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
 
 API Changes
 -----------
@@ -48,6 +58,13 @@ API Changes
 - A default value has been added to `measure.find_contours`, corresponding to
   the half distance between the min and max values of the image 
   [#4862](https://github.com/scikit-image/scikit-image/pull/4862)
+- ``skimage.restoration.richardson_lucy`` returns a single-precision output
+  when the input is single-precision. Prior to this release, double-precision
+  was always used.
+- The default value of ``threshold_rel`` in ``skimage.feature.corner`` has
+  changed from 0.1 to None, which corresponds to letting 
+  ``skimage.feature.peak_local_max`` decide on the default. This is currently
+  equivalent to ``threshold_rel=0``.
 
 
 Bugfixes
@@ -63,6 +80,16 @@ Bugfixes
   ([#4875](https://github.com/scikit-image/scikit-image/pull/4875/))
 - Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
   dimensions or more ([#4823](https://github.com/scikit-image/scikit-image/pull/4823))
+- Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
+  for 3D objects, since it did not take tunnels into account. A new implementation
+  based on integral geometry fixes this bug.
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
+- ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
+  now consistently handle negative values for ``seed_point``.
+- In `skimage.draw.polygon`, segmentation fault caused by 0d inputs.
+
 
 Deprecations
 ------------
@@ -72,6 +99,18 @@ Deprecations
 - ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
   removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
   instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
+- The explicit setting ``threshold_rel=0` was removed from the Examples of the
+  following docstrings: ``skimage.feature.BRIEF``,
+  ``skimage.feature.corner_harris``, ``skimage.feature.corner_shi_tomasi``,
+  ``skimage.feature.corner_foerstner``, ``skimage.feature.corner_fast``,
+  ``skimage.feature.corner_subpix``, ``skimage.feature.corner_peaks``,
+  ``skimage.feature.corner_orientations``, and
+  ``skimage.feature._detect_octave``.
+- In ``skimage.restoration._denoise``, the warning regarding
+  ``rescale_sigma=None`` was removed.
+- In ``skimage.restoration._cycle_spin``, the ``# doctest: +SKIP`` was removed.
 
 
 Contributors to this release

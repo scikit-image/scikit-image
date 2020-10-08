@@ -140,8 +140,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
         # Extract keypoints for current octave
         fast_response = corner_fast(octave_image, self.fast_n,
                                     self.fast_threshold)
-        keypoints = corner_peaks(fast_response, min_distance=1,
-                                 threshold_rel=0)
+        keypoints = corner_peaks(fast_response, min_distance=1)
 
         if len(keypoints) == 0:
             return (np.zeros((0, 2), dtype=dtype),
