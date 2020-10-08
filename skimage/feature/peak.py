@@ -66,12 +66,10 @@ def _get_threshold(image, threshold_abs, threshold_rel):
     """
 
     """
-    threshold_abs = threshold_abs if threshold_abs is not None else image.min()
+    threshold = threshold_abs if threshold_abs is not None else image.min()
 
     if threshold_rel is not None:
-        threshold = max(threshold_abs, threshold_rel * image.max())
-    else:
-        threshold = threshold_abs
+        threshold = max(threshold, threshold_rel * image.max())
 
     return threshold
 
