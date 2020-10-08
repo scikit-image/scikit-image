@@ -53,17 +53,17 @@ def _exclude_border(label, border_width):
     """Set label border values to 0.
 
     """
-    # zero out the image borders
-    for i, excluded in enumerate(border_width):
-        if excluded == 0:
+    # zero out label borders
+    for i, width in enumerate(border_width):
+        if width == 0:
             continue
-        label[(slice(None),) * i + (slice(None, excluded),)] = 0
-        label[(slice(None),) * i + (slice(-excluded, None),)] = 0
+        label[(slice(None),) * i + (slice(None, width),)] = 0
+        label[(slice(None),) * i + (slice(-width, None),)] = 0
     return label
 
 
 def _get_threshold(image, threshold_abs, threshold_rel):
-    """Set the threshold value according to an absolute and a relative
+    """Return the threshold value according to an absolute and a relative
     value.
 
     """
@@ -76,7 +76,7 @@ def _get_threshold(image, threshold_abs, threshold_rel):
 
 
 def _get_excluded_border_width(image, min_distance, exclude_border):
-    """
+    """Return border_width values relative to a min_distance if requested.
 
     """
 
@@ -99,7 +99,7 @@ def _get_excluded_border_width(image, min_distance, exclude_border):
                 )
             if exclude < 0:
                 raise ValueError(
-                    "`exclude_border` cannot contain a negative value")
+                    "`exclude_border` can not be a negative value")
         border_width = exclude_border
     else:
         raise TypeError(
@@ -255,13 +255,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         # interest, identify num_peaks_per_label peaks
         labels_peak_coord = []
 
-        for label_idx, obj in enumerate(ndi.find_objects(_labels)):
+        for label_idx, roi in enumerate(ndi.find_objects(_labels)):
 
-            if obj is None:
+            if roi is None:
                 continue
 
-            label_mask = labels[obj] == label_idx + 1
-            img_object = image[obj]
+            # Get roi mask
+            label_mask = labels[roi] == label_idx + 1
+            # Extract image roi
+            img_object = image[roi]
+            # Ensure masked values don't affect roi's local peaks
             img_object[np.logical_not(label_mask)] = bg_val
 
             mask = _get_peak_mask(img_object, footprint, threshold, label_mask)
@@ -272,7 +275,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
                                                     p_norm)
 
             # transform coordinates in global image indices space
-            for idx, s in enumerate(obj):
+            for idx, s in enumerate(roi):
                 coordinates[:, idx] += s.start
 
             labels_peak_coord.append(coordinates)
