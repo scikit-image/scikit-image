@@ -51,7 +51,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
             [Arc Acc]
 
     which is approximated by the weighted sum of squared differences in a local
-    window around each pixel in the image.
+    window around each pixel in the image. This formula can be extended to a
+    larger number of dimensions (see [1]_).
 
     Parameters
     ----------
@@ -91,6 +92,13 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
            [0., 1., 0., 1., 0.],
            [0., 0., 0., 0., 0.]])
 
+    See also
+    --------
+    structure_tensor_eigenvalues
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Structure_tensor
     """
     if order == 'xy' and image.ndim > 2:
         raise ValueError('Only "rc" order is supported for dim > 2.')
@@ -325,6 +333,9 @@ def structure_tensor_eigenvalues(A_elems):
            [0., 2., 4., 2., 0.],
            [0., 0., 0., 0., 0.]])
 
+    See also
+    --------
+    structure_tensor
     """
     return _symmetric_compute_eigenvalues(A_elems)
 
@@ -907,7 +918,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
         winy, winx = _compute_derivatives(window, mode='constant', cval=0)
 
-        # compute gradient suares and remove border
+        # compute gradient squares and remove border
         winx_winx = (winx * winx)[1:-1, 1:-1]
         winx_winy = (winx * winy)[1:-1, 1:-1]
         winy_winy = (winy * winy)[1:-1, 1:-1]
