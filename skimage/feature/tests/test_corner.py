@@ -1,10 +1,12 @@
 import numpy as np
-from skimage._shared.testing import assert_array_equal, assert_almost_equal
+
+from skimage._shared.testing import (assert_almost_equal, assert_array_equal,
+                                     assert_equal)
 from skimage import data
 from skimage import img_as_float
 from skimage import draw
 from skimage.color import rgb2gray
-from skimage.morphology import octagon
+from skimage.morphology import cube, octagon
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
@@ -48,6 +50,37 @@ def test_structure_tensor():
                                       [0, 0, 0, 0, 0],
                                       [0, 1, 4, 1, 0],
                                       [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_3d():
+    cube = np.zeros((5, 5, 5))
+    cube[2, 2, 2] = 1
+    A_elems = structure_tensor(cube, sigma=0.1)
+    assert_equal(len(A_elems), 6)
+    assert_array_equal(A_elems[0][:, 1, :], np.array([[0, 0, 0, 0, 0],
+                                                      [0, 1, 4, 1, 0],
+                                                      [0, 0, 0, 0, 0],
+                                                      [0, 1, 4, 1, 0],
+                                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(A_elems[0][1], np.array([[0, 0, 0, 0, 0],
+                                                [0, 1, 4, 1, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 1, 4, 1, 0],
+                                                [0, 0, 0, 0, 0]]))
+    assert_array_equal(A_elems[3][2], np.array([[0, 0, 0, 0, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 0, 0, 0, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_3d_rc_only():
+    cube = np.zeros((5, 5, 5))
+    with testing.raises(ValueError):
+        structure_tensor(cube, sigma=0.1, order='xy')
+    A_elems_rc = structure_tensor(cube, sigma=0.1, order='rc')
+    A_elems_none = structure_tensor(cube, sigma=0.1)
+    assert_array_equal(A_elems_rc, A_elems_none)
 
 
 def test_structure_tensor_orders():
@@ -112,6 +145,15 @@ def test_structure_tensor_eigenvalues():
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigenvalues_3d():
+    image = np.pad(cube(9), 5) * 1000
+    boundary = (np.pad(cube(9), 5) - np.pad(cube(7), 6)).astype(bool)
+    A_elems = structure_tensor(image, sigma=0.1)
+    e0, e1, e2 = structure_tensor_eigenvalues(A_elems)
+    # e0 should detect facets
+    assert np.all(e0[boundary] != 0)
 
 
 def test_structure_tensor_eigvals():
