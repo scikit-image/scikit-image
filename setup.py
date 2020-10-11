@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import os
+import io 
 import sys
 import tempfile
 import shutil
@@ -8,40 +9,44 @@ import builtins
 import textwrap
 
 import setuptools
+from configparser import ConfigParser
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
 
+# Checking if Python installation is >=3.6
+if sys.version_info < (3, 6, 0):
 
-DISTNAME = 'scikit-image'
-DESCRIPTION = 'Image processing in Python'
-MAINTAINER = 'Stefan van der Walt'
-MAINTAINER_EMAIL = 'stefan@sun.ac.za'
-URL = 'https://scikit-image.org'
-LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'https://scikit-image.org/docs/stable/install.html'
-PROJECT_URLS = {
-    "Bug Tracker": 'https://github.com/scikit-image/scikit-image/issues',
-    "Documentation": 'https://scikit-image.org/docs/stable/',
-    "Source Code": 'https://github.com/scikit-image/scikit-image'
-}
-
-with open('README.md', encoding='utf-8') as f:
-    LONG_DESCRIPTION = f.read()
-
-if sys.version_info < (3, 6):
-
-    error = """Python {py} detected.
-
+    error = f"""Python {'.'.join([str(v) for v in sys.version_info[:3]])} detected.
 scikit-image 0.16+ supports only Python 3.6 and above.
-
-For Python 2.7, please install the 0.14.x Long Term Support release using:
-
- $ pip install 'scikit-image<0.15'
-""".format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+For Python 2.7, please install the 0.14.x Long Term Support release using: $ pip install 'scikit-image<0.15'
+    """
 
     sys.stderr.write(error + "\n")
     sys.exit(1)
+
+
+# All settings are in configs.ini
+config = ConfigParser(delimiters=['='])
+config.read('settings.ini')
+cfg = config['DEFAULT']
+
+cfg_keys = 'distname description maintainer maintainer_email license python_requires url git_url download_url zip_safe'.split()
+for i in cfg_keys: assert i in cfg, f'Missing expected setting: {i}'
+
+DISTNAME = cfg['distname']
+DESCRIPTION = cfg['description']
+LONG_DESCRIPTION = io.open('README.md', encoding='utf-8').read()
+MAINTAINER = cfg['maintainer']
+MAINTAINER_EMAIL = cfg['maintainer_email']
+URL = cfg['url']
+DOWNLOAD_URL = cfg['download_url']
+LICENSE = cfg['license']
+PROJECT_URLS = {
+    "Bug Tracker": cfg['git_url'] + '/issues',
+    "Documentation": cfg['url'] + '/docs/stable/',
+    "Source Code": cfg['git_url']
+}
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
@@ -106,20 +111,19 @@ def openmp_build_ext():
 
     return ConditionalOpenMP
 
-
+# Grabbing __version__
 with open('skimage/__init__.py', encoding='utf-8') as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-
+# Parsing requirements file
 def parse_requirements_file(filename):
     with open(filename, encoding='utf-8') as fid:
         requires = [l.strip() for l in fid.readlines() if l]
 
     return requires
-
 
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 # The `requirements/extras.txt` file is explicitely omitted because
@@ -229,10 +233,10 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         extras_require=extras_require,
-        python_requires='>=3.6',
+        python_requires='>=' + cfg['python_requires'],
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
-        zip_safe=False,  # the package can run out of an .egg file
+        zip_safe=cfg['zip_safe'],  # the package can run out of an .egg file
 
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
