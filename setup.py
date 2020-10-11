@@ -30,27 +30,41 @@ $ pip install 'scikit-image<0.15'
 
 # All settings are in configs.ini
 config = ConfigParser(delimiters=['='])
-config.read('settings.ini')
-cfg = config['DEFAULT']
+config.read('setup.cfg')
+cfg = config['metadata']
 
-cfg_keys = 'distname description maintainer maintainer_email'.split()
-cfg_keys = cfg_keys + 'license python_requires url git_url download_url'.split()
-for i in cfg_keys: assert i in cfg, f'Missing expected setting: {i}'
 
-DISTNAME = cfg['distname']
+DISTNAME = cfg['name']
 DESCRIPTION = cfg['description']
 LONG_DESCRIPTION = io.open('README.md', encoding='utf-8').read()
-MAINTAINER = cfg['maintainer']
-MAINTAINER_EMAIL = cfg['maintainer_email']
+MAINTAINER = cfg['author']
+MAINTAINER_EMAIL = cfg['author_email']
 URL = cfg['url']
 DOWNLOAD_URL = cfg['download_url']
 LICENSE = cfg['license']
 PROJECT_URLS = {
-    "Bug Tracker": cfg['git_url'] + '/issues',
-    "Documentation": cfg['url'] + '/docs/stable/',
+    "Bug Tracker": URL + '/issues',
+    "Documentation": URL + '/docs/stable/',
     "Source Code": cfg['git_url']
 }
-
+CLASSIFIERS = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: C',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS'
+]
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
 # avoid attempting to load components that aren't built yet:
@@ -121,7 +135,6 @@ with open('skimage/__init__.py', encoding='utf-8') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-# Parsing requirements file
 def parse_requirements_file(filename):
     with open(filename, encoding='utf-8') as fid:
         requires = [l.strip() for l in fid.readlines() if l]
@@ -214,29 +227,11 @@ if __name__ == "__main__":
         download_url=DOWNLOAD_URL,
         project_urls=PROJECT_URLS,
         version=VERSION,
-
-        classifiers=[
-            'Development Status :: 4 - Beta',
-            'Environment :: Console',
-            'Intended Audience :: Developers',
-            'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: BSD License',
-            'Programming Language :: C',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3 :: Only',
-            'Topic :: Scientific/Engineering',
-            'Operating System :: Microsoft :: Windows',
-            'Operating System :: POSIX',
-            'Operating System :: Unix',
-            'Operating System :: MacOS',
-        ],
+        classifiers=CLASSIFIERS,
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         extras_require=extras_require,
-        python_requires='>=' + cfg['python_requires'],
+        python_requires=cfg['python_requires'],
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
