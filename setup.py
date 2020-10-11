@@ -17,9 +17,11 @@ from distutils.errors import CompileError, LinkError
 # Checking if Python installation is >=3.6
 if sys.version_info < (3, 6, 0):
 
-    error = f"""Python {'.'.join([str(v) for v in sys.version_info[:3]])} detected.
+    error = f"""Python {'.'.join([str(v) for v in sys.version_info[:3]])}
+detected. 
 scikit-image 0.16+ supports only Python 3.6 and above.
-For Python 2.7, please install the 0.14.x Long Term Support release using: $ pip install 'scikit-image<0.15'
+For Python 2.7, please install the 0.14.x Long Term Support release using: 
+$ pip install 'scikit-image<0.15'
     """
 
     sys.stderr.write(error + "\n")
@@ -31,7 +33,8 @@ config = ConfigParser(delimiters=['='])
 config.read('settings.ini')
 cfg = config['DEFAULT']
 
-cfg_keys = 'distname description maintainer maintainer_email license python_requires url git_url download_url'.split()
+cfg_keys = 'distname description maintainer maintainer_email'.split()
+cfg_keys = cfg_keys + 'license python_requires url git_url download_url'.split()
 for i in cfg_keys: assert i in cfg, f'Missing expected setting: {i}'
 
 DISTNAME = cfg['distname']
