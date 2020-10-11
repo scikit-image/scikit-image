@@ -1,9 +1,13 @@
 import numpy as np
 from skimage.transform import SimilarityTransform, warp
-from skimage.util.dtype import _convert as convert
 import warnings
 import functools
 import inspect
+
+try:
+    from skimage.util.dtype import _convert as convert
+except ImportError:
+    from skimage.util.dtype import convert
 
 
 class WarpSuite:

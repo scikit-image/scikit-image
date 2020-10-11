@@ -36,14 +36,14 @@ PATCH_SIZE = 21
 image = data.camera()
 
 # select some patches from grassy areas of the image
-grass_locations = [(474, 291), (440, 433), (466, 18), (462, 236)]
+grass_locations = [(280, 454), (342, 223), (444, 192), (455, 455)]
 grass_patches = []
 for loc in grass_locations:
     grass_patches.append(image[loc[0]:loc[0] + PATCH_SIZE,
                                loc[1]:loc[1] + PATCH_SIZE])
 
 # select some patches from sky areas of the image
-sky_locations = [(54, 48), (21, 233), (90, 380), (195, 330)]
+sky_locations = [(38, 34), (139, 28), (37, 437), (145, 379)]
 sky_patches = []
 for loc in sky_locations:
     sky_patches.append(image[loc[0]:loc[0] + PATCH_SIZE,

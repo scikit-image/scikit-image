@@ -1,8 +1,4 @@
-try:
-    import networkx as nx
-except ImportError:
-    from ..._shared.utils import warn
-    warn('RAGs require networkx')
+import networkx as nx
 import numpy as np
 from . import _ncut
 from . import _ncut_cy
