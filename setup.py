@@ -31,7 +31,7 @@ config = ConfigParser(delimiters=['='])
 config.read('settings.ini')
 cfg = config['DEFAULT']
 
-cfg_keys = 'distname description maintainer maintainer_email license python_requires url git_url download_url zip_safe'.split()
+cfg_keys = 'distname description maintainer maintainer_email license python_requires url git_url download_url'.split()
 for i in cfg_keys: assert i in cfg, f'Missing expected setting: {i}'
 
 DISTNAME = cfg['distname']
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         python_requires='>=' + cfg['python_requires'],
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
-        zip_safe=cfg['zip_safe'],  # the package can run out of an .egg file
+        zip_safe=False,  # the package can run out of an .egg file
 
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
