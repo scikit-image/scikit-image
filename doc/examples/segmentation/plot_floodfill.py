@@ -63,7 +63,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(light_coat, cmap=plt.cm.gray)
-ax[1].plot(150,170,'ro')  # seed point
+ax[1].plot(150, 170, 'ro')  # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -71,9 +71,9 @@ plt.show()
 
 
 ##############################################################################
-# The camerman's  coat is in varying shades of gray. Only the parts of the coat
+# The cameraman's  coat is in varying shades of gray. Only the parts of the coat
 # matching the shade near the seed value is changed.
-# Because the cameraman is dark haired,  it also changed some parts of his hair.
+# Because the cameraman is dark haired, it also changed some parts of his hair.
 #
 # Experimentation with tolerance
 # ------------------------------

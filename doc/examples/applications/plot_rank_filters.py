@@ -243,9 +243,9 @@ plt.tight_layout()
 ######################################################################
 # This filter is very sensitive to local outliers. One can
 # moderate this using the percentile version of the auto-level filter
-# which uses given # # percentiles (one inferior, one superior) in place
-# of local minimum and  maximum. The example below illustrates how the
-# percentile parameters  influence the local auto-level result.
+# which uses given percentiles (one inferior, one superior) in place
+# of local minimum and maximum. The example below illustrates how the
+# percentile parameters influence the local auto-level result.
 
 from skimage.filters.rank import autolevel_percentile
 
