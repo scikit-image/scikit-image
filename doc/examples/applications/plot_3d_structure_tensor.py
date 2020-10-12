@@ -33,18 +33,18 @@ data = data.kidney()
 #####################################################################
 # What exactly are the shape and size of our 3D multichannel image?
 
-print("number of dimensions: {}".format(data.ndim))
-print("shape: {}".format(data.shape))
-print("dtype: {}".format(data.dtype))
+print(f'number of dimensions: {data.ndim}')
+print(f'shape: {data.shape}')
+print(f'dtype: {data.dtype}')
 
 #####################################################################
 # For the purposes of this tutorial, we shall consider only the second colour
 # channel, which leaves us with a 3D single-channel image. What is the range
 # of values?
 
-n_plane, n_row, n_col, n_chan = data.shape
-v_min, v_max = (data[:, :, :, 1].min(), data[:, :, :, 1].max())
-print("range: ({}, {})".format(v_min, v_max))
+n_plane, n_Y, n_X, n_chan = data.shape
+v_min, v_max = data[:, :, :, 1].min(), data[:, :, :, 1].max()
+print(f'range: ({v_min}, {v_max})')
 
 #####################################################################
 # Let us visualize the middle slice of our 3D image.
@@ -105,13 +105,13 @@ px.imshow(
     sample[0, :, :],
     zmin=v_min,
     zmax=v_max,
-    title="Interactive view of bottom slice of sample data.")
+    title='Interactive view of bottom slice of sample data.'
+)
 
 #####################################################################
 # Therefore, we choose a 'width' of 3 for the window function.
 
 sigma = 3
-
 A_elems = feature.structure_tensor(sample, sigma=sigma)
 
 #####################################################################
