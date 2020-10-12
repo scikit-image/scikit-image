@@ -54,8 +54,8 @@ plt.show()
 cameraman = data.camera()
 
 # Change the cameraman's coat from dark to light (255).  The seed point is
-# chosen as (200, 100),
-light_coat = flood_fill(cameraman, (200, 100), 255, tolerance=10)
+# chosen as (150,170, 100),
+light_coat = flood_fill(cameraman, (170, 150), 255, tolerance=12)
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(cameraman, cmap=plt.cm.gray)
@@ -63,7 +63,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(light_coat, cmap=plt.cm.gray)
-ax[1].plot(100, 200, 'wo')  # seed point
+ax[1].plot(150,170,'ro')  # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -71,8 +71,9 @@ plt.show()
 
 
 ##############################################################################
-# Because the cameraman is dark haired it also changed his hair, as well as
-# parts of the tripod.
+# The camerman's  coat is in varying shades of gray. Only the parts of the coat
+# matching the shade near the seed value is changed.
+# Because the cameraman is dark haired,  it also changed some parts of his hair.
 #
 # Experimentation with tolerance
 # ------------------------------
