@@ -41,7 +41,7 @@ MAINTAINER = cfg['author']
 MAINTAINER_EMAIL = cfg['author_email']
 URL = cfg['url']
 DOWNLOAD_URL = cfg['download_url']
-LICENSE = cfg['license']
+LICENSE = 'Modified BSD'
 PROJECT_URLS = {
     "Bug Tracker": URL + '/issues',
     "Documentation": URL + '/docs/stable/',
