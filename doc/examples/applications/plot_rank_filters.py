@@ -151,9 +151,9 @@ ax[0].set_title('Original')
 ax[1].imshow(bilat, cmap=plt.cm.gray)
 ax[1].set_title('Bilateral mean')
 
-ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 
-ax[3].imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].imshow(bilat[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
@@ -241,13 +241,11 @@ for a in ax:
 plt.tight_layout()
 
 ######################################################################
-# This filter is very sensitive to local outliers, see the little white spot
-# in the left part of the sky. This is due to a local maximum which is very
-# high comparing to the rest of the neighborhood. One can moderate this using
-# the percentile version of the auto-level filter which uses given
-# percentiles (one inferior, one superior) in place of local minimum and
-# maximum. The example below illustrates how the percentile parameters
-# influence the local auto-level result.
+# This filter is very sensitive to local outliers. One can
+# moderate this using the percentile version of the auto-level filter
+# which uses given # # percentiles (one inferior, one superior) in place
+# of local minimum and  maximum. The example below illustrates how the
+# percentile parameters  influence the local auto-level result.
 
 from skimage.filters.rank import autolevel_percentile
 
@@ -255,10 +253,10 @@ image = data.camera()
 
 selem = disk(20)
 loc_autolevel = autolevel(image, selem=selem)
-loc_perc_autolevel0 = autolevel_percentile(image, selem=selem, p0=.00, p1=1.0)
-loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
-loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
-loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
+loc_perc_autolevel0 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
+loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
+loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
+loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.15, p1=.85)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
@@ -266,10 +264,10 @@ ax = axes.ravel()
 
 title_list = ['Original',
               'auto_level',
-              'auto-level 0%',
               'auto-level 1%',
               'auto-level 5%',
-              'auto-level 10%']
+              'auto-level 10%',
+              'auto-level 15%']
 image_list = [image,
               loc_autolevel,
               loc_perc_autolevel0,
@@ -305,9 +303,9 @@ ax[0].set_title('Original')
 ax[1].imshow(enh, cmap=plt.cm.gray)
 ax[1].set_title('Local morphological contrast enhancement')
 
-ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 
-ax[3].imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].imshow(enh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
@@ -334,9 +332,9 @@ ax[0].set_title('Original')
 ax[1].imshow(penh, cmap=plt.cm.gray)
 ax[1].set_title('Local percentile morphological\n contrast enhancement')
 
-ax[2].imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 
-ax[3].imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
+ax[3].imshow(penh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
