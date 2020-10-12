@@ -151,8 +151,14 @@ eigen[1, coords[1], 20:23, 12:14]
 eigen[2, coords[1], 20:23, 12:14]
 
 #####################################################################
-# The region about ``coords[1:]`` is markedly anisotropic in 3D, as expected.
-# We could say it is somewhat isotropic in the X-Y plane.
+# As expected, the region about voxel ``(Z, Y, X) = coords[1:]`` is markedly
+# anisotropic in 3D: There is an order of magnitude between the third-largest
+# eigenvalues on one hand, and the largest and second-largest eigenvalues on
+# the other hand.
+# This region is 'somewhat isotropic' in the X-Y plane: There is a factor of
+# (only) ~3 between the second-largest and largest eigenvalues.
+# This is definitely compatible with what we are seeing in the image, i.e., a
+# stronger gradient roughly along X and a weaker gradient perpendicular to it.
 # In an ellipsoidal representation of the 3D structure tensor, we would get
 # the pancake situation. The gradient directions are spread out (here, in the
 # X-Y plane) and perpendicular to Z.
