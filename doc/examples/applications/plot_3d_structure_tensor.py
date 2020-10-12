@@ -49,7 +49,12 @@ print(f'range: ({v_min}, {v_max})')
 #####################################################################
 # Let us visualize the middle slice of our 3D image.
 
-px.imshow(data[n_plane // 2, :, :, 1], zmin=v_min, zmax=v_max)
+px.imshow(
+    data[n_plane // 2, :, :, 1],
+    zmin=v_min,
+    zmax=v_max,
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'}
+)
 
 #####################################################################
 # Let us pick a specific region, which shows relative X-Y isotropy. In
@@ -98,13 +103,13 @@ display(sample)
 # ========================
 # About the brightest region (i.e., at X ~ 22 and Y ~ 17), we can see
 # variations (and, hence, strong gradients) along either X or Y over a typical
-# length of 3. Note that, in the interactive plot below, `x` (resp. `y`)
-# corresponds to Y (resp. X).
+# length of 3.
 
 px.imshow(
     sample[0, :, :],
     zmin=v_min,
     zmax=v_max,
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
     title='Interactive view of bottom slice of sample data.'
 )
 
