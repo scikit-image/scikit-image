@@ -151,7 +151,7 @@ def predict_segmenter(features, clf):
     """
     sh = features.shape
     if features.ndim > 2:
-        features = features.reshape((np.prod(sh[:-1]), sh[-1]))
+        features = features.reshape((-1, sh[-1]))
 
     try:
         predicted_labels = clf.predict(features)
