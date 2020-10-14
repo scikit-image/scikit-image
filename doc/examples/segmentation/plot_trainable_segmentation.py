@@ -95,7 +95,7 @@ fig.tight_layout()
 # ------------------
 #
 # If you have several images of similar objects acquired in similar conditions,
-# you can used the classifier trained with `fit_segmenter` to segment other
+# you can use the classifier trained with `fit_segmenter` to segment other
 # images. In the example below we just use a different part of the image.
 
 img_new = full_img[:700, 900:]
