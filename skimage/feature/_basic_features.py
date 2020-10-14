@@ -82,7 +82,7 @@ def _mutiscale_basic_features_singlechannel(
         num=num_sigma,
         base=2,
         endpoint=True,
-    )[::-1]
+    )
     with ThreadPoolExecutor(max_workers=num_workers) as ex:
         out_sigmas = list(
             ex.map(
