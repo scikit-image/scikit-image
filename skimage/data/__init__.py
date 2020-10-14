@@ -353,7 +353,6 @@ def camera():
     return _load("data/camera.png")
 
 
-
 def eagle():
     """A golden eagle.
 
