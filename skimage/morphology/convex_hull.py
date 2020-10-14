@@ -18,6 +18,32 @@ def _offsets_diamond(ndim):
     return offsets
 
 
+def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
+    ndim, n_coords = gridcoords.shape
+    coords_in_hull = np.zeros(n_coords)
+    chunk_size = n_coords
+
+    def _test_ineq(coords):
+        return np.all(hull_equations[:, :ndim].dot(coords) +
+                      hull_equations[:, ndim:] < tolerance, axis=0)
+
+    # Find the right chunk size
+    while chunk_size:
+        try:
+            tested_chunk = _test_ineq(gridcoords[:, :chunk_size])
+            coords_in_hull[:chunk_size] = tested_chunk
+            break
+        except MemoryError:
+            chunk_size = (chunk_size + 1) // 2
+
+    # Apply the test in chunks
+    for idx in range(chunk_size, n_coords, chunk_size):
+        tested_chunk = _test_ineq(gridcoords[:, idx: idx + chunk_size])
+        coords_in_hull[idx: idx + chunk_size] = tested_chunk
+
+    return coords_in_hull
+
+
 def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     """Compute the convex hull image of a binary image.
 
@@ -86,8 +112,8 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
         # A point is in the hull if it satisfies all of the hull's inequalities
-        coords_in_hull = np.all(hull.equations[:, :ndim].dot(gridcoords) +
-                                hull.equations[:, ndim:] < tolerance, axis=0)
+        coords_in_hull = _check_coords_in_hull(gridcoords,
+                                               hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
 
     return mask
