@@ -19,13 +19,44 @@ def _offsets_diamond(ndim):
 
 
 def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
+    r"""Checks all the co-ordinates for inclusiveness in the convex hull.
+
+    Parameters
+    ----------
+    gridcoords : (M, N) ndarray
+        Co-ordinates of ``N`` points in ``M`` dimensions.
+    hull_equations : (M, N) ndarray
+        Hyperplane equations of the facets of the convex hull.
+    tolerance : float
+        Tolerance when determining whether a point is inside the hull. Due
+        to numerical floating point errors, a tolerance of 0 can result in
+        some points erroneously being classified as being outside the hull.
+
+    Returns
+    -------
+    coords_in_hull : ndarray of bool
+        Binary 1D ndarray representing points in n-dimensional space
+        with value ``True`` set for points inside the convex hull.
+
+    Notes
+    -----
+    The check requires intermediate calculation of dot product which is
+    memory-intensitve. Thus, volume of ``gridcoords`` is broken down into
+    ``chunks`` to keep within the memory limit.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/5019
+
+    """
     ndim, n_coords = gridcoords.shape
     coords_in_hull = np.zeros(n_coords)
     chunk_size = n_coords
 
+    # A point is in the hull if it satisfies all of the hull's inequalities
     def _test_ineq(coords):
-        return np.all(hull_equations[:, :ndim].dot(coords) +
-                      hull_equations[:, ndim:] < tolerance, axis=0)
+        return np.all(hull_equations[:, :ndim].dot(coords)
+                      + hull_equations[:, ndim:] < tolerance, axis=0)
 
     # Find the right chunk size
     while chunk_size:
@@ -111,7 +142,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
-        # A point is in the hull if it satisfies all of the hull's inequalities
+
         coords_in_hull = _check_coords_in_hull(gridcoords,
                                                hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
