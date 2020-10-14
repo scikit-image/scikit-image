@@ -1,9 +1,8 @@
-import numpy as np
 from skimage.feature import multiscale_basic_features
 
 try:
     from sklearn.exceptions import NotFittedError
-
+    from sklearn.ensemble import RandomForestClassifier
     has_sklearn = True
 except ImportError:
     has_sklearn = False
@@ -37,11 +36,9 @@ class TrainableSegmenter(object):
 
     def __init__(self, clf=None, features_func=None):
         if clf is None:
-            try:
-                from sklearn.ensemble import RandomForestClassifier
-
+            if has_sklearn:
                 self.clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-            except ImportError:
+            else:
                 raise ImportError(
                     "Please install scikit-learn or pass a classifier instance"
                     "to TrainableSegmenter."
@@ -49,7 +46,6 @@ class TrainableSegmenter(object):
         else:
             self.clf = clf
         self.features_func = features_func
-        self.features = None
 
     def compute_features(self, image):
         if self.features_func is None:
@@ -70,10 +66,8 @@ class TrainableSegmenter(object):
             Input image, which can be grayscale or multichannel, and must have a
             number of dimensions compatible with ``self.features_func``.
         """
-        if self.features is None:
-            self.compute_features(image)
-        output, clf = fit_segmenter(labels, self.features, self.clf)
-        self.segmented_image = output
+        self.compute_features(image)
+        clf = fit_segmenter(labels, self.features, self.clf)
 
     def predict(self, image):
         """

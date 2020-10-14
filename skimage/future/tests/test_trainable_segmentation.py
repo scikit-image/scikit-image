@@ -1,7 +1,7 @@
 import pytest
 from functools import partial
 import numpy as np
-from skimage.future import fit_segmenter, predict_segmenter
+from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
 from scipy import spatial
 
@@ -84,3 +84,25 @@ def test_trainable_segmentation_predict():
     with pytest.raises(ValueError) as err:
         _ = predict_segmenter(test_features, clf)
         assert 'type of features' in str(err.value)
+
+
+def test_trainable_segmentation_oo():
+    img = np.zeros((20, 20))
+    img[:10] = 1
+    img += 0.05 * np.random.randn(*img.shape)
+    labels = np.zeros_like(img, dtype=np.uint8)
+    labels[:2] = 1
+    labels[-2:] = 2
+    clf = DummyNNClassifier()
+    features_func = partial(
+        multiscale_basic_features,
+        edges=False,
+        texture=False,
+        sigma_min=0.5,
+        sigma_max=2,
+    )
+    segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
+    segmenter.fit(labels, img)
+    out = segmenter.predict(img)
+    assert np.all(out[:10] == 1)
+    assert np.all(out[10:] == 2)
