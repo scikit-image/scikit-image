@@ -79,7 +79,7 @@ def _mutiscale_basic_features_singlechannel(
     sigmas = np.logspace(
         np.log2(sigma_min),
         np.log2(sigma_max),
-        num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
+        num=num_sigma,
         base=2,
         endpoint=True,
     )[::-1]
