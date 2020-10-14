@@ -16,9 +16,9 @@ New Features
 ------------
 
 - A new function ``segmentation.expand_labels`` has been added in order to dilate
-  labels without overlap #4795
+  labels while preventing overlap (#4795)
 - It is now possible to pass extra measurement functions to
-  ``measure.regionprops`` and ``regionprops_table`` #4810
+  ``measure.regionprops`` and ``regionprops_table`` (#4810)
 - Added a new perimeter function - ``measure.perimeter_crofton``.
 - Added 3D support for many filters in skimage.filters.rank.
 - New images have been added in the ``data`` subpackage: ``data.eagle``
@@ -37,10 +37,10 @@ Documentation
 - New tutorial on `visualizing 3D data <https://scikit-image.org/docs/dev/auto_examples/applications/plot_3d_image_processing.html>`_ (#4850)
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
-- automatic formatting of docstrings for improved consistency (#4849)
-- improved docstring for ``rgb2lab`` (#4839) and ``marching_cubes`` (#4846)
+- Automatic formatting of docstrings for improved consistency (#4849)
+- Improved docstring for ``rgb2lab`` (#4839) and ``marching_cubes`` (#4846)
 - Improved docstring for ``measure.marching_cubes``, mentioning how to decimate a
-  mesh using mayavi #4846
+  mesh using mayavi (#4846)
 - Improved docstring for ``util.random_noise`` (#5001)
 - Improved docstrings for ``morphology.h_maxima`` and ``morphology.h_minima``
   (#4929).
@@ -71,7 +71,7 @@ Improvements
 - ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to a
   LUT (#4966).  
 - ``measure.label`` has been accelerated for boolean input images, by using
-  ``ndimage``'s implementation for this case (#4945).
+  ``scipy.ndimage``'s implementation for this case (#4945).
 - ``util.apply_parallel`` now works with multichannel data (#4927).
 
 
@@ -90,7 +90,7 @@ API Changes
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
-  explicit name.
+  descriptive name.
 - The ``level`` parameter of ``measure.find_contours`` is now a keyword
   argument, with a default value set to (max(image) - min(image)) / 2.
 
@@ -98,15 +98,15 @@ API Changes
 Bugfixes
 --------
 
-- For the ransac algorithm, improved the case where all data points are 
+- For the RANSAC algorithm, improved the case where all data points are 
   outliers, which was previously raising an error 
-  #4844
+  (#4844)
 - An error-causing bug has been corrected for the ``bg_color`` parameter in
-  ``label2rgb`` when its value is a string #4840
+  ``label2rgb`` when its value is a string (#4840)
 - A normalization bug was fixed in ``metrics.variation_of_information`` 
-  #4875
+  (#4875)
 - Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
-  dimensions or more #4823
+  dimensions or more (#4823)
 - Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
   for 3D objects, since it did not take tunnels into account. A new implementation
   based on integral geometry fixes this bug.
@@ -115,8 +115,6 @@ Bugfixes
   They have been replaced with ``nrow`` and ``ncol``.
 - ``skimage.segmentation.flood_fill`` and ``skimage.segmentation.flood``
   now consistently handle negative values for ``seed_point``.
-- In ``skimage.draw.polygon``, a segmentation fault caused by 0d inputs has
-  been fixed.
 - Segmentation faults in ``segmentation.flood`` have been fixed in #4948 and #4972
 - A segfault in ``draw.polygon`` for the case of 0-d input has been fixed
   (#4943).
