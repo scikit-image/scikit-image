@@ -40,9 +40,10 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
 
     Notes
     -----
-    The check requires intermediate calculation of dot product which is
-    memory-intensitve. Thus, volume of ``gridcoords`` is broken down into
-    ``chunks`` to keep within the memory limit.
+    Check inclusiveness of co-ordinates in convex hull requires intermediate
+    calculations of dot products which are memory-intensive. Thus, the convex
+    hull equations are checked individually with all co-ordinates to keep
+    within the memory limit.
 
     References
     ----------
@@ -50,27 +51,19 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
 
     """
     ndim, n_coords = gridcoords.shape
-    coords_in_hull = np.zeros(n_coords)
-    chunk_size = n_coords
+    n_hull_equations = hull_equations.shape[0]
+    coords_in_hull = np.ones(n_coords, dtype=np.bool_)
+
+    # Pre-allocate arrays to cache intermediate results for reducing overheads
+    dot_array = np.zeros(n_coords, dtype=np.float64)
+    test_ineq_temp = np.zeros(n_coords, dtype=np.float64)
 
     # A point is in the hull if it satisfies all of the hull's inequalities
-    def _test_ineq(coords):
-        return np.all(hull_equations[:, :ndim].dot(coords)
-                      + hull_equations[:, ndim:] < tolerance, axis=0)
-
-    # Find the right chunk size
-    while chunk_size:
-        try:
-            tested_chunk = _test_ineq(gridcoords[:, :chunk_size])
-            coords_in_hull[:chunk_size] = tested_chunk
-            break
-        except MemoryError:
-            chunk_size = (chunk_size + 1) // 2
-
-    # Apply the test in chunks
-    for idx in range(chunk_size, n_coords, chunk_size):
-        tested_chunk = _test_ineq(gridcoords[:, idx: idx + chunk_size])
-        coords_in_hull[idx: idx + chunk_size] = tested_chunk
+    for idx in range(n_hull_equations):
+        # Tests a hull equation on all co-ordinates of volume
+        np.dot(hull_equations[idx, :ndim], gridcoords, out=dot_array)
+        np.add(dot_array, hull_equations[idx, ndim:], out=test_ineq_temp)
+        coords_in_hull *= test_ineq_temp < tolerance
 
     return coords_in_hull
 
