@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
+from .._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 
@@ -192,7 +193,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             1. - np.array(val, dtype=np.float))
 
 
-def _polygon(r, c, shape):
+def _polygon(r, c, shape, eps=1e-8):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -216,33 +217,32 @@ def _polygon(r, c, shape):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    cdef Py_ssize_t nr_verts = c.shape[0]
-    cdef Py_ssize_t minr = int(max(0, r.min()))
-    cdef Py_ssize_t maxr = int(ceil(r.max()))
-    cdef Py_ssize_t minc = int(max(0, c.min()))
-    cdef Py_ssize_t maxc = int(ceil(c.max()))
+    dtype = min(r.dtype, c.dtype)
+    if dtype not in ['float32', 'float64']:
+        dtype = np.dtype(np.float64)
+
+    nr_verts = c.shape[0]
+    minr = int(max(0, r.min()))
+    maxr = int(ceil(r.max()))
+    minc = int(max(0, c.min()))
+    maxc = int(ceil(c.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef Py_ssize_t r_i, c_i
-
     # make contiguous arrays for r, c coordinates
-    cdef cnp.ndarray contiguous_rdata, contiguous_cdata
-    contiguous_rdata = np.ascontiguousarray(r, dtype=np.double)
-    contiguous_cdata = np.ascontiguousarray(c, dtype=np.double)
-    cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
-    cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
+    rptr = np.ascontiguousarray(r, dtype)
+    cptr = np.ascontiguousarray(c, dtype)
 
     # output coordinate arrays
-    cdef list rr = list()
-    cdef list cc = list()
+    rr = list()
+    cc = list()
 
-    for r_i in range(minr, maxr+1):
-        for c_i in range(minc, maxc+1):
-            if point_in_polygon(nr_verts, cptr, rptr, c_i, r_i):
+    for r_i in np.arange(minr, maxr+1, dtype=dtype):
+        for c_i in np.arange(minc, maxc+1, dtype=dtype):
+            if point_in_polygon(cptr, rptr, c_i, r_i, eps):
                 rr.append(r_i)
                 cc.append(c_i)
 
