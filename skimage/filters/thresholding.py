@@ -235,8 +235,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     return thresh_image - offset
 
-
-def threshold_otsu(image=None, nbins=256, hist=None, bin_centers=None):
+def threshold_otsu(image=None, nbins=256, *, histogram=None):
     """Return threshold value based on Otsu's method.
     Either image or hist must be provided. In case hist is given, the actual
     histogram of the image is ignored.
@@ -248,11 +247,10 @@ def threshold_otsu(image=None, nbins=256, hist=None, bin_centers=None):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    hist : optional
-        Histogram to determine the threshold from.
-    bin_centers : optional
-        Intensity values for each histogram bin, corresponding to the given
-        histogram
+    histogram : (array, array)  tuple, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -278,7 +276,13 @@ def threshold_otsu(image=None, nbins=256, hist=None, bin_centers=None):
     if image is None and hist is None:
         raise Exception("Either name or hist must be provided.")
 
-    if hist is None:
+    if histogram is not None:
+        if isinstance(histogram, (tuple, list)):
+            hist, bin_centers = histogram
+        else:
+            hist = histogram
+            bin_centers = np.arange(counts.size)
+    else:
         if image.ndim > 2 and image.shape[-1] in (3, 4):
             msg = "threshold_otsu is expected to work correctly only for " \
                   "grayscale images; image shape {0} looks like an RGB image"
@@ -307,10 +311,7 @@ def threshold_otsu(image=None, nbins=256, hist=None, bin_centers=None):
 
     idx = np.argmax(variance12)
 
-    if bin_centers is None:
-        threshold = idx
-    else :
-        threshold = bin_centers[:-1][idx]
+    threshold = bin_centers[:-1][idx]
 
     return threshold
 
