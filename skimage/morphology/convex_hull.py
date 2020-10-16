@@ -57,13 +57,15 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     # Pre-allocate arrays to cache intermediate results for reducing overheads
     dot_array = np.zeros(n_coords, dtype=np.float64)
     test_ineq_temp = np.zeros(n_coords, dtype=np.float64)
+    coords_single_ineq = np.zeros(n_coords, dtype=np.bool_)
 
     # A point is in the hull if it satisfies all of the hull's inequalities
     for idx in range(n_hull_equations):
-        # Tests a hull equation on all co-ordinates of volume
+        # Tests a hyperplane equation on all co-ordinates of volume
         np.dot(hull_equations[idx, :ndim], gridcoords, out=dot_array)
         np.add(dot_array, hull_equations[idx, ndim:], out=test_ineq_temp)
-        coords_in_hull *= test_ineq_temp < tolerance
+        np.less(test_ineq_temp, tolerance, out=coords_single_ineq)
+        coords_in_hull *= coords_single_ineq
 
     return coords_in_hull
 
