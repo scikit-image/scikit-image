@@ -148,8 +148,9 @@ def test_structure_tensor_eigenvalues():
 
 
 def test_structure_tensor_eigenvalues_3d():
-    image = np.pad(cube(9), 5) * 1000
-    boundary = (np.pad(cube(9), 5) - np.pad(cube(7), 6)).astype(bool)
+    image = np.pad(cube(9), 5, mode='constant') * 1000
+    boundary = (np.pad(cube(9), 5, mode='constant')
+                - np.pad(cube(7), 6, mode='constant')).astype(bool)
     A_elems = structure_tensor(image, sigma=0.1)
     e0, e1, e2 = structure_tensor_eigenvalues(A_elems)
     # e0 should detect facets
