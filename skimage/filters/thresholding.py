@@ -235,7 +235,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     return thresh_image - offset
 
-def threshold_otsu(image=None, nbins=256, *, histogram=None):
+def threshold_otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
     Either image or hist must be provided. In case hist is given, the actual
     histogram of the image is ignored.
@@ -247,7 +247,7 @@ def threshold_otsu(image=None, nbins=256, *, histogram=None):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    histogram : (array, array)  tuple, optional
+    hist : (array, array)  tuple, optional
         Histogram to determine the threshold from and a corresponding array
         of bin center intensities. Alternatively, only the histogram can be
         passed.
@@ -276,11 +276,11 @@ def threshold_otsu(image=None, nbins=256, *, histogram=None):
     if image is None and hist is None:
         raise Exception("Either name or hist must be provided.")
 
-    if histogram is not None:
-        if isinstance(histogram, (tuple, list)):
-            hist, bin_centers = histogram
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
         else:
-            hist = histogram
+            counts = hist
             bin_centers = np.arange(counts.size)
     else:
         if image.ndim > 2 and image.shape[-1] in (3, 4):
@@ -293,16 +293,16 @@ def threshold_otsu(image=None, nbins=256, *, histogram=None):
         if np.all(image == first_pixel):
             return first_pixel
 
-        hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
-    hist = hist.astype(float)
+    counts = counts.astype(float)
 
     # class probabilities for all possible thresholds
-    weight1 = np.cumsum(hist)
-    weight2 = np.cumsum(hist[::-1])[::-1]
+    weight1 = np.cumsum(counts)
+    weight2 = np.cumsum(counts[::-1])[::-1]
     # class means for all possible thresholds
-    mean1 = np.cumsum(hist * bin_centers) / weight1
-    mean2 = (np.cumsum((hist * bin_centers)[::-1]) / weight2[::-1])[::-1]
+    mean1 = np.cumsum(counts * bin_centers) / weight1
+    mean2 = (np.cumsum((counts * bin_centers)[::-1]) / weight2[::-1])[::-1]
 
     # Clip ends to align class 1 and class 2 variables:
     # The last value of ``weight1``/``mean1`` should pair with zero values in
