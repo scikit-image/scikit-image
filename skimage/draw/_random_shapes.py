@@ -39,16 +39,16 @@ def _generate_rectangle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
 
     """
-    available_width = min(image[1] - point[1], shape[1])
-    print(available_width, image, point, shape)
-    if available_width < shape[0]:
-        raise ArithmeticError('cannot fit shape to image')
+    print(image, point, shape)
+    available_width = min(image[1] - point[1] - 1, shape[1])
+    # if available_width < shape[0]:
+    #     raise ArithmeticError('cannot fit shape to image')
     available_height = min(image[0] - point[0] - 1, shape[1])
-    if available_height < shape[0]:
-        raise ArithmeticError('cannot fit shape to image')
+    # if available_height < shape[0]:
+    #     raise ArithmeticError('cannot fit shape to image')
     # Pick random widths and heights.
-    r = random.randint(shape[0], available_height + 1)
-    c = random.randint(shape[0], available_width + 1)
+    r = shape[0] + random.randint(available_height)
+    c = shape[0] + random.randint(available_width)
     rectangle = draw_polygon([
         point[0],
         point[0] + r,
@@ -427,7 +427,6 @@ def random_shapes(image_shape,
                 # Couldn't fit the shape, skip it.
                 continue
             # Check if there is an overlap where the mask is nonzero.
-            print(shape_generator, point, shape, image_shape)
             if allow_overlap or not filled[indices].any():
                 image[indices] = colors[shape_idx]
                 filled[indices] = True
