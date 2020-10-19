@@ -28,7 +28,7 @@ from skimage.filters import rank
 from skimage.util import img_as_ubyte
 
 
-image = img_as_ubyte(data.camera())
+image = img_as_ubyte(data.eagle())
 
 # denoise image
 denoised = rank.median(image, disk(2))
@@ -60,7 +60,7 @@ ax[2].imshow(markers, cmap=plt.cm.nipy_spectral)
 ax[2].set_title("Markers")
 
 ax[3].imshow(image, cmap=plt.cm.gray)
-ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.7)
+ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.5)
 ax[3].set_title("Segmented")
 
 for a in ax:
