@@ -214,7 +214,7 @@ def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
         return data._fetch(data_filename)
-    except ConnectionError:
+    except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}')
 
 

@@ -7,56 +7,15 @@ Version 0.17
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
-* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
-* Remove ``rough_wall`` from ``skimage.data.__init__``.
-* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
 
 Version 0.18
 ------------
 
-* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
-  deprecation warning.
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
-* In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage.features.corner_peaks``, remove the warning.
-    * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
-        * ``skimage/feature/brief.py::BRIEF``
-        * `` skimage/feature/corner.py::corner_harris``
-        * `` skimage/feature/corner.py::corner_shi_tomasi``
-        * `` skimage/feature/corner.py::corner_foerstner``
-        * `` skimage/feature/corner.py::corner_fast``
-        * `` skimage/feature/corner.py::corner_subpix``
-        * `` skimage/feature/corner.py::corner_peaks``
-        * `` skimage/feature/corner.py::corner_orientations``
-    * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
-      ``threshold_rel=0``.
-* In ``skimage/transform`` remove histogram_matching.py.
-* In ``skimage/restoration/_denoise.py`` remove warning regarding
-  ``rescale_sigma``.
-    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
-      now that the denoise warning is gone.
 
 Version 0.19
 ------------
 
+* Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
   * Also make sure to look in the function ``_init_level_set``
@@ -89,10 +48,34 @@ Version 0.19
   decorator from `label2rgb` and set `bg_label` default value to 0.
 * In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
 
+Version 0.20
+------------
+
+* In ``skimage/feature/peak.py``, remove the `indices` argument and
+  the decorator `remove_arg`.
+* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
+  decorator from `find_contours`.
+* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
+  `structure_tensor`.
+* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
+  function.
+* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
+  `skivi.py` in `skimage/io/_plugins`.
+* Remove enrirely the folder skimage/scripts containing skivi app.
+  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
+  setup.py
+* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
+  Remove `viewer_examples` occurences in `tools/check_sdist.py` and
+  `tools/travis/script.sh`
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+
 Other
 -----
-* Remove custom fused type in ``skimage/morphology/_max_tree.pyx`` once
-  #3486 fused types is merged.
 * Remove the conditional import and function call when ``numpy`` is set
   to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Check whether imread wheels are available, then re-enable testing imread
@@ -109,6 +92,8 @@ Other
 * Remove pillow version related warning for MPO file format in
   `io._plugins.pil_plugin.imread` when upgrading pillow min version to
   6.0.0
+* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 * When ``numpy`` is set to >= 1.16, remove the warning assertion in
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``invalid value encountered in reduce``.
@@ -124,6 +109,5 @@ Other
   when texlive 2020 is available.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
-* Once numpydoc > 0.9.x (ie https://github.com/numpy/numpydoc/pull/256) is
-  released, remove `strip_signature_backslash = True` in
-  ``doc/source/conf.py``.
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).

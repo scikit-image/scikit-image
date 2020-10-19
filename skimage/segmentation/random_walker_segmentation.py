@@ -264,7 +264,8 @@ def _preprocess(labels):
 
 
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None):
+                  multichannel=False, return_full_prob=False, spacing=None,
+                  *, prob_tol=1e-3):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -308,9 +309,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
           requires that the pyamg module is installed.
-
     tol : float, optional
-        tolerance to achieve when solving the linear system using
+        Tolerance to achieve when solving the linear system using
         the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
     copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
@@ -326,6 +326,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
+    prob_tol : float, optional
+        Tolerance on the resulting probability to be in the interval [0, 1].
+        If the tolerance is not satisfied, a warning is displayed.
 
     Returns
     -------
@@ -339,9 +342,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           probability that label `label_nb` reaches the pixel `(i, j)`
           first.
 
-    See also
+    See Also
     --------
-    skimage.morphology.watershed: watershed segmentation
+    skimage.morphology.watershed : watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 
@@ -485,14 +488,20 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # first at pixel j by anisotropic diffusion.
     X = _solve_linear_system(lap_sparse, B, tol, mode)
 
+    if X.min() < -prob_tol or X.max() > 1 + prob_tol:
+        warn('The probability range is outside [0, 1] given the tolerance '
+             '`prob_tol`. Consider decreasing `beta` and/or decreasing '
+             '`tol`.')
+
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds
     labels[inds_isolated_seeds] = isolated_values
     labels = labels.reshape(labels_shape)
 
-    if return_full_prob:
-        mask = labels == 0
+    mask = labels == 0
+    mask[inds_isolated_seeds] = False
 
+    if return_full_prob:
         out = np.zeros((nlabels,) + labels_shape)
         for lab, (label_prob, prob) in enumerate(zip(out, X), start=1):
             label_prob[mask] = prob
@@ -500,6 +509,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     else:
         X = np.argmax(X, axis=0) + 1
         out = labels.astype(labels_dtype)
-        out[labels == 0] = X
+        out[mask] = X
 
     return out

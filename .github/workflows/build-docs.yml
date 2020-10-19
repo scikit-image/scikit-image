@@ -1,0 +1,53 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Build docs
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          sudo apt install optipng
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements/build.txt
+          python -m pip install -r requirements/default.txt
+          python -m pip install -r requirements/optional.txt
+          python -m pip install -r requirements/docs.txt
+      - name: Install package
+        run: |
+          python -m pip install .
+      - name: Push docs
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${DEPLOY_KEY}"
+          # See https://github.community/t/github-actions-bot-email-address/17204/5
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions"
+          (cd doc && make html)
+          git clone --quiet --branch=gh-pages "${GH_REF}" doc_build
+          cd doc_build
+          git rm -r dev
+          cp -r ../doc/build/html dev
+          git add dev
+          git commit -m "Deployed to GitHub Pages"
+          git push --force --quiet "${GH_REF}" gh-pages
+        env:
+          GH_REF: git@github.com:scikit-image/docs.git
+          DEPLOY_KEY: ${{ secrets.DOC_DEPLOY_KEY_PRIVATE }}
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+      - name: Store docs as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: docs
+          path: doc/build/html

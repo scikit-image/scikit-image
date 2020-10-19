@@ -57,31 +57,6 @@ from scipy import linalg
 from ..util import dtype, dtype_limits
 
 
-def guess_spatial_dimensions(image):
-    """Make an educated guess about whether an image has a channels dimension.
-
-    Parameters
-    ----------
-    image : ndarray
-        The input image.
-
-    Returns
-    -------
-    spatial_dims : int or None
-        The number of spatial dimensions of `image`. If ambiguous, the value
-        is ``None``.
-
-    Raises
-    ------
-    ValueError
-        If the image array has less than two or more than four dimensions.
-    """
-    from ..filters import _guess_spatial_dimensions
-    warn('This function is deprecated and will be removed in 0.18',
-         stacklevel=2)
-    return _guess_spatial_dimensions(image)
-
-
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
@@ -338,12 +313,13 @@ def hsv2rgb(hsv):
     v = arr[..., 2]
 
     hi = np.stack([hi, hi, hi], axis=-1).astype(np.uint8) % 6
-    out = np.choose(hi, [np.stack((v, t, p), axis=-1),
-                         np.stack((q, v, p), axis=-1),
-                         np.stack((p, v, t), axis=-1),
-                         np.stack((p, q, v), axis=-1),
-                         np.stack((t, p, v), axis=-1),
-                         np.stack((v, p, q), axis=-1)])
+    out = np.choose(
+        hi, np.stack([np.stack((v, t, p), axis=-1),
+                      np.stack((q, v, p), axis=-1),
+                      np.stack((p, v, t), axis=-1),
+                      np.stack((p, q, v), axis=-1),
+                      np.stack((t, p, v), axis=-1),
+                      np.stack((v, p, q), axis=-1)]))
 
     return out
 
@@ -1057,7 +1033,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
 
 def rgb2lab(rgb, illuminant="D65", observer="2"):
-    """RGB to lab color space conversion.
+    """Conversion from the sRGB color space (IEC 61966-2-1:1999)
+    to the CIE Lab colorspace under the given illuminant and observer.
 
     Parameters
     ----------
@@ -1080,6 +1057,10 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Notes
     -----
+    RGB is a device-dependent color space so, if you use this function, be
+    sure that the image you are analyzing has been mapped to the sRGB color
+    space.
+
     This function uses rgb2xyz and xyz2lab.
     By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
     x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
@@ -1445,9 +1426,17 @@ def separate_stains(rgb, conv_matrix):
     * ``ahx_from_rgb``: Alcian Blue + Hematoxylin
     * ``hpx_from_rgb``: Hematoxylin + PAS
 
+    This implementation borrows some ideas from DIPlib [2]_, e.g. the
+    compensation using a small value to avoid log artifacts when
+    calculating the Beer-Lambert law.
+
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [2] https://github.com/DIPlib/diplib/
+    .. [3] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution,” Anal. Quant. Cytol. Histol., vol.
+           23, no. 4, pp. 291–299, Aug. 2001.
 
     Examples
     --------
@@ -1457,9 +1446,12 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
     rgb = _prepare_colorarray(rgb, force_copy=True)
-    rgb += 2
-    stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
-    return np.reshape(stains, rgb.shape)
+    np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
+    log_adjust = np.log(1E-6)  # used to compensate the sum above
+
+    stains = (np.log(rgb) / log_adjust) @ conv_matrix
+
+    return stains
 
 
 def combine_stains(stains, conv_matrix):
@@ -1503,6 +1495,9 @@ def combine_stains(stains, conv_matrix):
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [2] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution,” Anal. Quant. Cytol. Histol., vol.
+           23, no. 4, pp. 291–299, Aug. 2001.
 
     Examples
     --------
@@ -1513,13 +1508,14 @@ def combine_stains(stains, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
-    from ..exposure import rescale_intensity
-
     stains = _prepare_colorarray(stains)
-    logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
-    rgb2 = np.power(10, logrgb2)
-    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
-                             in_range=(-1, 1))
+
+    # log_adjust here is used to compensate the sum within separate_stains().
+    log_adjust = -np.log(1E-6)
+    log_rgb = -(stains * log_adjust) @ conv_matrix
+    rgb = np.exp(log_rgb)
+
+    return np.clip(rgb, a_min=0, a_max=1)
 
 
 def lab2lch(lab):

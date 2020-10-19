@@ -27,14 +27,18 @@ section_end "Flake8.test"
 
 section "Tests.examples"
 # Run example applications
-echo Build or run examples
-pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
-pip list
-tools/build_versions.py
-echo 'backend : Template' > $MPL_DIR/matplotlibrc
+if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" != "0" ]]; then
+  echo Build or run examples
+  pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
+  pip list
+  tools/build_versions.py
+  echo 'backend : Template' > $MPL_DIR/matplotlibrc
+fi
 if [[ "${BUILD_DOCS}" == "1" ]]; then
+  echo Build docs
   export SPHINXCACHE=${HOME}/.cache/sphinx; make html
 elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
+  echo Test examples
   for f in doc/examples/*/*.py; do
     python "${f}"
     if [ $? -ne 0 ]; then

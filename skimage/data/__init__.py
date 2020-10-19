@@ -5,13 +5,9 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
-
-import warnings
 from warnings import warn
 import numpy as np
 import shutil
-
-from distutils.version import LooseVersion as Version
 
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
@@ -23,12 +19,13 @@ import os.path as osp
 import os
 
 __all__ = ['data_dir',
-           'load',
            'download_all',
            'astronaut',
            'binary_blobs',
+           'brain',
            'brick',
            'camera',
+           'cat',
            'cell',
            'checkerboard',
            'chelsea',
@@ -36,12 +33,15 @@ __all__ = ['data_dir',
            'coffee',
            'coins',
            'colorwheel',
+           'eagle',
            'grass',
            'gravel',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
+           'kidney',
            'lbp_frontal_face_cascade_filename',
+           'lily',
            'lfw_subset',
            'logo',
            'microaneurysms',
@@ -57,40 +57,48 @@ __all__ = ['data_dir',
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
-
-import pooch
-from pooch.utils import file_hash
-
-
-# Pooch expects a `+` to exist in development versions.
-# Since scikit-image doesn't follow that convention, we have to manually
-# remove `.dev` with a `+` if it exists.
-# This helps pooch understand that it should look in master
-# to find the required files
-pooch_version = __version__.replace('.dev', '+')
-url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
-
-# Create a new friend to manage your sample data storage
-image_fetcher = pooch.create(
-    # Pooch uses appdirs to select an appropriate directory for the cache
-    # on each platform.
-    # https://github.com/ActiveState/appdirs
-    # On linux this converges to
-    # '$HOME/.cache/scikit-image'
-    # With a version qualifier
-    path=pooch.os_cache("scikit-image"),
-    base_url=url,
-    version=pooch_version,
-    env="SKIMAGE_DATADIR",
-    registry=registry,
-    urls=registry_urls,
-)
-
-data_dir = osp.join(str(image_fetcher.abspath), 'data')
-
-os.makedirs(data_dir, exist_ok=True)
-shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-             osp.join(data_dir, 'README.txt'))
+try:
+    from pooch.utils import file_hash
+except ModuleNotFoundError:
+    # Function taken from
+    # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
+    def file_hash(fname, alg="sha256"):
+        """
+        Calculate the hash of a given file.
+        Useful for checking if a file has changed or been corrupted.
+        Parameters
+        ----------
+        fname : str
+            The name of the file.
+        alg : str
+            The type of the hashing algorithm
+        Returns
+        -------
+        hash : str
+            The hash of the file.
+        Examples
+        --------
+        >>> fname = "test-file-for-hash.txt"
+        >>> with open(fname, "w") as f:
+        ...     __ = f.write("content of the file")
+        >>> print(file_hash(fname))
+        0fc74468e6a9a829f103d069aeb2bb4f8646bad58bf146bb0e3379b759ec4a00
+        >>> import os
+        >>> os.remove(fname)
+        """
+        import hashlib
+        if alg not in hashlib.algorithms_available:
+            raise ValueError(
+                "Algorithm '{}' not available in hashlib".format(alg))
+        # Calculate the hash in chunks to avoid overloading the memory
+        chunksize = 65536
+        hasher = hashlib.new(alg)
+        with open(fname, "rb") as fin:
+            buff = fin.read(chunksize)
+            while buff:
+                hasher.update(buff)
+                buff = fin.read(chunksize)
+        return hasher.hexdigest()
 
 
 def _has_hash(path, expected_hash):
@@ -98,6 +106,50 @@ def _has_hash(path, expected_hash):
     if not osp.exists(path):
         return False
     return file_hash(path) == expected_hash
+
+
+def create_image_fetcher():
+    try:
+        import pooch
+    except ImportError:
+        # Without pooch, fallback on the standard data directory
+        # which for now, includes a few limited data samples
+        return None, legacy_data_dir
+
+    # Pooch expects a `+` to exist in development versions.
+    # Since scikit-image doesn't follow that convention, we have to manually
+    # remove `.dev` with a `+` if it exists.
+    # This helps pooch understand that it should look in master
+    # to find the required files
+    pooch_version = __version__.replace('.dev', '+')
+    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+
+    # Create a new friend to manage your sample data storage
+    image_fetcher = pooch.create(
+        # Pooch uses appdirs to select an appropriate directory for the cache
+        # on each platform.
+        # https://github.com/ActiveState/appdirs
+        # On linux this converges to
+        # '$HOME/.cache/scikit-image'
+        # With a version qualifier
+        path=pooch.os_cache("scikit-image"),
+        base_url=url,
+        version=pooch_version,
+        env="SKIMAGE_DATADIR",
+        registry=registry,
+        urls=registry_urls,
+    )
+
+    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+    return image_fetcher, data_dir
+
+
+image_fetcher, data_dir = create_image_fetcher()
+
+if image_fetcher is None:
+    has_pooch = False
+else:
+    has_pooch = True
 
 
 def _fetch(data_filename):
@@ -118,23 +170,26 @@ def _fetch(data_filename):
 
     Raises
     ------
-    ValueError:
+    KeyError:
         If the filename is not known to the scikit-image distribution.
 
+    ModuleNotFoundError:
+        If the filename is known to the scikit-image distribution but pooch
+        is not installed.
+
     ConnectionError:
-        If scikit-image is unable to connect to the internet but the dataset
-        has not been downloaded yet.
+        If scikit-image is unable to connect to the internet but the
+        dataset has not been downloaded yet.
     """
     resolved_path = osp.join(data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
 
     # Case 1:
-    # The file may already be in the data_dir. We may have decided to ship it
-    # in the scikit-image distribution.
+    # The file may already be in the data_dir.
+    # We may have decided to ship it in the scikit-image distribution.
     if _has_hash(resolved_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return resolved_path
-
 
     # Case 2:
     # The user is using a cloned version of the github repo, which
@@ -149,8 +204,20 @@ def _fetch(data_filename):
         return resolved_path
 
     # Case 3:
-    # Pooch needs to download the data. Let the image fetcher to search for our
-    # data. A ConnectionError is raised if no internet connection is available.
+    # Pooch not found.
+    if image_fetcher is None:
+        raise ModuleNotFoundError(
+            "The requested file is part of the scikit-image distribution, "
+            "but requires the installation of an optional dependency, pooch. "
+            "To install pooch, use your preferred python package manager. "
+            "Follow installation instruction found at "
+            "https://scikit-image.org/docs/stable/install.html"
+        )
+
+    # Case 4:
+    # Pooch needs to download the data. Let the image fetcher to search for
+    # our data. A ConnectionError is raised if no internet connection is
+    # available.
     try:
         resolved_path = image_fetcher.fetch(data_filename)
     except ConnectionError as err:
@@ -165,14 +232,23 @@ def _fetch(data_filename):
     return resolved_path
 
 
-# Fetch all legacy data so that it is available by default
-for filename in legacy_registry:
-    _fetch(filename)
+def _init_pooch():
+    os.makedirs(data_dir, exist_ok=True)
+    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                 osp.join(data_dir, 'README.txt'))
 
-else:
-    # Without pooch, fallback on the standard data directory
-    # which for now, includes a few limited data samples
-    data_dir = legacy_data_dir
+    data_base_dir = osp.join(data_dir, '..')
+    # Fetch all legacy data so that it is available by default
+    for filename in legacy_registry:
+        _fetch(filename)
+
+
+# This function creates directories, and has been the source of issues for
+# downstream users, see
+# https://github.com/scikit-image/scikit-image/issues/4660
+# https://github.com/scikit-image/scikit-image/issues/4664
+if has_pooch:
+    _init_pooch()
 
 
 def download_all(directory=None):
@@ -182,6 +258,11 @@ def download_all(directory=None):
     This allows us to use higher quality datasets, while keeping the
     library download size small.
 
+    This function requires the installation of an optional dependency, pooch,
+    to download the full dataset. Follow installation instruction found at
+
+        https://scikit-image.org/docs/stable/install.html
+
     Call this function to download all sample images making them available
     offline on your machine.
 
@@ -189,6 +270,11 @@ def download_all(directory=None):
     ----------
     directory: path-like, optional
         The directory where the dataset should be stored.
+
+    Raises
+    ------
+    ModuleNotFoundError:
+        If pooch is not install, this error will be raised.
 
     Notes
     -----
@@ -198,6 +284,13 @@ def download_all(directory=None):
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
 
+    if image_fetcher is None:
+        raise ModuleNotFoundError(
+            "To download all package data, scikit-image needs an optional "
+            "dependency, pooch."
+            "To install pooch, follow our installation instructions found at "
+            "https://scikit-image.org/docs/stable/install.html"
+        )
     # Consider moving this kind of logic to Pooch
     old_dir = image_fetcher.path
     try:
@@ -225,31 +318,6 @@ def lbp_frontal_face_cascade_filename():
     return _fetch('data/lbpcascade_frontalface_opencv.xml')
 
 
-def load(f, as_gray=False):
-    """Load an image file located in the data directory.
-
-    Parameters
-    ----------
-    f : string
-        File name.
-    as_gray : bool, optional
-        Whether to convert the image to grayscale.
-
-    Returns
-    -------
-    img : ndarray
-        Image loaded from ``skimage.data_dir``.
-
-    Notes
-    -----
-    This functions is deprecated and will be removed in 0.18.
-    """
-    warn('This function is deprecated and will be removed in 0.18. '
-         'Use `skimage.io.load` or `imageio.imread` directly.',
-         stacklevel=2)
-    return _load(f, as_gray=as_gray)
-
-
 def _load(f, as_gray=False):
     """Load an image file located in the data directory.
 
@@ -274,14 +342,45 @@ def _load(f, as_gray=False):
 def camera():
     """Gray-level "camera" image.
 
-    Often used for segmentation and denoising examples.
+    Can be used for segmentation and denoising examples.
 
     Returns
     -------
     camera : (512, 512) uint8 ndarray
         Camera image.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Lav Varshney).
+
+    .. versionchanged:: 0.18
+        This image was replaced due to copyright restrictions. For more
+        information, please see [1]_.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/3927
     """
     return _load("data/camera.png")
+
+
+
+def eagle():
+    """A golden eagle.
+
+    Suitable for examples on segmentation, Hough transforms, and corner
+    detection.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Dayane Machado).
+
+    Returns
+    -------
+    eagle : (2019, 1826) uint8 ndarray
+        Eagle image.
+    """
+    return _load("data/eagle.png")
 
 
 def astronaut():
@@ -418,21 +517,6 @@ def grass():
     >>> imageio.imwrite('grass.png', grass)
     """
     return _load("data/grass.png", as_gray=True)
-
-
-def rough_wall():
-    """Rough wall.
-
-    Returns
-    -------
-    rough_wall : (512, 512) uint8 image
-        Some rough wall.
-
-    """
-    warn("The rough_wall dataset has been removed due to licensing concerns."
-         "It has been replaced with the gravel dataset. This warning message"
-         "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
-    return gravel()
 
 
 def gravel():
@@ -580,6 +664,55 @@ def coins():
     return _load("data/coins.png")
 
 
+def kidney():
+    """Mouse kidney tissue.
+
+    This biological tissue on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (16, 512, 512, 3). That is 512x512 pixels in X-Y,
+    16 image slices in Z, and 3 color channels
+    (emission wavelengths 450nm, 515nm, and 605nm, respectively).
+    Real-space voxel size is 1.24 microns in X-Y, and 1.25 microns in Z.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
+
+    Returns
+    -------
+    kidney : (16, 512, 512, 3) uint16 ndarray
+        Kidney 3D multichannel image.
+    """
+    return _load("data/kidney.tif")
+
+
+def lily():
+    """Lily of the valley plant stem.
+
+    This plant stem on a pre-prepared slide was imaged with confocal
+    fluorescence microscopy (Nikon C1 inverted microscope).
+    Image shape is (922, 922, 4). That is 922x922 pixels in X-Y,
+    with 4 color channels.
+    Real-space voxel size is 1.24 microns in X-Y.
+    Data type is unsigned 16-bit integers.
+
+    Notes
+    -----
+    This image was acquired by Genevieve Buckley at Monasoh Micro Imaging in
+    2018.
+    License: CC0
+
+    Returns
+    -------
+    lily : (922, 922, 4) uint16 ndarray
+        Lily 2D multichannel image.
+    """
+    return _load("data/lily.tif")
+
+
 def logo():
     """Scikit-image logo, a RGBA image.
 
@@ -716,6 +849,10 @@ def chelsea():
         Chelsea image.
     """
     return _load("data/chelsea.png")
+
+
+# Define an alias for chelsea that is more descriptive.
+cat = chelsea
 
 
 def coffee():
@@ -930,3 +1067,25 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+def brain():
+    """Subset of data from the University of North Carolina Volume Rendering
+    Test Data Set.
+
+    The full dataset is available at [1]_.
+
+    Returns
+    -------
+    image : (10, 256, 256) uint16 ndarray
+
+    Notes
+    -----
+    The 3D volume consists of 10 layers from the larger volume.
+
+    References
+    ----------
+    .. [1] https://graphics.stanford.edu/data/voldata/
+
+    """
+    return _load("data/brain.tiff")

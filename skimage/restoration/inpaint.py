@@ -23,7 +23,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     mask_i = np.ravel_multi_index(np.where(mask), mask.shape)
 
     # Find masked points and prepare them to be easily enumerate over
-    mask_pts = np.array(np.where(mask)).T
+    mask_pts = np.stack(np.where(mask), axis=-1)
 
     # Iterate over masked points
     for mask_pt_n, mask_pt_idx in enumerate(mask_pts):
