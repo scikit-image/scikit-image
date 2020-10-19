@@ -8,7 +8,6 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
-from .._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 
@@ -193,7 +192,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             1. - np.array(val, dtype=np.float))
 
 
-def _polygon(r, c, shape, eps=1e-8):
+def _polygon(r, c, shape):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -217,10 +216,6 @@ def _polygon(r, c, shape, eps=1e-8):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    dtype = min(r.dtype, c.dtype)
-    if dtype not in ['float32', 'float64']:
-        dtype = np.dtype(np.float64)
-
     nr_verts = c.shape[0]
     minr = int(max(0, r.min()))
     maxr = int(ceil(r.max()))
@@ -233,16 +228,17 @@ def _polygon(r, c, shape, eps=1e-8):
         maxc = min(shape[1] - 1, maxc)
 
     # make contiguous arrays for r, c coordinates
-    rptr = np.ascontiguousarray(r, dtype)
-    cptr = np.ascontiguousarray(c, dtype)
+    cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
+    cdef cnp.float64_t[::1] cptr = np.ascontiguousarray(c, 'float64')
+    cdef cnp.float64_t r_i, c_i
 
     # output coordinate arrays
     rr = list()
     cc = list()
 
-    for r_i in np.arange(minr, maxr+1, dtype=dtype):
-        for c_i in np.arange(minc, maxc+1, dtype=dtype):
-            if point_in_polygon(cptr, rptr, c_i, r_i, eps):
+    for r_i in range(minr, maxr+1):
+        for c_i in range(minc, maxc+1):
+            if point_in_polygon(cptr, rptr, c_i, r_i):
                 rr.append(r_i)
                 cc.append(c_i)
 
