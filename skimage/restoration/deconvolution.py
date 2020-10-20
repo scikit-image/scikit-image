@@ -435,6 +435,9 @@ def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
            Image and depth from a conventional camera with a coded aperture.
            ACM transactions on graphics (TOG), 26(3), 70-es.
     """
+    float_type = np.promote_types(image.dtype, np.float32)
+    image = image.astype(float_type, copy=False)
+    psf = psf.astype(float_type, copy=False)
 
     n, m = image.shape
     # psf.shape() is expected to be odd in both dimension but works with even
