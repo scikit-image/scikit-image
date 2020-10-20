@@ -26,7 +26,8 @@ def test_data_dir():
 #     # The second concern is that this test essentially uses
 #     # alot of bandwidth, which is not fun for developers on
 #     # lower speed connections.
-#     # https://github.com/scikit-image/scikit-image/pull/4666/files/26d5138b25b958da6e97ebf979e9bc36f32c3568#r422604863
+#     # https://github.com/scikit-image/scikit-image/pull/4666/files/
+#     # 26d5138b25b958da6e97ebf979e9bc36f32c3568#r422604863
 #     data_dir = data.data_dir
 #     if image_fetcher is not None:
 #         data.download_all()
