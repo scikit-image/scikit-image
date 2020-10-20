@@ -15,6 +15,7 @@ from .j_invariant import calibrate_denoiser
 __all__ = ['wiener',
            'unsupervised_wiener',
            'richardson_lucy',
+           'DNP_Gauss_freq',
            'unwrap_phase',
            'denoise_tv_bregman',
            'denoise_tv_chambolle',
