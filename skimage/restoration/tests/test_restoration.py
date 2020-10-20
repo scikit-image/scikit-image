@@ -94,10 +94,8 @@ def test_DNP_Gauss_freq():
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved = restoration.DNP_Gauss_freq(data, psf)
 
-    # utilizing the inner region and an absolute error makes a saved
-    # reference image obsolete
-    np.testing.assert_allclose(deconvolved[200:300, 200:300],
-                               test_img[200:300, 200:300], atol=0.3)
+    path = fetch('restoration/tests/camera_dnp.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float32, np.float64])
