@@ -132,7 +132,7 @@ def test_can_generate_one_by_one_rectangle():
     crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
 
     # rgb
-    assert (np.shape(crop) == (2, 2, 3) and np.any(crop >= 1)
+    assert (np.shape(crop) == (1, 1, 3) and np.any(crop >= 1)
             and np.any(crop < 255))
 
 

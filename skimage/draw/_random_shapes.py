@@ -39,16 +39,12 @@ def _generate_rectangle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
 
     """
-    print(image, point, shape)
-    available_width = min(image[1] - point[1] - 1, shape[1])
-    # if available_width < shape[0]:
-    #     raise ArithmeticError('cannot fit shape to image')
-    available_height = min(image[0] - point[0] - 1, shape[1])
-    # if available_height < shape[0]:
-    #     raise ArithmeticError('cannot fit shape to image')
+    available_width = max(1, min(image[1] - point[1], shape[1]) - shape[0])
+    available_height = max(1, min(image[0] - point[0], shape[1]) - shape[0])
+
     # Pick random widths and heights.
-    r = shape[0] + random.randint(available_height)
-    c = shape[0] + random.randint(available_width)
+    r = shape[0] + random.randint(available_height) - 1
+    c = shape[0] + random.randint(available_width) - 1
     rectangle = draw_polygon([
         point[0],
         point[0] + r,
@@ -158,10 +154,9 @@ def _generate_triangle_mask(point, image, shape, random):
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('dimension must be > 1 for triangles')
-    available_side = min(image[1] - point[1], point[0] + 1, shape[1])
-    if available_side < shape[0]:
-        raise ArithmeticError('cannot fit shape to image')
-    side = random.randint(shape[0], available_side + 1)
+    available_side = min(image[1] - point[1],
+                         point[0] + 1, shape[1]) - shape[0]
+    side = shape[0] + random.randint(available_side)
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
     triangle = draw_polygon([
         point[0],
@@ -409,22 +404,23 @@ def random_shapes(image_shape,
     num_shapes = random.randint(min_shapes, max_shapes + 1)
     colors = _generate_random_colors(num_shapes, num_channels,
                                      intensity_range, random)
+    shape = (min_size, max_size)
     for shape_idx in range(num_shapes):
         if user_shape is None:
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
-        shape = (min_size, max_size)
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.randint(image_shape[1])
-            row = random.randint(image_shape[0])
+            column = random.randint(image_shape[1] - min_size + 1)
+            row = random.randint(image_shape[0] - min_size + 1)
             point = (row, column)
             try:
                 indices, label = shape_generator(point, image_shape, shape,
                                                  random)
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
+                indices = []
                 continue
             # Check if there is an overlap where the mask is nonzero.
             if allow_overlap or not filled[indices].any():
