@@ -1,10 +1,10 @@
 """
 =====================
-Image Deconvolution
+Image Deconvolution Natural Priors
 =====================
 In this example, we deconvolve an image using deconvolution with natural
 priors, e.g Gauss, solved in the frequency domain with a new
-deconvolution algorithm ([1]_, [2]_, [3_]).
+deconvolution algorithm ([1]_, [2]_, [3]_).
 
 The algorithm is based on a PSF (Point Spread Function),
 where PSF is described as the impulse response of the
@@ -36,7 +36,7 @@ astro_noisy = astro.copy()
 astro_noisy += (np.random.poisson(lam=25, size=astro.shape) - 10) / 255.
 
 # Restore Image using Richardson-Lucy algorithm
-deconvolved_RL = restoration.DNP_Gauss_freq(astro_noisy, psf)
+deconvolved_DNP = restoration.DNP_Gauss_freq(astro_noisy, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
 plt.gray()
@@ -50,8 +50,8 @@ ax[0].set_title('Original Data')
 ax[1].imshow(astro_noisy)
 ax[1].set_title('Noisy data')
 
-ax[2].imshow(deconvolved_RL, vmin=astro_noisy.min(), vmax=astro_noisy.max())
-ax[2].set_title('Restoration using\nGauss prior')
+ax[2].imshow(deconvolved_DNP, vmin=astro_noisy.min(), vmax=astro_noisy.max())
+ax[2].set_title('Restoration using\nnatural Gauss prior')
 
 
 fig.subplots_adjust(wspace=0.02, hspace=0.2,
