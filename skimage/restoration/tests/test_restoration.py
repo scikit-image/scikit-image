@@ -62,7 +62,7 @@ def test_image_shape():
     point[2, 2] = 1.
     psf = ndi.gaussian_filter(point, sigma=1.)
     # image shape: (45, 45), as reported in #1172
-    image = util.img_as_float(camera()[65:165, 215:315]) # just the face
+    image = util.img_as_float(camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
@@ -94,8 +94,10 @@ def test_DNP_Gauss_freq():
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved = restoration.DNP_Gauss_freq(data, psf)
 
-    path = fetch('restoration/tests/camera_dnp.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+    # utilizing the inner region and an absolute error makes a saved
+    # reference image obsolete
+    np.testing.assert_allclose(deconvolved[200:300, 200:300],
+                               test_img[200:300, 200:300], atol=0.3)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float32, np.float64])
