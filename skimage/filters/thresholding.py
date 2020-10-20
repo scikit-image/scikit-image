@@ -274,7 +274,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is None and hist is None:
-        raise Exception("Either name or hist must be provided.")
+        raise Exception("Either image or hist must be provided.")
 
     if hist is not None:
         if isinstance(hist, (tuple, list)):
