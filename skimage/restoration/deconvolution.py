@@ -383,3 +383,93 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
         im_deconv[im_deconv < -1] = -1
 
     return im_deconv
+
+
+def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
+    """ Deconvolution using natural image priors
+        with a Gaussian prior, solved in the frequency domain
+
+    Parameters
+    ----------
+    image : ndarray
+       Input degraded image.
+    psf : ndarray
+       The point spread function.
+    we : float, optional
+       Smoothness weight, see [2]
+    clip : boolean, optional
+       True by default. If true, pixel value of the result above 1 or
+       under 0 are thresholded for skimage pipeline compatibility.
+
+    Returns
+    -------
+    im_deconv : ndarray
+       The deconvolved image.
+
+    Examples
+    --------
+    >>> from skimage import image_as_float, data, restoration
+    >>> camera = img_as_float(data.camera())
+    >>> from scipy.signal import convolve2d
+    >>> psf = np.ones((5, 5)) / 25
+    >>> camera = convolve2d(camera, psf, 'same')
+    >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+    >>> deconvolved = restoration.DNP_Gauss_freq(camera, psf)
+
+    Notes
+    -----
+    This algorithm solves the deconvolution in the frequency domain. Artefacts
+    like 'ringing' on sharp transitions are strongly reduced in comparison to
+    other deconvolution strategies.
+    The smoothness weight needs to be estimated by trial and error. See [1-3]
+    for guidance.
+
+    References
+    ----------
+    .. [1] http://groups.csail.mit.edu/graphics/CodedAperture/
+    .. [2] Levin, A., Fergus, R., Durand, F., & Freeman, W. T. (2007).
+           Deconvolution using natural image priors.
+           Massachusetts Institute of Technology,
+           Computer Science and Artificial Intelligence Laboratory, 3.
+    .. [3] Levin, A., Fergus, R., Durand, F., & Freeman, W. T. (2007).
+           Image and depth from a conventional camera with a coded aperture.
+           ACM transactions on graphics (TOG), 26(3), 70-es.
+    """
+
+    n, m = image.shape
+    # psf.shape() is expected to be odd in both dimension but works with even
+    # too.
+    # not sure if the double flip is needed
+    psf = np.fliplr(np.flipud(psf))
+
+    # force some shapes
+    onesrow = np.array([-1, 1])
+    onesrow.shape = (1, 2)
+    onescol = np.array([-1, 1])
+    onescol.shape = (2, 1)
+    Gx = np.fft.fft2(onesrow, s=(n, m))
+    Gy = np.fft.fft2(onescol, s=(n, m))
+    F = np.fft.fft2(psf, s=(n, m))
+
+    A = np.conj(F)*F + we*(np.conj(Gx)*Gx + np.conj(Gy)*Gy)
+    b = np.conj(F)*np.fft.fft2(image)
+
+    X = np.divide(b, A)
+    x = np.real(np.fft.ifft2(X))
+
+    nf, mf = psf.shape
+    hs1 = np.int(np.floor((nf-1)/2))
+    hs2 = np.int(np.floor((mf-1)/2))
+
+    # complex picking to move time image back into the center
+    nidx = np.arange(0, n)
+    midx = np.arange(0, m)
+    nidxuse = np.concatenate((nidx[-1-hs1+1:], nidx[:-hs1]))
+    midxuse = np.concatenate((midx[-1-hs2+1:], midx[:-hs2]))
+    im_deconv = x[nidxuse[:, np.newaxis], midxuse]
+
+    if clip:
+        im_deconv[im_deconv > 1] = 1
+        im_deconv[im_deconv < 0] = 0
+
+    return im_deconv
