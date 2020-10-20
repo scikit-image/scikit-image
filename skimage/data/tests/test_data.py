@@ -14,27 +14,27 @@ def test_data_dir():
     assert 'astronaut.png' in os.listdir(data_dir)
 
 
-# def test_download_all_with_pooch():
-#     # jni first wrote this test with the intention of
-#     # fully deleting the files in the data_dir,
-#     # then ensure that the data gets downloaded accordingly.
-#     # hmaarrfk raised the concern that this test wouldn't
-#     # play well with parallel testing since we
-#     # may be breaking the global state that certain other
-#     # tests require, especially in parallel testing
-#
-#     # The second concern is that this test essentially uses
-#     # alot of bandwidth, which is not fun for developers on
-#     # lower speed connections.
-#     # https://github.com/scikit-image/scikit-image/pull/4666/files/
-#     # 26d5138b25b958da6e97ebf979e9bc36f32c3568#r422604863
-#     data_dir = data.data_dir
-#     if image_fetcher is not None:
-#         data.download_all()
-#         assert len(os.listdir(data_dir)) > 50
-#     else:
-#         with pytest.raises(ModuleNotFoundError):
-#             data.download_all()
+def test_download_all_with_pooch():
+    # jni first wrote this test with the intention of
+    # fully deleting the files in the data_dir,
+    # then ensure that the data gets downloaded accordingly.
+    # hmaarrfk raised the concern that this test wouldn't
+    # play well with parallel testing since we
+    # may be breaking the global state that certain other
+    # tests require, especially in parallel testing
+
+    # The second concern is that this test essentially uses
+    # alot of bandwidth, which is not fun for developers on
+    # lower speed connections.
+    # https://github.com/scikit-image/scikit-image/pull/4666/files/
+    # 26d5138b25b958da6e97ebf979e9bc36f32c3568#r422604863
+    data_dir = data.data_dir
+    if image_fetcher is not None:
+        data.download_all()
+        assert len(os.listdir(data_dir)) > 50
+    else:
+        with pytest.raises(ModuleNotFoundError):
+            data.download_all()
 
 
 def test_astronaut():
