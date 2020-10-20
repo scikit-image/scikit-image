@@ -237,6 +237,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
 def threshold_otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
+
     Either image or hist must be provided. In case hist is given, the actual
     histogram of the image is ignored.
 
