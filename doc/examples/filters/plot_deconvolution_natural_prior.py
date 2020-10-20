@@ -1,7 +1,7 @@
 """
-=====================
+==================================
 Image Deconvolution Natural Priors
-=====================
+==================================
 In this example, we deconvolve an image using deconvolution with natural
 priors, e.g Gauss, solved in the frequency domain with a new
 deconvolution algorithm ([1]_, [2]_, [3]_).
