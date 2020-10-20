@@ -87,6 +87,17 @@ def test_richardson_lucy():
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
+def test_DNP_Gauss_freq():
+    psf = np.ones((5, 5)) / 25
+    data = convolve2d(test_img, psf, 'same')
+    np.random.seed(0)
+    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    deconvolved = restoration.DNP_Gauss_freq(data, psf)
+
+    path = fetch('restoration/tests/camera_dnp.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+
+
 @pytest.mark.parametrize('dtype_image', [np.float32, np.float64])
 @pytest.mark.parametrize('dtype_psf', [np.float32, np.float64])
 def test_richardson_lucy_filtered(dtype_image, dtype_psf):
