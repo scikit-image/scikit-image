@@ -454,21 +454,21 @@ def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
     Gy = np.fft.fft2(onescol, s=(n, m))
     F = np.fft.fft2(psf, s=(n, m))
 
-    A = np.conj(F)*F + we*(np.conj(Gx)*Gx + np.conj(Gy)*Gy)
-    b = np.conj(F)*np.fft.fft2(image)
+    A = np.conj(F) * F + we * (np.conj(Gx) * Gx + np.conj(Gy) * Gy)
+    b = np.conj(F) * np.fft.fft2(image)
 
     X = np.divide(b, A)
     x = np.real(np.fft.ifft2(X))
 
     nf, mf = psf.shape
-    hs1 = np.int(np.floor((nf-1)/2))
-    hs2 = np.int(np.floor((mf-1)/2))
+    hs1 = np.int(np.floor((nf - 1) / 2))
+    hs2 = np.int(np.floor((mf - 1) / 2))
 
     # complex picking to move time image back into the center
     nidx = np.arange(0, n)
     midx = np.arange(0, m)
-    nidxuse = np.concatenate((nidx[-1-hs1+1:], nidx[:-hs1]))
-    midxuse = np.concatenate((midx[-1-hs2+1:], midx[:-hs2]))
+    nidxuse = np.concatenate((nidx[-1 - hs1 + 1:], nidx[:-hs1]))
+    midxuse = np.concatenate((midx[-1 - hs2 + 1:], midx[:-hs2]))
     im_deconv = x[nidxuse[:, np.newaxis], midxuse]
 
     if clip:
