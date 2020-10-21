@@ -216,11 +216,11 @@ def _polygon(r, c, shape):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    nr_verts = c.shape[0]
-    minr = int(max(0, r.min()))
-    maxr = int(ceil(r.max()))
-    minc = int(max(0, c.min()))
-    maxc = int(ceil(c.max()))
+    cdef Py_ssize_t nr_verts = c.shape[0]
+    cdef Py_ssize_t minr = int(max(0, r.min()))
+    cdef Py_ssize_t maxr = int(ceil(r.max()))
+    cdef Py_ssize_t minc = int(max(0, c.min()))
+    cdef Py_ssize_t maxc = int(ceil(c.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
