@@ -39,12 +39,12 @@ def _generate_rectangle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
 
     """
-    available_width = max(1, min(image[1] - point[1], shape[1]) - shape[0])
-    available_height = max(1, min(image[0] - point[0], shape[1]) - shape[0])
+    available_width = min(image[1] - point[1], shape[1]) - shape[0]
+    available_height = min(image[0] - point[0], shape[1]) - shape[0]
 
     # Pick random widths and heights.
-    r = shape[0] + random.randint(available_height) - 1
-    c = shape[0] + random.randint(available_width) - 1
+    r = shape[0] + random.randint(max(1, available_height)) - 1
+    c = shape[0] + random.randint(max(1, available_width)) - 1
     rectangle = draw_polygon([
         point[0],
         point[0] + r,
@@ -95,16 +95,17 @@ def _generate_circle_mask(point, image, shape, random):
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('size must be > 1 for circles')
-    min_radius = shape[0] / 2.0
-    max_radius = shape[1] / 2.0
+    min_radius = shape[0] // 2.0
+    max_radius = shape[1] // 2.0
     left = point[1]
     right = image[1] - point[1]
     top = point[0]
     bottom = image[0] - point[0]
-    available_radius = min(left, right, top, bottom, max_radius)
-    if available_radius < min_radius:
+    available_radius = min(left, right, top,
+                           bottom, max_radius) - min_radius
+    if available_radius < 0:
         raise ArithmeticError('cannot fit shape to image')
-    radius = random.randint(min_radius, available_radius + 1)
+    radius = int(min_radius + random.randint(max(1, available_radius)))
     # TODO: think about how to deprecate this
     # while draw_circle was deprecated in favor of draw_disk
     # switching to a label of 'disk' here
@@ -127,7 +128,7 @@ def _generate_triangle_mask(point, image, shape, random):
     Parameters
     ----------
     point : tuple
-        The row and column of the top left corner of a down-pointing triangle.
+        The row and column of the top left corner of a up-pointing triangle.
     image : tuple
         The height, width and depth of the image into which the shape
         is placed.
@@ -154,9 +155,9 @@ def _generate_triangle_mask(point, image, shape, random):
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('dimension must be > 1 for triangles')
-    available_side = min(image[1] - point[1],
-                         point[0] + 1, shape[1]) - shape[0]
-    side = shape[0] + random.randint(available_side)
+    available_side = min(image[1] - point[1], point[0],
+                         shape[1]) - shape[0]
+    side = shape[0] + random.randint(max(1, available_side)) - 1
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
     triangle = draw_polygon([
         point[0],
@@ -410,10 +411,11 @@ def random_shapes(image_shape,
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
+        print(shape_generator)
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.randint(image_shape[1] - min_size + 1)
-            row = random.randint(image_shape[0] - min_size + 1)
+            column = random.randint(max(1, image_shape[1] - min_size))
+            row = random.randint(max(1, image_shape[0] - min_size))
             point = (row, column)
             try:
                 indices, label = shape_generator(point, image_shape, shape,
