@@ -115,8 +115,9 @@ def fit_segmenter(labels, features, clf):
     ------
     NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
     """
-    training_data = features[labels > 0]
-    training_labels = labels[labels > 0].ravel()
+    mask = labels > 0
+    training_data = features[mask]
+    training_labels = labels[mask].ravel()
     clf.fit(training_data, training_labels)
     return clf
 
