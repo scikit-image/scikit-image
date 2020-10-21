@@ -40,15 +40,15 @@ Sections
 
        Documentation for the functions included in scikit-image.
 
-   * - `Mission statement <values.html>`_
+   * - `Mission Statement <values.html>`_
 
-       Our mission, vision and values.
+       Our mission, vision, and values.
 
      - `Governance <skips/1-governance.html>`_
 
        How decisions are made in scikit-image.
 
-   * - `Installation Steps <install.html>`_
+   * - `Installation <install.html>`_
 
        How to install scikit-image.
 
@@ -66,9 +66,9 @@ Sections
        <core_developer.html>`_.
 
 
-   * - `Examples <auto_examples/index.html>`_
+   * - `Gallery <auto_examples/index.html>`_
 
-       Introductory examples
+       Introductory generic and domain-specific examples.
 
      - `License Info <license.html>`_
 
