@@ -376,7 +376,6 @@ def random_shapes(image_shape,
     >>> labels # doctest: +SKIP
     [('circle', ((22, 18), (25, 21))),
      ('triangle', ((5, 6), (13, 13)))]
-
     """
     if min_size > image_shape[0] or min_size > image_shape[1]:
         raise ValueError('Minimum dimension must be less than ncols and nrows')
@@ -411,7 +410,6 @@ def random_shapes(image_shape,
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
-        print(shape_generator)
         for _ in range(num_trials):
             # Pick start coordinates.
             column = random.randint(max(1, image_shape[1] - min_size))
