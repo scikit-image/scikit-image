@@ -40,7 +40,7 @@ def _preprocess(image, mask, sigma, mode):
     mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
-        'constant'. Default is 'nearest'.
+        'constant'.
 
     Returns
     -------
