@@ -116,9 +116,9 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         Equalized image.
 
     The number of "effective" graylevels in the output image is set by `nbins`;
-    selecting a small value (eg. 128) speeds up processing and still produce
-    an output image of good quality. A clip limit of 0 or larger equal 1
-    results in standard (non-contrast limited) AHE.
+    selecting a small value (e.g. 128) speeds up processing and still produces
+    an output image of good quality. A clip limit of 0 or larger than or equal
+    to 1 results in standard (non-contrast limited) AHE.
     """
     ndim = image.ndim
     dtype = image.dtype
