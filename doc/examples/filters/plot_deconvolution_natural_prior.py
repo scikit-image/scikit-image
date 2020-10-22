@@ -8,8 +8,8 @@ deconvolution algorithm ([1]_, [2]_, [3]_).
 
 The algorithm is based on a PSF (Point Spread Function),
 where PSF is described as the impulse response of the
-optical system. The blurred image is sharpened with a smoothnes weight,
-which needs to be hand-tuned.
+optical system. The blurred image is sharpened with a smoothness weight,
+which defines the weight of the Gauss prior during deconvolution .
 
 .. [1] http://groups.csail.mit.edu/graphics/CodedAperture/
 .. [2] Levin, A., Fergus, R., Durand, F., & Freeman, W. T. (2007).

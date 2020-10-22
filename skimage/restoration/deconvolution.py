@@ -6,6 +6,7 @@ import numpy.random as npr
 from scipy.signal import convolve
 
 from . import uft
+from .._shared.fft import fftmodule as fft
 
 __keywords__ = "restoration, image, deconvolution"
 
@@ -385,9 +386,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     return im_deconv
 
 
-def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
-    """ Deconvolution using natural image priors
-        with a Gaussian prior, solved in the frequency domain
+def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
+    """ Deconvolution using Gaussian natural image priors.
 
     Parameters
     ----------
@@ -395,8 +395,9 @@ def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
        Input degraded image.
     psf : ndarray
        The point spread function.
-    we : float, optional
-       Smoothness weight, see [2]
+    smoothness_weight : float, optional
+       The smoothness weight defines how much weight the Gaussian prior is
+       given in the process. No prior is used when smoothness_weight=0.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under 0 are thresholded for skimage pipeline compatibility.
@@ -450,19 +451,20 @@ def DNP_Gauss_freq(image, psf, we=0.01, clip=True):
     onesrow.shape = (1, 2)
     onescol = np.array([-1, 1])
     onescol.shape = (2, 1)
-    Gx = np.fft.fft2(onesrow, s=(n, m))
-    Gy = np.fft.fft2(onescol, s=(n, m))
-    F = np.fft.fft2(psf, s=(n, m))
+    Gx = fft.fft2(onesrow, s=(n, m))
+    Gy = fft.fft2(onescol, s=(n, m))
+    F = fft.fft2(psf, s=(n, m))
 
-    A = np.conj(F) * F + we * (np.conj(Gx) * Gx + np.conj(Gy) * Gy)
-    b = np.conj(F) * np.fft.fft2(image)
+    A = np.conj(F) * F + smoothness_weight * (np.conj(Gx) * Gx
+                                              + np.conj(Gy) * Gy)
+    b = np.conj(F) * fft.fft2(image)
 
     X = np.divide(b, A)
-    x = np.real(np.fft.ifft2(X))
+    x = np.real(fft.ifft2(X))
 
     nf, mf = psf.shape
-    hs1 = np.int(np.floor((nf - 1) / 2))
-    hs2 = np.int(np.floor((mf - 1) / 2))
+    hs1 = (nf - 1) // 2
+    hs2 = (mf - 1) // 2
 
     # complex picking to move time image back into the center
     nidx = np.arange(0, n)
