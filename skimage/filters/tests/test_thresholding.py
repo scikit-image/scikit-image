@@ -466,6 +466,17 @@ def test_threshold_minimum():
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+def test_threshold_minimum_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=hist)
+    assert_equal(threshold, 85)
+
+def test_threshold_minimum_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=counts)
+    assert_equal(threshold, 85)
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))

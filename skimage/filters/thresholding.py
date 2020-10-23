@@ -720,22 +720,29 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-def threshold_minimum(image, nbins=256, max_iter=10000):
+def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
-    The histogram of the input ``image`` is computed and smoothed until
-    there are only two maxima. Then the minimum in between is the threshold
-    value.
+    The histogram of the input ``image`` is computed if not provided and
+    smoothed until there are only two maxima. Then the minimum in between is
+    the threshold value.
+
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : (M, N) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     max_iter : int, optional
         Maximum number of iterations to smooth the histogram.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -783,9 +790,19 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
 
-    smooth_hist = hist.astype(np.float64, copy=False)
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
+        else:
+            counts = hist
+            bin_centers = np.arange(counts.size)
+    else:
+        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    smooth_hist = counts.astype(np.float64, copy=False)
 
     for counter in range(max_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
