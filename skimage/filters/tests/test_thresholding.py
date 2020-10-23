@@ -389,6 +389,18 @@ def test_isodata_camera_image():
 
     assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
 
+def test_isodata_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=hist)
+    assert threshold == 102
+
+def test_isodata_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=counts)
+    assert threshold == 102
+
 
 def test_isodata_coins_image():
     coins = util.img_as_ubyte(data.coins())

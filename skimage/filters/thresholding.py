@@ -401,7 +401,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image, nbins=256, return_all=False):
+def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
@@ -417,9 +417,12 @@ def threshold_isodata(image, nbins=256, return_all=False):
     For integer images, the above equality holds to within one; for floating-
     point images, the equality holds to within the histogram bin-width.
 
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
+
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -427,6 +430,10 @@ def threshold_isodata(image, nbins=256, return_all=False):
     return_all : bool, optional
         If False (default), return only the lowest threshold that satisfies
         the above equality. If True, return all valid thresholds.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -454,7 +461,30 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
+
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
+        else:
+            counts = hist
+            bin_centers = np.arange(counts.size)
+    else:
+        if image.ndim > 2 and image.shape[-1] in (3, 4):
+            msg = "threshold_otsu is expected to work correctly only for " \
+                  "grayscale images; image shape {0} looks like an RGB image"
+            warn(msg.format(image.shape))
+
+        # Check if the image is multi-colored or not
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
+
+        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    counts = counts.astype(float)
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -463,15 +493,15 @@ def threshold_isodata(image, nbins=256, return_all=False):
         else:
             return bin_centers[0]
 
-    hist = hist.astype(np.float32)
+    counts = counts.astype(np.float32)
 
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
-    csuml = np.cumsum(hist)
+    csuml = np.cumsum(counts)
     csumh = csuml[-1] - csuml
 
     # intensity_sum contains the total pixel intensity from each bin
-    intensity_sum = hist * bin_centers
+    intensity_sum = counts * bin_centers
 
     # l and h contain average value of all pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively.
