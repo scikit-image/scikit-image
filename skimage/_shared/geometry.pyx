@@ -35,7 +35,7 @@ cdef unsigned char point_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
     cdef np_floats x0, x1, y0, y1, eps
     cdef unsigned int l_cross = 0, r_cross = 0
 
-    # Tolerence for vertices labelling
+    # Tolerance for vertices labelling
     eps = 1e-12
 
     # Initialization the loop
