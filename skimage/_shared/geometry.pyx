@@ -22,7 +22,7 @@ cdef unsigned char point_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
     Returns
     -------
     c : unsigned char
-        Point relative position to the polygone O: outside, 1: inside,
+        Point relative position to the polygon O: outside, 1: inside,
         2: vertex; 3: edge.
 
     References
