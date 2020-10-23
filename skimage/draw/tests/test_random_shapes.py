@@ -33,7 +33,6 @@ def test_generates_correct_bounding_boxes_for_rectangles():
     assert (crop >= 0).all() and (crop < 255).all()
 
     # The crop is complete.
-    print(bbox)
     image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
     assert (image == 255).all()
 
