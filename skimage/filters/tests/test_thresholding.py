@@ -230,7 +230,7 @@ def test_otsu_camera_image_histogram():
 
 def test_otsu_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
-    counts = histogram(camera.ravel(), 256, source_range='image')
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=counts) < 103
 
 def test_otsu_coins_image():
