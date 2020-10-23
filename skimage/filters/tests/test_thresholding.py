@@ -352,6 +352,16 @@ def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 145 < threshold_yen(camera) < 147
 
+def test_yen_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=hist) < 147
+
+def test_yen_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=counts) < 147
+
 
 def test_yen_coins_image():
     coins = util.img_as_ubyte(data.coins())

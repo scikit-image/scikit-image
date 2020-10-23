@@ -317,16 +317,22 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     return threshold
 
 
-def threshold_yen(image, nbins=256):
+def threshold_yen(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Yen's method.
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -352,14 +358,38 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
+
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
+        else:
+            counts = hist
+            bin_centers = np.arange(counts.size)
+    else:
+        if image.ndim > 2 and image.shape[-1] in (3, 4):
+            msg = "threshold_otsu is expected to work correctly only for " \
+                  "grayscale images; image shape {0} looks like an RGB image"
+            warn(msg.format(image.shape))
+
+        # Check if the image is multi-colored or not
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
+
+        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+
+    counts = counts.astype(float)
+
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns ``bin_centers`` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
 
     # Calculate probability mass function
-    pmf = hist.astype(np.float32) / hist.sum()
+    pmf = counts.astype(np.float32) / counts.sum()
     P1 = np.cumsum(pmf)  # Cumulative normalized histogram
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
