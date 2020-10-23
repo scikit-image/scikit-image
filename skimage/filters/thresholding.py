@@ -369,16 +369,6 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
             counts = hist
             bin_centers = np.arange(counts.size)
     else:
-        if image.ndim > 2 and image.shape[-1] in (3, 4):
-            msg = "threshold_otsu is expected to work correctly only for " \
-                  "grayscale images; image shape {0} looks like an RGB image"
-            warn(msg.format(image.shape))
-
-        # Check if the image is multi-colored or not
-        first_pixel = image.ravel()[0]
-        if np.all(image == first_pixel):
-            return first_pixel
-
         counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     counts = counts.astype(float)
@@ -472,16 +462,6 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
             counts = hist
             bin_centers = np.arange(counts.size)
     else:
-        if image.ndim > 2 and image.shape[-1] in (3, 4):
-            msg = "threshold_otsu is expected to work correctly only for " \
-                  "grayscale images; image shape {0} looks like an RGB image"
-            warn(msg.format(image.shape))
-
-        # Check if the image is multi-colored or not
-        first_pixel = image.ravel()[0]
-        if np.all(image == first_pixel):
-            return first_pixel
-
         counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     counts = counts.astype(float)
