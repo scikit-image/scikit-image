@@ -48,7 +48,7 @@ cdef unsigned char point_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
         y0 = yp[i] - y
 
         if (-eps < x0 < eps) and (-eps < y0 < eps):
-            # it is a vertex with an eps tolerence
+            # it is a vertex with an eps tolerance
             return VERTEX
 
         # if e straddles the x-axis
