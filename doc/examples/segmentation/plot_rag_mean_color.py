@@ -8,18 +8,18 @@ which are similar in color. We construct a RAG and define edges as the
 difference in mean color. We then join regions with similar mean color.
 """
 
-from skimage import data, segmentation, color
-from skimage.segmentation import graph
 from matplotlib import pyplot as plt
+from skimage import data, segmentation, color, util
+from skimage.segmentation import graph
 
 
-img = data.coffee()
+img = util.img_as_float(data.coffee())
 
 labels1 = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 out1 = color.label2rgb(labels1, img, kind='avg', bg_label=0)
 
 g = graph.rag_mean_color(img, labels1)
-labels2 = graph.cut_threshold(labels1, g, 29)
+labels2 = graph.cut_threshold(labels1, g, 0.1)
 out2 = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 
 fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True,
@@ -31,4 +31,5 @@ ax[1].imshow(out2)
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
+plt.show()
