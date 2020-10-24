@@ -9,10 +9,10 @@ a new region with all the pixels from the merged regions. Regions are merged
 until no highly similar region pairs remain.
 
 """
-
-from skimage import data, io, segmentation, color
-from skimage.segmentation import graph
 import numpy as np
+import matplotlib.pyplot as plt
+from skimage import data, segmentation, color, util
+from skimage.segmentation import graph
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -59,16 +59,24 @@ def merge_mean_color(graph, src, dst):
                                       graph.nodes[dst]['pixel count'])
 
 
-img = data.coffee()
-labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
-g = graph.rag_mean_color(img, labels)
+image = util.img_as_float(data.eagle())
+labels = segmentation.slic(
+    image, compactness=0.5, n_segments=400, start_label=1, multichannel=False
+    )
+g = graph.rag_mean_color(image, labels)
 
-labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
-                                   in_place_merge=True,
-                                   merge_func=merge_mean_color,
-                                   weight_func=_weight_mean_color)
+labels2 = graph.merge_hierarchical(
+    labels, g,
+    thresh=3,
+    rag_copy=True,
+    in_place_merge=True,
+    merge_func=merge_mean_color,
+    weight_func=_weight_mean_color,
+    )
 
-out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
+out = color.label2rgb(labels2, image, kind='overlay', bg_label=0)
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
-io.imshow(out)
-io.show()
+
+fig, ax = plt.subplots()
+ax.imshow(out)
+plt.show()
