@@ -14,14 +14,14 @@ For an example of how to construct region boundary based RAGs, see
 
 """
 
+from matplotlib import pyplot as plt
+import numpy as np
 from skimage import data, segmentation, filters, color
 from skimage.segmentation import graph
-from matplotlib import pyplot as plt
 
 
 def weight_boundary(graph, src, dst, n):
-    """
-    Handle merging of nodes of a region boundary region adjacency graph.
+    """Handle merging of nodes of a region boundary region adjacency graph.
 
     This function computes the `"weight"` and the count `"count"`
     attributes of the edge between `n` and the node formed after
@@ -66,13 +66,18 @@ def merge_boundary(graph, src, dst):
     """
     pass
 
-img = data.coffee()
-edges = filters.sobel(color.rgb2gray(img))
-labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
+
+image = data.coffee()
+edges = filters.sobel(color.rgb2gray(image))
+labels = segmentation.slic(
+    image, compactness=30, n_segments=400, start_label=1
+    )
 g = graph.rag_boundary(labels, edges)
 
-graph.show_rag(labels, g, img)
-plt.title('Initial RAG')
+fig, axes = plt.subplots(1, 3, sharex=True, sharey=True)
+
+graph.show_rag(labels, g, image, ax=axes[0])
+axes[0].set_title('Initial RAG')
 
 labels2 = graph.merge_hierarchical(
     labels, g, thresh=0.08, rag_copy=False,
@@ -81,12 +86,11 @@ labels2 = graph.merge_hierarchical(
     weight_func=weight_boundary,
 )
 
-graph.show_rag(labels, g, img)
-plt.title('RAG after hierarchical merging')
+graph.show_rag(labels, g, image, ax=axes[1])
+axes[1].set_title('RAG after hierarchical merging')
 
-plt.figure()
-out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
-plt.imshow(out)
-plt.title('Final segmentation')
+out = color.label2rgb(labels2, image, kind='avg', bg_label=0)
+axes[2].imshow(np.round(out).astype(np.uint8))
+axes[2].set_title('Final segmentation')
 
 plt.show()
