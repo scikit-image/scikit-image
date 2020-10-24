@@ -7,9 +7,9 @@ This example constructs a Region Adjacency Graph (RAG) and draws it with
 the `rag_draw` method.
 """
 
+import matplotlib.pyplot as plt
 from skimage import data, segmentation
 from skimage.segmentation import graph
-from matplotlib import pyplot as plt
 
 
 img = data.coffee()
@@ -31,5 +31,5 @@ fig.colorbar(lc, fraction=0.03, ax=ax[1])
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
