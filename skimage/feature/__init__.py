@@ -27,7 +27,7 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
-
+from .haar_fast import (haar_like_feature_fast)
 
 @deprecated(alt_func='skimage.registration.phase_cross_correlation',
             removed_version='0.19')
@@ -89,4 +89,5 @@ __all__ = ['canny',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'draw_haar_like_feature']
+           'draw_haar_like_feature',
+           'haar_like_feature_fast']
