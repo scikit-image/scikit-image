@@ -547,7 +547,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     offset = 1
     map_array = np.arange(labels.max() + 1)
     for n, d in rag.nodes(data=True):
-        for label in d['labels']:
+        for label in d.get('labels', [n]):
             map_array[label] = offset
         offset += 1
 
