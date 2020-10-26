@@ -235,6 +235,50 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     return thresh_image - offset
 
+
+def _validate_image_histogram(image, hist, nbins=None):
+    """Ensure that either image or hist were given, return valid histogram.
+
+    If hist is given, image is ignored.
+
+    Parameters
+    ----------
+    image : array or None
+        Grayscale image.
+    hist : array, 2-tuple of array, or None
+        Histogram, either a 1D counts array, or an array of counts together
+        with an array of bin centers.
+    nbins : int, optional
+        The number of bins with which to compute the histogram, if `hist` is
+        None.
+
+    Returns
+    -------
+    counts : 1D array of float
+        The number of pixels falling in each intensity bin
+    bin_centers : 1D array
+        The value corresponding to the center of each intensity bin.
+
+    Raises
+    ------
+    ValueError : if image and hist are both None
+    """
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
+
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
+        else:
+            counts = hist
+            bin_centers = np.arange(counts.size)
+    else:
+        counts, bin_centers = histogram(
+                image.ravel(), nbins, source_range='image'
+            )
+    return counts.astype(float), bin_centers
+
+
 def threshold_otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
 
@@ -274,29 +318,19 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     -----
     The input image must be grayscale.
     """
-    if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
 
-    if hist is not None:
-        if isinstance(hist, (tuple, list)):
-            counts, bin_centers = hist
-        else:
-            counts = hist
-            bin_centers = np.arange(counts.size)
-    else:
-        if image.ndim > 2 and image.shape[-1] in (3, 4):
-            msg = "threshold_otsu is expected to work correctly only for " \
-                  "grayscale images; image shape {0} looks like an RGB image"
-            warn(msg.format(image.shape))
-
-        # Check if the image is multi-colored or not
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
         first_pixel = image.ravel()[0]
         if np.all(image == first_pixel):
             return first_pixel
 
-        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
-
-    counts = counts.astype(float)
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     # class probabilities for all possible thresholds
     weight1 = np.cumsum(counts)
@@ -358,20 +392,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-
-    if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
-
-    if hist is not None:
-        if isinstance(hist, (tuple, list)):
-            counts, bin_centers = hist
-        else:
-            counts = hist
-            bin_centers = np.arange(counts.size)
-    else:
-        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
-
-    counts = counts.astype(float)
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns ``bin_centers`` containing only one value. Speed up with it.
@@ -451,20 +472,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-
-    if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
-
-    if hist is not None:
-        if isinstance(hist, (tuple, list)):
-            counts, bin_centers = hist
-        else:
-            counts = hist
-            bin_centers = np.arange(counts.size)
-    else:
-        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
-
-    counts = counts.astype(float)
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -770,17 +778,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
         return maximum_idxs
 
-    if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
-
-    if hist is not None:
-        if isinstance(hist, (tuple, list)):
-            counts, bin_centers = hist
-        else:
-            counts = hist
-            bin_centers = np.arange(counts.size)
-    else:
-        counts, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     smooth_hist = counts.astype(np.float64, copy=False)
 
