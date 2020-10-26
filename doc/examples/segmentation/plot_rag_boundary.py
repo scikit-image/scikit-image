@@ -30,4 +30,4 @@ lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis',
                     edge_width=1.2, ax=ax)
 
 fig.colorbar(lc, fraction=0.03)
-io.show()
+plt.show()
