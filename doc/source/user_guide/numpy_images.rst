@@ -118,7 +118,7 @@ This shows that ``cat`` is a 300-by-451 pixel image with three channels
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
 We can also use 2D boolean masks for 2D multichannel images, as we did with
-the grayscale image above::
+the grayscale image above:
 
 .. plot::
 

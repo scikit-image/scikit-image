@@ -128,7 +128,7 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -160,7 +160,7 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -214,7 +214,7 @@ def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
         return data._fetch(data_filename)
-    except ConnectionError:
+    except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}')
 
 

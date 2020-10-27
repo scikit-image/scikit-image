@@ -7,9 +7,8 @@ connected to a given seed point with a different value.
 import numpy as np
 from warnings import warn
 
-from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
-                      _fast_pad)
-from ._util import _offsets_to_raveled_neighbors
+from ._util import (_resolve_neighborhood, _set_border_values,
+                    _fast_pad, _offsets_to_raveled_neighbors)
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 
@@ -225,8 +224,6 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
         image = np.ascontiguousarray(image)
         order = 'C'
 
-    seed_value = image[seed_point]
-
     # Shortcut for rank zero
     if 0 in image.shape:
         return np.zeros(image.shape, dtype=np.bool)
@@ -237,20 +234,23 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     except TypeError:
         seed_point = (seed_point,)
 
+    seed_value = image[seed_point]
+    seed_point = tuple(np.asarray(seed_point) % image.shape)
+
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
 
     # Must annotate borders
-    working_image = _fast_pad(image, image.min())
+    working_image = _fast_pad(image, image.min(), order=order)
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
-    ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
+    ravelled_seed_idx = np.ravel_multi_index([i + 1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, selem, center=((1,) * image.ndim))
+        working_image.shape, selem, center=((1,) * image.ndim), order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
-    flags = np.zeros(working_image.shape, dtype=np.uint8)
-    _set_edge_values_inplace(flags, value=2)
+    flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)
+    _set_border_values(flags, value=2)
 
     try:
         if tolerance is not None:
@@ -265,16 +265,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
             high_tol = min(max_value, seed_value + tolerance)
             low_tol = max(min_value, seed_value - tolerance)
 
-            _flood_fill_tolerance(working_image.ravel(),
-                                  flags.ravel(),
+            _flood_fill_tolerance(working_image.ravel(order),
+                                  flags.ravel(order),
                                   neighbor_offsets,
                                   ravelled_seed_idx,
                                   seed_value,
                                   low_tol,
                                   high_tol)
         else:
-            _flood_fill_equal(working_image.ravel(),
-                              flags.ravel(),
+            _flood_fill_equal(working_image.ravel(order),
+                              flags.ravel(order),
                               neighbor_offsets,
                               ravelled_seed_idx,
                               seed_value)

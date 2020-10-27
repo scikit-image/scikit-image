@@ -115,7 +115,9 @@ def _blob_overlap(blob1, blob2, *, sigma_dim=1):
 
     # we divide coordinates by sigma * sqrt(ndim) to rescale space to isotropy,
     # giving spheres of radius = 1 or < 1.
-    if blob1[-1] > blob2[-1]:
+    if blob1[-1] == blob2[-1] == 0:
+        return 0.0
+    elif blob1[-1] > blob2[-1]:
         max_sigma = blob1[-sigma_dim:]
         r1 = 1
         r2 = blob2[-1] / blob1[-1]
@@ -182,7 +184,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
                 else:
                     blob1[-1] = 0
 
-    return np.array([b for b in blobs_array if b[-1] > 0])
+    return np.stack([b for b in blobs_array if b[-1] > 0])
 
 
 def _format_exclude_border(img_ndim, exclude_border):

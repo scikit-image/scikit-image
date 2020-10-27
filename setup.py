@@ -26,7 +26,7 @@ PROJECT_URLS = {
     "Source Code": 'https://github.com/scikit-image/scikit-image'
 }
 
-with open('README.md') as f:
+with open('README.md', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
 if sys.version_info < (3, 6):
@@ -107,7 +107,7 @@ def openmp_build_ext():
     return ConditionalOpenMP
 
 
-with open('skimage/__init__.py') as fid:
+with open('skimage/__init__.py', encoding='utf-8') as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.strip().split()[-1][1:-1]
@@ -115,7 +115,7 @@ with open('skimage/__init__.py') as fid:
 
 
 def parse_requirements_file(filename):
-    with open(filename) as fid:
+    with open(filename, encoding='utf-8') as fid:
         requires = [l.strip() for l in fid.readlines() if l]
 
     return requires
@@ -155,9 +155,16 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
+    cmdclass = {'build_py': build_py,
+                'sdist': sdist}
     try:
+        # test if build dependencies exist.
+        # if not, some commands are still viable.
+        # note: this must be kept in sync with pyproject.toml
         from numpy.distutils.core import setup
+        import cython
         extra = {'configuration': configuration}
+        cmdclass['build_ext'] = openmp_build_ext()
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
@@ -165,12 +172,13 @@ if __name__ == "__main__":
                                                    'clean',
                                                    'egg_info',
                                                    'install_egg_info',
-                                                   'rotate')):
-            # For these actions, NumPy is not required.
+                                                   'rotate',
+                                                   'sdist')):
+            # For these actions, compilation is not required.
             #
-            # They are required to succeed without Numpy for example when
-            # pip is used to install scikit-image when Numpy is not yet
-            # present in the system.
+            # They are required to succeed for example when pip is
+            # used to install scikit-image when Numpy/cython are not
+            # yet present in the system.
             from setuptools import setup
             extra = {}
         else:
@@ -191,6 +199,7 @@ if __name__ == "__main__":
         name=DISTNAME,
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
+        long_description_content_type="text/markdown",
         maintainer=MAINTAINER,
         maintainer_email=MAINTAINER_EMAIL,
         url=URL,
@@ -229,8 +238,6 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass={'build_py': build_py,
-                  'build_ext': openmp_build_ext(),
-                  'sdist': sdist},
+        cmdclass=cmdclass,
         **extra
     )

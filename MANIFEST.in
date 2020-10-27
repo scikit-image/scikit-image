@@ -1,7 +1,7 @@
 include setup*.py
 include MANIFEST.in
-include README.md
-include LICENSE.txt
+include pyproject.toml
+include *.md
 include *.txt
 include *.rst
 recursive-include requirements *.txt

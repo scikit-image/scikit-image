@@ -80,4 +80,4 @@ class TestMatchHistogram:
 
             channels_pdf.append((channel_values, channel_quantiles))
 
-        return np.asarray(channels_pdf)
+        return np.asarray(channels_pdf, dtype=object)
