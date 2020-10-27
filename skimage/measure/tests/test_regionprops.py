@@ -3,6 +3,8 @@ import math
 import numpy as np
 from numpy import array
 
+from skimage import data
+from skimage.segmentation import slic
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           perimeter_crofton, euler_number,
@@ -693,3 +695,24 @@ def test_extra_properties_table():
                             )
     assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
     assert_array_equal(out['pixelcount'], array([10, 2]))
+
+
+def test_multichannel():
+    """Test that computing multichannel properties works."""
+    astro = data.astronaut()
+    astro_green = astro[..., 1]
+    labels = slic(astro.astype(float), start_label=1)
+
+    segment_idx = np.max(labels) // 2
+    region = regionprops(labels, astro_green)[segment_idx]
+    region_multi = regionprops(labels, astro, multichannel=True)[segment_idx]
+    for prop in PROPS:
+        p = region[prop]
+        p_multi = region_multi[prop]
+        if np.shape(p) == np.shape(p_multi):
+            # property does not depend on multiple channels
+            assert_array_equal(p, p_multi)
+        else:
+            # property uses multiple channels, returns props stacked along
+            # final axis
+            assert_array_equal(p, np.asarray(p_multi)[..., 1])
