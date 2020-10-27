@@ -313,13 +313,9 @@ def test_rescale_nan_warning(in_range, out_range):
         r"Passing `np.nan` to mean no clipping in np.clip "
         r"has always been unreliable|\A\Z"
     )
-    # 2019/12/06 Passing NaN to np.min and np.max raises a RuntimeWarning for
-    # NumPy < 1.16
-    # TODO: Remove once minimal required NumPy version is 1.16
-    numpy_warning_smaller_1_16 = r"invalid value encountered in reduce|\A\Z"
 
     with expected_warnings(
-            [msg, numpy_warning_1_17_plus, numpy_warning_smaller_1_16]
+            [msg, numpy_warning_1_17_plus]
     ):
         exposure.rescale_intensity(image, in_range, out_range)
 
