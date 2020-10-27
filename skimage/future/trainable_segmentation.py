@@ -12,8 +12,7 @@ except ImportError:
 
 
 class TrainableSegmenter(object):
-    """
-    Estimator for classifying pixels.
+    """Estimator for classifying pixels.
 
     Parameters
     ----------
@@ -53,8 +52,7 @@ class TrainableSegmenter(object):
         self.features = self.features_func(image)
 
     def fit(self, labels, image=None):
-        """
-        Train classifier using partially labeled (annotated) image.
+        """Train classifier using partially labeled (annotated) image.
 
         Parameters
         ----------
@@ -70,8 +68,7 @@ class TrainableSegmenter(object):
         clf = fit_segmenter(labels, self.features, self.clf)
 
     def predict(self, image):
-        """
-        Segment new image using trained internal classifier.
+        """Segment new image using trained internal classifier.
 
         Parameters
         ----------
@@ -90,8 +87,7 @@ class TrainableSegmenter(object):
 
 
 def fit_segmenter(labels, features, clf):
-    """
-    Segmentation using labeled parts of the image and a classifier.
+    """Segmentation using labeled parts of the image and a classifier.
 
     Parameters
     ----------
@@ -123,8 +119,7 @@ def fit_segmenter(labels, features, clf):
 
 
 def predict_segmenter(features, clf):
-    """
-    Segmentation of images using a pretrained classifier.
+    """Segmentation of images using a pretrained classifier.
 
     Parameters
     ----------
