@@ -491,18 +491,18 @@ class RegionProperties:
     @_cached
     def weighted_moments_central(self):
         ctr = self.weighted_local_centroid
-        image = (
-            self._intensity_image_double()
-            if self._multichannel
-            else np.expand_dims(self._intensity_image_double(), self._ndim)
-        )
-        moments = [
-            _moments.moments_central(
-                image[..., i], center=ctr[..., i], order=3
-            )
-            for i in range(image.shape[-1])
-        ]
-        return np.squeeze(np.stack(moments, axis=-1))
+        image = self._intensity_image_double()
+        if self._multichannel:
+            moments_list = [
+                _moments.moments_central(
+                    image[..., i], center=ctr[..., i], order=3
+                )
+                for i in range(image.shape[-1])
+            ]
+            moments = np.stack(moments_list, axis=-1)
+        else:
+            moments = _moments.moments_central(image, ctr, order=3)
+        return moments
 
     @property
     @only2d
