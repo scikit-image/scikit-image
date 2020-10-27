@@ -102,7 +102,7 @@ def test_trainable_segmentation_oo():
         sigma_max=2,
     )
     segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
-    segmenter.fit(labels, img)
+    segmenter.fit(img, labels)
     out = segmenter.predict(img)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)

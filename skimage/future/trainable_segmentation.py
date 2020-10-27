@@ -52,19 +52,19 @@ class TrainableSegmenter(object):
             self.features_func = multiscale_basic_features
         self.features = self.features_func(image)
 
-    def fit(self, labels, image=None):
+    def fit(self, image, labels):
         """
         Train classifier using partially labeled (annotated) image.
 
         Parameters
         ----------
+        image : ndarray
+            Input image, which can be grayscale or multichannel, and must have a
+            number of dimensions compatible with ``self.features_func``.
         labels : ndarray of ints
             Labeled array of shape compatible with ``image`` (same shape for a
             single-channel image). Labels >= 1 correspond to the training set and
             label 0 to unlabeled pixels to be segmented.
-        image : ndarray
-            Input image, which can be grayscale or multichannel, and must have a
-            number of dimensions compatible with ``self.features_func``.
         """
         self.compute_features(image)
         clf = fit_segmenter(labels, self.features, self.clf)
