@@ -1077,7 +1077,7 @@ def skin():
 
     Notes
     -----
-    This image requires an Internet connexion the first time it is called,
+    This image requires an Internet connection the first time it is called,
     and to have the ``pooch`` package installed, in order to fetch the image
     file from the scikit-image datasets repository.
 
