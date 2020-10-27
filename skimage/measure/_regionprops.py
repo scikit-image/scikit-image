@@ -206,12 +206,13 @@ class RegionProperties:
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, *, extra_properties=None):
+                 cache_active, *, extra_properties=None, multichannel=False):
 
         if intensity_image is not None:
-            if not intensity_image.shape == label_image.shape:
-                raise ValueError('Label and intensity image must have the'
-                                 ' same shape.')
+            ndim = label_image.ndim
+            if not intensity_image.shape[:ndim] == label_image.shape:
+                raise ValueError('Label and intensity image shapes must match,'
+                                 ' except for channels (last) axis.')
 
         self.label = label
 
@@ -223,6 +224,8 @@ class RegionProperties:
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
+        self._multichannel = multichannel
+        self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
         if extra_properties is None:
@@ -371,7 +374,12 @@ class RegionProperties:
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
-        return self._intensity_image[self.slice] * self.image
+        image = (
+            self.image
+            if not self._multichannel
+            else np.expand_dims(self.image, self._ndim)
+        )
+        return self._intensity_image[self.slice] * image
 
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
@@ -384,15 +392,15 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image])
+        return np.max(self.intensity_image[self.image], axis=0)
 
     @property
     def mean_intensity(self):
-        return np.mean(self.intensity_image[self.image])
+        return np.mean(self.intensity_image[self.image], axis=0)
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image])
+        return np.min(self.intensity_image[self.image], axis=0)
 
     @property
     def major_axis_length(self):
@@ -468,23 +476,60 @@ class RegionProperties:
     @property
     @_cached
     def weighted_moments(self):
-        return _moments.moments(self._intensity_image_double(), 3)
+        image = (
+            self._intensity_image_double()
+            if self._multichannel
+            else np.expand_dims(self._intensity_image_double(), self._ndim)
+        )
+        moments = [
+            _moments.moments(image[..., i], order=3)
+            for i in range(image.shape[-1])
+        ]
+        return np.squeeze(np.stack(moments, axis=-1))
 
     @property
     @_cached
     def weighted_moments_central(self):
         ctr = self.weighted_local_centroid
-        return _moments.moments_central(self._intensity_image_double(),
-                                        center=ctr, order=3)
+        image = (
+            self._intensity_image_double()
+            if self._multichannel
+            else np.expand_dims(self._intensity_image_double(), self._ndim)
+        )
+        moments = [
+            _moments.moments_central(
+                image[..., i], center=ctr[..., i], order=3
+            )
+            for i in range(image.shape[-1])
+        ]
+        return np.squeeze(np.stack(moments, axis=-1))
 
     @property
     @only2d
     def weighted_moments_hu(self):
-        return _moments.moments_hu(self.weighted_moments_normalized)
+        nu = self.weighted_moments_normalized
+        if self._multichannel:
+            nchannels = self._intensity_image.shape[-1]
+            return np.stack(
+                [_moments.moments_hu(nu[..., i]) for i in range(nchannels)],
+                axis=-1,
+            )
+        else:
+            return _moments.moments_hu(nu)
 
     @property
     @_cached
     def weighted_moments_normalized(self):
+        mu = self.weighted_moments_central
+        if self._multichannel:
+            nchannels = self._intensity_image.shape[-1]
+            return np.stack(
+                [_moments.moments_normalized(mu[..., i], order=3)
+                 for i in range(nchannels)],
+                axis=-1,
+            )
+        else:
+            return _moments.moments_normalized(mu, order=3)
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
     def __iter__(self):
@@ -654,7 +699,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-', extra_properties=None):
+                      cache=True, separator='-', extra_properties=None,
+                      multichannel=False):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -698,6 +744,8 @@ def regionprops_table(label_image, intensity_image=None,
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
+    multichannel : bool
+        Whether the intensity image has multiple channels.
 
     Returns
     -------
@@ -807,7 +855,8 @@ def regionprops_table(label_image, intensity_image=None,
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None, *, extra_properties=None):
+                coordinates=None, *, extra_properties=None,
+                multichannel=False):
     r"""Measure properties of labeled image regions.
 
     Parameters
@@ -821,8 +870,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
             inconsistent handling of images with singleton dimensions. To
             recover the old behaviour, use
             ``regionprops(np.squeeze(label_image), ...)``.
-    intensity_image : (M, N[, P]) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image.
+    intensity_image : (M, N[, P][, C]) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image, plus
+        optionally an extra dimension for multichannel data.
         Default is None.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
@@ -850,6 +900,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
+    multichannel : bool
+        Whether the intensity image has multiple channels.
+
+        .. versionadded:: 0.18.0
 
     Returns
     -------
@@ -1091,7 +1145,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache, extra_properties=extra_properties)
+                                 cache, extra_properties=extra_properties,
+                                 multichannel=multichannel)
         regions.append(props)
 
     return regions
