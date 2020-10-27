@@ -29,7 +29,7 @@ image[rr, cc] = 1
 image[30:80, 200:250] = 1
 image[80:130, 250:300] = 1
 
-coords = corner_peaks(corner_harris(image), min_distance=5)
+coords = corner_peaks(corner_harris(image), min_distance=5, threshold_rel=0.02)
 coords_subpix = corner_subpix(image, coords, window_size=13)
 
 fig, ax = plt.subplots()

@@ -4,7 +4,7 @@
 
 import numpy as np
 cimport numpy as cnp
-
+cnp.import_array()
 
 cdef float cell_hog(double[:, ::1] magnitude,
                     double[:, ::1] orientation,

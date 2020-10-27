@@ -7,9 +7,11 @@ from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import check_nD, warn
 from ..transform import integral_image
-from ..util import crop, dtype_limits
+from ..util import dtype_limits
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
                                   _get_multiotsu_thresh_indices)
+
+from ._sparse import correlate_sparse, _validate_window_size
 
 
 __all__ = ['try_all_threshold',
@@ -251,11 +253,6 @@ def threshold_otsu(image, nbins=256):
         Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
-    Raises
-    ------
-    ValueError
-         If ``image`` only contains a single grayscale value.
-
     References
     ----------
     .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
@@ -271,16 +268,15 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+    if image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
 
     # Check if the image is multi-colored or not
-    if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images "
-                         "having more than one color. The input image seems "
-                         "to have just one color {0}.".format(image.min()))
+    first_pixel = image.ravel()[0]
+    if np.all(image == first_pixel):
+        return first_pixel
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
@@ -838,26 +834,6 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def _validate_window_size(axis_sizes):
-    """Ensure all sizes in ``axis_sizes`` are odd.
-
-    Parameters
-    ----------
-    axis_sizes : iterable of int
-
-    Raises
-    ------
-    ValueError
-        If any given axis size is even.
-    """
-    for axis_size in axis_sizes:
-        if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
-                   '`threshold_niblack` must not be even on any dimension. '
-                   'Got {}'.format(axis_sizes))
-            raise ValueError(msg)
-
-
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
@@ -905,10 +881,10 @@ def _mean_std(image, w):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     total_window_size = np.prod(w)
-    sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, pad_width) / total_window_size
-    sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, pad_width) / total_window_size
+    sum_full = correlate_sparse(integral, kern, mode='valid')
+    m = sum_full / total_window_size
+    sum_sq_full = correlate_sparse(integral_sq, kern, mode='valid')
+    g2 = sum_sq_full / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
@@ -1128,7 +1104,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:

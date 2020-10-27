@@ -22,7 +22,7 @@ plot2rst_paths : length-2 tuple, or list of tuples
 
 plot2rst_rcparams : dict
     Matplotlib configuration parameters. See
-    http://matplotlib.sourceforge.net/users/customizing.html for details.
+    https://matplotlib.org/tutorials/introductory/customizing.html for details.
 
 plot2rst_default_thumb : str
     Path (relative to doc root) of default thumbnail image.
@@ -397,7 +397,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
                          for role in sphinx_roles)
 
     # Grab all references to inject them in cells where needed
-    ref_regexp = re.compile(r'\n(\.\. \[(\d+)\].*(?:\n[ ]{7,8}.*)+)')
+    ref_regexp = re.compile('\n(\\.\\. \\[(\\d+)\\].*(?:\n[ ]{7,8}.*)+)')
     math_role_regexp = re.compile(':math:`(.*?)`')
 
     text = '\n'.join((content for (cell_type, _, content) in blocks

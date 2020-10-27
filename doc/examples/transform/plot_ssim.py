@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import mean_squared_error
 
 
 img = img_as_float(data.camera())
@@ -34,10 +35,6 @@ rows, cols = img.shape
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
 noise[np.random.random(size=noise.shape) > 0.5] *= -1
 
-def mse(x, y):
-    return np.linalg.norm(x - y)
-
-
 img_noise = img + noise
 img_const = img + abs(noise)
 
@@ -45,14 +42,14 @@ fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 
-mse_none = mse(img, img)
+mse_none = mean_squared_error(img, img)
 ssim_none = ssim(img, img, data_range=img.max() - img.min())
 
-mse_noise = mse(img, img_noise)
+mse_noise = mean_squared_error(img, img_noise)
 ssim_noise = ssim(img, img_noise,
                   data_range=img_noise.max() - img_noise.min())
 
-mse_const = mse(img, img_const)
+mse_const = mean_squared_error(img, img_const)
 ssim_const = ssim(img, img_const,
                   data_range=img_const.max() - img_const.min())
 

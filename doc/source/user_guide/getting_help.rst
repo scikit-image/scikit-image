@@ -19,7 +19,7 @@ closer to one's image processing applications.
 Users are warmly encouraged to report on their use of ``skimage`` on the
 :ref:`mailing_list`, in order to propose more examples in the future.
 Contributing examples to the gallery can be done on github (see
-:ref:`howto_contribute`).
+:doc:`../contribute`).
 
 Search field
 ------------
@@ -65,7 +65,7 @@ Mailing-list
 
 The scikit-image mailing-list is scikit-image@python.org (users
 should `join
-<https://mail.python.org/mailman/listinfo/scikit-image>`_ before posting). This
+<https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ before posting). This
 mailing-list is shared by users and developers, and it is the right
 place to ask any question about ``skimage``, or in general, image
 processing using Python.  Posting snippets of code with minimal examples

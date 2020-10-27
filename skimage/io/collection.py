@@ -8,7 +8,18 @@ from collections.abc import Sequence
 from copy import copy
 
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
+
+# Check CVE-2020-10379
+from distutils.version import LooseVersion
+if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+    from warnings import warn
+    warn('Your installed pillow version is < 7.1.0. '
+         'Several security issues (CVE-2020-11538, '
+         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
+         'have been fixed in pillow 7.1.0 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
 
 from tifffile import TiffFile
 
@@ -434,14 +445,9 @@ class MultiImage(ImageCollection):
         """Load a multi-img."""
         from ._io import imread
 
-        def load_func(fname, **kwargs):
-            if dtype is not None:
-                kwargs.setdefault('dtype', dtype)
-            return imread(fname, **kwargs)
-
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=load_func, **imread_kwargs)
+                                         load_func=imread, **imread_kwargs)
 
     @property
     def filename(self):

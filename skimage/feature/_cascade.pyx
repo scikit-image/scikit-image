@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 from ._texture cimport _multiblock_lbp
 import math
 
+cnp.import_array()
 
 # Struct for storing a single detection.
 cdef struct Detection:
@@ -70,8 +71,8 @@ cdef struct MBLBPStump:
 
     Py_ssize_t feature_id
     Py_ssize_t lut_idx
-    float left
-    float right
+    cnp.float32_t left
+    cnp.float32_t right
 
 
 # Struct for storing a stage of classifier which itself consists of
@@ -86,11 +87,11 @@ cdef struct Stage:
 
     Py_ssize_t first_idx
     Py_ssize_t amount
-    float threshold
+    cnp.float32_t threshold
 
 
 cdef vector[Detection] _group_detections(vector[Detection] detections,
-                                         float intersection_score_threshold=0.5,
+                                         cnp.float32_t intersection_score_threshold=0.5,
                                          int min_neighbour_number=4):
     """Group similar detections into a single detection and eliminate weak
     (non-overlapping) detections.
@@ -109,7 +110,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
     min_neighbour_number : int
         Minimum amount of intersecting detections in order for detection
         to be approved by the function.
-    intersection_score_threshold : float
+    intersection_score_threshold : cnp.float32_t
         The minimum value of value of ratio
         (intersection area) / (small rectangle ratio) in order to merge
         two rectangles into one cluster.
@@ -130,8 +131,8 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
         Py_ssize_t nr_of_detections = detections.size()
         Py_ssize_t best_cluster_nr
         bint new_cluster
-        float best_score
-        float intersection_score
+        cnp.float32_t best_score
+        cnp.float32_t intersection_score
 
     # Check if detections array is not empty.
     # Push first detection as first cluster.
@@ -327,7 +328,7 @@ cdef vector[Detection] get_mean_detections(vector[DetectionsCluster] clusters):
     return detections
 
 
-cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
+cdef cnp.float32_t rect_intersection_area(Detection rect_a, Detection rect_b):
     """Computes the intersection area of two rectangles.
 
 
@@ -340,7 +341,7 @@ cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
 
     Returns
     -------
-    result : float
+    result : cnp.float32_t
         The intersection score area.
     """
 
@@ -359,7 +360,7 @@ cdef float rect_intersection_area(Detection rect_a, Detection rect_b):
             fmax(0, fmin(r_a_2, r_b_2) - fmax(r_a_1, r_b_1)))
 
 
-cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
+cdef cnp.float32_t rect_intersection_score(Detection rect_a, Detection rect_b):
     """Computes the intersection score of two rectangles.
 
     The score is computed by dividing the intersection area of rectangles
@@ -374,17 +375,17 @@ cdef float rect_intersection_score(Detection rect_a, Detection rect_b):
 
     Returns
     -------
-    result : float
+    result : cnp.float32_t
         The intersection score. The number in the interval ``[0, 1]``.
         1 means rectangles fully intersect, 0 means they don't.
     """
 
     cdef:
-        float intersection_area
-        float union_area
-        float smaller_area
-        float area_a = rect_a.height * rect_a.width
-        float area_b = rect_b.height * rect_b.width
+        cnp.float32_t intersection_area
+        cnp.float32_t union_area
+        cnp.float32_t smaller_area
+        cnp.float32_t area_a = rect_a.height * rect_a.width
+        cnp.float32_t area_b = rect_b.height * rect_b.width
 
     intersection_area = rect_intersection_area(rect_a, rect_b)
 
@@ -405,7 +406,7 @@ cdef class Cascade:
 
     Attributes
     ----------
-    eps : float
+    eps : cnp.float32_t
         Accuracy parameter. Increasing it, makes the classifier detect less
         false positives but at the same time the false negative score increases.
     stages_number : Py_ssize_t
@@ -433,7 +434,7 @@ cdef class Cascade:
     """
 
     cdef:
-        public float eps
+        public cnp.float32_t eps
         public Py_ssize_t stages_number
         public Py_ssize_t stumps_number
         public Py_ssize_t features_number
@@ -460,14 +461,17 @@ cdef class Cascade:
         xml_file : file's path or file's object
             A file in a OpenCv format from which all the cascade classifier's
             parameters are loaded.
-        eps : float
-            Accuracy parameter. Increasing it, makes the classifier detect less
-            false positives but at the same time the false negative score increases.
+        eps : cnp.float32_t
+            Accuracy parameter. Increasing it, makes the classifier
+            detect less false positives but at the same time the false
+            negative score increases.
+
         """
 
         self._load_xml(xml_file, eps)
 
-    cdef bint classify(self, float[:, ::1] int_img, Py_ssize_t row, Py_ssize_t col, float scale) nogil:
+    cdef bint classify(self, cnp.float32_t[:, ::1] int_img, Py_ssize_t row,
+                       Py_ssize_t col, cnp.float32_t scale) nogil:
         """Classify the provided image patch i.e. check if the classifier
         detects an object in the given image patch.
 
@@ -477,7 +481,7 @@ cdef class Cascade:
 
         Parameters
         ----------
-        int_img : float[:, ::1]
+        int_img : cnp.float32_t[:, ::1]
             Memory-view to integral image.
         row : Py_ssize_t
             Row coordinate of the rectangle in the given image to classify.
@@ -485,7 +489,7 @@ cdef class Cascade:
         col : Py_ssize_t
             Column coordinate of the rectangle in the given image to classify.
             Top left corner of window.
-        scale : float
+        scale : cnp.float32_t
             The scale by which the search window is multiplied.
             After multiplication the result is rounded to the lowest integer.
 
@@ -497,8 +501,8 @@ cdef class Cascade:
         """
 
         cdef:
-            float stage_threshold
-            float stage_points
+            cnp.float32_t stage_threshold
+            cnp.float32_t stage_points
             int lbp_code
             int bit
             Py_ssize_t stage_number
@@ -523,7 +527,8 @@ cdef class Cascade:
 
             for weak_classifier_number in range(current_stage.amount):
 
-                current_stump = self.stumps[first_stump_idx + weak_classifier_number]
+                current_stump = self.stumps[first_stump_idx +
+                                            weak_classifier_number]
 
                 current_feature = self.features[current_stump.feature_id]
 
@@ -562,13 +567,13 @@ cdef class Cascade:
             Minimum size of window for which to search the scale factor.
         max_size : typle (int, int)
             Maximum size of window for which to search the scale factor.
-        scale_step : float
+        scale_step : cnp.float32_t
             The scale by which the search window is multiplied
             on each iteration.
 
         Returns
         -------
-        scale_factors : 1-D floats ndarray
+        scale_factors : 1-D cnp.float32_ts ndarray
             The scale factors that give the window sizes that are in the
             specified interval after multiplying the search window.
         """
@@ -619,8 +624,9 @@ cdef class Cascade:
         return int_img
 
 
-    def detect_multi_scale(self, img, float scale_factor, float step_ratio,
-                           min_size, max_size, min_neighbour_number=4,
+    def detect_multi_scale(self, img, cnp.float32_t scale_factor,
+                           cnp.float32_t step_ratio, min_size, max_size,
+                           min_neighbour_number=4,
                            intersection_score_threshold=0.5):
         """Search for the object on multiple scales of input image.
 
@@ -633,9 +639,9 @@ cdef class Cascade:
         ----------
         img : 2-D or 3-D ndarray
             Ndarray that represents the input image.
-        scale_factor : float
+        scale_factor : cnp.float32_t
             The scale by which searching window is multiplied on each step.
-        step_ratio : float
+        step_ratio : cnp.float32_t
             The ratio by which the search step in multiplied on each scale
             of the image. 1 represents the exaustive search and usually is
             slow. By setting this parameter to higher values the results will
@@ -648,7 +654,7 @@ cdef class Cascade:
         min_neighbour_number : int
             Minimum amount of intersecting detections in order for detection
             to be approved by the function.
-        intersection_score_threshold : float
+        intersection_score_threshold : cnp.float32_t
             The minimum value of value of ratio
             (intersection area) / (small rectangle ratio) in order to merge
             two detections into one.
@@ -677,9 +683,9 @@ cdef class Cascade:
             Py_ssize_t window_height = self.window_height
             Py_ssize_t window_width = self.window_width
             int result
-            float[::1] scale_factors
-            float[:, ::1] int_img
-            float current_scale_factor
+            cnp.float32_t[::1] scale_factors
+            cnp.float32_t[:, ::1] int_img
+            cnp.float32_t current_scale_factor
             vector[Detection] output
             Detection new_detection
 
@@ -687,7 +693,8 @@ cdef class Cascade:
         img_height = int_img.shape[0]
         img_width = int_img.shape[1]
 
-        scale_factors = self._get_valid_scale_factors(min_size, max_size, scale_factor)
+        scale_factors = self._get_valid_scale_factors(min_size,
+                                                      max_size, scale_factor)
         number_of_scales = scale_factors.shape[0]
 
         # Initialize lock to enable thread-safe writes to the array
@@ -698,9 +705,11 @@ cdef class Cascade:
             openmp.omp_init_lock(&mylock)
 
 
-        # As the amount of work between the threads is not equal we use `dynamic`
-        # schedule which enables them to use computing power on demand.
-        for scale_number in prange(0, number_of_scales, schedule='dynamic', nogil=True):
+        # As the amount of work between the threads is not equal we
+        # use `dynamic` schedule which enables them to use computing
+        # power on demand.
+        for scale_number in prange(0, number_of_scales,
+                                   schedule='dynamic', nogil=True):
 
             current_scale_factor = scale_factors[scale_number]
             current_step = <Py_ssize_t>round(current_scale_factor * step_ratio)
@@ -719,7 +728,9 @@ cdef class Cascade:
             while current_row < max_row:
                 while current_col < max_col:
 
-                    result = self.classify(int_img, current_row, current_col, scale_factors[scale_number])
+                    result = self.classify(int_img, current_row,
+                                           current_col,
+                                           scale_factors[scale_number])
 
                     if result:
 
@@ -759,9 +770,11 @@ cdef class Cascade:
         ----------
         xml_file : filename or file object
             File that contains the cascade classifier.
-        eps : float
-            Accuracy parameter. Increasing it, makes the classifier detect less
-            false positives but at the same time the false negative score increases.
+        eps : cnp.float32_t
+            Accuracy parameter. Increasing it, makes the classifier
+            detect less false positives but at the same time the false
+            negative score increases.
+
         """
 
         cdef:
@@ -770,7 +783,7 @@ cdef class Cascade:
             MBLBP* features_carr
             cnp.uint32_t* LUTs_carr
 
-            float stage_threshold
+            cnp.float32_t stage_threshold
 
             Py_ssize_t stage_number
             Py_ssize_t stages_number
@@ -816,7 +829,8 @@ cdef class Cascade:
         stumps_carr = <MBLBPStump*>malloc(stumps_number * sizeof(MBLBPStump))
         stages_carr = <Stage*>malloc(stages_number*sizeof(Stage))
         # Each look-up table consists of 8 u-int numbers.
-        LUTs_carr = <cnp.uint32_t*>malloc(8*stumps_number * sizeof(cnp.uint32_t))
+        LUTs_carr = <cnp.uint32_t*>malloc(8 * stumps_number *
+                                          sizeof(cnp.uint32_t))
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
@@ -845,7 +859,8 @@ cdef class Cascade:
             # Parse and load current stage.
             stage_threshold = float(current_stage.find('stageThreshold').text)
             weak_classifiers_amount = int(current_stage.find('maxWeakCount').text)
-            new_stage = Stage(stump_idx, weak_classifiers_amount, stage_threshold)
+            new_stage = Stage(stump_idx, weak_classifiers_amount,
+                              stage_threshold)
             stages_carr[stage_number] = new_stage
 
             weak_classifiers = current_stage.find('weakClassifiers')
@@ -876,7 +891,8 @@ cdef class Cascade:
                 for i in range(8):
                     LUTs_carr[stump_lut_idx + i] = lut[i]
 
-                new_stump = MBLBPStump(feature_number, stump_lut_idx, leaf_values[0], leaf_values[1])
+                new_stump = MBLBPStump(feature_number, stump_lut_idx,
+                                       leaf_values[0], leaf_values[1])
                 stumps_carr[stump_idx] = new_stump
 
                 stump_lut_idx += 8

@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
@@ -189,6 +191,20 @@ def test_blob_log():
     # Testing no peaks
     img_empty = np.zeros((100,100))
     assert blob_log(img_empty).size == 0
+
+
+def test_blob_log_no_warnings():
+    img = np.ones((11, 11))
+
+    xs, ys = disk((5, 5), 2)
+    img[xs, ys] = 255
+
+    xs, ys = disk((7, 6), 2)
+    img[xs, ys] = 255
+
+    with pytest.warns(None) as records:
+        blob_log(img, max_sigma=20, num_sigma=10, threshold=.1)
+    assert len(records) == 0
 
 
 def test_blob_log_3d():

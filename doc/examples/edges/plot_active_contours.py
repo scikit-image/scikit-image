@@ -16,13 +16,13 @@ points while obeying smoothness considerations. Typically it is a good idea to
 smooth images a bit before analyzing, as done in the following examples.
 
 We initialize a circle around the astronaut's face and use the default boundary
-condition ``bc='periodic'`` to fit a closed curve. The default parameters
-``w_line=0, w_edge=1`` will make the curve search towards edges, such as the
-boundaries of the face.
+condition ``boundary_condition='periodic'`` to fit a closed curve. The default
+parameters ``w_line=0, w_edge=1`` will make the curve search towards edges,
+such as the boundaries of the face.
 
 .. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
        International Journal of Computer Vision 1 (4): 321 (1988).
-       DOI:`10.1007/BF00133570`
+       :DOI:`10.1007/BF00133570`
 """
 
 import numpy as np
@@ -42,8 +42,7 @@ c = 220 + 100*np.cos(s)
 init = np.array([r, c]).T
 
 snake = active_contour(gaussian(img, 3),
-                       init, alpha=0.015, beta=10, gamma=0.001,
-                       coordinates='rc')
+                       init, alpha=0.015, beta=10, gamma=0.001)
 
 fig, ax = plt.subplots(figsize=(7, 7))
 ax.imshow(img, cmap=plt.cm.gray)
@@ -57,8 +56,8 @@ plt.show()
 ######################################################################
 # Here we initialize a straight line between two points, `(5, 136)` and
 # `(424, 50)`, and require that the spline has its end points there by giving
-# the boundary condition `bc='fixed'`. We furthermore make the algorithm
-# search for dark lines by giving a negative `w_line` value.
+# the boundary condition `boundary_condition='fixed'`. We furthermore
+# make the algorithm search for dark lines by giving a negative `w_line` value.
 
 img = data.text()
 
@@ -67,8 +66,7 @@ c = np.linspace(5, 424, 100)
 init = np.array([r, c]).T
 
 snake = active_contour(gaussian(img, 1), init, boundary_condition='fixed',
-                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1,
-                       coordinates='rc')
+                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.imshow(img, cmap=plt.cm.gray)

@@ -2,6 +2,7 @@ import math
 import numpy as np
 from numpy.linalg import inv, pinv
 from scipy import optimize
+from warnings import warn
 from .._shared.utils import check_random_state
 
 
@@ -47,11 +48,11 @@ class LineModelND(BaseModel):
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
-    >>> lm.estimate(np.array([x, y]).T)
+    >>> lm.estimate(np.stack([x, y], axis=-1))
     True
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
-    >>> res = lm.residuals(np.array([x, y]).T)
+    >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -277,12 +278,12 @@ class CircleModel(BaseModel):
         sum_x = np.sum(x)
         sum_y = np.sum(y)
         sum_xy = np.sum(x * y)
-        m1 = np.array([[np.sum(x ** 2), sum_xy, sum_x],
+        m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
                        [sum_xy, np.sum(y ** 2), sum_y],
                        [sum_x, sum_y, float(len(x))]])
-        m2 = np.array([[np.sum(x * x2y2),
+        m2 = np.stack([[np.sum(x * x2y2),
                         np.sum(y * x2y2),
-                        np.sum(x2y2)]]).T
+                        np.sum(x2y2)]], axis=-1)
         a, b, c = pinv(m1) @ m2
         a, b, c = a[0], b[0], c[0]
         xc = a / 2
@@ -868,9 +869,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 break
 
     # estimate final model using all inliers
-    if best_inliers is not None:
+    if best_inliers is not None and any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
         best_model.estimate(*data_inliers)
+    else:
+        best_model = None
+        best_inliers = None
+        warn("No inliers found. Model not fitted")
 
     return best_model, best_inliers

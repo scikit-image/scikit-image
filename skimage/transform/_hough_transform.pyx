@@ -14,6 +14,7 @@ from ..draw import circle_perimeter
 
 from .._shared.interpolation cimport round
 
+cnp.import_array()
 
 def _hough_circle(cnp.ndarray img,
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
@@ -312,9 +313,9 @@ def _hough_line(cnp.ndarray img,
     # finally, run the transform
     cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
 
+    nidxs = y_idxs.shape[0]  # x and y are the same shape
+    nthetas = theta.shape[0]
     with nogil:
-        nidxs = y_idxs.shape[0]  # x and y are the same shape
-        nthetas = theta.shape[0]
         for i in range(nidxs):
             x = x_idxs[i]
             y = y_idxs[i]
