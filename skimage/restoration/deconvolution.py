@@ -7,6 +7,7 @@ from scipy.signal import convolve
 
 from . import uft
 from .._shared.fft import fftmodule as fft
+from ..util import crop
 
 __keywords__ = "restoration, image, deconvolution"
 
@@ -386,34 +387,39 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     return im_deconv
 
 
-def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
+def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     """ Deconvolution using Gaussian natural image priors.
 
     Parameters
     ----------
     image : ndarray
-       Input degraded image.
+        Input degraded image.
     psf : ndarray
-       The point spread function.
+        The point spread function.
     smoothness_weight : float, optional
-       The smoothness weight defines how much weight the Gaussian prior is
-       given in the process. No prior is used when smoothness_weight=0.
+        The smoothness weight defines how much weight the Gaussian prior is
+        given in the process. No prior is used when smoothness_weight=0.
     clip : boolean, optional
-       True by default. If true, pixel value of the result above 1 or
-       under 0 are thresholded for skimage pipeline compatibility.
+        True by default. If true, pixel value of the result above 1 or
+        under 0 are thresholded for skimage pipeline compatibility.
+    pad_width : int or tuple of int, optional
+        If pad_width > 0, the image will be extended by `pad_width` along each
+        boundary by use of `numpy.pad` with `mode='reflect'`. This is done to
+        reduce artifacts that can arise near the edges of the deconvolved image
+        due to the periodic nature of the discrete Fourier transform.
 
     Returns
     -------
     im_deconv : ndarray
-       The deconvolved image.
+        The deconvolved image.
 
     Examples
     --------
     >>> from skimage import img_as_float, data, restoration
+    >>> from scipy.ndimage import convolve
     >>> camera = img_as_float(data.camera())
-    >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> camera = convolve2d(camera, psf, 'same')
+    >>> camera = convolve(camera, psf)
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
     >>> deconvolved = restoration.DNP_Gauss_freq(camera, psf)
 
@@ -444,6 +450,8 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
           "psf and image must have an equal number of dimensions"
         )
 
+    # pad to reduce boundary artifacts
+    image = np.pad(image, pad_width, mode='reflect')
     shape = image.shape
 
     # sum of squared first order differences along each axis
@@ -471,6 +479,8 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     # recenter the deconvolved image
     shift = tuple([(s - 1) // 2 for s in psf.shape])
     im_deconv = np.roll(x, shift=shift, axis=range(psf.ndim))
+    # remove any padding that was previously added
+    im_deconv = crop(im_deconv, pad_width)
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < 0] = 0
