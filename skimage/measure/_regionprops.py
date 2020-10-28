@@ -212,7 +212,7 @@ class RegionProperties:
             ndim = label_image.ndim
             if not (
                     intensity_image.shape[:ndim] == label_image.shape
-                    and intensity_image.ndim == label_image.ndim + 1
+                    and intensity_image.ndim in [ndim, ndim + 1]
                     ):
                 raise ValueError('Label and intensity image shapes must match,'
                                  ' except for channels (last) axis.')
