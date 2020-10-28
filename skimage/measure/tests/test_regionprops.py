@@ -699,7 +699,7 @@ def test_extra_properties_table():
 
 def test_multichannel():
     """Test that computing multichannel properties works."""
-    astro = data.astronaut()
+    astro = data.astronaut()[::4, ::4]
     astro_green = astro[..., 1]
     labels = slic(astro.astype(float), start_label=1)
 
