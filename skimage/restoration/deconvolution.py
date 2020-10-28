@@ -447,16 +447,16 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     onesrow.shape = (1, 2)
     onescol = np.array([-1, 1])
     onescol.shape = (2, 1)
-    Gx = fft.fft2(onesrow, s=(n, m))
-    Gy = fft.fft2(onescol, s=(n, m))
-    F = fft.fft2(psf, s=(n, m))
+    Gx = fft.rfft2(onesrow, s=(n, m))
+    Gy = fft.rfft2(onescol, s=(n, m))
+    F = fft.rfft2(psf, s=(n, m))
 
     A = np.conj(F) * F + smoothness_weight * (np.conj(Gx) * Gx
                                               + np.conj(Gy) * Gy)
-    b = np.conj(F) * fft.fft2(image)
+    b = np.conj(F) * fft.rfft2(image)
 
     X = np.divide(b, A)
-    x = np.real(fft.ifft2(X))
+    x = np.real(fft.irfft2(X))
 
     nf, mf = psf.shape
     hs1 = (nf - 1) // 2
