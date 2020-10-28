@@ -210,7 +210,10 @@ class RegionProperties:
 
         if intensity_image is not None:
             ndim = label_image.ndim
-            if not intensity_image.shape[:ndim] == label_image.shape:
+            if not (
+                    intensity_image.shape[:ndim] == label_image.shape
+                    and intensity_image.ndim == label_image.ndim + 1
+                    ):
                 raise ValueError('Label and intensity image shapes must match,'
                                  ' except for channels (last) axis.')
             multichannel = label_image.shape < intensity_image.shape
