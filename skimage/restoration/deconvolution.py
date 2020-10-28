@@ -439,6 +439,10 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     float_type = np.promote_types(image.dtype, np.float32)
     image = image.astype(float_type, copy=False)
     psf = psf.astype(float_type, copy=False)
+    if image.ndim != psf.ndim:
+        raise ValueError(
+          "psf and image must have an equal number of dimensions"
+        )
 
     shape = image.shape
 
