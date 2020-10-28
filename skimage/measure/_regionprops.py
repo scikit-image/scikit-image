@@ -486,7 +486,7 @@ class RegionProperties:
         if self._multichannel:
             moments = np.stack(
                     [_moments.moments(image[..., i], order=3)
-                    for i in range(image.shape[-1])],
+                        for i in range(image.shape[-1])],
                     axis=-1,
                     )
         else:
