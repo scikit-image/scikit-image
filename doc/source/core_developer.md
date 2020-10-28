@@ -125,6 +125,16 @@ While we collectively "own" any patches (and bugs!) that become part
 of the code base, you are vouching for changes you merge.  Please take
 that responsibility seriously.
 
+In practice, if you are the second core developer reviewing and approving a
+given pull request, you typically merge it (again, using GitHub's Squash and
+Merge feature) in the wake of your approval. What are the exceptions to this
+process? If the pull request has been particularly controversial or the
+subject of much debate (e.g., involving API changes), then you would want to
+wait a few days before merging. This waiting time gives others a chance to
+speak up in case they are not fine with the current state of the pull request.
+Another exceptional situation is one where the first approving review happened
+a long time ago and many changes have taken place in the meantime.
+
 Closing issues and pull requests
 --------------------------------
 
