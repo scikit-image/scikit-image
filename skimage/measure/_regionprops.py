@@ -841,11 +841,14 @@ def regionprops_table(label_image, intensity_image=None,
             list(properties) + [prop.__name__ for prop in extra_properties]
         )
     if len(regions) == 0:
-        label_image = np.zeros((3,) * label_image.ndim, dtype=int)
-        label_image[(1,) * label_image.ndim] = 1
+        ndim = label_image.ndim
+        label_image = np.zeros((3,) * ndim, dtype=int)
+        label_image[(1,) * ndim] = 1
         if intensity_image is not None:
-            intensity_image = np.zeros(label_image.shape,
-                                       dtype=intensity_image.dtype)
+            intensity_image = np.zeros(
+                    label_image.shape + intensity_image.shape[ndim:],
+                    dtype=intensity_image.dtype
+                )
         regions = regionprops(label_image, intensity_image=intensity_image,
                               cache=cache, extra_properties=extra_properties)
 
