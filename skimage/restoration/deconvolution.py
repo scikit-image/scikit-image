@@ -440,35 +440,33 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     image = image.astype(float_type, copy=False)
     psf = psf.astype(float_type, copy=False)
 
-    n, m = image.shape
+    shape = image.shape
 
-    # force some shapes
-    onesrow = np.array([-1, 1])
-    onesrow.shape = (1, 2)
-    onescol = np.array([-1, 1])
-    onescol.shape = (2, 1)
-    Gx = fft.rfft2(onesrow, s=(n, m))
-    Gy = fft.rfft2(onescol, s=(n, m))
-    F = fft.rfft2(psf, s=(n, m))
+    # sum of squared first order differences along each axis
+    ndim = psf.ndim
+    G = 0
+    d_shape = [1,] * ndim
+    for n in range(ndim):
+        if n == ndim - 1:
+            D = fft.rfft([-1, 1], n=shape[n])
+        else:
+            D = fft.fft([-1, 1], n=shape[n])
+        d_shape[n] = D.size
+        D = D.reshape(d_shape)  # reshape 1D array for broadcasting
+        G = G + np.conj(D) * D
+        d_shape[n] = 1
 
-    A = np.conj(F) * F + smoothness_weight * (np.conj(Gx) * Gx
-                                              + np.conj(Gy) * Gy)
-    b = np.conj(F) * fft.rfft2(image)
+    F = fft.rfftn(psf, s=shape)
+    F_conj = np.conj(F)
+    A = F_conj * F + smoothness_weight * G
+    b = F_conj * fft.rfft2(image)
 
     X = np.divide(b, A)
     x = np.real(fft.irfft2(X))
 
-    nf, mf = psf.shape
-    hs1 = (nf - 1) // 2
-    hs2 = (mf - 1) // 2
-
-    # complex picking to move time image back into the center
-    nidx = np.arange(0, n)
-    midx = np.arange(0, m)
-    nidxuse = np.concatenate((nidx[-1 - hs1 + 1:], nidx[:-hs1]))
-    midxuse = np.concatenate((midx[-1 - hs2 + 1:], midx[:-hs2]))
-    im_deconv = x[nidxuse[:, np.newaxis], midxuse]
-
+    # recenter the deconvolved image
+    shift = tuple([(s - 1) // 2 for s in psf.shape])
+    im_deconv = np.roll(x, shift=shift, axis=range(psf.ndim))
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < 0] = 0
