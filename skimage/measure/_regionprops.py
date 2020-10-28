@@ -206,13 +206,16 @@ class RegionProperties:
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, *, extra_properties=None, multichannel=False):
+                 cache_active, *, extra_properties=None):
 
         if intensity_image is not None:
             ndim = label_image.ndim
             if not intensity_image.shape[:ndim] == label_image.shape:
                 raise ValueError('Label and intensity image shapes must match,'
                                  ' except for channels (last) axis.')
+            multichannel = label_image.shape < intensity_image.shape
+        else:
+            multichannel = False
 
         self.label = label
 
@@ -699,8 +702,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-', extra_properties=None,
-                      multichannel=False):
+                      cache=True, separator='-', extra_properties=None):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -710,11 +712,15 @@ def regionprops_table(label_image, intensity_image=None,
 
     Parameters
     ----------
-    label_image : (N, M) ndarray
+    label_image : (N, M[, P]) ndarray
         Labeled input image. Labels with value 0 are ignored.
-    intensity_image : (N, M) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image.
+    intensity_image : (M, N[, P][, C]) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image, plus
+        optionally an extra dimension for multichannel data.
         Default is None.
+
+        .. versionchanged:: 0.18.0
+            The ability to provide an extra dimension for channels was added.
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
         For a list of available properties, please see :func:`regionprops`.
@@ -744,8 +750,6 @@ def regionprops_table(label_image, intensity_image=None,
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
-    multichannel : bool
-        Whether the intensity image has multiple channels.
 
     Returns
     -------
@@ -855,8 +859,7 @@ def regionprops_table(label_image, intensity_image=None,
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None, *, extra_properties=None,
-                multichannel=False):
+                coordinates=None, *, extra_properties=None):
     r"""Measure properties of labeled image regions.
 
     Parameters
@@ -874,6 +877,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Intensity (i.e., input) image with same size as labeled image, plus
         optionally an extra dimension for multichannel data.
         Default is None.
+
+        .. versionchanged:: 0.18.0
+            The ability to provide an extra dimension for channels was added.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
@@ -900,10 +906,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
-    multichannel : bool
-        Whether the intensity image has multiple channels.
-
-        .. versionadded:: 0.18.0
 
     Returns
     -------
@@ -1145,8 +1147,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache, extra_properties=extra_properties,
-                                 multichannel=multichannel)
+                                 cache, extra_properties=extra_properties)
         regions.append(props)
 
     return regions
