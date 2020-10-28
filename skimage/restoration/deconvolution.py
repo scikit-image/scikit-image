@@ -441,10 +441,6 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     psf = psf.astype(float_type, copy=False)
 
     n, m = image.shape
-    # psf.shape() is expected to be odd in both dimension but works with even
-    # too.
-    # not sure if the double flip is needed
-    psf = np.fliplr(np.flipud(psf))
 
     # force some shapes
     onesrow = np.array([-1, 1])
