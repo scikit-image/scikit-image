@@ -705,7 +705,7 @@ def test_multichannel():
 
     segment_idx = np.max(labels) // 2
     region = regionprops(labels, astro_green)[segment_idx]
-    region_multi = regionprops(labels, astro, multichannel=True)[segment_idx]
+    region_multi = regionprops(labels, astro)[segment_idx]
     for prop in PROPS:
         p = region[prop]
         p_multi = region_multi[prop]
