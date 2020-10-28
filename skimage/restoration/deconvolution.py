@@ -409,7 +409,7 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
 
     Examples
     --------
-    >>> from skimage import image_as_float, data, restoration
+    >>> from skimage import img_as_float, data, restoration
     >>> camera = img_as_float(data.camera())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
