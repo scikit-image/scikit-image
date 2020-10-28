@@ -151,13 +151,11 @@ def test_centroid_3d():
 
 def test_convex_area():
     area = regionprops(SAMPLE)[0].convex_area
-    # determined with MATLAB
-    assert area == 124
+    assert area == 125
 
 
 def test_convex_image():
     img = regionprops(SAMPLE)[0].convex_image
-    # determined with MATLAB
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -167,7 +165,7 @@ def test_convex_image():
          [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
     )
     assert_array_equal(img, ref)
@@ -387,8 +385,7 @@ def test_perimeter_crofton():
 
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
-    # determined with MATLAB
-    assert_almost_equal(solidity, 0.580645161290323)
+    assert_almost_equal(solidity, 0.576)
 
 
 def test_weighted_moments_central():
