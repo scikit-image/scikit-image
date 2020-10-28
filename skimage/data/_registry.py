@@ -131,6 +131,7 @@ registry = {
     "registration/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
+    "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
     "data/brain.tiff": "bcdbaf424fbad7b1fb0f855f608c68e5a838f35affc323ff04ea17f678eef5c6",
     "data/kidney.tif": "80c0799bc58b08cf6eaa53ecd202305eb42fd7bc73746cb6c5064dbeae7e8476",
     "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
@@ -139,6 +140,7 @@ registry = {
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
+    "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/master/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
     "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/master/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
     "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/master/brain.tiff",
     "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/master/eagle.png",

@@ -141,6 +141,15 @@ def test_lfw_subset():
     data.lfw_subset()
 
 
+def test_skin():
+    """Test that "skin" image can be loaded.
+
+    Needs internet connection.
+    """
+    skin = data.skin()
+    assert skin.ndim == 3
+
+
 def test_cell():
     """ Test that "cell" image can be loaded."""
     data.cell()

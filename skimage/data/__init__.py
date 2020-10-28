@@ -52,6 +52,7 @@ __all__ = ['data_dir',
            'rocket',
            'rough_wall',
            'shepp_logan_phantom',
+           'skin',
            'stereo_motorcycle']
 
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
@@ -362,7 +363,6 @@ def camera():
     .. [1] https://github.com/scikit-image/scikit-image/issues/3927
     """
     return _load("data/camera.png")
-
 
 
 def eagle():
@@ -1067,6 +1067,30 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+def skin():
+    """Microscopy image of dermis and epidermis (skin layers).
+
+    Hematoxylin and eosin stained slide at 10x of normal epidermis and dermis
+    with a benign intradermal nevus.
+
+    Notes
+    -----
+    This image requires an Internet connection the first time it is called,
+    and to have the ``pooch`` package installed, in order to fetch the image
+    file from the scikit-image datasets repository.
+
+    The source of this image is
+    https://en.wikipedia.org/wiki/File:Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG
+
+    The image was released in the public domain by its author Kilbad.
+
+    Returns
+    -------
+    skin : (960, 1280, 3) RGB image of uint8
+    """
+    return _load('data/skin.jpg')
 
 
 def brain():
