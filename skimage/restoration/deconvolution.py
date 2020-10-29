@@ -387,7 +387,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     return im_deconv
 
 
-def gaussian_natural_prior(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
+def gaussian_natural_prior(image, psf, smoothness_weight=0.01, clip=True,
+                           pad_width=0):
     """ Deconvolution using Gaussian natural image priors.
 
     Parameters
