@@ -158,9 +158,9 @@ def test_cell():
     data.cell()
 
 
-def test_cells_3d():
+def test_cells3d():
     """Needs internet connection."""
-    path = fetch('data/cells.tif')
+    path = fetch('data/cells3d.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
 

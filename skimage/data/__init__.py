@@ -636,7 +636,7 @@ def cells3d():
         * After rescaling the voxel size is ``(0.29 0.26 0.26)``.
     """
 
-    return _load("data/cells.tif")
+    return _load("data/cells3d.tif")
 
 
 def human_mitosis():
