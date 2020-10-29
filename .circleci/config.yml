@@ -9,15 +9,19 @@ jobs:
       - run:
           name: install dependencies and package
           command: |
+              python -m venv skimage_venv
+              source skimage_venv/bin/activate
               python -m pip install --upgrade pip
-              python -m pip install -r requirements/default.txt
               python -m pip install -r requirements/build.txt
+              python -m pip install -e . -vv
+              python -m pip install -r requirements/default.txt
               python -m pip install -r requirements/docs.txt
-              python -m pip install -e .
               export
       - run:
           name: build doc
+          no_output_timeout: 50m
           command: |
+              source skimage_venv/bin/activate
               cd doc
               make clean
               make html

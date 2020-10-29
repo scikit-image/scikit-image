@@ -27,6 +27,7 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
+from ._basic_features import multiscale_basic_features
 
 
 @deprecated(alt_func='skimage.registration.phase_cross_correlation',
@@ -89,4 +90,6 @@ __all__ = ['canny',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'draw_haar_like_feature']
+           'draw_haar_like_feature',
+           'multiscale_basic_features',
+           ]

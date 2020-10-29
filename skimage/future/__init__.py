@@ -9,6 +9,7 @@ import sys
 
 from .manual_segmentation import manual_polygon_segmentation
 from .manual_segmentation import manual_lasso_segmentation
+from .trainable_segmentation import fit_segmenter, predict_segmenter, TrainableSegmenter
 
 
 _remove_error = (
@@ -44,5 +45,10 @@ def __getattr__(name):
 
 del sys
 
-__all__ = ['manual_lasso_segmentation',
-           'manual_polygon_segmentation']
+__all__ = [
+    "manual_lasso_segmentation",
+    "manual_polygon_segmentation",
+    "fit_segmenter",
+    "predict_segmenter",
+    "TrainableSegmenter",
+]

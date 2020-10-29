@@ -141,6 +141,15 @@ def test_lfw_subset():
     data.lfw_subset()
 
 
+def test_skin():
+    """Test that "skin" image can be loaded.
+
+    Needs internet connection.
+    """
+    skin = data.skin()
+    assert skin.ndim == 3
+
+
 def test_cell():
     """ Test that "cell" image can be loaded."""
     data.cell()
@@ -151,6 +160,13 @@ def test_cells_3d():
     path = fetch('data/cells.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
+
+
+def test_brain_3d():
+    """Needs internet connection."""
+    path = fetch('data/brain.tiff')
+    image = io.imread(path)
+    assert image.shape == (10, 256, 256)
 
 
 def test_kidney_3d_multichannel():

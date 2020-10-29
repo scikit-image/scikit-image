@@ -53,7 +53,7 @@ for thresh in thresholds:
     ax[1].axvline(thresh, color='r')
 
 # Plotting the Multi Otsu result.
-ax[2].imshow(regions, cmap='Accent')
+ax[2].imshow(regions, cmap='jet')
 ax[2].set_title('Multi-Otsu result')
 ax[2].axis('off')
 

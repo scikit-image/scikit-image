@@ -17,11 +17,12 @@ in the constructed RGB image.
 
 """
 import numpy as np
+import imageio
 from matplotlib import pyplot as plt
 from skimage.color import rgb2gray
 from skimage.data import stereo_motorcycle
 from skimage.transform import warp
-from skimage.registration import optical_flow_tvl1
+from skimage.registration import optical_flow_tvl1, optical_flow_ilk
 
 # --- Load the sequence
 image0, image1, disp = stereo_motorcycle()
@@ -78,4 +79,49 @@ ax2.set_title("Target")
 ax2.set_axis_off()
 
 fig.tight_layout()
+
+###################################################################
+# The estimated vector field *(u, v)* can also be displayed with a
+# quiver plot.
+#
+# In the following example, Iterative Lukas-Kanade algorithm (iLK) is
+# applied to images of particles in the context of particle image
+# velocimetry (PIV). The sequence is the Case B from the
+# `PIV challenge 2001 <http://www.pivchallenge.org/>`_
+
+image0 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_1.tif")
+image1 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_2.tif")
+
+# --- Compute the optical flow
+v, u = optical_flow_ilk(image0, image1, radius=15)
+
+# --- Compute flow magnitude
+norm = np.sqrt(u ** 2 + v ** 2)
+
+# --- Display
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 4))
+
+# --- Sequence image sample
+
+ax0.imshow(image0, cmap='gray')
+ax0.set_title("Sequence image sample")
+ax0.set_axis_off()
+
+# --- Quiver plot arguments
+
+nvec = 20  # Number of vectors to be displayed along each image dimension
+nl, nc = image0.shape
+step = max(nl//nvec, nc//nvec)
+
+y, x = np.mgrid[:nl:step, :nc:step]
+u_ = u[::step, ::step]
+v_ = v[::step, ::step]
+
+ax1.imshow(norm)
+ax1.quiver(x, y, u_, v_, color='r', units='dots',
+           angles='xy', scale_units='xy', lw=3)
+ax1.set_title("Optical flow magnitude and vector field")
+ax1.set_axis_off()
+fig.tight_layout()
+
 plt.show()
