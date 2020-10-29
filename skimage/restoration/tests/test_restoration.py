@@ -7,6 +7,7 @@ from skimage.color import rgb2gray
 from skimage.data import astronaut, camera, image_fetcher
 from skimage import restoration, util
 from skimage.restoration import uft
+from skimage.metrics import structural_similarity
 
 test_img = util.img_as_float(camera())
 
@@ -88,15 +89,23 @@ def test_richardson_lucy():
 
 
 def test_gaussian_natural_prior():
-    test_img_astro = rgb2gray(astronaut())
+    ideal = rgb2gray(astronaut())
     psf = np.ones((5, 5)) / 25
-    data = convolve2d(test_img_astro, psf, 'same')
+    data = convolve2d(ideal, psf, 'same')
+    # add some noise to the data
     np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    data_n = data + 0.1 * data.std() * np.random.standard_normal(data.shape)
+    deconvolved_noise = restoration.gaussian_natural_prior(data_n, psf)
+    # also deconvolve with no noise data
     deconvolved = restoration.gaussian_natural_prior(data, psf)
 
+    # test for improvement of the image on noise free data
+    ssim_blurred = structural_similarity(ideal, data)
+    ssim_deconv = structural_similarity(ideal, deconvolved)
+    assert ssim_deconv > ssim_blurred
+
     path = image_fetcher.fetch('restoration/tests/astronaut_dnp.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-5)
+    np.testing.assert_allclose(deconvolved_noise, np.load(path), rtol=1e-5)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float32, np.float64])
