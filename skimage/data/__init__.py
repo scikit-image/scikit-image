@@ -611,11 +611,11 @@ def checkerboard():
 
 
 def cells3d():
-    """3D microscopy images of cells.
+    """3D fluorescence microscopy image of cells.
 
     The returned data is a 3D multichannel array with dimensions provided in
     ``(z, c, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
-    micrometer.
+    micrometer. Channel 0 contains cell membranes, channel 1 contains nuclei.
 
     Returns
     -------
