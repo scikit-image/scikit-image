@@ -7,6 +7,7 @@ from scipy.signal import convolve
 
 from . import uft
 from .._shared.fft import fftmodule as fft
+from ..util import crop
 
 __keywords__ = "restoration, image, deconvolution"
 
@@ -386,34 +387,39 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     return im_deconv
 
 
-def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
+def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     """ Deconvolution using Gaussian natural image priors.
 
     Parameters
     ----------
     image : ndarray
-       Input degraded image.
+        Input degraded image.
     psf : ndarray
-       The point spread function.
+        The point spread function.
     smoothness_weight : float, optional
-       The smoothness weight defines how much weight the Gaussian prior is
-       given in the process. No prior is used when smoothness_weight=0.
+        The smoothness weight defines how much weight the Gaussian prior is
+        given in the process. No prior is used when smoothness_weight=0.
     clip : boolean, optional
-       True by default. If true, pixel value of the result above 1 or
-       under 0 are thresholded for skimage pipeline compatibility.
+        True by default. If true, pixel value of the result above 1 or
+        under 0 are thresholded for skimage pipeline compatibility.
+    pad_width : int or tuple of int, optional
+        If pad_width > 0, the image will be extended by `pad_width` along each
+        boundary by use of `numpy.pad` with `mode='reflect'`. This is done to
+        reduce artifacts that can arise near the edges of the deconvolved image
+        due to the periodic nature of the discrete Fourier transform.
 
     Returns
     -------
     im_deconv : ndarray
-       The deconvolved image.
+        The deconvolved image.
 
     Examples
     --------
-    >>> from skimage import image_as_float, data, restoration
+    >>> from skimage import img_as_float, data, restoration
+    >>> from scipy.ndimage import convolve
     >>> camera = img_as_float(data.camera())
-    >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> camera = convolve2d(camera, psf, 'same')
+    >>> camera = convolve(camera, psf)
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
     >>> deconvolved = restoration.DNP_Gauss_freq(camera, psf)
 
@@ -439,40 +445,42 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True):
     float_type = np.promote_types(image.dtype, np.float32)
     image = image.astype(float_type, copy=False)
     psf = psf.astype(float_type, copy=False)
+    if image.ndim != psf.ndim:
+        raise ValueError(
+          "psf and image must have an equal number of dimensions"
+        )
 
-    n, m = image.shape
-    # psf.shape() is expected to be odd in both dimension but works with even
-    # too.
-    # not sure if the double flip is needed
-    psf = np.fliplr(np.flipud(psf))
+    # pad to reduce boundary artifacts
+    image = np.pad(image, pad_width, mode='reflect')
+    shape = image.shape
 
-    # force some shapes
-    onesrow = np.array([-1, 1])
-    onesrow.shape = (1, 2)
-    onescol = np.array([-1, 1])
-    onescol.shape = (2, 1)
-    Gx = fft.fft2(onesrow, s=(n, m))
-    Gy = fft.fft2(onescol, s=(n, m))
-    F = fft.fft2(psf, s=(n, m))
+    # sum of squared first order differences along each axis
+    ndim = psf.ndim
+    G = 0
+    d_shape = [1,] * ndim
+    for n in range(ndim):
+        if n == ndim - 1:
+            D = fft.rfft([-1, 1], n=shape[n])
+        else:
+            D = fft.fft([-1, 1], n=shape[n])
+        d_shape[n] = D.size
+        D = D.reshape(d_shape)  # reshape 1D array for broadcasting
+        G = G + np.conj(D) * D
+        d_shape[n] = 1
 
-    A = np.conj(F) * F + smoothness_weight * (np.conj(Gx) * Gx
-                                              + np.conj(Gy) * Gy)
-    b = np.conj(F) * fft.fft2(image)
+    F = fft.rfftn(psf, s=shape)
+    F_conj = np.conj(F)
+    A = F_conj * F + smoothness_weight * G
+    b = F_conj * fft.rfft2(image)
 
     X = np.divide(b, A)
-    x = np.real(fft.ifft2(X))
+    x = np.real(fft.irfft2(X))
 
-    nf, mf = psf.shape
-    hs1 = (nf - 1) // 2
-    hs2 = (mf - 1) // 2
-
-    # complex picking to move time image back into the center
-    nidx = np.arange(0, n)
-    midx = np.arange(0, m)
-    nidxuse = np.concatenate((nidx[-1 - hs1 + 1:], nidx[:-hs1]))
-    midxuse = np.concatenate((midx[-1 - hs2 + 1:], midx[:-hs2]))
-    im_deconv = x[nidxuse[:, np.newaxis], midxuse]
-
+    # recenter the deconvolved image
+    shift = tuple([(s - 1) // 2 for s in psf.shape])
+    im_deconv = np.roll(x, shift=shift, axis=range(psf.ndim))
+    # remove any padding that was previously added
+    im_deconv = crop(im_deconv, pad_width)
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < 0] = 0
