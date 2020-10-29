@@ -613,13 +613,13 @@ def checkerboard():
 def cells3d():
     """3D microscopy images of cells.
 
-    The returned data is a 3D array with the physical dimensions provided in
-    ``(z, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
+    The returned data is a 3D multichannel array with dimensions provided in
+    ``(z, c, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
     micrometer.
 
     Returns
     -------
-    cells3d: (60, 256, 256) float64 ndarray
+    cells3d: (60, 2, 256, 256) uint16 ndarray
         The volumetric images of cells taken with an optical microscope.
 
     Notes
@@ -629,7 +629,7 @@ def cells3d():
     It has been downsampled by a factor of 4 in the row and column dimensions
     to reduce computational time.
 
-    The microscope reports the following voxel spacing
+    The microscope reports the following voxel spacing in microns:
 
         * Original voxel size is ``(0.290, 0.065, 0.065)``.
         * Scaling factor is ``(1, 4, 4)`` in each dimension.

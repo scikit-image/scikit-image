@@ -43,7 +43,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 
-from skimage import exposure, io
+from skimage import exposure, io, util
 from skimage.data import cells3d
 
 
@@ -51,7 +51,7 @@ from skimage.data import cells3d
 # Load and display 3D images
 # ==========================
 
-data = cells3d()
+data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))

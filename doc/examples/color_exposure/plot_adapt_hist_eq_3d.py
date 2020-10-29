@@ -18,7 +18,7 @@ from matplotlib import cm, colors
 from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
-from skimage import exposure
+from skimage import exposure, util
 import imageio as io
 
 
@@ -26,7 +26,7 @@ import imageio as io
 
 from skimage.data import cells3d
 
-im_orig = cells3d()
+im_orig = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 # Reorder axis order from (z, y, x) to (x, y, z)
 im_orig = im_orig.transpose()
