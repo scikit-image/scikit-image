@@ -136,6 +136,7 @@ registry = {
     "data/kidney.tif": "80c0799bc58b08cf6eaa53ecd202305eb42fd7bc73746cb6c5064dbeae7e8476",
     "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
+    "data/boundary_tracing_tests.npz": "1b37154113ac3964d43ef4f1fe93f7377e85a29750a84487f8e101be388b017f",
 }
 
 registry_urls = {
