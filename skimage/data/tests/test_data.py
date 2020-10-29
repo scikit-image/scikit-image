@@ -162,7 +162,7 @@ def test_cells3d():
     """Needs internet connection."""
     path = fetch('data/cells3d.tif')
     image = io.imread(path)
-    assert image.shape == (60, 256, 256)
+    assert image.shape == (60, 2, 256, 256)
 
 
 def test_brain_3d():
