@@ -619,7 +619,7 @@ def cells3d():
 
     Returns
     -------
-    cells3D: (60, 256, 256) float64 ndarray
+    cells3d: (60, 256, 256) float64 ndarray
         The volumetric images of cells taken with an optical microscope.
 
     Notes
