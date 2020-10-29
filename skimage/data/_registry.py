@@ -148,7 +148,8 @@ registry_urls = {
     "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/master/lily-of-the-valley-fluorescence.tif",
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
-    "restoration/tests/astronaut_dnp.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_dnp.npy",
+    "restoration/tests/astronaut_dnp.npy":
+        "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_dnp.npy",
 }
 
 legacy_registry = {
