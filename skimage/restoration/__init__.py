@@ -3,7 +3,7 @@
 """
 
 from .deconvolution import (wiener, unsupervised_wiener, richardson_lucy,
-                            DNP_Gauss_freq)
+                            gaussian_natural_prior)
 from .unwrap import unwrap_phase
 from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
                        denoise_bilateral, denoise_wavelet, estimate_sigma)
@@ -16,7 +16,7 @@ from .j_invariant import calibrate_denoiser
 __all__ = ['wiener',
            'unsupervised_wiener',
            'richardson_lucy',
-           'DNP_Gauss_freq',
+           'gaussian_natural_prior',
            'unwrap_phase',
            'denoise_tv_bregman',
            'denoise_tv_chambolle',

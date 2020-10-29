@@ -97,14 +97,14 @@ class DeconvolutionSuite:
         restoration.richardson_lucy(self.volume_f32, self.psf_f32,
                                     iterations=1)
 
-    def time_DNP_Gauss_freq_f64(self):
-        restoration.DNP_Gauss_freq(self.volume_f64, self.psf_f64)
+    def time_gaussian_natural_prior_f64(self):
+        restoration.gaussian_natural_prior(self.volume_f64, self.psf_f64)
 
-    def time_DNP_Gauss_freq_f32(self):
-        restoration.DNP_Gauss_freq(self.volume_f32, self.psf_f32)
+    def time_gaussian_natural_prior_f32(self):
+        restoration.gaussian_natural_prior(self.volume_f32, self.psf_f32)
 
-    def peakmem_DNP_Gauss_freq_f64(self):
-        restoration.DNP_Gauss_freq(self.volume_f64, self.psf_f64)
+    def peakmem_gaussian_natural_prior_f64(self):
+        restoration.gaussian_natural_prior(self.volume_f64, self.psf_f64)
 
-    def peakmem_DNP_Gauss_freq_f32(self):
-        restoration.DNP_Gauss_freq(self.volume_f32, self.psf_f32)
+    def peakmem_gaussian_natural_prior_f32(self):
+        restoration.gaussian_natural_prior(self.volume_f32, self.psf_f32)

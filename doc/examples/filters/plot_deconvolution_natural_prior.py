@@ -36,7 +36,7 @@ astro_noisy = astro.copy()
 astro_noisy += (np.random.poisson(lam=25, size=astro.shape) - 10) / 255.
 
 # Restore Image using Richardson-Lucy algorithm
-deconvolved_DNP = restoration.DNP_Gauss_freq(astro_noisy, psf)
+deconvolved_DNP = restoration.gaussian_natural_prior(astro_noisy, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
 plt.gray()

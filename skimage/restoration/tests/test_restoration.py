@@ -87,16 +87,16 @@ def test_richardson_lucy():
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
-# def test_DNP_Gauss_freq():
-#     test_img_astro = rgb2gray(astronaut())
-#     psf = np.ones((5, 5)) / 25
-#     data = convolve2d(test_img_astro, psf, 'same')
-#     np.random.seed(0)
-#     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-#     deconvolved = restoration.DNP_Gauss_freq(data, psf)
-#
-#     path = fetch('restoration/tests/astronaut_dnp.npy')
-#     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-5)
+def test_gaussian_natural_prior():
+    test_img_astro = rgb2gray(astronaut())
+    psf = np.ones((5, 5)) / 25
+    data = convolve2d(test_img_astro, psf, 'same')
+    np.random.seed(0)
+    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    deconvolved = restoration.gaussian_natural_prior(data, psf)
+
+    path = image_fetcher.fetch('restoration/tests/astronaut_dnp.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-5)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float32, np.float64])

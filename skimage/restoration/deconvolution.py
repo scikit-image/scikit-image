@@ -387,7 +387,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     return im_deconv
 
 
-def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
+def gaussian_natural_prior(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     """ Deconvolution using Gaussian natural image priors.
 
     Parameters
@@ -421,7 +421,7 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve(camera, psf)
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
-    >>> deconvolved = restoration.DNP_Gauss_freq(camera, psf)
+    >>> deconvolved = restoration.gaussian_natural_prior(camera, psf)
 
     Notes
     -----
@@ -447,7 +447,7 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     psf = psf.astype(float_type, copy=False)
     if image.ndim != psf.ndim:
         raise ValueError(
-          "psf and image must have an equal number of dimensions"
+            "psf and image must have an equal number of dimensions"
         )
 
     # pad to reduce boundary artifacts
@@ -457,7 +457,7 @@ def DNP_Gauss_freq(image, psf, smoothness_weight=0.01, clip=True, pad_width=0):
     # sum of squared first order differences along each axis
     ndim = psf.ndim
     G = 0
-    d_shape = [1,] * ndim
+    d_shape = [1, ] * ndim
     for n in range(ndim):
         if n == ndim - 1:
             D = fft.rfft([-1, 1], n=shape[n])
