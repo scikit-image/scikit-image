@@ -4,7 +4,7 @@ from scipy.signal import convolve2d
 from scipy import ndimage as ndi
 from skimage._shared.testing import fetch
 from skimage.color import rgb2gray
-from skimage.data import astronaut, camera, image_fetcher
+from skimage.data import astronaut, camera
 from skimage import restoration, util
 from skimage.restoration import uft
 from skimage.metrics import structural_similarity
@@ -125,7 +125,7 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf):
                                               filter_epsilon=1e-6)
     assert deconvolved.dtype == data.dtype
 
-    path = image_fetcher.fetch('restoration/tests/astronaut_rl.npy')
+    path = fetch('restoration/tests/astronaut_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
                                atol=atol)
 

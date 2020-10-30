@@ -357,14 +357,16 @@ class TestPeakLocalMax():
         '''
         image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
-        with expected_warnings(["indices argument is deprecated"]):
+        with expected_warnings(["indices argument is deprecated",
+                                "When footprint.size < 2"]):
             result = peak.peak_local_max(image, labels=np.ones((10, 20)),
                                          footprint=footprint,
                                          min_distance=1, threshold_rel=0,
                                          threshold_abs=-1, indices=False,
                                          exclude_border=False)
         assert np.all(result)
-        with expected_warnings(["indices argument is deprecated"]):
+        with expected_warnings(["indices argument is deprecated",
+                                "When footprint.size < 2"]):
             result = peak.peak_local_max(image, footprint=footprint,
                                          threshold_abs=-1,
                                          indices=False,
@@ -411,7 +413,9 @@ class TestPeakLocalMax():
         assert_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+        with expected_warnings(["When min_distance < 1"]):
+            assert len(peak.peak_local_max(image,
+                                           min_distance=0)) == image.size - 1
 
 
 @pytest.mark.parametrize(

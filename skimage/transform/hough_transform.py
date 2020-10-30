@@ -58,6 +58,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     """
     from ..feature.peak import _prominent_peaks
 
+    min_angle = min(min_angle, hspace.shape[1])
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
