@@ -19,12 +19,12 @@ def _offsets_diamond(ndim):
 
 
 def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
-    r"""Checks all the co-ordinates for inclusiveness in the convex hull.
+    r"""Checks all the coordinates for inclusiveness in the convex hull.
 
     Parameters
     ----------
     gridcoords : (M, N) ndarray
-        Co-ordinates of ``N`` points in ``M`` dimensions.
+        Coordinates of ``N`` points in ``M`` dimensions.
     hull_equations : (M, N) ndarray
         Hyperplane equations of the facets of the convex hull.
     tolerance : float
@@ -40,10 +40,10 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
 
     Notes
     -----
-    Check inclusiveness of co-ordinates in convex hull requires intermediate
-    calculations of dot products which are memory-intensive. Thus, the convex
-    hull equations are checked individually with all co-ordinates to keep
-    within the memory limit.
+    Checking the inclusiveness of coordinates in a convex hull requires
+    intermediate calculations of dot products which are memory-intensive.
+    Thus, the convex hull equations are checked individually with all
+    coordinates to keep within the memory limit.
 
     References
     ----------
@@ -55,13 +55,13 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     coords_in_hull = np.ones(n_coords, dtype=np.bool_)
 
     # Pre-allocate arrays to cache intermediate results for reducing overheads
-    dot_array = np.zeros(n_coords, dtype=np.float64)
-    test_ineq_temp = np.zeros(n_coords, dtype=np.float64)
-    coords_single_ineq = np.zeros(n_coords, dtype=np.bool_)
+    dot_array = np.empty(n_coords, dtype=np.float64)
+    test_ineq_temp = np.empty(n_coords, dtype=np.float64)
+    coords_single_ineq = np.empty(n_coords, dtype=np.bool_)
 
     # A point is in the hull if it satisfies all of the hull's inequalities
     for idx in range(n_hull_equations):
-        # Tests a hyperplane equation on all co-ordinates of volume
+        # Tests a hyperplane equation on all coordinates of volume
         np.dot(hull_equations[idx, :ndim], gridcoords, out=dot_array)
         np.add(dot_array, hull_equations[idx, ndim:], out=test_ineq_temp)
         np.less(test_ineq_temp, tolerance, out=coords_single_ineq)
