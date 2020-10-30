@@ -104,7 +104,7 @@ def test_gaussian_natural_prior():
     ssim_deconv = structural_similarity(ideal, deconvolved)
     assert ssim_deconv > ssim_blurred
 
-    path = image_fetcher.fetch('restoration/tests/astronaut_dnp.npy')
+    path = fetch('restoration/tests/astronaut_dnp.npy')
     np.testing.assert_allclose(deconvolved_noise, np.load(path), rtol=1e-5)
 
 
