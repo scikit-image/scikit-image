@@ -94,7 +94,6 @@ def test_threads(num_threads):
 
 
 def test_ndim():
-    path = data.image_fetcher.fetch('data/cells.tif')
-    image = io.imread(path)[:5, ...]
+    image = data.cells3d()[:5, 1, ...]
     kernel = ellipsoid_kernel((3, 100, 100), 100)
     rolling_ball(image, kernel=kernel)

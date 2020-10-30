@@ -139,8 +139,7 @@ class RollingBall(object):
 
     def time_rollingball_ndim(self):
         from skimage.restoration.rolling_ball import ellipsoid_kernel
-        path = data.image_fetcher.fetch('data/cells.tif')
-        image = io.imread(path)
+        image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)

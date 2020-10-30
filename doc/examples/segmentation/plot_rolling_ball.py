@@ -248,8 +248,7 @@ plt.show()
 # dimensions must match the image dimensions, hence the kernel shape
 # is now 3 dimensional.
 
-path = data.image_fetcher.fetch('data/cells.tif')
-image = imageio.volread(path)
+image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
@@ -268,8 +267,7 @@ plt.show()
 # However, you can also filter along all 3 dimensions at the same
 # time by specifying a value other than 1.
 
-path = data.image_fetcher.fetch('data/cells.tif')
-image = imageio.volread(path)
+image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
@@ -285,8 +283,7 @@ plt.show()
 # Another possibility is to filter individual pixels along the
 # planar axis (z-stack axis).
 
-path = data.image_fetcher.fetch('data/cells.tif')
-image = imageio.volread(path)
+image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
