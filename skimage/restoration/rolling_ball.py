@@ -93,23 +93,23 @@ def rolling_ball(image, *, radius=100, kernel=None,
     intensity_difference = center_intensity - kernel
     intensity_difference[kernel == np.Inf] = np.Inf
     intensity_difference = intensity_difference.astype(img.dtype)
-    intensity_difference = intensity_difference.ravel()
+    intensity_difference = intensity_difference.reshape(-1)
 
     img = np.pad(img, kernel_center[:, np.newaxis],
                  constant_values=np.Inf, mode="constant")
 
     func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
-        img.ravel(),
+        img.reshape(-1),
         intensity_difference,
-        np.zeros_like(image, dtype=img.dtype).ravel(),
+        np.zeros_like(image, dtype=img.dtype).reshape(-1),
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape.astype(np.intp),
         num_threads
     )
 
-    background = background.astype(image.dtype)
+    background = background.astype(image.dtype, copy=False)
 
     return background
 

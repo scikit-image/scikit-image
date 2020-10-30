@@ -4,7 +4,7 @@ import numpy as np
 from numpy.lib import NumpyVersion as Version
 
 import skimage
-from skimage import data, filters, morphology, util, io
+from skimage import data, filters, morphology, util
 
 
 class Watershed(object):
