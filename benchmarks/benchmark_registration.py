@@ -35,6 +35,9 @@ class RegistrationSuite(object):
     def time_tvl1(self):
         registration.optical_flow_tvl1(self.I0, self.I1)
 
+    def time_ilk(self):
+        registration.optical_flow_ilk(self.I0, self.I1)
+
 
 class PhaseCrossCorrelationRegistration:
     """Benchmarks for registration.phase_cross_correlation in scikit-image"""

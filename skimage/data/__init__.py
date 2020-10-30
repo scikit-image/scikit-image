@@ -22,9 +22,12 @@ __all__ = ['data_dir',
            'download_all',
            'astronaut',
            'binary_blobs',
+           'brain',
            'brick',
            'camera',
+           'cat',
            'cell',
+           'cells3d',
            'checkerboard',
            'chelsea',
            'clock',
@@ -36,6 +39,7 @@ __all__ = ['data_dir',
            'gravel',
            'horse',
            'hubble_deep_field',
+           'human_mitosis',
            'immunohistochemistry',
            'kidney',
            'lbp_frontal_face_cascade_filename',
@@ -50,6 +54,7 @@ __all__ = ['data_dir',
            'rocket',
            'rough_wall',
            'shepp_logan_phantom',
+           'skin',
            'stereo_motorcycle']
 
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
@@ -340,15 +345,26 @@ def _load(f, as_gray=False):
 def camera():
     """Gray-level "camera" image.
 
-    Often used for segmentation and denoising examples.
+    Can be used for segmentation and denoising examples.
 
     Returns
     -------
     camera : (512, 512) uint8 ndarray
         Camera image.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Lav Varshney).
+
+    .. versionchanged:: 0.18
+        This image was replaced due to copyright restrictions. For more
+        information, please see [1]_.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/3927
     """
     return _load("data/camera.png")
-
 
 
 def eagle():
@@ -594,6 +610,64 @@ def checkerboard():
     return _load("data/chessboard_GRAY.png")
 
 
+def cells3d():
+    """3D fluorescence microscopy image of cells.
+
+    The returned data is a 3D multichannel array with dimensions provided in
+    ``(z, c, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
+    micrometer. Channel 0 contains cell membranes, channel 1 contains nuclei.
+
+    Returns
+    -------
+    cells3d: (60, 2, 256, 256) uint16 ndarray
+        The volumetric images of cells taken with an optical microscope.
+
+    Notes
+    -----
+    The data for this was provided by the Allen Institute for Cell Science.
+
+    It has been downsampled by a factor of 4 in the row and column dimensions
+    to reduce computational time.
+
+    The microscope reports the following voxel spacing in microns:
+
+        * Original voxel size is ``(0.290, 0.065, 0.065)``.
+        * Scaling factor is ``(1, 4, 4)`` in each dimension.
+        * After rescaling the voxel size is ``(0.29 0.26 0.26)``.
+    """
+
+    return _load("data/cells3d.tif")
+
+
+def human_mitosis():
+    """Image of human cells undergoing mitosis.
+
+    Returns
+    -------
+    human_mitosis: (512, 512) uint8 ndimage
+        Data of human cells undergoing mitosis taken during the preperation
+        of the manuscript in [1]_.
+
+    Notes
+    -----
+    Copyright David Root. Licensed under CC-0 [2]_.
+
+    References
+    ----------
+    .. [1] Moffat J, Grueneberg DA, Yang X, Kim SY, Kloepfer AM, Hinkle G,
+           Piqani B, Eisenhaure TM, Luo B, Grenier JK, Carpenter AE, Foo SY,
+           Stewart SA, Stockwell BR, Hacohen N, Hahn WC, Lander ES,
+           Sabatini DM, Root DE (2006) A lentiviral RNAi library for human and
+           mouse genes applied to an arrayed viral high-content screen. Cell,
+           124(6):1283-98 / :DOI: `10.1016/j.cell.2006.01.040` PMID 16564017
+
+    .. [2] GitHub licensing discussion
+           https://github.com/CellProfiler/examples/issues/41
+
+    """
+    return _load('data/mitosis.tif')
+
+
 def cell():
     """Cell floating in saline.
 
@@ -837,6 +911,10 @@ def chelsea():
     return _load("data/chelsea.png")
 
 
+# Define an alias for chelsea that is more descriptive.
+cat = chelsea
+
+
 def coffee():
     """Coffee cup.
 
@@ -1049,3 +1127,49 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+def skin():
+    """Microscopy image of dermis and epidermis (skin layers).
+
+    Hematoxylin and eosin stained slide at 10x of normal epidermis and dermis
+    with a benign intradermal nevus.
+
+    Notes
+    -----
+    This image requires an Internet connection the first time it is called,
+    and to have the ``pooch`` package installed, in order to fetch the image
+    file from the scikit-image datasets repository.
+
+    The source of this image is
+    https://en.wikipedia.org/wiki/File:Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG
+
+    The image was released in the public domain by its author Kilbad.
+
+    Returns
+    -------
+    skin : (960, 1280, 3) RGB image of uint8
+    """
+    return _load('data/skin.jpg')
+
+
+def brain():
+    """Subset of data from the University of North Carolina Volume Rendering
+    Test Data Set.
+
+    The full dataset is available at [1]_.
+
+    Returns
+    -------
+    image : (10, 256, 256) uint16 ndarray
+
+    Notes
+    -----
+    The 3D volume consists of 10 layers from the larger volume.
+
+    References
+    ----------
+    .. [1] https://graphics.stanford.edu/data/voldata/
+
+    """
+    return _load("data/brain.tiff")

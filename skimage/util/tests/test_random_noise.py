@@ -83,7 +83,7 @@ def test_salt_and_pepper():
     assert 0.11 < proportion <= 0.18
 
     # Verify the relative amount of salt vs. pepper is close to expected
-    assert 0.18 < saltmask.sum() / float(peppermask.sum()) < 0.33
+    assert 0.18 < saltmask.sum() / peppermask.sum() < 0.35
 
 
 def test_gaussian():
@@ -150,7 +150,7 @@ def test_poisson():
 
 def test_clip_poisson():
     seed = 42
-    data = camera()                             # 512x512 grayscale uint8
+    data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
@@ -170,7 +170,7 @@ def test_clip_poisson():
 
 def test_clip_gaussian():
     seed = 42
-    data = camera()                             # 512x512 grayscale uint8
+    data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
@@ -184,28 +184,28 @@ def test_clip_gaussian():
     cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=False)
     cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
                               clip=False)
-    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.36)
-    assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.337)
+    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.35)
+    assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.219)
 
 
 def test_clip_speckle():
     seed = 42
-    data = camera()                             # 512x512 grayscale uint8
+    data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
     cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=True)
-    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
-                                clip=True)
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', seed=seed,
+                                   clip=True)
     assert (cam_speckle.max() == 1.) and (cam_speckle.min() == 0.)
-    assert (cam_speckle2.max() == 1.) and (cam_speckle2.min() == -1.)
+    assert (cam_speckle_sig.max() == 1.) and (cam_speckle_sig.min() == -1.)
 
     # Signed and unsigned, unclipped
     cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=False)
-    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', seed=seed,
                                 clip=False)
     assert (cam_speckle.max() > 1.219) and (cam_speckle.min() == 0.)
-    assert (cam_speckle2.max() > 1.219) and (cam_speckle2.min() < -1.306)
+    assert (cam_speckle_sig.max() > 1.219) and (cam_speckle_sig.min() < -1.219)
 
 
 def test_bad_mode():

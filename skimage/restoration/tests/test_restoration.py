@@ -3,14 +3,12 @@ import pytest
 from scipy.signal import convolve2d
 from scipy import ndimage as ndi
 from skimage._shared.testing import fetch
-
-import skimage
 from skimage.color import rgb2gray
-from skimage.data import astronaut, camera, image_fetcher
-from skimage import restoration
+from skimage.data import astronaut, camera
+from skimage import restoration, util
 from skimage.restoration import uft
 
-test_img = skimage.img_as_float(camera())
+test_img = util.img_as_float(camera())
 
 
 def test_wiener():
@@ -64,7 +62,7 @@ def test_image_shape():
     point[2, 2] = 1.
     psf = ndi.gaussian_filter(point, sigma=1.)
     # image shape: (45, 45), as reported in #1172
-    image = skimage.img_as_float(camera()[110:155, 225:270]) # just the face
+    image = util.img_as_float(camera()[65:165, 215:315]) # just the face
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
@@ -106,7 +104,7 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf):
                                               filter_epsilon=1e-6)
     assert deconvolved.dtype == data.dtype
 
-    path = image_fetcher.fetch('restoration/tests/astronaut_rl.npy')
+    path = fetch('restoration/tests/astronaut_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
                                atol=atol)
 

@@ -11,22 +11,6 @@ Version 0.17
 Version 0.18
 ------------
 
-* In ``skimage.features.corner_peaks``, remove the warning.
-    * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
-        * ``skimage/feature/brief.py::BRIEF``
-        * `` skimage/feature/corner.py::corner_harris``
-        * `` skimage/feature/corner.py::corner_shi_tomasi``
-        * `` skimage/feature/corner.py::corner_foerstner``
-        * `` skimage/feature/corner.py::corner_fast``
-        * `` skimage/feature/corner.py::corner_subpix``
-        * `` skimage/feature/corner.py::corner_peaks``
-        * `` skimage/feature/corner.py::corner_orientations``
-    * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
-      ``threshold_rel=0``.
-* In ``skimage/restoration/_denoise.py`` remove warning regarding
-  ``rescale_sigma``.
-    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
-      now that the denoise warning is gone.
 
 Version 0.19
 ------------
@@ -77,6 +61,12 @@ Version 0.20
   function.
 * Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
   `skivi.py` in `skimage/io/_plugins`.
+* Remove enrirely the folder skimage/scripts containing skivi app.
+  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
+  setup.py
+* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
+  Remove `viewer_examples` occurences in `tools/check_sdist.py` and
+  `tools/travis/script.sh`
 
 Version 1.0
 -----------
@@ -86,8 +76,6 @@ Version 1.0
 
 Other
 -----
-* Remove the conditional import and function call when ``numpy`` is set
-  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
@@ -107,8 +95,6 @@ Other
 * When ``numpy`` is set to >= 1.16, remove the warning assertion in
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``invalid value encountered in reduce``.
-* When ``numpy`` is set to >= 1.17, revisit the warning assertion in
-  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
   when ``scipy`` upgrades to 1.1.
