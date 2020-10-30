@@ -29,8 +29,8 @@ cdef inline Py_ssize_t ind2ind(
             shape=to_shape
         ) + offset
 
-    However, it doesn't perform boundary checks; if missused this can cause
-    a segfault.
+    However, it doesn't perform boundary checks or type checks; if missused this
+    can cause a segfault.
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ cdef inline Py_ssize_t ind2ind(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
-                     DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                     DTYPE_FLOAT[::1] intensity_difference not None,
                      DTYPE_FLOAT[::1] out not None,
                      Py_ssize_t[::1] img_shape not None,
                      Py_ssize_t[::1] padded_img_shape not None,
@@ -86,10 +86,11 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     Parameters
     ----------
     img : (I) ndarray
-        A flat view into a padded image, e.g., from ``numpy.ravel()``.
-    ellipsoid_intensity : (K) ndarray
-        A flat view into the intensity of the ellipsoid, e.g., from
-        ``numpy.ravel()``. Indicates the difference between the 
+        A flat view into a padded image, e.g., from ``numpy.reshape(-1)``.
+    intensity_difference : (K) ndarray
+        A flat view into an array containing the intensity difference
+        between ellipsoid[center] and ellipsoid[pos], e.g., from
+        ``numpy.reshape(-1)``. Indicates the difference between the
         height/intensity of the ellipsoid at position ``(x,y)`` and
         the height/intensity at the center of the kernel.
     out : (I) ndarray
@@ -109,11 +110,13 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     Returns
     -------
     out_data : ndarray
-        the estimated background intensity. ``out_data.shape = img_shape``.
+        The array passed into ``out``, reshaped to
+        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        estimated background intensity.
 
     See Also
     --------
-    rolling_ellipsoid
+    rolling_ball
     """
 
     cdef Py_ssize_t offset, offset_idx, out_data_size, img_idx
@@ -140,8 +143,8 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
             # split into outer and inner loop for vectorization
             # (the inner loop is contiguous in memory)
             for ker_idx_last in range(kernel_last_dim):
-                tmp = (img[img_idx+ker_idx_last] + 
-                       ellipsoid_intensity[ker_idx_leading + ker_idx_last])
+                tmp = (img[img_idx+ker_idx_last] +
+                       intensity_difference[ker_idx_leading + ker_idx_last])
                 if min_value > tmp or isnan(tmp):
                     min_value = tmp
             if isnan(min_value):
@@ -153,7 +156,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def apply_kernel(DTYPE_FLOAT[::1] img not None,
-                 DTYPE_FLOAT[::1] ellipsoid_intensity not None,
+                 DTYPE_FLOAT[::1] intensity_difference not None,
                  DTYPE_FLOAT[::1] out not None,
                  Py_ssize_t[::1] img_shape not None,
                  Py_ssize_t[::1] padded_img_shape not None,
@@ -167,10 +170,11 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     Parameters
     ----------
     img : (I) ndarray
-        A flat view into a padded image, e.g., from ``numpy.ravel()``.
-    ellipsoid_intensity : (K) ndarray
-        A flat view into the intensity of the ellipsoid, e.g., from
-        ``numpy.ravel()``. Indicates the difference between the 
+        A flat view into a padded image, e.g., from ``numpy.reshape(-1)``.
+    intensity_difference : (K) ndarray
+        A flat view into an array containing the intensity difference
+        between ellipsoid[center] and ellipsoid[pos], e.g., from
+        ``numpy.reshape(-1)``. Indicates the difference between the
         height/intensity of the ellipsoid at position ``(x,y)`` and
         the height/intensity at the center of the kernel.
     out : (I) ndarray
@@ -190,11 +194,13 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     Returns
     -------
     out_data : ndarray
-        the estimated background intensity. ``out_data.shape = img_shape``.
+        The array passed into ``out``, reshaped to
+        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        estimated background intensity.
 
     See Also
     --------
-    rolling_ellipsoid
+    rolling_ball
 
     Notes
     -----
@@ -226,7 +232,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
                               padded_img_shape)
             for ker_idx_last in range(kernel_last_dim):
                 ker_idx = ker_idx_leading + ker_idx_last
-                tmp = (img[img_idx+ker_idx_last] + ellipsoid_intensity[ker_idx])
+                tmp = (img[img_idx+ker_idx_last] + intensity_difference[ker_idx])
                 if min_value > tmp:
                     min_value = tmp
         out[offset_idx] = min_value

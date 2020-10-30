@@ -39,8 +39,8 @@ def rolling_ball(image, *, radius=100, kernel=None,
     Notes
     -----
     For the pixel that has its background intensity estimated (without loss
-    of generality at ``midpoint``) the rolling ball method centers ``kernel``
-    under it and raises the kernel until its surface touches the image umbra
+    of generality at ``center``) the rolling ball method centers ``kernel``
+    under it and raises the kernel until the surface touches the image umbra
     at some ``pos=(y,x)``. The background intensity is then estimated
     using the image intensity at that position (``image[pos]``) plus the
     difference of ``kernel[center] - kernel[pos]``.
@@ -73,8 +73,8 @@ def rolling_ball(image, *, radius=100, kernel=None,
     >>> from skimage.restoration import rolling_ball, ellipsoid_kernel
     >>> image = data.coins()
     >>> kernel = ellipsoid_kernel((101, 101), 75)
-    >>> background = rolling_ball(data.coins())
-    >>> filtered_image = image - background   
+    >>> background = rolling_ball(data.coins(), kernel=kernel)
+    >>> filtered_image = image - background
     """
 
     image = np.asarray(image)
@@ -130,6 +130,10 @@ def ball_kernel(radius, ndim):
     kernel : ndarray
         The kernel containing the surface intensity of the top half
         of the ellipsoid.
+
+    See Also
+    --------
+    rolling_ball
     """
 
     kernel_coords = np.stack(
@@ -155,8 +159,8 @@ def ellipsoid_kernel(shape, intensity):
     ----------
     shape : arraylike
         Length of the principal axis of the ellipsoid (excluding
-        the intensity axis). The length should match the
-        dimensionality of the image the kernel will be applied to.
+        the intensity axis). The kernel needs to have the same
+        dimensionality as the image it will be applied to.
     intensity : int
         Length of the intensity axis of the ellipsoid.
 
@@ -165,6 +169,10 @@ def ellipsoid_kernel(shape, intensity):
     kernel : ndarray
         The kernel containing the surface intensity of the top half
         of the ellipsoid.
+
+    See Also
+    --------
+    rolling_ball
     """
 
     shape = np.asarray(shape)
