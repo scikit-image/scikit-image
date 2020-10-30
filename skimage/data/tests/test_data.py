@@ -190,3 +190,9 @@ def test_lily_multichannel():
     fetch('data/lily.tif')
     lily = data.lily()
     assert lily.shape == (922, 922, 4)
+
+
+def test_vortex():
+    image_pair = data.vortex()
+    for image in image_pair:
+        assert image.shape == (512, 512)
