@@ -138,6 +138,8 @@ registry = {
     "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
     "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
+    "data/pivchallenge-B-B001_1.tif": "e95e09abbcecba723df283ac7d361766328abd943701a2ec2f345d4a2014da2a",
+    "data/pivchallenge-B-B001_2.tif": "4ceb5407e4e333476a0f264c14b7a3f6c0e753fcdc99ee1c4b8196e5f823805e",
 }
 
 registry_urls = {
@@ -149,6 +151,8 @@ registry_urls = {
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
     "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/master/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
     "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/master/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
+    "data/pivchallenge-B-B001_1.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_1.tif",
+    "data/pivchallenge-B-B001_2.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_2.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
     "restoration/tests/astronaut_dnp.npy":
         "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_dnp.npy",
