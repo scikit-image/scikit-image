@@ -1,3 +1,153 @@
+Announcement: scikit-image 0.14.4
+=================================
+
+We're happy to announce the release of scikit-image v0.14.4!
+
+As a reminder, 0.14.x is the final version of scikit-image with support for
+Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
+are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
+This is a bugfix release, and contains the following changes from v0.14.3:
+
+Bug Fixes
+---------
+- Fix float32 support in denoise_bilateral and denoise_tv_bregman (#3937)
+- Fixup test for RANSAC: don't pick duplicate samples #3901 (#3916)
+
+Other Pull Requests
+-------------------
+- Backport PR #3943 on branch v0.14.x (Update the joblib link in tutorial_parallelization.rst) (#3944)
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Alexandre de Siqueira
+- Juan Nunez-Iglesias
+- Mark Harfouche
+
+
+Announcement: scikit-image 0.14.3
+=================================
+
+As a reminder, 0.14.x is the final version of scikit-image with support for
+Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
+are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
+This is a bugfix release, and contains the following changes from v0.14.2:
+
+API Changes
+-----------
+-  morphology.local_maxima now returns a boolean array instead of uint8 (#3749,
+   #3752)
+
+
+Bug Fixes
+---------
+- _marching_cubes_lewiner_cy: mark char as signed (#3587, #3678)
+- Fix potential use of NULL pointer (#3696)
+- pypi: explicitly exclude Python 3.1, 3.2, and 3.3 (#3726)
+- Reduce default tolerance in threshold_li (#3622) (#3781)
+- Denoising functions now accept float32 images (#3449) (#3486) (#3880)
+
+Other Pull Requests
+-------------------
+
+- BLD: pin cython's language_level (#3716)
+- Build tools: Upgrade xcode to 9.4 on v0.14.x branch (#3724)
+- Get rid of the requirements-parser dependency (#3534, #3727)
+- Add small galleries in the API (#2940, #3728)
+- Correctly ignore release notes auto-generated for docs (#3656, #3737)
+- Fix qt 5.12 pinning for 0.14.x branch. (#3744, #3753)
+- Minor fixes to documentation and testing infrastructure - backports #3870 and #3869 (#3881)
+- Set astropy minimum requirement to 1.2 to help the CIs. (#3767, #3770)
+- Avoid NumPy warning while stacking arrays. (#3768, #3771)
+- Fix human readable error message on a bad build. (#3223, #3790)
+- Unify LICENSE files for easier interpretation (#3791, #3792)
+- Documentation formatting / compilation fixes - Backport of #3838 to v0.14.x (#3885)
+- Fix build by using latest ``wheel`` package (scikit-image/scikit-image-wheels#10)
+
+
+12 authors added to this release [alphabetical by first name]
+-------------------------------------------------------------
+- Andrew Murray
+- Christoph Gohlke
+- Egor Panfilov
+- François Boulogne
+- Johannes Schönberger
+- Juan Nunez-Iglesias
+- Lars Grueter
+- Mark Harfouche
+- Matthew Bowden
+- Nehal J Wani
+- Nelle Varoquaux
+- Stefan van der Walt
+- Thomas A Caswell
+
+... and, as always, a special mention to Matthias Bussonnier's Meeseeks Box,
+which remains invaluable for our backports.
+
+4 committers added to this release [alphabetical by first name or login]
+------------------------------------------------------------------------
+- Josh Warner
+- Juan Nunez-Iglesias
+- Mark Harfouche
+- Stefan van der Walt
+
+5 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Egor Panfilov
+- François Boulogne
+- Juan Nunez-Iglesias
+- Mark Harfouche
+- Stefan van der Walt
+
+
+Announcement: scikit-image 0.14.2
+=================================
+
+This release handles an incompatibility between scikit-image and NumPy
+1.16.0, released on January 13th 2019.
+
+It contains the following changes from 0.14.1:
+
+API changes
+-----------
+- ``skimage.measure.regionprops`` no longer removes singleton dimensions from
+  label images (#3284). To recover the old behavior, replace
+  ``regionprops(label_image)`` calls with
+  ``regionprops(np.squeeze(label_image))``
+
+Bug fixes
+---------
+- Address deprecation of NumPy ``_validate_lengths`` (backport of #3556)
+- Correctly handle the maximum number of lines in Hough transforms
+  (backport of #3514)
+- Correctly implement early stopping criterion for rank kernel noise
+  filter (backport of #3503)
+- Fix ``skimage.measure.regionprops`` for 1x1 inputs (backport of #3284)
+
+Enhancements
+------------
+- Rewrite of ``local_maxima`` with flood-fill (backport of #3022, #3447)
+
+Build Process & Testing
+-----------------------
+- Dedicate a ``--pre`` build in appveyor (backport of #3222)
+- Avoid Travis-CI failure regarding ``skimage.lookfor`` (backport of #3477)
+- Stop using the ``pytest.fixtures`` decorator (#3558)
+- Filter out DeprecationPendingWarning for matrix subclass (#3637)
+- Fix matplotlib test warnings and circular import (#3632)
+
+Contributors & Reviewers
+------------------------
+- François Boulogne
+- Emmanuelle Gouillart
+- Lars Grüter
+- Mark Harfouche
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Stefan van der Walt
+
+
 Announcement: scikit-image 0.14.1
 =================================
 

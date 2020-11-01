@@ -21,6 +21,7 @@ References
 
 
 import numpy as np
+from .._shared.fft import fftmodule as fft
 
 __keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
@@ -52,8 +53,8 @@ def ufftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.fftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.fftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uifftn(inarray, dim=None):
@@ -83,8 +84,8 @@ def uifftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.ifftn(inarray, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.ifftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def urfftn(inarray, dim=None):
@@ -123,8 +124,8 @@ def urfftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.rfftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.rfftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uirfftn(inarray, dim=None, shape=None):
@@ -167,8 +168,8 @@ def uirfftn(inarray, dim=None, shape=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.irfftn(inarray, shape, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(outarray.shape[-dim:]))
+    outarray = fft.irfftn(inarray, shape, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def ufft2(inarray):
@@ -280,6 +281,10 @@ def uirfft2(inarray, shape=None):
     ----------
     inarray : ndarray, shape (M, N, ..., P)
         The array to transform.
+    shape : tuple of int, optional
+        The shape of the output. The shape of ``rfft`` is ambiguous in
+        case of odd-valued input shape. In this case, this parameter
+        should be provided. See ``np.fft.irfftn``.
 
     Returns
     -------
@@ -353,8 +358,8 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     dim : int, optional
         The last axis along which to compute the transform. All
         axes by default.
-    is_real : boolean (optional, default True)
-       If True, imp_resp is supposed real and the Hermitian property
+    is_real : boolean, optional
+       If True (default), imp_resp is supposed real and the Hermitian property
        is used with rfftn Fourier transform.
 
     Returns
@@ -395,9 +400,9 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
                                shift=-int(np.floor(axis_size / 2)),
                                axis=axis)
     if is_real:
-        return np.fft.rfftn(irpadded, axes=range(-dim, 0))
+        return fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
-        return np.fft.fftn(irpadded, axes=range(-dim, 0))
+        return fft.fftn(irpadded, axes=range(-dim, 0))
 
 
 def laplacian(ndim, shape, is_real=True):
@@ -409,10 +414,10 @@ def laplacian(ndim, shape, is_real=True):
     ----------
     ndim : int
         The dimension of the Laplacian.
-    shape : tuple, shape
-        The support on which to compute the transfer function
-    is_real : boolean (optional, default True)
-       If True, imp_resp is assumed to be real-valued and
+    shape : tuple
+        The support on which to compute the transfer function.
+    is_real : boolean, optional
+       If True (default), imp_resp is assumed to be real-valued and
        the Hermitian property is used with rfftn Fourier transform
        to return the transfer function.
 

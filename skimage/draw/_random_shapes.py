@@ -1,6 +1,8 @@
+import math
 import numpy as np
 
-from . import polygon as draw_polygon, circle as draw_circle
+from . import (polygon as draw_polygon, disk as draw_disk,
+               ellipse as draw_ellipse)
 from .._shared.utils import warn
 
 
@@ -14,7 +16,8 @@ def _generate_rectangle_mask(point, image, shape, random):
     point : tuple
         The row and column of the top left corner of the rectangle.
     image : tuple
-        The height, width and depth of the image into which the shape is placed.
+        The height, width and depth of the image into which the shape
+        is placed.
     shape : tuple
         The minimum and maximum size of the shape to fit.
     random : np.random.RandomState
@@ -34,16 +37,14 @@ def _generate_rectangle_mask(point, image, shape, random):
         bounding box coordinates of the shape.
     indices : 2-D array
         A mask of indices that the shape fills.
+
     """
-    available_width = min(image[1] - point[1], shape[1])
-    if available_width < shape[0]:
-        raise ArithmeticError('cannot fit shape to image')
-    available_height = min(image[0] - point[0], shape[1])
-    if available_height < shape[0]:
-        raise ArithmeticError('cannot fit shape to image')
+    available_width = min(image[1] - point[1], shape[1]) - shape[0]
+    available_height = min(image[0] - point[0], shape[1]) - shape[0]
+
     # Pick random widths and heights.
-    r = random.randint(shape[0], available_height + 1)
-    c = random.randint(shape[0], available_width + 1)
+    r = shape[0] + random.randint(max(1, available_height)) - 1
+    c = shape[0] + random.randint(max(1, available_width)) - 1
     rectangle = draw_polygon([
         point[0],
         point[0] + r,
@@ -55,7 +56,8 @@ def _generate_rectangle_mask(point, image, shape, random):
         point[1] + c,
         point[1] + c,
     ])
-    label = ('rectangle', ((point[0], point[0] + r), (point[1], point[1] + c)))
+    label = ('rectangle', ((point[0], point[0] + r + 1),
+                           (point[1], point[1] + c + 1)))
 
     return rectangle, label
 
@@ -93,21 +95,29 @@ def _generate_circle_mask(point, image, shape, random):
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('size must be > 1 for circles')
-    min_radius = shape[0] / 2.0
-    max_radius = shape[1] / 2.0
+    min_radius = shape[0] // 2.0
+    max_radius = shape[1] // 2.0
     left = point[1]
     right = image[1] - point[1]
     top = point[0]
     bottom = image[0] - point[0]
-    available_radius = min(left, right, top, bottom, max_radius)
-    if available_radius < min_radius:
+    available_radius = min(left, right, top,
+                           bottom, max_radius) - min_radius
+    if available_radius < 0:
         raise ArithmeticError('cannot fit shape to image')
-    radius = random.randint(min_radius, available_radius + 1)
-    circle = draw_circle(point[0], point[1], radius)
+    radius = int(min_radius + random.randint(max(1, available_radius)))
+    # TODO: think about how to deprecate this
+    # while draw_circle was deprecated in favor of draw_disk
+    # switching to a label of 'disk' here
+    # would be a breaking change for downstream libraries
+    # See discussion on naming convention here
+    # https://github.com/scikit-image/scikit-image/pull/4428
+    disk = draw_disk((point[0], point[1]), radius)
+    # Until a deprecation path is decided, always return `'circle'`
     label = ('circle', ((point[0] - radius + 1, point[0] + radius),
                         (point[1] - radius + 1, point[1] + radius)))
 
-    return circle, label
+    return disk, label
 
 
 def _generate_triangle_mask(point, image, shape, random):
@@ -118,9 +128,65 @@ def _generate_triangle_mask(point, image, shape, random):
     Parameters
     ----------
     point : tuple
-        The row and column of the top left corner of a down-pointing triangle.
+        The row and column of the top left corner of a up-pointing triangle.
     image : tuple
-        The height, width and depth of the image into which the shape is placed.
+        The height, width and depth of the image into which the shape
+        is placed.
+    shape : tuple
+        The minimum and maximum size and color of the shape to fit.
+    random : np.random.RandomState
+        The random state to use for random sampling.
+
+    Raises
+    ------
+    ArithmeticError
+        When a shape cannot be fit into the image with the given starting
+        coordinates. This usually means the image dimensions are too small or
+        shape dimensions too large.
+
+    Returns
+    -------
+    label : tuple
+        A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
+        bounding box coordinates of the shape.
+    indices : 2-D array
+        A mask of indices that the shape fills.
+
+    """
+    if shape[0] == 1 or shape[1] == 1:
+        raise ValueError('dimension must be > 1 for triangles')
+    available_side = min(image[1] - point[1], point[0],
+                         shape[1]) - shape[0]
+    side = shape[0] + random.randint(max(1, available_side)) - 1
+    triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
+    triangle = draw_polygon([
+        point[0],
+        point[0] - triangle_height,
+        point[0],
+    ], [
+        point[1],
+        point[1] + side // 2,
+        point[1] + side,
+    ])
+    label = ('triangle', ((point[0] - triangle_height, point[0] + 1),
+                          (point[1], point[1] + side + 1)))
+
+    return triangle, label
+
+
+def _generate_ellipse_mask(point, image, shape, random):
+    """Generate a mask for a filled ellipse shape.
+
+    The rotation, major and minor semi-axes of the ellipse are generated
+    randomly.
+
+    Parameters
+    ----------
+    point : tuple
+        The row and column of the top left corner of the rectangle.
+    image : tuple
+        The height, width and depth of the image into which the shape is
+        placed.
     shape : tuple
         The minimum and maximum size and color of the shape to fit.
     random : np.random.RandomState
@@ -142,32 +208,47 @@ def _generate_triangle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
-        raise ValueError('dimension must be > 1 for triangles')
-    available_side = min(image[1] - point[1], point[0] + 1, shape[1])
-    if available_side < shape[0]:
+        raise ValueError('size must be > 1 for ellipses')
+    min_radius = shape[0] / 2.0
+    max_radius = shape[1] / 2.0
+    left = point[1]
+    right = image[1] - point[1]
+    top = point[0]
+    bottom = image[0] - point[0]
+    available_radius = min(left, right, top, bottom, max_radius)
+    if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
-    side = random.randint(shape[0], available_side + 1)
-    triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
-    triangle = draw_polygon([
+    # NOTE: very conservative because we could take into account the fact that
+    # we have 2 different radii, but this is a good first approximation.
+    # Also, we can afford to have a uniform sampling because the ellipse will
+    # be rotated.
+    r_radius = random.uniform(min_radius, available_radius + 1)
+    c_radius = random.uniform(min_radius, available_radius + 1)
+    rotation = random.uniform(-np.pi, np.pi)
+    ellipse = draw_ellipse(
         point[0],
-        point[0] - triangle_height,
-        point[0],
-    ], [
         point[1],
-        point[1] + side // 2,
-        point[1] + side,
-    ])
-    label = ('triangle', ((point[0] - triangle_height, point[0]),
-                          (point[1], point[1] + side)))
+        r_radius,
+        c_radius,
+        shape=image[:2],
+        rotation=rotation,
+    )
+    max_radius = math.ceil(max(r_radius, c_radius))
+    min_x = np.min(ellipse[0])
+    max_x = np.max(ellipse[0]) + 1
+    min_y = np.min(ellipse[1])
+    max_y = np.max(ellipse[1]) + 1
+    label = ('ellipse', ((min_x, max_x), (min_y, max_y)))
 
-    return triangle, label
+    return ellipse, label
 
 
 # Allows lookup by key as well as random selection.
 SHAPE_GENERATORS = dict(
     rectangle=_generate_rectangle_mask,
     circle=_generate_circle_mask,
-    triangle=_generate_triangle_mask)
+    triangle=_generate_triangle_mask,
+    ellipse=_generate_ellipse_mask)
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
@@ -275,7 +356,7 @@ def random_shapes(image_shape,
         Number of channels in the generated image. If 1, generate monochrome
         images, else color images with multiple channels. Ignored if
         ``multichannel`` is set to False.
-    shape : {rectangle, circle, triangle, None} str, optional
+    shape : {rectangle, circle, triangle, ellipse, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
         The range of values to sample pixel values from. For grayscale images
@@ -292,7 +373,7 @@ def random_shapes(image_shape,
         If `True`, allow shapes to overlap.
     num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
-    seed : int, optional
+    random_seed : int, optional
         Seed to initialize the random number generator.
         If `None`, a random seed from the operating system is used.
 
@@ -358,25 +439,27 @@ def random_shapes(image_shape,
     labels = []
 
     num_shapes = random.randint(min_shapes, max_shapes + 1)
-    colors = _generate_random_colors(num_shapes, num_channels,
-                                     intensity_range, random,
+    colors = _generate_random_colors(num_shapes,
+                                     num_channels,
+                                     intensity_range,
+                                     random,
                                      exclude=background)
     for shape_idx in range(num_shapes):
         if user_shape is None:
             shape_generator = random.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
-        shape = (min_size, max_size)
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.randint(image_shape[1])
-            row = random.randint(image_shape[0])
+            column = random.randint(max(1, image_shape[1] - min_size))
+            row = random.randint(max(1, image_shape[0] - min_size))
             point = (row, column)
             try:
                 indices, label = shape_generator(point, image_shape, shape,
                                                  random)
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
+                indices = []
                 continue
             # Check if there is an overlap where the mask is nonzero.
             if allow_overlap or not filled[indices].any():

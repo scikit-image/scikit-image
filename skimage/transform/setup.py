@@ -11,12 +11,10 @@ def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
     config = Configuration('transform', parent_package, top_path)
-    config.add_data_dir('tests')
 
     cython(['_hough_transform.pyx',
             '_warps_cy.pyx',
-            '_radon_transform.pyx',
-            '_seam_carving.pyx'], working_path=base_path)
+            '_radon_transform.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -28,8 +26,6 @@ def configuration(parent_package='', top_path=None):
                          sources=['_radon_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
-    config.add_extension('_seam_carving', sources=['_seam_carving.c'],
-                         include_dirs=[get_numpy_include_dirs()])
     return config
 
 if __name__ == '__main__':

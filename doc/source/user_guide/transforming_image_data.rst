@@ -116,6 +116,8 @@ same color.
   * :ref:`sphx_glr_auto_examples_segmentation_plot_rag_mean_color.py`
 
 
+.. _exposure:
+
 Contrast and exposure
 ---------------------
 

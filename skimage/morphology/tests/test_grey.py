@@ -1,15 +1,13 @@
-import os
-
 import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import color, data, transform
-from skimage import img_as_uint, img_as_ubyte, data_dir
+from skimage.util import img_as_uint, img_as_ubyte
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_equal,
-                                     TestCase, parametrize)
+                                     TestCase, parametrize, fetch)
 
 
 class TestMorphology(TestCase):
@@ -28,9 +26,8 @@ class TestMorphology(TestCase):
         selems_2D = (selem.square, selem.diamond,
                      selem.disk, selem.star)
 
-        with expected_warnings(['Possible precision loss']):
-            image = img_as_ubyte(transform.downscale_local_mean(
-                color.rgb2gray(data.coffee()), (20, 20)))
+        image = img_as_ubyte(transform.downscale_local_mean(
+            color.rgb2gray(data.coffee()), (20, 20)))
 
         output = {}
         for n in range(1, 4):
@@ -43,14 +40,12 @@ class TestMorphology(TestCase):
         return output
 
     def test_gray_morphology(self):
-        expected = dict(np.load(
-            os.path.join(data_dir, 'gray_morph_output.npz')))
+        expected = dict(np.load(fetch('data/gray_morph_output.npz')))
         calculated = self._build_expected_output()
         assert_equal(expected, calculated)
 
 
 class TestEccentricStructuringElements(TestCase):
-    @testing.fixture(autouse=True)
     def setUp(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
@@ -244,9 +239,8 @@ def test_float():
 
 
 def test_uint16():
-    with expected_warnings(['Possible precision loss']):
-        im16, eroded16, dilated16, opened16, closed16 = (
-            map(img_as_uint, [im, eroded, dilated, opened, closed]))
+    im16, eroded16, dilated16, opened16, closed16 = (
+        map(img_as_uint, [im, eroded, dilated, opened, closed]))
     np.testing.assert_allclose(grey.erosion(im16), eroded16)
     np.testing.assert_allclose(grey.dilation(im16), dilated16)
     np.testing.assert_allclose(grey.opening(im16), opened16)

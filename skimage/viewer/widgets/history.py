@@ -3,8 +3,8 @@ from textwrap import dedent
 from ..qt import QtGui, QtCore, QtWidgets
 import numpy as np
 
-import skimage
-from ... import io, img_as_ubyte
+from ... import io
+from ...util import img_as_ubyte
 from .core import BaseWidget
 from ..utils import dialogs
 

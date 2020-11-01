@@ -27,8 +27,8 @@ from skimage.transform import rescale, resize, downscale_local_mean
 
 image = color.rgb2gray(data.astronaut())
 
-image_rescaled = rescale(image, 1.0 / 4.0, anti_aliasing=False)
-image_resized = resize(image, (image.shape[0] / 4, image.shape[1] / 4),
+image_rescaled = rescale(image, 0.25, anti_aliasing=False)
+image_resized = resize(image, (image.shape[0] // 4, image.shape[1] // 4),
                        anti_aliasing=True)
 image_downscaled = downscale_local_mean(image, (4, 3))
 

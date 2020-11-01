@@ -9,10 +9,10 @@ to provide better precision of the output contours. Contours which intersect
 the image edge are open; all others are closed.
 
 The `marching squares algorithm
-<http://www.essi.fr/~lingrand/MarchingCubes/algo.html>`__ is a special case of
-the marching cubes algorithm (Lorensen, William and Harvey E. Cline. Marching
-Cubes: A High Resolution 3D Surface Construction Algorithm. Computer Graphics
-(SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
+<http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html>`__ is a
+special case of the marching cubes algorithm (Lorensen, William and Harvey
+E. Cline. Marching Cubes: A High Resolution 3D Surface Construction Algorithm.
+Computer Graphics SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
 
 """
 import numpy as np
@@ -30,9 +30,9 @@ contours = measure.find_contours(r, 0.8)
 
 # Display the image and plot all contours found
 fig, ax = plt.subplots()
-ax.imshow(r, interpolation='nearest', cmap=plt.cm.gray)
+ax.imshow(r, cmap=plt.cm.gray)
 
-for n, contour in enumerate(contours):
+for contour in contours:
     ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
 
 ax.axis('image')

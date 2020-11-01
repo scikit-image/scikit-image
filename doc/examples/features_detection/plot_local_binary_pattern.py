@@ -101,13 +101,13 @@ def highlight_bars(bars, indexes):
         bars[i].set_facecolor('r')
 
 
-image = data.load('brick.png')
+image = data.brick()
 lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 
 def hist(ax, lbp):
     n_bins = int(lbp.max() + 1)
-    return ax.hist(lbp.ravel(), normed=True, bins=n_bins, range=(0, n_bins),
+    return ax.hist(lbp.ravel(), density=True, bins=n_bins, range=(0, n_bins),
                    facecolor='0.5')
 
 
@@ -132,8 +132,8 @@ for ax, labels in zip(ax_img, label_sets):
 for ax, labels, name in zip(ax_hist, label_sets, titles):
     counts, _, bars = hist(ax, lbp)
     highlight_bars(bars, labels)
-    ax.set_ylim(ymax=np.max(counts[:-1]))
-    ax.set_xlim(xmax=n_points + 2)
+    ax.set_ylim(top=np.max(counts[:-1]))
+    ax.set_xlim(right=n_points + 2)
     ax.set_title(name)
 
 ax_hist[0].set_ylabel('Percentage')
@@ -177,14 +177,14 @@ def match(refs, img):
     return best_name
 
 
-brick = data.load('brick.png')
-grass = data.load('grass.png')
-wall = data.load('rough-wall.png')
+brick = data.brick()
+grass = data.grass()
+gravel = data.gravel()
 
 refs = {
     'brick': local_binary_pattern(brick, n_points, radius, METHOD),
     'grass': local_binary_pattern(grass, n_points, radius, METHOD),
-    'wall': local_binary_pattern(wall, n_points, radius, METHOD)
+    'gravel': local_binary_pattern(gravel, n_points, radius, METHOD)
 }
 
 # classify rotated textures
@@ -211,8 +211,8 @@ ax2.axis('off')
 hist(ax5, refs['grass'])
 ax5.set_xlabel('Uniform LBP values')
 
-ax3.imshow(wall)
+ax3.imshow(gravel)
 ax3.axis('off')
-hist(ax6, refs['wall'])
+hist(ax6, refs['gravel'])
 
 plt.show()

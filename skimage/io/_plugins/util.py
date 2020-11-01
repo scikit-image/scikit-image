@@ -168,7 +168,6 @@ def histograms(image, nbins):
     -------
     out : (rcounts, gcounts, bcounts, vcounts)
         The binned histograms of the RGB channels and intensity values.
-
     This is a NAIVE histogram routine, meant primarily for fast display.
 
     '''
@@ -296,7 +295,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.add, channel, ammount)
         pool.run()
@@ -304,7 +304,7 @@ class ColorMixer(object):
     def multiply(self, channel, ammount):
         '''Mutliply the indicated channel by the specified value.
 
-         Parameters
+        Parameters
         ----------
         channel : flag
             the color channel to operate on
@@ -314,7 +314,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.multiply, channel, ammount)
         pool.run()
@@ -328,7 +329,6 @@ class ColorMixer(object):
             The ammount to add to each channel.
         factor : float
             The factor to multiply each channel by.
-
         result = clip((pixel + offset)*factor)
 
         '''

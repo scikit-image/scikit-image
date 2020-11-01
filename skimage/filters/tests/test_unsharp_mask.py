@@ -1,7 +1,6 @@
 import numpy as np
 from skimage.filters import unsharp_mask
 from skimage._shared.testing import parametrize
-from skimage._shared._warnings import expected_warnings
 
 
 @parametrize("shape,multichannel",
@@ -25,8 +24,7 @@ def test_unsharp_masking_output_type_and_shape(
     array = ((array + offset) * 128).astype(dtype)
     if (preserve is False) and (dtype in [np.float32, np.float64]):
         array /= max(np.abs(array).max(), 1.0)
-    with expected_warnings([r'precision|\A\Z']):
-        output = unsharp_mask(array, radius, amount, multichannel, preserve)
+    output = unsharp_mask(array, radius, amount, multichannel, preserve)
     assert output.dtype in [np.float32, np.float64]
     assert output.shape == shape
 

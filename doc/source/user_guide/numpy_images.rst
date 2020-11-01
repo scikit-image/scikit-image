@@ -1,3 +1,5 @@
+.. _numpy:
+
 ==================================
 A crash course on NumPy for images
 ==================================
@@ -116,7 +118,7 @@ This shows that ``cat`` is a 300-by-451 pixel image with three channels
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
 We can also use 2D boolean masks for 2D multichannel images, as we did with
-the grayscale image above::
+the grayscale image above:
 
 .. plot::
 
@@ -216,9 +218,6 @@ is the same::
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
     >>> print("%.2f seconds" % (t1 - t0))  # doctest: +SKIP
     0.14 seconds
-    >>> im3d_t = np.transpose(im3d).copy()  # place "planes" dimension at end
-    >>> im3d_t.shape
-    (1024, 1024, 100)
     >>> s0 = time.time(); x = out_of_order_multiply(im3d, 5); s1 = time.time()
     >>> print("%.2f seconds" % (s1 - s0))  # doctest: +SKIP
     1.18 seconds

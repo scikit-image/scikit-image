@@ -183,7 +183,7 @@ Delete a branch on github
    git push origin :my-unwanted-branch
 
 (Note the colon ``:`` before ``test-branch``.  See also:
-https://github.com/guides/remove-a-remote-branch
+https://help.github.com/en/github/using-git/managing-remote-repositories
 
 Several people sharing a single repository
 ------------------------------------------

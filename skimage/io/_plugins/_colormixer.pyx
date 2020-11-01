@@ -11,10 +11,10 @@ integers, so currently the only way to clip results efficiently
 one.
 
 """
-import cython
 
 cimport numpy as cnp
 from libc.math cimport exp, pow
+cnp.import_array()
 
 
 def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,

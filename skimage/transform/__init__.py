@@ -12,10 +12,9 @@ from ._geometric import (estimate_transform,
                          EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import (swirl, resize, rotate, rescale,
-                     downscale_local_mean, warp, warp_coords)
+                     downscale_local_mean, warp, warp_coords, warp_polar)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
-from .seam_carving import seam_carve
 
 
 __all__ = ['hough_circle',
@@ -34,6 +33,7 @@ __all__ = ['hough_circle',
            'integrate',
            'warp',
            'warp_coords',
+           'warp_polar',
            'estimate_transform',
            'matrix_transform',
            'EuclideanTransform',
@@ -52,5 +52,4 @@ __all__ = ['hough_circle',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian',
-           'seam_carve']
+           'pyramid_laplacian']

@@ -1,13 +1,15 @@
 # AppVeyor.com is a Continuous Integration service to build and run tests under
 # Windows
-
 environment:
   matrix:
-    - PYTHON: C:\Python35-x64
     - PYTHON: C:\Python36
     - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37
     - PYTHON: C:\Python37-x64
+    - PYTHON: C:\Python38
+    - PYTHON: C:\Python38-x64
+    - PYTHON: C:\Python37-x64
+      PIP_FLAGS: --pre
 
 matrix:
   fast_finish: true
@@ -34,20 +36,16 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   - "pip --version"
 
-  # Get stdint headers needed by tifffile.c.
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h"
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
-
   # Install the build and runtime dependencies of the project.
-  # The --pre flag is necessary to grab a SciPy wheel, which is in
-  # pre-release at the time of writing (03-10-2017)
-  - pip install --retries 3 --pre -r requirements.txt
-  - pip install --retries 3 -r requirements/build.txt
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
   - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
-  # Install the generated wheel package to test it
-  - "pip install --pre --no-index --find-links dist/ scikit-image"
+  # Install the generated wheel package to test it.
+  - pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
+  # Install the test dependencies
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
 
 # Not a .NET project, we build scikit-image in the install step instead
 build: false

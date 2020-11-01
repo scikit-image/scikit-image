@@ -60,7 +60,7 @@ img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
                           lbp_code=lbp_code, alpha=0.5)
 
 
-plt.imshow(img, interpolation='nearest')
+plt.imshow(img)
 
 plt.show()
 

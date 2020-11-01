@@ -1,31 +1,35 @@
-#!/usr/bin/env python
-
-
+#!/usr/bin/env python3
 import os
-import subprocess
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
+import tarfile
 
-base_dir = os.path.join(os.path.dirname(__file__), '..')
-os.chdir(base_dir)
+parser = ArgumentParser(description='Check a created sdist')
+parser.add_argument('sdist_name', type=str, nargs=1,
+                    help='The name of the sdist file to check')
+args = parser.parse_args()
+sdist_name = args.sdist_name[0]
 
-p = subprocess.Popen("python setup.py sdist".split(),
-                     stdout=subprocess.PIPE)
-out, err = p.communicate()
+with tarfile.open(sdist_name) as tar:
+    members = tar.getmembers()
 
-data = out.decode('utf-8').split('\n')
-data = [l for l in data if l.startswith('hard linking')]
-data = [l.replace('hard linking ', '') for l in data]
-data = ['./' + l.split(' ->')[0] for l in data]
+# The very first item contains the name of the archive
+top_parent = Path(members[0].name)
+
+filenames = ['./' + str(Path(m.name).relative_to(top_parent))
+             for m in members[1:]]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
 ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
                './downloads', './scikit_image.egg-info', './benchmarks']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
+                './CODE_OF_CONDUCT.md',
                 './.gitignore', './.travis.yml', './.gitmodules',
-                './.mailmap', './.coveragerc', './.appveyor.yml',
-                './.pep8speaks.yml', './asv.conf.json',
+                './.mailmap', './.coveragerc', './azure-pipelines.yml',
+                './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
                 './.codecov.yml',
-                './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
+                './skimage/filters/rank/README.rst']
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
@@ -51,7 +55,7 @@ for root, dirs, files in os.walk('./'):
             else:
                 fn = os.path.join(root, fn)
 
-                if not (fn in data or fn in ignore_files):
+                if not (fn in filenames or fn in ignore_files):
                     missing.append(fn)
 
 if missing:
