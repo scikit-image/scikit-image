@@ -159,8 +159,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         return `num_peaks` peaks based on highest peak intensity.
     footprint : ndarray of bools, optional
         If provided, `footprint == 1` represents the local region within which
-        to search for peaks at every point in `image`.  Overrides
-        `min_distance`.
+        to search for peaks at every point in `image`.
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
@@ -223,7 +222,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     >>> peak_mask[peak_idx] = True
 
     """
-    if min_distance < 1:
+    if footprint is None and min_distance < 1:
         warn("When min_distance < 1, peak_local_max acts as finding "
              "image > max(threshold_abs, threshold_rel).",
              RuntimeWarning, stacklevel=2)
@@ -236,12 +235,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     if footprint is None:
         size = 2 * min_distance + 1
         footprint = np.ones((size, ) * image.ndim, dtype=bool)
-    else:
-        footprint = np.asarray(footprint)
-        if footprint.size == 1:
-            warn("When footprint.size < 2, peak_local_max acts as finding "
-                 "image > max(threshold_abs, threshold_rel).",
-                 RuntimeWarning, stacklevel=2)
 
     if labels is None:
         # Non maximum filter

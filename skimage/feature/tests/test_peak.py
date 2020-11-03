@@ -355,30 +355,6 @@ class TestPeakLocalMax():
                                          exclude_border=False)
         assert np.all(result == expected)
 
-    def test_disk(self):
-        '''regression test of img-1194, footprint = [1]
-        Test peak.peak_local_max when every point is a local maximum
-        '''
-        image = np.random.uniform(size=(10, 20))
-        footprint = np.array([[1]])
-        with expected_warnings(["indices argument is deprecated",
-                                "When footprint.size < 2"]):
-            result = peak.peak_local_max(image,
-                                         labels=np.ones((10, 20), dtype=int),
-                                         footprint=footprint,
-                                         min_distance=0, threshold_rel=0,
-                                         threshold_abs=-1, indices=False,
-                                         exclude_border=False)
-        assert np.all(result)
-        with expected_warnings(["indices argument is deprecated",
-                                "When footprint.size < 2"]):
-            result = peak.peak_local_max(image, min_distance=0,
-                                         footprint=footprint,
-                                         threshold_abs=-1,
-                                         indices=False,
-                                         exclude_border=False)
-        assert np.all(result)
-
     def test_3D(self):
         image = np.zeros((30, 30, 30))
         image[16, 16, 16] = 1
@@ -537,7 +513,7 @@ class TestProminentPeaks(unittest.TestCase):
         image[y1, x1] = i1
         image[y2, x2] = i2
         out = peak._prominent_peaks(image, min_xdistance=3,
-                                   min_ydistance=3,)
+                                    min_ydistance=3,)
         assert_equal(out[0], np.array((i1,)))
         assert_equal(out[1], np.array((x1,)))
         assert_equal(out[2], np.array((y1,)))
@@ -547,12 +523,14 @@ class TestProminentPeaks(unittest.TestCase):
         labels = np.zeros((10, 20), int)
         image[5, 5] = 1
         labels[5, 5] = 1
+        image[5, 8] = 1
+        labels[5, 8] = 3
         labelsin = labels.copy()
         with expected_warnings(["indices argument is deprecated"]):
-            result = peak.peak_local_max(image, labels=labels,
-                                         footprint=np.ones((3, 3), bool),
-                                         min_distance=1, threshold_rel=0,
-                                         indices=False, exclude_border=False)
+            peak.peak_local_max(image, labels=labels,
+                                footprint=np.ones((3, 3), bool),
+                                min_distance=1, threshold_rel=0,
+                                indices=False, exclude_border=False)
         assert np.all(labels == labelsin)
 
     def test_many_objects(self):
