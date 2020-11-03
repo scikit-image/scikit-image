@@ -18,22 +18,15 @@ from matplotlib import cm, colors
 from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
-from skimage import exposure
+from skimage import exposure, util
 import imageio as io
 
 
 # Prepare data and apply histogram equalization
 
-# Try using skimage.data.image_fetcher for cached data loading,
-# otherwise fall back to reading the data from url
-from skimage.data import image_fetcher
-try:
-    path = image_fetcher.fetch('data/cells.tif')
-    im_orig = io.volread(path)
-except:
-    im_orig = io.volread('https://github.com/scikit-image/'
-                         'skimage-tutorials/blob/master/'
-                         'images/cells.tif?raw=True')
+from skimage.data import cells3d
+
+im_orig = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 # Reorder axis order from (z, y, x) to (x, y, z)
 im_orig = im_orig.transpose()

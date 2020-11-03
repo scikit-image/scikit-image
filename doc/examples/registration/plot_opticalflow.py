@@ -17,10 +17,9 @@ in the constructed RGB image.
 
 """
 import numpy as np
-import imageio
 from matplotlib import pyplot as plt
 from skimage.color import rgb2gray
-from skimage.data import stereo_motorcycle
+from skimage.data import stereo_motorcycle, vortex
 from skimage.transform import warp
 from skimage.registration import optical_flow_tvl1, optical_flow_ilk
 
@@ -89,8 +88,7 @@ fig.tight_layout()
 # velocimetry (PIV). The sequence is the Case B from the
 # `PIV challenge 2001 <http://www.pivchallenge.org/>`_
 
-image0 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_1.tif")
-image1 = imageio.imread("http://www.pivchallenge.org/pub/B/B001_2.tif")
+image0, image1 = vortex()
 
 # --- Compute the optical flow
 v, u = optical_flow_ilk(image0, image1, radius=15)
