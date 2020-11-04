@@ -627,8 +627,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # new and old threshold values is less than the tolerance
 
     if image.dtype == 'uint8' or image.dtype == 'uint16' :
-        nbins=256
-        hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+        nbins = 256
+        hist, bin_centers = histogram(image.ravel(),
+                                      nbins,
+                                      source_range='image')
         hist = hist.astype(float)
 
         while abs(t_next - t_curr) > tolerance:
@@ -636,11 +638,13 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             foreground = bin_centers > t_curr
             background = ~foreground
 
-            mean_fore = np.average(bin_centers[foreground], weights = hist[foreground])
-            mean_back = np.average(bin_centers[background], weights = hist[background])
+            mean_fore = np.average(bin_centers[foreground],
+                                   weights=hist[foreground])
+            mean_back = np.average(bin_centers[background],
+                                   weights=hist[background])
 
             t_next = ((mean_back - mean_fore) /
-                        (np.log(mean_back) - np.log(mean_fore)))
+                      (np.log(mean_back) - np.log(mean_fore)))
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
@@ -649,7 +653,6 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         return threshold
 
     else :
-
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = (image > t_curr)
