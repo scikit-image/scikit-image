@@ -626,7 +626,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
 
-    if image.dtype == 'uint8' or image.dtype == 'uint16' :
+    if image.dtype == 'uint8' or image.dtype == 'uint16':
         nbins = 256
         hist, bin_centers = histogram(image.ravel(),
                                       nbins,
@@ -643,8 +643,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             mean_back = np.average(bin_centers[background],
                                    weights=hist[background])
 
-            t_next = ((mean_back - mean_fore) /
-                      (np.log(mean_back) - np.log(mean_fore)))
+            t_next = ((mean_back - mean_fore)
+                      / (np.log(mean_back) - np.log(mean_fore)))
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
@@ -652,15 +652,15 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         threshold = t_next + image_min
         return threshold
 
-    else :
+    else:
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = (image > t_curr)
             mean_fore = np.mean(image[foreground])
             mean_back = np.mean(image[~foreground])
 
-            t_next = ((mean_back - mean_fore) /
-                    (np.log(mean_back) - np.log(mean_fore)))
+            t_next = ((mean_back - mean_fore) 
+                      / (np.log(mean_back) - np.log(mean_fore)))
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
