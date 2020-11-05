@@ -98,10 +98,19 @@ matrix:
       services:
         - xvfb
     - os: linux
-      python: 3.7
+      python: 3.9
       stage: Comprehensive tests
-      env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
-      dist: xenial # Required for Python 3.7
+      env: QT=PyQt5 BUILD_DOCS=1
+      dist: xenial # Required for Python 3.7+
+      services:
+        - xvfb
+    # build pre release packages on Python 3.8 since it has been out long
+    # enough for wheels to be built for packages that need to be compiled.
+    - os: linux
+      python: 3.8
+      stage: Comprehensive tests
+      env: QT=PyQt5 PIP_FLAGS="--pre"
+      dist: xenial # Required for Python 3.7+
       services:
         - xvfb
     # For smooth deployment, the osx_image here should match
@@ -123,6 +132,11 @@ matrix:
       language: objective-c
       stage: Initial tests
       env: MB_PYTHON_VERSION=3.8 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+    - os: osx
+      osx_image: xcode9.4
+      language: objective-c
+      stage: Comprehensive tests
+      env: MB_PYTHON_VERSION=3.9 TEST_EXAMPLES=0
 
 before_install:
     # Remove this line when the Ubuntu image is updated to Xenial
@@ -153,7 +167,10 @@ install:
     # pip will not create a virtual environment, just for building the package
     # This is problematic because the version of numpy of that virtual environment
     # may be higher than the version we want to test with.
-    - if [[ $INSTALL_FROM_SDIST ]]; then
+    - |
+      set -e
+
+      if [[ $INSTALL_FROM_SDIST ]]; then
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
@@ -173,6 +190,7 @@ install:
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
     - |
+      set -e
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
         pip install -r ./requirements/optional.txt $WHEELHOUSE
         if [[ "${EXTRA_DEPS}" != "0" ]]; then
