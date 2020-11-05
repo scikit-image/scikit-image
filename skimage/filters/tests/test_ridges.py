@@ -166,7 +166,7 @@ def test_3d_linearity():
 
 def test_2d_cropped_camera_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(camera(), ((200, 212), (100, 312)))
     a_white = invert(a_black)
 
     zeros = np.zeros((100, 100))
@@ -189,7 +189,7 @@ def test_2d_cropped_camera_image():
 
 def test_3d_cropped_camera_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(camera(), ((200, 212), (100, 312)))
     a_black = np.dstack([a_black, a_black, a_black])
     a_white = invert(a_black)
 

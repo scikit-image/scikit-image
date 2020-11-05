@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import check_nD, warn
 from ..transform import integral_image
-from ..util import crop, dtype_limits
+from ..util import dtype_limits
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
                                   _get_multiotsu_thresh_indices)
 

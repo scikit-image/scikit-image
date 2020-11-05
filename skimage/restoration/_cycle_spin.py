@@ -109,7 +109,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
     >>> denoised = cycle_spin(img, func=denoise_wavelet,
-    ...                       max_shifts=3) # doctest: +SKIP
+    ...                       max_shifts=3)
 
     """
     x = np.asanyarray(x)
