@@ -10,7 +10,7 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 fi
 
 section "List.installed.dependencies"
-pip list
+python -m pip list
 tools/build_versions.py
 section_end "List.installed.dependencies"
 
@@ -29,8 +29,8 @@ section "Tests.examples"
 # Run example applications
 if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" != "0" ]]; then
   echo Build or run examples
-  pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
-  pip list
+  python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
+  python -m pip list
   tools/build_versions.py
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
