@@ -34,12 +34,13 @@ def ensure_spacing(coord, spacing=1, p_norm=np.inf):
         for idx, candidates in enumerate(indices):
             if idx not in rejected_peaks_indices:
                 # keep current point and the points at exactly spacing from it
+                candidates.remove(idx)
                 dist = distance.cdist([coord[idx]],
                                       coord[candidates],
                                       distance.minkowski,
                                       p=p_norm).reshape(-1)
                 candidates = [c for c, d in zip(candidates, dist)
-                              if 0 < d < spacing]
+                              if d < spacing]
 
                 # candidates.remove(keep)
                 rejected_peaks_indices.update(candidates)
