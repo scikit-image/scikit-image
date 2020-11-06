@@ -123,6 +123,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
     of the two is chosen as the minimum intensity threshold of peaks.
 
+    .. versionchanged:: 0.18
+        Prior to version 0.18, peaks of the same height within a radius of
+        `min_distance` were all returned, but this could cause unexpected
+        behaviour. From 0.18 onwards, an arbitrary peak within the region is
+        returned. See issue gh-2592.
+
     Parameters
     ----------
     image : ndarray
