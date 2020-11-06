@@ -354,6 +354,26 @@ class TestPeakLocalMax():
                                          exclude_border=False)
         assert np.all(result == expected)
 
+    def test_disk(self):
+        '''regression test of img-1194, footprint = [1]
+        Test peak.peak_local_max when every point is a local maximum
+        '''
+        image = np.random.uniform(size=(10, 20))
+        footprint = np.array([[1]])
+        with expected_warnings(["indices argument is deprecated"]):
+            result = peak.peak_local_max(image, labels=np.ones((10, 20), int),
+                                         footprint=footprint,
+                                         min_distance=1, threshold_rel=0,
+                                         threshold_abs=-1, indices=False,
+                                         exclude_border=False)
+        assert np.all(result)
+        with expected_warnings(["indices argument is deprecated"]):
+            result = peak.peak_local_max(image, footprint=footprint,
+                                         threshold_abs=-1,
+                                         indices=False,
+                                         exclude_border=False)
+        assert np.all(result)
+
     def test_3D(self):
         image = np.zeros((30, 30, 30))
         image[15, 15, 15] = 1
