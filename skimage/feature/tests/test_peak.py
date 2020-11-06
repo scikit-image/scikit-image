@@ -242,7 +242,7 @@ class TestPeakLocalMax():
         image = np.zeros((10, 10, 10))
         result = peak.peak_local_max(image,
                                      footprint=np.ones((3, 3, 3), bool),
-                                     min_distance=0, threshold_rel=0,
+                                     min_distance=1, threshold_rel=0,
                                      exclude_border=False)
         assert result.shape == (0, image.ndim)
 
