@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import spatial
+from scipy.spatial import cKDTree, distance
 
 
 def ensure_spacing(coord, spacing=1, p_norm=np.inf):
@@ -27,13 +27,21 @@ def ensure_spacing(coord, spacing=1, p_norm=np.inf):
     output = coord
     if len(coord):
         # Use KDtree to find the peaks that are too close to each other
-        tree = spatial.cKDTree(coord)
+        tree = cKDTree(coord)
 
         indices = tree.query_ball_point(coord, r=spacing, p=p_norm)
         rejected_peaks_indices = set()
         for idx, candidates in enumerate(indices):
             if idx not in rejected_peaks_indices:
-                candidates.remove(idx)
+                # keep current point and the points at exactly spacing from it
+                dist = distance.cdist([coord[idx]],
+                                      coord[candidates],
+                                      distance.minkowski,
+                                      p=p_norm).reshape(-1)
+                candidates = [c for c, d in zip(candidates, dist)
+                              if 0 < d < spacing]
+
+                # candidates.remove(keep)
                 rejected_peaks_indices.update(candidates)
 
         # Remove the peaks that are too close to each other

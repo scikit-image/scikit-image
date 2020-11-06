@@ -61,7 +61,7 @@ class TestPeakLocalMax():
         image = np.zeros((5, 5), dtype=np.uint8)
         image[1:3, 1:3] = 10
         peaks = peak.peak_local_max(image, min_distance=1)
-        assert len(peaks) == 1
+        assert len(peaks) == 4
 
     def test_sorted_peaks(self):
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -196,6 +196,7 @@ class TestPeakLocalMax():
         expected = np.zeros_like(nd_image, dtype=np.bool)
         expected[2, 2, 2] = True
         expectedNoBorder = np.zeros_like(nd_image, dtype=bool)
+        expectedNoBorder[2, 2, 2] = True
         expectedNoBorder[0, 0, 1] = True
         expectedNoBorder[3, 0, 0] = True
         with expected_warnings(["indices argument is deprecated"]):
@@ -221,12 +222,10 @@ class TestPeakLocalMax():
                                     exclude_border=0, indices=False),
                 expectedNoBorder,
             )
-
-            expectedNoBorder[2, 2, 2] = True
             assert_equal(
                 peak.peak_local_max(nd_image,
                                     exclude_border=False, indices=False),
-                expectedNoBorder,
+                nd_image.astype(bool)
             )
 
     def test_empty(self):
@@ -357,33 +356,33 @@ class TestPeakLocalMax():
 
     def test_3D(self):
         image = np.zeros((30, 30, 30))
-        image[16, 16, 16] = 1
+        image[15, 15, 15] = 1
         image[5, 5, 5] = 1
         assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[16, 16, 16]])
+                     [[15, 15, 15]])
         assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[16, 16, 16]])
+                     [[15, 15, 15]])
         assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                           exclude_border=False).tolist()) == \
-            [[5, 5, 5], [16, 16, 16]]
+            [[5, 5, 5], [15, 15, 15]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
-            [[5, 5, 5], [16, 16, 16]]
+            [[5, 5, 5], [15, 15, 15]]
 
     def test_4D(self):
         image = np.zeros((30, 30, 30, 30))
-        image[16, 16, 16, 16] = 1
+        image[15, 15, 15, 15] = 1
         image[5, 5, 5, 5] = 1
         assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[16, 16, 16, 16]])
+                     [[15, 15, 15, 15]])
         assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[16, 16, 16, 16]])
+                     [[15, 15, 15, 15]])
         assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                           exclude_border=False).tolist()) == \
-            [[5, 5, 5, 5], [16, 16, 16, 16]]
+            [[5, 5, 5, 5], [15, 15, 15, 15]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
-            [[5, 5, 5, 5], [16, 16, 16, 16]]
+            [[5, 5, 5, 5], [15, 15, 15, 15]]
 
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
