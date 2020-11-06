@@ -541,9 +541,7 @@ class TestProminentPeaks(unittest.TestCase):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
         image[5, 5] = 1
-        labels[5, 5] = 1
-        image[5, 8] = 1
-        labels[5, 8] = 3
+        labels[5, 5] = 3
         labelsin = labels.copy()
         with expected_warnings(["indices argument is deprecated"]):
             peak.peak_local_max(image, labels=labels,
