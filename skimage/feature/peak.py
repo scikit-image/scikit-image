@@ -228,7 +228,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     >>> peak_mask[peak_idx] = True
 
     """
-    if footprint is None and min_distance < 1:
+    if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn("When min_distance < 1, peak_local_max acts as finding "
              "image > max(threshold_abs, threshold_rel * max(image)).",
              RuntimeWarning, stacklevel=2)
@@ -243,10 +243,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         footprint = np.ones((size, ) * image.ndim, dtype=bool)
     else:
         footprint = np.asarray(footprint)
-        if footprint.size == 1:
-            warn("When footprint.size < 2, peak_local_max acts as finding "
-                 "image > max(threshold_abs, threshold_rel * max(image))).",
-                 RuntimeWarning, stacklevel=2)
 
     if labels is None:
         # Non maximum filter
