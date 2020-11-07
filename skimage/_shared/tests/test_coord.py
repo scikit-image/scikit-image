@@ -15,7 +15,7 @@ def test_ensure_spacing_trivial(p):
     # --- 0 spacing
     assert np.array_equal(coord, ensure_spacing(coord, spacing=0, p_norm=p))
 
-    # Spacing is choosed to be half the minimum distance
+    # Spacing is chosen to be half the minimum distance
     spacing = pdist(coord, minkowski, p=p).min() * 0.5
 
     out = ensure_spacing(coord, spacing=spacing, p_norm=p)
