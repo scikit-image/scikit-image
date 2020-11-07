@@ -1,13 +1,12 @@
 import numpy as np
 from skimage.filters.thresholding import threshold_li
 from skimage.data import eagle
-from skimage.data import camera
 
-class ThresholdingLi:
+class ThresholdLi:
     """Benchmark for threshold_li in scikit-image."""
 
     def setup(self):
-        self.image = camera()
+        self.image = eagle()
 
     def time_integer_image(self):
         result1 = threshold_li(self.image)
