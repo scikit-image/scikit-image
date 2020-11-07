@@ -190,11 +190,11 @@ def disk(center, radius, *, shape=None):
     radius : double
         Radius of disk.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for disks that exceed the image
-        size. If None, the full extent of the disk is used.  Must be at least
-        length 2. Only the first two values are used to determine the extent of
-        the input image.
+        Image shape as a tuple of size 2 which is used to determine the maximum
+        extent of output pixel coordinates. This is useful for disks that
+        exceed the image size. If None, the full extent of the disk is used.
+        and the shape might result in negative coordinates and wraparound
+        behaviour.
 
     Returns
     -------
