@@ -293,9 +293,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     hist : array, or 2-tuple of arrays, optional
-        Histogram from which to determine the threshold, and optionally a corresponding array
-        of bin center intensities. Alternatively, only the histogram can be
-        passed.
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
 
     Returns
     -------
