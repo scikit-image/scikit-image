@@ -257,7 +257,7 @@ def _validate_image_histogram(image, hist, nbins=None):
     counts : 1D array of float
         Each element is the number of pixels falling in each intensity bin.
     bin_centers : 1D array
-        The value corresponding to the center of each intensity bin.
+        Each element is the value corresponding to the center of each intensity bin.
 
     Raises
     ------
