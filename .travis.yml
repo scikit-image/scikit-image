@@ -47,6 +47,12 @@ notifications:
 
 matrix:
   include:
+    # While we don't support 3.6 by building wheels,
+    # We will continue to build Python 3.6 as a proxy to PyPy support
+    - os: linux
+      python: 3.6
+      stage: Comprehensive tests
+      env: OPTIONAL_DEPS=0 BUILD_DOCS=0 INSTALL_FROM_SDIST=0
     - os: linux
       python: 3.7
       stage: Comprehensive tests
