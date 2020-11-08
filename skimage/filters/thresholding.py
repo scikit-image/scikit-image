@@ -282,7 +282,7 @@ def _validate_image_histogram(image, hist, nbins=None):
 def threshold_otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
 
-    Either image or hist must be provided. In case hist is given, the actual
+    Either image or hist must be provided. If hist is provided, the actual
     histogram of the image is ignored.
 
     Parameters
