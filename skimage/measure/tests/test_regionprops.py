@@ -3,6 +3,8 @@ import math
 import numpy as np
 from numpy import array
 
+from skimage import data
+from skimage.segmentation import slic
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           perimeter_crofton, euler_number,
@@ -151,13 +153,11 @@ def test_centroid_3d():
 
 def test_convex_area():
     area = regionprops(SAMPLE)[0].convex_area
-    # determined with MATLAB
-    assert area == 124
+    assert area == 125
 
 
 def test_convex_image():
     img = regionprops(SAMPLE)[0].convex_image
-    # determined with MATLAB
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -167,7 +167,7 @@ def test_convex_image():
          [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
     )
     assert_array_equal(img, ref)
@@ -387,8 +387,7 @@ def test_perimeter_crofton():
 
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
-    # determined with MATLAB
-    assert_almost_equal(solidity, 0.580645161290323)
+    assert_almost_equal(solidity, 0.576)
 
 
 def test_weighted_moments_central():
@@ -693,3 +692,24 @@ def test_extra_properties_table():
                             )
     assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
     assert_array_equal(out['pixelcount'], array([10, 2]))
+
+
+def test_multichannel():
+    """Test that computing multichannel properties works."""
+    astro = data.astronaut()[::4, ::4]
+    astro_green = astro[..., 1]
+    labels = slic(astro.astype(float), start_label=1)
+
+    segment_idx = np.max(labels) // 2
+    region = regionprops(labels, astro_green)[segment_idx]
+    region_multi = regionprops(labels, astro)[segment_idx]
+    for prop in PROPS:
+        p = region[prop]
+        p_multi = region_multi[prop]
+        if np.shape(p) == np.shape(p_multi):
+            # property does not depend on multiple channels
+            assert_array_equal(p, p_multi)
+        else:
+            # property uses multiple channels, returns props stacked along
+            # final axis
+            assert_array_equal(p, np.asarray(p_multi)[..., 1])
