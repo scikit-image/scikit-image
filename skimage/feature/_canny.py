@@ -320,8 +320,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     magnitude = np.hypot(isobel, jsobel)
 
     if use_quantiles:
-        high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
-        low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
+        low_threshold, high_threshold = np.percentile(magnitude,
+                                                      [100.0 * low_threshold,
+                                                       100.0 * high_threshold])
 
     # Non-maximum suppression
     local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
