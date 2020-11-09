@@ -17,7 +17,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage import generate_binary_structure, binary_erosion, label
 from ..filters import gaussian
 from .. import dtype_limits, img_as_float
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, deprecate_kwarg
 
 
 def smooth_with_function_and_mask(image, function, mask):
@@ -50,6 +50,8 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
+@deprecate_kwarg({'low_threshold': 'thresholds'}, removed_version="0.20")
+@deprecate_kwarg({'high_threshold': 'thresholds'}, removed_version="0.20")
 def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
           use_quantiles=False):
     """Edge filter an image using the Canny algorithm.
@@ -60,18 +62,16 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         Grayscale input image to detect edges on; can be of any dtype.
     sigma : float, optional
         Standard deviation of the Gaussian filter.
-    low_threshold : float, optional
-        Lower bound for hysteresis thresholding (linking edges).
-        If None, low_threshold is set to 10% of dtype's max.
-    high_threshold : float, optional
-        Upper bound for hysteresis thresholding (linking edges).
-        If None, high_threshold is set to 20% of dtype's max.
+    thresholds : (2, ) array_like, optional
+        Lower and upper bounds for hysteresis thresholding (linking edges).
+        If None, ``thresholds`` is set to 10% and 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
     use_quantiles : bool, optional
-        If True then treat low_threshold and high_threshold as quantiles of the
-        edge magnitude image, rather than absolute edge magnitude values. If True
-        then the thresholds must be in the range [0, 1].
+        If True then treat low_threshold and high_threshold as
+        quantiles of the edge magnitude image, rather than absolute
+        edge magnitude values. If True then the thresholds must be in
+        the range [0, 1].
 
     Returns
     -------
@@ -123,6 +123,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results
     >>> edges2 = feature.canny(im, sigma=3)
+
     """
 
     #
