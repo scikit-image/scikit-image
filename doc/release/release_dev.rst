@@ -73,7 +73,7 @@ Improvements
 - ``measure.label`` has been accelerated for boolean input images, by using
   ``scipy.ndimage``'s implementation for this case (#4945).
 - ``util.apply_parallel`` now works with multichannel data (#4927).
-
+- ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
 
 
 API Changes
@@ -93,6 +93,8 @@ API Changes
   descriptive name.
 - The ``level`` parameter of ``measure.find_contours`` is now a keyword
   argument, with a default value set to (max(image) - min(image)) / 2.
+- ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
+  to add support for Minkowski distances.
 
 
 Bugfixes
@@ -122,6 +124,12 @@ Bugfixes
   NaNs are found in the computation (as a result of NaNs in input images).
   Before this fix, an incorrect value could be returned where the input images
   had NaNs (#4886).
+- ``min_distance`` is now enforced for ``skimage.feature.peak_local_max``
+  (#2592).
+- Peak detection in labels is fixed in ``skimage.feature.peak_local_max``
+  (#4756).
+- Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
+  is avoided (#5047).
 
 
 Deprecations

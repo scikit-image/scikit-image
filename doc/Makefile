@@ -47,11 +47,12 @@ api:
 
 release_notes:
 	@echo "Copying release notes"
-	@cat `$(PYTHON) -c \
-		"from pathlib import Path; from skimage import io; \
-		 l = list(str(e) for e in Path('release').glob('release_*.*.*')); \
-		 l.sort(key=io.collection.alphanumeric_key); print(l[-1])"` \
-		| tail -n +4 > release/_release_notes_for_docs.rst
+	@tail -n +4 release/release_$$(\
+		ls release/release_*.*.* \
+			| sed s:release/release_:: \
+			| sort -nrt. -k1,1 -k2,2 \
+			| head -n 1) \
+		> release/_release_notes_for_docs.rst
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html

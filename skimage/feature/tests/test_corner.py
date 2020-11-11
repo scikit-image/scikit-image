@@ -251,10 +251,9 @@ def test_square_image():
     im[:25, :25] = 1.
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
-                             min_distance=10, threshold_rel=0)
+    results = corner_moravec(im) > 0
     # interest points along edge
-    assert len(results) == 57
+    assert np.count_nonzero(results) == 92
 
     # Harris
     results = peak_local_max(corner_harris(im, method='k'),
@@ -327,28 +326,22 @@ def test_rotated_img():
     im_rotated = im.T
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_moravec(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_moravec(im))
+    results_rotated = np.nonzero(corner_moravec(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
     # Harris
-    results = peak_local_max(corner_harris(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_harris(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_harris(im))
+    results_rotated = np.nonzero(corner_harris(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_shi_tomasi(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_shi_tomasi(im))
+    results_rotated = np.nonzero(corner_shi_tomasi(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
 
 def test_subpix_edge():
