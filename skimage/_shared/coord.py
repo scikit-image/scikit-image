@@ -82,7 +82,7 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=50):
         else:
             batch_list = np.array_split(coords, batch_size)
 
-        output = np.zeros((0, coords.shape[1]))
+        output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
         for batch in batch_list:
             output = _ensure_spacing(np.vstack([output, batch]),
                                      spacing, p_norm)
