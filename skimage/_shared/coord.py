@@ -49,7 +49,7 @@ def _ensure_spacing(coord, spacing, p_norm):
     return output
 
 
-def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=100):
+def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=50):
     """Returns a subset of coord where a minimum spacing is guaranteed.
 
     Parameters
