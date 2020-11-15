@@ -46,7 +46,7 @@ def test_2d_motion():
 def test_3d_motion():
     # Generate synthetic data
     rnd = np.random.RandomState(0)
-    image0 = rnd.normal(size=(100, 100, 100))
+    image0 = rnd.normal(size=(50, 55, 60))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow
     flow = optical_flow_tvl1(image0, image1, attachment=5)
@@ -65,7 +65,7 @@ def test_no_motion_2d():
 
 def test_no_motion_3d():
     rnd = np.random.RandomState(0)
-    img = rnd.normal(size=(128, 128, 128))
+    img = rnd.normal(size=(64, 64, 64))
 
     flow = optical_flow_tvl1(img, img)
 
