@@ -3,8 +3,6 @@ set -ex
 
 brew update
 brew install ccache
-brew tap homebrew/homebrew-cask
-brew cask install basictex
 
 # Set up virtualenv on OSX
 git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild
