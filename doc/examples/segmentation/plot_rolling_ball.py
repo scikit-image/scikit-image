@@ -141,7 +141,7 @@ plt.show()
 # ``rolling_ball`` can handle datatypes other than `np.uint8`. You can
 # pass them into the function in the same way.
 
-image = data.coins().astype(np.uint16)
+image = data.coins()[:200, :200].astype(np.uint16)
 
 background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -153,7 +153,7 @@ plt.show()
 # be much larger than the image intensity, which can lead to
 # unexpected results.
 
-image = util.img_as_float(data.coins())
+image = util.img_as_float(data.coins()[:200, :200])
 
 background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -271,7 +271,7 @@ image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
-        (10, 21, 21),
+        (5, 21, 21),
         0.1
     )
 )
@@ -287,7 +287,7 @@ image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
-        (120, 1, 1),
+        (100, 1, 1),
         0.1
     )
 )
