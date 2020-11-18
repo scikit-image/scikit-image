@@ -41,6 +41,8 @@ from .._shared.utils import warn
 cimport numpy as cnp
 from . cimport heap
 
+cnp.import_array()
+
 OFFSET_D = np.int8
 OFFSETS_INDEX_D = np.int16
 EDGE_D = np.int8

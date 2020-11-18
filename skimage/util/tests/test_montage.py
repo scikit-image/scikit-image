@@ -1,6 +1,6 @@
 from skimage._shared import testing
-from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     expected_warnings)
+from skimage._shared.testing import assert_equal, assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 import numpy as np
 from skimage.util import montage

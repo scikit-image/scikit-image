@@ -47,13 +47,13 @@ labels = random_walker(data, markers, beta=10, mode='bf')
 # Plot results
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2),
                                     sharex=True, sharey=True)
-ax1.imshow(data, cmap='gray', interpolation='nearest')
+ax1.imshow(data, cmap='gray')
 ax1.axis('off')
 ax1.set_title('Noisy data')
-ax2.imshow(markers, cmap='magma', interpolation='nearest')
+ax2.imshow(markers, cmap='magma')
 ax2.axis('off')
 ax2.set_title('Markers')
-ax3.imshow(labels, cmap='gray', interpolation='nearest')
+ax3.imshow(labels, cmap='gray')
 ax3.axis('off')
 ax3.set_title('Segmentation')
 

@@ -68,6 +68,10 @@ def imread(filename):
     """
     Read an image using QT's QImage.load
     """
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     qtimg = QImage()
     if not qtimg.load(filename):
         # QImage.load() returns false on failure, so raise an exception
@@ -100,6 +104,10 @@ def imread(filename):
     return img
 
 def imshow(arr, fancy=False):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     global app
     if not app:
         app = QApplication([])
@@ -124,6 +132,10 @@ def _app_show():
 
 
 def imsave(filename, img, format_str=None):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     # we can add support for other than 3D uint8 here...
     img = prepare_for_display(img)
     qimg = QImage(img.data, img.shape[1], img.shape[0],

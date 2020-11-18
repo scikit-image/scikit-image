@@ -1,16 +1,15 @@
-
 import numpy as np
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal
+from skimage._shared.testing import assert_array_almost_equal, assert_equal
+from skimage import color, data
 from skimage.filters import threshold_local, gaussian
-from skimage.util.apply_parallel import apply_parallel, dask_available
+from skimage.util.apply_parallel import apply_parallel
+
+import pytest
+da = pytest.importorskip('dask.array')
 
 
-@testing.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel():
-    import dask.array as da
-
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
 
@@ -39,10 +38,7 @@ def test_apply_parallel():
     assert_array_almost_equal(result3, expected3)
 
 
-@testing.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel_lazy():
-    import dask.array as da
-
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
     d = da.from_array(a, chunks=(6, 6))
@@ -68,7 +64,6 @@ def test_apply_parallel_lazy():
     assert_array_almost_equal(result2.compute(), expected1)
 
 
-@testing.skipif(not dask_available, reason="dask not installed")
 def test_no_chunks():
     a = np.ones(1 * 4 * 8 * 9).reshape(1, 4, 8, 9)
 
@@ -81,7 +76,6 @@ def test_no_chunks():
     assert_array_almost_equal(result, expected)
 
 
-@testing.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel_wrap():
     def wrapped(arr):
         return gaussian(arr, 1, mode='wrap')
@@ -92,7 +86,6 @@ def test_apply_parallel_wrap():
     assert_array_almost_equal(result, expected)
 
 
-@testing.skipif(not dask_available, reason="dask not installed")
 def test_apply_parallel_nearest():
     def wrapped(arr):
         return gaussian(arr, 1, mode='nearest')
@@ -102,3 +95,19 @@ def test_apply_parallel_nearest():
                             mode='nearest')
 
     assert_array_almost_equal(result, expected)
+
+
+@pytest.mark.parametrize('dtype', (np.float32, np.float64))
+@pytest.mark.parametrize('chunks', (None, (128, 128, 3)))
+@pytest.mark.parametrize('depth', (0, 8, (8, 8, 0)))
+def test_apply_parallel_rgb(depth, chunks, dtype):
+    cat = data.chelsea().astype(dtype) / 255.
+
+    func = color.rgb2ycbcr
+    cat_ycbcr_expected = func(cat)
+    cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
+                               dtype=dtype, multichannel=True)
+
+    assert_equal(cat_ycbcr.dtype, cat.dtype)
+
+    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)

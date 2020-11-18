@@ -62,11 +62,10 @@ original image and its Radon transform, often known as its *sinogram*:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.io import imread
-from skimage import data_dir
+from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, rescale
 
-image = imread(data_dir + "/phantom.png", as_gray=True)
+image = shepp_logan_phantom()
 image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
@@ -104,7 +103,7 @@ from skimage.transform import iradon
 
 reconstruction_fbp = iradon(sinogram, theta=theta, circle=True)
 error = reconstruction_fbp - image
-print('FBP rms reconstruction error: %.3g' % np.sqrt(np.mean(error**2)))
+print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 
 imkwargs = dict(vmin=-0.2, vmax=0.2)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5),
@@ -153,8 +152,8 @@ from skimage.transform import iradon_sart
 
 reconstruction_sart = iradon_sart(sinogram, theta=theta)
 error = reconstruction_sart - image
-print('SART (1 iteration) rms reconstruction error: %.3g'
-      % np.sqrt(np.mean(error**2)))
+print("SART (1 iteration) rms reconstruction error: "
+      f"{np.sqrt(np.mean(error**2)):.3g}")
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True)
 ax = axes.ravel()
@@ -170,8 +169,8 @@ ax[1].imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 reconstruction_sart2 = iradon_sart(sinogram, theta=theta,
                                    image=reconstruction_sart)
 error = reconstruction_sart2 - image
-print('SART (2 iterations) rms reconstruction error: %.3g'
-      % np.sqrt(np.mean(error**2)))
+print("SART (2 iterations) rms reconstruction error: "
+      f"{np.sqrt(np.mean(error**2)):.3g}")
 
 ax[2].set_title("Reconstruction\nSART, 2 iterations")
 ax[2].imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)

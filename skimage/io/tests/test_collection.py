@@ -23,13 +23,32 @@ def test_string_sort():
     sorted_filenames = sorted(filenames, key=alphanumeric_key)
     assert_equal(expected_filenames, sorted_filenames)
 
-class TestImageCollection(TestCase):
+def test_imagecollection_input():
+    """Test function for ImageCollection. The new behavior (implemented
+    in 0.16) allows the `pattern` argument to accept a list of strings
+    as the input.
 
+    Notes
+    -----
+        If correct, `images` will receive three images.
+    """
+    # Ensure that these images are part of the legacy datasets
+    # this means they will always be available in the user's install
+    # regarless of the availability of pooch
     pattern = [os.path.join(data_dir, pic)
-               for pic in ['camera.png', 'color.png']]
+               for pic in ['coffee.png',
+                           'chessboard_GRAY.png',
+                           'rocket.jpg']]
+    images = ImageCollection(pattern)
+    assert len(images) == 3
+
+
+class TestImageCollection(TestCase):
+    pattern = [os.path.join(data_dir, pic)
+               for pic in ['brick.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
-                       for pic in ['camera.png', 'moon.png']]
+                       for pic in ['brick.png', 'moon.png']]
 
     def setUp(self):
         reset_plugins()
@@ -122,7 +141,7 @@ class TestImageCollection(TestCase):
         expected_shape = (len(self.images_matched),) + self.images[0].shape
         assert_equal(array.shape, expected_shape)
 
-    def test_concatentate_mismatched_image_shapes(self):
+    def test_concatenate_mismatched_image_shapes(self):
         with testing.raises(ValueError):
             self.images.concatenate()
 

@@ -1,5 +1,7 @@
 __all__ = ['imread']
 
+from warnings import warn
+
 try:
     import osgeo.gdal as gdal
 except ImportError:
@@ -8,10 +10,9 @@ except ImportError:
                       "for further instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from file.
-
     """
     ds = gdal.Open(fname)
 
-    return ds.ReadAsArray().astype(dtype)
+    return ds.ReadAsArray()

@@ -1,9 +1,22 @@
 __all__ = ['imread', 'imsave']
 
+from distutils.version import LooseVersion
+import warnings
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
+
+# Check CVE-2020-10379
+from distutils.version import LooseVersion
+if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+    from warnings import warn
+    warn('Your installed pillow version is < 7.1.0. '
+         'Several security issues (CVE-2020-11538, '
+         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
+         'have been fixed in pillow 7.1.0 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -12,12 +25,12 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
+        Specifies data type of array elements.
     img_num : int, optional
-       Specifies which image to read in a file with multiple images
-       (zero-indexed).
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through.
 
@@ -36,6 +49,11 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
         im = Image.open(fname)
+        if im.format == 'MPO' and LooseVersion(pil_version) < '6.0.0':
+            warnings.warn("You are trying to read a MPO image. "
+                          "To ensure a good support of this format, "
+                          "please upgrade pillow to 6.0.0 version or later.",
+                          stacklevel=2)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
@@ -139,7 +157,8 @@ def _palette_is_grayscale(pil_image):
     is_grayscale : bool
         True if all colors in image palette are gray.
     """
-    assert pil_image.mode == 'P'
+    if pil_image.mode != 'P':
+        raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
     palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
     # Not all palette colors are used; unused colors have junk values.

@@ -17,11 +17,12 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal, assert_, assert_warns,
                            assert_no_warnings)
 
-from ._warnings import expected_warnings
 import warnings
 
-from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+from .. import data, io
+from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
+from ._warnings import expected_warnings
 
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
@@ -127,28 +128,23 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision loss']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['sign loss|precision loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_ubyte(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    with expected_warnings(['precision loss']):
-        r5 = roundtrip(img5, plugin, fmt)
+    r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
 
@@ -164,27 +160,23 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
-    with expected_warnings([r'precision|\A\Z']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings([r'sign loss|\A\Z']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['precision loss|sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_uint(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_uint(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
@@ -218,7 +210,15 @@ def teardown_test():
     warnings.simplefilter('default')
 
 
-def test_parallel(num_threads=2):
+def fetch(data_filename):
+    """Attempt to fetch data, but if unavailable, skip the tests."""
+    try:
+        return data._fetch(data_filename)
+    except (ConnectionError, ModuleNotFoundError):
+        pytest.skip(f'Unable to download {data_filename}')
+
+
+def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -229,6 +229,12 @@ def test_parallel(num_threads=2):
     num_threads : int, optional
         The number of times the function is run in parallel.
 
+    warnings_matching: list or None
+        This parameter is passed on to `expected_warnings` so as not to have
+        race conditions with the warnings filters. A single
+        `expected_warnings` context manager is used for all threads.
+        If None, then no warnings are checked.
+
     """
 
     assert num_threads > 0
@@ -236,19 +242,21 @@ def test_parallel(num_threads=2):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            threads = []
-            for i in range(num_threads - 1):
-                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-                threads.append(thread)
-            for thread in threads:
-                thread.start()
+            with expected_warnings(warnings_matching):
+                threads = []
+                for i in range(num_threads - 1):
+                    thread = threading.Thread(target=func, args=args,
+                                              kwargs=kwargs)
+                    threads.append(thread)
+                for thread in threads:
+                    thread.start()
 
-            result = func(*args, **kwargs)
+                result = func(*args, **kwargs)
 
-            for thread in threads:
-                thread.join()
+                for thread in threads:
+                    thread.join()
 
-            return result
+                return result
 
         return inner
 
