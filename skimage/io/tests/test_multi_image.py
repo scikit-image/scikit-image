@@ -20,25 +20,20 @@ def imgs():
             MultiImage(paths[0], conserve_memory=False),
             MultiImage(paths[1]),
             MultiImage(paths[1], conserve_memory=False),
-            MultiImage(paths[0]),
-            MultiImage(paths[1], conserve_memory=False),
             MultiImage(os.pathsep.join(paths))]
     yield imgs
 
     reset_plugins()
 
 def test_shapes(imgs):
-    img = imgs[-1]
-    imgs = img[:]
+    imgs = imgs[-1]
     assert imgs[0].shape == imgs[1].shape
     assert imgs[0].shape == (10, 10, 3)
 
 def test_len(imgs):
     assert len(imgs[0]) == len(imgs[1]) == 2
     assert len(imgs[2]) == len(imgs[3]) == 24
-    assert len(imgs[4]) == 2
-    assert len(imgs[5]) == 24
-    assert len(imgs[6]) == 26, len(imgs[6])
+    assert len(imgs[-1]) == 26, len(imgs[-1])
 
 def test_slicing(imgs):
     img = imgs[-1]
