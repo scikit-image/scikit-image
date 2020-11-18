@@ -179,18 +179,17 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        self._files = []
+        self._files = self._find_files(load_pattern)
+        self._numframes = len(self._files)
         if _is_multipattern(load_pattern):
             if isinstance(load_pattern, str):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         else:
             raise TypeError('Invalid pattern as input.')
 
