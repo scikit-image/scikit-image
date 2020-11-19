@@ -318,18 +318,6 @@ class ImageCollection(object):
                 new_ic.data = self.data[fidx]
             return new_ic
 
-    def _find_files(self, load_pattern):
-        """Expand given pattern to list of files, if possible."""
-        if isinstance(load_pattern, str):
-            load_pattern = load_pattern.split(os.pathsep)
-            files = []
-            for pattern in load_pattern:
-                files.extend(glob(pattern))
-            files = sorted(files, key=alphanumeric_key)
-        else:
-            files = load_pattern
-        return files
-
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
         num = self._numframes
