@@ -67,6 +67,10 @@ def openmp_build_ext():
 
         def can_compile_link(self):
 
+            if "PYODIDE_PACKAGE_ABI" in os.environ:
+                # pyodide doesn't support OpenMP
+                return False
+
             cc = self.compiler
             fname = 'test.c'
             cwd = os.getcwd()
