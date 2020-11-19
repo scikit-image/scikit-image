@@ -131,14 +131,14 @@ before_install:
         apt-key adv --list-public-keys --with-colons | grep '^pub' | cut -d':' -f 5 | egrep -o '.{8}$' | grep -wo 762E3157 > /dev/null 2>&1 || sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
       fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        set -ex
-        brew update
-        brew install ccache
+        set -ex;
+        brew update;
+        brew install ccache;
         # Set up virtualenv on OSX
-        git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild
-        source ~/multibuild/osx_utils.sh
-        get_macpython_environment $MB_PYTHON_VERSION ~/venv
-        set +ex
+        git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild;
+        source ~/multibuild/osx_utils.sh;
+        get_macpython_environment $MB_PYTHON_VERSION ~/venv;
+        set +ex;
         # source tools/travis/osx_install.sh;
       else
         virtualenv -p python ~/venv;
