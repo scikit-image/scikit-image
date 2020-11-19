@@ -30,7 +30,10 @@ jobs:
         PYTHON_VERSION: '3.9'
         ARCH: 'x64'
         PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
+        # Don't test examples since many dependencies are not available for
+        # Python 3.9
+        # In particular, pywinpty is failing at compilation time
+        TEST_EXAMPLES: 'false'
       Python38-x64-pre:
         PYTHON_VERSION: '3.8'
         ARCH: 'x64'
