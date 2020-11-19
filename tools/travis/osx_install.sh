@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-brew update
+# brew update
 brew install ccache
 
 # Set up virtualenv on OSX
