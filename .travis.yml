@@ -125,7 +125,8 @@ before_install:
         virtualenv -p python ~/venv;
         source ~/venv/bin/activate;
       fi
-    - ccache --zero-stats
+    # ccache may not be installed on OSX. Ignore errors.
+    - ccache --zero-stats || exit 0
     - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis/before_install.sh
     - which python; python --version
