@@ -1,5 +1,5 @@
 sphinx>=1.8,<=2.4.4
-sphinx-gallery>=0.7.0
+sphinx-gallery>=0.7.0,!=0.8.0
 numpydoc>=1.0
 sphinx-copybutton
 pytest-runner
@@ -14,4 +14,4 @@ pooch>=0.5.2
 tifffile>=2020.5.30
 myst-parser
 ipywidgets
-plotly>=4.9.0
+plotly>=4.12.0

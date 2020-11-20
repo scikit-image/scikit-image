@@ -46,10 +46,10 @@ def test_imagecollection_input():
 
 class TestImageCollection(TestCase):
     pattern = [os.path.join(data_dir, pic)
-               for pic in ['camera.png', 'color.png']]
+               for pic in ['brick.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
-                       for pic in ['camera.png', 'moon.png']]
+                       for pic in ['brick.png', 'moon.png']]
 
     def setUp(self):
         reset_plugins()

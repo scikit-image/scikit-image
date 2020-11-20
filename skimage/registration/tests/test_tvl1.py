@@ -65,7 +65,7 @@ def test_no_motion_2d():
 
 def test_no_motion_3d():
     rnd = np.random.RandomState(0)
-    img = rnd.normal(size=(128, 128, 128))
+    img = rnd.normal(size=(64, 64, 64))
 
     flow = optical_flow_tvl1(img, img)
 

@@ -221,8 +221,17 @@ class TestSimpleImage():
 
 def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 86 < threshold_otsu(camera) < 88
+    assert 101 < threshold_otsu(camera) < 103
 
+def test_otsu_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=hist) < 103
+
+def test_otsu_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=counts) < 103
 
 def test_otsu_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -254,7 +263,7 @@ def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
-    assert 62 < threshold_li(image) < 63
+    assert 78 < threshold_li(image) < 79
     assert ce_actual < _cross_entropy(image, threshold + 1)
     assert ce_actual < _cross_entropy(image, threshold - 1)
 
@@ -341,7 +350,17 @@ def test_li_pathological_arrays():
 
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 197 < threshold_yen(camera) < 199
+    assert 145 < threshold_yen(camera) < 147
+
+def test_yen_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=hist) < 147
+
+def test_yen_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=counts) < 147
 
 
 def test_yen_coins_image():
@@ -366,9 +385,21 @@ def test_isodata_camera_image():
     threshold = threshold_isodata(camera)
     assert np.floor((camera[camera <= threshold].mean() +
                      camera[camera > threshold].mean()) / 2.0) == threshold
-    assert threshold == 87
+    assert threshold == 102
 
-    assert threshold_isodata(camera, return_all=True) == [87]
+    assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
+
+def test_isodata_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=hist)
+    assert threshold == 102
+
+def test_isodata_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=counts)
+    assert threshold == 102
 
 
 def test_isodata_coins_image():
@@ -429,12 +460,23 @@ def test_threshold_minimum():
     camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert_equal(threshold, 76)
+    assert_equal(threshold, 85)
 
     astronaut = util.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+def test_threshold_minimum_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=hist)
+    assert_equal(threshold, 85)
+
+def test_threshold_minimum_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=counts)
+    assert_equal(threshold, 85)
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
@@ -596,12 +638,12 @@ def test_multiotsu_more_classes_then_values():
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
-    (threshold_otsu, 86, 88),
-    (threshold_yen, 197, 199),
-    (threshold_isodata, 86, 88),
-    (threshold_mean, 117, 119),
-    (threshold_triangle, 21, 23),
-    (threshold_minimum, 75, 77),
+    (threshold_otsu, 101, 103),
+    (threshold_yen, 145, 147),
+    (threshold_isodata, 101, 103),
+    (threshold_mean, 128, 130),
+    (threshold_triangle, 41, 43),
+    (threshold_minimum, 84, 86),
 ])
 def test_thresholds_dask_compatibility(thresholding, lower, upper):
     pytest.importorskip('dask', reason="dask python library is not installed")

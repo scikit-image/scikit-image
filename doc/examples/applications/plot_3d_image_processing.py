@@ -47,18 +47,16 @@ from scipy import ndimage as ndi
 
 import plotly.express as px
 from skimage import (
-    exposure, io
+    exposure, io, util
 )
-from skimage.data import image_fetcher
+from skimage.data import cells3d
 
 
 #####################################################################
 # Load and display 3D images
 # ==========================
-# Three-dimensional data can be loaded with `io.imread`.
 
-path = image_fetcher.fetch('data/cells.tif')
-data = io.imread(path)
+data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))

@@ -1,10 +1,12 @@
 import numpy as np
-from skimage._shared.testing import assert_array_equal, assert_almost_equal
+
+from skimage._shared.testing import (assert_almost_equal, assert_array_equal,
+                                     assert_equal)
 from skimage import data
 from skimage import img_as_float
 from skimage import draw
 from skimage.color import rgb2gray
-from skimage.morphology import octagon
+from skimage.morphology import cube, octagon
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
@@ -48,6 +50,37 @@ def test_structure_tensor():
                                       [0, 0, 0, 0, 0],
                                       [0, 1, 4, 1, 0],
                                       [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_3d():
+    cube = np.zeros((5, 5, 5))
+    cube[2, 2, 2] = 1
+    A_elems = structure_tensor(cube, sigma=0.1)
+    assert_equal(len(A_elems), 6)
+    assert_array_equal(A_elems[0][:, 1, :], np.array([[0, 0, 0, 0, 0],
+                                                      [0, 1, 4, 1, 0],
+                                                      [0, 0, 0, 0, 0],
+                                                      [0, 1, 4, 1, 0],
+                                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(A_elems[0][1], np.array([[0, 0, 0, 0, 0],
+                                                [0, 1, 4, 1, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 1, 4, 1, 0],
+                                                [0, 0, 0, 0, 0]]))
+    assert_array_equal(A_elems[3][2], np.array([[0, 0, 0, 0, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 0, 0, 0, 0],
+                                                [0, 4, 16, 4, 0],
+                                                [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_3d_rc_only():
+    cube = np.zeros((5, 5, 5))
+    with testing.raises(ValueError):
+        structure_tensor(cube, sigma=0.1, order='xy')
+    A_elems_rc = structure_tensor(cube, sigma=0.1, order='rc')
+    A_elems_none = structure_tensor(cube, sigma=0.1)
+    assert_array_equal(A_elems_rc, A_elems_none)
 
 
 def test_structure_tensor_orders():
@@ -112,6 +145,16 @@ def test_structure_tensor_eigenvalues():
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigenvalues_3d():
+    image = np.pad(cube(9), 5, mode='constant') * 1000
+    boundary = (np.pad(cube(9), 5, mode='constant')
+                - np.pad(cube(7), 6, mode='constant')).astype(bool)
+    A_elems = structure_tensor(image, sigma=0.1)
+    e0, e1, e2 = structure_tensor_eigenvalues(A_elems)
+    # e0 should detect facets
+    assert np.all(e0[boundary] != 0)
 
 
 def test_structure_tensor_eigvals():
@@ -208,10 +251,9 @@ def test_square_image():
     im[:25, :25] = 1.
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
-                             min_distance=10, threshold_rel=0)
+    results = corner_moravec(im) > 0
     # interest points along edge
-    assert len(results) == 57
+    assert np.count_nonzero(results) == 92
 
     # Harris
     results = peak_local_max(corner_harris(im, method='k'),
@@ -284,28 +326,22 @@ def test_rotated_img():
     im_rotated = im.T
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_moravec(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_moravec(im))
+    results_rotated = np.nonzero(corner_moravec(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
     # Harris
-    results = peak_local_max(corner_harris(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_harris(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_harris(im))
+    results_rotated = np.nonzero(corner_harris(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
-                             min_distance=10, threshold_rel=0)
-    results_rotated = peak_local_max(corner_shi_tomasi(im_rotated),
-                                     min_distance=10, threshold_rel=0)
-    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
-    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+    results = np.nonzero(corner_shi_tomasi(im))
+    results_rotated = np.nonzero(corner_shi_tomasi(im_rotated))
+    assert (np.sort(results[0]) == np.sort(results_rotated[1])).all()
+    assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
 
 def test_subpix_edge():
@@ -383,14 +419,12 @@ def test_corner_peaks():
                            threshold_rel=0)
     assert corners.shape == (2, 2)
 
-    with pytest.warns(FutureWarning,
-                      match="Until version 0.16, threshold_rel.*"):
-        corners = corner_peaks(response, exclude_border=False, min_distance=1)
-        assert corners.shape == (5, 2)
+    corners = corner_peaks(response, exclude_border=False, min_distance=1)
+    assert corners.shape == (5, 2)
 
-        corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                               indices=False)
-        assert np.sum(corners) == 5
+    corners = corner_peaks(response, exclude_border=False, min_distance=1,
+                           indices=False)
+    assert np.sum(corners) == 5
 
 
 def test_blank_image_nans():
