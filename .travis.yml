@@ -137,7 +137,7 @@ before_install:
     - tools/check_sdist.py $SDIST_NAME
 
 install:
-    - ccache --show-stats
+    - ccache --show-stats || echo ccache not installed
     # Test installing without cython using the sdist
     # --no-build-isolation ensures even in the presense of a pyproject.toml
     # pip will not create a virtual environment, just for building the package
