@@ -1,16 +1,7 @@
 # Workflow to build and test wheels
 name: Run tests
 
-on:
-  push:
-    branches:
-      - master
-      - gh-ci
-  pull_request:
-    branches:
-      - master
-      - gh-ci
-
+on: [push, pull request]
 
 jobs:
 
