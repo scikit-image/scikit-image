@@ -51,7 +51,7 @@ jobs:
             if [[ ${{ matrix.platform_id }} == "macos-latest" ]]; then
                 source tools/travis/osx_install.sh;
             else
-                virtualenv -p python ~/venv;
+                python -m venv ~/venv;
                 source ~/venv/bin/activate;
             fi
             source tools/github/before_install.sh
