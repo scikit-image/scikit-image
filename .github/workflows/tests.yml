@@ -1,7 +1,7 @@
 # Workflow to build and test wheels
 name: Run tests
 
-on: [push, pull request]
+on: push
 
 jobs:
 
