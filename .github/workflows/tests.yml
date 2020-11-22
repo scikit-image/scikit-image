@@ -58,8 +58,8 @@ jobs:
             python setup.py sdist
             pip install -vv --no-build-isolation -e .;
 
-        - name: Run tests
-          run: |
+      - name: Run tests
+        run: |
             pip install $PIP_FLAGS -r requirements/test.txt
             export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
             mkdir -p ${MPL_DIR}
