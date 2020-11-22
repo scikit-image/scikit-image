@@ -17,9 +17,9 @@ def plot_hist(img):
     plt.hist(img.ravel(), range=(0,256), bins=256)
     plt.show()
 
-def show_img(img, vmin=0, vmax=255):
-    plt.imshow(img, cmap="gray", vmin=vmin, vmax=vmax)
-    # plt.imshow(img, cmap="gray", vmin=np.min(img), vmax=np.max(img)+1)
+# if all pixels are the same value, a "white" image will look black, since min=max and normally min=black and max=white so it's ambiguous
+def show_img(img):
+    plt.imshow(img, cmap="gray")
     plt.show()
 
 def is_from_0_to_255(img):
@@ -35,7 +35,7 @@ def read_and_check_img(filepath):
         img = img[:,:,0]
     print("Done reading "+ filepath)
     # print(img)
-    show_img(img)
+    # show_img(img)
     # plot_hist(img)
     return img
 
@@ -43,7 +43,7 @@ def read_and_check_img(filepath):
 # TODO check C cdf (def function and use it)
 # TODO check T cdf (def function and use it)
 
-# VERIFICATION FUNCTIOSN
+# VERIFICATION FUNCTIONS
 def check_M_matrix_pdf(M):
 	# all elements should be either 0 or 1
 	if not np.logical_or(M==0, M==1):
