@@ -7,7 +7,7 @@ jobs:
 
   # Build the wheels for Linux, Windows and macOS for Python 3.6 and newer
   test_skimage:
-    name: Run tests cp${{ matrix.python }}-${{ matrix.platform_id }}
+    name: Run tests cp${{ matrix.python-version }}-${{ matrix.platform_id }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python: [37, 38]
+        python-version: [3.7, 3.8]
         bitness: [32, 64]
         include:
           # Run 32 and 64 bit version in parallel for Linux and Windows
@@ -44,6 +44,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version}}
 
       - name: Build package
         run: |
