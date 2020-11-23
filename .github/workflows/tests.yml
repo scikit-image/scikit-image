@@ -14,17 +14,11 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.7, 3.8]
         bitness: [64]
         include:
           # Run 32 and 64 bit version in parallel for Linux and Windows
-          - os: windows-latest
-            bitness: 64
-            platform_id: win_amd64
-            #- os: windows-latest
-            #bitness: 32
-            #platform_id: win32
           - os: ubuntu-latest
             bitness: 64
             platform_id: manylinux_x86_64
@@ -56,12 +50,9 @@ jobs:
             export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
             export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
-      - name: print options
-        if: matrix.os == 'ubuntu-latest'
-        run: set -ex
-    
       - name: Build package
         run: |
+            set -ex
             python -m venv ~/venv;
             source ~/venv/bin/activate;
             source tools/github/before_install.sh
