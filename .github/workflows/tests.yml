@@ -56,7 +56,9 @@ jobs:
       - name: Build package
         run: |
             set -ex
+            printenv
             source tools/github/before_install.sh
+            printenv
             python setup.py sdist
             pip install -vv --no-build-isolation -e .;
 
