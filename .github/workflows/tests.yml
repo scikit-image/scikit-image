@@ -44,10 +44,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
 
-
       - name: OSX configuration
         if: ${{ matrix.os }} == "macos-latest"
-        run:
+        run: |
             # OpenMP is not present on macOS by default
             brew install libomp
             export CC=/usr/bin/clang
@@ -57,12 +56,10 @@ jobs:
             export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
             export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
-      
       - name: print options
         if: ${{ matrix.os }} == "macos-latest" || ${{ matrix.os }} == "ubuntu-latest"
         run: set -ex
     
-
       - name: Build package
         run: |
             python -m venv ~/venv;
