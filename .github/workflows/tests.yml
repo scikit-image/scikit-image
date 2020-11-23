@@ -43,12 +43,15 @@ jobs:
         run: |
             # OpenMP is not present on macOS by default
             brew install libomp
-            export CC=/usr/bin/clang
-            export CXX=/usr/bin/clang++
+            export CC=clang
+            export CXX=clang++
             export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
             export CFLAGS="$CFLAGS -I/usr/local/opt/libomp/include"
             export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
             export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+            brew install ccache
+            export PATH=/usr/local/opt/ccache/libexec:$PATH
+            export CCACHE_CPP2=1
 
       - name: Build package
         run: |
