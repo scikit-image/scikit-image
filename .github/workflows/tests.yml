@@ -30,7 +30,7 @@ jobs:
             platform_id: macosx_x86_64
         
     if: matrix.os == 'macos-latest'
-        env:
+        env: |
             CC: /usr/bin/clang
             CXX: /usr/bin/clang++
             CPPFLAGS: "$CPPFLAGS -Xpreprocessor -fopenmp"
