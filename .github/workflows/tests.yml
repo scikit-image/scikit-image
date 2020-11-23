@@ -48,12 +48,8 @@ jobs:
       - name: Build package
         run: |
             set -ex
-            if [[ ${{ matrix.platform_id }} == "macos-latest" ]]; then
-                source tools/travis/osx_install.sh;
-            else
-                python -m venv ~/venv;
-                source ~/venv/bin/activate;
-            fi
+            python -m venv ~/venv;
+            source ~/venv/bin/activate;
             source tools/github/before_install.sh
             python setup.py sdist
             pip install -vv --no-build-isolation -e .;
