@@ -46,10 +46,9 @@ jobs:
 
       - name: Build package
         run: |
-            set -e
-            set -x
+            set -ex
             # OpenMP is not present on macOS by default
-            if [[ {{ matrix.os }} == "macos-latest" ]]; then
+            if [[ ${{ matrix.os }} == "macos-latest" ]]; then
                 brew install libomp
                 export CC=/usr/bin/clang
                 export CXX=/usr/bin/clang++
