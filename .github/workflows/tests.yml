@@ -5,16 +5,14 @@ on: push
 
 jobs:
 
-  # Build the wheels for Linux, Windows and macOS for Python 3.6 and newer
-  test_skimage:
-    name: Run tests cp${{ matrix.python-version }}-${{ matrix.platform_id }}
-    runs-on: ${{ matrix.os }}
+  test_skimage_linux:
+    name: Run tests cp${{ matrix.python-version }}
+    runs-on: ubuntu-latest
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
         python-version: [3.7, 3.8]
         bitness: [64]
         include:
@@ -22,21 +20,55 @@ jobs:
           - os: ubuntu-latest
             bitness: 64
             platform_id: manylinux_x86_64
-            #- os: ubuntu-latest
-            #bitness: 32
-            #platform_id: manylinux_i686
+        
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v1
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version}}
+
+      - name: Build package
+        run: |
+            set -ex
+            source tools/github/before_install.sh
+            python setup.py sdist
+            pip install -vv --no-build-isolation -e .;
+
+      - name: Run tests
+        run: |
+            pip install $PIP_FLAGS -r requirements/test.txt
+            export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+            mkdir -p ${MPL_DIR}
+            touch ${MPL_DIR}/matplotlibrc
+            pip install -r ./requirements/optional.txt
+            pip install -r ./requirements/extras.txt
+            source tools/github/script.sh
+
+  test_skimage_macos:
+    name: Run tests cp${{ matrix.python-version }}
+    runs-on: macos-latest
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8]
+        bitness: [64]
+        include:
           - os: macos-latest
             bitness: 64
             platform_id: macosx_x86_64
         
-    if: matrix.os == 'macos-latest'
-        env: |
-            CC: /usr/bin/clang
-            CXX: /usr/bin/clang++
-            CPPFLAGS: "$CPPFLAGS -Xpreprocessor -fopenmp"
-            CFLAGS: "$CFLAGS -Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-            CXXFLAGS: "$CXXFLAGS -I/usr/local/opt/libomp/include"
-            LDFLAGS: "$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+    env: |
+        CC: /usr/bin/clang
+        CXX: /usr/bin/clang++
+        CPPFLAGS: "$CPPFLAGS -Xpreprocessor -fopenmp"
+        CFLAGS: "$CFLAGS -Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
+        CXXFLAGS: "$CXXFLAGS -I/usr/local/opt/libomp/include"
+        LDFLAGS: "$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
     steps:
       - name: Checkout scikit-image
@@ -48,7 +80,6 @@ jobs:
           python-version: ${{ matrix.python-version}}
 
       - name: OSX configuration
-        if: matrix.os == 'macos-latest'
         run: |
             # OpenMP is not present on macOS by default
             set -ex
