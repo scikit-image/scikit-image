@@ -47,7 +47,8 @@ jobs:
 
       - name: Build package
         run: |
-            set -ex
+            set -e
+            set -x
             python -m venv ~/venv;
             source ~/venv/bin/activate;
             source tools/github/before_install.sh
