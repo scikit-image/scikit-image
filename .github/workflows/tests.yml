@@ -62,7 +62,7 @@ jobs:
             bitness: 64
             platform_id: macosx_x86_64
         
-    env: |
+    env:
         CC: /usr/bin/clang
         CXX: /usr/bin/clang++
         CPPFLAGS: "$CPPFLAGS -Xpreprocessor -fopenmp"
