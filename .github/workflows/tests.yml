@@ -42,6 +42,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
             # OpenMP is not present on macOS by default
+            set -ex
             brew install libomp
             export CC=/usr/bin/clang
             export CXX=/usr/bin/clang++
@@ -52,6 +53,7 @@ jobs:
             brew install ccache
             export PATH=/usr/local/opt/ccache/libexec:$PATH
             export CCACHE_CPP2=1
+            printenv
 
       - name: Build package
         run: |
