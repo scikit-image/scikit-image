@@ -8,6 +8,9 @@ jobs:
   test_skimage_linux:
     name: Run tests linux-cp${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    env: 
+        BUILD_DOCS: 1
+        TEST_EXAMPLES: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
@@ -46,6 +49,8 @@ jobs:
             pip install -r ./requirements/optional.txt
             pip install -r ./requirements/extras.txt
             source tools/github/script.sh
+
+
 
   test_skimage_macos:
     name: Run tests macos-cp${{ matrix.python-version }}
