@@ -37,6 +37,8 @@ jobs:
           python-version: ${{ matrix.python-version}}
 
       - name: Build package
+        env: 
+            VERSION: ${{ matrix.python-version}} 
         run: |
             set -ex
             source tools/github/before_install.sh

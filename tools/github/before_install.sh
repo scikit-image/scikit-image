@@ -41,7 +41,7 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-if [[ ${{ matrix.python-version}} != '3.6' ]]; then
+if [[ $VERSION != '3.6' ]]; then
     python -m pip install --upgrade pip wheel
 fi
 
