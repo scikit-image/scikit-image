@@ -21,6 +21,11 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            PIP_FLAGS: "--pre"
+        
+
         
     steps:
       - name: Checkout scikit-image

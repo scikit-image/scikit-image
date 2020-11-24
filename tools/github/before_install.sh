@@ -41,7 +41,11 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-python -m pip install --upgrade pip wheel
+if [[ ${{ matrix.python-version}} != '3.6' ]]; then
+    python -m pip install --upgrade pip wheel
+fi
+
+python -m pip install --upgrade wheel
 
 # install specific wheels from wheelhouse
 for requirement in matplotlib scipy pillow; do
