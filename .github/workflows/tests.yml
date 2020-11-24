@@ -16,13 +16,13 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8]
-        bitness: [64]
+        python-version: [3.6, 3.7, 3.8]
+        bitness: 64
         include:
           # Run 32 and 64 bit version in parallel for Linux and Windows
-          - os: ubuntu-latest
-            bitness: 64
-            platform_id: manylinux_x86_64
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            MINIMUM_REQUIREMENTS: 1
         
     steps:
       - name: Checkout scikit-image
@@ -55,12 +55,15 @@ jobs:
   test_skimage_macos:
     name: Run tests macos-cp${{ matrix.python-version }}
     runs-on: macos-latest
+    env: 
+        BUILD_DOCS: 1
+        TEST_EXAMPLES: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
         bitness: [64]
         include:
           - os: macos-latest
