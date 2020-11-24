@@ -30,8 +30,8 @@ jobs:
         PYTHON_VERSION: '3.9'
         ARCH: 'x64'
         PIP_FLAGS: ''
-        # Don't test examples since many dependencies are not available for
-        # Python 3.9
+        # TODO: Change to `1` when all the dependencies are available for
+        # Python 3.9 (as of November 2020, multiple are still missing)
         # In particular, pywinpty is failing at compilation time
         TEST_EXAMPLES: 'false'
       Python38-x64-pre:
