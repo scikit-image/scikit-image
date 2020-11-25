@@ -35,6 +35,7 @@ jobs:
       - name: Build wheels for CPython 3.9 and Mac OS
         if: matrix.os == 'macos-latest'
         run: |
+          brew install libomp
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp39-*"
