@@ -16,7 +16,7 @@ tools/build_versions.py
 
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
 
-if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" != "0" ]]; then
+if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples
   python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
   python -m pip list
