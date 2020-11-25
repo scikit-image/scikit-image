@@ -41,7 +41,7 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-python -m pip install --upgrade pip wheel
+python -m pip install --upgrade pip wheel setuptools
 
 
 # install specific wheels from wheelhouse
