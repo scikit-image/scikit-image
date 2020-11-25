@@ -6,7 +6,7 @@ on: push
 jobs:
 
   test_skimage_linux:
-    name: Run tests linux-cp${{ matrix.python-version }}-${{ matrix.PIP_FLAGS }}-MINI-{{ matrix.MINIMUM_REQUIREMENTS }}
+    name: Run tests linux-cp${{ matrix.python-version }}-${{ matrix.PIP_FLAGS }}-MINI-${{ matrix.MINIMUM_REQUIREMENTS }}
     runs-on: ubuntu-latest
     env: 
         BUILD_DOCS: 1
@@ -17,25 +17,16 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        PIP_FLAGS: ["", "--pre"]
-        MINIMUM_REQUIREMENTS: [0, 1]
+        PIP_FLAGS: [""]
+        MINIMUM_REQUIREMENTS: [0]
         include:
-          - platform_id: manylinux_x86_64
-            python-version: 3.6
-            MINIMUM_REQUIREMENTS: 0
-            PIP_FLAGS: ""
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
             PIP_FLAGS: ""
           - platform_id: manylinux_x86_64
-            python-version: 3.7
-            MINIMUM_REQUIREMENTS: 0
-            PIP_FLAGS: "--pre"
-          - platform_id: manylinux_x86_64
             python-version: 3.8
-            MINIMUM_REQUIREMENTS: 0
-            PIP_FLAGS: ""
+            PIP_FLAGS: "--pre"
         
 
         
