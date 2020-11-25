@@ -67,6 +67,8 @@ jobs:
         env: 
             VERSION: ${{ matrix.python-version }} 
             PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }} 
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }} 
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }} 
         run: |
             set -ex
             source tools/github/before_install.sh
