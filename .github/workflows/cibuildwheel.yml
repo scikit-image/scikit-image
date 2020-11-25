@@ -59,7 +59,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CIBW_TEST_REQUIRES: pytest pooch
-          CIBW_TEST_COMMAND: pytest skimage
+          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython (MacOS)
         if: matrix.os == 'macos-latest'
