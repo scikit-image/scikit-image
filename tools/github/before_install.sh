@@ -41,11 +41,8 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-if [[ $VERSION != '3.6' ]]; then
-    python -m pip install --upgrade pip wheel
-fi
+python -m pip install --upgrade pip wheel
 
-python -m pip install --upgrade wheel
 
 # install specific wheels from wheelhouse
 for requirement in matplotlib scipy pillow; do

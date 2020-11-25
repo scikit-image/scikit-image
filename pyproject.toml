@@ -11,4 +11,3 @@ requires = [
     # do not pin numpy on future versions of python to avoid incompatible numpy and python versions
     "numpy; python_version>='3.9'",
 ]
-build-backend = 'setuptools.build_meta'
