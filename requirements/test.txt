@@ -4,4 +4,4 @@ pytest-localserver
 pytest-faulthandler
 flake8
 codecov
-pooch>=0.5.2
+pooch>=1.0.0
