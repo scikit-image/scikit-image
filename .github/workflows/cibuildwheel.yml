@@ -33,7 +33,7 @@ jobs:
           python -m pip install cibuildwheel==1.6.3
 
       - name: Build wheels for CPython 3.9 and Mac OS
-        if: matrix.os == "macos-latest"
+        if: matrix.os == 'macos-latest'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
@@ -49,7 +49,7 @@ jobs:
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
       - name: Build wheels for CPython 3.9 (Linux and Windows)
-        if: matrix.os != "macos-latest"
+        if: matrix.os != 'macos-latest'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
