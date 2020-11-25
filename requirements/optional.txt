@@ -1,5 +1,5 @@
 SimpleITK
-astropy>=1.2.0
+astropy>=2.0.12
 qtpy
 pyamg
 dask[array]>=0.15.0,!=2.17.0
