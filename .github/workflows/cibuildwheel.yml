@@ -58,7 +58,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CIBW_TEST_REQUIRES: pytest pooch
+          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython (MacOS)
@@ -80,7 +80,6 @@ jobs:
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
 
-      
       - name: Build wheels for CPython (Linux and Windows)
         if: matrix.os != 'macos-latest'
         run: |
@@ -91,8 +90,8 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
-          CIBW_TEST_REQUIRES: pytest pooch
-          CIBW_TEST_COMMAND: pytest skimage
+          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
 
 
