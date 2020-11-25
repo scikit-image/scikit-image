@@ -3,7 +3,7 @@ version: 2
 jobs:
   doc:
     docker:
-      - image: circleci/python:3.9.0
+      - image: circleci/python:3.8.2
     steps:
       - checkout
       - run:
