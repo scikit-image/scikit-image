@@ -31,6 +31,9 @@ jobs:
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
+            OPTIONAL_DEPS: 0
+            # Test miminum requirements (don't build docs there is a problem
+            # with dask and astropy)
             OPTIONS_NAME: "mini-req"
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -41,6 +44,7 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.8
             PIP_FLAGS: "--pre"
+            # test pre-releases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -87,6 +91,7 @@ jobs:
             TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
             OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
+            echo $PIP_FLAGS
             pip install $PIP_FLAGS -r requirements/test.txt
             export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
             mkdir -p ${MPL_DIR}
