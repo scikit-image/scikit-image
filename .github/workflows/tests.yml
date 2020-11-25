@@ -19,14 +19,32 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
+        QT: ["PyQt5"]
+        WITH_PYSIDE: [0]
+        BUILD_DOCS: [1]
+        PYTHONOPTIMIZE: [0]
+        TEST_EXAMPLES: [0]
+        OPTIONAL_DEPS: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
-            PIP_FLAGS: ""
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 1
           - platform_id: manylinux_x86_64
             python-version: 3.8
             PIP_FLAGS: "--pre"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            BUILD_DOCS: 1
+            OPTIONAL_DEPS: 1
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            PYTHONOPTIMIZE: 2
+            BUILD_DOCS: 0
+
         
 
         
@@ -41,7 +59,8 @@ jobs:
 
       - name: Build package
         env: 
-            VERSION: ${{ matrix.python-version}} 
+            VERSION: ${{ matrix.python-version }} 
+            PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }} 
         run: |
             set -ex
             source tools/github/before_install.sh
@@ -49,13 +68,27 @@ jobs:
             pip install -vv -e .;
 
       - name: Run tests
+        env: 
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }} 
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }} 
+            QT: ${{ matrix.QT }} 
+            WITH_PYSIDE: ${{ matrix.WITH_PYSIDE }} 
+            BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
+            TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
+            OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
             pip install $PIP_FLAGS -r requirements/test.txt
             export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
             mkdir -p ${MPL_DIR}
             touch ${MPL_DIR}/matplotlibrc
-            pip install -r ./requirements/optional.txt
-            pip install -r ./requirements/extras.txt
+            if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+                pip install -r ./requirements/optional.txt
+                if [[ "${EXTRA_DEPS}" != "0" ]]; then
+                # Extra deps need compilation, and it may not always be possible to
+                # compile them easily on all platforms
+                    pip install -r ./requirements/extras.txt
+                fi
+            fi
             source tools/github/script.sh
 
 
