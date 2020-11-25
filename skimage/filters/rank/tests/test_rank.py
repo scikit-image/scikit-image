@@ -1,6 +1,7 @@
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose)
+                                     assert_allclose,
+                                     assert_array_almost_equal)
 from skimage._shared import testing
 
 from skimage.util import img_as_ubyte, img_as_float
@@ -119,9 +120,9 @@ class TestRank():
                 # reason.
                 assert result[19, 18] in [141, 172]
                 result[19, 18] = 172
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
             else:
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
 
         check()
 
@@ -135,7 +136,7 @@ class TestRank():
         def check():
             expected = self.refs_3d[filter]
             result = getattr(rank, filter)(self.volume, self.selem_3d)
-            assert_array_equal(expected, result)
+            assert_array_almost_equal(expected, result)
 
         check()
 
