@@ -26,7 +26,7 @@ fi
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   echo Build docs
   export SPHINXCACHE=${HOME}/.cache/sphinx; make html
-elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
+elif [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Test examples
   for f in doc/examples/*/*.py; do
     python "${f}"
