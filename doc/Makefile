@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j $(shell nproc || getconf _NPROCESSORS_ONLN || 1)
+SPHINXOPTS    ?= -j auto
 SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
@@ -38,7 +38,7 @@ clean:
 	-rm -rf $(DEST)
 	-rm -rf api
 	-rm -rf source/api
-	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+	-find ./source/auto_examples/* -type f | grep -v blank | xargs -r rm -f
 
 api:
 	@mkdir -p source/api
