@@ -8,7 +8,7 @@ jobs:
   test_skimage_linux:
     name: Run tests linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
     runs-on: ubuntu-latest
-    env: 
+    env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
 
@@ -57,9 +57,7 @@ jobs:
             BUILD_DOCS: 0
             OPTIONS_NAME: "optimize"
 
-        
 
-        
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v1
@@ -70,11 +68,11 @@ jobs:
           python-version: ${{ matrix.python-version}}
 
       - name: Build package
-        env: 
-            VERSION: ${{ matrix.python-version }} 
-            PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }} 
-            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }} 
-            PIP_FLAGS: ${{ matrix.PIP_FLAGS }} 
+        env:
+            VERSION: ${{ matrix.python-version }}
+            PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
             set -ex
             source tools/github/before_install.sh
@@ -82,11 +80,11 @@ jobs:
             pip install -vv -e .;
 
       - name: Run tests
-        env: 
-            PIP_FLAGS: ${{ matrix.PIP_FLAGS }} 
-            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }} 
-            QT: ${{ matrix.QT }} 
-            WITH_PYSIDE: ${{ matrix.WITH_PYSIDE }} 
+        env:
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+            QT: ${{ matrix.QT }}
+            WITH_PYSIDE: ${{ matrix.WITH_PYSIDE }}
             BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
             TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
             OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
@@ -120,7 +118,7 @@ jobs:
         include:
           - os: macos-latest
             platform_id: macosx_x86_64
-        
+
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
