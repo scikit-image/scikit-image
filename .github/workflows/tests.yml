@@ -36,7 +36,7 @@ jobs:
             # with dask and astropy)
             OPTIONS_NAME: "mini-req"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.6
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
