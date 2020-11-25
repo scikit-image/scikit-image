@@ -30,17 +30,17 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
-            OPTIONAL_DEPS: 1
+            BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req"
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
+            BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
             python-version: 3.8
             PIP_FLAGS: "--pre"
-            BUILD_DOCS: 0
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: 3.7
