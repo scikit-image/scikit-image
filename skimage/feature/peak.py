@@ -188,10 +188,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     Notes
     -----
     The peak local maximum function returns the coordinates of local peaks
-    (maxima) in an image. A maximum filter is used for finding local maxima.
-    This operation dilates the original image. After comparison of the dilated
-    and original image, this function returns the coordinates or a mask of the
-    peaks where the dilated image equals the original image.
+    (maxima) in an image. Internally, a maximum filter is used for finding local
+    maxima. This operation dilates the original image. After comparison of the
+    dilated and original image, this function returns the coordinates or a mask
+    of the peaks where the dilated image equals the original image.
 
     See also
     --------
@@ -220,12 +220,17 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
+    >>> img2[15, 15, 15] = 1
     >>> peak_idx = peak_local_max(img2, exclude_border=0)
     >>> peak_idx
-    array([[10, 10, 10]])
+    array([[10, 10, 10],
+           [15, 15, 15]])
 
     >>> peak_mask = np.zeros_like(img2, dtype=bool)
-    >>> peak_mask[peak_idx] = True
+    >>> peak_mask[tuple(peak_idx.T)] = True
+    >>> np.argwhere(peak_mask)
+    array([[10, 10, 10],
+           [15, 15, 15]])
 
     """
     if (footprint is None or footprint.size == 1) and min_distance < 1:
