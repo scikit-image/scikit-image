@@ -20,7 +20,7 @@ def crop(ar, crop_width, copy=False, order='K'):
         Number of values to remove from the edges of each axis.
         ``((before_1, after_1),`` ... ``(before_N, after_N))`` specifies
         unique crop widths at the start and end of each axis.
-        ``((before, after),)`` specifies a fixed start and end crop
+        ``((before, after),) or (before, after)`` specifies a fixed start and end crop
         for every axis.
         ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
         before = after = ``n`` for all axes.
@@ -39,7 +39,22 @@ def crop(ar, crop_width, copy=False, order='K'):
         view of the input array.
     """
     ar = np.array(ar, copy=False)
-    crops = _as_pairs(crop_width, ar.ndim, as_index=True)
+
+    if isinstance(crop_width, int):
+        crops = [[crop_width, crop_width]] * ar.ndim
+    elif isinstance(crop_width[0], int):
+        if len(crop_width) == 1:
+            crops = [[crop_width[0], crop_width[0]]] * ar.ndim
+        elif len(crop_width) == 2:
+            crops = [crop_width] * ar.ndim
+        else:
+            raise ValueError('invalid length for sequence crop_width')
+    elif len(crop_width) == 1:
+        crops = [crop_width[0]] * ar.ndim
+    elif len(crop_width)==ar.ndim:
+        crops = crop_width
+    else:
+        raise ValueError('invalid length for sequence crop_width')
 
     slices = tuple(slice(a, ar.shape[i] - b)
                    for i, (a, b) in enumerate(crops))

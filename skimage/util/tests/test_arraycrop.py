@@ -19,6 +19,12 @@ def test_pair_crop():
     assert_array_equal(out[-1], [31, 32])
     assert_equal(out.shape, (6, 2))
 
+def test_pair_tuple_crop():
+    arr = np.arange(45).reshape(9, 5)
+    out = crop(arr, ((1, 2),))
+    assert_array_equal(out[0], [6, 7])
+    assert_array_equal(out[-1], [31, 32])
+    assert_equal(out.shape, (6, 2))
 
 def test_int_crop():
     arr = np.arange(45).reshape(9, 5)
@@ -27,6 +33,12 @@ def test_int_crop():
     assert_array_equal(out[-1], [36, 37, 38])
     assert_equal(out.shape, (7, 3))
 
+def test_int_tuple_crop():
+    arr = np.arange(45).reshape(9, 5)
+    out = crop(arr, (1,))
+    assert_array_equal(out[0], [6, 7, 8])
+    assert_array_equal(out[-1], [36, 37, 38])
+    assert_equal(out.shape, (7, 3))
 
 def test_copy_crop():
     arr = np.arange(45).reshape(9, 5)
