@@ -4,24 +4,23 @@ n-dimensional array.
 """
 
 import numpy as np
-from numpy.lib.arraypad import _as_pairs
 
 __all__ = ['crop']
 
 
-def crop(ar, crop_width, copy=False, order='K'):
-    """Crop array `ar` by `crop_width` along each dimension.
+def crop(array, crop_width, copy=False, order='K'):
+    """Crop array `array` by `crop_width` along each dimension.
 
     Parameters
     ----------
-    ar : array-like of rank N
+    array : array-like of rank N
         Input array.
     crop_width : {sequence, int}
         Number of values to remove from the edges of each axis.
         ``((before_1, after_1),`` ... ``(before_N, after_N))`` specifies
         unique crop widths at the start and end of each axis.
-        ``((before, after),) or (before, after)`` specifies a fixed start and end crop
-        for every axis.
+        ``((before, after),) or (before, after)`` specifies
+        a fixed start and end crop for every axis.
         ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
         before = after = ``n`` for all axes.
     copy : bool, optional
@@ -38,28 +37,28 @@ def crop(ar, crop_width, copy=False, order='K'):
         The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
-    ar = np.array(ar, copy=False)
+    array = np.array(array, copy=False)
 
     if isinstance(crop_width, int):
-        crops = [[crop_width, crop_width]] * ar.ndim
+        crops = [[crop_width, crop_width]] * array.ndim
     elif isinstance(crop_width[0], int):
         if len(crop_width) == 1:
-            crops = [[crop_width[0], crop_width[0]]] * ar.ndim
+            crops = [[crop_width[0], crop_width[0]]] * array.ndim
         elif len(crop_width) == 2:
-            crops = [crop_width] * ar.ndim
+            crops = [crop_width] * array.ndim
         else:
             raise ValueError('invalid length for sequence crop_width')
     elif len(crop_width) == 1:
-        crops = [crop_width[0]] * ar.ndim
-    elif len(crop_width)==ar.ndim:
+        crops = [crop_width[0]] * array.ndim
+    elif len(crop_width) == array.ndim:
         crops = crop_width
     else:
         raise ValueError('invalid length for sequence crop_width')
 
-    slices = tuple(slice(a, ar.shape[i] - b)
+    slices = tuple(slice(a, array.shape[i] - b)
                    for i, (a, b) in enumerate(crops))
     if copy:
-        cropped = np.array(ar[slices], order=order, copy=True)
+        cropped = np.array(array[slices], order=order, copy=True)
     else:
-        cropped = ar[slices]
+        cropped = array[slices]
     return cropped
