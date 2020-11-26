@@ -48,7 +48,7 @@ def crop(ar, crop_width, copy=False, order='K'):
             crops = [crop_width] * ar.ndim
         else:
             raise ValueError(
-                f"crop_width sequence of length {len(crop_width)} is invalid\n"
+                f"crop_width has an invalid length: {len(crop_width)}\n"
                 "crop_width should be a sequence of N pairs, "
                 "a single pair, or a single integer"
             )
@@ -58,7 +58,7 @@ def crop(ar, crop_width, copy=False, order='K'):
         crops = crop_width
     else:
         raise ValueError(
-            f"crop_width sequence of length {len(crop_width)} is invalid\n"
+            f"crop_width has an invalid length: {len(crop_width)}\n"
             "crop_width should be a sequence of N pairs, "
             "a single pair, or a single integer"
         )
