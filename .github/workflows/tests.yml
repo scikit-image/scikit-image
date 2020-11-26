@@ -16,7 +16,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         QT: ["PyQt5"]
@@ -25,7 +25,7 @@ jobs:
         PYTHONOPTIMIZE: [0]
         TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [0]
-        OPTIONS_NAME: [""]
+        OPTIONS_NAME: ["default"]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -116,10 +116,18 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        QT: ["PyQt5"]
+        BUILD_DOCS: [1]
+        TEST_EXAMPLES: [0]
+        OPTIONAL_DEPS: [1]
+        OPTIONS_NAME: ["default"]
         include:
-          - os: macos-latest
-            platform_id: macosx_x86_64
+          - python-version: 3.6
+            OPTIONAL_DEPS: 0 
+        exclude:
+          - python-version: 3.6
+            OPTIONAL_DEPS: 1
         
     env:
         BUILD_DOCS: 1
@@ -145,15 +153,6 @@ jobs:
             # OpenMP is not present on macOS by default
             set -ex
             brew install libomp
-            #export CC=/usr/bin/clang
-            #export CXX=/usr/bin/clang++
-            #export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
-            #export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-            #export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
-            #export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
-            #brew install ccache
-            #export PATH=/usr/local/opt/ccache/libexec:$PATH
-            #export CCACHE_CPP2=1
 
       - name: Build package
         run: |
