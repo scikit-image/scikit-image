@@ -1,8 +1,8 @@
 SimpleITK
-astropy>=2.0.12
+astropy>=3.1.2
 qtpy
 pyamg
-dask[array]>=0.15.0,!=2.17.0
+dask[array]>=1.0.0,!=2.17.0
 # cloudpickle is necessary to provide the 'processes' scheduler for dask
 cloudpickle>=0.2.1
 pooch>=0.5.2
