@@ -123,8 +123,13 @@ jobs:
         include:
           - python-version: 3.6
             OPTIONAL_DEPS: 0 
+          - python-version: 3.9
+            OPTIONAL_DEPS: 0 
         exclude:
           - python-version: 3.6
+            OPTIONAL_DEPS: 1
+          # Problem with SimpleITK and py 3.9
+          - python-version: 3.9
             OPTIONAL_DEPS: 1
     env:
         BUILD_DOCS: 1
