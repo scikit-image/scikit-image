@@ -26,6 +26,7 @@ jobs:
         TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [0]
         OPTIONS_NAME: ["default"]
+        INSTALL_FROM_SDIST: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -56,6 +57,12 @@ jobs:
             PYTHONOPTIMIZE: 2
             BUILD_DOCS: 0
             OPTIONS_NAME: "optimize"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            INSTALL_FROM_SDIST: 1
+            OPTIONS_NAME: "install-from-sdist"
+
+
 
 
     steps:
@@ -73,11 +80,17 @@ jobs:
             PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
             MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
             PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+            INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
             set -ex
             source tools/github/before_install.sh
             python setup.py sdist
-            pip install -vv -e .;
+            if [[ $INSTALL_FROM_SDIST ]]; then
+                pip uninstall cython -y;
+                pip install dist/scikit-image-*.tar.gz;
+            else
+                pip install -vv -e .;
+            fi
 
       - name: Run tests
         env:
