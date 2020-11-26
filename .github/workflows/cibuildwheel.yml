@@ -41,13 +41,15 @@ jobs:
           CIBW_BUILD: "cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
+          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
           CXXFLAGS: "-I/usr/local/opt/libomp/include"
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython 3.9 (Linux and Windows)
         if: matrix.os != 'macos-latest'
@@ -57,7 +59,7 @@ jobs:
           CIBW_BUILD: "cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
+          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
 
@@ -71,13 +73,15 @@ jobs:
           CIBW_SKIP: "cp35-* cp36-* cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
+          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
           CXXFLAGS: "-I/usr/local/opt/libomp/include"
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
 
       - name: Build wheels for CPython (Linux and Windows)
@@ -89,7 +93,7 @@ jobs:
           CIBW_SKIP: "cp35-* cp36-* cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
+          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
           CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
 
@@ -102,7 +106,7 @@ jobs:
           CIBW_BUILD: "cp36-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
+          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||
           startsWith(github.ref, 'refs/tags/v0.17')
