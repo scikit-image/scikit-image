@@ -8,12 +8,12 @@ import numpy as np
 __all__ = ['crop']
 
 
-def crop(array, crop_width, copy=False, order='K'):
-    """Crop array `array` by `crop_width` along each dimension.
+def crop(ar, crop_width, copy=False, order='K'):
+    """Crop array `ar` by `crop_width` along each dimension.
 
     Parameters
     ----------
-    array : array-like of rank N
+    ar : array-like of rank N
         Input array.
     crop_width : {sequence, int}
         Number of values to remove from the edges of each axis.
@@ -37,28 +37,36 @@ def crop(array, crop_width, copy=False, order='K'):
         The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
-    array = np.array(array, copy=False)
+    ar = np.array(ar, copy=False)
 
     if isinstance(crop_width, int):
-        crops = [[crop_width, crop_width]] * array.ndim
+        crops = [[crop_width, crop_width]] * ar.ndim
     elif isinstance(crop_width[0], int):
         if len(crop_width) == 1:
-            crops = [[crop_width[0], crop_width[0]]] * array.ndim
+            crops = [[crop_width[0], crop_width[0]]] * ar.ndim
         elif len(crop_width) == 2:
-            crops = [crop_width] * array.ndim
+            crops = [crop_width] * ar.ndim
         else:
-            raise ValueError('invalid length for sequence crop_width')
+            raise ValueError(
+                f"crop_width sequence of length {len(crop_width)} is invalid\n"
+                "crop_width should be a sequence of N pairs, "
+                "a single pair, or a single integer"
+            )
     elif len(crop_width) == 1:
-        crops = [crop_width[0]] * array.ndim
-    elif len(crop_width) == array.ndim:
+        crops = [crop_width[0]] * ar.ndim
+    elif len(crop_width) == ar.ndim:
         crops = crop_width
     else:
-        raise ValueError('invalid length for sequence crop_width')
+        raise ValueError(
+            f"crop_width sequence of length {len(crop_width)} is invalid\n"
+            "crop_width should be a sequence of N pairs, "
+            "a single pair, or a single integer"
+        )
 
-    slices = tuple(slice(a, array.shape[i] - b)
+    slices = tuple(slice(a, ar.shape[i] - b)
                    for i, (a, b) in enumerate(crops))
     if copy:
-        cropped = np.array(array[slices], order=order, copy=True)
+        cropped = np.array(ar[slices], order=order, copy=True)
     else:
-        cropped = array[slices]
+        cropped = ar[slices]
     return cropped
