@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import imageio
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
 from skimage.io import reset_plugins
@@ -94,30 +95,19 @@ class TestImageCollection(TestCase):
         with testing.raises(AttributeError):
             set_files('newfiles')
 
-    def test_custom_pattern(self):
-        load_pattern = os.path.join(data_dir, 'b??ck.png')
-        files = [os.path.join(data_dir, pic)
-                 for pic in ['block.png', 'brick.png']]
+    def test_custom_load_func_w_kwarg(self):
+        load_pattern = os.path.join(data_dir, 'no_time_for_that_tiny.gif')
 
-        def load_fn(x):
-            return x
+        def load_fn(f, step):
+            vid = imageio.get_reader(f)
+            seq = [v for v in vid.iter_data()]
+            return seq[::step]
 
-        ic = ImageCollection(load_pattern, load_func=load_fn)
-        assert_equal(ic[0], files[0])
-        assert_equal(ic[1], files[1])
-
-    def test_custom_pattern_not_pil(self):
-        load_pattern = os.path.join(data_dir, 'chessboard_*_U8.npz')
-        files = [os.path.join(data_dir, pic)
-                 for pic in ['chessboard_GRAY_U8.npz',
-                             'chessboard_RGB_U8.npz']]
-
-        def load_fn(x):
-            return x
-
-        ic = ImageCollection(load_pattern, load_func=load_fn)
-        assert_equal(ic[0], files[0])
-        assert_equal(ic[1], files[1])
+        ic = ImageCollection(load_pattern, load_func=load_fn, step=3)
+        # Each file should map to one image (array).
+        assert len(ic) == 1
+        # GIF file has 24 frames, so 24 / 3 equals 8.
+        assert len(ic[0]) == 8
 
     def test_custom_load_func(self):
 
