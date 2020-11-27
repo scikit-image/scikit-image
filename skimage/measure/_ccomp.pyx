@@ -340,7 +340,7 @@ def undo_reshape_array(arr, swaps):
     return reshaped
 
 
-def label_cython(input_, neighbors=None, background=None, return_num=False,
+def label_cython(input_, background=None, return_num=False,
                  connectivity=None):
     # Connected components search as described in Fiorio et al.
     # We have to ensure that the shape of the input can be handled by the
@@ -367,30 +367,15 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
     get_shape_info(shape, &shapeinfo)
     get_bginfo(background, &bg)
 
-    if neighbors is None and connectivity is None:
+    if connectivity is None:
         # use the full connectivity by default
         connectivity = ndim
-    elif neighbors is not None:
-        # backwards-compatible neighbors recalc to connectivity,
-        if neighbors == 4:
-            connectivity = 1
-        elif neighbors == 8:
-            connectivity = ndim
-        else:
-            raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
-                             % neighbors)
-        # not sure why stacklevel should only be 2 not 3. Maybe cython
-        # is stripping away a stacklevel????
-        warn("The argument 'neighbors' is deprecated and will be removed in "
-             "scikit-image 0.18, use 'connectivity' instead. "
-             "For neighbors={neighbors}, use connectivity={connectivity}"
-             "".format(neighbors=neighbors, connectivity=connectivity),
-             stacklevel=2)
 
     if not 1 <= connectivity <= ndim:
         raise ValueError(
-            "Connectivity below 1 or above %d is illegal."
-            % ndim)
+            f'Connectivity for {input_.ndim}D image should '
+            f'be in [1, ..., {input_.ndim}]. Got {connectivity}.'
+        )
 
     cdef DTYPE_t conn = connectivity
     # Label output

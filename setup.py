@@ -59,6 +59,10 @@ class ConditionalOpenMP(build_ext):
 
     def can_compile_link(self, compile_flags, link_flags):
 
+        if "PYODIDE_PACKAGE_ABI" in os.environ:
+            # pyodide doesn't support OpenMP
+            return False
+
         cc = self.compiler
         fname = 'test.c'
         cwd = os.getcwd()
@@ -100,7 +104,9 @@ class ConditionalOpenMP(build_ext):
         compile_flags = list()
         link_flags = list()
 
+        # check which compiler is being used
         if self.compiler.compiler_type == "msvc":
+            # '-fopenmp' is called '/openmp' in msvc
             compile_flags += ['/openmp']
         else:
             compile_flags += ['-fopenmp']
@@ -162,9 +168,16 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
+    cmdclass = {'build_py': build_py,
+                'sdist': sdist}
     try:
+        # test if build dependencies exist.
+        # if not, some commands are still viable.
+        # note: this must be kept in sync with pyproject.toml
         from numpy.distutils.core import setup
+        import cython
         extra = {'configuration': configuration}
+        cmdclass['build_ext'] = ConditionalOpenMP
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
@@ -172,12 +185,13 @@ if __name__ == "__main__":
                                                    'clean',
                                                    'egg_info',
                                                    'install_egg_info',
-                                                   'rotate')):
-            # For these actions, NumPy is not required.
+                                                   'rotate',
+                                                   'sdist')):
+            # For these actions, compilation is not required.
             #
-            # They are required to succeed without Numpy for example when
-            # pip is used to install scikit-image when Numpy is not yet
-            # present in the system.
+            # They are required to succeed for example when pip is
+            # used to install scikit-image when Numpy/cython are not
+            # yet present in the system.
             from setuptools import setup
             extra = {}
         else:
@@ -206,7 +220,6 @@ if __name__ == "__main__":
         download_url=DOWNLOAD_URL,
         project_urls=PROJECT_URLS,
         version=VERSION,
-
         classifiers=[
             'Development Status :: 4 - Beta',
             'Environment :: Console',
@@ -218,6 +231,8 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
@@ -232,13 +247,9 @@ if __name__ == "__main__":
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
-
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
-
-        cmdclass={'build_py': build_py,
-                  'build_ext': ConditionalOpenMP,
-                  'sdist': sdist},
+        cmdclass=cmdclass,
         **extra
     )

@@ -5,23 +5,17 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
 
-from ._label import label
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-
+from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
 
 from functools import wraps
 
 
-__all__ = ['regionprops', 'perimeter']
+__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
-STREL_4 = np.array([[0, 1, 0],
-                    [1, 1, 1],
-                    [0, 1, 0]], dtype=np.uint8)
-STREL_8 = np.ones((3, 3), dtype=np.uint8)
-STREL_26_3D = np.ones((3, 3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -56,6 +50,7 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
+    'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -106,6 +101,7 @@ COL_DTYPES = {
     'moments_normalized': float,
     'orientation': float,
     'perimeter': float,
+    'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -213,9 +209,16 @@ class RegionProperties:
                  cache_active, *, extra_properties=None):
 
         if intensity_image is not None:
-            if not intensity_image.shape == label_image.shape:
-                raise ValueError('Label and intensity image must have the'
-                                 ' same shape.')
+            ndim = label_image.ndim
+            if not (
+                    intensity_image.shape[:ndim] == label_image.shape
+                    and intensity_image.ndim in [ndim, ndim + 1]
+                    ):
+                raise ValueError('Label and intensity image shapes must match,'
+                                 ' except for channel (last) axis.')
+            multichannel = label_image.shape < intensity_image.shape
+        else:
+            multichannel = False
 
         self.label = label
 
@@ -227,6 +230,8 @@ class RegionProperties:
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
+        self._multichannel = multichannel
+        self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
         if extra_properties is None:
@@ -322,10 +327,10 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        euler_array = self.filled_image != self.image
-        _, num = label(euler_array, connectivity=self._ndim, return_num=True,
-                       background=0)
-        return -num + 1
+        if self._ndim not in [2, 3]:
+            raise NotImplementedError('Euler number is implemented for '
+                                      '2D or 3D images only')
+        return euler_number(self.image, self._ndim)
 
     @property
     def extent(self):
@@ -336,8 +341,8 @@ class RegionProperties:
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
-            coordinates = np.vstack(find_contours(identity_convex_hull, .5, 
-                                                  fully_connected = 'high'))
+            coordinates = np.vstack(find_contours(identity_convex_hull, .5,
+                                                  fully_connected='high'))
         elif self._ndim == 3:
             coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
         distances = pdist(coordinates, 'sqeuclidean')
@@ -375,7 +380,12 @@ class RegionProperties:
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
-        return self._intensity_image[self.slice] * self.image
+        image = (
+            self.image
+            if not self._multichannel
+            else np.expand_dims(self.image, self._ndim)
+        )
+        return self._intensity_image[self.slice] * image
 
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
@@ -388,15 +398,15 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image])
+        return np.max(self.intensity_image[self.image], axis=0)
 
     @property
     def mean_intensity(self):
-        return np.mean(self.intensity_image[self.image])
+        return np.mean(self.intensity_image[self.image], axis=0)
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image])
+        return np.min(self.intensity_image[self.image], axis=0)
 
     @property
     def major_axis_length(self):
@@ -449,6 +459,11 @@ class RegionProperties:
         return perimeter(self.image, 4)
 
     @property
+    @only2d
+    def perimeter_crofton(self):
+        return perimeter_crofton(self.image, 4)
+
+    @property
     def solidity(self):
         return self.area / self.convex_area
 
@@ -467,23 +482,60 @@ class RegionProperties:
     @property
     @_cached
     def weighted_moments(self):
-        return _moments.moments(self._intensity_image_double(), 3)
+        image = self._intensity_image_double()
+        if self._multichannel:
+            moments = np.stack(
+                    [_moments.moments(image[..., i], order=3)
+                        for i in range(image.shape[-1])],
+                    axis=-1,
+                    )
+        else:
+            moments = _moments.moments(image, order=3)
+        return moments
 
     @property
     @_cached
     def weighted_moments_central(self):
         ctr = self.weighted_local_centroid
-        return _moments.moments_central(self._intensity_image_double(),
-                                        center=ctr, order=3)
+        image = self._intensity_image_double()
+        if self._multichannel:
+            moments_list = [
+                _moments.moments_central(
+                    image[..., i], center=ctr[..., i], order=3
+                )
+                for i in range(image.shape[-1])
+            ]
+            moments = np.stack(moments_list, axis=-1)
+        else:
+            moments = _moments.moments_central(image, ctr, order=3)
+        return moments
 
     @property
     @only2d
     def weighted_moments_hu(self):
-        return _moments.moments_hu(self.weighted_moments_normalized)
+        nu = self.weighted_moments_normalized
+        if self._multichannel:
+            nchannels = self._intensity_image.shape[-1]
+            return np.stack(
+                [_moments.moments_hu(nu[..., i]) for i in range(nchannels)],
+                axis=-1,
+            )
+        else:
+            return _moments.moments_hu(nu)
 
     @property
     @_cached
     def weighted_moments_normalized(self):
+        mu = self.weighted_moments_central
+        if self._multichannel:
+            nchannels = self._intensity_image.shape[-1]
+            return np.stack(
+                [_moments.moments_normalized(mu[..., i], order=3)
+                 for i in range(nchannels)],
+                axis=-1,
+            )
+        else:
+            return _moments.moments_normalized(mu, order=3)
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
     def __iter__(self):
@@ -659,13 +711,19 @@ def regionprops_table(label_image, intensity_image=None,
     The table is a dictionary mapping column names to value arrays. See Notes
     section below for details.
 
+    .. versionadded:: 0.16
+
     Parameters
     ----------
-    label_image : (N, M) ndarray
+    label_image : (N, M[, P]) ndarray
         Labeled input image. Labels with value 0 are ignored.
-    intensity_image : (N, M) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image.
+    intensity_image : (M, N[, P][, C]) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image, plus
+        optionally an extra dimension for multichannel data.
         Default is None.
+
+        .. versionchanged:: 0.18.0
+            The ability to provide an extra dimension for channels was added.
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
         For a list of available properties, please see :func:`regionprops`.
@@ -786,11 +844,14 @@ def regionprops_table(label_image, intensity_image=None,
             list(properties) + [prop.__name__ for prop in extra_properties]
         )
     if len(regions) == 0:
-        label_image = np.zeros((3,) * label_image.ndim, dtype=int)
-        label_image[(1,) * label_image.ndim] = 1
+        ndim = label_image.ndim
+        label_image = np.zeros((3,) * ndim, dtype=int)
+        label_image[(1,) * ndim] = 1
         if intensity_image is not None:
-            intensity_image = np.zeros(label_image.shape,
-                                       dtype=intensity_image.dtype)
+            intensity_image = np.zeros(
+                    label_image.shape + intensity_image.shape[ndim:],
+                    dtype=intensity_image.dtype
+                    )
         regions = regionprops(label_image, intensity_image=intensity_image,
                               cache=cache, extra_properties=extra_properties)
 
@@ -818,9 +879,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
             inconsistent handling of images with singleton dimensions. To
             recover the old behaviour, use
             ``regionprops(np.squeeze(label_image), ...)``.
-    intensity_image : (M, N[, P]) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image.
+    intensity_image : (M, N[, P][, C]) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image, plus
+        optionally an extra dimension for multichannel data.
         Default is None.
+
+        .. versionchanged:: 0.18.0
+            The ability to provide an extra dimension for channels was added.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
@@ -884,8 +949,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
-        Euler characteristic of region. Computed as number of objects (= 1)
-        subtracted by number of holes (8-connectivity).
+        Euler characteristic of the set of non-zero pixels.
+        Computed as number of connected components subtracted by number of
+        holes (input.ndim connectivity). In 3D, number of connected
+        components plus number of holes subtracted by number of tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -952,6 +1019,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **perimeter_crofton** : float
+        Perimeter of object approximated by the Crofton formula in 4
+        directions.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -1087,72 +1157,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         regions.append(props)
 
     return regions
-
-
-def perimeter(image, neighbourhood=4):
-    """Calculate total perimeter of all objects in binary image.
-
-    Parameters
-    ----------
-    image : (N, M) ndarray
-        2D binary image.
-    neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination. It is used to
-        compute the contour. A higher neighbourhood widens the border on which
-        the perimeter is computed.
-
-    Returns
-    -------
-    perimeter : float
-        Total perimeter of all objects in binary image.
-
-    References
-    ----------
-    .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
-           a Perimeter Estimator. The Queen's University of Belfast.
-           http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
-
-    Examples
-    --------
-    >>> from skimage import data, util
-    >>> from skimage.measure import label
-    >>> # coins image (binary)
-    >>> img_coins = data.coins() > 110
-    >>> # total perimeter of all objects in the image
-    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
-    7796.867...
-    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
-    8806.268...
-
-    """
-    if image.ndim != 2:
-        raise NotImplementedError('`perimeter` supports 2D images only')
-
-    if neighbourhood == 4:
-        strel = STREL_4
-    else:
-        strel = STREL_8
-    image = image.astype(np.uint8)
-    eroded_image = ndi.binary_erosion(image, strel, border_value=0)
-    border_image = image - eroded_image
-
-    perimeter_weights = np.zeros(50, dtype=np.double)
-    perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
-    perimeter_weights[[21, 33]] = sqrt(2)
-    perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
-
-    perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
-                                                           [ 2, 1,  2],
-                                                           [10, 2, 10]]),
-                                   mode='constant', cval=0)
-
-    # You can also write
-    # return perimeter_weights[perimeter_image].sum()
-    # but that was measured as taking much longer than bincount + np.dot (5x
-    # as much time)
-    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = perimeter_histogram @ perimeter_weights
-    return total_perimeter
 
 
 def _parse_docs():

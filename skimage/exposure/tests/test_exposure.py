@@ -153,7 +153,7 @@ def test_equalize_float():
 def test_equalize_masked():
     img = util.img_as_float(test_img)
     mask = np.zeros(test_img.shape)
-    mask[50:150, 50:250] = 1
+    mask[100:400, 100:400] = 1
     img_mask_eq = exposure.equalize_hist(img, mask=mask)
     img_eq = exposure.equalize_hist(img)
 
@@ -313,13 +313,9 @@ def test_rescale_nan_warning(in_range, out_range):
         r"Passing `np.nan` to mean no clipping in np.clip "
         r"has always been unreliable|\A\Z"
     )
-    # 2019/12/06 Passing NaN to np.min and np.max raises a RuntimeWarning for
-    # NumPy < 1.16
-    # TODO: Remove once minimal required NumPy version is 1.16
-    numpy_warning_smaller_1_16 = r"invalid value encountered in reduce|\A\Z"
 
     with expected_warnings(
-            [msg, numpy_warning_1_17_plus, numpy_warning_smaller_1_16]
+            [msg, numpy_warning_1_17_plus]
     ):
         exposure.rescale_intensity(image, in_range, out_range)
 
@@ -481,12 +477,14 @@ def test_adapthist_clip_limit():
     img_f = util.img_as_float(img_u)
 
     # uint8 input
-    img_clahe = exposure.equalize_adapthist(img_u, clip_limit=1)
-    assert_array_equal(img_f, img_clahe)
+    img_clahe0 = exposure.equalize_adapthist(img_u, clip_limit=0)
+    img_clahe1 = exposure.equalize_adapthist(img_u, clip_limit=1)
+    assert_array_equal(img_clahe0, img_clahe1)
 
     # float64 input
-    img_clahe = exposure.equalize_adapthist(img_f, clip_limit=1)
-    assert_array_equal(img_f, img_clahe)
+    img_clahe0 = exposure.equalize_adapthist(img_f, clip_limit=0)
+    img_clahe1 = exposure.equalize_adapthist(img_f, clip_limit=1)
+    assert_array_equal(img_clahe0, img_clahe1)
 
 
 def peak_snr(img1, img2):

@@ -115,9 +115,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([107432, 154712]), array([0. , 0.5, 1. ]))
+    (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([107432, 154712]), array([0.25, 0.75]))
+    (array([ 93585, 168559]), array([0.25, 0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
@@ -436,6 +436,14 @@ def _assert_non_negative(image):
                          'skimage.exposure.rescale_intensity.')
 
 
+def _adjust_gamma_u8(image, gamma, gain):
+    """LUT based implmentation of gamma adjustement.
+
+    """
+    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma)).astype('uint8')
+    return lut[image]
+
+
 def adjust_gamma(image, gamma=1, gain=1):
     """Performs Gamma Correction on the input image.
 
@@ -482,16 +490,22 @@ def adjust_gamma(image, gamma=1, gain=1):
     >>> image.mean() > gamma_corrected.mean()
     True
     """
-    _assert_non_negative(image)
-    dtype = image.dtype.type
-
     if gamma < 0:
         raise ValueError("Gamma should be a non-negative real number.")
 
-    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+    dtype = image.dtype.type
 
-    out = ((image / scale) ** gamma) * scale * gain
-    return out.astype(dtype)
+    if dtype is np.uint8:
+        out = _adjust_gamma_u8(image, gamma, gain)
+    else:
+        _assert_non_negative(image)
+
+        scale = float(dtype_limits(image, True)[1]
+                      - dtype_limits(image, True)[0])
+
+        out = (((image / scale) ** gamma) * scale * gain).astype(dtype)
+
+    return out
 
 
 def adjust_log(image, gain=1, inv=False):

@@ -2,6 +2,7 @@ import math
 import numpy as np
 from numpy.linalg import inv, pinv
 from scipy import optimize
+from warnings import warn
 from .._shared.utils import check_random_state
 
 
@@ -868,9 +869,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 break
 
     # estimate final model using all inliers
-    if best_inliers is not None:
+    if best_inliers is not None and any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
         best_model.estimate(*data_inliers)
+    else:
+        best_model = None
+        best_inliers = None
+        warn("No inliers found. Model not fitted")
 
     return best_model, best_inliers

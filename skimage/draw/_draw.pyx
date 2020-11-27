@@ -213,8 +213,8 @@ def _polygon(r, c, shape):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    r = np.asanyarray(r)
-    c = np.asanyarray(c)
+    r = np.atleast_1d(r)
+    c = np.atleast_1d(c)
 
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))
@@ -227,22 +227,18 @@ def _polygon(r, c, shape):
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef Py_ssize_t r_i, c_i
-
     # make contiguous arrays for r, c coordinates
-    cdef cnp.ndarray contiguous_rdata, contiguous_cdata
-    contiguous_rdata = np.ascontiguousarray(r, dtype=np.double)
-    contiguous_cdata = np.ascontiguousarray(c, dtype=np.double)
-    cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
-    cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
+    cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
+    cdef cnp.float64_t[::1] cptr = np.ascontiguousarray(c, 'float64')
+    cdef cnp.float64_t r_i, c_i
 
     # output coordinate arrays
-    cdef list rr = list()
-    cdef list cc = list()
+    rr = list()
+    cc = list()
 
     for r_i in range(minr, maxr+1):
         for c_i in range(minc, maxc+1):
-            if point_in_polygon(nr_verts, cptr, rptr, c_i, r_i):
+            if point_in_polygon(cptr, rptr, c_i, r_i):
                 rr.append(r_i)
                 cc.append(c_i)
 
