@@ -17,7 +17,7 @@ New Features
 
 - Add the iterative Lucas-Kanade (iLK) optical flow method (#4161)
 - Add Feret diameter in region properties (#4379, #4820)
-- Add functions to compute Euler number and Crofton perimiter estimation (#4380)
+- Add functions to compute Euler number and Crofton perimeter estimation (#4380)
 - Add a function to compute the Hausdorff distance (#4382)
 - Added 3D support for many filters in ``skimage.filters.rank``.
 - An experimental implementation of trainable pixel segmentation, aiming for
@@ -256,7 +256,7 @@ Other Pull Requests
 - Silence several warnings in the test suite (#4837)
 - Silence a few RuntimeWarnings in the test suite (#4838)
 - handle color string mapping correctly (#4840)
-- DOC: Autoformat docstrings in io.*.py (#4845)
+- DOC: Autoformat docstrings in ``io.*.py`` (#4845)
 - Update min req for pillow due to CVE-2020-10379 and co. (#4861)
 - DOC: First pass at format conversion, rst -> myst (#4863)
 - Fixed typo in comment (#4867)
@@ -318,6 +318,7 @@ Other Pull Requests
 52 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 
+A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package. 
 - Abhishek Arya
 - Abhishek Patil
 - Alexandre de Siqueira
