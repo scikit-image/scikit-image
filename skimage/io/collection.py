@@ -138,23 +138,24 @@ class ImageCollection(object):
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
     `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
-    ``load_func(file_pattern[5])`` to load the image.
+    ``load_func(load_pattern[5])`` to load the image.
 
-    Imagine, for example, an ImageCollection that loads every tenth
+    Imagine, for example, an ImageCollection that loads every third
     frame from a video file::
 
-      class AVILoader:
-          video_file = 'myvideo.avi'
+      video_file = 'no_time_for_that_tiny.gif'
 
-          def __call__(self, frame):
-              return video_read(self.video_file, frame)
+      def vidread_step(f, step):
+          vid = imageio.get_reader(f)
+          seq = [v for v in vid.iter_data()]
+          return seq[::step]
 
-      avi_load = AVILoader()
+      ic = ImageCollection(video_file, load_func=vidread_step, step=3)
 
-      frames = range(0, 1000, 10) # 0, 10, 20, ...
-      ic = ImageCollection(frames, load_func=avi_load)
+      ic  # is an ImageCollection object of length 1 because there is 1 file
 
-      x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
+      x = ic[0]  # calls vidread_step(video_file, step=3)
+      x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
     Another use of ``load_func`` would be to convert all images to ``uint8``::
 
@@ -191,7 +192,15 @@ class ImageCollection(object):
             raise TypeError('Invalid pattern as input.')
 
         self._files = sorted(self._files, key=alphanumeric_key)
-        self._numframes = self._find_images()
+
+        if load_func is None:
+            from ._io import imread
+            self.load_func = imread
+            self._numframes = self._find_images()
+        else:
+            self.load_func = load_func
+            self._numframes = len(self._files)
+            self._frame_index = None
 
         if conserve_memory:
             memory_slots = 1
@@ -200,12 +209,6 @@ class ImageCollection(object):
 
         self._conserve_memory = conserve_memory
         self._cached = None
-
-        if load_func is None:
-            from ._io import imread
-            self.load_func = imread
-        else:
-            self.load_func = load_func
 
         self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
