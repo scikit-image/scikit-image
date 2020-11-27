@@ -1,7 +1,7 @@
 # Workflow to build and test wheels
 name: Test
 
-on: push
+on: [push, pull_request]
 
 jobs:
 
