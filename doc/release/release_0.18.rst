@@ -319,6 +319,7 @@ Other Pull Requests
 ----------------------------------------------------------------------
 
 A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package. 
+
 - Abhishek Arya
 - Abhishek Patil
 - Alexandre de Siqueira
