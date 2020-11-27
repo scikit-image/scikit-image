@@ -306,7 +306,7 @@ Other Pull Requests
 - Code simplification after latest numpy bump (#5027)
 - Fixes broken link to CODE_OF_CONDUCT.md (#5030)
 - Specify whether core dev should merge right after second approving review. (#5040)
-- Update pytest configuration to include test_ functions (#5044)
+- Update pytest configuration to include ``test_`` functions (#5044)
 - MAINT Build fix for pyodide (#5059)
 - reduce OSX build time so that Travis is happy (#5067)
 - DOC: document the normalized kernel in prewitt_h, prewitt_v (#5076)
