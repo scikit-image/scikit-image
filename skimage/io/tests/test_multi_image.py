@@ -27,27 +27,27 @@ def imgs():
 
 def test_shapes(imgs):
     imgs = imgs[-1]
-    assert imgs[0].shape == imgs[1].shape
-    assert imgs[0].shape == (10, 10, 3)
+    assert imgs[0][0].shape == imgs[0][1].shape
+    assert imgs[0][0].shape == (10, 10, 3)
 
 def test_len(imgs):
-    assert len(imgs[0]) == len(imgs[1]) == 2
-    assert len(imgs[2]) == len(imgs[3]) == 24
-    assert len(imgs[-1]) == 26, len(imgs[-1])
+    assert len(imgs[0][0]) == len(imgs[1][0]) == 2
+    assert len(imgs[2][0]) == len(imgs[3][0]) == 24
+    assert len(imgs[-1]) == 2, len(imgs[-1])
 
 def test_slicing(imgs):
     img = imgs[-1]
     assert type(img[:]) is MultiImage
-    assert len(img[:]) == 26, len(img[:])
-    assert len(img[:1]) == 1
-    assert len(img[1:]) == 25
+    assert len(img[0][:]) + len(img[1][:]) == 26, len(img[:])
+    assert len(img[0][:1]) == 1
+    assert len(img[1][1:]) == 23
     assert_allclose(img[0], img[:1][0])
     assert_allclose(img[1], img[1:][0])
     assert_allclose(img[-1], img[::-1][0])
     assert_allclose(img[0], img[::-1][-1])
 
 def test_getitem(imgs):
-    for img in imgs:
+    for img in imgs[0]:
         num = len(img)
 
         for i in range(-num, num):
