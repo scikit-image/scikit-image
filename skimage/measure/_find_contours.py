@@ -25,7 +25,7 @@ def find_contours(image, level=None,
         Input image in which to find contours.
     level : float, optional
         Value along which to find contours in the array. By default, the level
-        is set to (max(image) - min(image)) / 2
+        is set to (max(image) + min(image)) / 2
 
         .. versionchanged:: 0.18
             This parameter is now optional.
@@ -144,7 +144,7 @@ def find_contours(image, level=None,
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
     if level is None:
-        level = (np.nanmax(image) - np.nanmin(image)) / 2.0
+        level = (np.nanmin(image) + np.nanmax(image)) / 2.0
 
     segments = _get_contour_segments(image.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
