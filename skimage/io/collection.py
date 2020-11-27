@@ -404,10 +404,9 @@ class MultiImage(ImageCollection):
 
     Parameters
     ----------
-    load_pattern : str or list
+    load_pattern : str or list of str
         Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by `os.pathsep`,
-        e.g. ``/tmp/work/*.png:/tmp/other/*.jpg``.
+        relative.
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
