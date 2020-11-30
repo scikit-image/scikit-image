@@ -20,7 +20,7 @@ from .._shared.utils import warn
 # https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
 # https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
-    from scipy.sparse.linalg.dsolve import umfpack
+    from scipy.sparse.linalg.dsolve.linsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
 
     def new_del(self):
