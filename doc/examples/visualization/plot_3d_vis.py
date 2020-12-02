@@ -1,10 +1,9 @@
 """
 ==========================================================
-Displaying images with some Python visualization libraries
+Displaying 3d surfaces with plotly
 ==========================================================
 
-How to visualize image arrays in 2D and in 3D with several Python visualization
-libraries: Matplotlib, plotly, Mayavi.
+Doc in progress
 """
 import numpy as np
 from skimage import data, filters, measure
