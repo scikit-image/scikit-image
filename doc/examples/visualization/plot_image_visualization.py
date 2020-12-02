@@ -21,7 +21,8 @@ plt.show()
 # ===============
 
 import plotly.express as px
+import plotly
 
 fig = px.imshow(img)
-fig
+plotly.io.show(fig)
 
