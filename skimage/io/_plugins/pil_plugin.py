@@ -7,6 +7,17 @@ from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
 
+# Check CVE-2020-10379
+from distutils.version import LooseVersion
+if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+    from warnings import warn
+    warn('Your installed pillow version is < 7.1.0. '
+         'Several security issues (CVE-2020-11538, '
+         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
+         'have been fixed in pillow 7.1.0 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
+
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
     """Load an image from file.
@@ -14,12 +25,12 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
+        Specifies data type of array elements.
     img_num : int, optional
-       Specifies which image to read in a file with multiple images
-       (zero-indexed).
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through.
 

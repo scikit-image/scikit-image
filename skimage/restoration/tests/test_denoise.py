@@ -648,11 +648,6 @@ def test_wavelet_invalid_method():
                                     rescale_sigma=True)
 
 
-def test_wavelet_rescale_sigma_deprecation():
-    # No specifying rescale_sigma results in a DeprecationWarning
-    assert_warns(FutureWarning, restoration.denoise_wavelet, np.ones(16))
-
-
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_levels(rescale_sigma):
     rstate = np.random.RandomState(1234)

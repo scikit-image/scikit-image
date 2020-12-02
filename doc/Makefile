@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j $(shell nproc || getconf _NPROCESSORS_ONLN || 1)
+SPHINXOPTS    ?= -j auto
 SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
@@ -38,7 +38,7 @@ clean:
 	-rm -rf $(DEST)
 	-rm -rf api
 	-rm -rf source/api
-	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+	-find ./source/auto_examples/* -type f | grep -v blank | xargs -r rm -f
 
 api:
 	@mkdir -p source/api
@@ -47,11 +47,12 @@ api:
 
 release_notes:
 	@echo "Copying release notes"
-	@cat `$(PYTHON) -c \
-		"from pathlib import Path; from skimage import io; \
-		 l = list(str(e) for e in Path('release').glob('release_*.*.*')); \
-		 l.sort(key=io.collection.alphanumeric_key); print(l[-1])"` \
-		| tail -n +4 > release/_release_notes_for_docs.rst
+	@tail -n +4 release/release_$$(\
+		ls release/release_*.*.* \
+			| sed s:release/release_:: \
+			| sort -nrt. -k1,1 -k2,2 \
+			| head -n 1) \
+		> release/_release_notes_for_docs.rst
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html

@@ -1,11 +1,12 @@
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose)
+                                     assert_allclose,
+                                     assert_array_almost_equal)
 from skimage._shared import testing
 
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
-from skimage.morphology import grey, disk
+from skimage.morphology import grey, disk, ball
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
@@ -85,10 +86,14 @@ class TestRank():
         # This image is used along with @test_parallel
         # to ensure that the same seed is used for each thread.
         self.image = np.random.rand(25, 25)
+        np.random.seed(0)
+        self.volume = np.random.rand(10, 10, 10)
         # Set again the seed for the other tests.
         np.random.seed(0)
         self.selem = morphology.disk(1)
+        self.selem_3d = morphology.ball(1)
         self.refs = np.load(fetch('data/rank_filter_tests.npz'))
+        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
@@ -115,11 +120,26 @@ class TestRank():
                 # reason.
                 assert result[19, 18] in [141, 172]
                 result[19, 18] = 172
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
             else:
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
 
         check()
+
+    @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
+                            'majority', 'maximum', 'mean', 'geometric_mean',
+                            'subtract_mean', 'median', 'minimum', 'modal',
+                            'enhance_contrast', 'pop', 'sum', 'threshold',
+                            'noise_filter', 'entropy'])
+    def test_rank_filters_3D(self, filter):
+        @test_parallel(warnings_matching=['Possible precision loss'])
+        def check():
+            expected = self.refs_3d[filter]
+            result = getattr(rank, filter)(self.volume, self.selem_3d)
+            assert_array_almost_equal(expected, result)
+
+        check()
+
 
     def test_random_sizes(self):
         # make sure the size is not a problem
@@ -318,6 +338,27 @@ class TestRank():
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
+    def test_compare_ubyte_vs_float_3d(self):
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_uint = np.random.randint(0, high=256,
+                                        size=(10, 20, 30), dtype=np.uint8)
+        volume_float = img_as_float(volume_uint)
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
+        for method in methods_3d:
+            func = getattr(rank, method)
+            out_u = func(volume_uint, ball(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_f = func(volume_float, ball(3))
+            assert_equal(out_u, out_f)
+
     def test_compare_8bit_unsigned_vs_signed(self):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -340,6 +381,30 @@ class TestRank():
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
+    def test_compare_8bit_unsigned_vs_signed_3d(self):
+        # filters applied on 8-bit volume ore 16-bit volume (having only real 8-bit
+        # of dynamic) should be identical
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_s = np.random.randint(0, high=127,
+                                     size=(10, 20, 30), dtype=np.int8)
+        volume_u = img_as_ubyte(volume_s)
+        assert_equal(volume_u, img_as_ubyte(volume_s))
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
+        for method in methods_3d:
+            func = getattr(rank, method)
+            out_u = func(volume_u, ball(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_s = func(volume_s, ball(3))
+            assert_equal(out_u, out_s)
+
     @parametrize('method',
                  ['autolevel', 'equalize', 'gradient', 'maximum',
                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
@@ -351,10 +416,27 @@ class TestRank():
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
+        np.random.seed(0)
+        volume8 = np.random.randint(128, high=256,
+                                    size=(10, 10, 10), dtype=np.uint8)
+        volume16 = volume8.astype(np.uint16)
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
         f16 = func(image16, disk(3))
         assert_equal(f8, f16)
+
+        if (method in methods_3d):
+            f8 = func(volume8, ball(3))
+            f16 = func(volume16, ball(3))
+
+            assert_equal(f8, f16)
 
     def test_trivial_selem8(self):
         # check that min, max and mean returns identity if structuring element

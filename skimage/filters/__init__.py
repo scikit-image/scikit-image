@@ -18,11 +18,13 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
 from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from ._median import median
+from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
 
 
 __all__ = ['inverse',
+           'correlate_sparse',
            'wiener',
            'LPIFilter2D',
            'gaussian',

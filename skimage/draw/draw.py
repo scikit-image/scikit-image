@@ -174,9 +174,8 @@ def circle(r, c, radius, shape=None):
             This function is deprecated and will be removed in scikit-image 0.19.
             Please use the function named ``disk`` instead.
     """
-    warnings.warn("circle is deprecated in favor of "
-                  "disk."
-                  "circle will be removed in version 0.19",
+    warnings.warn("`draw.circle` is deprecated in favor of `draw.disk`."
+                  "`draw.circle` will be removed in version 0.19",
                   FutureWarning, stacklevel=2)
     return disk((r, c), radius, shape=shape)
 
@@ -486,14 +485,14 @@ def polygon(r, c, shape=None):
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
@@ -769,7 +768,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         ``([num_planes,] num_rows, num_cols)``.
         Either `end` or `extent` must be specified.
         A negative extent is valid, and will result in a rectangle
-        going along the oposite direction. If extent is negative, the
+        going along the opposite direction. If extent is negative, the
         `start` point is not included.
     shape : tuple, optional
         Image shape used to determine the maximum bounds of the output

@@ -1,6 +1,5 @@
 import warnings
-import functools
-import collections as coll
+from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist, squareform
@@ -12,7 +11,7 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def _get_mask_centroids(mask, n_centroids):
+def _get_mask_centroids(mask, n_centroids, multichannel):
     """Find regularly spaced centroids on a mask.
 
     Parameters
@@ -35,10 +34,30 @@ def _get_mask_centroids(mask, n_centroids):
     coord = np.array(np.nonzero(mask), dtype=float).T
     # Fix random seed to ensure repeatability
     rnd = random.RandomState(123)
-    idx = np.sort(rnd.choice(np.arange(len(coord), dtype=int),
+
+    # select n_centroids randomly distributed points from within the mask
+    idx_full = np.arange(len(coord), dtype=int)
+    idx = np.sort(rnd.choice(idx_full,
                              min(n_centroids, len(coord)),
                              replace=False))
-    centroids, _ = kmeans2(coord, coord[idx])
+
+    # To save time, when n_centroids << len(coords), use only a subset of the
+    # coordinates when calling k-means. Rather than the full set of coords,
+    # we will use a substantially larger subset than n_centroids. Here we
+    # somewhat arbitrarily choose dense_factor=10 to make the samples
+    # 10 times closer together along each axis than the n_centroids samples.
+    dense_factor = 10
+    ndim_spatial = mask.ndim - 1 if multichannel else mask.ndim
+    n_dense = int((dense_factor ** ndim_spatial) * n_centroids)
+    if len(coord) > n_dense:
+        # subset of points to use for the k-means calculation
+        # (much denser than idx, but less than the full set)
+        idx_dense = np.sort(rnd.choice(idx_full,
+                                       n_dense,
+                                       replace=False))
+    else:
+        idx_dense = Ellipsis
+    centroids, _ = kmeans2(coord[idx_dense], coord[idx], iter=5)
 
     # Compute the minimum distance of each centroid to the others
     dist = squareform(pdist(centroids))
@@ -96,6 +115,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     image : 2D, 3D or 4D ndarray
         Input image, which can be 2D or 3D, and grayscale or multichannel
         (see `multichannel` parameter).
+        Input image must either be NaN-free or the NaN's must be masked out
     n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
     compactness : float, optional
@@ -139,10 +159,16 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
     start_label: int, optional
         The labels' index start. Should be 0 or 1.
+
+        .. versionadded:: 0.17
+           ``start_label`` was introduced in 0.17
     mask : 2D ndarray, optional
         If provided, superpixels are computed only where mask is True,
         and seed points are homogeneously distributed over the mask
         using a K-means clustering strategy.
+
+        .. versionadded:: 0.17
+           ``mask`` was introduced in 0.17
 
     Returns
     -------
@@ -249,7 +275,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
-        centroids, steps = _get_mask_centroids(mask, n_segments)
+        centroids, steps = _get_mask_centroids(mask, n_segments, multichannel)
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
@@ -259,7 +285,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif isinstance(spacing, (list, tuple)):
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
 
-    if not isinstance(sigma, coll.Iterable):
+    if not isinstance(sigma, Iterable):
         sigma = np.array([sigma, sigma, sigma], dtype=dtype)
         sigma /= spacing.astype(dtype)
     elif isinstance(sigma, (list, tuple)):

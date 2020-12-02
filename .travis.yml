@@ -22,11 +22,10 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+    - optipng
     # this became necessary to use matplotlib and qt5.12
     # https://github.com/matplotlib/matplotlib/pull/13412
     - qtbase5-dev
-
-stage: Comprehensive tests
 
 stages:
     # Do the style check and a single test job, don't proceed if it fails
@@ -51,24 +50,30 @@ matrix:
   include:
     - os: linux
       python: 3.6
+      stage: Comprehensive tests
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1
     - os: linux
       python: 3.6
+      stage: Comprehensive tests
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
-      env: PYTHONOPTIMIZE=2
+      stage: Comprehensive tests
+      env: PYTHONOPTIMIZE=2 BUILD_DOCS=0 TEST_EXAMPLES=0
     - os: linux
       python: 3.6
+      stage: Comprehensive tests
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.7
+      stage: Comprehensive tests
       dist: xenial # Required for Python 3.7+
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
       services:
         - xvfb
     - os: linux
       python: 3.7
+      stage: Comprehensive tests
       # Testing and installing from sdist will ensure that tests do not
       # depend on pooch to pass
       # pooch is used as an optional dependency to download datasets on the fly
@@ -80,21 +85,32 @@ matrix:
         - xvfb
     - os: linux
       python: 3.7
-      stage: Initial tests
+      stage: Comprehensive tests
       dist: xenial # Required for Python 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:
         - xvfb
     - os: linux
       python: 3.8
+      stage: Initial tests
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       dist: xenial # Required for Python 3.7+
       services:
         - xvfb
     - os: linux
-      python: 3.7
-      env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
-      dist: xenial # Required for Python 3.7
+      python: 3.9
+      stage: Comprehensive tests
+      env: QT=PyQt5 BUILD_DOCS=1
+      dist: xenial # Required for Python 3.7+
+      services:
+        - xvfb
+    # build pre release packages on Python 3.8 since it has been out long
+    # enough for wheels to be built for packages that need to be compiled.
+    - os: linux
+      python: 3.8
+      stage: Comprehensive tests
+      env: QT=PyQt5 PIP_FLAGS="--pre"
+      dist: xenial # Required for Python 3.7+
       services:
         - xvfb
     # For smooth deployment, the osx_image here should match
@@ -104,16 +120,23 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: MB_PYTHON_VERSION=3.6
+      stage: Comprehensive tests
+      env: MB_PYTHON_VERSION=3.6 TEST_EXAMPLES=0
     - os: osx
       osx_image: xcode9.4
       language: objective-c
+      stage: Comprehensive tests
       env: MB_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      # Require pre for scikit-learn 0.22 that has builds for 3.8
-      env: MB_PYTHON_VERSION=3.8
+      stage: Initial tests
+      env: MB_PYTHON_VERSION=3.8 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+    - os: osx
+      osx_image: xcode9.4
+      language: objective-c
+      stage: Comprehensive tests
+      env: MB_PYTHON_VERSION=3.9 TEST_EXAMPLES=0
 
 before_install:
     # Remove this line when the Ubuntu image is updated to Xenial
@@ -144,7 +167,10 @@ install:
     # pip will not create a virtual environment, just for building the package
     # This is problematic because the version of numpy of that virtual environment
     # may be higher than the version we want to test with.
-    - if [[ $INSTALL_FROM_SDIST ]]; then
+    - |
+      set -e
+
+      if [[ $INSTALL_FROM_SDIST ]]; then
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
@@ -157,19 +183,20 @@ install:
     # installing from SDIST will force the use of pooch as a downloading
     # backend to test the pooch functionality
     # Install testing requirements
-    - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
+    - pip install $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
     - export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
     - mkdir -p ${MPL_DIR}
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
     - |
+      set -e
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -r ./requirements/optional.txt $WHEELHOUSE
+        pip install -r ./requirements/optional.txt $WHEELHOUSE
         if [[ "${EXTRA_DEPS}" != "0" ]]; then
           # Extra deps need compilation, and it may not always be possible to
           # compile them easily on all platforms
-          pip install --retries 3 -r ./requirements/extras.txt $WHEELHOUSE
+          pip install -r ./requirements/extras.txt $WHEELHOUSE
         fi
       fi
     - tools/travis/install_qt.sh
@@ -178,6 +205,3 @@ script: tools/travis/script.sh
 
 after_success:
     - codecov
-    # Prepare.release
-    - doc/release/contribs.py HEAD~10
-    - bash tools/travis/deploy_docs.sh
