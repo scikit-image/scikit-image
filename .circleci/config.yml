@@ -35,7 +35,7 @@ jobs:
               source skimage_venv/bin/activate
               cd doc
               make clean
-              make html
+              SPHINXOPTS = "-j 1" make html
       - save_cache:
           key: data-v1-{{ checksum "/home/circleci/scikit-image/skimage/data/_registry.py" }}
           paths:
