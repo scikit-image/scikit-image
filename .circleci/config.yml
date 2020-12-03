@@ -37,7 +37,7 @@ jobs:
               make clean
               SPHINXOPTS="-j 1" make html
       - save_cache:
-          key: data-v1-{{ checksum "/home/circleci/scikit-image/skimage/data/_registry.py" }}
+          key: data-v1-{{ checksum "skimage/data/_registry.py" }}
           paths:
             - /home/circleci/.cache/scikit-image/master
       - store_artifacts:
