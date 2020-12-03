@@ -11,8 +11,8 @@ jobs:
           command: cat requirements/*.txt > requirements/all_requirements
       - restore_cache:
           keys:
-              data-v1-{{ checksum "/home/circleci/scikit-image/skimage/data/_registry.py" }}
-              packages-v1-{{ checksum "/home/circleci/scikit-image/requirements/all_requirements" }}
+              - data-v1-{{ checksum "/home/circleci/scikit-image/skimage/data/_registry.py" }}
+              - packages-v1-{{ checksum "/home/circleci/scikit-image/requirements/all_requirements" }}
       - run:
           name: install dependencies and package
           command: |
