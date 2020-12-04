@@ -1,5 +1,3 @@
-# Adapted from https://stackoverflow.com/a/51126745/214686
-
 import sys
 import importlib
 import importlib.util
