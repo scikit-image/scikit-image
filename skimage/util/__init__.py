@@ -14,8 +14,14 @@ from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
-from ._map_array import map_array
 from ._label import label_points
+
+
+# Temporary workaround
+def __getattr__(name):
+    if name == 'map_array':
+        from ._map_array import map_array
+        return map_array
 
 
 @functools.wraps(np.pad)
