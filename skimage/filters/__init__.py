@@ -83,7 +83,7 @@ __getattr__, __dir__, __all__ = lazy.install_lazy(
                   'prewitt', 'prewitt_h', 'prewitt_v',
                   'roberts', 'roberts_pos_diag', 'roberts_neg_diag',
                   'laplace',
-                  'farid, farid_h, farid_v'],
+                  'farid', 'farid_h', 'farid_v'],
         '_rank_order': ['rank_order'],
         '_gabor': ['gabor_kernel', 'gabor'],
         'thresholding': ['threshold_local', 'threshold_otsu', 'threshold_yen',
