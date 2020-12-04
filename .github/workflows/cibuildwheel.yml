@@ -41,6 +41,7 @@ jobs:
           CIBW_BUILD: "cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
@@ -59,6 +60,7 @@ jobs:
           CIBW_BUILD: "cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
@@ -93,6 +95,7 @@ jobs:
           CIBW_SKIP: "cp35-* cp36-* cp39-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
           CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
@@ -106,6 +109,7 @@ jobs:
           CIBW_BUILD: "cp36-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||
