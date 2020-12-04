@@ -94,7 +94,7 @@ __all__ = [
 ]
 
 from .util.lazy import install_lazy
-__getattr__, __dir__ = install_lazy(__name__, __all__)
+__getattr__, __dir__, _ = install_lazy(__name__, __all__)
 
 import sys
 

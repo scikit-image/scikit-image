@@ -5,19 +5,47 @@ import importlib
 import importlib.util
 
 
-def install_lazy(module_name, submodules):
+def install_lazy(module_name, submodules=None, submod_funcs=None):
+    """Install lazily loaded submodules and functions.
+
+    Parameters
+    ----------
+    module_name : str
+        Typically use __name__.
+    submodules : list
+        List of submodules to install.
+    submod_funcs : dict
+        Dictionary of submodule -> list of functions.  These functions are
+        imported as they are used.
+    """
+    if submod_funcs is None:
+        submod_funcs = {}
+
+    if submodules is None:
+        submodules = []
+
+    all_funcs = []
+    for mod, funcs in submod_funcs.items():
+        all_funcs.extend(funcs)
+
     def __getattr__(name):
         if name in submodules:
             lazy_mod = require(f'skimage.{name}')
             return lazy_mod
+        elif name in all_funcs:
+            for mod, funcs in submod_funcs.items():
+                if name in funcs:
+                    submod = importlib.import_module(
+                        f'{module_name}.{mod}'
+                    )
+                    return getattr(submod, name)
         else:
-            raise AttributeError(f'No skimage attribute {name}')
-
+            raise AttributeError(f'No {module_name} attribute {name}')
 
     def __dir__():
-        return submodules
+        return submodules + all_funcs
 
-    return __getattr__, __dir__
+    return __getattr__, __dir__, submodules + all_funcs
 
 
 def require(fullname):
