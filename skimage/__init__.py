@@ -68,10 +68,35 @@ dtype_limits
 
 """
 
-import sys
-
-
 __version__ = '0.19.0.dev0'
+
+__all__ = [
+    'color',
+    'data',
+    'draw',
+    'exposure',
+    'external',
+    'feature',
+    'filters',
+    'future',
+    'graph',
+    'io',
+    'measure',
+    'metrics',
+    'morphology',
+    'registration',
+    'restoration',
+    'segmentation',
+    '_shared',
+    'transform',
+    'util',
+    'viewer'
+]
+
+from .util.lazy import install_lazy
+__getattr__, __dir__ = install_lazy(__name__, __all__)
+
+import sys
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
