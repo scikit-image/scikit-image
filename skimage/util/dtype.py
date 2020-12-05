@@ -18,11 +18,11 @@ __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
 _integer_types = (np.byte, np.ubyte,          # 8 bits
                   np.short, np.ushort,        # 16 bits
                   np.intc, np.uintc,          # 16 or 32 or 64 bits
-                  np.int_, np.uint,           # 32 or 64 bits
+                  int, np.uint,           # 32 or 64 bits
                   np.longlong, np.ulonglong)  # 64 bits
 _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
                    for t in _integer_types}
-dtype_range = {np.bool_: (False, True),
+dtype_range = {bool: (False, True),
                np.bool8: (False, True),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
@@ -549,4 +549,4 @@ def img_as_bool(image, force_copy=False):
     half is False. All negative values (if present) are False.
 
     """
-    return _convert(image, np.bool_, force_copy)
+    return _convert(image, bool, force_copy)

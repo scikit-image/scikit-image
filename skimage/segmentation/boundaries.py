@@ -148,7 +148,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     ...                        [False, False,  True,  True,  True],
     ...                        [False, False,  True,  True,  True],
     ...                        [False, False,  True,  True,  True]],
-    ...                       dtype=np.bool_)
+    ...                       dtype=bool)
     >>> find_boundaries(bool_image)
     array([[False, False, False, False, False],
            [False, False,  True,  True,  True],

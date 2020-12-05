@@ -27,14 +27,14 @@ def test_find_boundaries():
 
 
 def test_find_boundaries_bool():
-    image = np.zeros((5, 5), dtype=np.bool_)
+    image = np.zeros((5, 5), dtype=bool)
     image[2:5, 2:5] = True
 
     ref = np.array([[False, False, False, False, False],
                     [False, False,  True,  True,  True],
                     [False,  True,  True,  True,  True],
                     [False,  True,  True, False, False],
-                    [False,  True,  True, False, False]], dtype=np.bool_)
+                    [False,  True,  True, False, False]], dtype=bool)
     result = find_boundaries(image)
     assert_array_equal(result, ref)
 
@@ -76,7 +76,7 @@ def test_mark_boundaries():
 
 
 def test_mark_boundaries_bool():
-    image = np.zeros((10, 10), dtype=np.bool_)
+    image = np.zeros((10, 10), dtype=bool)
     label_image = np.zeros((10, 10), dtype=np.uint8)
     label_image[2:7, 2:7] = 1
 

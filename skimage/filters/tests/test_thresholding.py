@@ -512,12 +512,12 @@ def test_triangle_float_images():
     int_bins = text.max() - text.min() + 1
     # Set nbins to match the uint case and threshold as float.
     assert(round(threshold_triangle(
-        text.astype(np.float_), nbins=int_bins)) == 104)
+        text.astype(float), nbins=int_bins)) == 104)
     # Check that rescaling image to floats in unit interval is equivalent.
     assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
     # Repeat for inverted image.
     assert(round(threshold_triangle(
-        np.invert(text).astype(np.float_), nbins=int_bins)) == 151)
+        np.invert(text).astype(float), nbins=int_bins)) == 151)
     assert (round(threshold_triangle(
         np.invert(text) / 255., nbins=int_bins) * 255) == 151)
 

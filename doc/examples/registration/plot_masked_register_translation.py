@@ -88,8 +88,8 @@ rr1, cc1 = draw.ellipse(259, 248, r_radius=125, c_radius=100,
 rr2, cc2 = draw.ellipse(300, 200, r_radius=110, c_radius=180,
                         shape=image.shape)
 
-mask1 = np.zeros_like(image, dtype=np.bool_)
-mask2 = np.zeros_like(image, dtype=np.bool_)
+mask1 = np.zeros_like(image, dtype=bool)
+mask2 = np.zeros_like(image, dtype=bool)
 mask1[rr1, cc1] = True
 mask2[rr2, cc2] = True
 

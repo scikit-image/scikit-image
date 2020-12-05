@@ -270,7 +270,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.ascontiguousarray(mask, dtype=np.bool_).view('uint8')
+        mask = np.ascontiguousarray(mask, dtype=bool).view('uint8')
         if mask.ndim == 2:
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:

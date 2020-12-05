@@ -8,7 +8,7 @@ from skimage.util import montage
 
 def test_montage_simple_gray():
     n_images, n_rows, n_cols = 3, 2, 3
-    arr_in = np.arange(n_images * n_rows * n_cols, dtype=np.float_)
+    arr_in = np.arange(n_images * n_rows * n_cols, dtype=float)
     arr_in = arr_in.reshape(n_images, n_rows, n_cols)
 
     arr_out = montage(arr_in)
@@ -25,7 +25,7 @@ def test_montage_simple_rgb():
     n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
     arr_in = np.arange(
             n_images * n_rows * n_cols * n_channels,
-            dtype=np.float_,
+            dtype=float,
             )
     arr_in = arr_in.reshape(n_images, n_rows, n_cols, n_channels)
 
@@ -53,7 +53,7 @@ def test_montage_simple_rgb():
 
 def test_montage_fill_gray():
     n_images, n_rows, n_cols = 3, 2, 3
-    arr_in = np.arange(n_images * n_rows * n_cols, dtype=np.float_)
+    arr_in = np.arange(n_images * n_rows * n_cols, dtype=float)
     arr_in = arr_in.reshape(n_images, n_rows, n_cols)
 
     arr_out = montage(arr_in, fill=0)
@@ -68,7 +68,7 @@ def test_montage_fill_gray():
 
 def test_montage_grid_default_gray():
     n_images, n_rows, n_cols = 15, 11, 7
-    arr_in = np.arange(n_images * n_rows * n_cols, dtype=np.float_)
+    arr_in = np.arange(n_images * n_rows * n_cols, dtype=float)
     arr_in = arr_in.reshape(n_images, n_rows, n_cols)
 
     n_tiles = int(np.ceil(np.sqrt(n_images)))

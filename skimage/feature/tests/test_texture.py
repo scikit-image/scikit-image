@@ -53,7 +53,7 @@ class TestGLCM():
 
     def test_error_raise_float(self):
         for dtype in [
-                np.float_, np.double, np.float16, np.float32, np.float64
+                float, np.double, np.float16, np.float32, np.float64
                 ]:
             with testing.raises(ValueError):
                 greycomatrix(self.image.astype(dtype), [1], [np.pi], 4)

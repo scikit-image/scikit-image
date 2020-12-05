@@ -101,7 +101,7 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     """
     check_nD(image, 2)
     input_dtype = image.dtype
-    if (input_dtype in (bool, np.bool_) or out_dtype in (bool, np.bool_)):
+    if (input_dtype in (bool, bool) or out_dtype in (bool, bool)):
         raise ValueError('dtype cannot be bool.')
     if input_dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '

@@ -272,7 +272,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
                 descriptors_list.append(descriptors)
                 mask_list.append(mask)
 
-        self.descriptors = np.vstack(descriptors_list).view(np.bool_)
+        self.descriptors = np.vstack(descriptors_list).view(bool)
         self.mask_ = np.hstack(mask_list)
 
     def detect_and_extract(self, image):
@@ -307,7 +307,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             if len(keypoints) == 0:
                 keypoints_list.append(keypoints)
                 responses_list.append(responses)
-                descriptors_list.append(np.zeros((0, 256), dtype=np.bool_))
+                descriptors_list.append(np.zeros((0, 256), dtype=bool))
                 continue
 
             descriptors, mask = self._extract_octave(octave_image, keypoints,
@@ -330,7 +330,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
         responses = np.hstack(responses_list)
         scales = np.hstack(scales_list)
         orientations = np.hstack(orientations_list)
-        descriptors = np.vstack(descriptors_list).view(np.bool_)
+        descriptors = np.vstack(descriptors_list).view(bool)
 
         if keypoints.shape[0] < self.n_keypoints:
             self.keypoints = keypoints

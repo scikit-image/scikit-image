@@ -75,7 +75,7 @@ def test_morphsnakes_simple_shape_chan_vese():
 
 
 def test_morphsnakes_simple_shape_geodesic_active_contour():
-    img = np.float_(disk_level_set((11, 11), center=(5, 5), radius=3.5))
+    img = float(disk_level_set((11, 11), center=(5, 5), radius=3.5))
     gimg = inverse_gaussian_gradient(img, alpha=10.0, sigma=1.0)
     ls = disk_level_set(img.shape, center=(5, 5), radius=6)
 

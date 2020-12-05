@@ -99,11 +99,11 @@ def check_iradon_center(size, theta, circle):
     # Create a test sinogram corresponding to a single projection
     # with a single non-zero pixel at the rotation center
     if circle:
-        sinogram = np.zeros((size, 1), dtype=np.float_)
+        sinogram = np.zeros((size, 1), dtype=float)
         sinogram[size // 2, 0] = 1.
     else:
         diagonal = int(np.ceil(np.sqrt(2) * size))
-        sinogram = np.zeros((diagonal, 1), dtype=np.float_)
+        sinogram = np.zeros((diagonal, 1), dtype=float)
         sinogram[sinogram.shape[0] // 2, 0] = 1.
     maxpoint = np.unravel_index(np.argmax(sinogram), sinogram.shape)
     print('shape of generated sinogram', sinogram.shape)
@@ -218,7 +218,7 @@ def test_iradon_angles():
 def check_radon_iradon_minimal(shape, slices):
     debug = False
     theta = np.arange(180)
-    image = np.zeros(shape, dtype=np.float_)
+    image = np.zeros(shape, dtype=float)
     image[slices] = 1.
     sinogram = radon(image, theta, circle=False)
     reconstructed = iradon(sinogram, theta, circle=False)

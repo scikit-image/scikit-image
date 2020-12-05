@@ -124,7 +124,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
         raise TypeError('Masked arrays are not supported')
 
     image = skimage.img_as_float(image)
-    mask = mask.astype(np.bool_)
+    mask = mask.astype(bool)
 
     # Split inpainting mask into independent regions
     kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)

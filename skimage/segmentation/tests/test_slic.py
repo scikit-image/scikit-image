@@ -116,10 +116,10 @@ def test_gray_3d():
 def test_list_sigma():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1]], np.float_)
+                    [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1],
-                             [0, 0, 0, 1, 1, 1]], np.int_)
+                             [0, 0, 0, 1, 1, 1]], int)
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
                      multichannel=False, start_label=0)
     assert_equal(seg_sigma, result_sigma)
@@ -128,11 +128,11 @@ def test_list_sigma():
 def test_spacing():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], np.float_)
+                    [1, 1, 0, 0, 0]], float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1],
-                                  [0, 0, 1, 1, 1]], np.int_)
+                                  [0, 0, 1, 1, 1]], int)
     result_spaced = np.array([[0, 0, 0, 0, 0],
-                              [1, 1, 1, 1, 1]], np.int_)
+                              [1, 1, 1, 1, 1]], int)
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0, start_label=0)
@@ -144,7 +144,7 @@ def test_spacing():
 
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], np.float_) + 1
+                    [1, 1, 0, 0, 0]], float) + 1
     with testing.raises(ValueError):
         slic(img, multichannel=True, convert2lab=True, start_label=0)
 
@@ -152,7 +152,7 @@ def test_invalid_lab_conversion():
 def test_enforce_connectivity():
     img = np.array([[0, 0, 0, 1, 1, 1],
                     [1, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0]], np.float_)
+                    [0, 0, 0, 1, 1, 0]], float)
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
@@ -171,11 +171,11 @@ def test_enforce_connectivity():
 
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
-                                 [0, 0, 0, 1, 1, 1]], np.float_)
+                                 [0, 0, 0, 1, 1, 1]], float)
 
     result_disconnected = np.array([[0, 0, 0, 1, 1, 1],
                                     [1, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 1, 1, 0]], np.float_)
+                                    [0, 0, 0, 1, 1, 0]], float)
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
@@ -306,10 +306,10 @@ def test_list_sigma_mask():
     msk = np.zeros((2, 6))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1]], np.float_)
+                    [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[0, 1, 1, 2, 2, 0],
-                             [0, 1, 1, 2, 2, 0]], np.int_)
+                             [0, 1, 1, 2, 2, 0]], int)
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
                      multichannel=False, mask=msk)
     assert_equal(seg_sigma, result_sigma)
@@ -320,11 +320,11 @@ def test_spacing_mask():
     msk = np.zeros((2, 5))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], np.float_)
+                    [1, 1, 0, 0, 0]], float)
     result_non_spaced = np.array([[0, 1, 1, 2, 0],
-                                  [0, 1, 2, 2, 0]], np.int_)
+                                  [0, 1, 2, 2, 0]], int)
     result_spaced = np.array([[0, 1, 1, 1, 0],
-                              [0, 2, 2, 2, 0]], np.int_)
+                              [0, 2, 2, 2, 0]], int)
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0, mask=msk)
@@ -339,7 +339,7 @@ def test_enforce_connectivity_mask():
     msk[:, 1:-1] = 1
     img = np.array([[0, 0, 0, 1, 1, 1],
                     [1, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0]], np.float_)
+                    [0, 0, 0, 1, 1, 0]], float)
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
@@ -357,11 +357,11 @@ def test_enforce_connectivity_mask():
 
     result_connected = np.array([[0, 1, 1, 2, 2, 0],
                                  [0, 1, 1, 2, 2, 0],
-                                 [0, 1, 1, 2, 2, 0]], np.float_)
+                                 [0, 1, 1, 2, 2, 0]], float)
 
     result_disconnected = np.array([[0, 1, 1, 2, 2, 0],
                                     [0, 1, 1, 2, 2, 0],
-                                    [0, 1, 1, 2, 2, 0]], np.float_)
+                                    [0, 1, 1, 2, 2, 0]], float)
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)

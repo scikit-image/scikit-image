@@ -9,8 +9,8 @@ from skimage.metrics import hausdorff_distance
 
 
 def test_hausdorff_empty():
-    empty = np.zeros((0, 2), dtype=np.bool_)
-    non_empty = np.zeros((3, 2), dtype=np.bool_)
+    empty = np.zeros((0, 2), dtype=bool)
+    non_empty = np.zeros((3, 2), dtype=bool)
     assert hausdorff_distance(empty, non_empty) == 0.
     assert hausdorff_distance(non_empty, empty) == 0.
     assert hausdorff_distance(empty, empty) == 0.
@@ -20,8 +20,8 @@ def test_hausdorff_simple():
     points_a = (3, 0)
     points_b = (6, 0)
     shape = (7, 1)
-    coords_a = np.zeros(shape, dtype=np.bool_)
-    coords_b = np.zeros(shape, dtype=np.bool_)
+    coords_a = np.zeros(shape, dtype=bool)
+    coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
     distance = np.sqrt(sum((ca - cb) ** 2
@@ -33,8 +33,8 @@ def test_hausdorff_simple():
              itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2))
 def test_hausdorff_region_single(points_a, points_b):
     shape = (5, 5)
-    coords_a = np.zeros(shape, dtype=np.bool_)
-    coords_b = np.zeros(shape, dtype=np.bool_)
+    coords_a = np.zeros(shape, dtype=bool)
+    coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
 
@@ -48,8 +48,8 @@ def test_hausdorff_region_single(points_a, points_b):
                                [(6, 4), (2, 6), (2, 4), (4, 0)]))
 def test_hausdorff_region_different_points(points_a, points_b):
     shape = (7, 7)
-    coords_a = np.zeros(shape, dtype=np.bool_)
-    coords_b = np.zeros(shape, dtype=np.bool_)
+    coords_a = np.zeros(shape, dtype=bool)
+    coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
 
@@ -84,8 +84,8 @@ def test_gallery():
     set_by = [(y_kite + y_r * y) for y in plt_y]
 
     # Set up the data to compute the hausdorff distance
-    coords_a = np.zeros(shape, dtype=np.bool_)
-    coords_b = np.zeros(shape, dtype=np.bool_)
+    coords_a = np.zeros(shape, dtype=bool)
+    coords_b = np.zeros(shape, dtype=bool)
 
     for x, y in zip(set_ax, set_ay):
         coords_a[(x, y)] = True
@@ -106,8 +106,8 @@ def test_gallery():
 def test_3d_hausdorff_region(points_a, points_b):
     hausdorff_distances_list = []
     shape = (3, 3, 3)
-    coords_a = np.zeros(shape, dtype=np.bool_)
-    coords_b = np.zeros(shape, dtype=np.bool_)
+    coords_a = np.zeros(shape, dtype=bool)
+    coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
 
