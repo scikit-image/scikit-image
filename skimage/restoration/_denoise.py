@@ -459,7 +459,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     >>> x, y, z = np.ogrid[0:20, 0:20, 0:20]
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
-    >>> mask = mask.astype(np.float)
+    >>> mask = mask.astype(np.float_)
     >>> mask += 0.2*np.random.randn(*mask.shape)
     >>> res = denoise_tv_chambolle(mask, weight=100)
 

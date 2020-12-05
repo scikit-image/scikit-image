@@ -103,7 +103,7 @@ def h_maxima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(np.int_)
 
     We can calculate all maxima with a height of at least 40:
 
@@ -231,7 +231,7 @@ def h_minima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 160; f[2:4,7:9] = 140; f[7:9,2:4] = 120; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(np.int_)
 
     We can calculate all minima with a depth of at least 40:
 

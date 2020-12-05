@@ -46,11 +46,11 @@ class TestColorconv(TestCase):
     img_grayscale = data.camera()
     img_rgba = np.array([[[0, 0.5, 1, 0],
                           [0, 0.5, 1, 1],
-                          [0, 0.5, 1, 0.5]]]).astype(np.float)
+                          [0, 0.5, 1, 0.5]]]).astype(np.float_)
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
-                        [1, 0, 1, 0, 1, 0, 1, 0]]).astype(np.float)
+                        [1, 0, 1, 0, 1, 0, 1, 0]]).astype(np.float_)
     colbars_array = np.swapaxes(colbars.reshape(3, 4, 2), 0, 2)
     colbars_point75 = colbars * 0.75
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
@@ -81,7 +81,7 @@ class TestColorconv(TestCase):
         rgb = rgba2rgb(rgba)
         expected = np.array([[[1, 1, 1],
                               [0, 0.5, 1],
-                              [0.5, 0.75, 1]]]).astype(np.float)
+                              [0.5, 0.75, 1]]]).astype(np.float_)
         self.assertEqual(rgb.shape, expected.shape)
         assert_almost_equal(rgb, expected)
 
@@ -271,7 +271,7 @@ class TestColorconv(TestCase):
                           self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2gray(self):
-        x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)
+        x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float_)
         g = rgb2gray(x)
         assert_array_almost_equal(g, 1)
 

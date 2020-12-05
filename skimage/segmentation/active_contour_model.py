@@ -134,7 +134,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                img.T, kx=2, ky=2, s=0)
 
     snake_xy = snake[:, ::-1]
-    x, y = snake_xy[:, 0].astype(np.float), snake_xy[:, 1].astype(np.float)
+    x, y = snake_xy[:, 0].astype(np.float_), snake_xy[:, 1].astype(np.float_)
     n = len(x)
     xsave = np.empty((convergence_order, n))
     ysave = np.empty((convergence_order, n))

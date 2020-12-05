@@ -1163,7 +1163,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(np.float_).eps
 
     # compute y_r and L
     xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
@@ -1234,7 +1234,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(np.float_).eps
 
     # compute y
     y = L.copy()

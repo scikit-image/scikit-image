@@ -4,7 +4,7 @@ from ..._shared.testing import assert_equal, assert_almost_equal
 from ..._shared._warnings import expected_warnings
 from ..profile import profile_line
 
-image = np.arange(100).reshape((10, 10)).astype(np.float)
+image = np.arange(100).reshape((10, 10)).astype(np.float_)
 
 
 def test_horizontal_rightward():
@@ -78,7 +78,7 @@ def test_pythagorean_triangle_right_downward_interpolated():
     assert_almost_equal(prof, expected_prof)
 
 
-pyth_image = np.zeros((6, 7), np.float)
+pyth_image = np.zeros((6, 7), np.float_)
 line = ((1, 2, 2, 3, 3, 4), (1, 2, 3, 3, 4, 5))
 below = ((2, 2, 3, 4, 4, 5), (0, 1, 2, 3, 4, 4))
 above = ((0, 1, 1, 2, 3, 3), (2, 2, 3, 4, 5, 6))
