@@ -23,7 +23,10 @@ def test_montage_simple_gray():
 
 def test_montage_simple_rgb():
     n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
-    arr_in = np.arange(n_images * n_rows * n_cols * n_channels, dtype=np.float_)
+    arr_in = np.arange(
+            n_images * n_rows * n_cols * n_channels,
+            dtype=np.float_,
+            )
     arr_in = arr_in.reshape(n_images, n_rows, n_cols, n_channels)
 
     arr_out = montage(arr_in, multichannel=True)
@@ -50,7 +53,7 @@ def test_montage_simple_rgb():
 
 def test_montage_fill_gray():
     n_images, n_rows, n_cols = 3, 2, 3
-    arr_in = np.arange(n_images*n_rows*n_cols, dtype=np.float_)
+    arr_in = np.arange(n_images * n_rows * n_cols, dtype=np.float_)
     arr_in = arr_in.reshape(n_images, n_rows, n_cols)
 
     arr_out = montage(arr_in, fill=0)
