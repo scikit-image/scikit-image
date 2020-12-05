@@ -67,7 +67,7 @@ def test_dtype():
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
     with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.bool))
+        regionprops(np.zeros((10, 10), dtype=np.bool_))
 
 
 def test_ndim():

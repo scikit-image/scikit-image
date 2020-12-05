@@ -107,7 +107,7 @@ def test_hough_line_peaks():
 
 def test_hough_line_peaks_ordered():
     # Regression test per PR #1421
-    testim = np.zeros((256, 64), dtype=np.bool)
+    testim = np.zeros((256, 64), dtype=np.bool_)
 
     testim[50:100, 20] = True
     testim[85:200, 25] = True

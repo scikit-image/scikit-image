@@ -48,7 +48,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool_)
     >>> clear_border(labels, mask=mask)
     array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 1, 0, 0, 1, 0],

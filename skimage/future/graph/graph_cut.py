@@ -208,7 +208,7 @@ def get_min_ncut(ev, d, w, num_cuts):
     # If all values in `ev` are equal, it implies that the graph can't be
     # further sub-divided. In this case the bi-partition is the the graph
     # itself and an empty set.
-    min_mask = np.zeros_like(ev, dtype=np.bool)
+    min_mask = np.zeros_like(ev, dtype=np.bool_)
     if np.allclose(mn, mx):
         return min_mask, mcut
 

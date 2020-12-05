@@ -14,7 +14,7 @@ def test_empty_input():
     assert output.size == 0
 
     # Boolean output type
-    assert flood(np.empty(0), ()).dtype == np.bool
+    assert flood(np.empty(0), ()).dtype == np.bool_
 
     # Maintain shape, even with zero size present
     assert flood(np.empty((20, 0, 4)), ()).shape == (20, 0, 4)

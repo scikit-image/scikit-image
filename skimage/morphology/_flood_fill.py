@@ -226,7 +226,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
 
     # Shortcut for rank zero
     if 0 in image.shape:
-        return np.zeros(image.shape, dtype=np.bool)
+        return np.zeros(image.shape, dtype=np.bool_)
 
     # Convenience for 1d input
     try:
@@ -287,4 +287,4 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
             raise
 
     # Output what the user requested; view does not create a new copy.
-    return flags[(slice(1, -1),) * image.ndim].view(np.bool)
+    return flags[(slice(1, -1),) * image.ndim].view(np.bool_)

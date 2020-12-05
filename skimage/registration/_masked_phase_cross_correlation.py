@@ -151,9 +151,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         raise ValueError("Correlation mode '{}' is not valid.".format(mode))
 
     fixed_image = np.array(arr1, dtype=np.float)
-    fixed_mask = np.array(m1, dtype=np.bool)
+    fixed_mask = np.array(m1, dtype=np.bool_)
     moving_image = np.array(arr2, dtype=np.float)
-    moving_mask = np.array(m2, dtype=np.bool)
+    moving_mask = np.array(m2, dtype=np.bool_)
     eps = np.finfo(np.float).eps
 
     # Array dimensions along non-transformation axes should be equal.

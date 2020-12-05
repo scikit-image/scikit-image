@@ -170,7 +170,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         selem = ndi.generate_binary_structure(ndim, connectivity)
     else:
         # Validate custom structured element
-        selem = np.asarray(selem, dtype=np.bool)
+        selem = np.asarray(selem, dtype=np.bool_)
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(

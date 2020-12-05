@@ -383,7 +383,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
             # Make sure that output is a tuple of 1 empty array per dimension
             return np.nonzero(image)
         else:
-            return np.zeros(image.shape, dtype=np.bool)
+            return np.zeros(image.shape, dtype=np.bool_)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
@@ -429,7 +429,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     if indices:
         return np.nonzero(flags)
     else:
-        return flags.view(np.bool)
+        return flags.view(np.bool_)
 
 
 def local_minima(image, selem=None, connectivity=None, indices=False,

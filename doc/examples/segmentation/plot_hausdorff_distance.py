@@ -42,8 +42,8 @@ set_by = [(y_kite + y_r * y) for y in plt_y]
 plt.plot(set_bx, set_by, 'og')
 
 # Set up the data to compute the hausdorff distance
-coords_a = np.zeros(shape, dtype=np.bool)
-coords_b = np.zeros(shape, dtype=np.bool)
+coords_a = np.zeros(shape, dtype=np.bool_)
+coords_b = np.zeros(shape, dtype=np.bool_)
 for x, y in zip(set_ax, set_ay):
     coords_a[(x, y)] = True
 

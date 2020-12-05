@@ -9,8 +9,8 @@ except ImportError:
 
 class SetMetricsSuite(object):
     shape = (6, 6)
-    coords_a = np.zeros(shape, dtype=np.bool)
-    coords_b = np.zeros(shape, dtype=np.bool)
+    coords_a = np.zeros(shape, dtype=np.bool_)
+    coords_b = np.zeros(shape, dtype=np.bool_)
 
     def setup(self):
         try:

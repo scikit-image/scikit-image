@@ -28,8 +28,8 @@ def hausdorff_distance(image0, image1):
     >>> points_a = (3, 0)
     >>> points_b = (6, 0)
     >>> shape = (7, 1)
-    >>> image_a = np.zeros(shape, dtype=np.bool)
-    >>> image_b = np.zeros(shape, dtype=np.bool)
+    >>> image_a = np.zeros(shape, dtype=np.bool_)
+    >>> image_b = np.zeros(shape, dtype=np.bool_)
     >>> image_a[points_a] = True
     >>> image_b[points_b] = True
     >>> hausdorff_distance(image_a, image_b)
