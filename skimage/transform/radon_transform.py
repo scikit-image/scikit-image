@@ -12,13 +12,16 @@ from functools import partial
 if fftmodule is np.fft:
     # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
     # (fftpack preserves single precision while numpy.fft does not)
-    from scipy.fftpack import fft, ifft
+    from scipy.fftpack import fft, ifft, fftshift, fftfreq
 else:
     fft = fftmodule.fft
     ifft = fftmodule.ifft
+    fftshift = fftmodule.fftshift
+    fftfreq = fftmodule.fftfreq
 
 
-__all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
+__all__ = ['radon', 'order_angles_golden_ratio',
+           'iradon', 'iradon_sart', 'iradon_filter']
 
 
 def radon(image, theta=None, circle=True, *, preserve_range=False):
@@ -125,20 +128,21 @@ def _sinogram_circle_to_square(sinogram):
     return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
-def _get_fourier_filter(size, filter_name):
-    """Construct the Fourier filter.
+def iradon_filter(filter_name, size):
+    """Construct the Fourier filter for the inverse radon transform.
 
     This computation lessens artifacts and removes a small bias as
     explained in [1], Chap 3. Equation 61.
 
     Parameters
     ----------
-    size: int
-        filter size. Must be even.
     filter_name: str
         Filter used in frequency domain filtering. Filters available:
         ramp, shepp-logan, cosine, hamming, hann. Assign None to use
         no filter.
+
+    size: int
+        filter size. Must be even.
 
     Returns
     -------
@@ -149,36 +153,40 @@ def _get_fourier_filter(size, filter_name):
     ----------
     .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
            Imaging", IEEE Press 1988.
-
     """
-    n = np.concatenate((np.arange(1, size / 2 + 1, 2, dtype=np.int),
-                        np.arange(size / 2 - 1, 0, -2, dtype=np.int)))
+    # Construct the Fourier filter
+
+    # The ramp filter is implemented based on eq. 61 on  p.72 of Kak and Slaney
+    # https://engineering.purdue.edu/~malcolm/pct/CTI_Ch03.pdf
+    n1 = np.arange(0, size / 2 + 1, dtype=np.int)
+    n2 = np.arange(size / 2 - 1, 0, -1, dtype=np.int)
+    n = np.concatenate((n1, n2))
     f = np.zeros(size)
     f[0] = 0.25
-    f[1::2] = -1 / (np.pi * n) ** 2
+    f[1::2] = -1 / (np.pi * n[1::2])**2
 
-    # Computing the ramp filter from the fourier transform of its
-    # frequency domain representation lessens artifacts and removes a
-    # small bias as explained in [1], Chap 3. Equation 61
-    fourier_filter = 2 * np.real(fft(f))         # ramp filter
+    kernel = 2 * np.real(fft(f))         # ramp filter
     if filter_name == "ramp":
         pass
     elif filter_name == "shepp-logan":
         # Start from first element to avoid divide by zero
-        omega = np.pi * fftmodule.fftfreq(size)[1:]
-        fourier_filter[1:] *= np.sin(omega) / omega
+        kernel *= np.sinc(fftfreq(size))
     elif filter_name == "cosine":
-        freq = np.linspace(0, np.pi, size, endpoint=False)
-        cosine_filter = fftmodule.fftshift(np.sin(freq))
-        fourier_filter *= cosine_filter
+        freq = (0.5 * np.arange(0, size) / size)
+        cosine_filter = fftshift(np.sin(2 * np.pi * np.abs(freq)))
+        kernel *= cosine_filter
     elif filter_name == "hamming":
-        fourier_filter *= fftmodule.fftshift(np.hamming(size))
+        hamming_filter = fftshift(np.hamming(size))
+        kernel *= hamming_filter
     elif filter_name == "hann":
-        fourier_filter *= fftmodule.fftshift(np.hanning(size))
+        hanning_filter = fftshift(np.hanning(size))
+        kernel *= hanning_filter
     elif filter_name is None:
-        fourier_filter[:] = 1
+        kernel[:] = 1
+    else:
+        raise ValueError("Unknown filter: %s" % filter_name)
 
-    return fourier_filter[:, np.newaxis]
+    return kernel[:, np.newaxis]
 
 
 @deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
@@ -287,7 +295,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Apply filter in Fourier domain
-    fourier_filter = _get_fourier_filter(projection_size_padded, filter_name)
+    fourier_filter = iradon_filter(filter_name, projection_size_padded)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
