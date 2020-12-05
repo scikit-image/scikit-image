@@ -304,7 +304,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             coordinates = np.empty((0, 2), dtype=int)
 
         if len(coordinates) > num_peaks:
-            out = np.zeros_like(image, dtype=np.bool)
+            out = np.zeros_like(image, dtype=bool)
             out[tuple(coordinates.T)] = True
             coordinates = _get_high_intensity_peaks(image, out,
                                                     num_peaks,
@@ -314,7 +314,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     if indices:
         return coordinates
     else:
-        out = np.zeros_like(image, dtype=np.bool)
+        out = np.zeros_like(image, dtype=bool)
         out[tuple(coordinates.T)] = True
         return out
 

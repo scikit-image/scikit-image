@@ -130,7 +130,7 @@ class RollingBall(object):
     peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
-        image = data.coins().astype(np.float_)
+        image = data.coins().astype(float)
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.NaN
         restoration.rolling_ball(image, radius=radius, nansafe=True)

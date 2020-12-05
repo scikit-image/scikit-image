@@ -189,7 +189,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
 
     return (np.array(rr, dtype=np.intp),
             np.array(cc, dtype=np.intp),
-            1. - np.array(val, dtype=np.float))
+            1. - np.array(val, dtype=float))
 
 
 def _polygon(r, c, shape):
@@ -400,10 +400,10 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
         return _coords_inside_image(np.array(rr, dtype=np.intp) + r_o,
                                     np.array(cc, dtype=np.intp) + c_o,
                                     shape,
-                                    val=np.array(val, dtype=np.float))
+                                    val=np.array(val, dtype=float))
     return (np.array(rr, dtype=np.intp) + r_o,
             np.array(cc, dtype=np.intp) + c_o,
-            np.array(val, dtype=np.float))
+            np.array(val, dtype=float))
 
 
 def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
