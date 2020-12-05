@@ -39,6 +39,18 @@
 #define NOMASK 0
 #define MASK 1
 
+
+cdef extern from "unwrap_2d_ljmu.h":
+    void unwrap2D(
+            double *wrapped_image,
+            double *UnwrappedImage,
+            unsigned char *input_mask,
+            int image_width, int image_height,
+            int wrap_around_x, int wrap_around_y,
+            char use_seed, unsigned int seed
+            );
+
+
 typedef struct {
   double mod;
   int x_connectivity;
