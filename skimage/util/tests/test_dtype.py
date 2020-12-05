@@ -110,7 +110,7 @@ def test_copy():
 
 
 def test_bool():
-    img_ = np.zeros((10, 10), np.bool_)
+    img_ = np.zeros((10, 10), bool)
     img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
     img8[1, 1] = True
@@ -149,7 +149,7 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+float_dtype_list = [float, float, np.double, np.single, np.float32,
                     np.float64, 'float32', 'float64']
 
 

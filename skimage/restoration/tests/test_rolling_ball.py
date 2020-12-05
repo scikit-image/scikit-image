@@ -19,7 +19,7 @@ def test_ellipsoid_const():
 
 
 def test_nan_const():
-    img = 123 * np.ones((100, 100), dtype=np.float_)
+    img = 123 * np.ones((100, 100), dtype=float)
     img[20, 20] = np.nan
     img[50, 53] = np.nan
 

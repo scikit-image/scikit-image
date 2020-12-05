@@ -11,7 +11,7 @@ def test_correlate_sparse_valid_mode():
                       [0, 1, 4, 3, 4],
                       [1, 2, 5, 4, 1],
                       [2, 4, 5, 2, 1],
-                      [4, 5, 1, 0, 0]], dtype=np.float)
+                      [4, 5, 1, 0, 0]], dtype=float)
 
     kernel = np.array([0, 1, 2, 4, 8, 16, 32, 64, 128]).reshape((3, 3))
 
@@ -28,7 +28,7 @@ def test_correlate_sparse(mode):
                       [0, 1, 4, 3, 4],
                       [1, 2, 5, 4, 1],
                       [2, 4, 5, 2, 1],
-                      [4, 5, 1, 0, 0]], dtype=np.float)
+                      [4, 5, 1, 0, 0]], dtype=float)
 
     kernel = np.array([0, 1, 2, 4, 8, 16, 32, 64, 128]).reshape((3, 3))
 
@@ -43,7 +43,7 @@ def test_correlate_sparse_invalid_kernel(mode):
                       [0, 1, 4, 3, 4],
                       [1, 2, 5, 4, 1],
                       [2, 4, 5, 2, 1],
-                      [4, 5, 1, 0, 0]], dtype=np.float)
+                      [4, 5, 1, 0, 0]], dtype=float)
     # invalid kernel size
     invalid_kernel = np.array([0, 1, 2, 4]).reshape((2, 2))
     with testing.raises(ValueError):
