@@ -482,7 +482,7 @@ def black_tophat(image, selem=None, out=None):
     else:
         original = image
     out = closing(image, selem, out=out)
-    if np.issubdtype(out.dtype, bool):
+    if np.issubdtype(out.dtype, np.bool_):
         np.logical_xor(out, original, out=out)
     else:
         out -= original
