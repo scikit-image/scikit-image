@@ -3,14 +3,6 @@
 # cython: nonecheck=False
 # cython: wraparound=False
 
-cdef extern from *:
-    void unwrap2D(double* wrapped_image,
-                  double* unwrapped_image,
-                  unsigned char* input_mask,
-                  int image_width, int image_height,
-                  int wrap_around_x, int wrap_around_y,
-                  char use_seed, unsigned int seed) nogil
-
 
 cdef extern from "unwrap_2d_ljmu.h":
     void unwrap2D(
@@ -20,7 +12,7 @@ cdef extern from "unwrap_2d_ljmu.h":
             int image_width, int image_height,
             int wrap_around_x, int wrap_around_y,
             char use_seed, unsigned int seed
-            )
+            ) nogil
 
 
 def unwrap_2d(double[:, ::1] image,
