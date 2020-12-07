@@ -141,6 +141,7 @@ def create_image_fetcher():
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
+        retry_if_failed=3,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
