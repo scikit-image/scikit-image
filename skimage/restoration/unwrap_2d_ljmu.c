@@ -39,6 +39,7 @@
 #define NOMASK 0
 #define MASK 1
 
+
 typedef struct {
   double mod;
   int x_connectivity;

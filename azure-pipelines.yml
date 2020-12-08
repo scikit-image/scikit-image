@@ -35,10 +35,23 @@ jobs:
         ARCH: 'x64'
         PIP_FLAGS: ''
         TEST_EXAMPLES: 'true'
-      Python37-x64-pre:
-        PYTHON_VERSION: '3.7'
+      # build pre release packages on Python 3.8 since it has been out long
+      # enough for wheels to be built for packages that need to be compiled.
+      Python38-x64-pre:
+        PYTHON_VERSION: '3.8'
         ARCH: 'x64'
         PIP_FLAGS: '--pre'
+      Python39:
+        PYTHON_VERSION: '3.9'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python39-x64:
+        PYTHON_VERSION: '3.9'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+        # NOTE(honles): winpty is required by one of the doc dependencies,
+        #               but does not provide a wheel for Python 3.9
+        # TEST_EXAMPLES: 'true'
   continueOnError: false
   timeoutInMinutes: 60
 
@@ -62,9 +75,14 @@ jobs:
       $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
       $PYTHON -m pip list
 
+
       # Install the build and runtime dependencies of the project
-      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
       $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
+
+      # Disable C99 complex if PyWavelets needs to be built from source.
+      # The compiler used will be MSVC, but C99 may be detected improperly
+      USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
+
       $PYTHON -m pip list
     displayName: 'Pre-installation'
 

@@ -223,6 +223,15 @@ def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 101 < threshold_otsu(camera) < 103
 
+def test_otsu_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=hist) < 103
+
+def test_otsu_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=counts) < 103
 
 def test_otsu_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -343,6 +352,16 @@ def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 145 < threshold_yen(camera) < 147
 
+def test_yen_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=hist) < 147
+
+def test_yen_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=counts) < 147
+
 
 def test_yen_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -369,6 +388,18 @@ def test_isodata_camera_image():
     assert threshold == 102
 
     assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
+
+def test_isodata_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=hist)
+    assert threshold == 102
+
+def test_isodata_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=counts)
+    assert threshold == 102
 
 
 def test_isodata_coins_image():
@@ -435,6 +466,17 @@ def test_threshold_minimum():
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+def test_threshold_minimum_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=hist)
+    assert_equal(threshold, 85)
+
+def test_threshold_minimum_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=counts)
+    assert_equal(threshold, 85)
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
@@ -470,12 +512,12 @@ def test_triangle_float_images():
     int_bins = text.max() - text.min() + 1
     # Set nbins to match the uint case and threshold as float.
     assert(round(threshold_triangle(
-        text.astype(np.float), nbins=int_bins)) == 104)
+        text.astype(float), nbins=int_bins)) == 104)
     # Check that rescaling image to floats in unit interval is equivalent.
     assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
     # Repeat for inverted image.
     assert(round(threshold_triangle(
-        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+        np.invert(text).astype(float), nbins=int_bins)) == 151)
     assert (round(threshold_triangle(
         np.invert(text) / 255., nbins=int_bins) * 255) == 151)
 

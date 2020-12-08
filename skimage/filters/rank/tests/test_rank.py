@@ -1,6 +1,7 @@
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose)
+                                     assert_allclose,
+                                     assert_array_almost_equal)
 from skimage._shared import testing
 
 from skimage.util import img_as_ubyte, img_as_float
@@ -119,9 +120,9 @@ class TestRank():
                 # reason.
                 assert result[19, 18] in [141, 172]
                 result[19, 18] = 172
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
             else:
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
 
         check()
 
@@ -135,7 +136,7 @@ class TestRank():
         def check():
             expected = self.refs_3d[filter]
             result = getattr(rank, filter)(self.volume, self.selem_3d)
-            assert_array_equal(expected, result)
+            assert_array_almost_equal(expected, result)
 
         check()
 
@@ -627,7 +628,7 @@ class TestRank():
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (np.bool_, np.uint8, np.uint16, np.int32, np.int64,
+        for dtype in (bool, np.uint8, np.uint16, np.int32, np.int64,
                       np.float32, np.float64):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
             rank.mean(image=image, selem=elem, out=out, mask=mask,
@@ -820,7 +821,7 @@ class TestRank():
         assert_equal(image.dtype, out.dtype)
 
     def test_input_boolean_dtype(self):
-        image = (np.random.rand(100, 100) * 256).astype(np.bool_)
-        elem = np.ones((3, 3), dtype=np.bool_)
+        image = (np.random.rand(100, 100) * 256).astype(bool)
+        elem = np.ones((3, 3), dtype=bool)
         with testing.raises(ValueError):
             rank.maximum(image=image, selem=elem)
