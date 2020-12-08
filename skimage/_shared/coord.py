@@ -49,7 +49,7 @@ def _ensure_spacing(coord, spacing, p_norm):
     return output
 
 
-def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=50):
+def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50):
     """Returns a subset of coord where a minimum spacing is guaranteed.
 
     Parameters
@@ -63,8 +63,9 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=50):
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
         Euclidean distance.
-    batch_size : int
-        Batch size used to process ``coord`` by batch to save memory.
+    min_split_size : int
+        Minimum split size used to process ``coord`` by batch to save
+        memory. If None, the memory saving strategy is not applyed.
 
     Returns
     -------
@@ -77,10 +78,14 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, batch_size=50):
     if len(coords):
 
         coords = np.atleast_2d(coords)
-        if batch_size is None:
+        if min_split_size is None:
             batch_list = [coords]
         else:
-            batch_list = np.array_split(coords, batch_size)
+            coord_count = len(coords)
+            split_count = int(np.log2(coord_count/min_split_size)) + 1
+            split_idx = np.cumsum(
+                [coord_count // (2 ** i) for i in range(1, split_count)])
+            batch_list = np.array_split(coords, split_idx)
 
         output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
         for batch in batch_list:
