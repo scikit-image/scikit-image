@@ -75,6 +75,7 @@ Documentation
   repository (#4892).
 - The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
   has been expanded (#4905).
+- Added links to the image.sc forum in example pages (#5094, #5096)
 
 Improvements
 ------------
@@ -103,6 +104,9 @@ Improvements
   inequalities in sequence (#5020)
 - Polygon rasterization is more precise and will no longer potentially exclude
   input vertices. (#5029)
+- Add data optional requirements to allow pip install scikit-image[data]
+  (#5105, #5111)
+- OpenMP support in MSVC (#4924, #5111)
 
 API Changes
 -----------
@@ -157,6 +161,8 @@ Bug fixes
   Before this fix, an incorrect value could be returned where the input images
   had NaNs (#4886).
 - Fix edge filters not respecting padding mode (#4907)
+- Use v{} for version tags with pooch (#5104, #5110)
+- Fix compilation error in XCode 12 (#5107, #5111)
 
 Deprecations
 ------------
@@ -209,6 +215,7 @@ Development process
 - We now build our wheels on GitHub Actions on the main repo using
   cibuildwheel. Many thanks to the matplotlib and scikit-learn developers for
   paving the way for us! (#5080)
+- Disable Travis-CI builds (#5099, #5111)
 
 Other Pull Requests
 -------------------
@@ -313,6 +320,7 @@ Other Pull Requests
 - Some minor tweaks to CI (#5079)
 - removed usage of numpy's private functions from util.arraycrop (#5081)
 - peak_local_max: remove deprecated `indices` argument from examples (#5082)
+- Replace np.bool, np.float, and np.int with bool, float, and int (#5103, #5108)
 
 
 52 authors added to this release [alphabetical by first name or login]
