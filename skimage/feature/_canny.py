@@ -158,12 +158,13 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     # because who knows what lies beyond the edge of the image?
     #
     check_nD(image, 2)
+    dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if not (low_threshold is None or high_threshold is None):
         thresholds = low_threshold, high_threshold
 
     if thresholds is None:
-        low_threshold, high_threshold = 0.1, 0.2
+        low_threshold, high_threshold = dtype_max * 0.1, dtype_max * 0.2
     else:
         low_threshold, high_threshold = thresholds
 
@@ -173,9 +174,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         if not(0.0 <= high_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
-        dtype_max = dtype_limits(image, clip_negative=False)[1]
-        low_threshold = low_threshold / dtype_max
-        high_threshold = high_threshold / dtype_max
+        low_threshold /= dtype_max
+        high_threshold /= dtype_max
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
