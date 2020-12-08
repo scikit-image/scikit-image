@@ -33,9 +33,12 @@ def test_imagecollection_input():
     -----
         If correct, `images` will receive three images.
     """
+    # Ensure that these images are part of the legacy datasets
+    # this means they will always be available in the user's install
+    # regarless of the availability of pooch
     pattern = [os.path.join(data_dir, pic)
-               for pic in ['palette_gray.png',
-                           'chessboard_GRAY_U16.tif',
+               for pic in ['coffee.png',
+                           'chessboard_GRAY.png',
                            'rocket.jpg']]
     images = ImageCollection(pattern)
     assert len(images) == 3
@@ -43,10 +46,10 @@ def test_imagecollection_input():
 
 class TestImageCollection(TestCase):
     pattern = [os.path.join(data_dir, pic)
-               for pic in ['camera.png', 'color.png']]
+               for pic in ['brick.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
-                       for pic in ['camera.png', 'moon.png']]
+                       for pic in ['brick.png', 'moon.png']]
 
     def setUp(self):
         reset_plugins()

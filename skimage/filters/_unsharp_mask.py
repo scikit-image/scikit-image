@@ -40,7 +40,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     multichannel : bool, optional
         If True, the last ``image`` dimension is considered as a color channel,
         otherwise as spatial. Color channels are processed individually.
-    preserve_range: bool, optional
+    preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of ``img_as_float``.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
@@ -82,27 +82,27 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
            [100, 100, 100, 100, 100],
            [100, 100, 100, 100, 100]], dtype=uint8)
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[ 0.39,  0.39,  0.39,  0.39,  0.39],
-           [ 0.39,  0.39,  0.38,  0.39,  0.39],
-           [ 0.39,  0.38,  0.53,  0.38,  0.39],
-           [ 0.39,  0.39,  0.38,  0.39,  0.39],
-           [ 0.39,  0.39,  0.39,  0.39,  0.39]])
+    array([[0.39, 0.39, 0.39, 0.39, 0.39],
+           [0.39, 0.39, 0.38, 0.39, 0.39],
+           [0.39, 0.38, 0.53, 0.38, 0.39],
+           [0.39, 0.39, 0.38, 0.39, 0.39],
+           [0.39, 0.39, 0.39, 0.39, 0.39]])
 
     >>> array = np.ones(shape=(5,5), dtype=np.int8)*100
     >>> array[2,2] = 127
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[ 0.79,  0.79,  0.79,  0.79,  0.79],
-           [ 0.79,  0.78,  0.75,  0.78,  0.79],
-           [ 0.79,  0.75,  1.  ,  0.75,  0.79],
-           [ 0.79,  0.78,  0.75,  0.78,  0.79],
-           [ 0.79,  0.79,  0.79,  0.79,  0.79]])
+    array([[0.79, 0.79, 0.79, 0.79, 0.79],
+           [0.79, 0.78, 0.75, 0.78, 0.79],
+           [0.79, 0.75, 1.  , 0.75, 0.79],
+           [0.79, 0.78, 0.75, 0.78, 0.79],
+           [0.79, 0.79, 0.79, 0.79, 0.79]])
 
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2, preserve_range=True), 2)
-    array([[ 100.  ,  100.  ,   99.99,  100.  ,  100.  ],
-           [ 100.  ,   99.39,   95.48,   99.39,  100.  ],
-           [  99.99,   95.48,  147.59,   95.48,   99.99],
-           [ 100.  ,   99.39,   95.48,   99.39,  100.  ],
-           [ 100.  ,  100.  ,   99.99,  100.  ,  100.  ]])
+    array([[100.  , 100.  ,  99.99, 100.  , 100.  ],
+           [100.  ,  99.39,  95.48,  99.39, 100.  ],
+           [ 99.99,  95.48, 147.59,  95.48,  99.99],
+           [100.  ,  99.39,  95.48,  99.39, 100.  ],
+           [100.  , 100.  ,  99.99, 100.  , 100.  ]])
 
 
     References
@@ -116,7 +116,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     """
     vrange = None  # Range for valid values; used for clipping.
     if preserve_range:
-        fimg = image.astype(np.float)
+        fimg = image.astype(float)
     else:
         fimg = img_as_float(image)
         negative = np.any(fimg < 0)
@@ -126,7 +126,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
             vrange = [0., 1.]
 
     if multichannel:
-        result = np.empty_like(fimg, dtype=np.float)
+        result = np.empty_like(fimg, dtype=float)
         for channel in range(image.shape[-1]):
             result[..., channel] = _unsharp_mask_single_channel(
                 fimg[..., channel], radius, amount, vrange)

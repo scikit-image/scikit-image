@@ -4,9 +4,10 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
-from skimage import color
-from skimage.draw import circle
+from skimage.color import rgb2gray
+from skimage.draw import disk
 from skimage._shared._warnings import expected_warnings
+from skimage.exposure import histogram
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -21,6 +22,8 @@ from skimage.filters.thresholding import (threshold_local,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
+from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
+                                        _get_multiotsu_thresh_indices)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_equal
@@ -218,8 +221,17 @@ class TestSimpleImage():
 
 def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 86 < threshold_otsu(camera) < 88
+    assert 101 < threshold_otsu(camera) < 103
 
+def test_otsu_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=hist) < 103
+
+def test_otsu_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=counts) < 103
 
 def test_otsu_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -239,15 +251,19 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
-        threshold_otsu(img)
+    assert threshold_otsu(img) == 1
+
+
+def test_otsu_one_color_image_3d():
+    img = np.ones((10, 10, 10), dtype=np.uint8)
+    assert threshold_otsu(img) == 1
 
 
 def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
-    assert 62 < threshold_li(image) < 63
+    assert 78 < threshold_li(image) < 79
     assert ce_actual < _cross_entropy(image, threshold + 1)
     assert ce_actual < _cross_entropy(image, threshold - 1)
 
@@ -326,13 +342,25 @@ def test_li_pathological_arrays():
     e = np.array([1, 1])
     f = np.array([1, 2])
     arrays = [a, b, c, d, e, f]
-    thresholds = [threshold_li(arr) for arr in arrays]
+    with np.errstate(divide='ignore'):
+        # ignoring "divide by zero encountered in log" error from np.log(0)
+        thresholds = [threshold_li(arr) for arr in arrays]
     assert np.all(np.isfinite(thresholds))
 
 
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 197 < threshold_yen(camera) < 199
+    assert 145 < threshold_yen(camera) < 147
+
+def test_yen_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=hist) < 147
+
+def test_yen_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=counts) < 147
 
 
 def test_yen_coins_image():
@@ -357,9 +385,21 @@ def test_isodata_camera_image():
     threshold = threshold_isodata(camera)
     assert np.floor((camera[camera <= threshold].mean() +
                      camera[camera > threshold].mean()) / 2.0) == threshold
-    assert threshold == 87
+    assert threshold == 102
 
-    assert threshold_isodata(camera, return_all=True) == [87]
+    assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
+
+def test_isodata_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=hist)
+    assert threshold == 102
+
+def test_isodata_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=counts)
+    assert threshold == 102
 
 
 def test_isodata_coins_image():
@@ -420,12 +460,23 @@ def test_threshold_minimum():
     camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert_equal(threshold, 76)
+    assert_equal(threshold, 85)
 
     astronaut = util.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+def test_threshold_minimum_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=hist)
+    assert_equal(threshold, 85)
+
+def test_threshold_minimum_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=counts)
+    assert_equal(threshold, 85)
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
@@ -461,12 +512,12 @@ def test_triangle_float_images():
     int_bins = text.max() - text.min() + 1
     # Set nbins to match the uint case and threshold as float.
     assert(round(threshold_triangle(
-        text.astype(np.float), nbins=int_bins)) == 104)
+        text.astype(float), nbins=int_bins)) == 104)
     # Check that rescaling image to floats in unit interval is equivalent.
     assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
     # Repeat for inverted image.
     assert(round(threshold_triangle(
-        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+        np.invert(text).astype(float), nbins=int_bins)) == 151)
     assert (round(threshold_triangle(
         np.invert(text) / 255., nbins=int_bins) * 255) == 151)
 
@@ -536,10 +587,13 @@ def test_niblack_sauvola_pathological_image():
 
 
 def test_bimodal_multiotsu_hist():
-    image = data.camera()
-    thr_otsu = threshold_otsu(image)
-    thr_multi = threshold_multiotsu(image, classes=2)
-    assert thr_otsu == thr_multi
+    for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+        img = getattr(data, name)()
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
+
+    for name in ['chelsea', 'coffee', 'astronaut', 'rocket']:
+        img = rgb2gray(getattr(data, name)())
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
 
 
 def test_check_multiotsu_results():
@@ -559,25 +613,56 @@ def test_multiotsu_output():
     coords = [(25, 25), (50, 50), (75, 75)]
     values = [64, 128, 192]
     for coor, val in zip(coords, values):
-        rr, cc = circle(coor[1], coor[0], 20)
+        rr, cc = disk(coor, 20)
         image[rr, cc] = val
-    thresholds = [64, 128]
-    assert np.array_equal(thresholds, threshold_multiotsu(image))
+    thresholds = [0, 64, 128]
+    assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
 
-    image = color.rgb2gray(data.astronaut())
-    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
+
+def test_multiotsu_astro_image():
+    img = util.img_as_ubyte(data.astronaut())
+    with expected_warnings(['grayscale']):
+        assert_almost_equal(threshold_multiotsu(img), [58, 149])
+
+
+def test_multiotsu_more_classes_then_values():
+    img = np.ones((10, 10), dtype=np.uint8)
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=2)
+    img[:, 3:] = 2
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=3)
+    img[:, 6:] = 3
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=4)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
-    (threshold_otsu, 86, 88),
-    (threshold_yen, 197, 199),
-    (threshold_isodata, 86, 88),
-    (threshold_mean, 117, 119),
-    (threshold_triangle, 21, 23),
-    (threshold_minimum, 75, 77),
+    (threshold_otsu, 101, 103),
+    (threshold_yen, 145, 147),
+    (threshold_isodata, 101, 103),
+    (threshold_mean, 128, 130),
+    (threshold_triangle, 41, 43),
+    (threshold_minimum, 84, 86),
 ])
 def test_thresholds_dask_compatibility(thresholding, lower, upper):
     pytest.importorskip('dask', reason="dask python library is not installed")
     import dask.array as da
     dask_camera = da.from_array(data.camera(), chunks=(256, 256))
     assert lower < float(thresholding(dask_camera)) < upper
+
+
+def test_multiotsu_lut():
+    for classes in [2, 3, 4]:
+        for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+            img = getattr(data, name)()
+            prob, bin_centers = histogram(img.ravel(),
+                                          nbins=256,
+                                          source_range='image',
+                                          normalize=True)
+            prob = prob.astype('float32')
+
+            result_lut = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
+            result = _get_multiotsu_thresh_indices(prob, classes - 1)
+
+            assert np.array_equal(result_lut, result)

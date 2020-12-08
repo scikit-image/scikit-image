@@ -43,7 +43,6 @@ References
 .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen, 2011
        :arXiv:`1107.2782`
 """
-import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, img_as_float
 from skimage.segmentation import chan_vese

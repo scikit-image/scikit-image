@@ -110,7 +110,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
            :DOI:`10.1109/TPAMI.1986.4767851`
     .. [2] William Green's Canny tutorial
-           http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+           https://en.wikipedia.org/wiki/Canny_edge_detector
 
     Examples
     --------
@@ -159,11 +159,17 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
 
     if low_threshold is None:
         low_threshold = 0.1
+    elif use_quantiles:
+        if not(0.0 <= low_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         low_threshold = low_threshold / dtype_max
 
     if high_threshold is None:
         high_threshold = 0.2
+    elif use_quantiles:
+        if not(0.0 <= high_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         high_threshold = high_threshold / dtype_max
 
@@ -264,11 +270,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #---- If use_quantiles is set then calculate the thresholds to use
     #
     if use_quantiles:
-        if high_threshold > 1.0 or low_threshold > 1.0:
-            raise ValueError("Quantile thresholds must not be > 1.0")
-        if high_threshold < 0.0 or low_threshold < 0.0:
-            raise ValueError("Quantile thresholds must not be < 0.0")
-
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 

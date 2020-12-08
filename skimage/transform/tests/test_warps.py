@@ -2,23 +2,26 @@ import numpy as np
 import pytest
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
-                                      _log_polar_mapping)
-from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
-                               AffineTransform,
-                               ProjectiveTransform,
-                               SimilarityTransform,
-                               downscale_local_mean,
-                               warp_polar,
-                               resize_local_mean)
-from skimage import transform as tf, data, img_as_float
-from skimage.color import rgb2gray
-from skimage.draw import circle_perimeter_aa
-from skimage.feature import peak_local_max
+from skimage.data import checkerboard, astronaut
+from skimage.util.dtype import img_as_float
+from skimage.color.colorconv import rgb2gray
+from skimage.draw.draw import circle_perimeter_aa
+from skimage.feature.peak import peak_local_max
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel, assert_array_equal)
 from skimage._shared._warnings import expected_warnings
+
+from skimage.transform._warps import (_stackcopy,
+                                      _linear_polar_mapping,
+                                      _log_polar_mapping, warp,
+                                      warp_coords, rotate, resize,
+                                      rescale, warp_polar, swirl,
+                                      downscale_local_mean,
+                               	      resize_local_mean)
+from skimage.transform._geometric import (AffineTransform,
+                                          ProjectiveTransform,
+                                          SimilarityTransform)
 
 
 np.random.seed(0)
@@ -355,21 +358,21 @@ def test_resize_dtype():
 
 
 def test_swirl():
-    image = img_as_float(data.checkerboard())
+    image = img_as_float(checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
     swirl_params.pop('mode')
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
@@ -382,7 +385,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(data.astronaut()))
+    img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -396,7 +399,7 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
-    image = data.astronaut().astype(np.float32)
+    image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
@@ -615,8 +618,9 @@ def test_log_warp_polar():
         image[rr, cc] = val
     warped = warp_polar(image, radius=200, scaling='log')
     profile = warped.mean(axis=0)
-    peaks = peak_local_max(profile)
-    gaps = peaks[:-1]-peaks[1:]
+    peaks_coord = peak_local_max(profile)
+    peaks_coord.sort(axis=0)
+    gaps = peaks_coord[1:] - peaks_coord[:-1]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
 
 
@@ -634,111 +638,5 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
     with testing.raises(ValueError):
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
-
-
-def test_resize_local_mean2d():
-    x = np.zeros((5, 5), dtype=np.double)
-    x[1, 1] = 1
-    resized = resize_local_mean(x, (10, 10))
-    ref = np.zeros((10, 10))
-    ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
-
-
-def test_resize_local_mean3d_keep():
-    # keep 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
-    x[1, 1, :] = 1
-    resized = resize_local_mean(x, (10, 10))
-    with testing.raises(ValueError):
-        # output_shape too short
-        resize_local_mean(x, (10, ))
-    ref = np.zeros((10, 10, 3))
-    ref[2:4, 2:4, :] = 1
-    assert_almost_equal(resized, ref)
-    resized = resize_local_mean(x, (10, 10, 3))
-    assert_almost_equal(resized, ref)
-
-
-def test_resize_local_mean3d_resize():
-    # resize 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
-    x[1, 1, :] = 1
-    resized = resize_local_mean(x, (10, 10, 1))
-    ref = np.zeros((10, 10, 1))
-    ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
-
-
-def test_resize_local_mean3d_2din_3dout():
-    # 3D output with 2D input
-    x = np.zeros((5, 5), dtype=np.double)
-    x[1, 1] = 1
-    resized = resize_local_mean(x, (10, 10, 1))
-    ref = np.zeros((10, 10, 1))
-    ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
-
-
-def test_resize_local_mean2d_4d():
-    # resize with extra output dimensions
-    x = np.zeros((5, 5), dtype=np.double)
-    x[1, 1] = 1
-    out_shape = (10, 10, 1, 1)
-    resized = resize_local_mean(x, out_shape)
-    ref = np.zeros(out_shape)
-    ref[2:4, 2:4, ...] = 1
-    assert_almost_equal(resized, ref)
-
-
-@pytest.mark.parametrize("dim", range(1, 6))
-def test_resize_local_mean_nd(dim):
-    shape = 2 + np.arange(dim) * 2
-    x = np.ones(shape)
-    out_shape = (np.asarray(shape) * 1.5).astype(int)
-    resized = resize_local_mean(x, out_shape)
-    expected_shape = 1.5 * shape
-    assert_equal(resized.shape, expected_shape)
-    assert_array_equal(resized, 1)
-
-
-def test_resize_local_mean3d():
-    x = np.zeros((5, 5, 2), dtype=np.double)
-    x[1, 1, 0] = 0
-    x[1, 1, 1] = 1
-    resized = resize_local_mean(x, (10, 10, 1))
-    ref = np.zeros((10, 10, 1))
-    ref[2:4, 2:4, :] = 0.5
-    assert_almost_equal(resized, ref)
-    resized = resize_local_mean(x, (10, 10, 1), grid_mode=False)
-    ref[1, 1, :] = 0.0703125
-    ref[2, 2, :] = 0.5
-    ref[3, 3, :] = 0.3828125
-    ref[1, 2, :] = ref[2, 1, :] = 0.1875
-    ref[1, 3, :] = ref[3, 1, :] = 0.1640625
-    ref[2, 3, :] = ref[3, 2, :] = 0.4375
-    assert_almost_equal(resized, ref)
-
-
-def test_resize_local_mean_dtype():
-    x = np.zeros((5, 5))
-    x_f32 = x.astype(np.float32)
-    x_u8 = x.astype(np.uint8)
-    x_b = x.astype(bool)
-
-    assert resize_local_mean(x, (10, 10),
-                             preserve_range=False).dtype == x.dtype
-    assert resize_local_mean(x, (10, 10),
-                             preserve_range=True).dtype == x.dtype
-    assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=False).dtype == np.double
-    assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=True).dtype == np.double
-    assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=False).dtype == np.double
-    assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=True).dtype == np.double
-    assert resize_local_mean(x_f32, (10, 10),
-                             preserve_range=False).dtype == x_f32.dtype
-    assert resize_local_mean(x_f32, (10, 10),
-                             preserve_range=True).dtype == x_f32.dtype
+==== BASE ====
+==== BASE ====

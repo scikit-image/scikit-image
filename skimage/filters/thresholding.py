@@ -7,8 +7,11 @@ from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import check_nD, warn
 from ..transform import integral_image
-from ..util import crop, dtype_limits
-from ..filters._multiotsu import _find_threshold_multiotsu
+from ..util import dtype_limits
+from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
+                                  _get_multiotsu_thresh_indices)
+
+from ._sparse import correlate_sparse, _validate_window_size
 
 
 __all__ = ['try_all_threshold',
@@ -233,27 +236,72 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     return thresh_image - offset
 
 
-def threshold_otsu(image, nbins=256):
-    """Return threshold value based on Otsu's method.
+def _validate_image_histogram(image, hist, nbins=None):
+    """Ensure that either image or hist were given, return valid histogram.
+
+    If hist is given, image is ignored.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : array or None
+        Grayscale image.
+    hist : array, 2-tuple of array, or None
+        Histogram, either a 1D counts array, or an array of counts together
+        with an array of bin centers.
+    nbins : int, optional
+        The number of bins with which to compute the histogram, if `hist` is
+        None.
+
+    Returns
+    -------
+    counts : 1D array of float
+        Each element is the number of pixels falling in each intensity bin.
+    bin_centers : 1D array
+        Each element is the value corresponding to the center of each intensity bin.
+
+    Raises
+    ------
+    ValueError : if image and hist are both None
+    """
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
+
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            counts, bin_centers = hist
+        else:
+            counts = hist
+            bin_centers = np.arange(counts.size)
+    else:
+        counts, bin_centers = histogram(
+                image.ravel(), nbins, source_range='image'
+            )
+    return counts.astype(float), bin_centers
+
+
+def threshold_otsu(image=None, nbins=256, *, hist=None):
+    """Return threshold value based on Otsu's method.
+
+    Either image or hist must be provided. If hist is provided, the actual
+    histogram of the image is ignored.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray, optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
 
     Returns
     -------
     threshold : float
         Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
-
-    Raises
-    ------
-    ValueError
-         If ``image`` only contains a single grayscale value.
 
     References
     ----------
@@ -270,26 +318,26 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
 
-    # Check if the image is multi-colored or not
-    if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images "
-                         "having more than one color. The input image seems "
-                         "to have just one color {0}.".format(image.min()))
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
-    hist = hist.astype(float)
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     # class probabilities for all possible thresholds
-    weight1 = np.cumsum(hist)
-    weight2 = np.cumsum(hist[::-1])[::-1]
+    weight1 = np.cumsum(counts)
+    weight2 = np.cumsum(counts[::-1])[::-1]
     # class means for all possible thresholds
-    mean1 = np.cumsum(hist * bin_centers) / weight1
-    mean2 = (np.cumsum((hist * bin_centers)[::-1]) / weight2[::-1])[::-1]
+    mean1 = np.cumsum(counts * bin_centers) / weight1
+    mean2 = (np.cumsum((counts * bin_centers)[::-1]) / weight2[::-1])[::-1]
 
     # Clip ends to align class 1 and class 2 variables:
     # The last value of ``weight1``/``mean1`` should pair with zero values in
@@ -297,20 +345,27 @@ def threshold_otsu(image, nbins=256):
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
-    threshold = bin_centers[:-1][idx]
+    threshold = bin_centers[idx]
+
     return threshold
 
 
-def threshold_yen(image, nbins=256):
+def threshold_yen(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Yen's method.
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
 
     Returns
     -------
@@ -336,14 +391,15 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
+
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns ``bin_centers`` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
 
     # Calculate probability mass function
-    pmf = hist.astype(np.float32) / hist.sum()
+    pmf = counts.astype(np.float32) / counts.sum()
     P1 = np.cumsum(pmf)  # Cumulative normalized histogram
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
@@ -355,7 +411,7 @@ def threshold_yen(image, nbins=256):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image, nbins=256, return_all=False):
+def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
@@ -371,16 +427,23 @@ def threshold_isodata(image, nbins=256, return_all=False):
     For integer images, the above equality holds to within one; for floating-
     point images, the equality holds to within the histogram bin-width.
 
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
+
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    return_all: bool, optional
+    return_all : bool, optional
         If False (default), return only the lowest threshold that satisfies
         the above equality. If True, return all valid thresholds.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -408,7 +471,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -417,15 +480,15 @@ def threshold_isodata(image, nbins=256, return_all=False):
         else:
             return bin_centers[0]
 
-    hist = hist.astype(np.float32)
+    counts = counts.astype(np.float32)
 
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
-    csuml = np.cumsum(hist)
+    csuml = np.cumsum(counts)
     csumh = csuml[-1] - csuml
 
     # intensity_sum contains the total pixel intensity from each bin
-    intensity_sum = hist * bin_centers
+    intensity_sum = counts * bin_centers
 
     # l and h contain average value of all pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively.
@@ -644,22 +707,29 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-def threshold_minimum(image, nbins=256, max_iter=10000):
+def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
-    The histogram of the input ``image`` is computed and smoothed until
-    there are only two maxima. Then the minimum in between is the threshold
-    value.
+    The histogram of the input ``image`` is computed if not provided and
+    smoothed until there are only two maxima. Then the minimum in between is
+    the threshold value.
+
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : (M, N) ndarray, optional
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter: int, optional
+    max_iter : int, optional
         Maximum number of iterations to smooth the histogram.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram to determine the threshold from and a corresponding array
+        of bin center intensities. Alternatively, only the histogram can be
+        passed.
 
     Returns
     -------
@@ -707,9 +777,9 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
-    smooth_hist = hist.astype(np.float64, copy=False)
+    smooth_hist = counts.astype(np.float64, copy=False)
 
     for counter in range(max_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
@@ -837,26 +907,6 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def _validate_window_size(axis_sizes):
-    """Ensure all sizes in ``axis_sizes`` are odd.
-
-    Parameters
-    ----------
-    axis_sizes : iterable of int
-
-    Raises
-    ------
-    ValueError
-        If any given axis size is even.
-    """
-    for axis_size in axis_sizes:
-        if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
-                   '`threshold_niblack` must not be even on any dimension. '
-                   'Got {}'.format(axis_sizes))
-            raise ValueError(msg)
-
-
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
@@ -904,10 +954,10 @@ def _mean_std(image, w):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     total_window_size = np.prod(w)
-    sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, pad_width) / total_window_size
-    sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, pad_width) / total_window_size
+    sum_full = correlate_sparse(integral, kern, mode='valid')
+    m = sum_full / total_window_size
+    sum_sq_full = correlate_sparse(integral_sq, kern, mode='valid')
+    g2 = sum_sq_full / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
@@ -929,7 +979,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -994,7 +1044,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1104,8 +1154,14 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Returns
     -------
-    idx_thresh : array
+    thresh : array
         Array containing the threshold values for the desired classes.
+
+    Raises
+    ------
+    ValueError
+         If ``image`` contains less grayscale value then the desired
+         number of classes.
 
     Notes
     -----
@@ -1114,12 +1170,15 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
+    The input image must be grayscale.
+
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:
            <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
@@ -1132,49 +1191,38 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> thresholds = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
+
     """
+
+    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+        msg = ("threshold_multiotsu is expected to work correctly only for "
+               "grayscale images; image shape {0} looks like an RGB image")
+        warn(msg.format(image.shape))
+
     # calculating the histogram and the probability of each gray level.
-    hist, bin_centers = histogram(image.ravel(),
+    prob, bin_centers = histogram(image.ravel(),
                                   nbins=nbins,
-                                  source_range='image')
-    prob = hist / image.size
-    # histogram ignores nbins for integer arrays.
-    nbins = len(bin_centers)
+                                  source_range='image',
+                                  normalize=True)
+    prob = prob.astype('float32')
 
-    # Compute the zeroth (momP, cumulative probability) and first
-    # (momS, mean) moments
+    nvalues = np.count_nonzero(prob)
+    if nvalues < classes:
+        msg = ("The input image has only {} different values. "
+               "It can not be thresholded in {} classes")
+        raise ValueError(msg.format(nvalues, classes))
+    elif nvalues == classes:
+        thresh_idx = np.where(prob > 0)[0][:-1]
+    else:
+        # Get threshold indices
+        try:
+            thresh_idx = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
+        except MemoryError:
+            # Don't use LUT if the number of bins is too large (if the
+            # image is uint16 for example): in this case, the
+            # allocated memory is too large.
+            thresh_idx = _get_multiotsu_thresh_indices(prob, classes - 1)
 
-    # building the lookup tables.
-    # step 1: calculating the diagonal.
-    prob[0] = 0
-    momP = np.diagflat(prob)
-    momS = np.diagflat(np.arange(nbins) * prob)
+    thresh = bin_centers[thresh_idx]
 
-    # step 2: calculating the first row.
-    momP[1, 2:] = prob[1] + np.cumsum(prob[2:])
-    momS[1, 2:] = prob[1] + np.cumsum(np.arange(2, nbins) * prob[2:])
-
-    # step 3: the other rows are recursively computed as:
-    # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
-    upper_tri = np.triu_indices_from(momP[2:, 2:], 1)
-
-    momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
-                               - np.repeat(momP[1, 1:-2],
-                                           np.arange(nbins - 3, 0, -1)))
-    momS[2:, 2:][upper_tri] = (momS[1, 2:][upper_tri[1]]
-                               - np.repeat(momS[1, 1:-2],
-                                           np.arange(nbins - 3, 0, -1)))
-
-    # step 4: calculating the between class variance.
-    var_btwcls = np.zeros_like(momP)
-    idx = momP > 0
-    var_btwcls[idx] = momS[idx] ** 2 / momP[idx]
-
-    # finding max threshold candidates, depending on classes.
-    # number of thresholds is equal to number of classes - 1.
-    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, nbins)
-
-    # correcting threshold values.
-    idx_thresh = bin_centers[:-1][aux_thresh.astype('int')]
-
-    return idx_thresh
+    return thresh

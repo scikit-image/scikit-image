@@ -5,6 +5,8 @@
 import numpy as np
 cimport numpy as cnp
 
+cnp.import_array()
+
 
 cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low,
                              Py_ssize_t high) nogil:

@@ -182,7 +182,7 @@ def _generate_thin_luts():
     """generate LUTs for thinning algorithm (for reference)"""
 
     def nabe(n):
-        return np.array([n >> i & 1 for i in range(0, 9)]).astype(np.bool)
+        return np.array([n >> i & 1 for i in range(0, 9)]).astype(bool)
 
     def G1(n):
         s = 0
@@ -238,7 +238,7 @@ G123_LUT = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
                      0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                      1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
-                     0, 1, 1, 0, 0, 1, 0, 0, 0], dtype=np.bool)
+                     0, 1, 1, 0, 0, 1, 0, 0, 0], dtype=bool)
 
 G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
@@ -253,7 +253,7 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
                       0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.bool)
+                      0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
 def thin(image, max_iter=None):
@@ -353,7 +353,7 @@ def thin(image, max_iter=None):
         n_pts_new = np.sum(skel)  # count points after thinning
         n_iter += 1
 
-    return skel.astype(np.bool)
+    return skel.astype(bool)
 
 
 # --------- Skeletonization by medial axis transform --------
@@ -434,7 +434,7 @@ def medial_axis(image, mask=None, return_distance=False):
     """
     global _eight_connect
     if mask is None:
-        masked_image = image.astype(np.bool)
+        masked_image = image.astype(bool)
     else:
         masked_image = image.astype(bool).copy()
         masked_image[~mask] = False
@@ -576,7 +576,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(image, *, img=None):
+def skeletonize_3d(image):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -587,14 +587,6 @@ def skeletonize_3d(image, *, img=None):
     image : ndarray, 2D or 3D
         A binary image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
-
-    Other Parameters
-    ----------------
-    img : DEPRECATED
-        Synonym for `image`.
-
-        .. deprecated:: 0.16
-           Will be removed in 0.17.
 
     Returns
     -------
@@ -625,10 +617,6 @@ def skeletonize_3d(image, *, img=None):
            Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
 
     """
-    if img is not None:
-        image = img
-        warn('Using img as a keyword argument to skeletonize_3d is deprecated.'
-             ' Use image instead.')
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
