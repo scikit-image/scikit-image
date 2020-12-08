@@ -27,7 +27,7 @@ New Features
   preventing overlap (#4795)
 - It is now possible to pass extra measurement functions to
   ``measure.regionprops`` and ``regionprops_table`` (#4810)
-- Add rolling ball algorithm for background substraction (#4851)
+- Add rolling ball algorithm for background subtraction (#4851)
 - New sample images have been added in the ``data`` subpackage: ``data.eagle``
   (#4922), ``data.human_mitosis`` (#4939), ``data.cells3d`` (#4951), and
   ``data.vortex`` (#5041). Also note that the image for ``data.camera`` has
@@ -75,13 +75,14 @@ Documentation
   repository (#4892).
 - The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
   has been expanded (#4905).
+- Added links to the image.sc forum in example pages (#5094, #5096)
 
 Improvements
 ------------
 
 - float32 support for SLIC (#4683), ORB (#4684, #4697), BRIEF (#4685),
   ``pyramid_gaussian`` (#4696), Richardson-Lucy deconvolution (#4880)
-- In ``skimage.restoration.richardson_lucy``, computations are now be done in
+- In ``skimage.restoration.richardson_lucy``, computations are now done in
   single-precision when the input image is single-precision. This can give a
   substantial performance improvement when working with single precision data.
 - Richardson-Lucy deconvolution now has a ``filter_epsilon`` keyword argument
@@ -103,6 +104,9 @@ Improvements
   inequalities in sequence (#5020)
 - Polygon rasterization is more precise and will no longer potentially exclude
   input vertices. (#5029)
+- Add data optional requirements to allow pip install scikit-image[data]
+  (#5105, #5111)
+- OpenMP support in MSVC (#4924, #5111)
 
 API Changes
 -----------
@@ -157,6 +161,8 @@ Bug fixes
   Before this fix, an incorrect value could be returned where the input images
   had NaNs (#4886).
 - Fix edge filters not respecting padding mode (#4907)
+- Use v{} for version tags with pooch (#5104, #5110)
+- Fix compilation error in XCode 12 (#5107, #5111)
 
 Deprecations
 ------------
@@ -171,7 +177,7 @@ Deprecations
 - The ``skimage.viewer`` subpackage and the ``skivi`` script have been
   deprecated and will be removed in version 0.20. For interactive visualization
   we recommend using dedicated tools such as `napari <https://napari.org>`_ or
-  `plotly <https://plot.ly>`_. In a similar vein, the ``qt`` and ``skivi``
+  `plotly <https://plotly.com>`_. In a similar vein, the ``qt`` and ``skivi``
   plugins of ``skimage.io`` have been deprecated
   and will be removed in version 0.20. (#4941, #4954)
 - In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
@@ -202,13 +208,14 @@ Development process
 - Artifacts for the documentation build are now found in each pull request
   (#4881).
 - Documentation source files can now be written in Markdown in addition to
-  ResT, thanks to ``myst`` (#4863).
+  ReST, thanks to ``myst`` (#4863).
 - update trove classifiers and tests for Python 3.9 + fix pytest config (#5052)
 - fix Azure Pipelines, pytest config, and trove classifiers for Python 3.8 (#5054)
 - Moved our testing from Travis to GitHub Actions (#5074)
 - We now build our wheels on GitHub Actions on the main repo using
   cibuildwheel. Many thanks to the matplotlib and scikit-learn developers for
   paving the way for us! (#5080)
+- Disable Travis-CI builds (#5099, #5111)
 
 Other Pull Requests
 -------------------
@@ -313,6 +320,7 @@ Other Pull Requests
 - Some minor tweaks to CI (#5079)
 - removed usage of numpy's private functions from util.arraycrop (#5081)
 - peak_local_max: remove deprecated `indices` argument from examples (#5082)
+- Replace np.bool, np.float, and np.int with bool, float, and int (#5103, #5108)
 
 
 52 authors added to this release [alphabetical by first name or login]
