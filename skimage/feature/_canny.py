@@ -17,7 +17,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage import generate_binary_structure, binary_erosion, label
 from ..filters import gaussian
 from .. import dtype_limits, img_as_float
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD, remove_arg
 
 
 def smooth_with_function_and_mask(image, function, mask):
@@ -50,10 +50,12 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
-@deprecate_kwarg({'low_threshold': 'thresholds'}, removed_version="0.20")
-@deprecate_kwarg({'high_threshold': 'thresholds'}, removed_version="0.20")
-def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
-          use_quantiles=False):
+@remove_arg('low_threshold', changed_version="0.20",
+            help_msg="Use thresholds argument instead.")
+@remove_arg('high_threshold', changed_version="0.20",
+            help_msg="Use thresholds argument instead.")
+def canny(image, sigma=1., low_threshold=None, high_threshold=None,
+          mask=None, use_quantiles=False, *, thresholds=None):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -62,9 +64,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         Grayscale input image to detect edges on; can be of any dtype.
     sigma : float, optional
         Standard deviation of the Gaussian filter.
-    thresholds : (2, ) array_like, optional
-        Lower and upper bounds for hysteresis thresholding (linking edges).
-        If None, ``thresholds`` is set to 10% and 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
     use_quantiles : bool, optional
@@ -72,6 +71,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         quantiles of the edge magnitude image, rather than absolute
         edge magnitude values. If True then the thresholds must be in
         the range [0, 1].
+    thresholds : (2, ) array_like, optional
+        Lower and upper bounds for hysteresis thresholding (linking edges).
+        If None, ``thresholds`` is set to 10% and 20% of dtype's max.
 
     Returns
     -------
@@ -156,22 +158,23 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     # because who knows what lies beyond the edge of the image?
     #
     check_nD(image, 2)
-    dtype_max = dtype_limits(image, clip_negative=False)[1]
 
-    if low_threshold is None:
-        low_threshold = 0.1
-    elif use_quantiles:
+    if not (low_threshold is None or high_threshold is None):
+        thresholds = low_threshold, high_threshold
+
+    if thresholds is None:
+        low_threshold, high_threshold = 0.1, 0.2
+    else:
+        low_threshold, high_threshold = thresholds
+
+    if use_quantiles:
         if not(0.0 <= low_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
-    else:
-        low_threshold = low_threshold / dtype_max
-
-    if high_threshold is None:
-        high_threshold = 0.2
-    elif use_quantiles:
         if not(0.0 <= high_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
+        dtype_max = dtype_limits(image, clip_negative=False)[1]
+        low_threshold = low_threshold / dtype_max
         high_threshold = high_threshold / dtype_max
 
     if mask is None:
