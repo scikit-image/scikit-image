@@ -13,20 +13,20 @@ def test_ensure_spacing_trivial(p, size):
     # --- A unique point
     coord = np.random.randn(1, 2)
     assert np.array_equal(coord, ensure_spacing(coord, p_norm=p,
-                                                batch_size=size))
+                                                min_split_size=size))
 
     # --- Verified spacing
     coord = np.random.randn(100, 2)
 
     # --- 0 spacing
     assert np.array_equal(coord, ensure_spacing(coord, spacing=0, p_norm=p,
-                                                batch_size=size))
+                                                min_split_size=size))
 
     # Spacing is chosen to be half the minimum distance
     spacing = pdist(coord, metric=minkowski, p=p).min() * 0.5
 
     out = ensure_spacing(coord, spacing=spacing, p_norm=p,
-                         batch_size=size)
+                         min_split_size=size)
 
     assert np.array_equal(coord, out)
 
@@ -38,7 +38,7 @@ def test_ensure_spacing_nD(ndim, size):
 
     expected = np.ones((1, ndim))
 
-    assert np.array_equal(ensure_spacing(coord, batch_size=size), expected)
+    assert np.array_equal(ensure_spacing(coord, min_split_size=size), expected)
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
@@ -52,7 +52,7 @@ def test_ensure_spacing_batch_processing(p, size):
     expected = ensure_spacing(coord, spacing=spacing, p_norm=p)
 
     assert np.array_equal(ensure_spacing(coord, spacing=spacing, p_norm=p,
-                                         batch_size=size),
+                                         min_split_size=size),
                           expected)
 
 
@@ -64,6 +64,6 @@ def test_ensure_spacing_p_norm(p, size):
 
     # --- Consider the average distance btween the point as spacing
     spacing = np.median(pdist(coord, metric=minkowski, p=p))
-    out = ensure_spacing(coord, spacing=spacing, p_norm=p, batch_size=size)
+    out = ensure_spacing(coord, spacing=spacing, p_norm=p, min_split_size=size)
 
     assert pdist(out, metric=minkowski, p=p).min() > spacing
