@@ -65,7 +65,7 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50):
         Euclidean distance.
     min_split_size : int
         Minimum split size used to process ``coord`` by batch to save
-        memory. If None, the memory saving strategy is not applyed.
+        memory. If None, the memory saving strategy is not applied.
 
     Returns
     -------
