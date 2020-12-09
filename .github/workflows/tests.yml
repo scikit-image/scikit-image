@@ -16,7 +16,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         QT: ["PyQt5"]
@@ -127,19 +127,19 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
         QT: ["PyQt5"]
         BUILD_DOCS: [1]
         TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: 3.6
-            OPTIONAL_DEPS: 0 
+          - python-version: 3.7
+            OPTIONAL_DEPS: 0
           - python-version: 3.9
-            OPTIONAL_DEPS: 0 
+            OPTIONAL_DEPS: 0
         exclude:
-          - python-version: 3.6
+          - python-version: 3.7
             OPTIONAL_DEPS: 1
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
