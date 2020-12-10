@@ -34,7 +34,7 @@ if sys.version_info < (3, 6):
 
     error = """Python {py} detected.
 
-scikit-image 0.16+ supports only Python 3.6 and above.
+scikit-image 0.18+ supports only Python 3.7 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
@@ -229,7 +229,6 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
@@ -243,7 +242,7 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         extras_require=extras_require,
-        python_requires='>=3.6',
+        python_requires='>=3.7',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
