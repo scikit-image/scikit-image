@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "wheel",
-    "setuptools",
+    "setuptools<=51.0.0",
     "Cython>=0.29.18",
     # We follow scipy for much of these pinnings
     # https://github.com/scipy/scipy/blob/master/pyproject.toml
