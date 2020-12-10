@@ -319,33 +319,7 @@ display(clipped_data)
 # `Plotly Express <https://plotly.com/python/sliders/>`_.
 # Note that this works in a static HTML page!
 
-# Create `[row, column]` coordinates
-coords = np.indices((n_row, n_col))
-x_coords = coords[0].ravel()[::-1]
-y_coords = coords[1].ravel()
-# Convert images (slices) into coordinate (long) format
-df = pd.DataFrame(columns=['x', 'y', 'value', 'plane'])
-for p in range(n_plane):
-    df = df.append(
-        pd.DataFrame({
-            'x': x_coords,
-            'y': y_coords,
-            'value': data[p].ravel(),
-            'plane': [p] * n_row * n_col
-        })
-    )
-
-fig = px.density_heatmap(
-    df,
-    x='y',
-    y='x',
-    z='value',
-    animation_frame='plane',
-    color_continuous_scale='gray',
-    range_color=[0.0, 1.0],
-    nbinsx=n_row,
-    nbinsy=n_col
-)
+fig = px.imshow(data, animation_frame=0, binary_string=True)
 fig.update_xaxes(showticklabels=False)
 fig.update_yaxes(showticklabels=False)
 fig.update_layout(
