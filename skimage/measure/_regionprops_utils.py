@@ -138,7 +138,7 @@ def euler_number(image, connectivity=None):
     """
 
     # as image can be a label image, transform it to binary
-    image = (image > 0).astype(np.int)
+    image = (image > 0).astype(int)
     image = np.pad(image, pad_width=1, mode='constant')
 
     # check connectivity
@@ -180,7 +180,7 @@ def euler_number(image, connectivity=None):
     if image.ndim == 2:
         return coefs @ h
     else:
-        return np.int(0.125 * coefs @ h)
+        return int(0.125 * coefs @ h)
 
 
 def perimeter(image, neighbourhood=4):

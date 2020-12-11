@@ -186,7 +186,7 @@ def test_cross_correlate_masked_output_range():
 
     # No assert array less or equal, so we add an eps
     # Also could not find an `assert_array_greater`, Use (-xcorr) instead
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(float).eps
     testing.assert_array_less(xcorr, 1 + eps)
     testing.assert_array_less(-xcorr, 1 + eps)
 

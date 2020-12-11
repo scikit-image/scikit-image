@@ -275,7 +275,7 @@ class CENSURE(FeatureDetector):
             self.scales = scales
             return
 
-        cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
+        cumulative_mask = np.zeros(keypoints.shape[0], dtype=bool)
 
         if self.mode == 'octagon':
             for i in range(self.min_scale + 1, self.max_scale):
