@@ -97,7 +97,13 @@ plt.tight_layout()
 # pixel wide), a small filter radius is sufficient. As the radius
 # increases, objects with bigger sizes get filtered as well, such as the
 # camera tripod. The median filter is often used for noise removal because it
-# preserves borders.
+# preserves borders. For example, consider noise which is located only on a
+# few pixels in the entire image, as is the case with salt-and-pepper noise
+# [2]_: the median filter will ignore the noisy pixels, for they will appear
+# as outliers; thus, it will not change significantly the median of a group of
+# local pixels, in contrast to what a moving average filter would do.
+#
+# .. [2] https://en.wikipedia.org/wiki/Salt-and-pepper_noise
 #
 # Image smoothing
 # ===============
@@ -168,12 +174,12 @@ plt.tight_layout()
 #
 # We compare here how the global histogram equalization is applied locally.
 #
-# The equalized image [2]_ has a roughly linear cumulative distribution
-# function for each pixel neighborhood. The local version [3]_ of the
-# histogram equalization emphasizes every local gray-level variations.
+# The equalized image [3]_ has a roughly linear cumulative distribution
+# function for each pixel neighborhood. The local version [4]_ of
+# histogram equalization emphasizes every local gray-level variation.
 #
-# .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
-# .. [3] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+# .. [3] https://en.wikipedia.org/wiki/Histogram_equalization
+# .. [4] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 from skimage import exposure
 from skimage.filters import rank
@@ -345,7 +351,7 @@ plt.tight_layout()
 # Image threshold
 # ===============
 #
-# The Otsu threshold [4]_ method can be applied locally using the local gray-\
+# The Otsu threshold method [5]_ can be applied locally using the local gray-\
 # level distribution. In the example below, for each pixel, an "optimal"
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
@@ -356,7 +362,7 @@ plt.tight_layout()
 # provided by :func:`skimage.filters.threshold_otsu`. Note that the former is
 # much slower than the latter.
 #
-# .. [4] https://en.wikipedia.org/wiki/Otsu's_method
+# .. [5] https://en.wikipedia.org/wiki/Otsu's_method
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu
