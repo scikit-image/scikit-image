@@ -3,32 +3,32 @@
 Rank filters
 ============
 
-Rank filters are non-linear filters using the local gray-level ordering to
-compute the filtered value [1]_. This ensemble of filters share a common base:
+Rank filters are non-linear filters using local gray-level ordering to
+compute the filtered value. This ensemble of filters share a common base:
 the local gray-level histogram is computed on the neighborhood of a pixel
-(defined by a 2-D structuring element). If the filtered value is taken as the
+(defined by a 2D structuring element). If the filtered value is taken as the
 middle value of the histogram, we get the classical median filter.
 
-Rank filters can be used for several purposes such as:
+Rank filters can be used for several purposes, such as:
 
-* image quality enhancement
-  e.g. image smoothing, sharpening
+* image quality enhancement,
+  e.g., image smoothing, sharpening
 
-* image pre-processing
-  e.g. noise reduction, contrast enhancement
+* image pre-processing,
+  e.g., noise reduction, contrast enhancement
 
-* feature extraction
-  e.g. border detection, isolated point detection
+* feature extraction,
+  e.g., border detection, isolated point detection
 
-* post-processing
-  e.g. small object removal, object grouping, contour smoothing
+* image post-processing,
+  e.g., small object removal, object grouping, contour smoothing
 
-Some well known filters are specific cases of rank filters [1]_ e.g.
-morphological dilation, morphological erosion, median filters.
+Some well-known filters (e.g., morphological dilation and morphological
+erosion) are specific cases of rank filters [1]_.
 
 In this example, we will see how to filter a gray-level image using some of the
 linear and non-linear filters available in skimage. We use the ``camera`` image
-from ``skimage.data`` for all comparisons.
+from `skimage.data` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
        Recognition 35 (2002) 527-535, :DOI:`10.1016/S0031-3203(01)00047-4`
@@ -50,7 +50,7 @@ ax[0].imshow(noisy_image, cmap=plt.cm.gray)
 ax[0].axis('off')
 
 ax[1].plot(hist_centers, hist, lw=2)
-ax[1].set_title('Histogram of grey values')
+ax[1].set_title('Gray-level histogram')
 
 plt.tight_layout()
 
@@ -59,7 +59,7 @@ plt.tight_layout()
 # Noise removal
 # =============
 #
-# Some noise is added to the image, 1% of pixels are randomly set to 255, 1%
+# Some noise is added to the image: 1% of pixels are randomly set to 255, 1%
 # are randomly set to 0. The **median** filter is applied to remove the
 # noise.
 
@@ -93,12 +93,17 @@ plt.tight_layout()
 
 ######################################################################
 #
-# The added noise is efficiently removed, as the image defaults are small (1
-# pixel wide), a small filter radius is sufficient. As the radius is
-# increasing, objects with bigger sizes are filtered as well, such as the
-# camera tripod. The median filter is often used for noise removal because
-# borders are preserved and e.g. salt and pepper noise typically does not
-# distort the gray-level.
+# The added noise is efficiently removed, as the image defaults are small (1-\
+# pixel wide), a small filter radius is sufficient. As the radius
+# increases, objects with bigger sizes get filtered as well, such as the
+# camera tripod. The median filter is often used for noise removal because it
+# preserves borders. For example, consider noise which is located only on a
+# few pixels in the entire image, as is the case with salt-and-pepper noise
+# [2]_: the median filter will ignore the noisy pixels, for they will appear
+# as outliers; thus, it will not change significantly the median of a group of
+# local pixels, in contrast to what a moving average filter would do.
+#
+# .. [2] https://en.wikipedia.org/wiki/Salt-and-pepper_noise
 #
 # Image smoothing
 # ===============
@@ -126,14 +131,14 @@ plt.tight_layout()
 ######################################################################
 #
 # One may be interested in smoothing an image while preserving important
-# borders (median filters already achieved this), here we use the
-# **bilateral** filter that restricts the local neighborhood to pixel having
-# a gray-level similar to the central one.
+# borders (median filters already achieved this). Here, we use the
+# **bilateral** filter that restricts the local neighborhood to pixels with
+# gray levels similar to the central one.
 #
 # .. note::
 #
 #     A different implementation is available for color images in
-#     :py:func:`skimage.filters.denoise_bilateral`.
+#     :func:`skimage.restoration.denoise_bilateral`.
 
 from skimage.filters.rank import mean_bilateral
 
@@ -169,12 +174,12 @@ plt.tight_layout()
 #
 # We compare here how the global histogram equalization is applied locally.
 #
-# The equalized image [2]_ has a roughly linear cumulative distribution
-# function for each pixel neighborhood. The local version [3]_ of the
-# histogram equalization emphasizes every local gray-level variations.
+# The equalized image [3]_ has a roughly linear cumulative distribution
+# function for each pixel neighborhood. The local version [4]_ of
+# histogram equalization emphasizes every local gray-level variation.
 #
-# .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
-# .. [3] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+# .. [3] https://en.wikipedia.org/wiki/Histogram_equalization
+# .. [4] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 from skimage import exposure
 from skimage.filters import rank
@@ -346,23 +351,18 @@ plt.tight_layout()
 # Image threshold
 # ===============
 #
-# The Otsu threshold [4]_ method can be applied locally using the local gray-
+# The Otsu threshold method [5]_ can be applied locally using the local gray-\
 # level distribution. In the example below, for each pixel, an "optimal"
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
 #
 # These algorithms can be used on both 2D and 3D images.
 #
-# The example compares the local threshold with the global threshold
-# :py:func:`skimage.filters.threshold_otsu`.
+# The example compares local thresholding with global thresholding, which is
+# provided by :func:`skimage.filters.threshold_otsu`. Note that the former is
+# much slower than the latter.
 #
-# .. note::
-#
-#     Local is much slower than global thresholding. A function for global
-#     Otsu thresholding can be found in :
-#     :py:func:`skimage.filters.threshold_otsu`.
-#
-# .. [4] https://en.wikipedia.org/wiki/Otsu's_method
+# .. [5] https://en.wikipedia.org/wiki/Otsu's_method
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu
@@ -403,7 +403,7 @@ for a in ax:
 plt.tight_layout()
 
 ######################################################################
-# The example compares the local threshold with the global threshold in 3D
+# The example below performs the same comparison, using a 3D image this time.
 
 brain = exposure.rescale_intensity(data.brain().astype(float))
 
@@ -514,16 +514,16 @@ plt.tight_layout()
 #
 # Local histograms can be exploited to compute local entropy, which is
 # related to the local image complexity. Entropy is computed using base 2
-# logarithm i.e. the filter returns the minimum number of bits needed to
+# logarithm, i.e., the filter returns the minimum number of bits needed to
 # encode local gray-level distribution.
 #
-# :py:func:`skimage.rank.entropy` returns the local entropy on a given
-# structuring element. The following example shows applies this filter
+# :func:`skimage.filters.rank.entropy` returns the local entropy on a given
+# structuring element. The following example applies this filter
 # on 8- and 16-bit images.
 #
 # .. note::
 #
-#     to better use the available image bit, the function returns 10x entropy
+#     To better use the available image bit, the function returns 10x entropy
 #     for 8-bit images and 1000x entropy for 16-bit images.
 
 from skimage import data
@@ -552,13 +552,13 @@ plt.tight_layout()
 # Implementation
 # ==============
 #
-# The central part of the ``skimage.rank`` filters is build on a sliding window
-# that updates the local gray-level histogram. This approach limits the
+# The central part of the `skimage.filters.rank` filters is built on a sliding
+# window that updates the local gray-level histogram. This approach limits the
 # algorithm complexity to O(n) where n is the number of image pixels. The
 # complexity is also limited with respect to the structuring element size.
 #
-# In the following we compare the performance of different implementations
-# available in ``skimage``.
+# In the following, we compare the performance of different implementations
+# available in `skimage`.
 
 from time import time
 
@@ -600,8 +600,8 @@ def ndi_med(image, n):
 ######################################################################
 #  Comparison between
 #
-# * ``filters.rank.maximum``
-# * ``morphology.dilate``
+# * `skimage.filters.rank.maximum`
+# * `skimage.morphology.dilation`
 #
 # on increasing structuring element size:
 
@@ -654,8 +654,8 @@ plt.tight_layout()
 ######################################################################
 # Comparison between:
 #
-# * ``filters.rank.median``
-# * ``scipy.ndimage.percentile``
+# * `skimage.filters.rank.median`
+# * `scipy.ndimage.percentile_filter`
 #
 # on increasing structuring element size:
 
@@ -679,7 +679,7 @@ ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 
 ######################################################################
-# Comparison of outcome of the three methods:
+# Comparison of outcome of the two methods:
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
@@ -695,7 +695,7 @@ for a in ax:
 plt.tight_layout()
 
 ######################################################################
-# and increasing image size:
+# on increasing image size:
 
 r = 9
 elem = disk(r + 1)
