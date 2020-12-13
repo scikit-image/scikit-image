@@ -7,6 +7,11 @@ scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
+This release of scikit-image drops support for Python 3.6 in accordance with
+the `NEP-29 Python and Numpy version support community standard
+<https://numpy.org/neps/nep-0029-deprecation_policy.html>`_: Python 3.7 or
+newer is required to run this version.
+
 For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
@@ -76,6 +81,9 @@ Documentation
 - The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
   has been expanded (#4905).
 - Added links to the image.sc forum in example pages (#5094, #5096)
+- Added missing datasets to gallery examples (#5116, #5118)
+- Add farid filters in __all__, to populate the documentation (#5128, #5129)
+- Proofread gallery example for rank filters. (#5126, #5136)
 
 Improvements
 ------------
@@ -107,6 +115,8 @@ Improvements
 - Add data optional requirements to allow pip install scikit-image[data]
   (#5105, #5111)
 - OpenMP support in MSVC (#4924, #5111)
+- Restandardize handling of Multi-Image files (#2815, #5132)
+- Consistent zoom boundary behavior across SciPy versions (#5131, #5133)
 
 API Changes
 -----------
@@ -115,7 +125,7 @@ API Changes
   when the input is single-precision. Prior to this release, double-precision
   was always used.
 - The default value of ``threshold_rel`` in ``skimage.feature.corner`` has
-  changed from 0.1 to None, which corresponds to letting 
+  changed from 0.1 to None, which corresponds to letting
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
@@ -216,6 +226,7 @@ Development process
   cibuildwheel. Many thanks to the matplotlib and scikit-learn developers for
   paving the way for us! (#5080)
 - Disable Travis-CI builds (#5099, #5111)
+- Improvements to CircleCI build: no parallelization and caching) (#5097, #5119)
 
 Other Pull Requests
 -------------------
@@ -321,12 +332,15 @@ Other Pull Requests
 - removed usage of numpy's private functions from util.arraycrop (#5081)
 - peak_local_max: remove deprecated `indices` argument from examples (#5082)
 - Replace np.bool, np.float, and np.int with bool, float, and int (#5103, #5108)
+- change plausible script to track outbound links (#5115, #5123)
+- Remove Python 3.6 support (#5117, #5125)
+- Optimize ensure_spacing (#5062, #5135)
 
 
 52 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 
-A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package. 
+A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package.
 
 - Abhishek Arya
 - Abhishek Patil
