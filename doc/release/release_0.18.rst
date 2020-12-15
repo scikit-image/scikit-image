@@ -123,19 +123,15 @@ API Changes
 
 - ``skimage.restoration.richardson_lucy`` returns a single-precision output
   when the input is single-precision. Prior to this release, double-precision
-  was always used.
+  was always used. (#4880)
 - The default value of ``threshold_rel`` in ``skimage.feature.corner`` has
   changed from 0.1 to None, which corresponds to letting
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
-- ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
-  descriptive name.
-- The ``level`` parameter of ``measure.find_contours`` is now a keyword
-  argument, with a default value set to (max(image) - min(image)) / 2.
-- ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
-  to add support for Minkowski distances.
 - In ``measure.label``, the deprecated ``neighbors`` parameter has been
   removed. (#4942)
+- The image returned by ``data.camera`` has changed because of copyright
+  issues (#4913).
 
 Bug fixes
 ---------
