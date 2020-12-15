@@ -78,7 +78,7 @@ Documentation
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_
   has been expanded (#4905).
 - Added links to the image.sc forum in example pages (#5094, #5096)
 - Added missing datasets to gallery examples (#5116, #5118)
@@ -144,12 +144,12 @@ Bug fixes
 - Fix bug in ``random_walker`` when input labels have negative values (#4771)
 - PSF flipping is now correct for Richardson-Lucy deconvolution work in >2D (#4823)
 - Fix equalize_adapthist (CLAHE) for clip value 1.0 (#4828)
-- For the RANSAC algorithm, improved the case where all data points are 
-  outliers, which was previously raising an error 
+- For the RANSAC algorithm, improved the case where all data points are
+  outliers, which was previously raising an error
   (#4844)
 - An error-causing bug has been corrected for the ``bg_color`` parameter in
   ``label2rgb`` when its value is a string (#4840)
-- A normalization bug was fixed in ``metrics.variation_of_information`` 
+- A normalization bug was fixed in ``metrics.variation_of_information``
   (#4875)
 - Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
   for 3D objects, since it did not take tunnels into account. A new implementation
@@ -186,7 +186,7 @@ Deprecations
   `plotly <https://plotly.com>`_. In a similar vein, the ``qt`` and ``skivi``
   plugins of ``skimage.io`` have been deprecated
   and will be removed in version 0.20. (#4941, #4954)
-- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and
   ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 - The explicit setting ``threshold_rel=0` was removed from the Examples of the
   following docstrings: ``skimage.feature.BRIEF``,
