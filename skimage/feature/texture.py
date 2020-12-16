@@ -296,21 +296,21 @@ def local_binary_pattern(image, P, R, method='default'):
         Method to determine the pattern:
 
         ``default``
-           Original local binary pattern which is gray scale but not 
-           rotation invariant.
+           Original local binary pattern which is gray scale but not
+            rotation invariant.
         ``ror``
-           Extension of default implementation which is gray scale and 
-           rotation invariant.
+           Extension of default implementation which is gray scale and
+            rotation invariant.
         ``uniform``
-           Improved rotation invariance with uniform patterns and finer 
-           quantization of the angular space which is gray scale and 
-           rotation invariant.
+           Improved rotation invariance with uniform patterns and finer
+            quantization of the angular space which is gray scale and
+            rotation invariant.
         ``nri_uniform``
-           Non rotation-invariant uniform patterns variant which is 
-           only gray scale invariant [2]_.
+           Non rotation-invariant uniform patterns variant which is
+            only gray scale invariant [2]_.
         ``var``
-           Rotation invariant variance measures of the contrast of local 
-           image texture which is rotation but not gray scale invariant.
+           Rotation invariant variance measures of the contrast of local
+            image texture which is rotation but not gray scale invariant.
 
     Returns
     -------
