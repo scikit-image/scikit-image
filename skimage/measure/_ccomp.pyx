@@ -15,7 +15,7 @@ cdef DTYPE_t BG_NODE_NULL = -999
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef long (* fun_ravel)(long, long, long, shape_info *) nogil
+ctypedef size_t (* fun_ravel)(size_t, size_t, size_t, shape_info *) nogil
 
 
 # For having stuff concerning background in one place
@@ -167,26 +167,29 @@ cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef long ravel_index1D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index1D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index2D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 2D array. z is ignored
     """
-    cdef long ret = x + y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x
     return ret
 
 
-cdef long ravel_index3D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index3D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 3D array
     """
-    cdef long ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
     return ret
 
 
