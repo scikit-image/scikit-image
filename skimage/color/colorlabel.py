@@ -188,7 +188,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     if len(mapped_labels_flat) == 0:
         return image
 
-    dense_labels = range(max(mapped_labels_flat) + 1)
+    dense_labels = range(np.max(mapped_labels_flat) + 1)
 
     label_to_color = np.stack([c for i, c in zip(dense_labels, color_cycle)])
 
