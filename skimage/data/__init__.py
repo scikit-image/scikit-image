@@ -123,8 +123,8 @@ def create_image_fetcher():
     # remove `.dev` with a `+` if it exists.
     # This helps pooch understand that it should look in master
     # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    if '+' in pooch_version:
+    skimage_version_for_pooch = __version__.replace('.dev', '+')
+    if '+' in skimage_version_for_pooch:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
                "{version}/skimage/")
     else:
@@ -141,7 +141,7 @@ def create_image_fetcher():
         # With a version qualifier
         path=pooch.os_cache("scikit-image"),
         base_url=url,
-        version=pooch_version,
+        version=skimage_version_for_pooch,
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
