@@ -193,7 +193,7 @@ def affine(reference_image, moving_image,
         translation_indices = slice(ndim, ndim**2 - 1, ndim)
 
     for ref, mvg in image_pairs:
-        parameter_vector[translation_indices] *= pyramid_scale
+        parameter_vector[translation_indices] /= (pyramid_scale * nlevels)
         _cost = functools.partial(_param_cost, ref, mvg,
                                   vector_to_matrix=vector_to_matrix,
                                   cost=cost, multichannel=multichannel)
