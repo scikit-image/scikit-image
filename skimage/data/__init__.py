@@ -52,7 +52,6 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
-           'rough_wall',
            'shepp_logan_phantom',
            'skin',
            'stereo_motorcycle']
