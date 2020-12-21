@@ -117,7 +117,7 @@ def create_image_fetcher():
         pooch_version = pooch.__version__.lstrip('v')
         retry = {'retry_if_failed': 3}
         # Keep version check in synch with
-        # scikit-image/requirements/optional.txt 
+        # scikit-image/requirements/optional.txt
         if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
             # we need a more recent version of pooch to retry
             retry = {}
