@@ -1,7 +1,4 @@
 import numpy as np
-import collections
-
-from .._shared.utils import warn
 
 
 def integral_image(image):
@@ -60,7 +57,7 @@ def integrate(ii, start, end):
 
     Examples
     --------
-    >>> arr = np.ones((5, 6), dtype=np.float)
+    >>> arr = np.ones((5, 6), dtype=float)
     >>> ii = integral_image(arr)
     >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)
     array([3.])

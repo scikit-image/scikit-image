@@ -18,8 +18,9 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
         Whether or not to manipulate the labels array in-place.
     mask : ndarray of bool, same shape as `image`, optional.
         Image data mask. Objects in labels image overlapping with
-        False pixels of mask will be removed. If defined, the 
+        False pixels of mask will be removed. If defined, the
         argument buffer_size will be ignored.
+
     Returns
     -------
     out : (M[, N[, ..., P]]) array
@@ -47,7 +48,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(bool)
     >>> clear_border(labels, mask=mask)
     array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 1, 0, 0, 1, 0],
@@ -67,12 +68,12 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
         err_msg = "image and mask should have the same shape but are {} and {}"
         assert image.shape == mask.shape, \
                err_msg.format(image.shape, mask.shape)
-        if mask.dtype != np.bool_:
+        if mask.dtype != bool:
             raise TypeError("mask should be of type bool.")
         borders = ~mask
     else:
         # create borders with buffer_size
-        borders = np.zeros_like(image, dtype=np.bool_)
+        borders = np.zeros_like(image, dtype=bool)
         ext = buffer_size + 1
         slstart = slice(ext)
         slend = slice(-ext, None)

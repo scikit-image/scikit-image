@@ -16,22 +16,22 @@ def test_chan_vese_flat_level_set():
     img[3:6, 3:6] = np.ones((3, 3))
     ls = np.full((10, 10), 1000)
     result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=ls)
-    assert_array_equal(result.astype(np.float), np.ones((10, 10)))
+    assert_array_equal(result.astype(float), np.ones((10, 10)))
     result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=-ls)
-    assert_array_equal(result.astype(np.float), np.zeros((10, 10)))
+    assert_array_equal(result.astype(float), np.zeros((10, 10)))
 
 
 def test_chan_vese_small_disk_level_set():
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
     result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set="small disk")
-    assert_array_equal(result.astype(np.float), img)
+    assert_array_equal(result.astype(float), img)
 
 
 def test_chan_vese_simple_shape():
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
-    result = chan_vese(img, mu=0.0, tol=1e-8).astype(np.float)
+    result = chan_vese(img, mu=0.0, tol=1e-8).astype(float)
     assert_array_equal(result, img)
 
 
@@ -52,7 +52,7 @@ def test_chan_vese_remove_noise():
     img = ref.copy()
     img[8, 3] = 1
     result = chan_vese(img, mu=0.3, tol=1e-3, max_iter=100, dt=10,
-                       init_level_set="disk").astype(np.float)
+                       init_level_set="disk").astype(float)
     assert_array_equal(result, ref)
 
 
@@ -69,7 +69,7 @@ def test_chan_vese_gap_closing():
     img = ref.copy()
     img[:, 6] = np.zeros((20))
     result = chan_vese(img, mu=0.7, tol=1e-3, max_iter=1000, dt=1000,
-                       init_level_set="disk").astype(np.float)
+                       init_level_set="disk").astype(float)
     assert_array_equal(result, ref)
 
 

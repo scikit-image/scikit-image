@@ -1,18 +1,32 @@
-import os
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose)
+                                     assert_allclose,
+                                     assert_array_almost_equal)
 from skimage._shared import testing
 
-import skimage
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
-from skimage.morphology import grey, disk
+from skimage.morphology import grey, disk, ball
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
+from skimage.filters.rank import subtract_mean
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, arch32, parametrize, xfail
-from pytest import param
+from skimage._shared.testing import test_parallel, parametrize, fetch
+import pytest
+
+# To be removed along with tophat and bottomhat functions.
+all_rank_filters.remove('tophat')
+all_rank_filters.remove('bottomhat')
+
+
+def test_deprecation():
+    selem = disk(3)
+    image = img_as_ubyte(data.camera()[:50, :50])
+
+    with expected_warnings(['rank.tophat is deprecated.']):
+        rank.tophat(image, selem)
+    with expected_warnings(['rank.bottomhat is deprecated.']):
+        rank.bottomhat(image, selem)
 
 
 def test_otsu_edge_case():
@@ -41,17 +55,45 @@ def test_otsu_edge_case():
     assert result[1, 1] in [141, 172]
 
 
-class TestRank:
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+def test_subtract_mean_underflow_correction(dtype):
+    # Input: [10, 10, 10]
+    selem = np.ones((1, 3))
+    arr = np.array([[10, 10, 10]], dtype=dtype)
+    result = subtract_mean(arr, selem)
+
+    if dtype == np.uint8:
+        expected_val = 127
+    else:
+        expected_val = (arr.max() + 1) // 2 - 1
+
+    assert np.all(result == expected_val)
+
+
+@pytest.fixture(scope='module')
+def refs():
+    yield np.load(fetch("data/rank_filter_tests.npz"))
+
+
+@pytest.fixture(scope='module')
+def refs():
+    yield np.load(fetch("data/rank_filter_tests.npz"))
+
+
+class TestRank():
     def setup(self):
         np.random.seed(0)
         # This image is used along with @test_parallel
         # to ensure that the same seed is used for each thread.
         self.image = np.random.rand(25, 25)
+        np.random.seed(0)
+        self.volume = np.random.rand(10, 10, 10)
         # Set again the seed for the other tests.
         np.random.seed(0)
         self.selem = morphology.disk(1)
-        self.refs = np.load(os.path.join(skimage.data_dir,
-                                         "rank_filter_tests.npz"))
+        self.selem_3d = morphology.ball(1)
+        self.refs = np.load(fetch('data/rank_filter_tests.npz'))
+        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
@@ -78,11 +120,26 @@ class TestRank:
                 # reason.
                 assert result[19, 18] in [141, 172]
                 result[19, 18] = 172
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
             else:
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
 
         check()
+
+    @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
+                            'majority', 'maximum', 'mean', 'geometric_mean',
+                            'subtract_mean', 'median', 'minimum', 'modal',
+                            'enhance_contrast', 'pop', 'sum', 'threshold',
+                            'noise_filter', 'entropy'])
+    def test_rank_filters_3D(self, filter):
+        @test_parallel(warnings_matching=['Possible precision loss'])
+        def check():
+            expected = self.refs_3d[filter]
+            result = getattr(rank, filter)(self.volume, self.selem_3d)
+            assert_array_almost_equal(expected, result)
+
+        check()
+
 
     def test_random_sizes(self):
         # make sure the size is not a problem
@@ -271,14 +328,35 @@ class TestRank:
         image_uint = img_as_ubyte(data.camera()[:50, :50])
         image_float = img_as_float(image_uint)
 
-        methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
-                   'subtract_mean', 'enhance_contrast', 'pop', 'tophat']
+        methods = ['autolevel', 'equalize', 'gradient', 'threshold',
+                   'subtract_mean', 'enhance_contrast', 'pop']
 
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, disk(3))
             with expected_warnings(["Possible precision loss"]):
                 out_f = func(image_float, disk(3))
+            assert_equal(out_u, out_f)
+
+    def test_compare_ubyte_vs_float_3d(self):
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_uint = np.random.randint(0, high=256,
+                                        size=(10, 20, 30), dtype=np.uint8)
+        volume_float = img_as_float(volume_uint)
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
+        for method in methods_3d:
+            func = getattr(rank, method)
+            out_u = func(volume_uint, ball(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_f = func(volume_float, ball(3))
             assert_equal(out_u, out_f)
 
     def test_compare_8bit_unsigned_vs_signed(self):
@@ -292,9 +370,9 @@ class TestRank:
         image_u = img_as_ubyte(image_s)
         assert_equal(image_u, img_as_ubyte(image_s))
 
-        methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+        methods = ['autolevel', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
-                   'modal', 'enhance_contrast', 'pop', 'threshold', 'tophat']
+                   'modal', 'enhance_contrast', 'pop', 'threshold']
 
         for method in methods:
             func = getattr(rank, method)
@@ -303,10 +381,34 @@ class TestRank:
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
+    def test_compare_8bit_unsigned_vs_signed_3d(self):
+        # filters applied on 8-bit volume ore 16-bit volume (having only real 8-bit
+        # of dynamic) should be identical
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_s = np.random.randint(0, high=127,
+                                     size=(10, 20, 30), dtype=np.int8)
+        volume_u = img_as_ubyte(volume_s)
+        assert_equal(volume_u, img_as_ubyte(volume_s))
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
+        for method in methods_3d:
+            func = getattr(rank, method)
+            out_u = func(volume_u, ball(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_s = func(volume_s, ball(3))
+            assert_equal(out_u, out_s)
+
     @parametrize('method',
-                 ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+                 ['autolevel', 'equalize', 'gradient', 'maximum',
                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                  'enhance_contrast', 'pop', 'threshold', 'tophat'])
+                  'enhance_contrast', 'pop', 'threshold'])
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -314,10 +416,27 @@ class TestRank:
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
+        np.random.seed(0)
+        volume8 = np.random.randint(128, high=256,
+                                    size=(10, 10, 10), dtype=np.uint8)
+        volume16 = volume8.astype(np.uint16)
+
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
+
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
         f16 = func(image16, disk(3))
         assert_equal(f8, f16)
+
+        if (method in methods_3d):
+            f8 = func(volume8, ball(3))
+            f16 = func(volume16, ball(3))
+
+            assert_equal(f8, f16)
 
     def test_trivial_selem8(self):
         # check that min, max and mean returns identity if structuring element
@@ -509,7 +628,7 @@ class TestRank:
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (np.bool_, np.uint8, np.uint16, np.int32, np.int64,
+        for dtype in (bool, np.uint8, np.uint16, np.int32, np.int64,
                       np.float32, np.float64):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
             rank.mean(image=image, selem=elem, out=out, mask=mask,
@@ -702,7 +821,7 @@ class TestRank:
         assert_equal(image.dtype, out.dtype)
 
     def test_input_boolean_dtype(self):
-        image = (np.random.rand(100, 100) * 256).astype(np.bool_)
-        elem = np.ones((3, 3), dtype=np.bool_)
+        image = (np.random.rand(100, 100) * 256).astype(bool)
+        elem = np.ones((3, 3), dtype=bool)
         with testing.raises(ValueError):
             rank.maximum(image=image, selem=elem)

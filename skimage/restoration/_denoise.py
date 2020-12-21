@@ -232,7 +232,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               range_lut, empty_dims, out)
 
 
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+                       *, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -258,6 +259,10 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
+    multichannel : bool, optional
+        Apply total-variation denoising separately for each channel. This
+        option should be true for color images, otherwise the denoising is
+        also applied in the channels dimension.
 
     Returns
     -------
@@ -277,7 +282,6 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     """
     image = np.atleast_3d(img_as_float(image))
-    image = np.ascontiguousarray(image)
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -286,8 +290,25 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
-    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
-                        isotropic, out)
+
+    if multichannel:
+        channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
+        for c in range(image.shape[-1]):
+            # the algorithm below expects 3 dimensions to always be present.
+            # slicing the array in this fashion preserves the channel dimension for us
+            channel_in = np.ascontiguousarray(image[..., c:c+1])
+
+            _denoise_tv_bregman(channel_in, image.dtype.type(weight),
+                                max_iter, eps, isotropic, channel_out)
+
+            out[..., c] = channel_out[..., 0]
+
+    else:
+        image = np.ascontiguousarray(image)
+
+        _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+                            isotropic, out)
+
     return np.squeeze(out[1:-1, 1:-1])
 
 
@@ -438,7 +459,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     >>> x, y, z = np.ogrid[0:20, 0:20, 0:20]
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
-    >>> mask = mask.astype(np.float)
+    >>> mask = mask.astype(float)
     >>> mask += 0.2*np.random.randn(*mask.shape)
     >>> res = denoise_tv_chambolle(mask, weight=100)
 
@@ -570,8 +591,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for image
         dlen = wavelet.dec_len
-        wavelet_levels = np.min(
-            [pywt.dwt_max_level(s, dlen) for s in image.shape])
+        wavelet_levels = pywt.dwtn_max_level(image.shape, wavelet)
 
         # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)
@@ -674,7 +694,7 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink',
-                    rescale_sigma=None):
+                    rescale_sigma=True):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -708,12 +728,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
         "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
-    rescale_sigma : bool or None, optional
+    rescale_sigma : bool, optional
         If False, no rescaling of the user-provided ``sigma`` will be
-        performed. The default of ``None`` rescales sigma appropriately if the
-        image is rescaled internally. A ``DeprecationWarning`` is raised to
-        warn the user about this new behaviour. This warning can be avoided
-        by setting ``rescale_sigma=True``.
+        performed. The default of ``True`` rescales sigma appropriately if the
+        image is rescaled internally.
 
         .. versionadded:: 0.16
            ``rescale_sigma`` was introduced in 0.16
@@ -794,16 +812,6 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     if convert2ycbcr and not multichannel:
         raise ValueError("convert2ycbcr requires multichannel == True")
 
-    if rescale_sigma is None:
-        msg = (
-            "As of scikit-image 0.16, automated rescaling of sigma to match "
-            "any internal rescaling of the image is performed. Setting "
-            "rescale_sigma to False, will disable this new behaviour. To "
-            "avoid this warning the user should explicitly set rescale_sigma "
-            "to True or False."
-        )
-        warn(msg, DeprecationWarning)
-        rescale_sigma = True
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,
                                                        multichannel,

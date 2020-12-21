@@ -6,6 +6,7 @@ from skimage.measure.fit import _dynamic_max_trials
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_array_less, xfail, arch32)
+from skimage._shared._warnings import expected_warnings
 
 
 def test_line_model_invalid_input():
@@ -386,3 +387,12 @@ def test_ransac_sample_duplicates():
     data = np.arange(4)
     ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
            max_trials=10)
+
+
+def test_ransac_with_no_final_inliers():
+    data = np.random.rand(5, 2)
+    with expected_warnings(['No inliers found. Model not fitted']):
+        model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
+                                residual_threshold=0, random_state=1523427)
+    assert inliers is None
+    assert model is None

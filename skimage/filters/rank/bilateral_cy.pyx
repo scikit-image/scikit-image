@@ -8,9 +8,10 @@ from libc.math cimport log
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
+cnp.import_array()
 
 cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
-                              Py_ssize_t* histo,
+                              Py_ssize_t[::1] histo,
                               double pop, dtype_t g,
                               Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               double p0, double p1,
@@ -34,7 +35,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
 
 
 cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
-                             Py_ssize_t* histo,
+                             Py_ssize_t[::1] histo,
                              double pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,
@@ -53,7 +54,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
 
 
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
-                             Py_ssize_t* histo,
+                             Py_ssize_t[::1] histo,
                              double pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,

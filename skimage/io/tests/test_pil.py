@@ -3,7 +3,7 @@ import numpy as np
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 
-from ... import data_dir, img_as_float
+from ... import img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
 
 from PIL import Image
@@ -15,7 +15,7 @@ from skimage._shared import testing
 from skimage._shared.testing import (mono_check, color_check,
                                      assert_equal, assert_array_equal,
                                      assert_array_almost_equal,
-                                     assert_allclose)
+                                     assert_allclose, fetch)
 from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
 
@@ -33,7 +33,6 @@ def teardown():
 def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.
     Call `use_plugin` directly before the tests to ensure that PIL is used.
-
     """
     try:
         use_plugin('pil')
@@ -53,10 +52,10 @@ def test_png_round_trip():
 
 
 def test_imread_as_gray():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    img = imread(fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
@@ -75,21 +74,21 @@ def test_imread_separate_channels():
 
 
 def test_imread_multipage_rgb_tif():
-    img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))
+    img = imread(fetch('data/multipage_rgb.tif'))
     assert img.shape == (2, 10, 10, 3), img.shape
 
 
 def test_imread_palette():
-    img = imread(os.path.join(data_dir, 'palette_gray.png'))
+    img = imread(fetch('data/palette_gray.png'))
     assert img.ndim == 2
-    img = imread(os.path.join(data_dir, 'palette_color.png'))
+    img = imread(fetch('data/palette_color.png'))
     assert img.ndim == 3
 
 
 def test_imread_index_png_with_alpha():
     # The file `foo3x5x4indexed.png` was created with this array
     # (3x5 is (height)x(width)):
-    data = np.array([[[127, 0, 255, 255],
+    dfoo = np.array([[[127, 0, 255, 255],
                       [127, 0, 255, 255],
                       [127, 0, 255, 255],
                       [127, 0, 255, 255],
@@ -104,14 +103,14 @@ def test_imread_index_png_with_alpha():
                       [0, 31, 255, 255],
                       [0, 31, 255, 255],
                       [0, 31, 255, 255]]], dtype=np.uint8)
-    img = imread(os.path.join(data_dir, 'foo3x5x4indexed.png'))
-    assert_array_equal(img, data)
+    img = imread(fetch('data/foo3x5x4indexed.png'))
+    assert_array_equal(img, dfoo)
 
 
 def test_palette_is_gray():
-    gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
+    gray = Image.open(fetch('data/palette_gray.png'))
     assert _palette_is_grayscale(gray)
-    color = Image.open(os.path.join(data_dir, 'palette_color.png'))
+    color = Image.open(fetch('data/palette_color.png'))
     assert not _palette_is_grayscale(color)
 
 
@@ -119,24 +118,24 @@ def test_bilevel():
     expected = np.zeros((10, 10))
     expected[::2] = 255
 
-    img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
+    img = imread(fetch('data/checker_bilevel.png'))
     assert_array_equal(img, expected)
 
 
 def test_imread_uint16():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = imread(fetch('data/chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
 
 
 def test_imread_truncated_jpg():
     with testing.raises(IOError):
-        imread(os.path.join(data_dir, 'truncated.jpg'))
+        imread(fetch('data/truncated.jpg'))
 
 
 def test_jpg_quality_arg():
-    chessboard = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    chessboard = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     with temporary_file(suffix='.jpg') as jpg:
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
@@ -147,8 +146,8 @@ def test_jpg_quality_arg():
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
@@ -220,19 +219,19 @@ def test_imsave_filelike():
 
 def test_imsave_boolean_input():
     shape = (2, 2)
-    image = np.eye(*shape, dtype=np.bool)
+    image = np.eye(*shape, dtype=bool)
     s = BytesIO()
 
     # save to file-like object
     with expected_warnings(
-            ['is a boolean image: setting True to 1 and False to 0']):
+            ['is a boolean image: setting True to 255 and False to 0']):
         imsave(s, image)
 
     # read from file-like object
     s.seek(0)
     out = imread(s)
     assert_equal(out.shape, shape)
-    assert_allclose(out, image)
+    assert_allclose(out.astype(bool), image)
 
 
 def test_imexport_imimport():
@@ -256,18 +255,18 @@ def test_all_mono():
 
 
 def test_multi_page_gif():
-    img = imread(os.path.join(data_dir, 'no_time_for_that_tiny.gif'))
+    img = imread(fetch('data/no_time_for_that_tiny.gif'))
     assert img.shape == (24, 25, 14, 3), img.shape
-    img2 = imread(os.path.join(data_dir, 'no_time_for_that_tiny.gif'),
+    img2 = imread(fetch('data/no_time_for_that_tiny.gif'),
                   img_num=5)
     assert img2.shape == (25, 14, 3)
     assert_allclose(img[5], img2)
 
 
 def test_cmyk():
-    ref = imread(os.path.join(data_dir, 'color.png'))
+    ref = imread(fetch('data/color.png'))
 
-    img = Image.open(os.path.join(data_dir, 'color.png'))
+    img = Image.open(fetch('data/color.png'))
     img = img.convert('CMYK')
 
     f = NamedTemporaryFile(suffix='.jpg')
@@ -293,5 +292,5 @@ def test_cmyk():
 
 
 def test_extreme_palette():
-    img = imread(os.path.join(data_dir, 'green_palette.png'))
+    img = imread(fetch('data/green_palette.png'))
     assert_equal(img.ndim, 3)

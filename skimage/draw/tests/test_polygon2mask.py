@@ -11,4 +11,4 @@ polygon = np.array([[80, 111, 146, 234, 407, 300, 187, 45],
 def test_polygon2mask():
     mask = draw.polygon2mask(image_shape, polygon)
     assert mask.shape == image_shape
-    assert mask.sum() == 57647
+    assert mask.sum() == 57653
