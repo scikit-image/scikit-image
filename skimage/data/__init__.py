@@ -5,6 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
+from distutils.version import LooseVersion
 from warnings import warn
 import numpy as np
 import shutil
@@ -113,6 +114,11 @@ def _has_hash(path, expected_hash):
 def create_image_fetcher():
     try:
         import pooch
+        pooch_version = pooch.__version__.lstrip('v')
+        retry = {'retry_if_failed': 3}
+        if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+            # we need a more recent version of pooch to retry
+            retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
@@ -145,7 +151,10 @@ def create_image_fetcher():
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
-        retry_if_failed=3,
+        # Note: this should read `retry_if_failed=3,`, but we generate that
+        # dynamically at import time above, in case installed pooch is a less
+        # recent version
+        **retry,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
