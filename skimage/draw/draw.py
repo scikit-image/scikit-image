@@ -205,7 +205,26 @@ def disk(center, radius, *, shape=None):
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.draw import disk
+    >>> shape = (4, 4)
+    >>> img = np.zeros(shape, dtype=np.uint8)
+    >>> rr, cc = disk((0, 0), 2, shape=shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 0, 0],
+           [1, 1, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0]], dtype=uint8)
+    >>> img = np.zeros(shape, dtype=np.uint8)
+    >>> # Negative coordinates in rr and cc perform a wraparound
+    >>> rr, cc = disk((0, 0), 2, shape=None)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 0, 1],
+           [1, 1, 0, 1],
+           [0, 0, 0, 0],
+           [1, 1, 0, 1]], dtype=uint8)
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = disk((4, 4), 5)
     >>> img[rr, cc] = 1
