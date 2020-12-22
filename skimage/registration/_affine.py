@@ -185,6 +185,7 @@ def affine(reference_image, moving_image,
     if initial_parameters is None:
         initial_parameters = np.eye(ndim, ndim + 1).ravel()
     parameter_vector = initial_parameters
+    parameter_vector[translation_indices] /= pyramid_scale ** (nlevels + 1)
 
     if vector_to_matrix is None:
         vector_to_matrix = _parameter_vector_to_matrix
@@ -193,7 +194,7 @@ def affine(reference_image, moving_image,
         translation_indices = slice(ndim, ndim**2 - 1, ndim)
 
     for ref, mvg in image_pairs:
-        parameter_vector[translation_indices] /= (pyramid_scale * nlevels)
+        parameter_vector[translation_indices] *= pyramid_scale
         _cost = functools.partial(_param_cost, ref, mvg,
                                   vector_to_matrix=vector_to_matrix,
                                   cost=cost, multichannel=multichannel)
