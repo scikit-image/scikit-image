@@ -5,6 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
+from distutils.version import LooseVersion
 from warnings import warn
 import numpy as np
 import shutil
@@ -52,7 +53,6 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
-           'rough_wall',
            'shepp_logan_phantom',
            'skin',
            'stereo_motorcycle']
@@ -114,6 +114,13 @@ def _has_hash(path, expected_hash):
 def create_image_fetcher():
     try:
         import pooch
+        pooch_version = pooch.__version__.lstrip('v')
+        retry = {'retry_if_failed': 3}
+        # Keep version check in synch with
+        # scikit-image/requirements/optional.txt
+        if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+            # we need a more recent version of pooch to retry
+            retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
@@ -124,8 +131,8 @@ def create_image_fetcher():
     # remove `.dev` with a `+` if it exists.
     # This helps pooch understand that it should look in master
     # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    if '+' in pooch_version:
+    skimage_version_for_pooch = __version__.replace('.dev', '+')
+    if '+' in skimage_version_for_pooch:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
                "{version}/skimage/")
     else:
@@ -142,11 +149,14 @@ def create_image_fetcher():
         # With a version qualifier
         path=pooch.os_cache("scikit-image"),
         base_url=url,
-        version=pooch_version,
+        version=skimage_version_for_pooch,
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
-        retry_if_failed=3,
+        # Note: this should read `retry_if_failed=3,`, but we generate that
+        # dynamically at import time above, in case installed pooch is a less
+        # recent version
+        **retry,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
