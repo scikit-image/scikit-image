@@ -104,7 +104,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         each labeled segment with its average color, for a stained-class or
         pastel painting appearance.
     force_grayscale : bool, optional
-        Whether or not to convert the input image to grayscale. By default it 
+        Whether or not to convert the input image to grayscale. By default it
         converts the image to grayscale before making the overlay.
 
     Returns
@@ -148,7 +148,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     image_alpha : float [0, 1], optional
         Opacity of the image.
     force_grayscale : bool, optional
-        Whether or not to convert the input image to grayscale. By default it 
+        Whether or not to convert the input image to grayscale. By default it
         converts the image to grayscale before making the overlay.
 
     Returns
