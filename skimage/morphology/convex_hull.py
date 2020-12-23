@@ -2,6 +2,7 @@
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull
+from ..measure.pnpoly import grid_points_in_poly
 from scipy.ndimage.morphology import binary_fill_holes
 from ..draw import polygon_perimeter
 from ._convex_hull import possible_hull
@@ -88,7 +89,7 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     return coords_in_hull
 
 
-def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
+def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, fast_drawing=None):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -106,6 +107,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
         Tolerance when determining whether a point is inside the hull. Due
         to numerical floating point errors, a tolerance of 0 can result in
         some points erroneously being classified as being outside the hull.
+    fast_drawing : bool or None, optional
+        If ``True``, use the fast SciPy function ``polygon_perimeter`` to locate
+        hull perimeter pixels and then fill it in. If ``False``, use the slower
+        Cython function ``grid_points_in_poly`` to locate convex hull pixels.
+        If ``None``, default to ``False`` (in future will default to ``True``).
 
     Returns
     -------
@@ -118,6 +124,8 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     """
     ndim = image.ndim
+    if fast_drawing is None:
+        fast_drawing = False
     if np.count_nonzero(image) == 0:
         warn("Input image is entirely zero, no valid convex hull. "
              "Returning empty image", UserWarning)
@@ -139,8 +147,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     # Add a vertex for the middle of each pixel edge
     if offset_coordinates:
         offsets = _offsets_diamond(image.ndim)
-        # Avoid applying offsets beyond the perimeter of the image
-        coords = _apply_partial_offsets(image, coords, offsets)
+        if fast_drawing and ndim == 2:
+            # Avoid applying offsets beyond the perimeter of the image
+            coords = _apply_partial_offsets(image, coords, offsets)
+        else:
+            coords = (coords[:, np.newaxis, :] + offsets).reshape(-1, ndim)
 
     # repeated coordinates can *sometimes* cause problems in
     # scipy.spatial.ConvexHull, so we remove them.
@@ -150,12 +161,18 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     hull = ConvexHull(coords)
     vertices = hull.points[hull.vertices]
 
+    # --- Default behaviour (to be deprecated): ---
+    # If 2D, use fast Cython function to locate convex hull pixels,
+    # --- or if ``fast_drawing`` is enabled: ---
     # If 2D, locate hull perimeter pixels and use fast SciPy function to fill it in
     if ndim == 2:
-        hull_perim_r, hull_perim_c = polygon_perimeter(vertices[:, 0], vertices[:, 1])
-        mask = np.zeros(image.shape, dtype=np.bool)
-        mask[hull_perim_r, hull_perim_c] = True
-        mask = binary_fill_holes(mask)
+        if fast_drawing:
+            hull_perim_r, hull_perim_c = polygon_perimeter(vertices[:, 0], vertices[:, 1])
+            mask = np.zeros(image.shape, dtype=np.bool)
+            mask[hull_perim_r, hull_perim_c] = True
+            mask = binary_fill_holes(mask)
+        else:
+            mask = grid_points_in_poly(image.shape, vertices)
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
