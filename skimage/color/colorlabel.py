@@ -73,7 +73,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 @change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
+              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay',
+              force_grayscale=True):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -102,6 +103,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         and overlays the colored labels over the original image. 'avg' replaces
         each labeled segment with its average color, for a stained-class or
         pastel painting appearance.
+    force_grayscale : bool, optional
+        Whether or not to convert the input image to grayscale. By default it 
+        converts the image to grayscale before making the overlay.
 
     Returns
     -------
@@ -111,7 +115,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     """
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                  bg_color, image_alpha)
+                                  bg_color, image_alpha, force_grayscale)
     elif kind == 'avg':
         return _label2rgb_avg(label, image, bg_label, bg_color)
     else:
@@ -119,7 +123,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
-                       bg_label=-1, bg_color=None, image_alpha=1):
+                       bg_label=-1, bg_color=None, image_alpha=1,
+                       force_grayscale=True):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -142,6 +147,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
+    force_grayscale : bool, optional
+        Whether or not to convert the input image to grayscale. By default it 
+        converts the image to grayscale before making the overlay.
 
     Returns
     -------
@@ -164,11 +172,11 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
 
-        if image.ndim > label.ndim:
-            image = img_as_float(rgb2gray(image))
+        if image.ndim > label.ndim and force_grayscale:
+            image = gray2rgb(img_as_float(rgb2gray(image)))
         else:
             image = img_as_float(image)
-        image = gray2rgb(image) * image_alpha + (1 - image_alpha)
+        image = image * image_alpha + (1 - image_alpha)
 
     # Ensure that all labels are non-negative so we can index into
     # `label_to_color` correctly.
