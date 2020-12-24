@@ -533,3 +533,35 @@ def test_projective_str():
     want = want.replace('1\\.', ' *1\\.')
     print(want)
     assert re.match(want, str(tform))
+
+
+def _assert_least_squares(tf, src, dst):
+    baseline = np.sum((tf(src) - dst) ** 2)
+    for i in range(tf.params.size):
+        for update in [0.001, -0.001]:
+            params = np.copy(tf.params)
+            params.flat[i] += update
+            new_tf = tf.__class__(matrix=params)
+            new_ssq = np.sum((new_tf(src) - dst) ** 2)
+            assert new_ssq > baseline
+
+
+def test_estimate_affine_3d():
+    ndim = 3
+    src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
+    matrix = np.array(
+        [[4.8, 0.1, 0.2, 25],
+         [0.0, 1.0, 0.1, 30],
+         [0.0, 0.0, 1.0, -2],
+         [0.0, 0.0, 0.0, 1.]]
+    )
+    tf = AffineTransform(matrix=matrix)
+    dst = tf(src)
+    dst_noisy = dst + np.random.random((25, ndim))
+    tf2 = AffineTransform(dimensionality=ndim)
+    tf2.estimate(src, dst_noisy)
+    # we check rot/scale/etc more tightly than translation because translation
+    # estimation is on the 1 pixel scale
+    assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)
+    assert_almost_equal(tf2.params[:, -1], matrix[:, -1], decimal=0)
+    _assert_least_squares(tf2, src, dst_noisy)
