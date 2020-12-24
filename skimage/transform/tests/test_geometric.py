@@ -1,7 +1,9 @@
 import numpy as np
 import re
 from skimage.transform._geometric import GeometricTransform
-from skimage.transform._geometric import _center_and_normalize_points
+from skimage.transform._geometric import (
+    _center_and_normalize_points, _euler_rotation_matrix
+)
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
@@ -590,3 +592,11 @@ def test_affine_transform_from_linearized_parameters():
     # incorrect number of parameters
     with testing.raises(ValueError):
         tf = AffineTransform(matrix=mat[:-1].ravel()[:-1])
+
+
+def test_euler_rotation():
+    v = [0, 10, 0]
+    angles = np.radians([90, 45, 45])
+    expected = [-5, -5, 7.1]
+    R = _euler_rotation_matrix(angles)
+    assert_almost_equal(R @ v, expected, decimal=1)

@@ -1058,7 +1058,8 @@ def _euler_rotation(axis, angle):
                    [(-1)**i * s,               c]])
     Ri = np.eye(3)
     axes = sorted({0, 1, 2} - {axis})
-    Ri[axes][:, axes] = R2
+    sl = slice(axes[0], axes[1] + 1, axes[1] - axes[0])
+    Ri[sl, sl] = R2
     return Ri
 
 
@@ -1080,7 +1081,7 @@ def _euler_rotation_matrix(angles):
     dim = len(angles)
     R = np.eye(dim)
     for i, angle in enumerate(angles):
-        R @= _euler_rotation(i, angle)
+        R = R @ _euler_rotation(i, angle)
     return R
 
 
