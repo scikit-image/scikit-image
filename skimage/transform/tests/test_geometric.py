@@ -587,3 +587,6 @@ def test_affine_transform_from_linearized_parameters():
     )
     tf = AffineTransform(matrix=mat[:-1].ravel())
     assert_equal(np.array(tf), mat)
+    # incorrect number of parameters
+    with testing.raises(ValueError):
+        tf = AffineTransform(matrix=mat[:-1].ravel()[:-1])
