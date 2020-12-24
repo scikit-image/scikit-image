@@ -579,3 +579,11 @@ def test_array_protocol():
     tf = ProjectiveTransform(mat)
     assert_equal(np.array(tf), mat)
     assert_equal(np.array(tf, dtype=int), mat.astype(int))
+
+
+def test_affine_transform_from_linearized_parameters():
+    mat = np.concatenate(
+        (np.random.random((3, 4)), np.eye(4)[-1:]), axis=0
+    )
+    tf = AffineTransform(matrix=mat[:-1].ravel())
+    assert_equal(np.array(tf), mat)

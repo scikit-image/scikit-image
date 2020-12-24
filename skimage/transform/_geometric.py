@@ -837,12 +837,12 @@ class AffineTransform(ProjectiveTransform):
                 dimensionality = int(d)
                 if d != dimensionality:
                     raise ValueError('Invalid number of elements for '
-                                     'linearized matrix: {}'.format(nparam))
+                                     f'linearized matrix: {nparam}')
                 part_matrix = np.reshape(
-                        matrix, (dimensionality, dimensionality + 1)
+                    matrix, (dimensionality, dimensionality + 1)
                 )
                 matrix = np.concatenate(
-                        (part_matrix, [[0] * d + [1]]), axis=0
+                    (part_matrix, np.eye(dimensionality + 1)[-1:]), axis=0
                 )
             elif matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
