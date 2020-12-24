@@ -572,3 +572,10 @@ def test_fundamental_3d_not_implemented():
         _ = FundamentalMatrixTransform(dimensionality=3)
     with testing.raises(NotImplementedError):
         _ = FundamentalMatrixTransform(np.eye(4))
+
+
+def test_array_protocol():
+    mat = np.eye(4)
+    tf = ProjectiveTransform(mat)
+    assert_equal(np.array(tf), mat)
+    assert_equal(np.array(tf, dtype=int), mat.astype(int))
