@@ -565,3 +565,10 @@ def test_estimate_affine_3d():
     assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)
     assert_almost_equal(tf2.params[:, -1], matrix[:, -1], decimal=0)
     _assert_least_squares(tf2, src, dst_noisy)
+
+
+def test_fundamental_3d_not_implemented():
+    with testing.raises(NotImplementedError):
+        _ = FundamentalMatrixTransform(dimensionality=3)
+    with testing.raises(NotImplementedError):
+        _ = FundamentalMatrixTransform(np.eye(4))
