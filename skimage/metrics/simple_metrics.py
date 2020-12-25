@@ -184,8 +184,8 @@ def _pad_to(arr, shape):
     array([[1, 0, 0]])
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
-        raise ValueError("Target shape must be strictly greater "
-                         "than input shape.")
+        raise ValueError(f"Target shape {shape} must be greater than input"
+                         f"shape {arr.shape} along every axis.")
     padding = [(0, s-i) for s, i in zip(shape, arr.shape)]
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
