@@ -1,6 +1,6 @@
 """
 ==========================================
-datasets with 3 or more spatial dimensions
+Datasets with 3 or more spatial dimensions
 ==========================================
 
 Most scikit-image functions are compatible with 3-D datasets, ie images with
