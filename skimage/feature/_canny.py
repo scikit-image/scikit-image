@@ -195,16 +195,23 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     eroded_mask = eroded_mask & (magnitude > 0)
     #
     #--------- Find local maxima --------------
+    isobel_gt_0 = isobel >= 0
+    jsobel_gt_0 = jsobel >= 0
+    isobel_lt_0 = isobel <= 0
+    jsobel_lt_0 = jsobel <= 0
+    abs_isobel_lt_jsobel = abs_isobel <= abs_jsobel
+    abs_isobel_gt_jsobel = abs_isobel >= abs_jsobel
+
     #
     # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
     # 90-135 degrees and 135-180 degrees.
     #
     local_maxima = np.zeros(image.shape, bool)
     #----- 0 to 45 degrees ------
-    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
-    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
+    pts_plus = isobel_gt_0 & jsobel_gt_0
+    pts_minus = isobel_lt_0 & jsobel_lt_0
+    pts_tmp = (pts_plus | pts_minus) & eroded_mask
+    pts = pts_tmp & abs_isobel_gt_jsobel
     # Get the magnitudes shifted left to make a matrix of the points to the
     # right of pts. Similarly, shift left and down to get the points to the
     # top right of pts.
@@ -220,10 +227,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #----- 45 to 90 degrees ------
     # Mix diagonal and vertical
     #
-    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
-    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
+    pts = pts_tmp & abs_isobel_lt_jsobel
     c1 = magnitude[:, 1:][pts[:, :-1]]
     c2 = magnitude[1:, 1:][pts[:-1, :-1]]
     m = magnitude[pts]
@@ -236,10 +240,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #----- 90 to 135 degrees ------
     # Mix anti-diagonal and vertical
     #
-    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
-    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
+    pts_plus = isobel_lt_0 & jsobel_gt_0
+    pts_minus = isobel_gt_0 & jsobel_lt_0
+    pts_tmp = (pts_plus | pts_minus) & eroded_mask
+    pts = pts_tmp & abs_isobel_lt_jsobel
     c1a = magnitude[:, 1:][pts[:, :-1]]
     c2a = magnitude[:-1, 1:][pts[1:, :-1]]
     m = magnitude[pts]
@@ -252,10 +256,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #----- 135 to 180 degrees ------
     # Mix anti-diagonal and anti-horizontal
     #
-    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
-    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
+    pts = pts_tmp & abs_isobel_gt_jsobel
     c1 = magnitude[:-1, :][pts[1:, :]]
     c2 = magnitude[:-1, 1:][pts[1:, :-1]]
     m = magnitude[pts]
