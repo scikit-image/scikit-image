@@ -173,25 +173,31 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     else:
         high_threshold = high_threshold / dtype_max
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=bool)
-
     def fsmooth(x):
         return img_as_float(gaussian(x, sigma, mode='constant'))
 
-    smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
+    if mask is None:
+        mask = np.ones(image.shape, dtype=bool)
+        smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
+        eroded_mask = mask
+        eroded_mask[:1, :] = 0
+        eroded_mask[-1:, :] = 0
+        eroded_mask[:, :1] = 0
+        eroded_mask[:, -1:] = 0
+    else:
+        smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
+        #
+        # Make the eroded mask. Setting the border value to zero will wipe
+        # out the image edges for us.
+        #
+        s = generate_binary_structure(2, 2)
+        eroded_mask = binary_erosion(mask, s, border_value=0)
+
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
     magnitude = np.hypot(isobel, jsobel)
-
-    #
-    # Make the eroded mask. Setting the border value to zero will wipe
-    # out the image edges for us.
-    #
-    s = generate_binary_structure(2, 2)
-    eroded_mask = binary_erosion(mask, s, border_value=0)
     eroded_mask = eroded_mask & (magnitude > 0)
     #
     #--------- Find local maxima --------------
