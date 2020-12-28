@@ -173,18 +173,18 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     else:
         high_threshold = high_threshold / dtype_max
 
-    def fsmooth(x):
-        return img_as_float(gaussian(x, sigma, mode='constant'))
+    def fsmooth(x, mode='constant'):
+        return img_as_float(gaussian(x, sigma, mode=mode))
 
     if mask is None:
-        mask = np.ones(image.shape, dtype=bool)
-        smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
-        eroded_mask = mask
+        smoothed = fsmooth(image, mode='reflect')
+        eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
         eroded_mask[-1:, :] = 0
         eroded_mask[:, :1] = 0
         eroded_mask[:, -1:] = 0
     else:
+
         smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
         #
         # Make the eroded mask. Setting the border value to zero will wipe
