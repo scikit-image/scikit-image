@@ -289,10 +289,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     if count == 0:
         return low_mask
 
-    sums = (np.array(ndi.sum(high_mask, labels,
-                             np.arange(count, dtype=np.int32) + 1),
-                     copy=False, ndmin=1))
+    nonzero_sums = np.unique(labels[high_mask])
     good_label = np.zeros((count + 1,), bool)
-    good_label[1:] = sums > 0
+    good_label[nonzero_sums] = True
+
     output_mask = good_label[labels]
     return output_mask
