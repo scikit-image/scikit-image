@@ -46,7 +46,7 @@ from scipy import ndimage as ndi
 
 import plotly.express as px
 from skimage import (
-    exposure, io, util
+    exposure, util
 )
 from skimage.data import cells3d
 
@@ -75,15 +75,18 @@ print("rescaled spacing: {} (after downsampling)\n".format(rescaled_spacing))
 print("normalized spacing: {}\n".format(spacing))
 
 #####################################################################
-# Let us try and visualize the (3D) image with `io.imshow`.
+# Let us try and visualize our 3D image. Unfortunately, many image viewers,
+# such as matplotlib's `imshow`, are only capable of displaying 2D data. We
+# can see that they raise an error when we try to view 3D data:
 
 try:
-    io.imshow(data, cmap="gray")
+    fig, ax = plt.subplots()
+    ax.imshow(data, cmap='gray')
 except TypeError as e:
     print(str(e))
 
 #####################################################################
-# The `io.imshow` function can only display grayscale and RGB(A) 2D images.
+# The `imshow` function can only display grayscale and RGB(A) 2D images.
 # We can thus use it to visualize 2D planes. By fixing one axis, we can
 # observe three different views of the image.
 
@@ -128,10 +131,12 @@ display(data)
 # Jupyter widgets. Let the user select which slice to display and show the
 # position of this slice in the 3D dataset.
 # Note that you cannot see the Jupyter widget at work in a static HTML page,
-# as is the case in the scikit-image gallery. For the following piece of
-# code to work, you need a Jupyter kernel running either locally or in the
-# cloud: see the bottom of this page to either download the Jupyter notebook
-# and run it on your computer, or open it directly in Binder.
+# as is the case in the online version of this example. For the following
+# piece of code to work, you need a Jupyter kernel running either locally or
+# in the cloud: see the bottom of this page to either download the Jupyter
+# notebook and run it on your computer, or open it directly in Binder. On top
+# of an active kernel, you need a web browser: running the code in pure Python
+# will not work either.
 
 
 def slice_in_3D(ax, i):
