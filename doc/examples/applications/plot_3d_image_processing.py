@@ -108,20 +108,15 @@ show_plane(c, data[:, :, n_col // 2], title=f'Column = {n_col // 2}')
 
 #####################################################################
 # As hinted before, a three-dimensional image can be viewed as a series of
-# two-dimensional planes. Let us write a helper function, `display`, to
-# display 30 planes of our data. By default, every other plane is displayed.
+# two-dimensional planes. Let us write a helper function, `display`, to create
+# a montage of several planes. By default, every other plane is displayed.
 
 
-def display(im3d, cmap="gray", step=2):
-    _, axes = plt.subplots(nrows=5, ncols=6, figsize=(16, 14))
-
-    vmin = im3d.min()
-    vmax = im3d.max()
-
-    for ax, image in zip(axes.flatten(), im3d[::step]):
-        ax.imshow(image, cmap=cmap, vmin=vmin, vmax=vmax)
-        ax.set_xticks([])
-        ax.set_yticks([])
+def display(im3d, cmap='gray', step=2):
+    data_montage = util.montage(im3d[::step], padding_width=4, fill=np.nan)
+    _, ax = plt.subplots(figsize=(16, 14))
+    ax.imshow(data_montage, cmap=cmap)
+    ax.set_axis_off()
 
 
 display(data)
