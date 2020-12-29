@@ -20,9 +20,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 import plotly.express as px
-from skimage import (
-    data, io
-)
+from skimage import data
 
 
 #####################################################################
@@ -33,23 +31,26 @@ from skimage import (
 data = data.kidney()
 
 #####################################################################
-# What exactly are the shape and size of our 3D multichannel image?
+# The returned dataset is a 3D multichannel image with dimensions provided in
+# ``(z, y, x, c)`` order.
 
 print("shape: {}".format(data.shape))
 print("dtype: {}".format(data.dtype))
-print("range: ({}, {})".format(data.min(), data.max()))
+v_min, v_max = data.min(), data.max()
+print("range: ({}, {})".format(v_min, v_max))
 
 #####################################################################
 # First of all, we notice that the range of values is unusual: With images, we
 # typically expect a range of ``(0.0, 1.0)`` for float values and a range of
 # ``(0, 255)`` for integer values.
-# So let us consider only a slice (2D plane) of the data for now.
-# The `io.imshow` function can display both grayscale and RGB(A) 2D images.
+# Let us consider only a slice (2D plane) of the data for now. More
+# specifically, let us consider the slice located halfway in the stack.
+# The `imshow` function can display both grayscale and RGB(A) 2D images.
 
-(n_plane, n_row, n_col, n_chan) = data.shape
-(v_min, v_max) = (data.min(), data.max())
+n_plane, n_row, n_col, n_chan = data.shape
 
-io.imshow(data[n_plane // 2])
+_, ax = plt.subplots()
+ax.imshow(data[n_plane // 2])
 
 #####################################################################
 # The warning message echoes our concern, while the image rendering is clearly
