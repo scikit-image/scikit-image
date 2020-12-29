@@ -70,6 +70,9 @@ def test_coffee():
 
 def test_eagle():
     """ Test that "eagle" image can be loaded. """
+    # Fetching the data through the testing module will
+    # cause the test to skip if pooch isn't installed.
+    fetch('data/eagle.png')
     eagle = data.eagle()
     assert_equal(eagle.ndim, 2)
     assert_equal(eagle.dtype, np.dtype('uint8'))
@@ -141,16 +144,25 @@ def test_lfw_subset():
     data.lfw_subset()
 
 
+def test_skin():
+    """Test that "skin" image can be loaded.
+
+    Needs internet connection.
+    """
+    skin = data.skin()
+    assert skin.ndim == 3
+
+
 def test_cell():
     """ Test that "cell" image can be loaded."""
     data.cell()
 
 
-def test_cells_3d():
+def test_cells3d():
     """Needs internet connection."""
-    path = fetch('data/cells.tif')
+    path = fetch('data/cells3d.tif')
     image = io.imread(path)
-    assert image.shape == (60, 256, 256)
+    assert image.shape == (60, 2, 256, 256)
 
 
 def test_brain_3d():
@@ -178,3 +190,11 @@ def test_lily_multichannel():
     fetch('data/lily.tif')
     lily = data.lily()
     assert lily.shape == (922, 922, 4)
+
+
+def test_vortex():
+    fetch('data/pivchallenge-B-B001_1.tif')
+    fetch('data/pivchallenge-B-B001_2.tif')
+    image0, image1 = data.vortex()
+    for image in [image0, image1]:
+        assert image.shape == (512, 512)

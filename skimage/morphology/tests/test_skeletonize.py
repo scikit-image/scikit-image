@@ -210,7 +210,7 @@ class TestMedialAxis():
                              [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                            dtype=np.bool_)
+                            dtype=bool)
         result = medial_axis(image)
         assert np.all(result == expected)
         result, distance = medial_axis(image, return_distance=True)
@@ -230,7 +230,7 @@ class TestMedialAxis():
                              [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                            dtype=np.bool_)
+                            dtype=bool)
         result = medial_axis(image)
         assert np.all(result == expected)
 

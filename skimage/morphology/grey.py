@@ -405,7 +405,7 @@ def white_tophat(image, selem=None, out=None):
     selem = np.array(selem)
     if out is image:
         opened = opening(image, selem)
-        if np.issubdtype(opened.dtype, np.bool_):
+        if np.issubdtype(opened.dtype, bool):
             np.logical_xor(out, opened, out=out)
         else:
             out -= opened
@@ -414,11 +414,11 @@ def white_tophat(image, selem=None, out=None):
         out = np.empty_like(image)
     # work-around for NumPy deprecation warning for arithmetic 
     # operations on bool arrays
-    if isinstance(image, np.ndarray) and image.dtype == np.bool:
+    if isinstance(image, np.ndarray) and image.dtype == bool:
         image_ = image.view(dtype=np.uint8)
     else:
         image_ = image
-    if isinstance(out, np.ndarray) and out.dtype == np.bool:
+    if isinstance(out, np.ndarray) and out.dtype == bool:
         out_ = out.view(dtype=np.uint8)
     else:
         out_ = out

@@ -45,7 +45,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     --------
     >>> from skimage.transform import hough_line, hough_line_peaks
     >>> from skimage.draw import line
-    >>> img = np.zeros((15, 15), dtype=np.bool_)
+    >>> img = np.zeros((15, 15), dtype=bool)
     >>> rr, cc = line(0, 0, 14, 14)
     >>> img[rr, cc] = 1
     >>> rr, cc = line(0, 14, 14, 0)
@@ -58,6 +58,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     """
     from ..feature.peak import _prominent_peaks
 
+    min_angle = min(min_angle, hspace.shape[1])
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
@@ -97,7 +98,7 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     --------
     >>> from skimage.transform import hough_circle
     >>> from skimage.draw import circle_perimeter
-    >>> img = np.zeros((100, 100), dtype=np.bool_)
+    >>> img = np.zeros((100, 100), dtype=bool)
     >>> rr, cc = circle_perimeter(25, 35, 23)
     >>> img[rr, cc] = 1
     >>> try_radii = np.arange(5, 50)

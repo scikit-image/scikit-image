@@ -54,7 +54,7 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         raise ValueError("Descriptor length must equal.")
 
     if metric is None:
-        if np.issubdtype(descriptors1.dtype, np.bool_):
+        if np.issubdtype(descriptors1.dtype, bool):
             metric = 'hamming'
         else:
             metric = 'euclidean'

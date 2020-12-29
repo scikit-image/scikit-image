@@ -149,6 +149,9 @@ else:
     major, minor = v.release[:2]
     binder_branch = 'v{}.{}.x'.format(major, minor)
 
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery'
 
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
@@ -384,11 +387,11 @@ _python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
 _python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('https://docs.scipy.org/doc/numpy',
+    'numpy': ('https://numpy.org/doc/stable',
               (None, './_intersphinx/numpy-objects.inv')),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('http://scikit-learn.org/stable',
+    'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
                    (None, 'https://matplotlib.org/objects.inv'))

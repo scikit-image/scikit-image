@@ -14,7 +14,7 @@ DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
 DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
                     'uint12': (0, 2 ** 12 - 1),
                     'uint14': (0, 2 ** 14 - 1),
-                    'bool': dtype_range[np.bool_],
+                    'bool': dtype_range[bool],
                     'float': dtype_range[np.float64]})
 
 
@@ -115,9 +115,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([107432, 154712]), array([0. , 0.5, 1. ]))
+    (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([107432, 154712]), array([0.25, 0.75]))
+    (array([ 93585, 168559]), array([0.25, 0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
@@ -291,7 +291,7 @@ def _output_dtype(dtype_or_range):
     """
     if type(dtype_or_range) in [list, tuple, np.ndarray]:
         # pair of values: always return float.
-        return np.float_
+        return float
     if type(dtype_or_range) == type:
         # already a type: return it
         return dtype_or_range
