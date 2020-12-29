@@ -7,7 +7,7 @@ from .._shared.utils import warn, check_shape_equality
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
-           'normalized_mutual_information'
+           'normalized_mutual_information',
            ]
 
 
@@ -184,22 +184,22 @@ def _pad_to(arr, shape):
     array([[1, 0, 0]])
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
-        raise ValueError(f"Target shape {shape} must be greater than input"
-                         f"shape {arr.shape} along every axis.")
+        raise ValueError(f"Target shape {shape} cannot be smaller than input"
+                         f"shape {arr.shape} along any axis.")
     padding = [(0, s-i) for s, i in zip(shape, arr.shape)]
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
 
 def normalized_mutual_information(image0, image1, *, bins=100):
-    r"""Compute the normalized mutual information.
+    r"""Compute the normalized mutual information (NMI).
 
-    The normalized mutual information is given by::
+    The normalized mutual information of :math:`A` and :math:`B` is given by::
 
     ..math::
 
         Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 
-    where :math:`H(X)` is the entropy, :math:`- \sum_{x \in X}{x \log x}.`
+    where :math:`H(X) := - \sum_{x \in X}{x \log x}` is the entropy.
 
     It was proposed to be useful in registering images by Colin Studholme and
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
