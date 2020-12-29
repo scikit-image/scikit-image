@@ -280,6 +280,9 @@ each and every contributor, regardless of their role.
 - Kevin Mader
   Montage improvements
 
+- Matti Eskelinen
+  ImageCollection improvements
+
 - David Volgyes
   Unsharp masking
 
@@ -301,3 +304,6 @@ each and every contributor, regardless of their role.
 
 - David J. Mellert
   Polar and log-polar warping, nD windows
+
+- Sebastian Wallkötter
+  morphology.rolling_ball and morphology.rolling_ellipsoid

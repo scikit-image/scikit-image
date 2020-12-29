@@ -245,7 +245,7 @@ def test_rescale_out_range():
     """
     image = np.array([-10, 0, 10], dtype=np.int8)
     out = exposure.rescale_intensity(image, out_range=(0, 127))
-    assert out.dtype == np.float_
+    assert out.dtype == float
     assert_array_almost_equal(out, [0, 63.5, 127])
 
 
@@ -313,13 +313,9 @@ def test_rescale_nan_warning(in_range, out_range):
         r"Passing `np.nan` to mean no clipping in np.clip "
         r"has always been unreliable|\A\Z"
     )
-    # 2019/12/06 Passing NaN to np.min and np.max raises a RuntimeWarning for
-    # NumPy < 1.16
-    # TODO: Remove once minimal required NumPy version is 1.16
-    numpy_warning_smaller_1_16 = r"invalid value encountered in reduce|\A\Z"
 
     with expected_warnings(
-            [msg, numpy_warning_1_17_plus, numpy_warning_smaller_1_16]
+            [msg, numpy_warning_1_17_plus]
     ):
         exposure.rescale_intensity(image, in_range, out_range)
 
@@ -330,7 +326,7 @@ def test_rescale_nan_warning(in_range, out_range):
         ('uint10', np.uint16),
         ('uint12', np.uint16),
         ('uint16', np.uint16),
-        ('float', np.float_),
+        ('float', float),
     ]
 )
 def test_rescale_output_dtype(out_range, out_dtype):
@@ -350,7 +346,7 @@ def test_rescale_float_output():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=(0, 255))
     testing.assert_array_equal(output_image, [0, 128, 255])
-    assert output_image.dtype == np.float_
+    assert output_image.dtype == float
 
 
 def test_rescale_raises_on_incorrect_out_range():
@@ -481,12 +477,14 @@ def test_adapthist_clip_limit():
     img_f = util.img_as_float(img_u)
 
     # uint8 input
-    img_clahe = exposure.equalize_adapthist(img_u, clip_limit=1)
-    assert_array_equal(img_f, img_clahe)
+    img_clahe0 = exposure.equalize_adapthist(img_u, clip_limit=0)
+    img_clahe1 = exposure.equalize_adapthist(img_u, clip_limit=1)
+    assert_array_equal(img_clahe0, img_clahe1)
 
     # float64 input
-    img_clahe = exposure.equalize_adapthist(img_f, clip_limit=1)
-    assert_array_equal(img_f, img_clahe)
+    img_clahe0 = exposure.equalize_adapthist(img_f, clip_limit=0)
+    img_clahe1 = exposure.equalize_adapthist(img_f, clip_limit=1)
+    assert_array_equal(img_clahe0, img_clahe1)
 
 
 def peak_snr(img1, img2):

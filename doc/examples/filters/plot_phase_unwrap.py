@@ -52,7 +52,7 @@ ax4.set_title('Unwrapped minus original')
 # Create a simple ramp
 image = np.ones((100, 100)) * np.linspace(0, 8 * np.pi, 100).reshape((-1, 1))
 # Mask the image to split it in two horizontally
-mask = np.zeros_like(image, dtype=np.bool)
+mask = np.zeros_like(image, dtype=bool)
 mask[image.shape[0] // 2, :] = True
 
 image_wrapped = np.ma.array(np.angle(np.exp(1j * image)), mask=mask)

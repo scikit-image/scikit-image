@@ -75,9 +75,6 @@ def equalize_adapthist(image, kernel_size=None,
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
 
-    if clip_limit == 1.0:
-        return img_as_float(image)  # convert to float for consistency
-
     image = img_as_uint(image)
     image = np.round(
         rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
@@ -108,7 +105,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     kernel_size: int or N-tuple of int
         Defines the shape of contextual regions used in the algorithm.
     clip_limit : float
-        Normalized clipping limit (higher values give more contrast).
+        Normalized clipping limit between 0 and 1 (higher values give more
+        contrast).
     nbins : int
         Number of gray bins for histogram ("data range").
 
@@ -118,10 +116,9 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         Equalized image.
 
     The number of "effective" graylevels in the output image is set by `nbins`;
-    selecting a small value (eg. 128) speeds up processing and still produce
-    an output image of good quality. The output image will have the same
-    minimum and maximum value as the input image. A clip limit smaller than 1
-    results in standard (non-contrast limited) AHE.
+    selecting a small value (e.g. 128) speeds up processing and still produces
+    an output image of good quality. A clip limit of 0 or larger than or equal
+    to 1 results in standard (non-contrast limited) AHE.
     """
     ndim = image.ndim
     dtype = image.dtype
@@ -162,7 +159,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     if clip_limit > 0.0:
         clim = int(np.clip(clip_limit * np.product(kernel_size), 1, None))
     else:
-        clim = NR_OF_GRAY  # Large value, do not clip (AHE)
+        # largest possible value, i.e., do not clip (AHE)
+        clim = np.product(kernel_size)
 
     hist = np.apply_along_axis(np.bincount, -1, hist_blocks, minlength=nbins)
     hist = np.apply_along_axis(clip_histogram, -1, hist, clip_limit=clim)

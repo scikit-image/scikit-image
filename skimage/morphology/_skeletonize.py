@@ -182,7 +182,7 @@ def _generate_thin_luts():
     """generate LUTs for thinning algorithm (for reference)"""
 
     def nabe(n):
-        return np.array([n >> i & 1 for i in range(0, 9)]).astype(np.bool)
+        return np.array([n >> i & 1 for i in range(0, 9)]).astype(bool)
 
     def G1(n):
         s = 0
@@ -238,7 +238,7 @@ G123_LUT = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
                      0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                      1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
-                     0, 1, 1, 0, 0, 1, 0, 0, 0], dtype=np.bool)
+                     0, 1, 1, 0, 0, 1, 0, 0, 0], dtype=bool)
 
 G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
@@ -253,7 +253,7 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
                       0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.bool)
+                      0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
 def thin(image, max_iter=None):
@@ -353,7 +353,7 @@ def thin(image, max_iter=None):
         n_pts_new = np.sum(skel)  # count points after thinning
         n_iter += 1
 
-    return skel.astype(np.bool)
+    return skel.astype(bool)
 
 
 # --------- Skeletonization by medial axis transform --------
@@ -434,7 +434,7 @@ def medial_axis(image, mask=None, return_distance=False):
     """
     global _eight_connect
     if mask is None:
-        masked_image = image.astype(np.bool)
+        masked_image = image.astype(bool)
     else:
         masked_image = image.astype(bool).copy()
         masked_image[~mask] = False

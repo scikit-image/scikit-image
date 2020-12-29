@@ -499,3 +499,15 @@ def test_prob_tol():
         res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
+
+
+def test_umfpack_import():
+    from skimage.segmentation import random_walker_segmentation
+    UmfpackContext = random_walker_segmentation.UmfpackContext
+    try:
+        # when scikit-umfpack is installed UmfpackContext should not be None
+        import scikits.umfpack
+        assert UmfpackContext is not None
+    except ImportError:
+        assert UmfpackContext is None
+    return
