@@ -52,7 +52,14 @@ def _preprocess(image, mask, sigma, mode):
     """
 
     if mask is None:
-        mask = np.ones(image.shape, dtype=bool)
+        # Smooth the masked image
+        smoothed_image = gaussian(image, sigma=sigma, mode=mode)
+        eroded_mask = np.ones(image.shape, dtype=bool)
+        eroded_mask[:1, :] = 0
+        eroded_mask[-1:, :] = 0
+        eroded_mask[:, :1] = 0
+        eroded_mask[:, -1:] = 0
+        return smoothed_image, eroded_mask
 
     masked_image = np.zeros_like(image)
     masked_image[mask] = image[mask]
@@ -183,7 +190,7 @@ def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
 
 
 def canny(image, sigma=1., low_threshold=None, high_threshold=None,
-          mask=None, use_quantiles=False):
+          mask=None, use_quantiles=False, *, mode='constant'):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -205,6 +212,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         quantiles of the edge magnitude image, rather than absolute
         edge magnitude values. If ``True`` then the thresholds must be
         in the range [0, 1].
+    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
+        The ``mode`` parameter determines how the array borders are
+        handled during Gaussian filtering, where ``cval`` is the value when
+        mode is equal to 'constant'.
 
     Returns
     -------
@@ -312,7 +323,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         raise ValueError("low_threshold should be lower then high_threshold")
 
     # Image filtering
-    smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant')
+    smoothed, eroded_mask = _preprocess(image, mask, sigma, mode)
 
     # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)

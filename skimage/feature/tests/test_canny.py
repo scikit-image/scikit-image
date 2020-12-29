@@ -86,7 +86,7 @@ class TestCanny(unittest.TestCase):
              [False, False, False, False, False, False]])
 
         result = feature.canny(image, low_threshold=0.6, high_threshold=0.8,
-                               use_quantiles=True)
+                               use_quantiles=True, mode='nearest')
 
         assert_equal(result, correct_output)
 
