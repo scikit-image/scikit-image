@@ -196,13 +196,14 @@ if __name__ == "__main__":
             extra = {}
         else:
             print(textwrap.dedent("""
-                To install scikit-image from source, you will need NumPy.
-                Install NumPy with pip using:
+                To install scikit-image from source, you will need NumPy
+                and Cython.
+                Install NumPy and Cython with your python package manager.
+                If you are using pip, the commands are:
 
-                  pip install numpy
+                  pip install numpy cython
 
-                Or use your operating system package manager. For more
-                details, see:
+                For more details, see:
 
                    https://scikit-image.org/docs/stable/install.html
             """))

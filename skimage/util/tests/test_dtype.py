@@ -157,7 +157,7 @@ def test_float_conversion_dtype():
     """Test any convertion from a float dtype to an other."""
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
@@ -172,7 +172,7 @@ def test_float_conversion_dtype_warns():
     from skimage.util.dtype import convert
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
