@@ -61,3 +61,4 @@ ax.imshow(data[n_plane // 2])
 # to map to a colour range.
 
 px.imshow(data[n_plane // 2], zmin=v_min, zmax=v_max)
+# sphinx_gallery_thumbnail_number = 2
