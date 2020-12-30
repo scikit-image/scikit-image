@@ -31,34 +31,52 @@ from skimage import data
 data = data.kidney()
 
 #####################################################################
-# The returned dataset is a 3D multichannel image with dimensions provided in
-# ``(z, y, x, c)`` order.
+# The returned dataset is a 3D multichannel image:
 
-print("shape: {}".format(data.shape))
-print("dtype: {}".format(data.dtype))
-v_min, v_max = data.min(), data.max()
-print("range: ({}, {})".format(v_min, v_max))
+print(f'number of dimensions: {data.ndim}')
+print(f'shape: {data.shape}')
+print(f'dtype: {data.dtype}')
 
 #####################################################################
-# First of all, we notice that the range of values is unusual: With images, we
+# Dimensions are provided in the following order: ``(z, y, x, c)``.
+
+n_plane, n_Y, n_X, n_chan = data.shape
+
+#####################################################################
+# What is the range of values for each colour channel?
+
+(vmin_0, vmin_1, vmin_2) = (data[:, :, :, 0].min(),
+                            data[:, :, :, 1].min(),
+                            data[:, :, :, 2].min())
+(vmax_0, vmax_1, vmax_2) = (data[:, :, :, 0].max(),
+                            data[:, :, :, 1].max(),
+                            data[:, :, :, 2].max())
+print(f'range for channel 0: ({vmin_0}, {vmax_0})')
+print(f'range for channel 1: ({vmin_1}, {vmax_1})')
+print(f'range for channel 2: ({vmin_2}, {vmax_2})')
+
+#####################################################################
+# We notice that the ranges of values is unusual: With images, we
 # typically expect a range of ``(0.0, 1.0)`` for float values and a range of
 # ``(0, 255)`` for integer values.
 # Let us consider only a slice (2D plane) of the data for now. More
 # specifically, let us consider the slice located halfway in the stack.
 # The `imshow` function can display both grayscale and RGB(A) 2D images.
 
-n_plane, n_row, n_col, n_chan = data.shape
-
 _, ax = plt.subplots()
 ax.imshow(data[n_plane // 2])
 
 #####################################################################
 # The warning message echoes our concern, while the image rendering is clearly
-# not satisfactory colour-wise.
+# not satisfactory colour-wise. Not all multichannel images are RGB(A)!
 # We turn to `plotly`'s implementation of the `imshow` function, for it lets
 # us specify the `value range
 # <https://plotly.com/python/imshow/#defining-the-data-range-covered-by-the-color-range-with-zmin-and-zmax>`_
 # to map to a colour range.
 
-px.imshow(data[n_plane // 2], zmin=v_min, zmax=v_max)
+px.imshow(
+    data[n_plane // 2],
+    zmin=[vmin_0, vmin_1, vmin_2],
+    zmax=[vmax_0, vmax_1, vmax_2]
+)
 # sphinx_gallery_thumbnail_number = 2
