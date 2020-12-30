@@ -151,7 +151,9 @@ else:
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 import plotly.io as pio
-pio.renderers.default = 'sphinx_gallery'
+pio.renderers.default = 'sphinx_gallery_png'
+from plotly.io._sg_scraper import plotly_sg_scraper
+image_scrapers = ('matplotlib', plotly_sg_scraper,)
 
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
@@ -161,6 +163,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
+    'image_scrapers': image_scrapers,
     # Default thumbnail size (400, 280)
     # Default CSS rescales (160, 112)
     # Size is decreased to reduce webpage loading time
