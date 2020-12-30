@@ -223,7 +223,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     out : array, same shape and type as `image`
         The output visualization.
     """
-    out = np.zeros(label_field.shape + (3,))
+    out = np.zeros(label_field.shape + (3,), dtype=image.dtype)
     labels = np.unique(label_field)
     bg = (labels == bg_label)
     if bg.any():
