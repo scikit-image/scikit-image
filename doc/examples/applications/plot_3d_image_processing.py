@@ -3,7 +3,10 @@
 Explore 3D images (of cells)
 ============================
 
-This tutorial is an introduction to three-dimensional image processing. Images
+This tutorial is an introduction to three-dimensional image processing.
+For a quick intro to 3D datasets, please refer to
+:ref:`sphx_glr_auto_examples_data_plot_3d.py`.
+Images
 are represented as `numpy` arrays. A single-channel, or grayscale, image is a
 2D matrix of pixel intensities of shape ``(n_row, n_col)``, where ``n_row``
 (resp. ``n_col``) denotes the number of `rows` (resp. `columns`). We can
