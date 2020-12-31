@@ -80,3 +80,39 @@ px.imshow(
     zmax=[vmax_0, vmax_1, vmax_2]
 )
 # sphinx_gallery_thumbnail_number = 2
+
+#####################################################################
+# Normalize range for each channel
+# ================================
+
+px.imshow(
+    data[n_plane // 2],
+    facet_col=2,
+    binary_string=True,
+    labels={'facet_col': 'channel'}
+)
+
+#####################################################################
+# Explore slices as animation frames
+# ==================================
+
+px.imshow(
+    data,
+    zmin=[vmin_0, vmin_1, vmin_2],
+    zmax=[vmax_0, vmax_1, vmax_2],
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'plane'}
+)
+
+#####################################################################
+# Combine channel facetting and slice animation
+# =============================================
+
+px.imshow(
+    data,
+    animation_frame=0,
+    facet_col=3,
+    binary_string=True,
+    labels={'facet_col': 'channel', 'animation_frame': 'plane'}
+)
