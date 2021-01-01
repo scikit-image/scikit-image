@@ -100,9 +100,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     kind : string, one of {'overlay', 'overlay-rgb', 'avg'}
         The kind of color image desired. 'overlay' cycles over defined colors
         and overlays the colored labels over the original image. 'overlay-rgb'
-        behaves same as 'overlay', but it preserves the rgb content of the 
-        input image. 'avg' replaces each labeled segment with its average color,
-        for a stained-class or pastel painting appearance.
+        behaves same as 'overlay', but it preserves the rgb content of the
+        input image. 'avg' replaces each labeled segment with its average
+        color, for a stained-class or pastel painting appearance.
 
     Returns
     -------
@@ -149,8 +149,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     image_alpha : float [0, 1], optional
         Opacity of the image.
     preserve_rgb : bool, optional
-        Whether or not to preserve the rgb content of the input image. By default
-        it converts the image to grayscale before making the overlay.
+        Whether or not to preserve the rgb content of the input image.By
+        default it converts the image to grayscale before making the overlay.
 
     Returns
     -------
