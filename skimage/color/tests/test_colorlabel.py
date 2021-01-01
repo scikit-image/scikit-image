@@ -170,12 +170,12 @@ def test_avg():
     # reference label-colored image
     rout = np.array([[0.5, 0.5, 0.5, 0.5],
                      [0.5, 0.5, 0.5, 0.5],
-                     [0. , 0. , 0. , 0. ]])
+                     [0., 0., 0., 0.]])
     gout = np.array([[0.25, 0.25, 0.25, 0.75],
                      [0.25, 0.75, 0.75, 0.75],
-                     [0.  , 0.  , 0.  , 0.  ]])
-    bout = np.array([[0. , 0. , 0. , 1. ],
-                     [0. , 1. , 1. , 1. ],
+                     [0., 0., 0., 0.]])
+    bout = np.array([[0., 0., 0., 1.],
+                     [0., 1., 1., 1.],
                      [0.0, 0.0, 1.0, 1.0]])
     expected_out = np.dstack((rout, gout, bout))
 
@@ -206,8 +206,9 @@ def test_bg_color_rgb_string():
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
-    output = label2rgb(labels, image=img, alpha=0.9, bg_label=0, bg_color='red')
-    assert output[0, 0, 0] > 0.9 # red channel
+    output = label2rgb(labels, image=img, alpha=0.9,
+                       bg_label=0, bg_color='red')
+    assert output[0, 0, 0] > 0.9  # red channel
 
 
 def test_avg_with_2d_image():
@@ -216,3 +217,21 @@ def test_avg_with_2d_image():
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
     assert_no_warnings(label2rgb, labels, image=img, bg_label=0, kind='avg')
+
+
+def test_overlay_rgb():
+    rgb_img = np.random.uniform(size=(10, 10, 3))
+    labels = np.ones((10, 10), dtype=np.int64)
+    labels[5:, 5:] = 2
+    labels[:3, :3] = 0
+    alpha = 0.3
+    rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
+                    bg_label=0, kind='overlay-rgb')
+    # check that rgb part of input image is preserved, where labels=0
+    assert_array_equal(rgb_img[:3, :3]*(1-alpha), rgb[:3, :3])
+
+    # now check only with kind=overlay that does not match
+    rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
+                    bg_label=0, kind='overlay')
+    with testing.raises(AssertionError):
+        assert_array_equal(rgb_img[:3, :3]*(1-alpha), rgb[:3, :3])
