@@ -228,10 +228,10 @@ def test_overlay_rgb():
     rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
                     bg_label=0, kind='overlay-rgb')
     # check that rgb part of input image is preserved, where labels=0
-    assert_array_equal(rgb_img[:3, :3] * (1-alpha), rgb[:3, :3])
+    assert_array_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
     # now check only with kind=overlay that does not match
     rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
                     bg_label=0, kind='overlay')
     with testing.raises(AssertionError):
-        assert_array_equal(rgb_img[:3, :3] * (1-alpha), rgb[:3, :3])
+        assert_array_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
