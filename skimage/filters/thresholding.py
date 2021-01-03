@@ -944,10 +944,10 @@ def _mean_std(image, w):
     pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
-    padded_sq = padded * padded
 
     integral = integral_image(padded)
-    integral_sq = integral_image(padded_sq)
+    padded *= padded
+    integral_sq = integral_image(padded)
 
     # Store the kernel as a list 2-tuples where:
     #     - The first element is an index into the kernel (of shape w).
