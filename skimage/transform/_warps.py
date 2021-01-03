@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.lib import NumpyVersion
+import scipy
 from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,
@@ -147,6 +149,21 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                     cval=cval, mode=ndi_mode)
+
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        order = _validate_interpolation_order(image.dtype, order)
+        ndi_mode = _to_ndimage_mode(mode)
+        # TODO: move the following conversion into _to_ndimage_mode
+        if ndi_mode == 'constant':
+            ndi_mode = 'grid-constant'
+        elif ndi_mode == 'wrap':
+            ndi_mode = 'grid-wrap'
+        zoom_factors = [1 / f for f in factors]
+        image = convert_to_float(image, preserve_range)
+        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
+                       cval=cval, grid_mode=True)
+        _clip_warp_output(image, out, order, mode, cval, clip)
+        return out
 
     # 2-dimensional interpolation
     if len(output_shape) == 2 or (len(output_shape) == 3 and
