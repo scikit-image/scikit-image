@@ -11,7 +11,7 @@ from ..util import dtype_limits
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
                                   _get_multiotsu_thresh_indices)
 
-from ._sparse import correlate_sparse, _validate_window_size
+from ._sparse import _validate_window_size, _correlate_sparse
 
 
 __all__ = ['try_all_threshold',
@@ -949,15 +949,22 @@ def _mean_std(image, w):
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros(tuple(k + 1 for k in w))
-    for indices in itertools.product(*([[0, -1]] * image.ndim)):
-        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+    # Store the kernel as a list 2-tuples where:
+    #     - The first element is an index into the kernel (of shape w).
+    #     - The second element is the value at that index.
+    kernel_indices_and_values = []
+    for indices in itertools.product(*tuple([(0, _w) for _w in w])):
+        kernel_indices_and_values.append(
+            (indices, (-1) ** (image.ndim % 2 != np.sum(indices) % 2))
+        )
 
     total_window_size = np.prod(w)
-    sum_full = correlate_sparse(integral, kern, mode='valid')
-    m = sum_full / total_window_size
-    sum_sq_full = correlate_sparse(integral_sq, kern, mode='valid')
-    g2 = sum_sq_full / total_window_size
+    kernel_shape = tuple(_w + 1 for _w in w)
+    m = _correlate_sparse(integral, kernel_shape, kernel_indices_and_values)
+    m /= total_window_size
+    g2 = _correlate_sparse(integral_sq, kernel_shape,
+                           kernel_indices_and_values)
+    g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
