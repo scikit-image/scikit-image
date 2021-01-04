@@ -123,9 +123,11 @@ def correlate_sparse(image, kernel, mode='reflect'):
     values = kernel[indices].astype(padded_image.dtype, copy=False)
     indices = list(zip(*indices))
     kernel_indices_and_values = [(idx, v) for idx, v in zip(indices, values)]
-    if (0, ) * kernel.ndim not in indices:
+    # _correlate_sparse requires an index at (0,) * ndim to be present
+    corner_index = (0,) * kernel.ndim
+    if corner_index not in indices:
         kernel_indices_and_values = \
-            [((0,) * kernel.ndim, 0.0)] + kernel_indices_and_values
+            [(corner_index, 0.0)] + kernel_indices_and_values
     out = _correlate_sparse(
         padded_image, kernel.shape, kernel_indices_and_values
     )
