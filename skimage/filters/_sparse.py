@@ -31,32 +31,6 @@ def _to_np_mode(mode):
     return mode
 
 
-def _validate_window_size(axis_sizes):
-    """Ensure all sizes in ``axis_sizes`` are odd.
-
-    Parameters
-    ----------
-    axis_sizes : iterable of int
-
-    Raises
-    ------
-    ValueError
-        If any given axis size is even.
-    """
-    for axis_size in axis_sizes:
-        if axis_size % 2 == 0:
-            msg = ('Window size must not be even on any dimension. '
-                   'Got {}'.format(axis_sizes))
-            raise ValueError(msg)
-
-
-def _to_np_mode(mode):
-    """Convert padding modes from `ndi.correlate` to `np.pad`."""
-    mode_translation_dict = dict(nearest='edge', reflect='symmetric',
-                                 mirror='reflect')
-    if mode in mode_translation_dict:
-        mode = mode_translation_dict[mode]
-    return mode
 
 
 def _get_view(padded, kernel_shape, idx, val):
