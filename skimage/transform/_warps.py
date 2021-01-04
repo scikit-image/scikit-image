@@ -2,12 +2,13 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, _to_ndimage_mode)
+                         ProjectiveTransform)
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float, _validate_interpolation_order)
+                             convert_to_float, _to_ndimage_mode,
+                             _validate_interpolation_order)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,

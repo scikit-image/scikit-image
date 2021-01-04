@@ -1,5 +1,5 @@
 import numpy as np
-from collections.abc import Iterable
+from .._shared.utils import _to_np_mode
 
 
 def _validate_window_size(axis_sizes):
@@ -20,17 +20,6 @@ def _validate_window_size(axis_sizes):
                    '`threshold_niblack` must not be even on any dimension. '
                    'Got {}'.format(axis_sizes))
             raise ValueError(msg)
-
-
-def _to_np_mode(mode):
-    """Convert padding modes from `ndi.correlate` to `np.pad`."""
-    mode_translation_dict = dict(nearest='edge', reflect='symmetric',
-                                 mirror='reflect')
-    if mode in mode_translation_dict:
-        mode = mode_translation_dict[mode]
-    return mode
-
-
 
 
 def _get_view(padded, kernel_shape, idx, val):
