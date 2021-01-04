@@ -3,7 +3,9 @@ import warnings
 import functools
 import sys
 import numpy as np
+from numpy.lib import NumpyVersion
 import numbers
+import scipy
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
@@ -430,6 +432,9 @@ def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
     mode_translation_dict = dict(edge='nearest', symmetric='reflect',
                                  reflect='mirror')
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        mode_translation_dict.update({'constant': 'grid-constant',
+                                      'wrap': 'grid-wrap'})
     if mode in mode_translation_dict:
         mode = mode_translation_dict[mode]
     return mode
