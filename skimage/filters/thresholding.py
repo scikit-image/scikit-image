@@ -155,7 +155,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     ----------
     image : (N, M[, ..., P]) ndarray
         Grayscale input image.
-    block_size : int
+    block_size : int or sequence of int
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
@@ -203,9 +203,14 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     >>> binary_image2 = image > threshold_local(image, 15, 'generic',
     ...                                         param=func)
     """
-    if block_size % 2 == 0:
-        raise ValueError("The kwarg ``block_size`` must be odd! Given "
-                         "``block_size`` {0} is even.".format(block_size))
+    if np.isscalar(block_size):
+        block_size = (block_size,) * image.ndim
+    elif len(block_size) != image.ndim:
+        raise ValueError("len(block_size) must equal image.ndim.")
+    block_size = tuple(block_size)
+    if any(b % 2 == 0 for b in block_size):
+        raise ValueError("block_size must be odd! Given block_size"
+                         "{0} contains even values.".format(block_size))
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -213,19 +218,22 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
-            sigma = (block_size - 1) / 6.0
+            sigma = tuple([(b - 1) / 6.0 for b in block_size])
         else:
             sigma = param
         ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
                             cval=cval)
     elif method == 'mean':
-        mask = 1. / block_size * np.ones((block_size,))
+        masks = {}
+        for b in set(block_size):
+            masks[b] = 1. / b * np.ones((b,))
         # # separation of filters to speedup convolution
-        thresh_image = ndi.convolve1d(image, mask, axis=0, output=thresh_image,
-                                      mode=mode, cval=cval)
-        for ax in range(1, image.ndim):
-            ndi.convolve1d(thresh_image, mask, axis=ax, output=thresh_image,
-                           mode=mode, cval=cval)
+        b = block_size[0]
+        thresh_image = ndi.convolve1d(
+            image, masks[b], axis=0, output=thresh_image, mode=mode, cval=cval)
+        for ax, b in zip(range(1, image.ndim), block_size[1:]):
+            ndi.convolve1d(thresh_image, masks[b], axis=ax,
+                           output=thresh_image, mode=mode, cval=cval)
     elif method == 'median':
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)
