@@ -153,8 +153,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     Parameters
     ----------
-    image : (N, M) ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     block_size : int
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
@@ -186,7 +186,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     Returns
     -------
-    threshold : (N, M) ndarray
+    threshold : (N, M[, ..., P]) ndarray
         Threshold image. All pixels in the input image higher than the
         corresponding pixel in the threshold image are considered foreground.
 
@@ -206,7 +206,6 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     if block_size % 2 == 0:
         raise ValueError("The kwarg ``block_size`` must be odd! Given "
                          "``block_size`` {0} is even.".format(block_size))
-    check_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -221,11 +220,12 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
                             cval=cval)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
-        # separation of filters to speedup convolution
-        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode,
-                       cval=cval)
-        ndi.convolve1d(thresh_image, mask, axis=1, output=thresh_image,
-                       mode=mode, cval=cval)
+        # # separation of filters to speedup convolution
+        thresh_image = ndi.convolve1d(image, mask, axis=0, output=thresh_image,
+                                      mode=mode, cval=cval)
+        for ax in range(1, image.ndim):
+            ndi.convolve1d(thresh_image, mask, axis=ax, output=thresh_image,
+                           mode=mode, cval=cval)
     elif method == 'median':
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)

@@ -123,7 +123,8 @@ class TestSimpleImage():
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
 
-    def test_threshold_local_gaussian(self):
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_gaussian(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -131,14 +132,20 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='gaussian')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+        out = threshold_local(image, 3, method='gaussian', mode='reflect')
+        assert_equal(ref, image > out)
 
-        out = threshold_local(self.image, 3, method='gaussian',
-                              param=1./3.)
-        assert_equal(ref, self.image > out)
+        out = threshold_local(image, 3, method='gaussian', mode='reflect',
+                              param=1. / 3.)
+        assert_equal(ref, image > out)
 
-    def test_threshold_local_mean(self):
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_mean(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -146,10 +153,16 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='mean')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+        out = threshold_local(image, 3, method='mean', mode='reflect')
+        assert_equal(ref, image > out)
 
-    def test_threshold_local_median(self):
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_median(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False, False],
@@ -157,8 +170,13 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='median')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+        out = threshold_local(image, 3, method='median', mode='reflect')
+        assert_equal(ref, image > out)
 
     def test_threshold_local_median_constant_mode(self):
         out = threshold_local(self.image, 3, method='median',
