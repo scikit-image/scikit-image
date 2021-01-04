@@ -295,7 +295,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
+    image : (N, M[, ..., P]) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -365,8 +365,8 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -440,8 +440,8 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -597,8 +597,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
 
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
@@ -727,8 +727,8 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray, optional
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -923,8 +923,8 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     w : int, or iterable of int
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -987,8 +987,8 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -1052,8 +1052,8 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -1151,7 +1151,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, ..., P]) ndarray
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
