@@ -71,7 +71,7 @@ d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1),
                       in_range=(0, np.percentile(ihc_hed[:, :, 2], 99)))
 
 # Put the two channels into an RGB image as green and blue channels
-zdh = np.dstack((np.zeros_like(h), d, h))
+zdh = np.dstack((null, d, h))
 
 fig = plt.figure()
 axis = plt.subplot(1, 1, 1, sharex=ax[0], sharey=ax[0])
