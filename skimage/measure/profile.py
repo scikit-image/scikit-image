@@ -2,7 +2,7 @@ from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _validate_interpolation_order
+from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
 
 
 def profile_line(image, src, dst, linewidth=1,
@@ -100,6 +100,8 @@ def profile_line(image, src, dst, linewidth=1,
              "To avoid this warning, set `mode=` explicitly.",
              FutureWarning, stacklevel=2)
         mode = 'constant'
+
+    mode = _fix_ndimage_mode(mode)
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
