@@ -3,8 +3,7 @@ import numpy as np
 from scipy import spatial
 import textwrap
 
-from .._shared.utils import (get_bound_method_class, safe_as_int,
-                             _to_ndimage_mode)
+from .._shared.utils import get_bound_method_class, safe_as_int
 
 
 def _center_and_normalize_points(points):

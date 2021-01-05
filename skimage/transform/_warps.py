@@ -119,14 +119,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                np.asarray(output_shape, dtype=float))
 
     # Translate modes used by np.pad to those used by scipy.ndimage
-    try:
-        ndi_mode = _to_ndimage_mode(mode)
-    except KeyError:
-        raise ValueError("Unknown mode, or cannot translate mode. The "
-                         "mode should be one of 'constant', 'edge', "
-                         "'symmetric', 'reflect', or 'wrap'. See the "
-                         "documentation of numpy.pad for more info.")
-
+    ndi_mode = _to_ndimage_mode(mode)
     if anti_aliasing:
         if anti_aliasing_sigma is None:
             anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
