@@ -432,9 +432,15 @@ def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
     mode_translation_dict = dict(edge='nearest', symmetric='reflect',
                                  reflect='mirror')
-    if NumpyVersion(scipy.__version__) >= '1.6.0':
-        mode_translation_dict.update({'constant': 'grid-constant',
-                                      'wrap': 'grid-wrap'})
     if mode in mode_translation_dict:
         mode = mode_translation_dict[mode]
+    return _fix_ndimage_mode(mode)
+
+
+def _fix_ndimage_mode(mode):
+    # SciPy 1.6.0 introduced grid variants of constant and wrap which
+    # have less surprising behavior for images. Use these when available
+    grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
+    if NumpyVersion(scipy.__version__) >= '1.6.0' and mode in grid_modes:
+        return grid_modes[mode]
     return mode
