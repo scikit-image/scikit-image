@@ -229,7 +229,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
             masks[b] = 1. / b * np.ones((b,))
         # # separation of filters to speedup convolution
         b = block_size[0]
-        thresh_image = ndi.convolve1d(
+        ndi.convolve1d(
             image, masks[b], axis=0, output=thresh_image, mode=mode, cval=cval)
         for ax, b in zip(range(1, image.ndim), block_size[1:]):
             ndi.convolve1d(thresh_image, masks[b], axis=ax,
