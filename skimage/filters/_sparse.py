@@ -67,7 +67,9 @@ def _correlate_sparse(image, kernel_shape, kernel_indices_and_values):
     """
     idx, val = kernel_indices_and_values[0]
     # implementation assumes this corner is first in kernel_indices_in_values
-    assert tuple(idx) == (0, ) * image.ndim
+    if tuple(idx) != (0,) * image.ndim:
+        raise RuntimeError("Unexpected initial index in "
+                           "kernel_indices_and_values.")
     out = _get_view(image, kernel_shape, idx, val)
     if not out.flags.owndata:
         # make out contiguous and avoid modifying image
