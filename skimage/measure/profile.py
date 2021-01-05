@@ -6,7 +6,7 @@ from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
 
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=None, mode=None, cval=0.0,
+                 order=None, mode='reflect', cval=0.0,
                  *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
@@ -93,14 +93,6 @@ def profile_line(image, src, dst, linewidth=1,
     """
 
     order = _validate_interpolation_order(image.dtype, order)
-
-    if mode is None:
-        warn("Default out of bounds interpolation mode 'constant' is "
-             "deprecated. In version 0.19 it will be set to 'reflect'. "
-             "To avoid this warning, set `mode=` explicitly.",
-             FutureWarning, stacklevel=2)
-        mode = 'constant'
-
     mode = _fix_ndimage_mode(mode)
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
