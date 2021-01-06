@@ -70,14 +70,10 @@ def test_subtract_mean_underflow_correction(dtype):
     assert np.all(result == expected_val)
 
 
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
-
-
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
+# Note: Explicitly read all values into a dict. Otherwise, stochastic test
+#       failures related to I/O can occur during parallel test cases.
+ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
+ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
 class TestRank():
@@ -92,8 +88,8 @@ class TestRank():
         np.random.seed(0)
         self.selem = morphology.disk(1)
         self.selem_3d = morphology.ball(1)
-        self.refs = np.load(fetch('data/rank_filter_tests.npz'))
-        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
+        self.refs = ref_data
+        self.refs_3d = ref_data_3d
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
