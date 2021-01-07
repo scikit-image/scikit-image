@@ -949,21 +949,18 @@ def _mean_std(image, w):
     padded *= padded
     integral_sq = integral_image(padded)
 
-    # Store the kernel as a list 2-tuples where:
-    #     - The first element is an index into the kernel (of shape w).
-    #     - The second element is the value at that index.
-    kernel_indices_and_values = []
-    for indices in itertools.product(*tuple([(0, _w) for _w in w])):
-        kernel_indices_and_values.append(
-            (indices, (-1) ** (image.ndim % 2 != np.sum(indices) % 2))
-        )
+    # Create lists of non-zero kernel indices and values
+    kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
+    kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+                     for indices in kernel_indices]
 
     total_window_size = np.prod(w)
     kernel_shape = tuple(_w + 1 for _w in w)
-    m = _correlate_sparse(integral, kernel_shape, kernel_indices_and_values)
+    m = _correlate_sparse(integral, kernel_shape, kernel_indices,
+                          kernel_values)
     m /= total_window_size
-    g2 = _correlate_sparse(integral_sq, kernel_shape,
-                           kernel_indices_and_values)
+    g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
+                           kernel_values)
     g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
