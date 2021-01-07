@@ -248,12 +248,14 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     else:
         padded0, padded1 = image0, image1
 
-    hist, bin_edges = np.histogramdd([np.ravel(padded0),
-                                      np.ravel(padded1)],
-                                     bins=bins, density=True)
+    hist, bin_edges = np.histogramdd(
+            [np.reshape(padded0, -1), np.reshape(padded1, -1)],
+            bins=bins,
+            density=True,
+            )
 
     H0 = entropy(np.sum(hist, axis=0))
     H1 = entropy(np.sum(hist, axis=1))
-    H01 = entropy(np.ravel(hist))
+    H01 = entropy(np.reshape(hist, -1))
 
     return (H0 + H1) / H01
