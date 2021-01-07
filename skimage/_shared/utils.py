@@ -434,10 +434,11 @@ def _to_ndimage_mode(mode):
                                  symmetric='reflect', reflect='mirror',
                                  wrap='wrap')
     if mode not in mode_translation_dict:
-        raise ValueError("Unknown mode, or cannot translate mode. The "
-                         "mode should be one of 'constant', 'edge', "
-                         "'symmetric', 'reflect', or 'wrap'. See the "
-                         "documentation of numpy.pad for more info.")
+        raise ValueError(
+            ("Unknown mode: '{}', or cannot translate mode. The "
+             "mode should be one of 'constant', 'edge', 'symmetric', "
+             "'reflect', or 'wrap'. See the documentation of numpy.pad for"
+             "more info.").format(mode))
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 
