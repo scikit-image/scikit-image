@@ -144,13 +144,13 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     if data_range is None:
         if image_true.dtype != image_test.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im_true.")
+                 "image_true.")
         dmin, dmax = dtype_range[image_true.dtype.type]
         true_min, true_max = np.min(image_true), np.max(image_true)
         if true_max > dmax or true_min < dmin:
             raise ValueError(
-                "im_true has intensity values outside the range expected for "
-                "its data type.  Please manually specify the data_range")
+                "image_true has intensity values outside the range expected "
+                "for its data type. Please manually specify the data_range.")
         if true_min >= 0:
             # most common case (255 for uint8, 1 for float)
             data_range = dmax
