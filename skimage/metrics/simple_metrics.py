@@ -190,7 +190,7 @@ def _pad_to(arr, shape):
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
 
-def normalized_mutual_information(im_true, im_test, *, bins=100):
+def normalized_mutual_information(image0, image1, *, bins=100):
     r"""Compute the normalized mutual information.
 
     The normalized mutual information is given by::
@@ -207,7 +207,7 @@ def normalized_mutual_information(im_true, im_test, *, bins=100):
 
     Parameters
     ----------
-    im_true, im_test : ndarray
+    image0, image1 : ndarray
         Images to be compared. The two input images must have the same number
         of dimensions.
     bins : int or sequence of int, optional
@@ -237,23 +237,23 @@ def normalized_mutual_information(im_true, im_test, *, bins=100):
            Pattern Recognition 32(1):71-86
            :DOI:`10.1016/S0031-3203(98)00091-0`
     """
-    if im_true.ndim != im_test.ndim:
+    if image0.ndim != image1.ndim:
         raise ValueError('NMI requires images of same number of dimensions. '
-                         'Got {}D for `im_true` and {}D for `im_test`.'
-                         .format(im_true.ndim, im_test.ndim))
-    if im_true.shape != im_test.shape:
-        max_shape = np.maximum(im_true.shape, im_test.shape)
-        padded_true = _pad_to(im_true, max_shape)
-        padded_test = _pad_to(im_test, max_shape)
+                         'Got {}D for `image0` and {}D for `image1`.'
+                         .format(image0.ndim, image1.ndim))
+    if image0.shape != image1.shape:
+        max_shape = np.maximum(image0.shape, image1.shape)
+        padded0 = _pad_to(image0, max_shape)
+        padded1 = _pad_to(image1, max_shape)
     else:
-        padded_true, padded_test = im_true, im_test
+        padded0, padded1 = image0, image1
 
-    hist, bin_edges = np.histogramdd([np.ravel(padded_true),
-                                      np.ravel(padded_test)],
+    hist, bin_edges = np.histogramdd([np.ravel(padded0),
+                                      np.ravel(padded1)],
                                      bins=bins, density=True)
 
-    H_im_true = entropy(np.sum(hist, axis=0))
-    H_im_test = entropy(np.sum(hist, axis=1))
-    H_true_test = entropy(np.ravel(hist))
+    H0 = entropy(np.sum(hist, axis=0))
+    H1 = entropy(np.sum(hist, axis=1))
+    H01 = entropy(np.ravel(hist))
 
-    return (H_im_true + H_im_test) / H_true_test
+    return (H0 + H1) / H01
