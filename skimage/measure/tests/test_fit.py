@@ -141,6 +141,16 @@ def test_circle_model_estimate():
     assert_almost_equal(model0.params, model_est.params, 0)
 
 
+def test_circle_model_int_overflow():
+    xy = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype=np.int32)
+    xy += 500
+
+    model = CircleModel()
+    model.estimate(xy)
+
+    assert_almost_equal(model.params, [500, 500, 1])
+
+
 def test_circle_model_residuals():
     model = CircleModel()
     model.params = (0, 0, 5)
