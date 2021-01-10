@@ -270,6 +270,9 @@ class CircleModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
+
         x = data[:, 0]
         y = data[:, 1]
 
@@ -280,7 +283,7 @@ class CircleModel(BaseModel):
         sum_xy = np.sum(x * y)
         m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
                        [sum_xy, np.sum(y ** 2), sum_y],
-                       [sum_x, sum_y, float(len(x))]])
+                       [sum_x, sum_y, len(x)]])
         m2 = np.stack([[np.sum(x * x2y2),
                         np.sum(y * x2y2),
                         np.sum(x2y2)]], axis=-1)
@@ -414,13 +417,16 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
+
         x = data[:, 0]
         y = data[:, 1]
 
         # Quadratic part of design matrix [eqn. 15] from [1]
         D1 = np.vstack([x ** 2, x * y, y ** 2]).T
         # Linear part of design matrix [eqn. 16] from [1]
-        D2 = np.vstack([x, y, np.ones(len(x))]).T
+        D2 = np.vstack([x, y, np.ones(len(x), dtype=float_type)]).T
 
         # forming scatter matrix [eqn. 17] from [1]
         S1 = D1.T @ D1
