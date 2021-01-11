@@ -23,7 +23,7 @@ def test_hough_line():
     dist = d[y[0]]
     theta = angles[x[0]]
 
-    assert_almost_equal(dist, 80.723, 1)
+    assert_almost_equal(dist, 81.726, 1)
     assert_almost_equal(theta, 1.41, 1)
 
 
@@ -79,7 +79,7 @@ def test_probabilistic_hough_seed():
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
                                                seed=1234)
-    assert len(lines) == 65
+    assert len(lines) == 64
 
 
 def test_probabilistic_hough_bad_input():
@@ -101,7 +101,7 @@ def test_hough_line_peaks():
     out, theta, dist = transform.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
-    assert_almost_equal(dist[0], 80.723, 1)
+    assert_almost_equal(dist[0], 81.726, 1)
     assert_almost_equal(theta[0], 1.41, 1)
 
 
@@ -110,7 +110,7 @@ def test_hough_line_peaks_ordered():
     testim = np.zeros((256, 64), dtype=bool)
 
     testim[50:100, 20] = True
-    testim[85:200, 25] = True
+    testim[20:225, 25] = True
     testim[15:35, 50] = True
     testim[1:-1, 58] = True
 
