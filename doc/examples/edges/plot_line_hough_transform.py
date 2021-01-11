@@ -30,7 +30,7 @@ appropriately.
 
 We can think of each non-zero pixel "voting" for potential line candidates. The
 local maxima in the resulting histogram indicates the parameters of the most
-probably lines. In our example, the maxima occur at 45 and 135 degrees,
+probable lines. In our example, the maxima occur at 45 and 135 degrees,
 corresponding to the normal vector angles of each line.
 
 Another approach is the Progressive Probabilistic Hough Transform [2]_. It is
