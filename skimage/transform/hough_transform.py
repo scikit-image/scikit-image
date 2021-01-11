@@ -174,7 +174,8 @@ def hough_line(image, theta=None):
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
-        Defaults to a vector of 180 angles evenly spaced in the range [-pi/2, pi/2).
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
 
     Returns
     -------
@@ -241,7 +242,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
-        Defaults to a vector of 180 angles evenly spaced in the range [-pi/2, pi/2).
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
     seed : int, optional
         Seed to initialize the random number generator.
 
