@@ -79,7 +79,7 @@ image[idx, idx] = 255
 
 # Classic straight-line Hough transform
 # Set a precision of 0.5 degree.
-tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
+tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360, endpoint=False)
 h, theta, d = hough_line(image, theta=tested_angles)
 
 # Generating figure 1
