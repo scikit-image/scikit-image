@@ -218,7 +218,7 @@ def hough_line(image, theta=None):
 
     if theta is None:
         # These values are approximations of pi/2
-        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
     return _hough_line(image, theta=theta)
 
