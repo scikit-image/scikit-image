@@ -92,9 +92,12 @@ ax[0].imshow(image, cmap=cm.gray)
 ax[0].set_title('Input image')
 ax[0].set_axis_off()
 
-ax[1].imshow(np.log(1 + h),
-             extent=[np.rad2deg(theta[0]), np.rad2deg(theta[-1]), d[-1], d[0]],
-             cmap=cm.gray, aspect=1/1.5)
+angle_step = 0.5 * np.diff(theta).mean()
+d_step = 0.5 * np.diff(d).mean()
+bounds = [np.rad2deg(theta[0] - angle_step),
+          np.rad2deg(theta[-1] + angle_step),
+          d[-1] + d_step, d[0] - d_step]
+ax[1].imshow(np.log(1 + h), extent=bounds, cmap=cm.gray, aspect=1 / 1.5)
 ax[1].set_title('Hough transform')
 ax[1].set_xlabel('Angles (degrees)')
 ax[1].set_ylabel('Distance (pixels)')
