@@ -23,7 +23,7 @@ def test_hough_line():
     dist = d[y[0]]
     theta = angles[x[0]]
 
-    assert_almost_equal(dist, 80.723, 1)
+    assert_almost_equal(dist, 80.0, 1)
     assert_almost_equal(theta, 1.41, 1)
 
 
@@ -101,7 +101,7 @@ def test_hough_line_peaks():
     out, theta, dist = transform.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
-    assert_almost_equal(dist[0], 81.726, 1)
+    assert_almost_equal(dist[0], 81.0, 1)
     assert_almost_equal(theta[0], 1.41, 1)
 
 
