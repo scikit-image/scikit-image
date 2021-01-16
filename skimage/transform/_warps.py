@@ -3,7 +3,7 @@ from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,
                          ProjectiveTransform, _to_ndimage_mode)
-from ._warps_cy import _warp_fast
+from ._warps_cy import _warp_fast, _warp_fast_batch
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
@@ -878,13 +878,10 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
                                            output_shape=output_shape,
                                            order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
-                dims = []
-                for dim in range(image.shape[2]):
-                    dims.append(_warp_fast[ctype](image[..., dim], matrix,
-                                                  output_shape=output_shape,
-                                                  order=order, mode=mode,
-                                                  cval=cval))
-                warped = np.dstack(dims)
+                warped = _warp_fast_batch[ctype](image, matrix,
+                                                 output_shape=output_shape,
+                                                 order=order,
+                                                 mode=mode, cval=cval)
 
     if warped is None:
         # use ndi.map_coordinates
