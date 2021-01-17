@@ -6,6 +6,24 @@ import textwrap
 from .._shared.utils import get_bound_method_class, safe_as_int
 
 
+def _affine_matrix_from_vector(v):
+    """Affine matrix from linearized (d, d + 1) matrix entries."""
+    nparam = v.size
+    # solve for d in: d * (d - 1) = nparam
+    d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
+    dimensionality = int(d)
+    if d != dimensionality:
+        raise ValueError('Invalid number of elements for '
+                         f'linearized matrix: {nparam}')
+    part_matrix = np.reshape(
+        v, (dimensionality, dimensionality + 1)
+    )
+    matrix = np.concatenate(
+        (part_matrix, np.eye(dimensionality + 1)[-1:]), axis=0
+    )
+    return matrix
+
+
 def _center_and_normalize_points(points):
     """Center and normalize image points.
 
@@ -830,21 +848,7 @@ class AffineTransform(ProjectiveTransform):
         if params and dimensionality > 2:
             raise ValueError('Parameter input is only supported in 2D.')
         elif matrix is not None:
-            if matrix.ndim == 1:  # linearized (d, d + 1) homogeneous matrix
-                nparam = matrix.size
-                # solve for d in: d * (d - 1) = nparam
-                d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
-                dimensionality = int(d)
-                if d != dimensionality:
-                    raise ValueError('Invalid number of elements for '
-                                     f'linearized matrix: {nparam}')
-                part_matrix = np.reshape(
-                    matrix, (dimensionality, dimensionality + 1)
-                )
-                matrix = np.concatenate(
-                    (part_matrix, np.eye(dimensionality + 1)[-1:]), axis=0
-                )
-            elif matrix.shape[0] != matrix.shape[1]:
+            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
             else:
                 dimensionality = matrix.shape[0] - 1
@@ -1265,16 +1269,7 @@ class SimilarityTransform(EuclideanTransform):
             raise ValueError("You cannot specify the transformation matrix and"
                              " the implicit parameters at the same time.")
         elif matrix is not None:
-            if matrix.ndim == 1:  # parameter vector: scale, rot, translation
-                if dimensionality > 3:
-                    raise ValueError(
-                        'Parameter vectors are only supported for 2D and 3D.'
-                    )
-                scale = matrix[0]
-                rotation = matrix[1:-dimensionality]
-                translation = matrix[-dimensionality:]
-                params = True
-            elif matrix.shape[0] != matrix.shape[1] or matrix.ndim > 2:
+            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
             else:
                 self.params = matrix
