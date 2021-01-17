@@ -67,7 +67,7 @@ access), specifically to:
   meaning that the appropriate version number would look something like
   ``0.20.0.dev0`` with the period between ``0`` and ``dev`` and a trailing
   ``0`` immediately after ``dev``. The final ``0`` is necessary to ensure
-  that 
+  that
   `NumpyVersion <https://github.com/scikit-image/scikit-image/pull/4947>`_
   correctly interprets the version number.
 
@@ -176,6 +176,10 @@ access), specifically to:
 
    python setup.py sdist
    twine upload dist/scikit-image-<major>.<minor>.0.tar.gz
+
+- Publish the release on github:
+
+  Go to https://github.com/scikit-image/scikit-image/releases
 
 - Update the release docs:
    - Edit ``doc/source/_static/docversions.js`` and commit
