@@ -605,3 +605,11 @@ def test_euler_rotation():
     expected = [-5, -5, 7.1]
     R = _euler_rotation_matrix(angles)
     assert_almost_equal(R @ v, expected, decimal=1)
+
+
+
+def test_euler_angle_consistency():
+    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    euclid = EuclideanTransform(rotation=angles, dimensionality=3)
+    similar = SimilarityTransform(rotation=angles, dimensionality=3)
+    testing.assert_array_almost_equal(euclid, similar)
