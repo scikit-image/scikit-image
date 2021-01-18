@@ -599,6 +599,11 @@ def test_affine_transform_from_linearized_parameters():
         _ = AffineTransform(matrix=v[:-1])
 
 
+def test_affine_params_nD_error():
+    with testing.raises(ValueError):
+        _ = AffineTransform(scale=5, dimensionality=3)
+
+
 def test_euler_rotation():
     v = [0, 10, 0]
     angles = np.radians([90, 45, 45])
@@ -607,9 +612,43 @@ def test_euler_rotation():
     assert_almost_equal(R @ v, expected, decimal=1)
 
 
+def test_euclidean_param_defaults():
+    # 2D rotation is 0 when only translation is given
+    tf = EuclideanTransform(translation=(5, 5))
+    assert np.array(tf)[0, 1] == 0
+    # off diagonals are 0 when only translation is given
+    tf = EuclideanTransform(translation=(4, 5, 9), dimensionality=3)
+    assert_equal(np.array(tf)[[0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1]], 0)
+    with testing.raises(ValueError):
+        # specifying parameters for D>3 is not supported
+        _ = EuclideanTransform(translation=(5, 6, 7, 8), dimensionality=4)
+    with testing.raises(ValueError):
+        # incorrect number of angles for given dimensionality
+        _ = EuclideanTransform(rotation=(4, 8), dimensionality=3)
+    # translation is 0 when rotation is given
+    tf = EuclideanTransform(rotation=np.pi * np.arange(3), dimensionality=3)
+    assert_equal(np.array(tf)[:-1, 3], 0)
+
+
+def test_similarity_transform_params():
+    with testing.raises(ValueError):
+        _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
+    tf = SimilarityTransform(scale=4, dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+
 
 def test_euler_angle_consistency():
     angles = np.random.random((3,)) * 2 * np.pi - np.pi
     euclid = EuclideanTransform(rotation=angles, dimensionality=3)
     similar = SimilarityTransform(rotation=angles, dimensionality=3)
     testing.assert_array_almost_equal(euclid, similar)
+
+
+def test_2D_only_implementations():
+    with testing.raises(NotImplementedError):
+        _ = PolynomialTransform(dimensionality=3)
+    tf = AffineTransform(dimensionality=3)
+    with testing.raises(NotImplementedError):
+        _ = tf.rotation
+    with testing.raises(NotImplementedError):
+        _ = tf.shear
