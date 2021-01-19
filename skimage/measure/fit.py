@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from numpy.linalg import inv, pinv
-from scipy import optimize
+from scipy import optimize, spatial
 from warnings import warn
 from .._shared.utils import check_random_state
 
@@ -274,27 +274,14 @@ class CircleModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
-        x = data[:, 0]
-        y = data[:, 1]
+        A = np.append(data * 2, np.ones((data.shape[0], 1)), axis=1)
+        f = np.sum(data ** 2, axis=1)
+        C, _, _, _ = np.linalg.lstsq(A, f, rcond=None)
+        center = C[0:2]
+        distances = spatial.minkowski_distance(center, data)
+        r = np.sqrt(np.mean(distances ** 2))
 
-        # http://www.had2know.com/academics/best-fit-circle-least-squares.html
-        x2y2 = (x ** 2 + y ** 2)
-        sum_x = np.sum(x)
-        sum_y = np.sum(y)
-        sum_xy = np.sum(x * y)
-        m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
-                       [sum_xy, np.sum(y ** 2), sum_y],
-                       [sum_x, sum_y, len(x)]])
-        m2 = np.stack([[np.sum(x * x2y2),
-                        np.sum(y * x2y2),
-                        np.sum(x2y2)]], axis=-1)
-        a, b, c = pinv(m1) @ m2
-        a, b, c = a[0], b[0], c[0]
-        xc = a / 2
-        yc = b / 2
-        r = np.sqrt(4 * c + a ** 2 + b ** 2) / 2
-
-        self.params = (xc, yc, r)
+        self.params = tuple(center) + (r,)
 
         return True
 
