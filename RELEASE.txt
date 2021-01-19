@@ -179,7 +179,11 @@ access), specifically to:
 
 - Publish the release on github:
 
-  Go to https://github.com/scikit-image/scikit-image/releases
+  Go to https://github.com/scikit-image/scikit-image/releases and
+  click on "Draft a new release".
+  Choose the tag corresponding to this release, copy the release notes,
+  and upload the wheels in the appropriate slot. Finally, click on
+  "Publish release".
 
 - Update the release docs:
    - Edit ``doc/source/_static/docversions.js`` and commit
