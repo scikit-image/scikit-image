@@ -142,17 +142,6 @@ def test_circle_model_estimate():
     assert_almost_equal(model0.params, model_est.params, 0)
 
 
-@pytest.mark.skip(reason="This must be a bug.")
-def test_circle_model_int_overflow():
-    xy = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype="int16")
-    xy += 500
-
-    model = CircleModel()
-    model.estimate(xy)
-
-    assert_almost_equal(model.params, [500, 500, 1])
-
-
 def test_circle_model_residuals():
     model = CircleModel()
     model.params = (0, 0, 5)
@@ -232,8 +221,8 @@ def test_ellipse_model_estimate_from_data():
     # test whether estimated parameters are smaller then 1000, so means stable
     assert_array_less(model.params[:4], np.array([1e3] * 4))
 
-    # test whether all parameters are more than 0. Negative values were the result
-    # of an integer overflow
+    # test whether all parameters are more than 0. Negative values were the
+    # result of an integer overflow
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 

@@ -270,6 +270,7 @@ class CircleModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
+        # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
@@ -417,6 +418,7 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
@@ -426,7 +428,7 @@ class EllipseModel(BaseModel):
         # Quadratic part of design matrix [eqn. 15] from [1]
         D1 = np.vstack([x ** 2, x * y, y ** 2]).T
         # Linear part of design matrix [eqn. 16] from [1]
-        D2 = np.vstack([x, y, np.ones(len(x), dtype=float_type)]).T
+        D2 = np.vstack([x, y, np.ones_like(x)]).T
 
         # forming scatter matrix [eqn. 17] from [1]
         S1 = D1.T @ D1
