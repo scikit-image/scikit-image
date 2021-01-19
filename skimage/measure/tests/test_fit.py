@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
@@ -158,6 +159,12 @@ def test_circle_model_residuals():
     assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
                         np.sqrt(2 * 6**2) - 5)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
+
+
+def test_circle_model_insufficient_data():
+    model = CircleModel()
+    with pytest.raises(ValueError):
+        model.estimate(np.ones((6,2)))
 
 
 def test_ellipse_model_invalid_input():
