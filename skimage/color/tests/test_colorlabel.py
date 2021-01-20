@@ -219,19 +219,20 @@ def test_avg_with_2d_image():
     assert_no_warnings(label2rgb, labels, image=img, bg_label=0, kind='avg')
 
 
-def test_overlay_rgb():
+def test_overlay_saturation():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
     labels[5:, 5:] = 2
     labels[:3, :3] = 0
     alpha = 0.3
     rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
-                    bg_label=0, kind='overlay-rgb')
+                    bg_label=0, saturation=1)
     # check that rgb part of input image is preserved, where labels=0
-    assert_array_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
+    assert_array_almost_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
-    # now check only with kind=overlay that does not match
+    # now check with saturation=0 that does not match with rgb values
     rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
-                    bg_label=0, kind='overlay')
+                    bg_label=0, saturation=0)
+
     with testing.raises(AssertionError):
-        assert_array_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
+        assert_array_almost_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
