@@ -2,10 +2,12 @@ import numpy as np
 from skimage.segmentation import (morphological_chan_vese,
                                   morphological_geodesic_active_contour,
                                   inverse_gaussian_gradient,
-                                  circle_level_set)
+                                  circle_level_set,
+                                  disk_level_set)
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def gaussian_blob():
@@ -38,7 +40,7 @@ def test_morphsnakes_incorrect_ndim():
 
 def test_morphsnakes_black():
     img = np.zeros((11, 11))
-    ls = circle_level_set(img.shape, (5, 5), 3)
+    ls = disk_level_set(img.shape, center=(5, 5), radius=3)
 
     ref_zeros = np.zeros(img.shape, dtype=np.int8)
     ref_ones = np.ones(img.shape, dtype=np.int8)
@@ -61,8 +63,8 @@ def test_morphsnakes_black():
 
 def test_morphsnakes_simple_shape_chan_vese():
     img = gaussian_blob()
-    ls1 = circle_level_set(img.shape, (5, 5), 3)
-    ls2 = circle_level_set(img.shape, (5, 5), 6)
+    ls1 = disk_level_set(img.shape, center=(5, 5), radius=3)
+    ls2 = disk_level_set(img.shape, center=(5, 5), radius=6)
 
     acwe_ls1 = morphological_chan_vese(img, iterations=10, init_level_set=ls1)
     acwe_ls2 = morphological_chan_vese(img, iterations=10, init_level_set=ls2)
@@ -73,9 +75,9 @@ def test_morphsnakes_simple_shape_chan_vese():
 
 
 def test_morphsnakes_simple_shape_geodesic_active_contour():
-    img = np.float_(circle_level_set((11, 11), (5, 5), 3.5))
+    img = (disk_level_set((11, 11), center=(5, 5), radius=3.5)).astype(float)
     gimg = inverse_gaussian_gradient(img, alpha=10.0, sigma=1.0)
-    ls = circle_level_set(img.shape, (5, 5), 6)
+    ls = disk_level_set(img.shape, center=(5, 5), radius=6)
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -97,6 +99,12 @@ def test_morphsnakes_simple_shape_geodesic_active_contour():
     assert gac_ls.dtype == np.int8
 
 
+def test_deprecated_circle_level_set():
+    img = gaussian_blob()
+    with expected_warnings(['circle_level_set is deprecated']):
+        ls1 = circle_level_set(img.shape, (5, 5), 3)
+
+
 def test_init_level_sets():
     image = np.zeros((6, 6))
     checkerboard_ls = morphological_chan_vese(image, 0, 'checkerboard')
@@ -107,16 +115,16 @@ def test_init_level_sets():
                                  [0, 0, 0, 0, 0, 1],
                                  [1, 1, 1, 1, 1, 0]], dtype=np.int8)
 
-    circle_ls = morphological_geodesic_active_contour(image, 0, 'circle')
-    circle_ref = np.array([[0, 0, 0, 0, 0, 0],
-                           [0, 0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 0, 1, 1, 1, 0]], dtype=np.int8)
+    disk_ls = morphological_geodesic_active_contour(image, 0, 'disk')
+    disk_ref = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 0, 1, 1, 1, 0]], dtype=np.int8)
 
     assert_array_equal(checkerboard_ls, checkerboard_ref)
-    assert_array_equal(circle_ls, circle_ref)
+    assert_array_equal(disk_ls, disk_ref)
 
 
 def test_morphsnakes_3d():
@@ -127,10 +135,10 @@ def test_morphsnakes_3d():
     def callback(x):
         evolution.append(x.sum())
 
-    ls = morphological_chan_vese(image, 5, 'circle',
+    ls = morphological_chan_vese(image, 5, 'disk',
                                  iter_callback=callback)
 
-    # Check that the initial circle level set is correct
+    # Check that the initial disk level set is correct
     assert evolution[0] == 81
 
     # Check that the final level set is correct

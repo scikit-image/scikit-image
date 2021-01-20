@@ -2,16 +2,16 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from ..transform import resize
-from ..util import img_as_float
+from .._shared.utils import convert_to_float
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
     """Return image with each channel smoothed by the Gaussian filter."""
-    smoothed = np.empty(image.shape, dtype=np.double)
+    smoothed = np.empty_like(image)
 
     # apply Gaussian filter to all channels independently
     if multichannel:
-        sigma = (sigma, )*(image.ndim - 1) + (0, )
+        sigma = (sigma, ) * (image.ndim - 1) + (0, )
     ndi.gaussian_filter(image, sigma, output=smoothed,
                         mode=mode, cval=cval)
     return smoothed
@@ -23,7 +23,8 @@ def _check_factor(factor):
 
 
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False):
+                   mode='reflect', cval=0, multichannel=False,
+                   preserve_range=False):
     """Smooth and then downsample image.
 
     Parameters
@@ -47,6 +48,10 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -55,12 +60,12 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(downscale)
 
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     out_shape = tuple([math.ceil(d / float(downscale)) for d in image.shape])
     if multichannel:
@@ -78,7 +83,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False):
+                   mode='reflect', cval=0, multichannel=False,
+                   preserve_range=False):
     """Upsample and then smooth image.
 
     Parameters
@@ -102,6 +108,10 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -110,12 +120,12 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(upscale)
 
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     out_shape = tuple([math.ceil(upscale * d) for d in image.shape])
     if multichannel:
@@ -133,7 +143,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=False):
+                     mode='reflect', cval=0, multichannel=False,
+                     preserve_range=False):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -168,6 +179,10 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -176,13 +191,13 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     layer = 0
     current_shape = image.shape
@@ -210,7 +225,8 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
 
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0, multichannel=False):
+                      mode='reflect', cval=0, multichannel=False,
+                      preserve_range=False):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
@@ -248,6 +264,11 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+
 
     Returns
     -------
@@ -256,14 +277,14 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
 
     """
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution

@@ -7,7 +7,7 @@ from skimage.metrics import structural_similarity
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_almost_equal)
+                                     assert_array_almost_equal, fetch)
 
 np.random.seed(5)
 cam = data.camera()
@@ -160,54 +160,34 @@ def test_structural_similarity_multichannel_chelsea():
 
 
 def test_gaussian_mssim_vs_IPOL():
-    # Tests vs. imdiff result from the following IPOL article and code:
-    # https://www.ipol.im/pub/art/2011/g_lmii/
-    mssim_IPOL = 0.327309966087341
+    """Tests vs. imdiff result from the following IPOL article and code:
+    https://www.ipol.im/pub/art/2011/g_lmii/
+
+    Notes
+    -----
+    To generate mssim_IPOL, we need a local copy of cam_noisy:
+
+    >>> from skimage import io
+    >>> io.imsave('/tmp/cam_noisy.png', cam_noisy)
+
+    Then, we use the following command:
+    $ ./imdiff -m mssim <path to camera.png>/camera.png /tmp/cam_noisy.png
+
+    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Available at:
+    https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
+    """
+    mssim_IPOL = 0.357959091663361
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_IPOL, decimal=3)
-
-
-def test_gaussian_mssim_vs_author_ref():
-    """
-    test vs. result from original author's Matlab implementation available at
-    https://ece.uwaterloo.ca/~z70wang/research/ssim/
-
-    Matlab test code:
-       img1 = imread('camera.png')
-       img2 = imread('camera_noisy.png')
-       mssim = ssim_index(img1, img2)
-    """
-    mssim_matlab = 0.327314295673357
-    mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_matlab, decimal=10)
-
-
-def test_gaussian_mssim_and_gradient_vs_Matlab():
-    # comparison to Matlab implementation of N. Avanaki:
-    # https://ece.uwaterloo.ca/~nnikvand/Coderep/SHINE%20TOOLBOX/SHINEtoolbox/
-    # Note: final line of ssim_sens.m was modified to discard image borders
-
-    ref = np.load(os.path.join(data_dir, 'mssim_matlab_output.npz'))
-    grad_matlab = ref['grad_matlab']
-    mssim_matlab = float(ref['mssim_matlab'])
-
-    mssim, grad = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                                        gradient=True,
-                                        use_sample_covariance=False)
-
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
-
-    # check almost equal aside from object borders
-    assert_array_almost_equal(grad_matlab[5:-5], grad[5:-5])
+    assert_almost_equal(mssim, mssim_IPOL, decimal=5)
 
 
 def test_mssim_vs_legacy():
-    # check that ssim with default options matches skimage 0.11 result
-    mssim_skimage_0pt11 = 0.34192589699605191
+    # check that ssim with default options matches skimage 0.17 result
+    mssim_skimage_0pt17 = 0.3674518327910367
     mssim = structural_similarity(cam, cam_noisy)
-    assert_almost_equal(mssim, mssim_skimage_0pt11)
+    assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
 def test_mssim_mixed_dtype():
@@ -238,4 +218,3 @@ def test_invalid_input():
         structural_similarity(X, X, K2=-0.1)
     with testing.raises(ValueError):
         structural_similarity(X, X, sigma=-1.0)
-

@@ -85,7 +85,7 @@ class TestMaxtree(TestCase):
             assert_array_equal(P, P_exp)
             assert_array_equal(S, S_exp)
 
-        img_float = img.astype(np.float)
+        img_float = img.astype(float)
         img_float = (img_float - 8) / 2.0
         for img_type in [np.float32, np.float64]:
             img_float = img_float.astype(img_type)

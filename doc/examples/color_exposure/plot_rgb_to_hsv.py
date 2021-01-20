@@ -80,4 +80,3 @@ ax0.axis('off')
 
 fig.tight_layout()
 plt.show()
-

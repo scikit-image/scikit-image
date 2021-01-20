@@ -16,7 +16,7 @@ References
 .. [1] Viola, Paul, and Michael J. Jones. "Robust real-time face
        detection." International journal of computer vision 57.2
        (2004): 137-154.
-       http://www.merl.com/publications/docs/TR2004-043.pdf
+       https://www.merl.com/publications/docs/TR2004-043.pdf
        :DOI:`10.1109/CVPR.2001.990517`
 
 """

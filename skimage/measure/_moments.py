@@ -112,7 +112,7 @@ def moments_coords_central(coords, center=None, order=3):
         # This format corresponds to coordinate tuples as returned by
         # e.g. np.nonzero: (row_coords, column_coords).
         # We represent them as an npoints x ndim array.
-        coords = np.transpose(coords)
+        coords = np.stack(coords, axis=-1)
     check_nD(coords, 2)
     ndim = coords.shape[1]
     if center is None:
@@ -292,7 +292,6 @@ def moments_normalized(mu, order=3):
            [       nan, 0.        , 0.        , 0.        ],
            [0.078125  , 0.        , 0.00610352, 0.        ],
            [0.        , 0.        , 0.        , 0.        ]])
-
     """
     if np.any(np.array(mu.shape) <= order):
         raise ValueError("Shape of image moments must be >= `order`")
@@ -315,7 +314,7 @@ def moments_hu(nu, dtype=None):
     Parameters
     ----------
     nu : (M, M) array
-        Normalized central image moments, where M must be > 4.
+        Normalized central image moments, where M must be >= 4.
 
     Returns
     -------
@@ -339,6 +338,16 @@ def moments_hu(nu, dtype=None):
            Berlin, 1993.
     .. [5] https://en.wikipedia.org/wiki/Image_moment
 
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 0.5
+    >>> image[10:12, 10:12] = 1
+    >>> mu = moments_central(image)
+    >>> nu = moments_normalized(mu)
+    >>> moments_hu(nu)
+    array([7.45370370e-01, 3.51165981e-01, 1.04049179e-01, 4.06442107e-02,
+           2.64312299e-03, 2.40854582e-02, 4.33680869e-19])
     """
     nu = np.asarray(nu)
     if dtype is None:
@@ -367,6 +376,14 @@ def centroid(image):
     -------
     center : tuple of float, length ``image.ndim``
         The centroid of the (nonzero) pixels in ``image``.
+
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 0.5
+    >>> image[10:12, 10:12] = 1
+    >>> centroid(image)
+    array([13.16666667, 13.16666667])
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1)
     center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
@@ -460,4 +477,9 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     if T is None:
         T = inertia_tensor(image, mu)
     eigvals = np.linalg.eigvalsh(T)
+    # Floating point precision problems could make a positive
+    # semidefinite matrix have an eigenvalue that is very slightly
+    # negative. This can cause problems down the line, so set values
+    # very near zero to zero.
+    eigvals = np.clip(eigvals, 0, None, out=eigvals)
     return sorted(eigvals, reverse=True)

@@ -1,6 +1,6 @@
+import warnings
 import numpy as np
 import scipy.ndimage as ndi
-from .._shared.utils import warn
 from . import _marching_cubes_classic_cy
 
 
@@ -33,7 +33,9 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     -------
     verts : (V, 3) array
         Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
@@ -44,7 +46,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     The marching cubes algorithm is implemented as described in [1]_.
     A simple explanation is available here::
 
-      http://www.essi.fr/~lingrand/MarchingCubes/algo.html
+      http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
 
     There are several known ambiguous cases in the marching cubes algorithm.
     Using point labeling as in [1]_, Figure 4, as shown::
@@ -97,6 +99,22 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     --------
     skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
+    """
+
+    # Deprecate the function in favor of marching_cubes
+    warnings.warn("marching_cubes_classic is deprecated in favor of "
+                  "marching_cubes with `method='_lorensen'` "
+                  "to apply Lorensen et al. algorithm. "
+                  "marching_cubes_classic will be removed in version 0.19",
+                  FutureWarning, stacklevel=2)
+
+    return _marching_cubes_classic(volume, level, spacing, gradient_direction)
+
+
+def _marching_cubes_classic(volume, level, spacing, gradient_direction):
+    """Lorensen et al. algorithm for marching cubes. See
+    marching_cubes_classic for documentation.
+
     """
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
     if volume.ndim != 3:

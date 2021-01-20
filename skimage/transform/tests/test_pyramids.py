@@ -1,11 +1,12 @@
 import math
+import pytest
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_, assert_equal
-from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_array_equal, assert_, assert_equal,
+                                     assert_almost_equal)
 
 
 image = data.astronaut()
@@ -20,9 +21,13 @@ def test_pyramid_reduce_rgb():
 
 def test_pyramid_reduce_gray():
     rows, cols = image_gray.shape
-    out = pyramids.pyramid_reduce(image_gray, downscale=2,
-                                  multichannel=False)
-    assert_array_equal(out.shape, (rows / 2, cols / 2))
+    out1 = pyramids.pyramid_reduce(image_gray, downscale=2,
+                                   multichannel=False)
+    assert_array_equal(out1.shape, (rows / 2, cols / 2))
+    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
+    out2 = pyramids.pyramid_reduce(image_gray, downscale=2,
+                                   multichannel=False, preserve_range=True)
+    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_nd():
@@ -130,3 +135,13 @@ def test_check_factor():
         pyramids._check_factor(0.99)
     with testing.raises(ValueError):
         pyramids._check_factor(- 2)
+
+
+@pytest.mark.parametrize('dtype, expected',
+                         zip(['float32', 'float64', 'uint8', 'int64'],
+                             ['float32', 'float64', 'float64', 'float64']))
+def test_pyramid_gaussian_dtype_support(dtype, expected):
+    img = np.random.randn(32, 8).astype(dtype)
+    pyramid = pyramids.pyramid_gaussian(img)
+
+    assert np.all([im.dtype == expected for im in pyramid])

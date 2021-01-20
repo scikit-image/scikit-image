@@ -11,6 +11,8 @@ from ..measure._ccomp cimport find_root, join_trees
 from ..util import img_as_float64
 from .._shared.utils import warn
 
+cnp.import_array()
+
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
@@ -66,7 +68,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     	                           (image[1:, :width-1, :] - image[:height-1, 1:, :]), axis=-1))
     cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([
     	right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
-        uright_cost.ravel()]).astype(np.float)
+        uright_cost.ravel()]).astype(float)
 
     # compute edges between pixels:
     cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
