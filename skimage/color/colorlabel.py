@@ -100,8 +100,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     kind : string, one of {'overlay', 'overlay-rgb', 'avg'}
         The kind of color image desired. 'overlay' cycles over defined colors
         and overlays the colored labels over the original image. 'overlay-rgb'
-        behaves same as 'overlay', but it preserves the rgb content of the
-        input image. 'avg' replaces each labeled segment with its average
+        behaves just like 'overlay', but it preserves the RGB content of the
+        original image. 'avg' replaces each labeled segment with its average
         color, for a stained-glass or pastel painting appearance.
 
     Returns
@@ -112,7 +112,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     """
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                  bg_color, image_alpha, preserve_rgb=False)
+                                  bg_color, image_alpha)
     elif kind == 'overlay-rgb':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha, preserve_rgb=True)
@@ -120,7 +120,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         return _label2rgb_avg(label, image, bg_label, bg_color)
     else:
         raise ValueError(
-            "`kind` must be either 'overlay', 'overlay-rgb' or 'avg'.")
+            "`kind` must be one of: 'overlay', 'overlay-rgb', or 'avg'.")
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
@@ -134,7 +134,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         Integer array of labels with the same shape as `image`.
     image : array, shape (M, N, 3), optional
         Image used as underlay for labels. If the input is an RGB image, it's
-        converted to grayscale before coloring.
+        converted to grayscale before coloring unless `preserve_rgb=True`.
     colors : list, optional
         List of colors. If the number of labels exceeds the number of colors,
         then the colors are cycled.
@@ -149,8 +149,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     image_alpha : float [0, 1], optional
         Opacity of the image.
     preserve_rgb : bool, optional
-        Whether or not to preserve the RGB content of the input image.By
-        default it converts the image to grayscale before making the overlay.
+        Whether or not to preserve the RGB content of the input image. By
+        default (`preserve_rgb=False`), the input image is converted to
+        grayscale before making the overlay.
 
     Returns
     -------
