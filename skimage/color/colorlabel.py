@@ -179,7 +179,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         image = img_as_float(image)
         if image.ndim > label.ndim:
             hsv = rgb2hsv(image)
-            hsv[..., 1] = hsv[..., 1] * saturation
+            hsv[..., 1] *= saturation
             image = hsv2rgb(hsv)
         elif image.ndim == label.ndim:
             image = gray2rgb(image)
