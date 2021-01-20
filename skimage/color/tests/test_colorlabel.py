@@ -3,6 +3,7 @@ import pytest
 
 import numpy as np
 from skimage.color.colorlabel import label2rgb
+from skimage.color.colorconv import rgb2hsv, hsv2rgb
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal,
@@ -219,7 +220,7 @@ def test_avg_with_2d_image():
     assert_no_warnings(label2rgb, labels, image=img, bg_label=0, kind='avg')
 
 
-def test_overlay_saturation():
+def test_overlay_full_saturation():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
     labels[5:, 5:] = 2
@@ -230,9 +231,31 @@ def test_overlay_saturation():
     # check that rgb part of input image is preserved, where labels=0
     assert_array_almost_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
-    # now check with saturation=0 that does not match with rgb values
-    rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
-                    bg_label=0, saturation=0)
 
-    with testing.raises(AssertionError):
-        assert_array_almost_equal(rgb_img[:3, :3] * (1 - alpha), rgb[:3, :3])
+def test_overlay_custom_saturation():
+    rgb_img = np.random.uniform(size=(10, 10, 3))
+    labels = np.ones((10, 10), dtype=np.int64)
+    labels[5:, 5:] = 2
+    labels[:3, :3] = 0
+    alpha = 0.3
+    saturation = 0.3
+    rgb = label2rgb(labels, image=rgb_img, alpha=alpha,
+                    bg_label=0, saturation=saturation)
+
+    hsv = rgb2hsv(rgb_img)
+    hsv[..., 1] *= saturation
+    saturaded_img = hsv2rgb(hsv)
+
+    # check that rgb part of input image is saturated, where labels=0
+    assert_array_almost_equal(saturaded_img[:3, :3] * (1 - alpha), rgb[:3, :3])
+
+
+@pytest.mark.filterwarnings("error")
+def test_saturation_warning():
+    rgb_img = np.random.uniform(size=(10, 10, 3))
+    labels = np.ones((10, 10), dtype=np.int64)
+    with pytest.raises(UserWarning):
+        label2rgb(labels, image=rgb_img,
+                  bg_label=0, saturation=2)
+        label2rgb(labels, image=rgb_img,
+                  bg_label=0, saturation=-1)

@@ -74,7 +74,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 @change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
               bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay',
-              saturation=0):
+              *, saturation=0):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -161,6 +161,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    if not 0 <= saturation <= 1:
+        warn(f"saturation must be in range [0, 1], got {saturation}")
+
     if colors is None:
         colors = DEFAULT_COLORS
     colors = [_rgb_vector(c) for c in colors]
