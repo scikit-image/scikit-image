@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
