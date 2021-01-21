@@ -9,23 +9,15 @@ from collections import defaultdict
 
 def impute_blanks(data):
 	#skip 6,6 outside border
-	#count = 0
 	#new_data = np.zeros([128,128])
 	for j in range(7,121):
 		for i in range(7,121):
-			if data[i][j] == 0.0:
+			if data[j][i] == 0.0:
 				#try: shortened range means we don't need to try-except
-				if data[j][i-1] + data[j][i+1] > 0.001 and (data[j+1][i] + data[j-1][i] > 0.001): 
-					#count+=1
-					data[j][i] = (data[j+1][i] + data[j-1][i] + data[j][i-1] + data[j][i+1])/4
-			#		new_data[j][i] = (data[j+1][i] + data[j-1][i] + data[j][i-1] + data[j][i+1])/4
-			#	else: 
-			#		new_data[j][i] = data[j][i]
-				#except:
-				#	pass
-	#test = data - new_data
-	#print(np.max(test))
-	#print(count)
+				vertical = data[j+1][i] + data[j-1][i]
+				horizontal = data[j][i-1] + data[j][i+1]
+				if horizontal > 0.001 and vertical > 0.001: 
+					data[j][i] = (vertical+horizontal)/4
 	return data
 
 def get_cube(file):
