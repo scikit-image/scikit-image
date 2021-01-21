@@ -193,7 +193,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     References
     ----------
     .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
-           (2nd Edition)." Prentice-Hall Inc, 2002: 600-612.
+           (2nd Edition)." Prentice-Hall Inc., 2002: 600--612.
            ISBN: 0-201-18075-8
 
     Examples
