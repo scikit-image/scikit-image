@@ -212,14 +212,14 @@ def test_ellipse_model_estimate_from_data():
         [643, 926], [644, 975], [643, 655], [646, 705], [651, 664], [651, 984],
         [647, 665], [651, 715], [651, 725], [651, 734], [647, 809], [651, 825],
         [651, 873], [647, 900], [652, 917], [651, 944], [652, 742], [648, 811],
-        [651, 994], [652, 783], [650, 911], [654, 879]], dtype="int32")
+        [651, 994], [652, 783], [650, 911], [654, 879]], dtype=np.int32)
 
     # estimate parameters of real data
     model = EllipseModel()
     model.estimate(data)
 
     # test whether estimated parameters are smaller then 1000, so means stable
-    assert_array_less(model.params[:4], np.array([1e3] * 4))
+    assert_array_less(model.params[:4], np.full(4, 1000))
 
     # test whether all parameters are more than 0. Negative values were the
     # result of an integer overflow
