@@ -192,7 +192,9 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     References
     ----------
-    .. [1] https://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+           (2nd Edition)." Prentice-Hall Inc, 2002: 600-612.
+           ISBN: 0-201-18075-8
 
     Examples
     --------
@@ -202,6 +204,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = image > threshold_local(image, 15, 'generic',
     ...                                         param=func)
+
     """
     if block_size % 2 == 0:
         raise ValueError("The kwarg ``block_size`` must be odd! Given "
