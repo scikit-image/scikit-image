@@ -12,12 +12,12 @@ def impute_blanks(data):
 	#skip 6,6 outside border
 	for j in range(7,121):  #y axis is first
 		for i in range(7,121):
-			if data[j][i] == 0.0:
+			if np.linalg.norm(data[j][i]) == 0.0:
 				#try: shortened range means we don't need to try-except
-				vertical = data[j+1][i] + data[j-1][i]
-				horizontal = data[j][i-1] + data[j][i+1]
+				vertical = np.dot(data[j+1][i],data[j-1][i])
+				horizontal = np.dot(data[j][i-1],data[j][i+1])
 				if horizontal > 0.001 and vertical > 0.001: 
-					data[j][i] = (vertical+horizontal)/4
+					data[j][i] = (data[j+1][i]+data[j-1][i]+data[j][i+1]+data[j][i-1])/4
 	return data
 
 def smooth_data(data):
@@ -39,11 +39,8 @@ def get_cube(file):
 def preprocess(cube):
 	#load data, set NaNs to 0
 
-	#looking at median value for best 'image' - best for clustering?
-	avg_data = np.median(cube,axis=2)
-
 	#fill in blank pixels	
-	filled_in_data = impute_blanks(avg_data)	
+	filled_in_data = impute_blanks(cube)	
 	#boxcar smoothing
 	smoothed_data = smooth_data(filled_in_data)
 
@@ -84,11 +81,14 @@ def get_axis(cube):
 def create_plots(image_data,segment_data,spectra_data,lower,upper):
     #create 3 plots, save out output
 
+	#looking at median value for best 'image'
+	image = np.median(image_data,axis=2)
+
 	fig, (ax1,ax2,ax3) = plt.subplots(1,3, figsize=(60,20))#,sharey=True)
 
 	sns.set(font_scale=4)
 	ax1.tick_params(labelsize='small')
-	sns.heatmap(image_data,vmin=lower,vmax=upper, ax=ax1)
+	sns.heatmap(image,vmin=lower,vmax=upper, ax=ax1)
 	num_seg = len(np.unique(segment_data))
 	cmap = sns.color_palette("hls",num_seg)
 	ax2.tick_params(labelsize='small')
