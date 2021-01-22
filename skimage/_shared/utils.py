@@ -1,10 +1,11 @@
 import inspect
-import warnings
 import functools
+import numbers
 import sys
+import warnings
+
 import numpy as np
 from numpy.lib import NumpyVersion
-import numbers
 import scipy
 
 from ..util import img_as_float
