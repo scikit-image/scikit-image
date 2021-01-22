@@ -697,6 +697,9 @@ class ProjectiveTransform(GeometricTransform):
 
         # params: a0, a1, a2, b0, b1, b2, c0, c1
         A = np.zeros((n * d, (d+1) ** 2))
+        # fill the A matrix with the appropriate block matrices; see docstring
+        # for 2D example — this can be generalised to more blocks in the 3D and
+        # higher-dimensional cases.
         for ddim in range(d):
             A[ddim*n : (ddim+1)*n, ddim*(d+1) : ddim*(d+1) + d] = src
             A[ddim*n : (ddim+1)*n, ddim*(d+1) + d] = 1
