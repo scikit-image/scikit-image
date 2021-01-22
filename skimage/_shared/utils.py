@@ -446,6 +446,6 @@ def _fix_ndimage_mode(mode):
     # SciPy 1.6.0 introduced grid variants of constant and wrap which
     # have less surprising behavior for images. Use these when available
     grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
-    if NumpyVersion(scipy.__version__) >= '1.6.0' and mode in grid_modes:
-        return grid_modes[mode]
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        mode = grid_modes.get(mode, mode)
     return mode
