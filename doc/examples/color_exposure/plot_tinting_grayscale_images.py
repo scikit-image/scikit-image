@@ -60,7 +60,8 @@ all_hues = color.hsv2rgb(hsv)
 
 fig, ax = plt.subplots(figsize=(5, 2))
 # Set image extent so hues go from 0 to 1 and the image is a nice aspect ratio.
-ax.imshow(all_hues, extent=(0, 1, 0, 0.2))
+ax.imshow(all_hues, extent=(0 - 0.5 / len(hue_gradient),
+                            1 + 0.5 / len(hue_gradient), 0, 0.2))
 ax.set_axis_off()
 
 ######################################################################

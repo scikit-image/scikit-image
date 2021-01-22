@@ -6,15 +6,6 @@ import textwrap
 from .._shared.utils import get_bound_method_class, safe_as_int
 
 
-def _to_ndimage_mode(mode):
-    """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
-    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
-                                 reflect='mirror')
-    if mode in mode_translation_dict:
-        mode = mode_translation_dict[mode]
-    return mode
-
-
 def _center_and_normalize_points(points):
     """Center and normalize image points.
 
