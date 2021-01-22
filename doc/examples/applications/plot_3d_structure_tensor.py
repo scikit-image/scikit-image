@@ -62,19 +62,15 @@ px.imshow(
 # Z.
 
 sample = data[5:13, 380:410, 370:400, 1]
+step = 3
+cols = sample.shape[0] // step + 1
+_, axes = plt.subplots(nrows=1, ncols=cols, figsize=(16, 8))
 
-
-def display(im3d, cmap='gray', step=3):
-    _, axes = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
-
-    for it, (ax, image) in enumerate(zip(axes.flatten(), im3d[::step])):
-        ax.imshow(image, cmap=cmap, vmin=v_min, vmax=v_max)
-        ax.set_title(f'Plane = {5 + it * step}')
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-
-display(sample)
+for it, (ax, image) in enumerate(zip(axes.flatten(), sample[::step])):
+    ax.imshow(image, cmap='gray', vmin=v_min, vmax=v_max)
+    ax.set_title(f'Plane = {5 + it * step}')
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 #####################################################################
 # To view the sample data in 3D, run the following code:
