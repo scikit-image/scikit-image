@@ -163,8 +163,15 @@ def test_circle_model_residuals():
 
 def test_circle_model_insufficient_data():
     model = CircleModel()
+
     with pytest.raises(ValueError):
-        model.estimate(np.ones((6,2)))
+        model.estimate(np.array([[1, 2], [3, 4]]))
+
+    with pytest.raises(ValueError):
+        model.estimate(np.ones((6, 2)))
+
+    with pytest.raises(ValueError):
+        model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
 
 
 def test_ellipse_model_invalid_input():

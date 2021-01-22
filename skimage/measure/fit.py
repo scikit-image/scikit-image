@@ -274,9 +274,13 @@ class CircleModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
-        A = np.append(data * 2, np.ones((data.shape[0], 1)), axis=1)
+        A = np.append(data * 2, np.ones((data.shape[0], 1), dtype=float_type), axis=1)
         f = np.sum(data ** 2, axis=1)
-        C, _, _, _ = np.linalg.lstsq(A, f, rcond=None)
+        C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
+
+        if rank != 3:
+            raise ValueError("Input data does not contain enough significant data points")
+
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances ** 2))
