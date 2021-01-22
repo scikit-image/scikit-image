@@ -4,13 +4,13 @@ import seaborn as sns
 import os, glob, sys
 import pandas as pd
 from matplotlib import pyplot as plt
-from skimage import segmentation
+from skimage import segmentation, filters
 from collections import defaultdict
+from scipy import ndimage
 
 def impute_blanks(data):
 	#skip 6,6 outside border
-	#new_data = np.zeros([128,128])
-	for j in range(7,121):
+	for j in range(7,121):  #y axis is first
 		for i in range(7,121):
 			if data[j][i] == 0.0:
 				#try: shortened range means we don't need to try-except
@@ -19,6 +19,14 @@ def impute_blanks(data):
 				if horizontal > 0.001 and vertical > 0.001: 
 					data[j][i] = (vertical+horizontal)/4
 	return data
+
+def smooth_data(data):
+	#a few different filters to try - median, gaussian and 3x3 boxcar rolling average
+	#smoothed = filters.median(data)
+	#smoothed = filters.gaussian(data,preserve_range=True)#,truncate=3.0)
+	smoothed = ndimage.uniform_filter(data,size=3,mode='constant')
+
+	return smoothed
 
 def get_cube(file):
 	data = sio.loadmat(file)
@@ -30,14 +38,15 @@ def get_cube(file):
 def preprocess(cube):
 	#load data, set NaNs to 0
 
-	#handle broken pixels
+	#looking at median value for best 'image' - best for clustering?
 	avg_data = np.median(cube,axis=2)
-	filled_in_data = impute_blanks(avg_data)	
 
-	#wn = data['cube']['wn'][0][0] #maybe one less [0]?
-	#average results (boxcar)
-	
-	return filled_in_data#cube
+	#fill in blank pixels	
+	filled_in_data = impute_blanks(avg_data)	
+	#boxcar smoothing
+	smoothed_data = smooth_data(filled_in_data)
+
+	return smoothed_data
 
 def get_segments(data):
 	#do segmentation here
@@ -85,12 +94,10 @@ def create_plots(image_data,segment_data,spectra_data,lower,upper):
 	sns.heatmap(segment_data, cmap=cmap, ax=ax2)
 	ax3.tick_params(labelsize='medium')
 	keys = list(spectra_data.columns)
-	#keys.remove('wn')
-	for key in keys[:-1]:
+	for key in keys[:-1]: #remove 'wn' at end
 		sns.lineplot(x='wn',y=key,data=spectra_data,label=key,ax=ax3, linewidth=3)
 
 	plt.savefig("multiplot_test.png")
-	#plt.clf()
 
 if __name__ == "__main__":
 	#go to data, and get data
