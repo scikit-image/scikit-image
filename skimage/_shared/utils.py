@@ -6,10 +6,6 @@ import warnings
 
 import numpy as np
 from numpy.lib import NumpyVersion
-<<<<<<< HEAD
-import numbers
-=======
->>>>>>> 8a4f0bcff (Fix behavior of mode='constant' when SciPy 1.6 is available)
 import scipy
 
 from ..util import img_as_float
