@@ -80,23 +80,25 @@ display(sample)
 
 #####################################################################
 # To view the sample data in 3D, run the following code:
-
-# import plotly.graph_objects as go
 #
-# (n_Z, n_Y, n_X) = sample.shape
-# Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
+# .. code-block:: python
 #
-# fig = go.Figure(
-#     data=go.Volume(
-#         x=X.flatten(),
-#         y=Y.flatten(),
-#         z=Z.flatten(),
-#         value=sample.flatten(),
-#         opacity=0.5,
-#         slices_z=dict(show=True, locations=[4])
+#     import plotly.graph_objects as go
+#
+#     (n_Z, n_Y, n_X) = sample.shape
+#     Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
+#
+#     fig = go.Figure(
+#         data=go.Volume(
+#             x=X.flatten(),
+#             y=Y.flatten(),
+#             z=Z.flatten(),
+#             value=sample.flatten(),
+#             opacity=0.5,
+#             slices_z=dict(show=True, locations=[4])
+#         )
 #     )
-# )
-# fig.show()
+#     fig.show()
 
 #####################################################################
 # Compute structure tensor
