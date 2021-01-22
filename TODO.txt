@@ -109,7 +109,9 @@ Other (2022)
 Other (2023)
 ------------
 * When ``scipy`` is set to >= 1.16, remove legacy (i.e. non-zoom) code paths in
-``skimage.transform.resize``.
+  ``skimage.transform.resize``.
+* When ``scipy`` is set to >= 1.16, remove SciPy version checks from
+  ``skimage._shared.utils._fix_ndimage_mode``
 
 Other
 -----
