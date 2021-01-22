@@ -64,6 +64,8 @@ def _center_and_normalize_points(points):
     centered = points - centroid
     rms = np.sqrt(np.sum(centered ** 2) / n)
 
+    # if all the points are the same, the transformation matrix cannot be
+    # created. We return an equivalent matrix with np.nans as sentinel values.
     if rms == 0:
         return np.full((d + 1, d + 1), np.nan), np.full_like(points, np.nan)
 
