@@ -224,16 +224,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
                             cval=cval)
     elif method == 'mean':
-        masks = {}
-        for b in set(block_size):
-            masks[b] = 1. / b * np.ones((b,))
-        # # separation of filters to speedup convolution
-        b = block_size[0]
-        ndi.convolve1d(
-            image, masks[b], axis=0, output=thresh_image, mode=mode, cval=cval)
-        for ax, b in zip(range(1, image.ndim), block_size[1:]):
-            ndi.convolve1d(thresh_image, masks[b], axis=ax,
-                           output=thresh_image, mode=mode, cval=cval)
+        ndi.uniform_filter(image, block_size, output=thresh_image, mode=mode,
+                           cval=cval)
     elif method == 'median':
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)
