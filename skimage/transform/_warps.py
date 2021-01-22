@@ -143,12 +143,11 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
         _clip_warp_output(image, out, order, mode, cval, clip)
-        return out
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
 
     # 2-dimensional interpolation
-    if len(output_shape) == 2 or (len(output_shape) == 3 and
+    elif len(output_shape) == 2 or (len(output_shape) == 3 and
                                   output_shape[2] == input_shape[2]):
         rows = output_shape[0]
         cols = output_shape[1]
