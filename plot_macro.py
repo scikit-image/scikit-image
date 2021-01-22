@@ -22,6 +22,7 @@ def impute_blanks(data):
 
 def smooth_data(data):
 	#a few different filters to try - median, gaussian and 3x3 boxcar rolling average
+	#can try to use ndimage instead of filters for gaussian etc
 	#smoothed = filters.median(data)
 	#smoothed = filters.gaussian(data,preserve_range=True)#,truncate=3.0)
 	smoothed = ndimage.uniform_filter(data,size=3,mode='constant')
