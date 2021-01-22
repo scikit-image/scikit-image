@@ -9,9 +9,9 @@ from .._shared.utils import get_bound_method_class, safe_as_int
 def _affine_matrix_from_vector(v):
     """Affine matrix from linearized (d, d + 1) matrix entries."""
     nparam = v.size
-    # solve for d in: d * (d - 1) = nparam
+    # solve for d in: d * (d + 1) = nparam
     d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
-    dimensionality = int(d)
+    dimensionality = int(np.round(d))  # round to prevent approx errors
     if d != dimensionality:
         raise ValueError('Invalid number of elements for '
                          f'linearized matrix: {nparam}')
