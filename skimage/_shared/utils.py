@@ -3,7 +3,9 @@ import warnings
 import functools
 import sys
 import numpy as np
+from numpy.lib import NumpyVersion
 import numbers
+import scipy
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
@@ -428,8 +430,22 @@ def _to_np_mode(mode):
 
 def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
-    mode_translation_dict = dict(edge='nearest', symmetric='reflect',
-                                 reflect='mirror')
-    if mode in mode_translation_dict:
-        mode = mode_translation_dict[mode]
+    mode_translation_dict = dict(constant='constant', edge='nearest',
+                                 symmetric='reflect', reflect='mirror',
+                                 wrap='wrap')
+    if mode not in mode_translation_dict:
+        raise ValueError(
+            ("Unknown mode: '{}', or cannot translate mode. The "
+             "mode should be one of 'constant', 'edge', 'symmetric', "
+             "'reflect', or 'wrap'. See the documentation of numpy.pad for"
+             "more info.").format(mode))
+    return _fix_ndimage_mode(mode_translation_dict[mode])
+
+
+def _fix_ndimage_mode(mode):
+    # SciPy 1.6.0 introduced grid variants of constant and wrap which
+    # have less surprising behavior for images. Use these when available
+    grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        mode = grid_modes.get(mode, mode)
     return mode
