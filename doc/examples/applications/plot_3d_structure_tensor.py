@@ -1,6 +1,6 @@
 """
 ==========================================
-Estimate isotropy in a 3D microscopy image
+Estimate anisotropy in a 3D microscopy image
 ==========================================
 
 In this tutorial, we compute the structure tensor of a 3D image.
@@ -38,7 +38,7 @@ print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')
 
 #####################################################################
-# For the purposes of this tutorial, we shall consider only the second colour
+# For the purposes of this tutorial, we shall consider only the second color
 # channel, which leaves us with a 3D single-channel image. What is the range
 # of values?
 
