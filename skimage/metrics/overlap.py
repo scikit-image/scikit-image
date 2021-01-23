@@ -1,10 +1,10 @@
 """
-This module defines a number of functions to quantify the overlap between shapes, e.g. rectangles representing detections by bounding-boxes.
+Module defining a number of functions to quantify the overlap between shapes, e.g. rectangles representing detections by bounding-boxes.
 
 """
-def rectangle_area(topLeft_r, topLeft_c, bottomRight_r, bottomRight_c):
+def rectangle_area(topLeft, bottomRight):
     """Compute the area of a rectangle."""
-    return (bottomRight_c - topLeft_c + 1) * (bottomRight_r - topLeft_r + 1)
+    return (bottomRight[0] - topLeft[0] + 1) * (bottomRight[1] - topLeft[1] + 1)
 
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
@@ -24,15 +24,15 @@ def isRectangleIntersecting(rectangle1, rectangle2):
     -------
     True if the rectangle are intersecting.
     """
-    topLeft_r1,  topLeft_c1, bottomRight_r1, bottomRight_c1 = rectangle1
-    topLeft_r2,  topLeft_c2, bottomRight_r2, bottomRight_c2 = rectangle2
+    topLeft1, bottomRight1 = rectangle1
+    topLeft2, bottomRight2 = rectangle2
     
     # If one rectangle is on left side of other 
-    if topLeft_c1 >= bottomRight_c2 or topLeft_c2 >= bottomRight_c1: 
+    if topLeft1[1] >= bottomRight2[1] or topLeft2[1] >= bottomRight1[1]: 
         return False
       
     # If one rectangle is above other 
-    if topLeft_r1 >= bottomRight_r2 or topLeft_r2 >= bottomRight_r1: 
+    if topLeft1[0] >= bottomRight2[0] or topLeft2[0] >= bottomRight1[0]: 
         return False
     
     return True
@@ -57,16 +57,16 @@ def intersection_rectangles(rectangle1, rectangle2):
     """    
     if not isRectangleIntersecting(rectangle1, rectangle2): raise ValueError("The rectangles are not intersecting")
    
-    topLeft_r1,  topLeft_c1, bottomRight_r1, bottomRight_c1 = rectangle1
-    topLeft_r2,  topLeft_c2, bottomRight_r2, bottomRight_c2 = rectangle2
+    topLeft1, bottomRight1 = rectangle1
+    topLeft2, bottomRight2 = rectangle2
     
     # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
-    topLeft_r = max(topLeft_r1, topLeft_r2)
-    topLeft_c = max(topLeft_c1, topLeft_c2)
-    bottomRight_r = min(bottomRight_r1, bottomRight_r2)
-    bottomRight_c = min(bottomRight_c1, bottomRight_c2)
+    topLeft_r = max(topLeft1[0], topLeft2[0])
+    topLeft_c = max(topLeft1[1], topLeft2[1])
+    bottomRight_r = min(bottomRight1[0], bottomRight2[0])
+    bottomRight_c = min(bottomRight1[1], bottomRight2[1])
     
-    return topLeft_r, topLeft_c, bottomRight_r, bottomRight_c
+    return (topLeft_r, topLeft_c), (bottomRight_r, bottomRight_c)
 
 def intersection_area_rectangles(rectangle1, rectangle2):
     """
@@ -91,9 +91,7 @@ def intersection_area_rectangles(rectangle1, rectangle2):
     return rectangle_area( intersection_rectangles(rectangle1, rectangle2) )
 
 def union_area_rectangles(rectangle1, rectangle2):
-    """
-    Compute the equivalent area for the union of 2 rectangles.
-    """
+    """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
     return (rectangle_area(rectangle1) 
             + rectangle_area(rectangle2) 
             - intersection_area_rectangles(rectangle1 , rectangle2) )
@@ -105,3 +103,13 @@ def intersection_over_union_rectangles(rectangle1, rectangle2):
     The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
     """
     return intersection_area_rectangles(rectangle1, rectangle2) / union_area_rectangles(rectangle1, rectangle2)
+
+
+if __name__ == "__main__":
+    rectangle1 = ((0,0),(2,4))
+    rectangle2 = ((1,3),(3,6))
+    
+    assert rectangle_area(*rectangle1) == 3*5
+    assert rectangle_area(*rectangle2) == 3*4
+    
+    assert intersection_rectangles(rectangle1, rectangle2) == ((1,3), (2,4))
