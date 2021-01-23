@@ -2,15 +2,15 @@
 This module defines a number of functions to quantify the overlap between shapes, e.g. rectangles representing detections by bounding-boxes.
 
 """
-def rectangle_area(xl, yl, xr, yr):
+def rectangle_area(topLeft_r, topLeft_c, bottomRight_r, bottomRight_c):
     """Compute the area of a rectangle."""
-    return (xr - xl + 1) * (yr - yl + 1)
+    return (bottomRight_c - topLeft_c + 1) * (bottomRight_r - topLeft_r + 1)
 
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
     Check if 2 rectangles are intersecting.
     
-    The rectangle should be encoded as the (xl, yl, xr, yr) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
+    The rectangle should be encoded as the (topLeft_r, topLeft_c, bottomRight_r, bottomRight_c) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
     Adapted from post from Aman Gupta at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
     
     Parameters
@@ -24,15 +24,15 @@ def isRectangleIntersecting(rectangle1, rectangle2):
     -------
     True if the rectangle are intersecting.
     """
-    xl1, yl1, xr1, yr1 = rectangle1
-    xl2, yl2, xr2, yr2 = rectangle2
+    topLeft_r1,  topLeft_c1, bottomRight_r1, bottomRight_c1 = rectangle1
+    topLeft_r2,  topLeft_c2, bottomRight_r2, bottomRight_c2 = rectangle2
     
     # If one rectangle is on left side of other 
-    if xl1 >= xr2 or xl2 >= xr1: 
+    if topLeft_c1 >= bottomRight_c2 or topLeft_c2 >= bottomRight_c1: 
         return False
       
     # If one rectangle is above other 
-    if yl1 >= yr2 or yl2 >= yr1: 
+    if topLeft_r1 >= bottomRight_r2 or topLeft_r2 >= bottomRight_r1: 
         return False
     
     return True
@@ -41,7 +41,7 @@ def intersection_rectangles(rectangle1, rectangle2):
     """
     Compute the coordinates of a rectangle at the intersection between 2 rectangles.
     
-    The rectangle should be encoded as the (xl, yl, xr, yr) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
+    The rectangle should be encoded as the (topLeft_r, topLeft_c, bottomRight_r, bottomRight_c) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
 
     Parameters
     ----------
@@ -52,21 +52,21 @@ def intersection_rectangles(rectangle1, rectangle2):
 
     Returns
     -------
-    (xl,yl,xr,yr) tuple for the  coordinates of the intersecting rectangle.
+    (topLeft_c,topLeft_r,bottomRight_c,bottomRight_r) tuple for the  coordinates of the intersecting rectangle.
 
     """    
     if not isRectangleIntersecting(rectangle1, rectangle2): raise ValueError("The rectangles are not intersecting")
    
-    xl1, yl1, xr1, yr1 = rectangle1
-    xl2, yl2, xr2, yr2 = rectangle2
+    topLeft_r1,  topLeft_c1, bottomRight_r1, bottomRight_c1 = rectangle1
+    topLeft_r2,  topLeft_c2, bottomRight_r2, bottomRight_c2 = rectangle2
     
     # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
-    xl = max(xl1, xl2)
-    yl = max(yl1, yl2)
-    xr = min(xr1, xr2)
-    yr = min(yr1, yr2)
+    topLeft_r = max(topLeft_r1, topLeft_r2)
+    topLeft_c = max(topLeft_c1, topLeft_c2)
+    bottomRight_r = min(bottomRight_r1, bottomRight_r2)
+    bottomRight_c = min(bottomRight_c1, bottomRight_c2)
     
-    return xl, yl, xr, yr
+    return topLeft_r, topLeft_c, bottomRight_r, bottomRight_c
 
 def intersection_area_rectangles(rectangle1, rectangle2):
     """
