@@ -1,7 +1,7 @@
 """
-==========================================
+============================================
 Estimate anisotropy in a 3D microscopy image
-==========================================
+============================================
 
 In this tutorial, we compute the structure tensor of a 3D image.
 For a general introduction to 3D image processing, please refer to
@@ -97,9 +97,9 @@ for it, (ax, image) in enumerate(zip(axes.flatten(), sample[::step])):
 #####################################################################
 # Compute structure tensor
 # ========================
-# About the brightest region (i.e., at X ~ 22 and Y ~ 17), we can see
-# variations (and, hence, strong gradients) along either X or Y over a typical
-# length of 3.
+# Let us visualize the bottom slice of our sample data and determine the
+# typical size for strong variations. We shall use this size as the
+# 'width' of the window function.
 
 px.imshow(
     sample[0, :, :],
@@ -110,9 +110,15 @@ px.imshow(
 )
 
 #####################################################################
-# Therefore, we choose a 'width' of 3 for the window function.
+# About the brightest region (i.e., at X ~ 22 and Y ~ 17), we can see
+# variations (and, hence, strong gradients) over 2 or 3 (resp. 1 or 2) pixels
+# along X (resp. Y). We may thus choose, say, ``sigma = 1.5`` for the window
+# function. Alternatively, we can pass sigma on a per-axis basis, e.g.,
+# ``sigma = (1, 2, 3)``. Note that size 1 sounds reasonable along the first
+# (Z, plane) axis, since the latter is of size 8 (13 - 5). Viewing slices in
+# the X-Z or Y-Z planes confirms it is reasonable.
 
-sigma = 3
+sigma = (1, 1.5, 2.5)
 A_elems = feature.structure_tensor(sample, sigma=sigma)
 
 #####################################################################
@@ -129,32 +135,68 @@ assert coords[0] == 0  # by definition
 coords
 
 #####################################################################
+# .. note::
+#    The reader may check how robust this result (coordinates
+#    ``(Z, Y, X) = coords[1:]``) is to varying ``sigma``.
+#
 # We are looking at a local property. Let us consider a tiny neighbourhood
 # of this maximum in the X-Y plane.
 
-eigen[0, coords[1], 20:23, 12:14]
+eigen[0, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 
 #####################################################################
 # If we examine the second-largest eigenvalues in this neighbourhood, we can
 # see that they have the same order of magnitude as the largest ones.
 
-eigen[1, coords[1], 20:23, 12:14]
+eigen[1, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 
 #####################################################################
 # In contrast, the third-largest eigenvalues are one order of magnitude
 # smaller.
 
-eigen[2, coords[1], 20:23, 12:14]
+eigen[2, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 
 #####################################################################
-# As expected, the region about voxel ``(Z, Y, X) = coords[1:]`` is markedly
+# Let us visualize the slice of sample data in the X-Y plane where the
+# maximum eigenvalue is found.
+
+px.imshow(
+    sample[coords[1], :, :],
+    zmin=v_min,
+    zmax=v_max,
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
+    title=f'Interactive view of plane Z = {coords[1]}.'
+)
+
+#####################################################################
+# Let us visualize the slices of sample data in the X-Z (left) and Y-Z (right)
+# planes where the maximum eigenvalue is found. The Z axis is the vertical
+# axis in the subplots below. We can see the expected relative invariance
+# along the Z axis, i.e., the longitudinal structures in the kidney tissue,
+# especially in the Y-Z plane (``longitudinal=1``).
+
+subplots = np.dstack((sample[:, coords[2], :], sample[:, :, coords[3]]))
+px.imshow(
+    subplots,
+    zmin=v_min,
+    zmax=v_max,
+    facet_col=2,
+    labels={'facet_col': 'longitudinal'}
+)
+
+#####################################################################
+# As a conclusion, the region about voxel ``(Z, Y, X) = coords[1:]`` is
 # anisotropic in 3D: There is an order of magnitude between the third-largest
 # eigenvalues on one hand, and the largest and second-largest eigenvalues on
 # the other hand.
-# This region is 'somewhat isotropic' in the X-Y plane: There is a factor of
-# (only) ~3 between the second-largest and largest eigenvalues.
+
+#####################################################################
+# The neighbourhood in question is 'somewhat isotropic' in a plane (which,
+# here, would be relatively close to the X-Y plane): There is a factor of
+# less than 2 between the second-largest and largest eigenvalues.
 # This is definitely compatible with what we are seeing in the image, i.e., a
-# stronger gradient roughly along X and a weaker gradient perpendicular to it.
+# stronger gradient across a direction (which, here, would be relatively close
+# to the X axis) and a weaker gradient perpendicular to it.
 
 #####################################################################
 # In an ellipsoidal representation of the 3D structure tensor [2]_,
