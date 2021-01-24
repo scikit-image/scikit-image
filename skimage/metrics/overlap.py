@@ -3,14 +3,20 @@ Module defining a number of functions to quantify the overlap between shapes, e.
 
 """
 def rectangle_area(topLeft, bottomRight):
-    """Compute the area of a rectangle."""
-    return (bottomRight[0] - topLeft[0] + 1) * (bottomRight[1] - topLeft[1] + 1)
+    """Compute the area of a rectangle encoded as (r1,c1),(r2,c2)."""
+    r1,c1 = topLeft
+    r2,c2 = bottomRight
+    return (r2 - r1 + 1) * (c2 - c1 +1)
+
+def r1c1wh_to_r1c1r2c2(r1, c1, width, height):
+    """Convert rectangle encoded as (r, c, width, height) to (r1,c1),(r2,c2) the coordinates of the top left and bottom right corner."""
+    return (r1,c1), (r1 + height -1, c1 + width -1 )
 
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
     Check if 2 rectangles are intersecting.
     
-    The rectangle should be encoded as the (topLeft_r, topLeft_c, bottomRight_r, bottomRight_c) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
+    The rectangle should be encoded as the (topLeft_r, topLeft_c, with, height) for the r,c-coordinates of the top left corner of the rectangle.
     Adapted from post from Aman Gupta at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
     
     Parameters
@@ -24,8 +30,8 @@ def isRectangleIntersecting(rectangle1, rectangle2):
     -------
     True if the rectangle are intersecting.
     """
-    topLeft1, bottomRight1 = rectangle1
-    topLeft2, bottomRight2 = rectangle2
+    topLeft1, bottomRight1 = r1c1wh_to_r1c1r2c2(*rectangle1)
+    topLeft2, bottomRight2 = r1c1wh_to_r1c1r2c2(*rectangle2)
     
     # If one rectangle is on left side of other 
     if topLeft1[1] >= bottomRight2[1] or topLeft2[1] >= bottomRight1[1]: 
@@ -41,7 +47,7 @@ def intersection_rectangles(rectangle1, rectangle2):
     """
     Compute the coordinates of a rectangle at the intersection between 2 rectangles.
     
-    The rectangle should be encoded as the (topLeft_r, topLeft_c, bottomRight_r, bottomRight_c) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
+    The rectangle should be encoded as the (topLeft_r, topLeft_c, width, height) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
 
     Parameters
     ----------
@@ -57,8 +63,8 @@ def intersection_rectangles(rectangle1, rectangle2):
     """    
     if not isRectangleIntersecting(rectangle1, rectangle2): raise ValueError("The rectangles are not intersecting")
    
-    topLeft1, bottomRight1 = rectangle1
-    topLeft2, bottomRight2 = rectangle2
+    topLeft1, bottomRight1 = r1c1wh_to_r1c1r2c2(*rectangle1)
+    topLeft2, bottomRight2 = r1c1wh_to_r1c1r2c2(*rectangle2)
     
     # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
     topLeft_r = max(topLeft1[0], topLeft2[0])
@@ -91,10 +97,17 @@ def intersection_area_rectangles(rectangle1, rectangle2):
     return rectangle_area( intersection_rectangles(rectangle1, rectangle2) )
 
 def union_area_rectangles(rectangle1, rectangle2):
-    """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
-    return (rectangle_area(rectangle1) 
-            + rectangle_area(rectangle2) 
-            - intersection_area_rectangles(rectangle1 , rectangle2) )
+    """
+    Compute the area for the rectangle corresponding to the union of 2 rectangles.
+    
+    The rectangle should be encoded as r,c,width, height.
+    """
+    width1, height1 = rectangle1[2:]
+    width2, height2 = rectangle2[2:]
+    
+    return ( width1 * height1 + 
+             width2 * height2 - 
+             intersection_area_rectangles(rectangle1 , rectangle2) )
 
 def intersection_over_union_rectangles(rectangle1, rectangle2):
     """
