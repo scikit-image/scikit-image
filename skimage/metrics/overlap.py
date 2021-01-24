@@ -2,53 +2,46 @@
 Module defining a number of functions to quantify the overlap between shapes, e.g. rectangles representing detections by bounding-boxes.
 
 """
-def rectangle_area(topLeft, bottomRight):
-    """Compute the area of a rectangle encoded as (r1,c1),(r2,c2)."""
-    r1,c1 = topLeft
-    r2,c2 = bottomRight
-    return (r2 - r1 + 1) * (c2 - c1 +1)
 
-def r1c1wh_to_r1c1r2c2(r1, c1, width, height):
-    """Convert rectangle encoded as (r, c, width, height) to (r1,c1),(r2,c2) the coordinates of the top left and bottom right corner."""
-    return (r1,c1), (r1 + height -1, c1 + width -1 )
+class Rectangle():
+    """Represent a rectangular bounding-box."""
+    
+    def __init__(self, r, c, height, width):
+        self.topLeft = (r,c)
+        self.bottomRight = (r + height -1, c + width -1)
+        self.area = height * width
 
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
     Check if 2 rectangles are intersecting.
     
-    The rectangle should be encoded as the (topLeft_r, topLeft_c, with, height) for the r,c-coordinates of the top left corner of the rectangle.
     Adapted from post from Aman Gupta at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
     
     Parameters
     ----------
-    rectangle1 : tuple of 4 integers
+    rectangle1 : a Rectangle object
         First rectangle.
-    rectangle2 : tuple of 4 integers
+    rectangle2 : a second Rectangle object
         Second rectangle
 
     Returns
     -------
     True if the rectangle are intersecting.
     """
-    topLeft1, bottomRight1 = r1c1wh_to_r1c1r2c2(*rectangle1)
-    topLeft2, bottomRight2 = r1c1wh_to_r1c1r2c2(*rectangle2)
-    
     # If one rectangle is on left side of other 
-    if topLeft1[1] >= bottomRight2[1] or topLeft2[1] >= bottomRight1[1]: 
+    if rectangle1.topLeft[1] >= rectangle2.bottomRight[1] or rectangle2.topLeft[1] >= rectangle1.bottomRight[1]: 
         return False
       
     # If one rectangle is above other 
-    if topLeft1[0] >= bottomRight2[0] or topLeft2[0] >= bottomRight1[0]: 
+    if rectangle1.topLeft[0] >= rectangle2.bottomRight[0] or rectangle2.topLeft[0] >= rectangle1.bottomRight[0]: 
         return False
     
     return True
 
 def intersection_rectangles(rectangle1, rectangle2):
     """
-    Compute the coordinates of a rectangle at the intersection between 2 rectangles.
+    Return a rectangle object corresponding to the intersection between 2 rectangles.
     
-    The rectangle should be encoded as the (topLeft_r, topLeft_c, width, height) for the coordinates of the top left (l) and bottom right (r) corners of the rectangle.
-
     Parameters
     ----------
     rectangle1 : tuple of 4 integers
@@ -58,21 +51,21 @@ def intersection_rectangles(rectangle1, rectangle2):
 
     Returns
     -------
-    (topLeft_c,topLeft_r,bottomRight_c,bottomRight_r) tuple for the  coordinates of the intersecting rectangle.
-
+    Rectangle object representing the intersection.
+    Raise Value error if no interesection.
     """    
     if not isRectangleIntersecting(rectangle1, rectangle2): raise ValueError("The rectangles are not intersecting")
-   
-    topLeft1, bottomRight1 = r1c1wh_to_r1c1r2c2(*rectangle1)
-    topLeft2, bottomRight2 = r1c1wh_to_r1c1r2c2(*rectangle2)
-    
+       
     # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
-    topLeft_r = max(topLeft1[0], topLeft2[0])
-    topLeft_c = max(topLeft1[1], topLeft2[1])
-    bottomRight_r = min(bottomRight1[0], bottomRight2[0])
-    bottomRight_c = min(bottomRight1[1], bottomRight2[1])
+    r = max(rectangle1.topLeft[0], rectangle2.topLeft[0])
+    c = max(rectangle1.topLeft[1], rectangle2.topLeft[1])
+    bottomRight_r = min(rectangle1.bottomRight[0], rectangle2.bottomRight[0])
+    bottomRight_c = min(rectangle1.bottomRight[1], rectangle2.bottomRight[1])
     
-    return (topLeft_r, topLeft_c), (bottomRight_r, bottomRight_c)
+    height = bottomRight_r - r +1
+    width  = bottomRight_c - c +1
+    
+    return Rectangle(r, c, height, width)
 
 def intersection_area_rectangles(rectangle1, rectangle2):
     """
@@ -80,10 +73,8 @@ def intersection_area_rectangles(rectangle1, rectangle2):
     
     Parameters
     ----------
-    rectangle1 : tuple of ints
-        a first rectangle encoded as (x, y, width, height).
-    rectangle2 : tuple of ints
-         a second rectangle encoded as (x, y, width, height)..
+    rectangle1 : Rectangle
+    rectangle2 : Rectangle
 
     Returns
     -------
@@ -94,20 +85,13 @@ def intersection_area_rectangles(rectangle1, rectangle2):
         return 0
     
     # Compute area of the intersecting box
-    return rectangle_area( intersection_rectangles(rectangle1, rectangle2) )
+    return intersection_rectangles(rectangle1, rectangle2).area
 
 def union_area_rectangles(rectangle1, rectangle2):
-    """
-    Compute the area for the rectangle corresponding to the union of 2 rectangles.
-    
-    The rectangle should be encoded as r,c,width, height.
-    """
-    width1, height1 = rectangle1[2:]
-    width2, height2 = rectangle2[2:]
-    
-    return ( width1 * height1 + 
-             width2 * height2 - 
-             intersection_area_rectangles(rectangle1 , rectangle2) )
+    """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
+    return (  rectangle1.area
+            + rectangle2.area 
+            - intersection_area_rectangles(rectangle1 , rectangle2) )
 
 def intersection_over_union_rectangles(rectangle1, rectangle2):
     """
@@ -119,10 +103,12 @@ def intersection_over_union_rectangles(rectangle1, rectangle2):
 
 
 if __name__ == "__main__":
-    rectangle1 = ((0,0),(2,4))
-    rectangle2 = ((1,3),(3,6))
+    height1, width1 = 2,4
+    height2 = width2 = 3
+    rectangle1 = Rectangle(0, 0, height1, width1)
+    rectangle2 = Rectangle(1, 3, height2, width2)
     
-    assert rectangle_area(*rectangle1) == 3*5
-    assert rectangle_area(*rectangle2) == 3*4
+    assert rectangle1.area == height1 * width1
+    assert rectangle2.area == height2 * width2
     
-    assert intersection_rectangles(rectangle1, rectangle2) == ((1,3), (2,4))
+    #assert intersection_rectangles(rectangle1, rectangle2) == ((1,3), (2,4))
