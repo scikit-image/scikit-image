@@ -155,6 +155,10 @@ eigen[2, coords[1], 20:23, 12:14]
 # (only) ~3 between the second-largest and largest eigenvalues.
 # This is definitely compatible with what we are seeing in the image, i.e., a
 # stronger gradient roughly along X and a weaker gradient perpendicular to it.
-# In an ellipsoidal representation of the 3D structure tensor, we would get
-# the pancake situation. The gradient directions are spread out (here, in the
-# X-Y plane) and perpendicular to Z.
+
+#####################################################################
+# In an ellipsoidal representation of the 3D structure tensor [2]_,
+# we would get the pancake situation. The gradient directions are spread out
+# (here, in the X-Y plane) and perpendicular to Z.
+#
+# .. [2] https://en.wikipedia.org/wiki/Structure_tensor#Interpretation_2
