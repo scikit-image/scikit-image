@@ -6,11 +6,52 @@ Module defining a number of functions to quantify the overlap between shapes, e.
 class Rectangle():
     """Represent a rectangular bounding-box."""
     
-    def __init__(self, r, c, height, width):
-        self.topLeft = (r,c)
-        self.bottomRight = (r + height -1, c + width -1)
-        self.area = height * width
+    def __init__(self, topLeft, bottomRight=None, size=None):
+        """
+        Construct a rectangle using the (r,c) coordinates for the top left corner, the coordinates of the botton right corner or the size (height, width).
 
+        Parameters
+        ----------
+        topLeft : tuple
+            (r,c)-coordinates for the top left corner of the rectangle.
+        bottomRight : tuple, optional
+            (r,c)-coordinates for the bottom right corner of the rectangle. The default is None.
+        size : tuple, optional
+            Size of the rectangle (height, width). The default is None.
+
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
+
+        Returns
+        -------
+        Rectangle object.
+
+        """
+        self.r = topLeft[0]
+        self.c = topLeft[1]
+        
+        if (bottomRight is None) and (size is None):
+            raise ValueError("One of bottomRight or size argument should be defined.")
+            
+        elif (bottomRight is not None) and (size is not None):
+            raise ValueError("Either specify the bottomRight or size.")
+        
+        elif bottomRight is not None:
+            self.bottomRight = bottomRight
+            self.height = self.bottomRight[0] - self.topLeft[0] +1
+            self.width  = self.bottomRight[1] - self.topLeft[1] +1
+            self.size = (self.height, self.width)
+        
+        elif size is not None:
+            self.height, self.width = size
+            self.size = size
+            self.bottomRight = (self.r + self.height-1, 
+                                self.c + self.width -1)
+        
+        self.area = self.height * self.width
+        
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
     Check if 2 rectangles are intersecting.
@@ -54,18 +95,16 @@ def intersection_rectangles(rectangle1, rectangle2):
     Rectangle object representing the intersection.
     Raise Value error if no interesection.
     """    
-    if not isRectangleIntersecting(rectangle1, rectangle2): raise ValueError("The rectangles are not intersecting")
+    if not isRectangleIntersecting(rectangle1, rectangle2): 
+        raise ValueError("The rectangles are not intersecting")
        
     # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
-    r = max(rectangle1.topLeft[0], rectangle2.topLeft[0])
-    c = max(rectangle1.topLeft[1], rectangle2.topLeft[1])
+    r = max(rectangle1.r, rectangle2.r)
+    c = max(rectangle1.c, rectangle2.c)
     bottomRight_r = min(rectangle1.bottomRight[0], rectangle2.bottomRight[0])
     bottomRight_c = min(rectangle1.bottomRight[1], rectangle2.bottomRight[1])
     
-    height = bottomRight_r - r +1
-    width  = bottomRight_c - c +1
-    
-    return Rectangle(r, c, height, width)
+    return Rectangle((r,c), (bottomRight_r, bottomRight_c))
 
 def intersection_area_rectangles(rectangle1, rectangle2):
     """
@@ -105,8 +144,8 @@ def intersection_over_union_rectangles(rectangle1, rectangle2):
 if __name__ == "__main__":
     height1, width1 = 2,4
     height2 = width2 = 3
-    rectangle1 = Rectangle(0, 0, height1, width1)
-    rectangle2 = Rectangle(1, 3, height2, width2)
+    rectangle1 = Rectangle((0, 0), size=(height1, width1))
+    rectangle2 = Rectangle((1, 3), size=(height2, width2))
     
     assert rectangle1.area == height1 * width1
     assert rectangle2.area == height2 * width2
