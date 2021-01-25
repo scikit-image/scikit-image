@@ -94,6 +94,24 @@ def test_structure_tensor_orders():
     assert_array_equal(A_elems_xy, A_elems_rc[::-1])
 
 
+def test_structure_tensor_sigma():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    cube = np.zeros((5, 5, 5))
+    cube[2, 2, 2] = 1
+    A_2d_default = structure_tensor(square, sigma=0.1)
+    A_2d_tuple_2 = structure_tensor(square, sigma=(0.1, 0.1))
+    A_3d_default = structure_tensor(cube, sigma=0.1)
+    A_3d_tuple_3 = structure_tensor(cube, sigma=(0.1, 0.1, 0.1))
+    assert_array_equal(A_2d_tuple_2, A_2d_default)
+    assert_array_equal(A_3d_tuple_3, A_3d_default)
+    with testing.raises(TypeError):
+        A_2d_tuple_1 = structure_tensor(square, sigma=(0.1,))
+    with testing.raises(ValueError):
+        A_2d_tuple_3 = structure_tensor(square, sigma=(0.1, 0.1, 0.2))
+    with testing.raises(ValueError):
+        A_3d_tuple_2 = structure_tensor(cube, sigma=(0.1, 0.2))
+
 def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 4
