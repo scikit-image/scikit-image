@@ -246,6 +246,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif image.ndim == 3 and not multichannel:
         # Add channel as single last dimension
         image = image[..., np.newaxis]
+    else: 
+        # Spectra custom, add as last dim
+        image = image[...,np.newaxis]
+        is_2d = True
 
     if multichannel and (convert2lab or convert2lab is None):
         if image.shape[-1] != 3 and convert2lab:

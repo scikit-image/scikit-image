@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from skimage import segmentation, filters
 from collections import defaultdict
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 def impute_blanks(data):
 	#skip 6,6 outside border
@@ -25,7 +25,7 @@ def smooth_data(data):
 	#can try to use ndimage instead of filters for gaussian etc
 	#smoothed = filters.median(data)
 	#smoothed = filters.gaussian(data,preserve_range=True)#,truncate=3.0)
-	smoothed = ndimage.uniform_filter(data,size=3,mode='constant')
+	smoothed = ndi.uniform_filter(data,size=3,mode='constant')
 
 	return smoothed
 
@@ -48,7 +48,7 @@ def preprocess(cube):
 
 def get_segments(data):
 	#do segmentation here
-	labels = segmentation.slic(data, n_segments=20, compactness=5, multichannel=True, convert2lab=False)
+	labels = segmentation.slic(data, n_segments=20, compactness=5, convert2lab=False, start_label=1)
 	return labels
 
 def get_spectra(segment_labels, cube, wn):
@@ -63,7 +63,7 @@ def get_spectra(segment_labels, cube, wn):
 				segment_spectra[segment_labels[y][x]] = cube[y][x]
 
 	spectra = defaultdict(list)
-	for cluster in range(num_labels):
+	for cluster in range(1,num_labels):
 		spectra[cluster] = np.mean(segment_spectra[cluster],axis=0)
 
 	multispectra = pd.DataFrame.from_dict(spectra)
