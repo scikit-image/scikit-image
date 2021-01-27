@@ -234,6 +234,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                             if max_dist_color[k] < dist_color:
                                 max_dist_color[k] = dist_color
 
+
     return np.asarray(nearest_segments)
 
 
