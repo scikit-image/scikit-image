@@ -172,8 +172,8 @@ px.imshow(
 # Let us visualize the slices of sample data in the X-Z (left) and Y-Z (right)
 # planes where the maximum eigenvalue is found. The Z axis is the vertical
 # axis in the subplots below. We can see the expected relative invariance
-# along the Z axis, i.e., the longitudinal structures in the kidney tissue,
-# especially in the Y-Z plane (``longitudinal=1``).
+# along the Z axis (corresponding to longitudinal structures in the kidney
+# tissue), especially in the Y-Z plane (``longitudinal=1``).
 
 subplots = np.dstack((sample[:, coords[2], :], sample[:, :, coords[3]]))
 px.imshow(
