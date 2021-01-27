@@ -139,8 +139,19 @@ coords
 #    The reader may check how robust this result (coordinates
 #    ``(Z, Y, X) = coords[1:]``) is to varying ``sigma``.
 #
+# Let us view the spatial distribution of the eigenvalues in the X-Y plane
+# where the maximum eigenvalue is found (i.e., ``Z = coords[1]``).
+
+px.imshow(
+    eigen[:, coords[1], :, :],
+    facet_col=0,
+    labels={'x': 'Y', 'y': 'X', 'facet_col': 'rank'},
+    title=f'Eigenvalues for plane Z = {coords[1]}.'
+)
+
+#####################################################################
 # We are looking at a local property. Let us consider a tiny neighbourhood
-# of this maximum in the X-Y plane.
+# around the maximum eigenvalue in the above X-Y plane.
 
 eigen[0, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 
@@ -188,13 +199,14 @@ px.imshow(
 # As a conclusion, the region about voxel ``(Z, Y, X) = coords[1:]`` is
 # anisotropic in 3D: There is an order of magnitude between the third-largest
 # eigenvalues on one hand, and the largest and second-largest eigenvalues on
-# the other hand.
+# the other hand. We could see this at first glance in figure `Eigenvalues for
+# plane Z = 1`.
 
 #####################################################################
 # The neighbourhood in question is 'somewhat isotropic' in a plane (which,
 # here, would be relatively close to the X-Y plane): There is a factor of
 # less than 2 between the second-largest and largest eigenvalues.
-# This is definitely compatible with what we are seeing in the image, i.e., a
+# This description is compatible with what we are seeing in the image, i.e., a
 # stronger gradient across a direction (which, here, would be relatively close
 # to the X axis) and a weaker gradient perpendicular to it.
 
