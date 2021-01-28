@@ -19,6 +19,11 @@ def test_negative_sigma():
                  sigma=np.asarray([-1.0, 1.0]))
 
 
+def test_1D():
+    x = np.arange(50) / 50
+    y = filters.gaussian(x, sigma=(1,))
+
+
 def test_null_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.

@@ -145,6 +145,8 @@ def _guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
+    if image.ndim == 1:
+        return 1
     if image.ndim == 2:
         return 2
     if image.ndim == 3 and image.shape[-1] != 3:
