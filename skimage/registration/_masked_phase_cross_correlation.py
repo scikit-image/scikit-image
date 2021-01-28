@@ -255,7 +255,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     tol = 1e3 * eps * np.max(np.abs(denom), axis=axes, keepdims=True)
     nonzero_indices = denom > tol
 
-    out = np.zeros_like(denom)
+    # explicitly set out dtype for compatibility with SciPy < 1.4, where
+    # fftmodule will be numpy.fft which always uses float64 dtype.
+    out = np.zeros_like(denom, dtype=float_dtype)
     out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
     np.clip(out, a_min=-1, a_max=1, out=out)
 

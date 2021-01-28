@@ -2,7 +2,7 @@
 
 Otherwise fall back to numpy.fft.
 
-Like numpy 1.15+ scipy 1.3+ is also using pocketfft, but a newer
+Like numpy 1.15+ scipy 1.4+ is also using pocketfft, but a newer
 C++/pybind11 version called pypocketfft
 """
 try:
