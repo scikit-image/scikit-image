@@ -233,11 +233,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
+        upsample_factor = np.array(upsample_factor, dtype=float_dtype)
         shifts = np.round(shifts * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
-        upsample_factor = np.array(upsample_factor, dtype=np.float64)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
