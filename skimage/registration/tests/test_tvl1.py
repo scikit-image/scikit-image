@@ -26,19 +26,22 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     """
     grid = np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij')
     grid = np.stack(grid)
-    gt_flow = np.zeros_like(grid)
+    gt_flow = np.zeros_like(grid, dtype=float)
     gt_flow[0, ...] = max_motion * np.sin(grid[0]/grid[0].max()*npics*np.pi)
     image1 = warp(image0, grid - gt_flow, mode='edge')
     return gt_flow, image1
 
 
-def test_2d_motion():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_2d_motion(dtype):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
-    image0 = rnd.normal(size=(256, 256))
+    image0 = rnd.normal(size=(256, 256)).astype(dtype, copy=False)
     gt_flow, image1 = _sin_flow_gen(image0)
+    image1 = image1.astype(dtype, copy=False)
     # Estimate the flow
-    flow = optical_flow_tvl1(image0, image1, attachment=5)
+    flow = optical_flow_tvl1(image0, image1, attachment=5, dtype=dtype)
+    assert flow.dtype == dtype
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow) .mean() < 0.5
 
