@@ -23,7 +23,10 @@ except ImportError:
 
 class RegistrationSuite(object):
     """Benchmark for registration routines in scikit-image."""
-    def setup(self):
+    param_names = ["dtype"]
+    params = [(np.float32, np.float64)]
+
+    def setup(self, *args):
         try:
             from skimage.registration import optical_flow_tvl1
         except ImportError:
@@ -32,11 +35,11 @@ class RegistrationSuite(object):
         self.I0 = rgb2gray(I0)
         self.I1 = rgb2gray(I1)
 
-    def time_tvl1(self):
-        registration.optical_flow_tvl1(self.I0, self.I1)
+    def time_tvl1(self, dtype):
+        registration.optical_flow_tvl1(self.I0, self.I1, dtype=dtype)
 
-    def time_ilk(self):
-        registration.optical_flow_ilk(self.I0, self.I1)
+    def time_ilk(self, dtype):
+        registration.optical_flow_ilk(self.I0, self.I1, dtype=dtype)
 
 
 class PhaseCrossCorrelationRegistration:
