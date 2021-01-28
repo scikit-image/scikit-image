@@ -88,8 +88,7 @@ def test_guess_spatial_dimensions():
     testing.assert_equal(_guess_spatial_dimensions(im2), 3)
     testing.assert_equal(_guess_spatial_dimensions(im3), None)
     testing.assert_equal(_guess_spatial_dimensions(im4), 3)
-    with testing.raises(ValueError):
-        _guess_spatial_dimensions(im5)
+    testing.assert_equal(_guess_spatial_dimensions(im5), 1)
 
 
 @pytest.mark.parametrize(
