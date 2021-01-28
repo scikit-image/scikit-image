@@ -21,7 +21,7 @@ def test_negative_sigma():
 
 def test_1D():
     x = np.arange(50) / 50
-    y = filters.gaussian(x, sigma=(1,))
+    y = gaussian(x, sigma=(1,))
 
 
 def test_null_sigma():
