@@ -150,11 +150,18 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     if mode not in {'full', 'same'}:
         raise ValueError("Correlation mode '{}' is not valid.".format(mode))
 
-    fixed_image = np.array(arr1, dtype=float)
+    fixed_image = np.asarray(arr1)
+    moving_image = np.asarray(arr2)
+    float_dtype = np.result_type(fixed_image.dtype, moving_image.dtype,
+                                 np.float32)
+    if float_dtype.kind == 'c':
+        raise ValueError("complex-valued arr1, arr2 are not supported")
+
+    fixed_image = fixed_image.astype(float_dtype)
     fixed_mask = np.array(m1, dtype=bool)
-    moving_image = np.array(arr2, dtype=float)
+    moving_image = moving_image.astype(float_dtype)
     moving_mask = np.array(m2, dtype=bool)
-    eps = np.finfo(float).eps
+    eps = np.finfo(float_dtype).eps
 
     # Array dimensions along non-transformation axes should be equal.
     all_axes = set(range(fixed_image.ndim))
@@ -185,7 +192,10 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
     # results in arr_fft shape (4, 4, 7)
     fft = partial(fftmodule.fftn, s=fast_shape, axes=axes)
-    ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
+    _ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
+
+    def ifft(x):
+        return _ifft(x).real
 
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0
@@ -197,13 +207,12 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
 
     fixed_fft = fft(fixed_image)
     rotated_moving_fft = fft(rotated_moving_image)
-    fixed_mask_fft = fft(fixed_mask)
-    rotated_moving_mask_fft = fft(rotated_moving_mask)
+    fixed_mask_fft = fft(fixed_mask.astype(float_dtype))
+    rotated_moving_mask_fft = fft(rotated_moving_mask.astype(float_dtype))
 
     # Calculate overlap of masks at every point in the convolution.
     # Locations with high overlap should not be taken into account.
-    number_overlap_masked_px = np.real(
-        ifft(rotated_moving_mask_fft * fixed_mask_fft))
+    number_overlap_masked_px = ifft(rotated_moving_mask_fft * fixed_mask_fft)
     number_overlap_masked_px[:] = np.round(number_overlap_masked_px)
     number_overlap_masked_px[:] = np.fmax(number_overlap_masked_px, eps)
     masked_correlated_fixed_fft = ifft(rotated_moving_mask_fft * fixed_fft)

@@ -68,6 +68,8 @@ def _upsampled_dft(data, upsampled_region_size,
         kernel = ((np.arange(ups_size) - ax_offset)[:, None]
                   * fft.fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
+        # use kernel with same precision as the data
+        kernel = kernel.astype(data.dtype, copy=False)
 
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
@@ -216,7 +218,9 @@ def phase_cross_correlation(reference_image, moving_image, *,
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
-    shifts = np.stack(maxima).astype(np.float64)
+    float_dtype = image_product.real.dtype
+
+    shifts = np.stack([m.astype(float_dtype, copy=False) for m in maxima])
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
@@ -245,7 +249,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
                                   cross_correlation.shape)
         CCmax = cross_correlation[maxima]
 
-        maxima = np.stack(maxima).astype(np.float64) - dftshift
+        maxima = np.stack([m.astype(float_dtype, copy=False) for m in maxima])
+        maxima -= dftshift
 
         shifts = shifts + maxima / upsample_factor
 

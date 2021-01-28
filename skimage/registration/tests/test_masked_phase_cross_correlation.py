@@ -123,7 +123,8 @@ def test_masked_registration_padfield_data():
         assert_equal((shift_x, shift_y), (-xi, yi))
 
 
-def test_cross_correlate_masked_output_shape():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_cross_correlate_masked_output_shape(dtype):
     """Masked normalized cross-correlation should return a shape
     of N + M + 1 for each transform axis."""
     shape1 = (15, 4, 5)
@@ -131,8 +132,8 @@ def test_cross_correlate_masked_output_shape():
     expected_full_shape = tuple(np.array(shape1) + np.array(shape2) - 1)
     expected_same_shape = shape1
 
-    arr1 = np.zeros(shape1)
-    arr2 = np.zeros(shape2)
+    arr1 = np.zeros(shape1, dtype=dtype)
+    arr2 = np.zeros(shape2, dtype=dtype)
     # Trivial masks
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
@@ -140,10 +141,13 @@ def test_cross_correlate_masked_output_shape():
     full_xcorr = cross_correlate_masked(
         arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
     assert_equal(full_xcorr.shape, expected_full_shape)
+    assert full_xcorr.dtype == dtype
 
     same_xcorr = cross_correlate_masked(
         arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
     assert_equal(same_xcorr.shape, expected_same_shape)
+    assert same_xcorr.dtype == dtype
+
 
 
 def test_cross_correlate_masked_test_against_mismatched_dimensions():
@@ -254,5 +258,6 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
 
     # Autocorrelation should have maximum in center of array
-    testing.assert_almost_equal(xcorr.max(), 1)
+    # uint8 inputs will be processed in float32, so reduce decimal to 5
+    testing.assert_almost_equal(xcorr.max(), 1, decimal=5)
     testing.assert_array_equal(max_index, np.array(arr1.shape) / 2)
