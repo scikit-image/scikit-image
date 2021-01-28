@@ -52,7 +52,7 @@ def test_3d_motion():
     image0 = rnd.normal(size=(100, 100, 100))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow
-    flow = optical_flow_tvl1(image0, image1, attachment=5)
+    flow = optical_flow_tvl1(image0, image1, attachment=10)
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow) .mean() < 0.5
 
