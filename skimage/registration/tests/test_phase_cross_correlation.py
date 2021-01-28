@@ -41,7 +41,7 @@ def test_real_input(dtype):
     reference_image = camera().astype(dtype, copy=False)
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
-    shifted_image = fft.ifftn(shifted_image).astype(dtype, copy=False)
+    shifted_image = fft.ifftn(shifted_image).real.astype(dtype, copy=False)
 
     # subpixel precision
     result, error, diffphase = phase_cross_correlation(reference_image,
