@@ -107,7 +107,7 @@ def hausdorff_points(image0, image1):
 
     if max_dist_from_b > max_dist_from_a:
         return a_points[max_index_from_b],\
-               b_points[nearest_b_point_indices_from_a[max_index_from_b]]
+            b_points[nearest_b_point_indices_from_a[max_index_from_b]]
     else:
         return a_points[nearest_a_point_indices_from_b[max_index_from_a]],\
-               b_points[max_index_from_a]
+            b_points[max_index_from_a]
