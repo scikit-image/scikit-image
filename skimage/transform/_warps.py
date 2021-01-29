@@ -66,8 +66,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
-        the image to avoid aliasing artifacts. If input image data
-        type is bool, no anti-aliasing is applied.
+        the image to avoid aliasing artifacts. If input data type is not bool,
+        anti_aliasing is applied by default when down-sampling. If input image
+        data type is bool, no anti-aliasing is applied.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
         By default, this value is chosen as (s - 1) / 2 where s is the
@@ -115,8 +116,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
              "from version 0.19 a ValueError will be raised instead of this "
              "warning.", FutureWarning, stacklevel=2)
 
-    factors = (np.asarray(input_shape, dtype=float) /
-               np.asarray(output_shape, dtype=float))
+    factors = np.divide(input_shape, output_shape)
+    # create copy so input values range stays accessible through image for clip
+    img_in = image.copy()
 
     # Translate modes used by np.pad to those used by scipy.ndimage
     ndi_mode = _to_ndimage_mode(mode)
@@ -132,15 +134,15 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
             elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
-        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
-                                    cval=cval, mode=ndi_mode)
+        img_in = ndi.gaussian_filter(img_in, anti_aliasing_sigma,
+                                     cval=cval, mode=ndi_mode)
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
-        order = _validate_interpolation_order(image.dtype, order)
+        order = _validate_interpolation_order(img_in.dtype, order)
         zoom_factors = [1 / f for f in factors]
-        image = convert_to_float(image, preserve_range)
-        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
+        img_in = convert_to_float(img_in, preserve_range)
+        out = ndi.zoom(img_in, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
         _clip_warp_output(image, out, order, mode, cval, clip)
 
@@ -172,12 +174,12 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         tform.params[0, 1] = 0
         tform.params[1, 0] = 0
 
-        out = warp(image, tform, output_shape=output_shape, order=order,
+        out = warp(img_in, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=clip,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _validate_interpolation_order(image.dtype, order)
+        order = _validate_interpolation_order(img_in.dtype, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
@@ -186,9 +188,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                                          sparse=False,
                                          indexing='ij'))
 
-        image = convert_to_float(image, preserve_range)
+        img_in = convert_to_float(img_in, preserve_range)
 
-        out = ndi.map_coordinates(image, coord_map, order=order,
+        out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
         _clip_warp_output(image, out, order, mode, cval, clip)
