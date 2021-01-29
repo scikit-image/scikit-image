@@ -355,6 +355,18 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
+def test_resize_anti_aliasing_clip():
+    # clip as expected after anti_aliasing
+    x = np.ones((5, 5), dtype=np.float64)
+    resized_order0 = resize(x, (3, 3), order=0, anti_aliasing=True)
+    resized_order1 = resize(x, (3, 3), order=1, anti_aliasing=True)
+
+    assert resized_order0.min() == 1.0
+    assert resized_order0.max() == 1.0
+    assert resized_order1.min() == 1.0
+    assert resized_order1.max() == 1.0
+
+
 def test_swirl():
     image = img_as_float(checkerboard())
 
