@@ -121,7 +121,7 @@ plt.show()
 ######################################################################
 # Circle model
 # ============
-
+from skimage.measure import CircleModel
 
 
 def generate_noisy_circle(size, noise_level, radius=1):
@@ -140,11 +140,13 @@ x3, y3 = (2 * half_width * np.random.rand(1000) - half_width,
 		  2 * half_width * np.random.rand(1000) - half_width)
 
 x, y = np.concatenate((x1, x2, x3)), np.concatenate((y1, y2, y3))
-xy = np.stack([x,y], axis=1).astype(float)
+xy = np.stack([x, y], axis=1).astype(float)
 
 # Fit with RANSAC
-ransac_kwarg = {'min_samples': 100, 'residual_threshold': .01, 'max_trials': 1000, }
-model_robust, inliers = measure.ransac(xy, CircleModel, **ransac_kwarg)
+ransac_kwarg = {'min_samples': 100,
+                'residual_threshold': .01,
+                'max_trials': 1000, }
+model_robust, inliers = ransac(xy, CircleModel, **ransac_kwarg)
 outliers = inliers == False
 cy, cx, r = model_robust.params
 
@@ -159,9 +161,9 @@ ax[0].plot(x1, y1, '.')
 circle = plt.Circle((cy, cx), radius=r, alpha=0.1)
 ax[1].add_patch(circle)
 ax[1].plot(xy[inliers, 0], xy[inliers, 1],
-          'bo', markersize=1, label='inliers')
+           'bo', markersize=1, label='inliers')
 ax[1].plot(xy[~inliers, 0], xy[~inliers, 1],
-          'ro', markersize=1, label='outliers')
+           'ro', markersize=1, label='outliers')
 plt.title(f'Radius: {r:.4f}, Center: {cy:.6f}, {cx:.6f}')
 plt.legend()
 plt.show()
