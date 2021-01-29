@@ -144,7 +144,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         img_in = convert_to_float(img_in, preserve_range)
         out = ndi.zoom(img_in, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
-        _clip_warp_output(image, out, order, mode, cval, clip)
+        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
 
@@ -178,7 +178,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                    mode=mode, cval=cval, clip=False,
                    preserve_range=preserve_range)
         # clip outside of warp to clip w.r.t input values, not filtered values.
-        _clip_warp_output(image, out, order, mode, cval, clip)
+        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     else:  # n-dimensional interpolation
         order = _validate_interpolation_order(img_in.dtype, order)
@@ -195,7 +195,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-        _clip_warp_output(image, out, order, mode, cval, clip)
+        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     return out
 
@@ -637,11 +637,13 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
+def _clip_warp_output(input_image, output_image, order, mode, cval, clip,
+                      anti_aliasing=False):
     """Clip output image to range of values of input image.
 
     Note that this function modifies the values of `output_image` in-place
-    and it is only modified if ``clip=True``.
+    and it is only modified if ``clip=True`` and either the spline interpolation
+    `order` > 0 or `anti_aliasing` is True.
 
     Parameters
     ----------
@@ -652,22 +654,26 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
 
     Other parameters
     ----------------
-    order : int, optional
+    order : int
         The order of the spline interpolation, default is 1. The order has to
         be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
-    cval : float, optional
+    cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    clip : bool, optional
+    clip : bool
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
+    anti_aliasing : bool, optional
+        Whether a Gaussian filter was applied to smooth `output_image` prior
+        to down-scaling. Default is False to prevent changes in functions
+        without anti_aliasing parameter.
 
     """
-    if clip and order != 0:
+    if clip and (order != 0 or anti_aliasing):
         min_val = input_image.min()
         max_val = input_image.max()
 
