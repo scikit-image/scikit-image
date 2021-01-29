@@ -225,7 +225,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
     float_dtype = image_product.real.dtype
 
-    shifts = np.stack([m.astype(float_dtype, copy=False) for m in maxima])
+    shifts = np.stack(maxima).astype(float_dtype, copy=False)
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
@@ -254,7 +254,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
                                   cross_correlation.shape)
         CCmax = cross_correlation[maxima]
 
-        maxima = np.stack([m.astype(float_dtype, copy=False) for m in maxima])
+        maxima = np.stack(maxima).astype(float_dtype, copy=False)
         maxima -= dftshift
 
         shifts += maxima / upsample_factor
