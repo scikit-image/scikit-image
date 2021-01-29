@@ -4,7 +4,12 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-from .._shared.fft import fftmodule as fft
+try:
+    from scipy.fft import fftn, ifftn
+except ImportError:
+    # scipy < 1.4 does not have an fft module
+    from scipy.fftpack import fftn, ifftn
+from scipy.fftpack import fftfreq
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -66,7 +71,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
         kernel = ((np.arange(ups_size) - ax_offset)[:, None]
-                  * fft.fftfreq(n_items, upsample_factor))
+                  * fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
         # use kernel with same precision as the data
         kernel = kernel.astype(data.dtype, copy=False)
@@ -203,15 +208,15 @@ def phase_cross_correlation(reference_image, moving_image, *,
         target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fft.fftn(reference_image)
-        target_freq = fft.fftn(moving_image)
+        src_freq = fftn(reference_image)
+        target_freq = fftn(moving_image)
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = fft.ifftn(image_product)
+    cross_correlation = ifftn(image_product)
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
@@ -252,7 +257,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
         maxima = np.stack([m.astype(float_dtype, copy=False) for m in maxima])
         maxima -= dftshift
 
-        shifts = shifts + maxima / upsample_factor
+        shifts += maxima / upsample_factor
 
         if return_error:
             src_amp = np.sum(np.real(src_freq * src_freq.conj()))
