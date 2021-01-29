@@ -119,7 +119,7 @@ class deprecate_kwarg:
 
     Parameters
     ----------
-    arg_mapping: dict
+    kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
     warning_msg: str
