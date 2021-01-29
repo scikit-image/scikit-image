@@ -118,7 +118,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     factors = np.divide(input_shape, output_shape)
     # create copy so input values range stays accessible through image for clip
-    img_in = image.copy()
+    img_in = image
 
     # Translate modes used by np.pad to those used by scipy.ndimage
     ndi_mode = _to_ndimage_mode(mode)
@@ -175,8 +175,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         tform.params[1, 0] = 0
 
         out = warp(img_in, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=clip,
+                   mode=mode, cval=cval, clip=False,
                    preserve_range=preserve_range)
+        # clip outside of warp to clip w.r.t input values, not filtered values.
+        _clip_warp_output(image, out, order, mode, cval, clip)
 
     else:  # n-dimensional interpolation
         order = _validate_interpolation_order(img_in.dtype, order)
