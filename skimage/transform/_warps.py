@@ -640,8 +640,8 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip,
     """Clip output image to range of values of input image.
 
     Note that this function modifies the values of `output_image` in-place
-    and it is only modified if ``clip=True`` and either the spline interpolation
-    `order` > 0 or `anti_aliasing` is True.
+    and it is only modified if ``clip=True`` and either the spline
+    interpolation `order` > 0 or `anti_aliasing` is True.
 
     Parameters
     ----------
