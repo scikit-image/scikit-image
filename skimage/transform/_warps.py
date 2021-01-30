@@ -144,7 +144,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         img_in = convert_to_float(img_in, preserve_range)
         out = ndi.zoom(img_in, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
-        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
 
@@ -174,11 +173,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         tform.params[0, 1] = 0
         tform.params[1, 0] = 0
 
+        # clip outside of warp to clip w.r.t input values, not filtered values.
         out = warp(img_in, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=False,
                    preserve_range=preserve_range)
-        # clip outside of warp to clip w.r.t input values, not filtered values.
-        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     else:  # n-dimensional interpolation
         order = _validate_interpolation_order(img_in.dtype, order)
@@ -195,7 +193,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-        _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
+    _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
 
     return out
 
