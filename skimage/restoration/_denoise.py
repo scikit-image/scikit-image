@@ -3,7 +3,7 @@ import numpy as np
 from math import ceil
 from .. import img_as_float
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import warn
+from .._shared.utils import _float_type, warn
 import pywt
 import skimage.color as color
 from skimage.color.colorconv import ycbcr_from_rgb
@@ -645,6 +645,7 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
     """If the ``image`` is rescaled, also rescale ``sigma`` consistently.
 
     Images that are not floating point will be rescaled via ``img_as_float``.
+    Half-precision images will be promoted to single precision.
     """
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
@@ -666,6 +667,8 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
                          for s in sigma]
             elif sigma is not None:
                 sigma *= scale_factor
+    elif image.dtype == np.float16:
+        image = image.astype(np.float32)
     return image, sigma
 
 

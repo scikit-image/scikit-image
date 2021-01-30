@@ -1,6 +1,7 @@
 import functools
 import numpy as np
 
+from skimage._shared import testing
 from skimage._shared.testing import assert_
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
@@ -27,10 +28,12 @@ def test_invariant_denoise():
     assert_(denoised_mse < original_mse)
 
 
-def test_invariant_denoise_color():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_invariant_denoise_color(dtype):
     denoised_img_color = _invariant_denoise(
-            noisy_img_color, _denoise_wavelet,
+            noisy_img_color.astype(dtype), _denoise_wavelet,
             denoiser_kwargs=dict(multichannel=True))
+    assert denoised_img_color.dtype == dtype
 
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)

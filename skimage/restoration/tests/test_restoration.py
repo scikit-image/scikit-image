@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from scipy.signal import convolve2d
 from scipy import ndimage as ndi
+from skimage._shared import testing
 from skimage._shared.testing import fetch
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
@@ -11,46 +12,60 @@ from skimage.restoration import uft
 test_img = util.img_as_float(camera())
 
 
-def test_wiener():
-    psf = np.ones((5, 5)) / 25
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_wiener(dtype):
+    psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    data = data.astype(dtype, copy=False)
     deconvolved = restoration.wiener(data, psf, 0.05)
+    assert deconvolved.dtype == dtype
 
     path = fetch('restoration/tests/camera_wiener.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+    atol = 1e-5 if dtype == np.float32 else 0
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
+                               atol=atol)
 
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
+    assert otf.real.dtype == dtype
     deconvolved = restoration.wiener(data, otf, 0.05,
                                      reg=laplacian,
                                      is_real=False)
+    assert deconvolved.real.dtype == dtype
     np.testing.assert_allclose(np.real(deconvolved),
                                np.load(path),
-                               rtol=1e-3)
+                               rtol=1e-3, atol=atol)
 
 
-def test_unsupervised_wiener():
-    psf = np.ones((5, 5)) / 25
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_unsupervised_wiener(dtype):
+    psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    data = data.astype(dtype, copy=False)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf)
+    assert deconvolved.dtype == dtype
 
     path = fetch('restoration/tests/camera_unsup.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+    atol = 1e-5 if dtype == np.float32 else 0
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
+                               atol=atol)
 
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
+    assert otf.real.dtype == dtype
     np.random.seed(0)
     deconvolved = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
         user_params={"callback": lambda x: None})[0]
+    assert deconvolved.real.dtype == dtype
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved),
                                np.load(path),
-                               rtol=1e-3)
+                               rtol=1e-3, atol=atol)
 
 
 def test_image_shape():

@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from skimage import data, io
+from skimage._shared import testing
 from skimage.restoration import rolling_ball
 from skimage.restoration.rolling_ball import ellipsoid_kernel
 
@@ -15,6 +16,15 @@ def test_ellipsoid_const():
     img = 155 * np.ones((100, 100), dtype=np.uint8)
     kernel = ellipsoid_kernel((25, 53), 50)
     background = rolling_ball(img, kernel=kernel)
+    assert np.allclose(img - background, np.zeros_like(img))
+
+
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_rolling_ball_dtype(dtype):
+    img = 155 * np.ones((100, 100), dtype=dtype)
+    kernel = ellipsoid_kernel((25, 53), 50).astype(dtype, copy=False)
+    background = rolling_ball(img, kernel=kernel)
+    assert background.dtype == img.dtype
     assert np.allclose(img - background, np.zeros_like(img))
 
 
