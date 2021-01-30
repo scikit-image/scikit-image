@@ -32,7 +32,8 @@ def test_hausdorff_simple():
     distance = np.sqrt(sum((ca - cb) ** 2
                            for ca, cb in zip(points_a, points_b)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
+                                                            points_b))
 
 
 @parametrize("points_a, points_b",
@@ -47,7 +48,8 @@ def test_hausdorff_region_single(points_a, points_b):
     distance = np.sqrt(sum((ca - cb) ** 2
                            for ca, cb in zip(points_a, points_b)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
+                                                            points_b))
 
 
 @parametrize("points_a, points_b",
@@ -63,7 +65,8 @@ def test_hausdorff_region_different_points(points_a, points_b):
     distance = np.sqrt(sum((ca - cb) ** 2
                            for ca, cb in zip(points_a, points_b)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
+                                                            points_b))
 
 
 def test_gallery():
@@ -114,7 +117,6 @@ def test_gallery():
            np.equal(hd_points, ((30, 40), (30, 50))).all()
 
 
-
 @parametrize("points_a, points_b",
              itertools.product([(0, 0, 1), (0, 1, 0), (1, 0, 0)],
                                [(0, 0, 2), (0, 2, 0), (2, 0, 0)]))
@@ -128,4 +130,5 @@ def test_3d_hausdorff_region(points_a, points_b):
     distance = np.sqrt(sum((ca - cb) ** 2
                            for ca, cb in zip(points_a, points_b)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
+                                                            points_b))
