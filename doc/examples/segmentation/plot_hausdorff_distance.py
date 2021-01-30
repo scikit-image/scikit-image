@@ -52,8 +52,8 @@ for x, y in zip(set_bx, set_by):
 
 # Call the hausdorff function on the coordinates
 metrics.hausdorff_distance(coords_a, coords_b)
-hausdorff_point_a, hausdorff_point_b = metrics.hausdorff_points(coords_a,
-                                                                coords_b)
+hausdorff_point_a, hausdorff_point_b = metrics.hausdorff_pair(coords_a,
+                                                              coords_b)
 
 # Plot the lines that shows the length of the hausdorff distance
 x_line = [30, 30]

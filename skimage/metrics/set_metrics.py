@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from scipy.spatial import cKDTree
 
@@ -52,7 +54,7 @@ def hausdorff_distance(image0, image1):
                max(cKDTree(b_points).query(a_points, k=1)[0]))
 
 
-def hausdorff_points(image0, image1):
+def hausdorff_pair(image0, image1):
     """Returns pair of points that are Hausdorff distance apart between nonzero
     elements of given images.
 
@@ -83,7 +85,7 @@ def hausdorff_points(image0, image1):
     >>> image_b = np.zeros(shape, dtype=bool)
     >>> image_a[points_a] = True
     >>> image_b[points_b] = True
-    >>> hausdorff_points(image_a, image_b)
+    >>> hausdorff_pair(image_a, image_b)
     (array([3, 0]), array([6, 0]))
 
     """
@@ -92,18 +94,19 @@ def hausdorff_points(image0, image1):
 
     # If either of the sets are empty, there is no corresponding pair of points
     if len(a_points) == 0 or len(b_points) == 0:
-        return ()
+        warnings.warn("One or both of the images is empty.", stacklevel=2)
+        return (), ()
 
     nearest_dists_from_b, nearest_a_point_indices_from_b = cKDTree(a_points)\
         .query(b_points)
     nearest_dists_from_a, nearest_b_point_indices_from_a = cKDTree(b_points)\
         .query(a_points)
 
-    max_dist_from_a = nearest_dists_from_b.max()
-    max_dist_from_b = nearest_dists_from_a.max()
-
     max_index_from_a = nearest_dists_from_b.argmax()
     max_index_from_b = nearest_dists_from_a.argmax()
+
+    max_dist_from_a = nearest_dists_from_b[max_index_from_a]
+    max_dist_from_b = nearest_dists_from_a[max_index_from_b]
 
     if max_dist_from_b > max_dist_from_a:
         return a_points[max_index_from_b],\
