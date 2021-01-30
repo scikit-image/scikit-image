@@ -3,11 +3,13 @@ from __future__ import print_function, division
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_equal
 import itertools
+import pytest
 
 from skimage._shared.testing import parametrize
 from skimage.metrics import hausdorff_distance, hausdorff_pair
 
 
+@pytest.mark.filterwarnings("ignore:One or both")
 def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=bool)
     non_empty = np.zeros((3, 2), dtype=bool)
