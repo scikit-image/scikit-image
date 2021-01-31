@@ -21,7 +21,7 @@ def label_points(coords, output_shape):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.util.points_to_labels import label_points
+    >>> from skimage.util._label import label_points
     >>> coords = np.array([[0, 1], [2, 2]])
     >>> output_shape = (5, 5)
     >>> mask = label_points(coords, output_shape)
