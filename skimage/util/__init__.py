@@ -15,6 +15,7 @@ from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
 from ._map_array import map_array
+from ._label import label_points
 
 
 @functools.wraps(np.pad)
@@ -46,4 +47,5 @@ __all__ = ['img_as_float32',
            'apply_parallel',
            'invert',
            'unique_rows',
+           'label_points',
            ]
