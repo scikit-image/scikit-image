@@ -1,3 +1,5 @@
+import functools
+import operator
 
 import numpy as np
 from scipy import sparse
@@ -29,6 +31,19 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
     neigh_coef_full[(radius,) * mask.ndim] = 1
     neigh_coef_full = laplace(laplace(neigh_coef_full))
+
+    # ostrides is in number of elements, not bytes
+    channel_stride = out.strides[-1]
+    ostrides = tuple(s // channel_stride for s in out.strides)
+
+    # precompute offsets to all neighboring elements in neigh_coeff_full footprint
+    idx_coef = np.where(neigh_coef_full)
+    coef_vals = neigh_coef_full[idx_coef]
+    offsets = tuple(c - radius for c in idx_coef)
+    raveled_offsets = tuple(ax_off * ax_stride
+                            for ax_off, ax_stride in zip(offsets, ostrides))
+    raveled_offsets =  functools.reduce(operator.add, raveled_offsets)
+
     # lists storing sparse matrix indices and values
     row_idx_unknown = []
     col_idx_unknown = []
@@ -70,21 +85,16 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
             # b_hi = (p + radius + 1) for p in mask_pt_idx
             neigh_coef = neigh_coef_full
 
-            # Iterate over masked point's neighborhood
-            it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-            for coef in it_inner:
-                if coef == 0:
-                    continue
-                tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
-                tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
+            for coef, off in zip(coef_vals, raveled_offsets):
+                mask_offset = mask_i[mask_pt_n] + off
 
-                if mask[tuple(tmp_pt_idx)]:
+                if mask.ravel()[mask_offset]:
                     row_idx_unknown.append(mask_pt_n)
-                    col_idx_unknown.append(tmp_pt_i)
+                    col_idx_unknown.append(mask_offset)
                     data_unknown.append(coef)
                 else:
                     row_idx_known.append(mask_pt_n)
-                    col_idx_known.append(tmp_pt_i)
+                    col_idx_known.append(mask_offset)
                     data_known.append(coef)
 
     # Prepare diagonal matrix
