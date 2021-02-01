@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy.ndimage import map_coordinates
 
 from skimage.data import checkerboard, astronaut
