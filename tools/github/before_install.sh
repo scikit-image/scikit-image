@@ -33,15 +33,6 @@ fi
 
 python -m pip install --upgrade pip wheel setuptools
 
-
-# install specific wheels from wheelhouse
-for requirement in matplotlib scipy pillow; do
-    WHEELS="$WHEELS $(grep $requirement requirements/default.txt)"
-done
-# cython is not in the default.txt requirements
-WHEELS="$WHEELS $(grep -i cython requirements/build.txt)"
-python -m pip install $PIP_FLAGS $WHEELS
-
 # Install build time requirements
 python -m pip install $PIP_FLAGS -r requirements/build.txt
 # Default requirements are necessary to build because of lazy importing
