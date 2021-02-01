@@ -8,9 +8,10 @@ import skimage
 from ..measure import label
 
 
+
 def _get_neighborhood(nd_idx, radius, nd_shape):
-    bounds_lo = (nd_idx - radius).clip(min=0)
-    bounds_hi = (nd_idx + radius + 1).clip(max=nd_shape)
+    bounds_lo = tuple(max(p - radius, 0) for p in nd_idx)
+    bounds_hi = tuple(min(p + radius + 1, s) for p, s in zip(nd_idx, nd_shape))
     return bounds_lo, bounds_hi
 
 
@@ -20,33 +21,58 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
 
     # Find indexes of masked points in flatten array
-    mask_i = np.ravel_multi_index(np.where(mask), mask.shape)
+    mask_i = np.where(mask.ravel())[0]
 
     # Find masked points and prepare them to be easily enumerate over
-    mask_pts = np.stack(np.where(mask), axis=-1)
+    mask_pts = np.where(mask)
 
+    # Create biharmonic coefficients ndarray
+    radius = 2
+    neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
+    neigh_coef_full[(radius,) * mask.ndim] = 1
+    neigh_coef_full = laplace(laplace(neigh_coef_full))
     # Iterate over masked points
-    for mask_pt_n, mask_pt_idx in enumerate(mask_pts):
-        # Get bounded neighborhood of selected radius
-        b_lo, b_hi = _get_neighborhood(mask_pt_idx, 2, out.shape)
+    for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
+        if any(p < radius or p >= s - radius
+               for p, s in zip(mask_pt_idx, out.shape)):
+            # Get bounded neighborhood of selected radius
+            b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
+            # Create biharmonic coefficients ndarray
+            neigh_coef = np.zeros(tuple(h - l for l, h in zip(b_lo, b_hi)))
+            neigh_coef[tuple(p - l for p, l in zip(mask_pt_idx, b_lo))] = 1
+            neigh_coef = laplace(laplace(neigh_coef))
 
-        # Create biharmonic coefficients ndarray
-        neigh_coef = np.zeros(b_hi - b_lo)
-        neigh_coef[tuple(mask_pt_idx - b_lo)] = 1
-        neigh_coef = laplace(laplace(neigh_coef))
+            # Iterate over masked point's neighborhood
+            it_inner = np.nditer(neigh_coef, flags=['multi_index'])
+            for coef in it_inner:
+                if coef == 0:
+                    continue
+                tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
+                tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
 
-        # Iterate over masked point's neighborhood
-        it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-        for coef in it_inner:
-            if coef == 0:
-                continue
-            tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
-            tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
+                if mask[tuple(tmp_pt_idx)]:
+                    matrix_unknown[mask_pt_n, tmp_pt_i] = coef
+                else:
+                    matrix_known[mask_pt_n, tmp_pt_i] = coef
 
-            if mask[tuple(tmp_pt_idx)]:
-                matrix_unknown[mask_pt_n, tmp_pt_i] = coef
-            else:
-                matrix_known[mask_pt_n, tmp_pt_i] = coef
+        else:
+            b_lo = tuple(p - radius for p in mask_pt_idx)
+            # b_hi = (p + radius + 1) for p in mask_pt_idx
+            neigh_coef = neigh_coef_full
+
+            # Iterate over masked point's neighborhood
+            it_inner = np.nditer(neigh_coef, flags=['multi_index'])
+            for coef in it_inner:
+                if coef == 0:
+                    continue
+                tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
+                tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
+
+                if mask[tuple(tmp_pt_idx)]:
+                    matrix_unknown[mask_pt_n, tmp_pt_i] = coef
+                else:
+                    matrix_known[mask_pt_n, tmp_pt_i] = coef
+
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
@@ -67,7 +93,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     result = result.ravel()
 
     # Substitute masked points with inpainted versions
-    for mask_pt_n, mask_pt_idx in enumerate(mask_pts):
+    for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
         out[tuple(mask_pt_idx)] = result[mask_pt_n]
 
     return out
