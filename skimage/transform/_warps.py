@@ -94,6 +94,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
+    input_type = image.dtype
     if output_ndim > image.ndim:
         # append dimensions to input_shape
         input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
@@ -106,9 +107,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                          "dimensions")
 
     if anti_aliasing is None:
-        anti_aliasing = not image.dtype == bool
+        anti_aliasing = not input_type == bool
 
-    if image.dtype == bool and anti_aliasing:
+    if input_type == bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution is not defined "
              "with bool data type. Please set anti_aliasing to False or "
              "explicitely cast input image to another data type. Starting "
@@ -116,6 +117,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
              "warning.", FutureWarning, stacklevel=2)
 
     factors = np.divide(input_shape, output_shape)
+    image = convert_to_float(image, preserve_range)
     # create copy so input values range stays accessible through image for clip
     img_in = image
 
@@ -138,9 +140,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
-        order = _validate_interpolation_order(img_in.dtype, order)
+        order = _validate_interpolation_order(input_type, order)
         zoom_factors = [1 / f for f in factors]
-        img_in = convert_to_float(img_in, preserve_range)
         out = ndi.zoom(img_in, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
 
@@ -178,7 +179,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _validate_interpolation_order(img_in.dtype, order)
+        order = _validate_interpolation_order(input_type, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
@@ -186,8 +187,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         coord_map = np.array(np.meshgrid(*coord_arrays,
                                          sparse=False,
                                          indexing='ij'))
-
-        img_in = convert_to_float(img_in, preserve_range)
 
         out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
