@@ -17,8 +17,6 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
 
 def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
-    matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size))
-    matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
 
     # Find indexes of masked points in flatten array
     mask_i = np.where(mask.ravel())[0]
@@ -31,6 +29,15 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
     neigh_coef_full[(radius,) * mask.ndim] = 1
     neigh_coef_full = laplace(laplace(neigh_coef_full))
+    # lists storing sparse matrix indices and values
+    row_idx_unknown = []
+    col_idx_unknown = []
+    data_unknown = []
+    row_idx_known = []
+    col_idx_known = []
+
+    # Iterate over masked points
+    data_known = []
     # Iterate over masked points
     for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
         if any(p < radius or p >= s - radius
@@ -51,10 +58,13 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
                 tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
 
                 if mask[tuple(tmp_pt_idx)]:
-                    matrix_unknown[mask_pt_n, tmp_pt_i] = coef
+                    row_idx_unknown.append(mask_pt_n)
+                    col_idx_unknown.append(tmp_pt_i)
+                    data_unknown.append(coef)
                 else:
-                    matrix_known[mask_pt_n, tmp_pt_i] = coef
-
+                    row_idx_known.append(mask_pt_n)
+                    col_idx_known.append(tmp_pt_i)
+                    data_known.append(coef)
         else:
             b_lo = tuple(p - radius for p in mask_pt_idx)
             # b_hi = (p + radius + 1) for p in mask_pt_idx
@@ -69,14 +79,22 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
                 tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
 
                 if mask[tuple(tmp_pt_idx)]:
-                    matrix_unknown[mask_pt_n, tmp_pt_i] = coef
+                    row_idx_unknown.append(mask_pt_n)
+                    col_idx_unknown.append(tmp_pt_i)
+                    data_unknown.append(coef)
                 else:
-                    matrix_known[mask_pt_n, tmp_pt_i] = coef
-
+                    row_idx_known.append(mask_pt_n)
+                    col_idx_known.append(tmp_pt_i)
+                    data_known.append(coef)
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
                                         shape=(out.size, out.size))
+
+    sp_shape = (np.sum(mask), out.size)
+    matrix_known = sparse.coo_matrix((data_known, (row_idx_known, col_idx_known)), shape=sp_shape)
+    matrix_unknown = sparse.coo_matrix((data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape)
+    matrix_unknown = matrix_unknown.tocsr()
 
     # Calculate right hand side as a sum of known matrix's columns
     matrix_known = matrix_known.tocsr()
@@ -84,7 +102,6 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
 
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
-    matrix_unknown = sparse.csr_matrix(matrix_unknown)
     result = spsolve(matrix_unknown, rhs)
 
     # Handle enormous values
