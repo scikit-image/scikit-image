@@ -85,17 +85,19 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
             # b_hi = (p + radius + 1) for p in mask_pt_idx
             neigh_coef = neigh_coef_full
 
-            for coef, off in zip(coef_vals, raveled_offsets):
-                mask_offset = mask_i[mask_pt_n] + off
+            mask_offsets = mask_i[mask_pt_n] + raveled_offsets
+            in_mask = mask.ravel()[mask_offsets]
+            c_unknown = coef_vals[in_mask]
+            data_unknown += list(c_unknown)
+            row_idx_unknown += [mask_pt_n,] * len(c_unknown)
+            col_idx_unknown += list(mask_offsets[in_mask])
 
-                if mask.ravel()[mask_offset]:
-                    row_idx_unknown.append(mask_pt_n)
-                    col_idx_unknown.append(mask_offset)
-                    data_unknown.append(coef)
-                else:
-                    row_idx_known.append(mask_pt_n)
-                    col_idx_known.append(mask_offset)
-                    data_known.append(coef)
+            not_in_mask = ~in_mask
+            c_known = coef_vals[not_in_mask]
+            data_known += list(c_known)
+            row_idx_known += [mask_pt_n,] * len(c_known)
+            col_idx_known += list(mask_offsets[not_in_mask])
+
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
