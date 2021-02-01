@@ -16,6 +16,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
+@profile
 def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
 
@@ -35,13 +36,13 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     channel_stride = np.min(out.strides)
     ostrides = tuple(s // channel_stride for s in out.strides)
 
-    # precompute offsets to all neighboring elements in neigh_coeff_full footprint
+    # offsets to all neighboring elements in neigh_coeff_full footprint
     idx_coef = np.where(neigh_coef_full)
     coef_vals = neigh_coef_full[idx_coef]
     offsets = tuple(c - radius for c in idx_coef)
     raveled_offsets = tuple(ax_off * ax_stride
                             for ax_off, ax_stride in zip(offsets, ostrides))
-    raveled_offsets =  functools.reduce(operator.add, raveled_offsets)
+    raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
     # lists storing sparse matrix indices and values
     row_idx_unknown = []
@@ -59,8 +60,9 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
             # Get bounded neighborhood of selected radius
             b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
             # Create biharmonic coefficients ndarray
-            neigh_coef = np.zeros(tuple(h - l for l, h in zip(b_lo, b_hi)))
-            neigh_coef[tuple(p - l for p, l in zip(mask_pt_idx, b_lo))] = 1
+            neigh_coef = np.zeros(tuple(hi - lo
+                                        for lo, hi in zip(b_lo, b_hi)))
+            neigh_coef[tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))] = 1
             neigh_coef = laplace(laplace(neigh_coef))
 
             # Iterate over masked point's neighborhood
@@ -88,27 +90,28 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
             in_mask = mask.ravel()[mask_offsets]
             c_unknown = coef_vals[in_mask]
             data_unknown += list(c_unknown)
-            row_idx_unknown += [mask_pt_n,] * len(c_unknown)
+            row_idx_unknown += [mask_pt_n] * len(c_unknown)
             col_idx_unknown += list(mask_offsets[in_mask])
 
             not_in_mask = ~in_mask
             c_known = coef_vals[not_in_mask]
             data_known += list(c_known)
-            row_idx_known += [mask_pt_n,] * len(c_known)
+            row_idx_known += [mask_pt_n] * len(c_known)
             col_idx_known += list(mask_offsets[not_in_mask])
-
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
                                         shape=(out.size, out.size))
 
     sp_shape = (np.sum(mask), out.size)
-    matrix_known = sparse.coo_matrix((data_known, (row_idx_known, col_idx_known)), shape=sp_shape)
-    matrix_unknown = sparse.coo_matrix((data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape)
-    matrix_unknown = matrix_unknown.tocsr()
+    matrix_known = sparse.coo_matrix(
+        (data_known, (row_idx_known, col_idx_known)), shape=sp_shape
+    ).tocsr()
+    matrix_unknown = sparse.coo_matrix(
+        (data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape
+    ).tocsr()
 
     # Calculate right hand side as a sum of known matrix's columns
-    matrix_known = matrix_known.tocsr()
     rhs = -(matrix_known * flat_diag_image).sum(axis=1)
 
     # Solve linear system for masked points
@@ -127,6 +130,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     return out
 
 
+@profile
 def inpaint_biharmonic(image, mask, multichannel=False):
     """Inpaint masked points in image with biharmonic equations.
 
@@ -194,11 +198,11 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     for idx_channel in range(image.shape[-1]):
         known_points = image[..., idx_channel][~mask]
         limits = (np.min(known_points), np.max(known_points))
-
         for idx_region in range(1, num_labels+1):
             mask_region = mask_labeled == idx_region
-            _inpaint_biharmonic_single_channel(mask_region,
-                out[..., idx_channel], limits)
+            _inpaint_biharmonic_single_channel(
+                mask_region, out[..., idx_channel], limits
+            )
 
     if not multichannel:
         out = out[..., 0]
