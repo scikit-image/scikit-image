@@ -15,7 +15,7 @@ def label_points(coords, output_shape):
 
     Returns
     -------
-    label_mask: ndarray
+    labels: ndarray
         A mask of zeroes containing unique integer labels at the `coords`
 
     Examples
@@ -41,10 +41,10 @@ def label_points(coords, output_shape):
     if coords.shape[1] != len(output_shape):
         raise ValueError("Dimensionality of points should match the output shape")
 
-    if True in (coords < 0):
+    if np.any(coords < 0):
         raise ValueError("Coordinates should be positive and start from 0")
 
-    np_indices = tuple(np.transpose(np.round(coords).astype(np.int)))
-    label_mask = np.zeros(output_shape, dtype=np.uint64)
-    label_mask[np_indices] = np.arange(1, coords.shape[0] + 1)
-    return label_mask
+    np_indices = tuple(np.transpose(np.round(coords).astype(np.int, copy=False)))
+    labels = np.zeros(output_shape, dtype=np.uint64)
+    labels[np_indices] = np.arange(1, coords.shape[0] + 1)
+    return labels
