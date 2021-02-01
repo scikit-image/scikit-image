@@ -355,37 +355,20 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
-def test_resize_anti_aliasing_clip():
-    # clip as expected after anti_aliasing
-    x_f64 = np.ones((5, 5), dtype=np.float64)
-    x_u8 = np.ones((5, 5), dtype=np.uint8) * 255
+@pytest.mark.parametrize('order', [0, 1])
+@pytest.mark.parametrize('preserve_range', [True, False])
+@pytest.mark.parametrize('anti_aliasing', [True, False])
+@pytest.mark.parametrize('dtype', [np.float64, np.uint8])
+def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
+    # test if clip as expected
+    expected_max = 255.0 if (dtype == np.uint8 and preserve_range) else 1.0
+    x = np.ones((5, 5), dtype=dtype)
+    if dtype == np.uint8:
+        x *= 255
+    resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
+                     anti_aliasing=anti_aliasing)
 
-    resized_f64_order0 = resize(x_f64, (3, 3), order=0, anti_aliasing=True)
-    resized_f64_order1 = resize(x_f64, (3, 3), order=1, anti_aliasing=True)
-    resized_f64_order0_range = resize(x_f64, (3, 3), order=0,
-                                      preserve_range=True,
-                                      anti_aliasing=True)
-    resized_f64_order1_range = resize(x_f64, (3, 3), order=1,
-                                      preserve_range=True,
-                                      anti_aliasing=True)
-    resized_u8_order0 = resize(x_u8, (3, 3), order=0, preserve_range=False,
-                               anti_aliasing=True)
-    resized_u8_order1 = resize(x_u8, (3, 3), order=1, preserve_range=False,
-                               anti_aliasing=True)
-    resized_u8_order0_range = resize(x_u8, (3, 3), order=0, preserve_range=True,
-                                     anti_aliasing=True)
-    resized_u8_order1_range = resize(x_u8, (3, 3), order=1, preserve_range=True,
-                                     anti_aliasing=True)
-
-    assert resized_f64_order0.max() == 1.0
-    assert resized_f64_order1.max() == 1.0
-    assert resized_f64_order0_range.max() == 1.0
-    assert resized_f64_order1_range.max() == 1.0
-
-    assert resized_u8_order0.max() == 1.0
-    assert resized_u8_order1.max() == 1.0
-    assert resized_u8_order0_range.max() == 255.0
-    assert resized_u8_order1_range.max() == 255.0
+    assert resized.max() == expected_max
 
 
 def test_swirl():
