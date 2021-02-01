@@ -10,7 +10,6 @@ import skimage
 from ..measure import label
 
 
-
 def _get_neighborhood(nd_idx, radius, nd_shape):
     bounds_lo = tuple(max(p - radius, 0) for p in nd_idx)
     bounds_hi = tuple(min(p + radius + 1, s) for p, s in zip(nd_idx, nd_shape))
@@ -33,7 +32,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     neigh_coef_full = laplace(laplace(neigh_coef_full))
 
     # ostrides is in number of elements, not bytes
-    channel_stride = out.strides[-1]
+    channel_stride = np.min(out.strides)
     ostrides = tuple(s // channel_stride for s in out.strides)
 
     # precompute offsets to all neighboring elements in neigh_coeff_full footprint
