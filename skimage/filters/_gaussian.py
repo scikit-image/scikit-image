@@ -143,8 +143,10 @@ def _guess_spatial_dimensions(image):
     Raises
     ------
     ValueError
-        If the image array has less than two or more than four dimensions.
+        If the image array has less than four dimensions.
     """
+    if image.ndim == 1:
+        return 1
     if image.ndim == 2:
         return 2
     if image.ndim == 3 and image.shape[-1] != 3:
@@ -154,7 +156,7 @@ def _guess_spatial_dimensions(image):
     if image.ndim == 4 and image.shape[-1] == 3:
         return 3
     else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+        raise ValueError("Expected 1D, 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
 def difference_of_gaussians(image, low_sigma, high_sigma=None, *,

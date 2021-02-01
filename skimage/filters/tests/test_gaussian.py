@@ -17,7 +17,7 @@ def test_negative_sigma():
     with testing.raises(ValueError):
         gaussian(a,
                  sigma=np.asarray([-1.0, 1.0]))
-
+        
 
 def test_null_sigma():
     a = np.zeros((3, 3))
@@ -83,8 +83,7 @@ def test_guess_spatial_dimensions():
     testing.assert_equal(_guess_spatial_dimensions(im2), 3)
     testing.assert_equal(_guess_spatial_dimensions(im3), None)
     testing.assert_equal(_guess_spatial_dimensions(im4), 3)
-    with testing.raises(ValueError):
-        _guess_spatial_dimensions(im5)
+    testing.assert_equal(_guess_spatial_dimensions(im5), 1)
 
 
 @pytest.mark.parametrize(
