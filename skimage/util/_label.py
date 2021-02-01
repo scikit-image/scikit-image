@@ -34,17 +34,20 @@ def label_points(coords, output_shape):
 
     Notes
     -----
-    - The labels are assigned to coordinates that are converted to integer and considered to start from 0.
+    - The labels are assigned to coordinates that are converted to
+      integer and considered to start from 0.
     - Coordinates that are out of range of the mask raise an IndexError.
     - Negative coordinates raise a ValueError
     """
     if coords.shape[1] != len(output_shape):
-        raise ValueError("Dimensionality of points should match the output shape")
+        raise ValueError("Dimensionality of points should match the "
+                         "output shape")
 
     if np.any(coords < 0):
         raise ValueError("Coordinates should be positive and start from 0")
 
-    np_indices = tuple(np.transpose(np.round(coords).astype(np.int, copy=False)))
+    np_indices = tuple(np.transpose(np.round(coords).astype(np.int,
+                                                            copy=False)))
     labels = np.zeros(output_shape, dtype=np.uint64)
     labels[np_indices] = np.arange(1, coords.shape[0] + 1)
     return labels
