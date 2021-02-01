@@ -17,12 +17,7 @@ def test_negative_sigma():
     with testing.raises(ValueError):
         gaussian(a,
                  sigma=np.asarray([-1.0, 1.0]))
-
-
-def test_1D():
-    x = np.arange(50) / 50
-    y = gaussian(x, sigma=(1,))
-
+        
 
 def test_null_sigma():
     a = np.zeros((3, 3))
