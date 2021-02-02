@@ -191,7 +191,8 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), tol=tol, atol=0, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, i].toarray(), 
+               tol=tol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])]
         if np.any([info > 0 for _, info in cg_out]):
             warn("Conjugate gradient convergence to tolerance not achieved. "
