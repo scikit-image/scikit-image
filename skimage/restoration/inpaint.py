@@ -16,7 +16,6 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-@profile
 def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Initialize sparse matrices
 
@@ -110,9 +109,15 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     matrix_unknown = sparse.coo_matrix(
         (data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape
     ).tocsr()
+    
 
     # Calculate right hand side as a sum of known matrix's columns
     rhs = -(matrix_known * flat_diag_image).sum(axis=1)
+    print(f"matrix_known.nnz={matrix_known.nnz}")
+    print(f"matrix_unknown.nnz={matrix_unknown.nnz}")
+    print(f"rhs.size={rhs.size}")
+    print(f"neigh_coef nnz={np.sum(neigh_coef != 0)}")
+    print(f"mask.sum()={mask.sum()}")
 
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
@@ -130,7 +135,6 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     return out
 
 
-@profile
 def inpaint_biharmonic(image, mask, multichannel=False):
     """Inpaint masked points in image with biharmonic equations.
 
