@@ -40,12 +40,17 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
     radius = neigh_coef_full.shape[0] // 2
 
+    # boolean indicating which masked points are near the boundary
+    out_of_bounds = functools.reduce(
+        np.logical_or, [np.logical_or(p < radius, p >= s - radius)
+                        for p, s in zip(mask_pts, out.shape)]
+    )
+
     # Iterate over masked points
     mask_flat = mask.flatten()
     out_flat = np.ascontiguousarray(out.reshape((-1, nchannels)).T)
     for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
-        if any(p < radius or p >= s - radius
-               for p, s in zip(mask_pt_idx, out.shape)):
+        if out_of_bounds[mask_pt_n]:
             # Get bounded neighborhood of selected radius
             b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
             # Create biharmonic coefficients ndarray
@@ -91,7 +96,9 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
             row_idx_known.append(mask_pt_n)
             for ch in range(nchannels):
                 img_vals = out_flat[ch][mask_offsets[not_in_mask]]
-                data_known[ch].append(-np.sum(coef_vals[not_in_mask] * img_vals))
+                data_known[ch].append(
+                    -np.sum(coef_vals[not_in_mask] * img_vals)
+                )
 
     # form sparse matrix of unknown values
     sp_shape = (np.sum(mask), out.size)
