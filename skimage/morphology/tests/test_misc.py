@@ -29,7 +29,8 @@ def test_two_connectivity():
 
 def test_in_place():
     image = test_image.copy()
-    observed = remove_small_objects(image, min_size=6, in_place=True)
+    with expected_warnings(["in_place argument is deprecated"]):
+        observed = remove_small_objects(image, min_size=6, in_place=True)
     assert_equal(observed is image, True,
                  "remove_small_objects in_place argument failed.")
 
