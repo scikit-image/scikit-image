@@ -47,12 +47,13 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     row_idx_unknown = []
     col_idx_unknown = []
     data_unknown = []
+
+    # lists storing sparse right hand side vector indices and values
     row_idx_known = []
-    col_idx_known = []
+    data_known = []
 
     # Iterate over masked points
-    data_known = []
-    # Iterate over masked points
+    out_flat = out.flatten()
     for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
         if any(p < radius or p >= s - radius
                for p, s in zip(mask_pt_idx, out.shape)):
@@ -66,6 +67,7 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
 
             # Iterate over masked point's neighborhood
             it_inner = np.nditer(neigh_coef, flags=['multi_index'])
+            val_known = 0
             for coef in it_inner:
                 if coef == 0:
                     continue
@@ -77,9 +79,10 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
                     col_idx_unknown.append(tmp_pt_i)
                     data_unknown.append(coef)
                 else:
-                    row_idx_known.append(mask_pt_n)
-                    col_idx_known.append(tmp_pt_i)
-                    data_known.append(coef)
+                    val_known -= coef * out_flat[tmp_pt_i]
+            if val_known != 0:
+                row_idx_known.append(mask_pt_n)
+                data_known.append(val_known)
         else:
             b_lo = tuple(p - radius for p in mask_pt_idx)
             # b_hi = (p + radius + 1) for p in mask_pt_idx
@@ -94,30 +97,22 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
 
             not_in_mask = ~in_mask
             c_known = coef_vals[not_in_mask]
-            data_known += list(c_known)
-            row_idx_known += [mask_pt_n] * len(c_known)
-            col_idx_known += list(mask_offsets[not_in_mask])
+            row_idx_known.append(mask_pt_n)
+            img_vals = out_flat[mask_offsets[not_in_mask]]
+            data_known.append(-np.sum(coef_vals[not_in_mask] * img_vals))
 
-    # Prepare diagonal matrix
-    flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
-                                        shape=(out.size, out.size))
-
-    sp_shape = (np.sum(mask), out.size)
-    matrix_known = sparse.coo_matrix(
-        (data_known, (row_idx_known, col_idx_known)), shape=sp_shape
+    # form sparse vector representing the right hand side
+    row_idx_known = np.asarray(row_idx_known)
+    col_idx_known = np.zeros_like(row_idx_known)
+    rhs = sparse.coo_matrix(
+        (data_known, (row_idx_known, col_idx_known)), shape=(np.sum(mask), 1)
     ).tocsr()
+
+    # form sparse matrix of unknown values
+    sp_shape = (np.sum(mask), out.size)
     matrix_unknown = sparse.coo_matrix(
         (data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape
     ).tocsr()
-    
-
-    # Calculate right hand side as a sum of known matrix's columns
-    rhs = -(matrix_known * flat_diag_image).sum(axis=1)
-    print(f"matrix_known.nnz={matrix_known.nnz}")
-    print(f"matrix_unknown.nnz={matrix_unknown.nnz}")
-    print(f"rhs.size={rhs.size}")
-    print(f"neigh_coef nnz={np.sum(neigh_coef != 0)}")
-    print(f"mask.sum()={mask.sum()}")
 
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
@@ -198,7 +193,6 @@ def inpaint_biharmonic(image, mask, multichannel=False):
         image = image[..., np.newaxis]
 
     out = np.copy(image)
-
     for idx_channel in range(image.shape[-1]):
         known_points = image[..., idx_channel][~mask]
         limits = (np.min(known_points), np.max(known_points))
