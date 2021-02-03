@@ -2,7 +2,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn
+from .._shared.utils import warn, remove_arg
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -139,7 +139,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
+@remove_arg("in_place", changed_version="0.21",
+            help_msg="Please use out argument instead.")
+def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
+                       out=None):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
@@ -152,8 +155,12 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
-        If `True`, remove the connected components in the input array itself.
-        Otherwise, make a copy.
+        If `True`, remove the connected components in the input array
+        itself. Otherwise, make a copy. Deprecated since version 0.19
+        and will be removed in version 0.21. `out` can be used instead.
+    out : ndarray
+        Array of the same shape as `ar`, into which the output is
+        placed. By default, a new array is created.
 
     Raises
     ------
@@ -186,7 +193,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> d = morphology.remove_small_holes(a, 2, in_place=True)
+    >>> d = morphology.remove_small_holes(a, 2, out=a)
     >>> d is a
     True
 
