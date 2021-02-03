@@ -16,7 +16,8 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _inpaint_biharmonic_single_channel(mask, out, limits):
+def _inpaint_biharmonic_single_channel(mask, out, limits, neigh_coef_full,
+                                       coef_vals, raveled_offsets):
     # Initialize sparse matrices
 
     # Find indexes of masked points in flatten array
@@ -24,24 +25,6 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
 
     # Find masked points and prepare them to be easily enumerate over
     mask_pts = np.where(mask)
-
-    # Create biharmonic coefficients ndarray
-    radius = 2
-    neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
-    neigh_coef_full[(radius,) * mask.ndim] = 1
-    neigh_coef_full = laplace(laplace(neigh_coef_full))
-
-    # ostrides is in number of elements, not bytes
-    channel_stride = np.min(out.strides)
-    ostrides = tuple(s // channel_stride for s in out.strides)
-
-    # offsets to all neighboring elements in neigh_coeff_full footprint
-    idx_coef = np.where(neigh_coef_full)
-    coef_vals = neigh_coef_full[idx_coef]
-    offsets = tuple(c - radius for c in idx_coef)
-    raveled_offsets = tuple(ax_off * ax_stride
-                            for ax_off, ax_stride in zip(offsets, ostrides))
-    raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
     # lists storing sparse matrix indices and values
     row_idx_unknown = []
@@ -51,6 +34,8 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     # lists storing sparse right hand side vector indices and values
     row_idx_known = []
     data_known = []
+
+    radius = neigh_coef_full.shape[0] // 2
 
     # Iterate over masked points
     out_flat = out.flatten()
@@ -191,15 +176,34 @@ def inpaint_biharmonic(image, mask, multichannel=False):
 
     if not multichannel:
         image = image[..., np.newaxis]
-
     out = np.copy(image)
+
+    # Create biharmonic coefficients ndarray
+    radius = 2
+    neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
+    neigh_coef_full[(radius,) * mask.ndim] = 1
+    neigh_coef_full = laplace(laplace(neigh_coef_full))
+
+    # ostrides is in number of elements, not bytes
+    channel_stride = np.min(out[..., 0].strides)
+    ostrides = tuple(s // channel_stride for s in out[..., 0].strides)
+
+    # offsets to all neighboring elements in neigh_coeff_full footprint
+    idx_coef = np.where(neigh_coef_full)
+    coef_vals = neigh_coef_full[idx_coef]
+    offsets = tuple(c - radius for c in idx_coef)
+    raveled_offsets = tuple(ax_off * ax_stride
+                            for ax_off, ax_stride in zip(offsets, ostrides))
+    raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+
     for idx_channel in range(image.shape[-1]):
         known_points = image[..., idx_channel][~mask]
         limits = (np.min(known_points), np.max(known_points))
         for idx_region in range(1, num_labels+1):
             mask_region = mask_labeled == idx_region
             _inpaint_biharmonic_single_channel(
-                mask_region, out[..., idx_channel], limits
+                mask_region, out[..., idx_channel], limits, neigh_coef_full,
+                coef_vals, raveled_offsets
             )
 
     if not multichannel:
