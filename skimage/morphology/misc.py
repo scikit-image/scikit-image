@@ -48,7 +48,7 @@ def _check_dtype_supported(ar):
                         "Got %s." % ar.dtype)
 
 
-@remove_arg("in_place", changed_version="0.21",
+@remove_arg("in_place", changed_version="1.0",
             help_msg="Please use out argument instead.")
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
                          *, out=None):
