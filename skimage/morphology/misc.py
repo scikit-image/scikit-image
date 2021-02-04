@@ -139,10 +139,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-@remove_arg("in_place", changed_version="0.21",
+@remove_arg("in_place", changed_version="1.0",
             help_msg="Please use out argument instead.")
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
-                       out=None):
+                       *, out=None):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
@@ -156,11 +156,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
         If `True`, remove the connected components in the input array
-        itself. Otherwise, make a copy. Deprecated since version 0.19
-        and will be removed in version 0.21. `out` can be used instead.
+        itself. Otherwise, make a copy. Deprecated since version 0.19.
+        Please use `out` instead.
     out : ndarray
-        Array of the same shape as `ar`, into which the output is
-        placed. By default, a new array is created.
+        Array of the same shape as `ar` and bool dtype, into which the
+        output is placed. By default, a new array is created.
 
     Raises
     ------
@@ -212,23 +212,23 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
         warn("Any labeled images will be returned as a boolean array. "
              "Did you mean to use a boolean array?", UserWarning)
 
+    if out is not None:
+        if out.dtype != bool:
+            raise TypeError("out dtype must be bool")
+        in_place = False
+
     if in_place:
         out = ar
-    else:
-        out = ar.copy()
+    elif out is None:
+        out = ar.astype(bool, copy=True)
 
     # Creating the inverse of ar
-    if in_place:
-        np.logical_not(out, out=out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, in_place)
+    out = remove_small_objects(out, area_threshold, connectivity,
+                               in_place=True)
 
-    if in_place:
-        np.logical_not(out, out=out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(out, out=out)
 
     return out
