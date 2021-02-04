@@ -192,7 +192,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-    _clip_warp_output(image, out, order, mode, cval, clip, anti_aliasing)
+    _clip_warp_output(image, out, order, mode, cval, clip)
 
     return out
 
@@ -634,8 +634,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _clip_warp_output(input_image, output_image, order, mode, cval, clip,
-                      anti_aliasing=False):
+def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
     """Clip output image to range of values of input image.
 
     Note that this function modifies the values of `output_image` in-place
@@ -664,13 +663,9 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    anti_aliasing : bool, optional
-        Whether a Gaussian filter was applied to smooth `output_image` prior
-        to down-scaling. Default is False to prevent changes in functions
-        without anti_aliasing parameter.
 
     """
-    if clip and (order != 0 or anti_aliasing):
+    if clip:
         min_val = input_image.min()
         max_val = input_image.max()
 
