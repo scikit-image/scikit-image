@@ -17,7 +17,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
 
 
 def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
-                                      coef_vals, raveled_offsets):
+                                      coef_vals, raveled_offsets, limits):
     # Initialize sparse matrices
 
     # Find indexes of masked points in flatten array
@@ -82,8 +82,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                     data_known[ch].append(vals_known[ch])
         else:
             # All voxels in kernel footprint are within bounds.
-            neigh_coef = neigh_coef_full
-
             mask_offsets = mask_i[mask_pt_n] + raveled_offsets
             in_mask = mask.ravel()[mask_offsets]
             c_unknown = coef_vals[in_mask]
@@ -120,10 +118,8 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
         result = spsolve(matrix_unknown, rhs)
 
-        # Handle enormous values
-        known_points= image[..., ch][~mask]
-        limits = (np.min(known_points), np.max(known_points))
-        result = np.clip(result, *limits)
+        # Handle enormous values on a per-channel basis
+        result = np.clip(result, *limits[ch])
 
         out[..., ch][mask_pts] = result.ravel()
 
@@ -215,16 +211,23 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
                             for ax_off, ax_stride in zip(offsets, ostrides))
     raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
+    # determine per-channel intensity limits
+    limits = []
+    for ch in range(out.shape[-1]):
+        known_points= image[..., ch][~mask]
+        limits.append((np.min(known_points), np.max(known_points)))
+
     if split_into_regions:
         for idx_region in range(1, num_labels + 1):
             mask_region = mask_labeled == idx_region
             _inpaint_biharmonic_single_region(
                 image, mask_region, out, neigh_coef_full, coef_vals,
-                raveled_offsets
+                raveled_offsets, limits
             )
     else:
         _inpaint_biharmonic_single_region(
-            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
+            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets,
+            limits
         )
 
     if not multichannel:
