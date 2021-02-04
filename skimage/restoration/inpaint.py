@@ -7,7 +7,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
-from ..measure import label
+from ..measure import label, regionprops_table
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -47,7 +47,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     )
 
     # Iterate over masked points
-    mask_flat = mask.flatten()
+    mask_flat = mask.ravel()
     out_flat = np.ascontiguousarray(out.reshape((-1, nchannels)).T)
     for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
         if out_of_bounds[mask_pt_n]:
@@ -182,10 +182,25 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
     if split_into_regions:
         # Split inpainting mask into independent regions
+        mask = mask.astype(bool, copy=False)
         kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
         mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
         mask_labeled, num_labels = label(mask_dilated, return_num=True)
         mask_labeled *= mask
+
+        # create slices for cropping to each labeled region
+        props = regionprops_table(mask_labeled)
+        ndim = len(img_baseshape)
+        def _get_ax_slices(axis, ndim, size, radius=2):
+            return [
+                slice(max(ax_start - radius, 0), min(ax_end + radius, size))
+                for ax_start, ax_end
+                in zip(props[f'bbox-{axis}'], props[f'bbox-{axis + ndim}'])
+            ]
+        bbox_slices = list(
+            zip(*[_get_ax_slices(ax, ndim, img_baseshape[ax])
+                  for ax in range(ndim)])
+        )
     else:
         num_labels = 1
 
@@ -203,13 +218,10 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     channel_stride = np.min(out[..., 0].strides)
     ostrides = tuple(s // channel_stride for s in out[..., 0].strides)
 
-    # offsets to all neighboring elements in neigh_coeff_full footprint
+    # offsets to all neighboring non-zero elements in the footprint
     idx_coef = np.where(neigh_coef_full)
     coef_vals = neigh_coef_full[idx_coef]
     offsets = tuple(c - radius for c in idx_coef)
-    raveled_offsets = tuple(ax_off * ax_stride
-                            for ax_off, ax_stride in zip(offsets, ostrides))
-    raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
     # determine per-channel intensity limits
     limits = []
@@ -219,12 +231,37 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
     if split_into_regions:
         for idx_region in range(1, num_labels + 1):
-            mask_region = mask_labeled == idx_region
-            _inpaint_biharmonic_single_region(
-                image, mask_region, out, neigh_coef_full, coef_vals,
-                raveled_offsets, limits
+
+            # extract only the region surrounding the label of interest
+            roi_sl = bbox_slices[idx_region - 1]
+            mask_region = mask_labeled[roi_sl] == idx_region
+            # add slice for axes
+            roi_sl =  tuple(list(roi_sl) + [slice(None,)])
+            # copy because otmp must be C contiguous
+            otmp = out[roi_sl].copy()
+
+            # compute raveled offsets for the ROI
+            ostrides = tuple(s // channel_stride for s in otmp[..., 0].strides)
+            raveled_offsets = tuple(
+                ax_off * ax_stride
+                for ax_off, ax_stride in zip(offsets, ostrides)
             )
+            raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+
+            _inpaint_biharmonic_single_region(
+                image[roi_sl], mask_region, otmp,
+                neigh_coef_full, coef_vals, raveled_offsets, limits
+            )
+            # assign output to the
+            out[roi_sl] = otmp
     else:
+        # compute raveled offsets for output image
+        raveled_offsets = tuple(
+            ax_off * ax_stride
+            for ax_off, ax_stride in zip(offsets, ostrides)
+        )
+        raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+
         _inpaint_biharmonic_single_region(
             image, mask, out, neigh_coef_full, coef_vals, raveled_offsets,
             limits
