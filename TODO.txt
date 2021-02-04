@@ -71,7 +71,8 @@ Version 1.0
 
 * consider removing the argument `coordinates` in
   `skimage.segmentation.active_contour`, which has not effect.
-
+* In ``skimage/morphology/_clear_border.py`` remove the deprecated parameter
+  in clear_border() ``in_place`` and update the tests.
 
 Other (2021)
 ------------
