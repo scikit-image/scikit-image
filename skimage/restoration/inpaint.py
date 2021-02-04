@@ -130,7 +130,8 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     return out
 
 
-def inpaint_biharmonic(image, mask, multichannel=False):
+def inpaint_biharmonic(image, mask, multichannel=False, *,
+                       split_into_regions=False):
     """Inpaint masked points in image with biharmonic equations.
 
     Parameters
@@ -183,11 +184,14 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     image = skimage.img_as_float(image)
     mask = mask.astype(bool)
 
-    # Split inpainting mask into independent regions
-    kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-    mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
-    mask_labeled, num_labels = label(mask_dilated, return_num=True)
-    mask_labeled *= mask
+    if split_into_regions:
+        # Split inpainting mask into independent regions
+        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
+        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+        mask_labeled, num_labels = label(mask_dilated, return_num=True)
+        mask_labeled *= mask
+    else:
+        num_labels = 1
 
     if not multichannel:
         image = image[..., np.newaxis]
@@ -211,11 +215,16 @@ def inpaint_biharmonic(image, mask, multichannel=False):
                             for ax_off, ax_stride in zip(offsets, ostrides))
     raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
-    for idx_region in range(1, num_labels + 1):
-        mask_region = mask_labeled == idx_region
+    if split_into_regions:
+        for idx_region in range(1, num_labels + 1):
+            mask_region = mask_labeled == idx_region
+            _inpaint_biharmonic_single_region(
+                image, mask_region, out, neigh_coef_full, coef_vals,
+                raveled_offsets
+            )
+    else:
         _inpaint_biharmonic_single_region(
-            image, mask_region, out, neigh_coef_full, coef_vals,
-            raveled_offsets
+            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
         )
 
     if not multichannel:
