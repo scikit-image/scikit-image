@@ -107,7 +107,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                          "dimensions")
 
     if anti_aliasing is None:
-        anti_aliasing = not input_type == bool
+        anti_aliasing = (not input_type == bool and
+                         np.any(output_shape < input_shape))
 
     if input_type == bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution is not defined "
