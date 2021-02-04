@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.morphology import remove_small_objects, remove_small_holes
 
 from skimage._shared import testing
@@ -33,6 +34,16 @@ def test_in_place():
         observed = remove_small_objects(image, min_size=6, in_place=True)
     assert_equal(observed is image, True,
                  "remove_small_objects in_place argument failed.")
+
+
+@pytest.mark.parametrize("in_dtype", [bool, int, np.int32])
+@pytest.mark.parametrize("out_dtype", [bool, int, np.int32])
+def test_out(in_dtype, out_dtype):
+    image = test_image.astype(in_dtype, copy=True)
+    expected_out = np.empty_like(test_image, dtype=out_dtype)
+    out = remove_small_objects(image, min_size=6, out=expected_out)
+
+    assert out is expected_out
 
 
 def test_labeled_image():
