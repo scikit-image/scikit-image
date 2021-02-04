@@ -192,7 +192,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.map_coordinates(img_in, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-    _clip_warp_output(image, out, order, mode, cval, clip)
+    _clip_warp_output(image, out, mode, cval, clip)
 
     return out
 
@@ -634,12 +634,11 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
+def _clip_warp_output(input_image, output_image, mode, cval, clip):
     """Clip output image to range of values of input image.
 
     Note that this function modifies the values of `output_image` in-place
-    and it is only modified if ``clip=True`` and either the spline
-    interpolation `order` > 0 or `anti_aliasing` is True.
+    and it is only modified if ``clip=True``.
 
     Parameters
     ----------
@@ -650,9 +649,6 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
 
     Other parameters
     ----------------
-    order : int
-        The order of the spline interpolation, default is 1. The order has to
-        be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
@@ -927,7 +923,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
                                      mode=ndi_mode, order=order, cval=cval)
 
-    _clip_warp_output(image, warped, order, mode, cval, clip)
+    _clip_warp_output(image, warped, mode, cval, clip)
 
     return warped
 
