@@ -47,11 +47,13 @@ def test_descs_shape():
     assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
 
 
-def test_daisy_sigmas_and_radii():
-    img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_daisy_sigmas_and_radii(dtype):
+    img = data.astronaut()[:64, :64].mean(axis=2).astype(dtype, copy=False)
     sigmas = [1, 2, 3]
     radii = [1, 2]
-    daisy(img, sigmas=sigmas, ring_radii=radii)
+    descs = daisy(img, sigmas=sigmas, ring_radii=radii)
+    assert descs.dtype == img.dtype
 
 
 def test_daisy_incompatible_sigmas_and_radii():
