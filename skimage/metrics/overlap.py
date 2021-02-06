@@ -8,7 +8,7 @@ class Rectangle():
     
     def __init__(self, topLeft, bottomRight=None, size=None):
         """
-        Construct a rectangle using the (r,c) coordinates for the top left corner, the coordinates of the botton right corner or the size (height, width).
+        Construct a rectangle using the (r,c) coordinates for the top left corner, and either the coordinates of the botton right corner or the rectangle dimensions (height, width).
 
         Parameters
         ----------
@@ -22,7 +22,7 @@ class Rectangle():
         Raises
         ------
         ValueError
-            DESCRIPTION.
+            If none or both of bottomRight and size are provided.
 
         Returns
         -------
