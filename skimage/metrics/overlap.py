@@ -52,6 +52,14 @@ class Rectangle():
                                 self.c + self.width -1)
         
         self.area = self.height * self.width
+    
+    
+    def __eq__(self, rectangle2):
+        """Return true if 2 rectangles have the same position and dimension."""
+        if self.topLeft == rectangle2.topLeft and self.bottomRight == rectangle2.bottomRight:
+            return True
+        else:
+            return False
         
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
@@ -169,7 +177,4 @@ if __name__ == "__main__":
     assert isRectangleIntersecting(rectangle1, rectangle3) == True
     
     # Intersection rectangle
-    #assert intersection_rectangles(rectangle1, rectangle3) == Rectangle((0,0), bottomRight=(1,2))
-    # line above actually correct but have to implement the comparison in the class
-    assert intersection_rectangles(rectangle1, rectangle3).topLeft == (0,0)
-    assert intersection_rectangles(rectangle1, rectangle3).bottomRight == (1,2)
+    assert intersection_rectangles(rectangle1, rectangle3) == Rectangle((0,0), bottomRight=(1,2))
