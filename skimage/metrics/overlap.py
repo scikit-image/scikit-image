@@ -29,6 +29,7 @@ class Rectangle():
         Rectangle object.
 
         """
+        self.topLeft =topLeft
         self.r = topLeft[0]
         self.c = topLeft[1]
         
