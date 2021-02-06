@@ -143,12 +143,33 @@ def intersection_over_union_rectangles(rectangle1, rectangle2):
 
 
 if __name__ == "__main__":
+    
     height1, width1 = 2,4
+    rectangle1 = Rectangle((0, 0), size=(height1, width1)) # bottom right in (1,3) thus
+    
     height2 = width2 = 3
-    rectangle1 = Rectangle((0, 0), size=(height1, width1))
     rectangle2 = Rectangle((1, 3), size=(height2, width2))
     
+    rectangle3 = Rectangle((0,0), bottomRight=(2,2))
+    
+    rectangle4 = Rectangle((10,10), size=(5,5))
+    
+    
+    # Check area
     assert rectangle1.area == height1 * width1
     assert rectangle2.area == height2 * width2
+    assert rectangle3.area == 3*3
     
-    #assert intersection_rectangles(rectangle1, rectangle2) == ((1,3), (2,4))
+    # Check other dimension (the one not set in constructor)
+    assert rectangle1.bottomRight == (1,3)
+    assert (rectangle3.height, rectangle3.width) == (3,3)
+    
+    # Intersections
+    assert isRectangleIntersecting(rectangle1, rectangle2) == False
+    assert isRectangleIntersecting(rectangle1, rectangle3) == True
+    
+    # Intersection rectangle
+    #assert intersection_rectangles(rectangle1, rectangle3) == Rectangle((0,0), bottomRight=(1,2))
+    # line above actually correct but have to implement the comparison in the class
+    assert intersection_rectangles(rectangle1, rectangle3).topLeft == (0,0)
+    assert intersection_rectangles(rectangle1, rectangle3).bottomRight == (1,2)
