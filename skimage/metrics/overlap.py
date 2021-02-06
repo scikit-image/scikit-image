@@ -177,4 +177,13 @@ if __name__ == "__main__":
     assert isRectangleIntersecting(rectangle1, rectangle3) == True
     
     # Intersection rectangle
-    assert intersection_rectangles(rectangle1, rectangle3) == Rectangle((0,0), bottomRight=(1,2))
+    inter13 = intersection_rectangles(rectangle1, rectangle3)
+    assert  inter13 == Rectangle((0,0), bottomRight=(1,2))
+    #intersection_rectangles(rectangle1, rectangle2) # should raise an issue
+    
+    # Union area
+    union_area13 = union_area_rectangles(rectangle1, rectangle3)
+    assert union_area13 == (rectangle1.area + rectangle3.area - inter13.area)
+    
+    # IoU
+    assert intersection_over_union_rectangles(rectangle1, rectangle3) == inter13.area/union_area13
