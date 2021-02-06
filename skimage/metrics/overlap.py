@@ -34,10 +34,10 @@ class Rectangle():
         self.c = topLeft[1]
         
         if (bottomRight is None) and (size is None):
-            raise ValueError("One of bottomRight or size argument should be defined.")
+            raise ValueError("One of bottomRight or size argument should be provided.")
             
         elif (bottomRight is not None) and (size is not None):
-            raise ValueError("Either specify the bottomRight or size.")
+            raise ValueError("Either specify the bottomRight or size, not both.")
         
         elif bottomRight is not None:
             self.bottomRight = bottomRight
@@ -86,10 +86,10 @@ def intersection_rectangles(rectangle1, rectangle2):
     
     Parameters
     ----------
-    rectangle1 : tuple of 4 integers
-    
-    rectangle2 : TYPE
-        DESCRIPTION.
+    rectangle1 : a Rectangle object
+        First rectangle.
+    rectangle2 : a second Rectangle object
+        Second rectangle
 
     Returns
     -------
