@@ -7,13 +7,20 @@ for instance rectangles representing detections by bounding-boxes.
 class Rectangle():
     """
     Represents rectangles which position corresponds to the (r,c) coordinates for the top left corner.
-    Rectangle objects have a number of attributes such as the coordinates for the bottom right corner, rectangle dimensions or area.
-    Utility functions to compute the intersection of 2 rectangles, or the equivalent area for te union of 2 rectangles are also provided.
+    Rectangle objects have a number of attributes:
+        - coordinates for the bottom right corner
+        - rectangle dimensions
+        - area
+    as well as utility functions :
+        - computation of the intersection of 2 rectangles
+        - equivalent area for te union of 2 rectangles.
     """
 
     def __init__(self, top_left, bottom_right=None, size=None):
         """
-        Construct a rectangle using the (r,c) coordinates for the top left corner, and either the coordinates of the botton right corner or the rectangle dimensions (height, width).
+        Construct a rectangle using the (r,c) coordinates for the top left corner,
+        and either the coordinates of the botton right corner
+        or the rectangle size (height, width).
 
         Parameters
         ----------
@@ -75,7 +82,8 @@ class Rectangle():
         """
         Check if 2 rectangles are intersecting.
 
-        Adapted from post from Aman Gupta at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
+        Adapted from post from Aman Gupta
+        at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
 
         Parameters
         ----------
@@ -89,11 +97,13 @@ class Rectangle():
         True if the rectangles are intersecting.
         """
         # If one rectangle is on left side of other
-        if rectangle1.top_left[1] >= rectangle2.bottom_right[1] or rectangle2.top_left[1] >= rectangle1.bottom_right[1]:
+        if (rectangle1.top_left[1] >= rectangle2.bottom_right[1] or
+            rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
             return False
 
         # If one rectangle is above other
-        if rectangle1.top_left[0] >= rectangle2.bottom_right[0] or rectangle2.top_left[0] >= rectangle1.bottom_right[0]:
+        if (rectangle1.top_left[0] >= rectangle2.bottom_right[0] or
+            rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
             return False
 
         return True
@@ -114,16 +124,18 @@ class Rectangle():
         ------
         ValueError
             If the rectangles are not intersecting.
-            The function is_intersecting can be called to first test if the rectangles are intersecting.
+            Use is_intersecting to first test if the rectangles are intersecting.
 
         Returns
         -------
         Rectangle object representing the intersection.
         """
         if not Rectangle.is_intersecting(rectangle1, rectangle2):
-            raise ValueError("The rectangles are not intersecting. Use is_intersecting to first test if the rectangles are intersecting.")
+            raise ValueError("""The rectangles are not intersecting.
+                             Use is_intersecting to first test if the rectangles are intersecting.""")
 
-        # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
+        # determine the (r, c)-coordinates of the top left and bottom right corners
+        # for the intersection rectangle
         r = max(rectangle1.r, rectangle2.r)
         c = max(rectangle1.c, rectangle2.c)
         bottom_right_r = min(rectangle1.bottom_right[0], rectangle2.bottom_right[0])
