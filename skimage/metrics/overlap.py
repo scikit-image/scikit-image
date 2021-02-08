@@ -40,10 +40,10 @@ class Rectangle():
         if (bottomRight is None) and (size is None):
             raise ValueError("One of bottomRight or size argument should be provided.")
 
-        elif (bottomRight is not None) and (size is not None):
+        if (bottomRight is not None) and (size is not None):
             raise ValueError("Either specify the bottomRight or size, not both.")
 
-        elif bottomRight is not None:
+        if bottomRight is not None:
             self.bottomRight = bottomRight
             self.height = self.bottomRight[0] - self.topLeft[0] +1
             self.width  = self.bottomRight[1] - self.topLeft[1] +1
@@ -64,10 +64,10 @@ class Rectangle():
         if not isinstance(rectangle2, Rectangle):
             return False
 
-        elif self.topLeft == rectangle2.topLeft and self.bottomRight == rectangle2.bottomRight:
+        if self.topLeft == rectangle2.topLeft and self.bottomRight == rectangle2.bottomRight:
             return True
-        else:
-            return False
+
+        return False
 
 def isRectangleIntersecting(rectangle1, rectangle2):
     """
