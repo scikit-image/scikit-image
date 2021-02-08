@@ -56,7 +56,11 @@ class Rectangle():
     
     def __eq__(self, rectangle2):
         """Return true if 2 rectangles have the same position and dimension."""
-        if self.topLeft == rectangle2.topLeft and self.bottomRight == rectangle2.bottomRight:
+        
+        if not isinstance(rectangle2, Rectangle): 
+            return False
+        
+        elif self.topLeft == rectangle2.topLeft and self.bottomRight == rectangle2.bottomRight:
             return True
         else:
             return False
@@ -179,6 +183,7 @@ if __name__ == "__main__":
     # Intersection rectangle
     inter13 = intersection_rectangles(rectangle1, rectangle3)
     assert  inter13 == Rectangle((0,0), bottomRight=(1,2))
+    assert rect_inter13 != 5
     #intersection_rectangles(rectangle1, rectangle2) # should raise an issue
     
     # Union area
