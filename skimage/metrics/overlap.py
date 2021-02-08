@@ -69,7 +69,8 @@ class Rectangle():
 
         return False
 
-    def isRectangleIntersecting(rectangle1, rectangle2):
+    @staticmethod
+    def isIntersecting(rectangle1, rectangle2):
         """
         Check if 2 rectangles are intersecting.
 
@@ -96,6 +97,7 @@ class Rectangle():
 
         return True
 
+    @staticmethod
     def intersection_rectangles(rectangle1, rectangle2):
         """
         Return a Rectangle corresponding to the intersection between 2 rectangles.
@@ -111,14 +113,14 @@ class Rectangle():
         ------
         ValueError
             If the rectangles are not intersecting.
-            The function isRectangleIntersecting can be called to first test if the rectangles are intersecting.
+            The function isIntersecting can be called to first test if the rectangles are intersecting.
 
         Returns
         -------
         Rectangle object representing the intersection.
         """
-        if not isRectangleIntersecting(rectangle1, rectangle2):
-            raise ValueError("The rectangles are not intersecting. Use isRectangleIntersecting to first test if the rectangles are intersecting.")
+        if not Rectangle.isIntersecting(rectangle1, rectangle2):
+            raise ValueError("The rectangles are not intersecting. Use isIntersecting to first test if the rectangles are intersecting.")
 
         # determine the (x, y)-coordinates of the top left and bottom right points of the intersection rectangle
         r = max(rectangle1.r, rectangle2.r)
@@ -128,7 +130,8 @@ class Rectangle():
 
         return Rectangle((r,c), (bottomRight_r, bottomRight_c))
 
-    def intersection_area_rectangles(rectangle1, rectangle2):
+    @staticmethod
+    def intersection_area(rectangle1, rectangle2):
         """
         Return the intersection area between 2 rectangles.
 
@@ -142,25 +145,27 @@ class Rectangle():
         Intersection, float
             a float value corresponding to the intersection area.
         """
-        if not isRectangleIntersecting(rectangle1, rectangle2):
+        if not Rectangle.isIntersecting(rectangle1, rectangle2):
             return 0
 
         # Compute area of the intersecting box
-        return intersection_rectangles(rectangle1, rectangle2).area
+        return Rectangle.intersection_rectangles(rectangle1, rectangle2).area
 
-    def union_area_rectangles(rectangle1, rectangle2):
+    @staticmethod
+    def union_area(rectangle1, rectangle2):
         """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
         return (  rectangle1.area
                 + rectangle2.area
-                - intersection_area_rectangles(rectangle1 , rectangle2) )
+                - Rectangle.intersection_area(rectangle1 , rectangle2) )
 
-    def intersection_over_union_rectangles(rectangle1, rectangle2):
+    @staticmethod
+    def intersection_over_union(rectangle1, rectangle2):
         """
         Compute the ratio intersection aera over union area for a pair of rectangle.
 
         The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
         """
-        return intersection_area_rectangles(rectangle1, rectangle2) / union_area_rectangles(rectangle1, rectangle2)
+        return Rectangle.intersection_area(rectangle1, rectangle2) / Rectangle.union_area(rectangle1, rectangle2)
 
 
 if __name__ == "__main__":
@@ -186,18 +191,18 @@ if __name__ == "__main__":
     assert (rectangle3.height, rectangle3.width) == (3,3)
 
     # Intersections
-    assert isRectangleIntersecting(rectangle1, rectangle2) == False
-    assert isRectangleIntersecting(rectangle1, rectangle3) == True
+    assert Rectangle.isIntersecting(rectangle1, rectangle2) == False
+    assert Rectangle.isIntersecting(rectangle1, rectangle3) == True
 
     # Intersection rectangle and == comparison
-    rect_inter13 = intersection_rectangles(rectangle1, rectangle3)
+    rect_inter13 = Rectangle.intersection_rectangles(rectangle1, rectangle3)
     assert  rect_inter13 == Rectangle((0,0), bottomRight=(1,2))
     assert rect_inter13 != 5
     #intersection_rectangles(rectangle1, rectangle2) # should raise an issue
 
     # Union area
-    union_area13 = union_area_rectangles(rectangle1, rectangle3)
+    union_area13 = Rectangle.union_area(rectangle1, rectangle3)
     assert union_area13 == (rectangle1.area + rectangle3.area - rect_inter13.area)
 
     # IoU
-    assert intersection_over_union_rectangles(rectangle1, rectangle3) == rect_inter13.area/union_area13
+    assert Rectangle.intersection_over_union(rectangle1, rectangle3) == rect_inter13.area/union_area13
