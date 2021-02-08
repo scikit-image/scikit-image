@@ -180,15 +180,15 @@ if __name__ == "__main__":
     assert isRectangleIntersecting(rectangle1, rectangle2) == False
     assert isRectangleIntersecting(rectangle1, rectangle3) == True
     
-    # Intersection rectangle
-    inter13 = intersection_rectangles(rectangle1, rectangle3)
-    assert  inter13 == Rectangle((0,0), bottomRight=(1,2))
+    # Intersection rectangle and == comparison
+    rect_inter13 = intersection_rectangles(rectangle1, rectangle3)
+    assert  rect_inter13 == Rectangle((0,0), bottomRight=(1,2))
     assert rect_inter13 != 5
     #intersection_rectangles(rectangle1, rectangle2) # should raise an issue
     
     # Union area
     union_area13 = union_area_rectangles(rectangle1, rectangle3)
-    assert union_area13 == (rectangle1.area + rectangle3.area - inter13.area)
+    assert union_area13 == (rectangle1.area + rectangle3.area - rect_inter13.area)
     
     # IoU
-    assert intersection_over_union_rectangles(rectangle1, rectangle3) == inter13.area/union_area13
+    assert intersection_over_union_rectangles(rectangle1, rectangle3) == rect_inter13.area/union_area13
