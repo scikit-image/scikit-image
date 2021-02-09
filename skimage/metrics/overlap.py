@@ -158,7 +158,7 @@ class Rectangle():
         bottom_right_r = min(rectangle1.bottom_right[0], rectangle2.bottom_right[0])
         bottom_right_c = min(rectangle1.bottom_right[1], rectangle2.bottom_right[1])
 
-        return Rectangle((r, c), (bottom_right_r, bottom_right_c))
+        return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
 
     @staticmethod
     def intersection_area(rectangle1, rectangle2):
