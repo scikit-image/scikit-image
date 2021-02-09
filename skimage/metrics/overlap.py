@@ -68,7 +68,6 @@ class Rectangle():
 
     def __eq__(self, rectangle2):
         """Return true if 2 rectangles have the same position and dimension."""
-
         if not isinstance(rectangle2, Rectangle):
             return False
 
@@ -98,12 +97,12 @@ class Rectangle():
         """
         # If one rectangle is on left side of other
         if (rectangle1.top_left[1] >= rectangle2.bottom_right[1] or
-            rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
+           rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
             return False
 
         # If one rectangle is above other
         if (rectangle1.top_left[0] >= rectangle2.bottom_right[0] or
-            rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
+           rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
             return False
 
         return True
@@ -184,7 +183,7 @@ class Rectangle():
 if __name__ == "__main__":
 
     height1, width1 = 2, 4
-    rectangle1 = Rectangle((0, 0), size=(height1, width1)) # bottom right in (1,3) thus
+    rectangle1 = Rectangle((0, 0), size=(height1, width1))  # bottom right in (1,3) thus
 
     height2 = width2 = 3
     rectangle2 = Rectangle((1, 3), size=(height2, width2))
