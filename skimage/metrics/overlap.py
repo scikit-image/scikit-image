@@ -21,26 +21,6 @@ class Rectangle():
     dimensions : tuple of 2 ints, optional, default=None
         dimensions of the rectangle (height, width). The default is None.
 
-    Attributes
-    ----------
-    r : int
-        row coordinate for the top left corner of the rectangle.
-
-    c : int
-        column coordinate for the top left corner of the rectangle.
-
-    top_left : tuple of 2 ints
-        (r, c)-coordinates for the top left corner of the rectangle.
-
-    bottom_right : tuple of 2 ints
-        (r, c)-coordinates for the bottom right corner of the rectangle.
-
-    width: int
-        rectangle width in pixels.
-
-    height: int
-        rectangle height in pixels.
-
     Raises
     ------
     ValueError
