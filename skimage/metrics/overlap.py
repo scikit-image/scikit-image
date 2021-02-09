@@ -8,7 +8,7 @@ class Rectangle():
     """
     Construct a rectangle using the (r,c) coordinates for the top left corner,
     and either the coordinates of the botton right corner
-    or the rectangle size (height, width).
+    or the rectangle dimensions (height, width).
 
     Parameters
     ----------
@@ -18,8 +18,8 @@ class Rectangle():
     bottom_right : tuple of 2 ints, optional, default=None
         (r,c)-coordinates for the bottom right corner of the rectangle.
 
-    size : tuple of 2 ints, optional, default=None
-        Size of the rectangle (height, width). The default is None.
+    dimensions : tuple of 2 ints, optional, default=None
+        dimensions of the rectangle (height, width). The default is None.
 
     Attributes
     ----------
@@ -44,31 +44,31 @@ class Rectangle():
     Raises
     ------
     ValueError
-        If none or both of bottom_right and size are provided.
+        If none or both of bottom_right and dimensions are provided.
 
     Returns
     -------
     Rectangle object.
     """
 
-    def __init__(self, top_left, *, bottom_right=None, size=None):
+    def __init__(self, top_left, *, bottom_right=None, dimensions=None):
         self.top_left = top_left
         self.r = top_left[0]
         self.c = top_left[1]
 
-        if (bottom_right is None) and (size is None):
-            raise ValueError("One of bottom_right or size argument should be provided.")
+        if (bottom_right is None) and (dimensions is None):
+            raise ValueError("One of bottom_right or dimensions argument should be provided.")
 
-        if (bottom_right is not None) and (size is not None):
-            raise ValueError("Either specify the bottom_right or size, not both.")
+        if (bottom_right is not None) and (dimensions is not None):
+            raise ValueError("Either specify the bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
             self.bottom_right = bottom_right
             self.height = self.bottom_right[0] - self.top_left[0] + 1
             self.width  = self.bottom_right[1] - self.top_left[1] + 1
 
-        elif size is not None:
-            self.height, self.width = size
+        elif dimensions is not None:
+            self.height, self.width = dimensions
             self.bottom_right = (self.r + self.height - 1,
                                  self.c + self.width - 1)
 
@@ -86,8 +86,8 @@ class Rectangle():
         """Return the rectangle area in pixels."""
         return self.height * self.width
 
-    def get_size(self):
-        """Return the (height, width) size in pixels."""
+    def get_dimensions(self):
+        """Return the (height, width) dimensions in pixels."""
         return self.height, self.width
 
     @staticmethod
@@ -197,14 +197,14 @@ class Rectangle():
 if __name__ == "__main__":
 
     height1, width1 = 2, 4
-    rectangle1 = Rectangle((0, 0), size=(height1, width1))  # bottom right in (1,3) thus
+    rectangle1 = Rectangle((0, 0), dimensions=(height1, width1))  # bottom right in (1,3) thus
 
     height2 = width2 = 3
-    rectangle2 = Rectangle((1, 3), size=(height2, width2))
+    rectangle2 = Rectangle((1, 3), dimensions=(height2, width2))
 
     rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
 
-    rectangle4 = Rectangle((10, 10), size=(5, 5))
+    rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
 
 
     # Check area
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
     # Check other dimension (the one not set in constructor)
     assert rectangle1.bottom_right == (1, 3)
-    assert rectangle3.get_size() == (3, 3)
+    assert rectangle3.get_dimensions() == (3, 3)
 
     # Intersections
     assert not Rectangle.is_intersecting(rectangle1, rectangle2)
