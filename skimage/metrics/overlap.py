@@ -6,41 +6,59 @@ for instance rectangles representing detections by bounding-boxes.
 
 class Rectangle():
     """
-    Represents rectangles which position corresponds to the (r,c) coordinates for the top left corner.
-    Rectangle objects have a number of attributes:
-        - coordinates for the bottom right corner
-        - rectangle dimensions
-        - area
-    as well as utility functions :
-        - computation of the intersection of 2 rectangles
-        - equivalent area for te union of 2 rectangles.
+    Construct a rectangle using the (r,c) coordinates for the top left corner,
+    and either the coordinates of the botton right corner
+    or the rectangle size (height, width).
+
+    Parameters
+    ----------
+    top_left : tuple of 2 ints
+        (r,c)-coordinates for the top left corner of the rectangle.
+
+    bottom_right : tuple of 2 ints, optional, default=None
+        (r,c)-coordinates for the bottom right corner of the rectangle.
+
+    size : tuple of 2 ints, optional, default=None
+        Size of the rectangle (height, width). The default is None.
+
+    Attributes
+    ----------
+    r : int
+        row coordinate for the top left corner of the rectangle.
+
+    c : int
+        column coordinate for the top left corner of the rectangle.
+
+    top_left : tuple of 2 ints
+        (r, c)-coordinates for the top left corner of the rectangle.
+
+    bottom_right : tuple of 2 ints
+        (r, c)-coordinates for the bottom right corner of the rectangle.
+
+    width: int
+        rectangle width in pixels.
+
+    height: int
+        rectangle height in pixels.
+
+    area: int
+        rectangle area in pixels.
+
+    size: tuple of 2 ints
+        rectangle dimensions (height, width).
+
+
+    Raises
+    ------
+    ValueError
+        If none or both of bottom_right and size are provided.
+
+    Returns
+    -------
+    Rectangle object.
     """
 
     def __init__(self, top_left, *, bottom_right=None, size=None):
-        """
-        Construct a rectangle using the (r,c) coordinates for the top left corner,
-        and either the coordinates of the botton right corner
-        or the rectangle size (height, width).
-
-        Parameters
-        ----------
-        top_left : tuple of 2 ints
-            (r,c)-coordinates for the top left corner of the rectangle.
-        bottom_right : tuple of 2 ints, optional
-            (r,c)-coordinates for the bottom right corner of the rectangle. The default is None.
-        size : tuple of 2 ints, optional
-            Size of the rectangle (height, width). The default is None.
-
-        Raises
-        ------
-        ValueError
-            If none or both of bottom_right and size are provided.
-
-        Returns
-        -------
-        Rectangle object.
-
-        """
         self.top_left = top_left
         self.r = top_left[0]
         self.c = top_left[1]
