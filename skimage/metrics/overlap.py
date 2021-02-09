@@ -65,7 +65,7 @@ class Rectangle():
         if bottom_right is not None:
             self.bottom_right = bottom_right
             self.height = self.bottom_right[0] - self.top_left[0] + 1
-            self.width = self.bottom_right[1] - self.top_left[1] + 1
+            self.width  = self.bottom_right[1] - self.top_left[1] + 1
 
         elif size is not None:
             self.height, self.width = size
