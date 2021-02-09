@@ -52,9 +52,9 @@ class Rectangle():
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
-        self.top_left = top_left
-        self.r = top_left[0]
-        self.c = top_left[1]
+        self._top_left = top_left
+        self._r = top_left[0]
+        self._c = top_left[1]
 
         if (bottom_right is None) and (dimensions is None):
             raise ValueError("One of bottom_right or dimensions argument should be provided.")
@@ -63,32 +63,42 @@ class Rectangle():
             raise ValueError("Either specify the bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
-            self.bottom_right = bottom_right
-            self.height = self.bottom_right[0] - self.top_left[0] + 1
-            self.width  = self.bottom_right[1] - self.top_left[1] + 1
+            self._bottom_right = bottom_right
+            self._height = self._bottom_right[0] - self._top_left[0] + 1
+            self._width  = self._bottom_right[1] - self._top_left[1] + 1
 
         elif dimensions is not None:
-            self.height, self.width = dimensions
-            self.bottom_right = (self.r + self.height - 1,
-                                 self.c + self.width - 1)
+            self._height, self._width = dimensions
+            self._bottom_right = (self._r + self._height - 1,
+                                 self._c + self._width - 1)
 
     def __eq__(self, rectangle2):
         """Return true if 2 rectangles have the same position and dimension."""
         if not isinstance(rectangle2, Rectangle):
             return False
 
-        if self.top_left == rectangle2.top_left and self.bottom_right == rectangle2.bottom_right:
+        if (self._top_left == rectangle2._top_left and
+           self._bottom_right == rectangle2._bottom_right):
             return True
 
         return False
 
+    def get_top_left(self):
+        """Returns the (r,c)-coordinates for the top left corner."""
+        return self._top_left
+
+    def get_bottom_right(self):
+        """Returns the (r,c)-coordinates for the bottom right corner."""
+        return self._bottom_right
+
     def get_area(self):
         """Return the rectangle area in pixels."""
-        return self.height * self.width
+        return self._height * self._width
 
     def get_dimensions(self):
         """Return the (height, width) dimensions in pixels."""
-        return self.height, self.width
+        return self._height, self._width
+
 
     @staticmethod
     def is_intersecting(rectangle1, rectangle2):
@@ -110,13 +120,13 @@ class Rectangle():
         True if the rectangles are intersecting.
         """
         # If one rectangle is on left side of other
-        if (rectangle1.top_left[1] >= rectangle2.bottom_right[1] or
-           rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
+        if (rectangle1._top_left[1] >= rectangle2._bottom_right[1] or
+           rectangle2._top_left[1] >= rectangle1._bottom_right[1]):
             return False
 
         # If one rectangle is above other
-        if (rectangle1.top_left[0] >= rectangle2.bottom_right[0] or
-           rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
+        if (rectangle1._top_left[0] >= rectangle2._bottom_right[0] or
+           rectangle2._top_left[0] >= rectangle1._bottom_right[0]):
             return False
 
         return True
@@ -149,10 +159,10 @@ class Rectangle():
 
         # determine the (r, c)-coordinates of the top left and bottom right corners
         # for the intersection rectangle
-        r = max(rectangle1.r, rectangle2.r)
-        c = max(rectangle1.c, rectangle2.c)
-        bottom_right_r = min(rectangle1.bottom_right[0], rectangle2.bottom_right[0])
-        bottom_right_c = min(rectangle1.bottom_right[1], rectangle2.bottom_right[1])
+        r = max(rectangle1._r, rectangle2._r)
+        c = max(rectangle1._c, rectangle2._c)
+        bottom_right_r = min(rectangle1._bottom_right[0], rectangle2._bottom_right[0])
+        bottom_right_c = min(rectangle1._bottom_right[1], rectangle2._bottom_right[1])
 
         return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
 
@@ -213,7 +223,7 @@ if __name__ == "__main__":
     assert rectangle3.get_area() == 3*3
 
     # Check other dimension (the one not set in constructor)
-    assert rectangle1.bottom_right == (1, 3)
+    assert rectangle1.get_bottom_right() == (1, 3)
     assert rectangle3.get_dimensions() == (3, 3)
 
     # Intersections
