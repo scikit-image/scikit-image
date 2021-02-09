@@ -16,7 +16,7 @@ class Rectangle():
         - equivalent area for te union of 2 rectangles.
     """
 
-    def __init__(self, top_left, bottom_right=None, size=None):
+    def __init__(self, top_left, *, bottom_right=None, size=None):
         """
         Construct a rectangle using the (r,c) coordinates for the top left corner,
         and either the coordinates of the botton right corner
