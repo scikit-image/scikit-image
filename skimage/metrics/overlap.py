@@ -53,15 +53,15 @@ class Rectangle():
 
         if bottom_right is not None:
             self.bottom_right = bottom_right
-            self.height = self.bottom_right[0] - self.top_left[0] +1
-            self.width = self.bottom_right[1] - self.top_left[1] +1
+            self.height = self.bottom_right[0] - self.top_left[0] + 1
+            self.width = self.bottom_right[1] - self.top_left[1] + 1
             self.size = (self.height, self.width)
 
         elif size is not None:
             self.height, self.width = size
             self.size = size
-            self.bottom_right = (self.r + self.height-1,
-                                 self.c + self.width -1)
+            self.bottom_right = (self.r + self.height - 1,
+                                 self.c + self.width - 1)
 
         self.area = self.height * self.width
 
