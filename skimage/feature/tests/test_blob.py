@@ -1,17 +1,20 @@
-import pytest
+import math
 
 import numpy as np
+import pytest
+from numpy.testing import assert_almost_equal
+
+from skimage._shared import testing
 from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
 from skimage.feature.blob import _blob_overlap
-import math
-from numpy.testing import assert_almost_equal
 
 
-def test_blob_dog():
+@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+def test_blob_dog(dtype):
     r2 = math.sqrt(2)
-    img = np.ones((512, 512))
+    img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 5)
     img[xs, ys] = 255
@@ -22,7 +25,12 @@ def test_blob_dog():
     xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    blobs = blob_dog(img, min_sigma=5, max_sigma=50)
+    threshold = 2.0
+    if img.dtype.kind != 'f':
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= img.ptp()
+
+    blobs = blob_dog(img, min_sigma=5, max_sigma=50, threshold=threshold)
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
@@ -43,7 +51,7 @@ def test_blob_dog():
     assert abs(radius(b) - 45) <= thresh
 
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100), dtype=dtype)
     assert blob_dog(img_empty).size == 0
 
     # Testing 3D
@@ -52,8 +60,13 @@ def test_blob_dog():
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
+    threshold = 0.1
+    if img.dtype.kind != 'f':
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= img.ptp()
+
     blobs = blob_dog(im3, min_sigma=3, max_sigma=10,
-                          sigma_ratio=1.2, threshold=0.1)
+                          sigma_ratio=1.2, threshold=threshold)
     b = blobs[0]
 
     assert b.shape == (4,)
@@ -69,11 +82,11 @@ def test_blob_dog():
     im3 = np.pad(im3, pad, mode='constant')
 
     blobs = blob_dog(
-        im3,
+        im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=0.1
+        threshold=threshold
     )
     b = blobs[0]
 
@@ -85,15 +98,11 @@ def test_blob_dog():
     assert abs(math.sqrt(3) * b[4] - r) < 1
     assert abs(math.sqrt(3) * b[5] - r) < 1
 
+
+def test_blob_dog_excl_border():
     # Testing exclude border
 
     # image where blob is 5 px from borders, radius 5
-    img = np.ones((512, 512))
-    xs, ys = disk((5, 5), 5)
-    img[xs, ys] = 255
-
-
-def test_blob_dog_excl_border():
     img = np.ones((512, 512))
     xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
@@ -118,9 +127,10 @@ def test_blob_dog_excl_border():
     assert blobs.shape[0] == 0, msg
 
 
-def test_blob_log():
+@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+def test_blob_log(dtype):
     r2 = math.sqrt(2)
-    img = np.ones((256, 256))
+    img = np.ones((256, 256), dtype=dtype)
 
     xs, ys = disk((200, 65), 5)
     img[xs, ys] = 255
@@ -134,7 +144,12 @@ def test_blob_log():
     xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
-    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
+    threshold = 1
+    if img.dtype.kind != 'f':
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= img.ptp()
+
+    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=threshold)
 
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
@@ -165,7 +180,7 @@ def test_blob_log():
         img,
         min_sigma=5,
         max_sigma=20,
-        threshold=1,
+        threshold=threshold,
         log_scale=True)
 
     b = s[0]
@@ -272,8 +287,9 @@ def test_blob_log_exclude_border():
     assert blobs.shape[0] == 0, msg
 
 
-def test_blob_doh():
-    img = np.ones((512, 512), dtype=np.uint8)
+@testing.parametrize('dtype', [np.uint8, np.float16, np.float32])
+def test_blob_doh(dtype):
+    img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 20)
     img[xs, ys] = 255
@@ -287,12 +303,20 @@ def test_blob_doh():
     xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
+    # Note: have to either scale up threshold or rescale the image to the range
+    #       [0, 1] internally.
+    threshold = 0.05
+    if img.dtype.kind == 'f':
+        # account for lack of internal scaling to [0, 1] by img_as_float
+        ptp = img.ptp()
+        threshold *= ptp ** 2
+
     blobs = blob_doh(
         img,
         min_sigma=1,
         max_sigma=60,
         num_sigma=10,
-        threshold=.05)
+        threshold=threshold)
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)
