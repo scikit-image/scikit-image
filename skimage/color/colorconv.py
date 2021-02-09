@@ -396,11 +396,14 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 # XYZ coordinates of the illuminants, scaled to [0, 1]. For each illuminant I
 # we have:
 #
-#   illuminant[I][0] corresponds to the XYZ coordinates for the 2 degree
+#   illuminant[I]['2'] corresponds to the XYZ coordinates for the 2 degree
 #   field of view.
 #
-#   illuminant[I][1] corresponds to the XYZ coordinates for the 10 degree
+#   illuminant[I]['10'] corresponds to the XYZ coordinates for the 10 degree
 #   field of view.
+#
+#   illuminant[I]['R'] corresponds to the XYZ coordinates for R illuminants
+#   in grDevices::convertColor
 #
 # The XYZ coordinates are calculated from [1], using the formula:
 #
@@ -436,9 +439,9 @@ def get_xyz_coords(illuminant, observer, dtype=float):
 
     Parameters
     ----------
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
     dtype: dtype, optional
         Output data type.
@@ -910,9 +913,9 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     ----------
     xyz : (..., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -976,9 +979,9 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     ----------
     lab : (..., 3) array_like
         The image in Lab format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -1040,9 +1043,9 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
     ----------
     rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -1080,9 +1083,9 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     ----------
     lab : (..., 3) array_like
         The image in Lab format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -1116,9 +1119,9 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     ----------
     xyz : (..., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
@@ -1201,9 +1204,9 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     ----------
     luv : (..., 3) array_like
         The image in CIE-Luv format. Final dimension denotes channels.
-    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10"}, optional
+    observer : {"2", "10", "R"}, optional
         The aperture angle of the observer.
 
     Returns
