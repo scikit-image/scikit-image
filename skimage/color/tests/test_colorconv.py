@@ -303,24 +303,20 @@ class TestColorconv(TestCase):
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
+    # Except additional observer 'R' matrices generated using
+    # R function grDevices::convertColor
     def test_xyz2lab(self):
         assert_array_almost_equal(xyz2lab(self.xyz_array),
                                   self.lab_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["d50", "d55", "d65", "d75"]:
-            for obs in ["2", "10"]:
+        for I in ["a", "b", "c", "d50", "d55", "d65", "d75", "e"]:
+            for obs in ["2", "10", "r"]:
                 fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab_array_I_obs,
                                           xyz2lab(self.xyz_array, I, obs),
                                           decimal=2)
-        for I in ["a", "e"]:
-            fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
-            lab_array_I_obs = np.load(fetch(fname))
-            assert_array_almost_equal(lab_array_I_obs,
-                                      xyz2lab(self.xyz_array, I, "2"),
-                                      decimal=2)
 
     def test_xyz2lab_dtype(self):
         img = self.xyz_array.astype('float64')
@@ -334,8 +330,8 @@ class TestColorconv(TestCase):
                                   self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["A", "B", "C", "d50", "d55", "d65", "d75", "E"]:
-            for obs in ["2", "10", "R"]:
+        for I in ["a", "b", "c", "d50", "d55", "d65", "d75", "e"]:
+            for obs in ["2", "10", "r"]:
                 fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
