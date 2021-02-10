@@ -1,11 +1,14 @@
 import numpy as np
 
+from .._shared import utils
 
 __all__ = ['montage']
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg()
 def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
-            padding_width=0, multichannel=False):
+            padding_width=0, multichannel=False, *, channel_axis=None):
     """Create a montage of several single- or multichannel images.
 
     Create a rectangular montage from an input array representing an ensemble
@@ -88,15 +91,16 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     # Since skimage.util is in the critical import path, we lazy import
     # exposure to improve import time
     from .. import exposure
-    if multichannel:
+
+    if channel_axis is not None:
         arr_in = np.asarray(arr_in)
     else:
         arr_in = np.asarray(arr_in)[..., np.newaxis]
 
     if arr_in.ndim != 4:
         raise ValueError('Input array has to be 3-dimensional for grayscale '
-                         'images, or 4-dimensional with `multichannel=True` '
-                         'for color images.')
+                         'images, or 4-dimensional with a `channel_axis` '
+                         'specified.')
 
     n_images, n_rows, n_cols, n_chan = arr_in.shape
 
@@ -136,7 +140,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
         idx_sc = idx_image % ntiles_col
         arr_out[slices_row[idx_sr], slices_col[idx_sc], :] = image
 
-    if multichannel:
+    if channel_axis is not None:
         return arr_out
     else:
         return arr_out[..., 0]
