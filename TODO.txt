@@ -72,8 +72,8 @@ Version 1.0
 * consider removing the argument `coordinates` in
   `skimage.segmentation.active_contour`, which has not effect.
 * In ``skimage/morphology/misc.py`` remove the deprecated parameter
-  in remove_small_holes() ``in_place`` and update the tests.
-
+  ``in_place`` in remove_small_holes() and remove_small_objects()
+  and update the tests.
 
 Other (2021)
 ------------

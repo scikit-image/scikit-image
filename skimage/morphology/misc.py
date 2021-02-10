@@ -48,7 +48,10 @@ def _check_dtype_supported(ar):
                         "Got %s." % ar.dtype)
 
 
-def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
+@remove_arg("in_place", changed_version="1.0",
+            help_msg="Please use out argument instead.")
+def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
+                         *, out=None):
     """Remove objects smaller than the specified size.
 
     Expects ar to be an array with labeled objects, and removes objects
@@ -68,7 +71,11 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         labelling if `ar` is bool.
     in_place : bool, optional (default: False)
         If ``True``, remove the objects in the input array itself.
-        Otherwise, make a copy.
+        Otherwise, make a copy. Deprecated since version 0.19. Please
+        use `out` instead.
+    out : ndarray
+        Array of the same shape as `ar`, into which the output is
+        placed. By default, a new array is created.
 
     Raises
     ------
@@ -98,7 +105,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> d = morphology.remove_small_objects(a, 6, in_place=True)
+    >>> d = morphology.remove_small_objects(a, 6, out=a)
     >>> d is a
     True
 
@@ -106,9 +113,12 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     # Raising type error if not int or bool
     _check_dtype_supported(ar)
 
+    if out is not None:
+        in_place = False
+
     if in_place:
         out = ar
-    else:
+    elif out is None:
         out = ar.copy()
 
     if min_size == 0:  # shortcut for efficiency
@@ -226,8 +236,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity,
-                               in_place=True)
+    out = remove_small_objects(out, area_threshold, connectivity, out=out)
 
     np.logical_not(out, out=out)
 
