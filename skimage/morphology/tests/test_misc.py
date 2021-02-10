@@ -131,9 +131,25 @@ def test_two_connectivity_holes():
 
 def test_in_place_holes():
     image = test_holes_image.copy()
-    observed = remove_small_holes(image, area_threshold=3, in_place=True)
+    with expected_warnings(["in_place argument is deprecated"]):
+        observed = remove_small_holes(image, area_threshold=3, in_place=True)
     assert_equal(observed is image, True,
                  "remove_small_holes in_place argument failed.")
+
+
+def test_out_remove_small_holes():
+    image = test_holes_image.copy()
+    expected_out = np.empty_like(image)
+    out = remove_small_holes(image, area_threshold=3, out=expected_out)
+
+    assert out is expected_out
+
+
+def test_non_bool_out():
+    image = test_holes_image.copy()
+    expected_out = np.empty_like(image, dtype=int)
+    with testing.raises(TypeError):
+        remove_small_holes(image, area_threshold=3, out=expected_out)
 
 
 def test_labeled_image_holes():
