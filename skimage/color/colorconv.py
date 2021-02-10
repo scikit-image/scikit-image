@@ -475,6 +475,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
     .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
     """
     illuminant = illuminant.upper()
+    observer = observer.upper()
     try:
         return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
