@@ -67,7 +67,7 @@ registry = {
     "color/tests/data/lab_array_e_r.npy": "ac05f17a83961b020ceccbdd46bddc86943d43e678dabcc898caf4a1e4be6165",
     "color/tests/data/luv_array_a_10.npy": "c8af67f9fd64a6e9c610ac0c12c5315a49ca229363f048e5d851409d4a3ae5b6",
     "color/tests/data/luv_array_a_2.npy": "eaf05dc61f4a70ece367d5e751a14d42b7c397c7b1c2df4cfecec9ddf26e1c1a",
-    "color/tests/data/luv_array_a_r.npy": "aa747032295a7cc2414c15868d13a78bc197b3a3e02a35d36b13eca757940074",
+    "color/tests/data/luv_array_a_r.npy": "2c0891add787ec757601f9c61ad14dd9621dd969af4e32753f2e64df437081b7",
     "color/tests/data/luv_array_b_10.npy": "eb163df12b28847584cc3da803fcd7d811f4b43c5061fcec6f0439eb3f7d18ad",
     "color/tests/data/luv_array_b_2.npy": "75b7320a90d171d98070bfa248632fb9ca648a5ba67db869e4971f0c1110793f",
     "color/tests/data/luv_array_b_r.npy": "0a74c41df369cbb5fc0a00c16d60dc6f946ebf144bc5e506545b0d160fa53dfa",
