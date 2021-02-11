@@ -1,7 +1,7 @@
 """
-=============================================
-Immunohistochemical staining color separation
-=============================================
+===============================================
+Separate colors in immunohistochemical staining
+===============================================
 
 Color deconvolution consists in the separation of features by their colors.
 
