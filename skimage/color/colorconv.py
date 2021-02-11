@@ -405,7 +405,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 #   illuminant[I]['R'] corresponds to the XYZ coordinates for R illuminants
 #   in grDevices::convertColor
 #
-# The XYZ coordinates are calculated from [1], using the formula:
+# The XYZ coordinates are calculated from [1] and [2], using the formula:
 #
 #   X = x * ( Y / y )
 #   Y = Y
@@ -418,6 +418,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 #     References
 #    ----------
 #    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+#    .. [2] https://www.rdocumentation.org/packages/grDevices/versions/3.6.2/source
 
 illuminants = \
     {"A": {'2': (1.098466069456375, 1, 0.3558228003436005),

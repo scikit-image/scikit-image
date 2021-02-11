@@ -395,6 +395,8 @@ class TestColorconv(TestCase):
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
+    # Except additional observer 'R' matrices generated using
+    # R function grDevices::convertColor
     def test_xyz2luv(self):
         assert_array_almost_equal(xyz2luv(self.xyz_array),
                                   self.luv_array, decimal=3)
