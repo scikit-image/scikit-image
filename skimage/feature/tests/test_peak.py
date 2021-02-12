@@ -83,7 +83,8 @@ class TestPeakLocalMax():
         image[1, 5] = 12
         image[3, 5] = 8
         image[5, 3] = 7
-        assert len(peak.peak_local_max(image, min_distance=1, threshold_abs=0)) == 5
+        assert len(peak.peak_local_max(image, min_distance=1,
+                                       threshold_abs=0)) == 5
         peaks_limited = peak.peak_local_max(
             image, min_distance=1, threshold_abs=0, num_peaks=2)
         assert len(peaks_limited) == 2
@@ -490,6 +491,22 @@ def test_exclude_border_errors():
     # exclude_border is a negative value.
     with pytest.raises(ValueError):
         assert peak.peak_local_max(image, exclude_border=-1)
+
+
+def test_input_values_with_label():
+    # Issue #5235: input values may be modified when label is used
+
+    img = np.random.rand(128, 128)
+    labels = np.zeros((128, 128), int)
+
+    labels[10:20, 10:20] = 1
+    labels[12:16, 12:16] = 0
+
+    img_before = img.copy()
+
+    _ = peak.peak_local_max(img, labels=labels)
+
+    assert_equal(img, img_before)
 
 
 class TestProminentPeaks(unittest.TestCase):
