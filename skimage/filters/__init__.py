@@ -71,10 +71,11 @@ __all__ = ['inverse',
            'window']
 
 from ..util import lazy
+print('module:', __name__)
 __getattr__, __dir__, __all__ = lazy.install_lazy(
     __name__,
-    submodules=['rank'],
-    submod_funcs={
+    submodules={'rank'},
+    submod_attrs={
         'lpi_filter': ['inverse', 'wiener', 'LPFilter2D'],
         '_gaussian': ['gaussian', '_guess_spatial_dimensions',
                       'difference_of_gaussians'],
