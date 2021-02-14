@@ -2,14 +2,14 @@ from skimage.metrics.overlap import Rectangle
 from skimage._shared import testing
 
 height1, width1 = 2, 4
-rectangle1 = Rectangle((0, 0), size=(height1, width1))  # bottom right in (1,3) thus
+rectangle1 = Rectangle((0, 0), dimensions=(height1, width1))  # bottom right in (1,3) thus
 
 height2 = width2 = 3
-rectangle2 = Rectangle((1, 3), size=(height2, width2))
+rectangle2 = Rectangle((1, 3), dimensions=(height2, width2))
 
 rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
 
-rectangle4 = Rectangle((10, 10), size=(5, 5))
+rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
 
 rect_inter13 = Rectangle.intersection_rectangles(rectangle1, rectangle3)
 
@@ -23,13 +23,13 @@ def test_area():
 
 
 def test_constructor_size():
-    assert rectangle1.get_top_right() == (0, 0)
+    assert rectangle1.get_top_left() == (0, 0)
     assert rectangle1.get_bottom_right() == (1, 3)
 
 
 def test_constructor_bottom_corner():
-    assert rectangle3.get_top_right() == (0, 0)
-    assert rectangle3.get_size() == (3, 3)
+    assert rectangle3.get_top_left() == (0, 0)
+    assert rectangle3.get_dimensions() == (3, 3)
 
 
 def test_intersection():
