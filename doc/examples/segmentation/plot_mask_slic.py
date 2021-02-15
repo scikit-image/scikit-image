@@ -17,13 +17,13 @@ overcome border problems that affects SLIC method, particularely in
 case of irregular mask.
 
 .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
-    Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
-    State-of-the-art Superpixel Methods, TPAMI, May 2012.
+    Pascal Fua, and Sabine Süsstrunk, "SLIC Superpixels Compared to
+    State-of-the-Art Superpixel Methods," IEEE TPAMI, 2012,
     :DOI:`10.1109/TPAMI.2012.120`
 
 .. [2] Irving, Benjamin. "maskSLIC: regional superpixel generation
     with application to local pathology characterisation in medical
-    images.", 2016, , :arXiv:`1606.09518`
+    images," 2016, :arXiv:`1606.09518`
 
 """
 
@@ -64,7 +64,7 @@ ax2.set_title('Mask')
 
 ax3.imshow(segmentation.mark_boundaries(img, slic))
 ax3.contour(mask, colors='red', linewidths=1)
-ax3.set_title("SLIC")
+ax3.set_title('SLIC')
 
 ax4.imshow(segmentation.mark_boundaries(img, m_slic))
 ax4.contour(mask, colors='red', linewidths=1)
