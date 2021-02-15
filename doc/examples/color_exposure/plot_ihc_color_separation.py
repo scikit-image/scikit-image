@@ -61,7 +61,7 @@ fig.tight_layout()
 
 
 ######################################################################
-# Now we can easily manipulate the hematoxylin and DAB "channels:"
+# Now we can easily manipulate the hematoxylin and DAB channels:
 
 from skimage.exposure import rescale_intensity
 
