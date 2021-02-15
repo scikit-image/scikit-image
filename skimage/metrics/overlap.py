@@ -64,11 +64,11 @@ class Rectangle():
         return False
 
     def get_top_left(self):
-        """Returns the (r,c)-coordinates for the top left corner."""
+        """Return the (r,c)-coordinates for the top left corner."""
         return self._top_left
 
     def get_bottom_right(self):
-        """Returns the (r,c)-coordinates for the bottom right corner."""
+        """Return the (r,c)-coordinates for the bottom right corner."""
         return self._bottom_right
 
     def get_area(self):
@@ -182,43 +182,3 @@ class Rectangle():
         The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
         """
         return Rectangle.intersection_area(rectangle1, rectangle2) / Rectangle.union_area(rectangle1, rectangle2)
-
-
-if __name__ == "__main__":
-
-    height1, width1 = 2, 4
-    rectangle1 = Rectangle((0, 0), dimensions=(height1, width1))  # bottom right in (1,3) thus
-
-    height2 = width2 = 3
-    rectangle2 = Rectangle((1, 3), dimensions=(height2, width2))
-
-    rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
-
-    rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
-
-
-    # Check area
-    assert rectangle1.get_area() == height1 * width1
-    assert rectangle2.get_area() == height2 * width2
-    assert rectangle3.get_area() == 3*3
-
-    # Check other dimension (the one not set in constructor)
-    assert rectangle1.get_bottom_right() == (1, 3)
-    assert rectangle3.get_dimensions() == (3, 3)
-
-    # Intersections
-    assert not Rectangle.is_intersecting(rectangle1, rectangle2)
-    assert Rectangle.is_intersecting(rectangle1, rectangle3)
-
-    # Intersection rectangle and == comparison
-    rect_inter13 = Rectangle.intersection_rectangles(rectangle1, rectangle3)
-    assert  rect_inter13 == Rectangle((0, 0), bottom_right=(1, 2))
-    assert rect_inter13 != 5
-    #intersection_rectangles(rectangle1, rectangle2) # should raise an issue
-
-    # Union area
-    union_area13 = Rectangle.union_area(rectangle1, rectangle3)
-    assert union_area13 == (rectangle1.get_area() + rectangle3.get_area() - rect_inter13.get_area())
-
-    # IoU
-    assert Rectangle.intersection_over_union(rectangle1, rectangle3) == rect_inter13.get_area()/union_area13
