@@ -20,12 +20,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                                       coef_vals, raveled_offsets, limits):
     # Initialize sparse matrices
 
-    # Find indexes of masked points in flatten array
-    mask_i = np.where(mask.ravel())[0]
-
-    # Find masked points and prepare them to be easily enumerate over
-    mask_pts = np.where(mask)
-
     # lists storing sparse matrix indices and values
     row_idx_unknown = []
     col_idx_unknown = []
@@ -40,65 +34,81 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
     radius = neigh_coef_full.shape[0] // 2
 
-    # boolean indicating which masked points are near the boundary
-    out_of_bounds = functools.reduce(
-        np.logical_or, [np.logical_or(p < radius, p >= s - radius)
-                        for p, s in zip(mask_pts, out.shape)]
+    edge_mask = np.ones(mask.shape, dtype=bool)
+    edge_mask[(slice(2, -2),) * mask.ndim] = 0
+    boundary_mask = edge_mask * mask
+    center_mask = ~edge_mask * mask
+    # print(f"boundary_mask.sum() = {boundary_mask.sum()}")
+    # print(f"center_mask.sum() = {center_mask.sum()}")
+
+    boundary_pts = np.where(boundary_mask)
+    boundary_i = np.where(boundary_mask.ravel())[0]
+    center_pts = np.where(center_mask)
+    center_i = np.where(center_mask.ravel())[0]
+    mask_i = np.concatenate((boundary_i, center_i))
+    mask_pts = tuple(
+        [np.concatenate((b, c)) for b, c in zip(boundary_pts, center_pts)]
     )
 
-    # Iterate over masked points
+    # Iterate over masked points near the boundary
     mask_flat = mask.ravel()
     out_flat = np.ascontiguousarray(out.reshape((-1, nchannels)).T)
-    for mask_pt_n, mask_pt_idx in enumerate(zip(*mask_pts)):
-        if out_of_bounds[mask_pt_n]:
+    for mask_pt_n, mask_pt_idx in enumerate(zip(*boundary_pts)):
+        # Get bounded neighborhood of selected radius
+        b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
 
-            # Get bounded neighborhood of selected radius
-            b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
-            # Create biharmonic coefficients ndarray
-            neigh_coef = np.zeros(tuple(hi - lo
-                                        for lo, hi in zip(b_lo, b_hi)))
-            neigh_coef[tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))] = 1
-            neigh_coef = laplace(laplace(neigh_coef))
+        # Create biharmonic coefficients ndarray
+        neigh_coef = np.zeros(tuple(hi - lo
+                                    for lo, hi in zip(b_lo, b_hi)))
+        neigh_coef[tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))] = 1
+        neigh_coef = laplace(laplace(neigh_coef))
 
-            # Iterate over masked point's neighborhood
-            it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-            vals_known = [0] * nchannels
-            for coef in it_inner:
-                if coef == 0:
-                    continue
-                tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
-                tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
+        # Iterate over masked point's neighborhood
+        it_inner = np.nditer(neigh_coef, flags=['multi_index'])
+        vals_known = [0] * nchannels
+        for coef in it_inner:
+            if coef == 0:
+                continue
+            tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
+            tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
 
-                if mask_flat[tmp_pt_i]:
-                    row_idx_unknown.append(mask_pt_n)
-                    col_idx_unknown.append(tmp_pt_i)
-                    data_unknown.append(coef)
-                else:
-                    for ch in range(nchannels):
-                        vals_known[ch] -= coef * out_flat[ch][tmp_pt_i]
-
-            if any(val_known != 0 for val_known in vals_known):
-                row_idx_known.append(mask_pt_n)
+            if mask_flat[tmp_pt_i]:
+                row_idx_unknown.append(mask_pt_n)
+                col_idx_unknown.append(tmp_pt_i)
+                data_unknown.append(coef)
+            else:
                 for ch in range(nchannels):
-                    data_known[ch].append(vals_known[ch])
-        else:
-            # All voxels in kernel footprint are within bounds.
-            mask_offsets = mask_i[mask_pt_n] + raveled_offsets
-            in_mask = mask.ravel()[mask_offsets]
-            c_unknown = coef_vals[in_mask]
-            data_unknown += list(c_unknown)
-            row_idx_unknown += [mask_pt_n] * len(c_unknown)
-            col_idx_unknown += list(mask_offsets[in_mask])
+                    vals_known[ch] -= coef * out_flat[ch][tmp_pt_i]
 
-            if len(c_unknown) != len(mask_offsets):
-                not_in_mask = ~in_mask
-                c_known = coef_vals[not_in_mask]
-                row_idx_known.append(mask_pt_n)
-                for ch in range(nchannels):
-                    img_vals = out_flat[ch][mask_offsets[not_in_mask]]
-                    data_known[ch].append(
-                        -np.sum(coef_vals[not_in_mask] * img_vals)
+        if any(val_known != 0 for val_known in vals_known):
+            row_idx_known.append(mask_pt_n)
+            for ch in range(nchannels):
+                data_known[ch].append(vals_known[ch])
+
+
+    # Iterate over masked points not near the boundary
+    start_idx = mask_pt_n + 1
+    for mask_pt_n, mask_pt_idx in enumerate(zip(*center_pts), start=mask_pt_n + 1):
+        # All voxels in kernel footprint are within bounds.
+        mask_offsets = center_i[mask_pt_n - start_idx] + raveled_offsets
+        in_mask = mask.ravel()[mask_offsets]
+        c_unknown = coef_vals[in_mask]
+        data_unknown += list(c_unknown)
+        row_idx_unknown += [mask_pt_n] * len(c_unknown)
+        col_idx_unknown += list(mask_offsets[in_mask])
+
+        if len(c_unknown) != len(mask_offsets):
+            not_in_mask = ~in_mask
+            c_known = coef_vals[not_in_mask]
+            row_idx_known.append(mask_pt_n)
+            for ch in range(nchannels):
+                img_vals = out_flat[ch][mask_offsets[not_in_mask]]
+                data_known[ch].append(
+                    -np.sum(coef_vals[not_in_mask] * img_vals)
                     )
+
+    # print(f"len(row_idx_unknown) = {len(row_idx_unknown)}")
+    # print(f"data_known[0].size = {len(data_known[0])}")
 
     # form sparse matrix of unknown values
     sp_shape = (np.sum(mask), out.size)
