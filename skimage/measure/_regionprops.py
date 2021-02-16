@@ -398,7 +398,8 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0).astype(np.double)
+        return np.max(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def mean_intensity(self):
@@ -406,7 +407,8 @@ class RegionProperties:
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0).astype(np.double)
+        return np.min(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def major_axis_length(self):
