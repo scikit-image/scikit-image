@@ -493,8 +493,8 @@ def test_exclude_border_errors():
         assert peak.peak_local_max(image, exclude_border=-1)
 
 
-def test_input_values_with_label():
-    # Issue #5235: input values may be modified when label is used
+def test_input_values_with_labels():
+    # Issue #5235: input values may be modified when labels are used
 
     img = np.random.rand(128, 128)
     labels = np.zeros((128, 128), int)
