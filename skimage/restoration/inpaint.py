@@ -43,9 +43,10 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
     boundary_pts = np.where(boundary_mask)
     boundary_i = np.where(boundary_mask.ravel())[0]
-    center_pts = np.where(center_mask)
     center_i = np.where(center_mask.ravel())[0]
     mask_i = np.concatenate((boundary_i, center_i))
+
+    center_pts = np.where(center_mask)
     mask_pts = tuple(
         [np.concatenate((b, c)) for b, c in zip(boundary_pts, center_pts)]
     )
@@ -88,10 +89,10 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
     # Iterate over masked points not near the boundary
     start_idx = mask_pt_n + 1
-    for mask_pt_n, mask_pt_idx in enumerate(zip(*center_pts), start=mask_pt_n + 1):
+    for mask_pt_n, c_i in enumerate(center_i, start=mask_pt_n + 1):
         # All voxels in kernel footprint are within bounds.
-        mask_offsets = center_i[mask_pt_n - start_idx] + raveled_offsets
-        in_mask = mask.ravel()[mask_offsets]
+        mask_offsets = c_i + raveled_offsets
+        in_mask = mask_flat[mask_offsets]
         c_unknown = coef_vals[in_mask]
         data_unknown += list(c_unknown)
         row_idx_unknown += [mask_pt_n] * len(c_unknown)
@@ -106,7 +107,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                 data_known[ch].append(
                     -np.sum(coef_vals[not_in_mask] * img_vals)
                     )
-
     # print(f"len(row_idx_unknown) = {len(row_idx_unknown)}")
     # print(f"data_known[0].size = {len(data_known[0])}")
 
