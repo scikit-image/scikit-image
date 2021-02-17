@@ -6,8 +6,10 @@ from scipy import sparse
 from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
+
 import skimage
 from ..measure import label, regionprops_table
+from ._inpaint import _build_matrix_inner
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -16,30 +18,30 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
+def _get_neigh_coef(shape, center, coef_cache={}):
+    key = (shape, center)
+    if key in coef_cache:
+        neigh_coef = coef_cache[key]
+    else:
+        # Create biharmonic coefficients ndarray
+        neigh_coef = np.zeros(shape)
+        neigh_coef[center] = 1
+        neigh_coef = laplace(laplace(neigh_coef))
+        coef_cache[key] = neigh_coef
+    return neigh_coef
+
+
 def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                                       coef_vals, raveled_offsets, limits):
     # Initialize sparse matrices
 
-    # lists storing sparse matrix indices and values
-    row_idx_unknown = []
-    col_idx_unknown = []
-    data_unknown = []
-
     nchannels = out.shape[-1]
-
-    # lists storing sparse right hand side vector indices and values
-    row_idx_known = []
-    # dictionary containing rhs data for each channel
-    data_known = {ch: [] for ch in range(nchannels)}
-
     radius = neigh_coef_full.shape[0] // 2
 
     edge_mask = np.ones(mask.shape, dtype=bool)
     edge_mask[(slice(2, -2),) * mask.ndim] = 0
     boundary_mask = edge_mask * mask
     center_mask = ~edge_mask * mask
-    # print(f"boundary_mask.sum() = {boundary_mask.sum()}")
-    # print(f"center_mask.sum() = {center_mask.sum()}")
 
     boundary_pts = np.where(boundary_mask)
     boundary_i = np.where(boundary_mask.ravel())[0]
@@ -51,18 +53,43 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         [np.concatenate((b, c)) for b, c in zip(boundary_pts, center_pts)]
     )
 
+    # Trick: Use convolution predetermine the number of non-zero entries in the
+    #        sparse system matrix.
+    structure = neigh_coef_full != 0
+    mask_uint8 = mask.astype(np.uint8)
+    tmp = mask * ndi.convolve(mask_uint8, structure, mode='constant')
+    nnz_matrix = tmp.sum()
+
+    # Need to estimate the number of zeros for the right hand side vector.
+    # The computation below will slightly overestimate the true number of zeros
+    # due to edge effects (the kernel itself gets shrunk in size near the
+    # edges, but that isn't accounted for here). We can trim any trailing zeros
+    # later.
+    nnz_rhs_vector_max = mask.sum() - (tmp==structure.sum()).sum()
+
+    # pre-allocate arrays storing sparse matrix indices and values
+    row_idx_known = np.empty(nnz_rhs_vector_max, dtype=np.intp)
+    data_known = np.empty((nnz_rhs_vector_max, nchannels), dtype=out.dtype)
+    row_idx_unknown = np.empty(nnz_matrix, dtype=np.intp)
+    col_idx_unknown = np.empty(nnz_matrix, dtype=np.intp)
+    data_unknown = np.empty(nnz_matrix, dtype=out.dtype)
+
+    # cache the various small, non-square Laplacians used near the boundary
+    coef_cache = {}
+
     # Iterate over masked points near the boundary
     mask_flat = mask.ravel()
-    out_flat = np.ascontiguousarray(out.reshape((-1, nchannels)).T)
+    out_flat = np.ascontiguousarray(out.reshape((-1, nchannels)))
+    idx_known = 0
+    idx_unknown = 0
+    mask_pt_n = -1
     for mask_pt_n, mask_pt_idx in enumerate(zip(*boundary_pts)):
         # Get bounded neighborhood of selected radius
         b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
 
-        # Create biharmonic coefficients ndarray
-        neigh_coef = np.zeros(tuple(hi - lo
-                                    for lo, hi in zip(b_lo, b_hi)))
-        neigh_coef[tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))] = 1
-        neigh_coef = laplace(laplace(neigh_coef))
+        coef_shape = tuple(hi - lo for lo, hi in zip(b_lo, b_hi))
+        coef_center = tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))
+        neigh_coef = _get_neigh_coef(coef_shape, coef_center, coef_cache)
 
         # Iterate over masked point's neighborhood
         it_inner = np.nditer(neigh_coef, flags=['multi_index'])
@@ -74,41 +101,39 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
             tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
 
             if mask_flat[tmp_pt_i]:
-                row_idx_unknown.append(mask_pt_n)
-                col_idx_unknown.append(tmp_pt_i)
-                data_unknown.append(coef)
+                row_idx_unknown[idx_unknown] = mask_pt_n
+                col_idx_unknown[idx_unknown] = tmp_pt_i
+                data_unknown[idx_unknown] = coef
+                idx_unknown += 1
             else:
                 for ch in range(nchannels):
-                    vals_known[ch] -= coef * out_flat[ch][tmp_pt_i]
+                    vals_known[ch] -= coef * out_flat[tmp_pt_i, ch]
 
         if any(val_known != 0 for val_known in vals_known):
-            row_idx_known.append(mask_pt_n)
+            row_idx_known[idx_known] = mask_pt_n
             for ch in range(nchannels):
-                data_known[ch].append(vals_known[ch])
+                data_known[idx_known, ch] = vals_known[ch]
+            idx_known += 1
 
+    # Now use an efficient Cython-based implementation for all interior points
+    row_start = mask_pt_n + 1
+    known_start_idx = idx_known
+    unknown_start_idx = idx_unknown
 
-    # Iterate over masked points not near the boundary
-    start_idx = mask_pt_n + 1
-    for mask_pt_n, c_i in enumerate(center_i, start=mask_pt_n + 1):
-        # All voxels in kernel footprint are within bounds.
-        mask_offsets = c_i + raveled_offsets
-        in_mask = mask_flat[mask_offsets]
-        c_unknown = coef_vals[in_mask]
-        data_unknown += list(c_unknown)
-        row_idx_unknown += [mask_pt_n] * len(c_unknown)
-        col_idx_unknown += list(mask_offsets[in_mask])
+    nnz_rhs = _build_matrix_inner(
+        # starting indices
+        row_start, known_start_idx, unknown_start_idx,
+        # input arrays
+        center_i, raveled_offsets, coef_vals, mask_flat.astype(np.int16),
+        out_flat,
+        # output arrays
+        row_idx_known, data_known, row_idx_unknown, col_idx_unknown,
+        data_unknown
+    )
 
-        if len(c_unknown) != len(mask_offsets):
-            not_in_mask = ~in_mask
-            c_known = coef_vals[not_in_mask]
-            row_idx_known.append(mask_pt_n)
-            for ch in range(nchannels):
-                img_vals = out_flat[ch][mask_offsets[not_in_mask]]
-                data_known[ch].append(
-                    -np.sum(coef_vals[not_in_mask] * img_vals)
-                    )
-    # print(f"len(row_idx_unknown) = {len(row_idx_unknown)}")
-    # print(f"data_known[0].size = {len(data_known[0])}")
+    # trim RHS vector values and indices to the exact length
+    row_idx_known = row_idx_known[:nnz_rhs]
+    data_known = data_known[:nnz_rhs, :]
 
     # form sparse matrix of unknown values
     sp_shape = (np.sum(mask), out.size)
@@ -119,12 +144,11 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
 
-    row_idx_known = np.asarray(row_idx_known)
     col_idx_known = np.zeros_like(row_idx_known)
     for ch in range(nchannels):
         # form sparse vector representing the right hand side
         rhs = sparse.coo_matrix(
-            (data_known[ch], (row_idx_known, col_idx_known)),
+            (data_known[:, ch], (row_idx_known, col_idx_known)),
             shape=(np.sum(mask), 1)
         ).tocsr()
 
@@ -213,8 +237,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             zip(*[_get_ax_slices(ax, ndim, img_baseshape[ax])
                   for ax in range(ndim)])
         )
-    else:
-        num_labels = 1
 
     if not multichannel:
         image = image[..., np.newaxis]
@@ -222,13 +244,12 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
     # Create biharmonic coefficients ndarray
     radius = 2
-    neigh_coef_full = np.zeros((2*radius + 1,) * mask.ndim)
-    neigh_coef_full[(radius,) * mask.ndim] = 1
-    neigh_coef_full = laplace(laplace(neigh_coef_full))
+    coef_shape = (2*radius + 1,) * mask.ndim
+    coef_center = (radius,) * mask.ndim
+    neigh_coef_full = _get_neigh_coef(coef_shape, coef_center)
 
-    # ostrides is in number of elements, not bytes
-    channel_stride = np.min(out[..., 0].strides)
-    ostrides = tuple(s // channel_stride for s in out[..., 0].strides)
+    # stride for the last spatial dimension
+    channel_stride_bytes = out.strides[-2]
 
     # offsets to all neighboring non-zero elements in the footprint
     idx_coef = np.where(neigh_coef_full)
@@ -249,11 +270,11 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             mask_region = mask_labeled[roi_sl] == idx_region
             # add slice for axes
             roi_sl =  tuple(list(roi_sl) + [slice(None,)])
-            # copy because otmp must be C contiguous
             otmp = out[roi_sl].copy()
 
             # compute raveled offsets for the ROI
-            ostrides = tuple(s // channel_stride for s in otmp[..., 0].strides)
+            ostrides = tuple(s // channel_stride_bytes
+                             for s in otmp[..., 0].strides)
             raveled_offsets = tuple(
                 ax_off * ax_stride
                 for ax_off, ax_stride in zip(offsets, ostrides)
@@ -267,6 +288,9 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             # assign output to the
             out[roi_sl] = otmp
     else:
+        ostrides = tuple(s // channel_stride_bytes
+                         for s in out[..., 0].strides)
+
         # compute raveled offsets for output image
         raveled_offsets = tuple(
             ax_off * ax_stride
