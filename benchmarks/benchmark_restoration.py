@@ -1,6 +1,11 @@
 import numpy as np
 from skimage.data import camera
 from skimage import restoration, data, color
+from skimage.morphology import binary_dilation
+try:
+    from skimage.morphology import disk
+except ImportError:
+    from skimage.morphology import circle as disk
 import scipy.ndimage as ndi
 
 
@@ -170,6 +175,16 @@ class Inpaint(object):
         mask[200:205, -200:] = 1
         mask[150:255, 20:23] = 1
         mask[365:368, 60:130] = 1
+
+        # add randomly positioned small point-like defects
+        rstate = np.random.RandomState(0)
+        for radius in [0, 2, 4]:
+            # larger defects are less common
+            thresh = 2.75 + 0.25 * radius  # larger defects are less commmon
+            tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
+            if radius > 0:
+                tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+            mask[tmp_mask] = 1
 
         for layer in range(image.shape[-1]):
             image[np.where(mask)] = 0
