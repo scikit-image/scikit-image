@@ -149,19 +149,14 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
 
-    col_idx_known = np.zeros_like(row_idx_known)
+    # dense vector representing the right hand side
+    rhs = np.zeros((n_mask,), dtype=out.dtype)
     for ch in range(n_channels):
-        # form sparse vector representing the right hand side
-        if ch == 0:
-            rhs = sparse.coo_matrix(
-                (data_known[:, ch], (row_idx_known, col_idx_known)),
-                shape=(n_mask, 1)
-            ).tocsr()
-        else:
-            # update rhs data with values from the current channel
-            rhs.data[:] = data_known[:, ch]
+        rhs[row_idx_known] = data_known[:, ch]
 
-        result = spsolve(matrix_unknown, rhs)
+        # set use_umfpack to False so float32 data is supported
+        result = spsolve(matrix_unknown, rhs, use_umfpack=False,
+                         permc_spec='MMD_AT_PLUS_A')
 
         # Handle enormous values on a per-channel basis
         result = np.clip(result, *limits[ch])
