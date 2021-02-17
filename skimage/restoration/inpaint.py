@@ -69,7 +69,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
     # pre-allocate arrays storing sparse matrix indices and values
     row_idx_known = np.empty(nnz_rhs_vector_max, dtype=np.intp)
-    data_known = np.empty((nnz_rhs_vector_max, nchannels), dtype=out.dtype)
+    data_known = np.zeros((nnz_rhs_vector_max, nchannels), dtype=out.dtype)
     row_idx_unknown = np.empty(nnz_matrix, dtype=np.intp)
     col_idx_unknown = np.empty(nnz_matrix, dtype=np.intp)
     data_unknown = np.empty(nnz_matrix, dtype=out.dtype)
@@ -270,6 +270,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             mask_region = mask_labeled[roi_sl] == idx_region
             # add slice for axes
             roi_sl =  tuple(list(roi_sl) + [slice(None,)])
+            # copy for contiguity and to account for possible ROI overlap
             otmp = out[roi_sl].copy()
 
             # compute raveled offsets for the ROI
