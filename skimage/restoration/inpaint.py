@@ -257,7 +257,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
     # Create biharmonic coefficients ndarray
     radius = 2
-    coef_shape = (2*radius + 1,) * mask.ndim
+    coef_shape = (2 * radius + 1,) * mask.ndim
     coef_center = (radius,) * mask.ndim
     neigh_coef_full, coef_idx, coef_vals = _get_neigh_coef(coef_shape,
                                                            coef_center)
