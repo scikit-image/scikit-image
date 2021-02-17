@@ -19,6 +19,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
 
 
 def _get_neigh_coef(shape, center, coef_cache={}):
+    """Create biharmonic coefficients ndarray."""
     key = (shape, center)
     if key in coef_cache:
         neigh_coef = coef_cache[key]
@@ -53,8 +54,8 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         [np.concatenate((b, c)) for b, c in zip(boundary_pts, center_pts)]
     )
 
-    # Trick: Use convolution predetermine the number of non-zero entries in the
-    #        sparse system matrix.
+    # Use convolution to predetermine the number of non-zero entries in the
+    # sparse system matrix.
     structure = neigh_coef_full != 0
     mask_uint8 = mask.astype(np.uint8)
     tmp = mask * ndi.convolve(mask_uint8, structure, mode='constant')
@@ -63,7 +64,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # Need to estimate the number of zeros for the right hand side vector.
     # The computation below will slightly overestimate the true number of zeros
     # due to edge effects (the kernel itself gets shrunk in size near the
-    # edges, but that isn't accounted for here). We can trim any trailing zeros
+    # edges, but that isn't accounted for here). We can trim any excess entries
     # later.
     nnz_rhs_vector_max = mask.sum() - (tmp==structure.sum()).sum()
 
@@ -91,28 +92,27 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         coef_center = tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))
         neigh_coef = _get_neigh_coef(coef_shape, coef_center, coef_cache)
 
-        # Iterate over masked point's neighborhood
-        it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-        vals_known = [0] * nchannels
-        for coef in it_inner:
-            if coef == 0:
-                continue
-            tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
-            tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
+        # extract only nonzero indices
+        coef_idx = np.where(neigh_coef)
+        coefs = neigh_coef[coef_idx]
 
+        # compute corresponding 1d indices into the mask
+        coef_idx = [c + b for c, b in zip(coef_idx, b_lo)]
+        _mask_i = np.ravel_multi_index(coef_idx, mask.shape)
+
+        # Iterate over masked point's neighborhood
+        nvals = 0
+        for coef, tmp_pt_i in zip(coefs, _mask_i):
             if mask_flat[tmp_pt_i]:
                 row_idx_unknown[idx_unknown] = mask_pt_n
                 col_idx_unknown[idx_unknown] = tmp_pt_i
                 data_unknown[idx_unknown] = coef
                 idx_unknown += 1
             else:
-                for ch in range(nchannels):
-                    vals_known[ch] -= coef * out_flat[tmp_pt_i, ch]
-
-        if any(val_known != 0 for val_known in vals_known):
+                data_known[idx_known, :] -= coef * out_flat[tmp_pt_i, :]
+                nvals += 1
+        if nvals:
             row_idx_known[idx_known] = mask_pt_n
-            for ch in range(nchannels):
-                data_known[idx_known, ch] = vals_known[ch]
             idx_known += 1
 
     # Now use an efficient Cython-based implementation for all interior points
@@ -162,6 +162,15 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     return out
 
 
+def _get_ax_slices(props, axis, ndim, size, radius=2):
+    """Return slice objects to extract an ROI bounding box."""
+    return [
+        slice(max(ax_start - radius, 0), min(ax_end + radius, size))
+        for ax_start, ax_end
+        in zip(props[f'bbox-{axis}'], props[f'bbox-{axis + ndim}'])
+    ]
+
+
 def inpaint_biharmonic(image, mask, multichannel=False, *,
                        split_into_regions=False):
     """Inpaint masked points in image with biharmonic equations.
@@ -177,6 +186,9 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
         otherwise as spatial.
+    split_into_regions : boolean, optional
+        If True, inpainting is performed on a region-by-region basis. This is
+        likely to be slower, but will have reduced memory requirements.
 
     Returns
     -------
@@ -227,14 +239,9 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         # create slices for cropping to each labeled region
         props = regionprops_table(mask_labeled)
         ndim = len(img_baseshape)
-        def _get_ax_slices(axis, ndim, size, radius=2):
-            return [
-                slice(max(ax_start - radius, 0), min(ax_end + radius, size))
-                for ax_start, ax_end
-                in zip(props[f'bbox-{axis}'], props[f'bbox-{axis + ndim}'])
-            ]
+
         bbox_slices = list(
-            zip(*[_get_ax_slices(ax, ndim, img_baseshape[ax])
+            zip(*[_get_ax_slices(props, ax, ndim, img_baseshape[ax])
                   for ax in range(ndim)])
         )
 
