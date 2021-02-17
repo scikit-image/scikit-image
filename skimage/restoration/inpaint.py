@@ -149,19 +149,21 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]
 
-    # dense vector representing the right hand side
-    rhs = np.zeros((n_mask,), dtype=out.dtype)
+    # dense vectors representing the right hand side for each channel
+    rhs = np.zeros((n_mask, n_channels), dtype=out.dtype)
+    rhs[row_idx_known, :] = data_known
+
+    # set use_umfpack to False so float32 data is supported
+    result = spsolve(matrix_unknown, rhs, use_umfpack=False,
+                     permc_spec='MMD_ATA')
+    if result.ndim == 1:
+        result = result[:, np.newaxis]
+
+    # Handle enormous values on a per-channel basis
     for ch in range(n_channels):
-        rhs[row_idx_known] = data_known[:, ch]
+        result[..., ch] = np.clip(result[..., ch], *limits[ch])
 
-        # set use_umfpack to False so float32 data is supported
-        result = spsolve(matrix_unknown, rhs, use_umfpack=False,
-                         permc_spec='MMD_AT_PLUS_A')
-
-        # Handle enormous values on a per-channel basis
-        result = np.clip(result, *limits[ch])
-
-        out[..., ch][mask_pts] = result.ravel()
+    out[mask_pts] = result
 
     return out
 
