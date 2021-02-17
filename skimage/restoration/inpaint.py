@@ -72,7 +72,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # edges, but that isn't accounted for here). We can trim any excess entries
     # later.
     n_mask = mask.sum()
-    nnz_rhs_vector_max = n_mask - (tmp==structure.sum()).sum()
+    nnz_rhs_vector_max = n_mask - (tmp == structure.sum()).sum()
 
     # pre-allocate arrays storing sparse matrix indices and values
     row_idx_known = np.empty(nnz_rhs_vector_max, dtype=np.intp)
@@ -271,7 +271,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     # determine per-channel intensity limits
     limits = []
     for ch in range(out.shape[-1]):
-        known_points= image[..., ch][~mask]
+        known_points = image[..., ch][~mask]
         limits.append((np.min(known_points), np.max(known_points)))
 
     if split_into_regions:
@@ -281,7 +281,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             roi_sl = bbox_slices[idx_region - 1]
             mask_region = mask_labeled[roi_sl] == idx_region
             # add slice for axes
-            roi_sl =  tuple(list(roi_sl) + [slice(None,)])
+            roi_sl = tuple(list(roi_sl) + [slice(None)])
             # copy for contiguity and to account for possible ROI overlap
             otmp = out[roi_sl].copy()
 
