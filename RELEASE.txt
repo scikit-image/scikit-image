@@ -23,9 +23,9 @@ access), specifically to:
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
-- Branch v<major>.<minor>.x from master. This is the "release branch", where
+- Branch v<major>.<minor>.x from `main`. This is the "release branch", where
   you will make your changes gearing up for release, and cherry-pick them as
-  appropriate to master.
+  appropriate to `main`.
 
 - On the release branch, update the release notes:
 
@@ -55,14 +55,14 @@ access), specifically to:
 
 - Submit the release notes for review by other project maintainers:
 
-  - Create a PR from v<major>.<minor>.x branch to master (at this point,
+  - Create a PR from v<major>.<minor>.x branch to `main` (at this point,
     the difference should show the full contents of the release notes).
   - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
   - Once the consensus is found, ask the project maintainers to merge
     the PR.
   - Cherry pick the change onto the release branch.
 
-- On the master branch, update the version number in ``skimage/__init__.py``
+- On the main branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
   ``0.20.0.dev0`` with the period between ``0`` and ``dev`` and a trailing
@@ -71,7 +71,7 @@ access), specifically to:
   `NumpyVersion <https://github.com/scikit-image/scikit-image/pull/4947>`_
   correctly interprets the version number.
 
- - On the master branch, edit ``doc/source/_static/docversions.js``,
+ - On the main branch, edit ``doc/source/_static/docversions.js``,
   add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
   change back to the release branch.
 
@@ -219,7 +219,7 @@ access), specifically to:
 - Make a PR to scikit-image with any updates you might have to these notes
 
 - If making a patch release (v<major>.<minor>.<patch>), forward-port the
-  release notes to the master branch and make a PR.
+  release notes to the main branch and make a PR.
 
 Conda-forge
 -----------

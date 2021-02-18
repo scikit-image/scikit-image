@@ -20,7 +20,7 @@ guidelines.
 All Contributors Are Treated The Same
 -------------------------------------
 
-You now have the ability to push changes directly to the master
+You now have the ability to push changes directly to the main
 branch, but should never do so; instead, continue making pull requests
 as before and in accordance with the 
 {doc}`general contributor guide <contribute>`.
@@ -95,7 +95,7 @@ whether to accept the changes.)
 [gh_feedback]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request
 
 Our default merge policy is to squash all PR commits into a single
-commit. Users who wish to bring the latest changes from ``master``
+commit. Users who wish to bring the latest changes from ``main``
 into their branch should be advised to merge, not to rebase.  Even
 when merge conflicts arise, don’t ask for a rebase unless you know
 that a contributor is experienced with git. Instead, rebase the branch
