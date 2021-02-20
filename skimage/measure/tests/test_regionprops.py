@@ -1,5 +1,4 @@
 import math
-from collections.abc import Iterable
 
 import numpy as np
 from numpy import array
@@ -580,12 +579,20 @@ def test_regionprops_table():
 def test_regionprops_table_equal_to_original():
     regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
     out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
-                                  properties=COL_DTYPES.keys())
+                                  properties=COL_DTYPES.keys(),
+                                  separator="-")
 
-    for prop in COL_DTYPES.keys():
-        for i in range(len(regions)):
-            if not isinstance(regions[i][prop], Iterable):
-                assert regions[i][prop] == out_table[prop][i]
+    for prop, dtype in COL_DTYPES.items():
+        for i, reg in enumerate(regions):
+            rp = reg[prop]
+            if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+                assert_array_equal(rp, out_table[prop][i])
+            else:
+                shape = rp.shape if isinstance(rp, np.ndarray) else (len(rp),)
+                for ind in np.ndindex(shape):
+                    modified_prop = "-".join(map(str, (prop,) + ind))
+                    loc = ind if len(ind) > 1 else ind[0]
+                    assert_equal(rp[loc], out_table[modified_prop][i])
 
 
 def test_regionprops_table_no_regions():
