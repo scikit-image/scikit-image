@@ -585,7 +585,9 @@ def test_regionprops_table_equal_to_original():
     for prop, dtype in COL_DTYPES.items():
         for i, reg in enumerate(regions):
             rp = reg[prop]
-            if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+            if np.isscalar(rp) or \
+                    prop in OBJECT_COLUMNS or \
+                    dtype is np.object_:
                 assert_array_equal(rp, out_table[prop][i])
             else:
                 shape = rp.shape if isinstance(rp, np.ndarray) else (len(rp),)
