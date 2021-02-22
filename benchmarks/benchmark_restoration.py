@@ -156,7 +156,7 @@ class RollingBall(object):
 
 
 class Inpaint(object):
-    """Benchmark Rolling Ball algorithm."""
+    """Benchmark inpainting algorithm."""
 
     def setup(self):
         image = data.astronaut()
