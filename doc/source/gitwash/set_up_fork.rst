@@ -27,11 +27,11 @@ Clone your fork
    ``git branch -a`` to show you all branches.  You'll get something
    like::
 
-      * master
-      remotes/origin/master
+      * main
+      remotes/origin/main
 
-   This tells you that you are currently on the ``master`` branch, and
-   that you also have a ``remote`` connection to ``origin/master``.
+   This tells you that you are currently on the ``main`` branch, and
+   that you also have a ``remote`` connection to ``origin/main``.
    What remote repository is ``remote/origin``? Try ``git remote -v`` to
    see the URLs for the remote.  They will point to your github fork.
 
