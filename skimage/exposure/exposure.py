@@ -647,6 +647,10 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         if image.shape[2] == 3:
             image = rgb2gray(image)
 
+    if image.dtype==np.bool:
+        return image.any() and (image==False).any()
+
+
     dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])
     ratio = (limits[1] - limits[0]) / (dlimits[1] - dlimits[0])
