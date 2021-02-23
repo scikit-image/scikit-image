@@ -55,7 +55,6 @@ cpdef Py_ssize_t _build_matrix_inner(
         for o in range(num_offsets):
             loc = center_i[i] + raveled_offsets[o]
             cval = coef_vals[o]
-            # print(f"    loc={loc}")
             if mask_flat[loc]:
                 data_unknown[unknown_idx] = cval
                 row_idx_unknown[unknown_idx] = row_idx
@@ -69,6 +68,5 @@ cpdef Py_ssize_t _build_matrix_inner(
         if n_known > 0:
             row_idx_known[known_idx] = row_idx
             known_idx += 1
-            # print(f"row_idx={row_idx}, unknown_idx={unknown_idx}, known_idx={known_idx}")
         row_idx += 1
     return known_idx
