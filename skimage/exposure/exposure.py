@@ -647,7 +647,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         if image.shape[2] == 3:
             image = rgb2gray(image)
 
-    if image.dtype == np.bool:
+    if image.dtype == bool:
         return image.any() and (image == False).any()
 
 
