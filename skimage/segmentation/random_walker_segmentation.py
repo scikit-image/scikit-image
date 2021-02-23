@@ -119,7 +119,7 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
         edges = inv_idx.reshape(edges.shape)
 
     # Build the sparse linear system
-    pixel_nb = edges.shape[1]
+    pixel_nb = l_x * l_y * l_z
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
