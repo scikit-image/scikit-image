@@ -258,6 +258,9 @@ def _init_pooch():
     dest_path = osp.join(data_dir, 'README.txt')
     shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                  dest_path)
+    # In case the user installing/running from a read-only filesystem,
+    # we need to ensure README.txt has user-write permission when it is
+    # put into their cache directory.
     current = stat.S_IMODE(os.lstat(dest_path).st_mode)
     os.chmod(dest_path, current | stat.S_IWUSR)
 
