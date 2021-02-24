@@ -18,6 +18,7 @@ from .. import __version__
 
 import os.path as osp
 import os
+import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -254,8 +255,11 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
+    dest_path = osp.join(data_dir, 'README.txt')
     shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
+                 dest_path)
+    current = stat.S_IMODE(os.lstat(dest_path).st_mode)
+    os.chmod(dest_path, current | stat.S_IWUSR)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
