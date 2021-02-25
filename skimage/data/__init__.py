@@ -255,14 +255,17 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
+
+    # Copy in the README.txt if it doesn't already exist.
+    # If the file was originally copied to the data cache directory read-only
+    # then we cannot overwrite it, nor do we need to copy on every init.
+    # In general, as the data cache directory contains the scikit-image version
+    # it should not be necessary to overwrite this file as it should not
+    # change.
     dest_path = osp.join(data_dir, 'README.txt')
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 dest_path)
-    # In case the user installing/running from a read-only filesystem,
-    # we need to ensure README.txt has user-write permission when it is
-    # put into their cache directory.
-    current = stat.S_IMODE(os.lstat(dest_path).st_mode)
-    os.chmod(dest_path, current | stat.S_IWUSR)
+    if not os.path.isfile(dest_path):
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     dest_path)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
