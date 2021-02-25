@@ -15,9 +15,11 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
         https://en.wikipedia.org/wiki/Inpainting
 .. [2]  Wikipedia. Biharmonic equation
         https://en.wikipedia.org/wiki/Biharmonic_equation
-.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
-        inpainting by biharmonic functions: numerical aspects",
-        :arXiv:`1707.06567`
+.. [3]  S.B.Damelin and N.S.Hoang. "On Surface Completion and Image
+        Inpainting by Biharmonic Functions: Numerical Aspects",
+        International Journal of Mathematics and Mathematical Sciences,
+        Vol. 2018, Article ID 3950312
+        :DOI:`10.1155/2018/3950312`
 .. [4]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
         Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
         28 (2010), 104-113,
