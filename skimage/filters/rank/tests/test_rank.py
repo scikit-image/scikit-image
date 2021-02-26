@@ -14,20 +14,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, parametrize, fetch
 import pytest
 
-# To be removed along with tophat and bottomhat functions.
-all_rank_filters.remove('tophat')
-all_rank_filters.remove('bottomhat')
-
-
-def test_deprecation():
-    selem = disk(3)
-    image = img_as_ubyte(data.camera()[:50, :50])
-
-    with expected_warnings(['rank.tophat is deprecated.']):
-        rank.tophat(image, selem)
-    with expected_warnings(['rank.bottomhat is deprecated.']):
-        rank.bottomhat(image, selem)
-
 
 def test_otsu_edge_case():
     # This is an edge case that causes OTSU to appear to misbehave
@@ -70,14 +56,10 @@ def test_subtract_mean_underflow_correction(dtype):
     assert np.all(result == expected_val)
 
 
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
-
-
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
+# Note: Explicitly read all values into a dict. Otherwise, stochastic test
+#       failures related to I/O can occur during parallel test cases.
+ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
+ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
 class TestRank():
@@ -92,8 +74,8 @@ class TestRank():
         np.random.seed(0)
         self.selem = morphology.disk(1)
         self.selem_3d = morphology.ball(1)
-        self.refs = np.load(fetch('data/rank_filter_tests.npz'))
-        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
+        self.refs = ref_data
+        self.refs_3d = ref_data_3d
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):

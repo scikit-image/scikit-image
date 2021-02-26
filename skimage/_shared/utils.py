@@ -1,9 +1,12 @@
 import inspect
-import warnings
 import functools
-import sys
-import numpy as np
 import numbers
+import sys
+import warnings
+
+import numpy as np
+from numpy.lib import NumpyVersion
+import scipy
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
@@ -116,7 +119,7 @@ class deprecate_kwarg:
 
     Parameters
     ----------
-    arg_mapping: dict
+    kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
     warning_msg: str
@@ -415,3 +418,35 @@ def _validate_interpolation_order(image_dtype, order):
              FutureWarning, stacklevel=2)
 
     return order
+
+
+def _to_np_mode(mode):
+    """Convert padding modes from `ndi.correlate` to `np.pad`."""
+    mode_translation_dict = dict(nearest='edge', reflect='symmetric',
+                                 mirror='reflect')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
+
+
+def _to_ndimage_mode(mode):
+    """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
+    mode_translation_dict = dict(constant='constant', edge='nearest',
+                                 symmetric='reflect', reflect='mirror',
+                                 wrap='wrap')
+    if mode not in mode_translation_dict:
+        raise ValueError(
+            ("Unknown mode: '{}', or cannot translate mode. The "
+             "mode should be one of 'constant', 'edge', 'symmetric', "
+             "'reflect', or 'wrap'. See the documentation of numpy.pad for"
+             "more info.").format(mode))
+    return _fix_ndimage_mode(mode_translation_dict[mode])
+
+
+def _fix_ndimage_mode(mode):
+    # SciPy 1.6.0 introduced grid variants of constant and wrap which
+    # have less surprising behavior for images. Use these when available
+    grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        mode = grid_modes.get(mode, mode)
+    return mode

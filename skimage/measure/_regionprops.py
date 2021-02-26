@@ -93,9 +93,9 @@ COL_DTYPES = {
     'label': int,
     'local_centroid': float,
     'major_axis_length': float,
-    'max_intensity': int,
+    'max_intensity': float,
     'mean_intensity': float,
-    'min_intensity': int,
+    'min_intensity': float,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -398,7 +398,8 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0)
+        return np.max(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def mean_intensity(self):
@@ -406,7 +407,8 @@ class RegionProperties:
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0)
+        return np.min(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def major_axis_length(self):
