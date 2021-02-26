@@ -1,13 +1,16 @@
 import numpy as np
+from numpy.lib import NumpyVersion
+import scipy
 from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, _to_ndimage_mode)
+                         ProjectiveTransform)
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float, _validate_interpolation_order)
+                             convert_to_float, _to_ndimage_mode,
+                             _validate_interpolation_order)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -115,6 +118,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     factors = (np.asarray(input_shape, dtype=float) /
                np.asarray(output_shape, dtype=float))
 
+    # Translate modes used by np.pad to those used by scipy.ndimage
+    ndi_mode = _to_ndimage_mode(mode)
     if anti_aliasing:
         if anti_aliasing_sigma is None:
             anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
@@ -127,28 +132,22 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
             elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
-
-        # Translate modes used by np.pad to those used by ndi.gaussian_filter
-        np_pad_to_ndimage = {
-            'constant': 'constant',
-            'edge': 'nearest',
-            'symmetric': 'reflect',
-            'reflect': 'mirror',
-            'wrap': 'wrap'
-        }
-        try:
-            ndi_mode = np_pad_to_ndimage[mode]
-        except KeyError:
-            raise ValueError("Unknown mode, or cannot translate mode. The "
-                             "mode should be one of 'constant', 'edge', "
-                             "'symmetric', 'reflect', or 'wrap'. See the "
-                             "documentation of numpy.pad for more info.")
-
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                     cval=cval, mode=ndi_mode)
 
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        # The grid_mode kwarg was introduced in SciPy 1.6.0
+        order = _validate_interpolation_order(image.dtype, order)
+        zoom_factors = [1 / f for f in factors]
+        image = convert_to_float(image, preserve_range)
+        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
+                       cval=cval, grid_mode=True)
+        _clip_warp_output(image, out, order, mode, cval, clip)
+
+    # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
+
     # 2-dimensional interpolation
-    if len(output_shape) == 2 or (len(output_shape) == 3 and
+    elif len(output_shape) == 2 or (len(output_shape) == 3 and
                                   output_shape[2] == input_shape[2]):
         rows = output_shape[0]
         cols = output_shape[1]
@@ -189,7 +188,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
         image = convert_to_float(image, preserve_range)
 
-        ndi_mode = _to_ndimage_mode(mode)
         out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 

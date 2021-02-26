@@ -47,6 +47,7 @@ class TestColorconv(TestCase):
     img_rgba = np.array([[[0, 0.5, 1, 0],
                           [0, 0.5, 1, 1],
                           [0, 0.5, 1, 0.5]]]).astype(float)
+    img_stains = img_as_float(img_rgb) * 0.3
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
@@ -183,32 +184,33 @@ class TestColorconv(TestCase):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
 
-    # RGB<->HED roundtrip with ubyte image
+    # HED<->RGB roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
-        img_rgb = img_as_ubyte(self.img_rgb)
-        new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
-        assert_equal(new, img_rgb)
+        img_in = img_as_ubyte(self.img_stains)
+        img_out = rgb2hed(hed2rgb(img_in))
+        assert_equal(img_as_ubyte(img_out), img_in)
 
-    # RGB<->HED roundtrip with float image
+    # HED<->RGB roundtrip with float image
     def test_hed_rgb_float_roundtrip(self):
-        img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(hed2rgb(rgb2hed(img_rgb)), img_rgb)
+        img_in = self.img_stains
+        img_out = rgb2hed(hed2rgb(img_in))
+        assert_array_almost_equal(img_out, img_in)
 
-    # RGB<->HDX roundtrip with ubyte image
-    def test_hdx_rgb_roundtrip(self):
-        from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
-        img_rgb = self.img_rgb
-        conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
-                              rgb_from_hdx)
-        assert_equal(img_as_ubyte(conv), img_rgb)
+    # BRO<->RGB roundtrip with ubyte image
+    def test_bro_rgb_roundtrip(self):
+        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
+        img_in = img_as_ubyte(self.img_stains)
+        img_out = combine_stains(img_in, rgb_from_bro)
+        img_out = separate_stains(img_out, bro_from_rgb)
+        assert_equal(img_as_ubyte(img_out), img_in)
 
-    # RGB<->HDX roundtrip with float image
-    def test_hdx_rgb_roundtrip_float(self):
-        from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
-        img_rgb = img_as_float(self.img_rgb)
-        conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
-                              rgb_from_hdx)
-        assert_array_almost_equal(conv, img_rgb)
+    # BRO<->RGB roundtrip with float image
+    def test_bro_rgb_roundtrip_float(self):
+        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
+        img_in = self.img_stains
+        img_out = combine_stains(img_in, rgb_from_bro)
+        img_out = separate_stains(img_out, bro_from_rgb)
+        assert_array_almost_equal(img_out, img_in)
 
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):

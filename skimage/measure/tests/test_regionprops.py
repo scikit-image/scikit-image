@@ -1,4 +1,5 @@
 import math
+from collections.abc import Iterable
 
 import numpy as np
 from numpy import array
@@ -30,6 +31,7 @@ SAMPLE = np.array(
 )
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
+INTENSITY_FLOAT_SAMPLE = INTENSITY_SAMPLE.copy().astype(np.float64) / 10.0
 
 SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
 SAMPLE_MULTIPLE[3:5, 7:8] = 2
@@ -573,6 +575,17 @@ def test_regionprops_table():
     assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_regionprops_table_equal_to_original():
+    regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
+    out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
+                                  properties=COL_DTYPES.keys())
+
+    for prop in COL_DTYPES.keys():
+        for i in range(len(regions)):
+            if not isinstance(regions[i][prop], Iterable):
+                assert regions[i][prop] == out_table[prop][i]
 
 
 def test_regionprops_table_no_regions():

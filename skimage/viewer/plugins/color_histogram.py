@@ -27,7 +27,7 @@ class ColorHistogram(PlotPlugin):
         # Calculate color histogram in the Lab colorspace:
         L, a, b = self.lab_image.T
         left, right = -100, 100
-        ab_extents = [left, right, right, left]
+        ab_extents = [left - 0.5, right + 0.5, right + 0.5, left - 0.5]
         self.mask = np.ones(L.shape, bool)
         bins = np.arange(left, right)
         hist, x_edges, y_edges = np.histogram2d(a.flatten(), b.flatten(),

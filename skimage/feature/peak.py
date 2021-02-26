@@ -281,7 +281,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             # Get roi mask
             label_mask = labels[roi] == label_idx + 1
             # Extract image roi
-            img_object = image[roi]
+            img_object = image[roi].copy()
             # Ensure masked values don't affect roi's local peaks
             img_object[np.logical_not(label_mask)] = bg_val
 

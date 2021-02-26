@@ -57,9 +57,10 @@ from ..._shared.utils import check_nD, warn
 
 from . import generic_cy
 
-__all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
+
+__all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
-           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
+           'enhance_contrast', 'pop', 'threshold', 'noise_filter',
            'entropy', 'otsu']
 
 
@@ -385,62 +386,6 @@ def autolevel(image, selem, out=None, mask=None,
                                           selem, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-
-
-def bottomhat(image, selem, out=None, mask=None, shift_x=False,
-              shift_y=False):
-    """Local bottom-hat of an image.
-
-    This filter computes the morphological closing of the image and then
-    subtracts the result from the original image.
-
-    Parameters
-    ----------
-    image : 2-D array (integer or float)
-        Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
-        If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
-
-    Returns
-    -------
-    out : 2-D array (same dtype as input image)
-        Output image.
-
-    Warns
-    -----
-    Deprecated:
-        .. versionadded:: 0.17
-
-        This function is deprecated and will be removed in scikit-image 0.19.
-        This filter was misnamed and we believe that the usefulness is narrow.
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk
-    >>> from skimage.filters.rank import bottomhat
-    >>> img = data.camera()
-    >>> out = bottomhat(img, disk(5))  # doctest: +SKIP
-
-    """
-    warnings.warn("rank.bottomhat is deprecated. This filter is named"
-                  " incorrectly, which can be confusing."
-                  " As we believe that the usefulness is narrow,"
-                  " this function will be removed in 0.19.",
-                  stacklevel=2, category=FutureWarning)
-
-    return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def equalize(image, selem, out=None, mask=None,
@@ -1160,61 +1105,6 @@ def threshold(image, selem, out=None, mask=None,
                                           selem, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-
-
-def tophat(image, selem, out=None, mask=None, shift_x=False,
-           shift_y=False):
-    """Local top-hat of an image.
-
-    This filter computes the morphological opening of the image and then
-    subtracts the result from the original image.
-
-    Parameters
-    ----------
-    image : 2-D array (integer or float)
-        Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
-        If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
-
-    Returns
-    -------
-    out : 2-D array (same dtype as input image)
-        Output image.
-
-    Warns
-    -----
-    Deprecated:
-        .. versionadded:: 0.17
-
-        This function is deprecated and will be removed in scikit-image 0.19.
-        This filter was misnamed and we believe that the usefulness is narrow.
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk
-    >>> from skimage.filters.rank import tophat
-    >>> img = data.camera()
-    >>> out = tophat(img, disk(5))  # doctest: +SKIP
-
-    """
-    warnings.warn("rank.tophat is deprecated. This filter is named"
-                  " incorrectly, which can be confusing."
-                  " As we believe that the usefulness is narrow,"
-                  " this function will be removed in 0.19.",
-                  stacklevel=2, category=FutureWarning)
-    return _apply_scalar_per_pixel(generic_cy._tophat, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def noise_filter(image, selem, out=None, mask=None,
