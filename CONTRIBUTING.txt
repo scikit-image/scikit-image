@@ -192,7 +192,7 @@ Guidelines
   :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
 * No changes are ever merged without review and approval by two core team members.
   There is an exception to this rule: pull requests which affect only the documentation
-  require review and approval by only one core team member. Reach out on the
+  require review and approval by only one core team member in most cases. If the maintainer feels the changes are large or likely to be controversial, two reviews should still be encouraged. Reach out on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
