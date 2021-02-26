@@ -14,20 +14,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, parametrize, fetch
 import pytest
 
-# To be removed along with tophat and bottomhat functions.
-all_rank_filters.remove('tophat')
-all_rank_filters.remove('bottomhat')
-
-
-def test_deprecation():
-    selem = disk(3)
-    image = img_as_ubyte(data.camera()[:50, :50])
-
-    with expected_warnings(['rank.tophat is deprecated.']):
-        rank.tophat(image, selem)
-    with expected_warnings(['rank.bottomhat is deprecated.']):
-        rank.bottomhat(image, selem)
-
 
 def test_otsu_edge_case():
     # This is an edge case that causes OTSU to appear to misbehave

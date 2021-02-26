@@ -71,7 +71,9 @@ Version 1.0
 
 * consider removing the argument `coordinates` in
   `skimage.segmentation.active_contour`, which has not effect.
-
+* In ``skimage/morphology/misc.py`` remove the deprecated parameter
+  ``in_place`` in remove_small_holes(), remove_small_objects() and
+  clear_border(), and update the tests.
 
 Other (2021)
 ------------
@@ -91,11 +93,6 @@ Other (2021)
 * Remove pillow version related warning for MPO file format in
   `io._plugins.pil_plugin.imread` when upgrading pillow min version to
   6.0.0
-* Specify atol value in `cg` calls and remove condition on scipy's version in
-  ``skimage/segmentation/random_walker_segmentation.py`` when ``scipy`` upgrades
-  to 1.1.
-* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1.
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 
@@ -108,9 +105,9 @@ Other (2022)
 
 Other (2023)
 ------------
-* When ``scipy`` is set to >= 1.16, remove legacy (i.e. non-zoom) code paths in
+* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
   ``skimage.transform.resize``.
-* When ``scipy`` is set to >= 1.16, remove SciPy version checks from
+* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
   ``skimage._shared.utils._fix_ndimage_mode``
 
 Other

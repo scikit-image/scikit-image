@@ -9,7 +9,7 @@
     "project_url": "https://scikit-image.org/",
     "repo": ".",
 
-    "branches": ["master"],
+    "branches": ["main"],
     "dvcs": "git",
     "environment_type": "conda",
     "install_timeout": 1200,

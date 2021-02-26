@@ -42,12 +42,6 @@ except ImportError:
 from ..util import img_as_float
 
 from scipy.sparse.linalg import cg, spsolve
-import scipy
-from distutils.version import LooseVersion as Version
-import functools
-
-if Version(scipy.__version__) >= Version('1.1'):
-    cg = functools.partial(cg, atol=0)
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
@@ -125,7 +119,7 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
         edges = inv_idx.reshape(edges.shape)
 
     # Build the sparse linear system
-    pixel_nb = edges.shape[1]
+    pixel_nb = l_x * l_y * l_z
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
@@ -197,7 +191,8 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, i].toarray(),
+               tol=tol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])]
         if np.any([info > 0 for _, info in cg_out]):
             warn("Conjugate gradient convergence to tolerance not achieved. "
