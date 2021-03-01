@@ -67,7 +67,10 @@ px.imshow(data[n_plane // 2], zmax=vmax)
 # sphinx_gallery_thumbnail_number = 2
 
 #####################################################################
-# Here you go, *fluorescence* microscopy!
+# Here you go, *fluorescence* microscopy! Actually, kidney tissue is
+# well-known for making a good microscope test slide, precisely because it has
+# a great amount of auto-fluorescence: Everything will look fairly bright,
+# regardless of the microscope settings.
 
 #####################################################################
 # Normalize range for each channel
@@ -98,8 +101,7 @@ print(f'range for channel 1: ({vmin_1}, {vmax_1})')
 print(f'range for channel 2: ({vmin_2}, {vmax_2})')
 
 #####################################################################
-# We may want to be very specific and pass value ranges on a per-channel
-# basis:
+# Let us be very specific and pass value ranges on a per-channel basis:
 
 px.imshow(
     data[n_plane // 2],
@@ -108,8 +110,14 @@ px.imshow(
 )
 
 #####################################################################
+# Plotly lets you interact with this visualization by panning, zooming in and
+# out, let alone exporting the desired figure as a static image in PNG format.
+
+#####################################################################
 # Explore slices as animation frames
 # ==================================
+# Click the play button to move along the ``z`` axis, through the stack of all
+# 16 slices.
 
 px.imshow(
     data,
@@ -131,3 +139,9 @@ px.imshow(
     binary_string=True,
     labels={'facet_col': 'channel', 'animation_frame': 'plane'}
 )
+
+#####################################################################
+# The biologist's eye can spot that the two bright blobs (best seen in
+# ``channel=2``) are kidney glomeruli [2]_.
+#
+# .. [2] https://en.wikipedia.org/wiki/Glomerulus_(kidney)
