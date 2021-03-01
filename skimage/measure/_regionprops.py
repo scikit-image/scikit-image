@@ -18,13 +18,17 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 PROPS = {
     'Area': 'area',
-    'BoundingBox': 'bbox',
     'AreaBoundingBox': 'area_bbox',
-    'MomentsCentral': 'moments_central',
-    'Centroid': 'centroid',
     'AreaConvex': 'area_convex',
+    'AreaFilled': 'area_filled',
+    'AxisMajorLength': 'axis_major_length',
+    'AxisMinorLength': 'axis_minor_length',
+    'BoundingBox': 'bbox',
+    'Centroid': 'centroid',
+    'CentroidLocal': 'centroid_local',
+    'CentroidWeighted': 'centroid_weighted',
+    'CentroidWeightedLocal': 'centroid_weighted_local',
     # 'ConvexHull',
-    'ImageConvex': 'image_convex',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
     'EquivalentDiameter': 'equivalent_diameter',
@@ -32,22 +36,24 @@ PROPS = {
     'Extent': 'extent',
     # 'Extrema',
     'FeretDiameterMax': 'feret_diameter_max',
-    'AreaFilled': 'area_filled',
-    'ImageFilled': 'image_filled',
-    'MomentsHu': 'moments_hu',
     'Image': 'image',
+    'ImageConvex': 'image_convex',
+    'ImageFilled': 'image_filled',
+    'ImageIntensity': 'image_intensity',
     'InertiaTensor': 'inertia_tensor',
     'InertiaTensorEigvals': 'inertia_tensor_eigvals',
-    'ImageIntensity': 'image_intensity',
-    'Label': 'label',
-    'CentroidLocal': 'centroid_local',
-    'AxisMajorLength': 'axis_major_length',
     'IntensityMax': 'intensity_max',
     'IntensityMean': 'intensity_mean',
     'IntensityMin': 'intensity_min',
-    'AxisMinorLength': 'axis_minor_length',
+    'Label': 'label',
     'Moments': 'moments',
+    'MomentsCentral': 'moments_central',
+    'MomentsHu': 'moments_hu',
     'MomentsNormalized': 'moments_normalized',
+    'MomentsWeighted': 'moments_weighted',
+    'MomentsWeightedCentral': 'moments_weighted_central',
+    'MomentsWeightedHu': 'moments_weighted_hu',
+    'MomentsWeightedNormalized': 'moments_weighted_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
     'PerimeterCrofton': 'perimeter_crofton',
@@ -56,12 +62,6 @@ PROPS = {
     'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
-    'MomentsWeightedCentral': 'moments_weighted_central',
-    'CentroidWeighted': 'centroid_weighted',
-    'MomentsWeightedHu': 'moments_weighted_hu',
-    'CentroidWeightedLocal': 'centroid_weighted_local',
-    'MomentsWeighted': 'moments_weighted',
-    'MomentsWeightedNormalized': 'moments_weighted_normalized'
 }
 
 OBJECT_COLUMNS = {
@@ -71,45 +71,45 @@ OBJECT_COLUMNS = {
 
 COL_DTYPES = {
     'area': int,
-    'bbox': int,
     'area_bbox': int,
-    'moments_central': float,
-    'centroid': float,
     'area_convex': int,
-    'image_convex': object,
+    'area_filled': int,
+    'axis_major_length': float,
+    'axis_minor_length': float,
+    'bbox': int,
+    'centroid': float,
+    'centroid_local': float,
+    'centroid_weighted': float,
+    'centroid_weighted_local': float,
     'coords': object,
     'eccentricity': float,
     'equivalent_diameter': float,
     'euler_number': int,
     'extent': float,
     'feret_diameter_max': float,
-    'area_filled': int,
-    'image_filled': object,
-    'moments_hu': float,
     'image': object,
+    'image_convex': object,
+    'image_filled': object,
+    'image_intensity': object,
     'inertia_tensor': float,
     'inertia_tensor_eigvals': float,
-    'image_intensity': object,
-    'label': int,
-    'centroid_local': float,
-    'axis_major_length': float,
     'intensity_max': float,
     'intensity_mean': float,
     'intensity_min': float,
-    'axis_minor_length': float,
+    'label': int,
     'moments': float,
+    'moments_central': float,
+    'moments_hu': float,
     'moments_normalized': float,
+    'moments_weighted': float,
+    'moments_weighted_central': float,
+    'moments_weighted_hu': float,
+    'moments_weighted_normalized': float,
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
-    'moments_weighted_central': float,
-    'centroid_weighted': float,
-    'moments_weighted_hu': float,
-    'centroid_weighted_local': float,
-    'moments_weighted': float,
-    'moments_weighted_normalized': float
 }
 
 PROP_VALS = set(PROPS.values())
@@ -927,19 +927,35 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     **area** : int
         Number of pixels of the region.
+    **area_bbox** : int
+        Number of pixels of bounding box.
+    **area_convex** : int
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
+    **area_filled** : int
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the image_filled.
+    **axis_major_length** : float
+        The length of the major axis of the ellipse that has the same
+        normalized second central moments as the region.
+    **axis_minor_length** : float
+        The length of the minor axis of the ellipse that has the same
+        normalized second central moments as the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
         ``[min_row; max_row)`` and ``[min_col; max_col)``.
-    **area_bbox** : int
-        Number of pixels of bounding box.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
-    **area_convex** : int
-        Number of pixels of convex hull image, which is the smallest convex
-        polygon that encloses the region.
-    **image_convex** : (H, J) ndarray
-        Binary convex hull image which has the same size as bounding box.
+    **centroid_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box.
+    **centroid_weighted** : array
+        Centroid coordinate tuple ``(row, col)`` weighted with intensity
+        image.
+    **centroid_weighted_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box, weighted with intensity image.
     **coords** : (N, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
@@ -962,37 +978,27 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours``. [5]_
-    **area_filled** : int
-        Number of pixels of the region will all the holes filled in. Describes
-        the area of the image_filled.
+    **image** : (H, J) ndarray
+        Sliced binary region image which has the same size as bounding box.
+    **image_convex** : (H, J) ndarray
+        Binary convex hull image which has the same size as bounding box.
     **image_filled** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
-    **image** : (H, J) ndarray
-        Sliced binary region image which has the same size as bounding box.
+    **image_intensity** : ndarray
+        Image inside region bounding box.
     **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The eigenvalues of the inertia tensor in decreasing order.
-    **image_intensity** : ndarray
-        Image inside region bounding box.
-    **label** : int
-        The label in the labeled input image.
-    **centroid_local** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box.
-    **axis_major_length** : float
-        The length of the major axis of the ellipse that has the same
-        normalized second central moments as the region.
     **intensity_max** : float
         Value with the greatest intensity in the region.
     **intensity_mean** : float
         Value with the mean intensity in the region.
     **intensity_min** : float
         Value with the least intensity in the region.
-    **axis_minor_length** : float
-        The length of the minor axis of the ellipse that has the same
-        normalized second central moments as the region.
+    **label** : int
+        The label in the labeled input image.
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
@@ -1014,26 +1020,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
-    **orientation** : float
-        Angle between the 0th axis (rows) and the major
-        axis of the ellipse that has the same second moments as the region,
-        ranging from `-pi/2` to `pi/2` counter-clockwise.
-    **perimeter** : float
-        Perimeter of object which approximates the contour as a line
-        through the centers of border pixels using a 4-connectivity.
-    **perimeter_crofton** : float
-        Perimeter of object approximated by the Crofton formula in 4
-        directions.
-    **slice** : tuple of slices
-        A slice to extract the object from the source image.
-    **solidity** : float
-        Ratio of pixels in the region to pixels of the convex hull image.
-    **centroid_weighted** : array
-        Centroid coordinate tuple ``(row, col)`` weighted with intensity
-        image.
-    **centroid_weighted_local** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box, weighted with intensity image.
     **moments_weighted** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
@@ -1059,6 +1045,20 @@ def regionprops(label_image, intensity_image=None, cache=True,
             wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+    **orientation** : float
+        Angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+    **perimeter** : float
+        Perimeter of object which approximates the contour as a line
+        through the centers of border pixels using a 4-connectivity.
+    **perimeter_crofton** : float
+        Perimeter of object approximated by the Crofton formula in 4
+        directions.
+    **slice** : tuple of slices
+        A slice to extract the object from the source image.
+    **solidity** : float
+        Ratio of pixels in the region to pixels of the convex hull image.
 
     Each region also supports iteration, so that you can do::
 
