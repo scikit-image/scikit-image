@@ -24,7 +24,7 @@ def test_salt():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.15
+    assert 0.11 < proportion <= 0.16
 
 
 def test_salt_p1():
@@ -35,9 +35,10 @@ def test_salt_p1():
 
 def test_singleton_dim():
     """Ensure images where size of a given dimension is 1 work correctly."""
-    image = np.random.rand(1, 20)
+    image = np.random.rand(1, 100)
     noisy = random_noise(image, mode='salt', amount=0.1, seed=42)
-    assert np.sum(noisy == 1) == 2
+    tolerance = 5e-2
+    assert abs(np.average(noisy == 1) - 0.1) <= tolerance
 
 
 def test_pepper():
@@ -62,7 +63,7 @@ def test_pepper():
 
     proportion = (float((cam_noisy_signed == -1).sum() - orig_zeros) /
                   (cam.shape[0] * cam.shape[1]))
-    assert 0.11 < proportion <= 0.15
+    assert 0.11 < proportion <= 0.16
 
 
 def test_salt_and_pepper():

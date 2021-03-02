@@ -5,7 +5,7 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
-def choose(p, shape, seed=None):
+def choose(p, shape):
     """
     Function to return Bernoulli trials at a given probability
     of a given size.
@@ -21,9 +21,6 @@ def choose(p, shape, seed=None):
         The probability that any given trial returns `True`.
     shape : int or tuple of ints
         The shape of the ndarray to return.
-    seed : {None, int, array_like[ints], SeedSequence, BitGenerator,
-        Generator}, optional
-        The seed to a (or a) numpy random generator.
 
     Returns
     -------
@@ -35,7 +32,7 @@ def choose(p, shape, seed=None):
         return np.zeros(shape, dtype=bool)
     if p == 1:
         return ~np.zeros(shape, dtype=bool)
-    PRNG = np.random.default_rng(seed)
+    PRNG = np.random.default_rng()
     return PRNG.random(
         size=shape,
         dtype=np.float32,
@@ -209,8 +206,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = choose(p, image.shape, seed)
-        salted = choose(q, image.shape, seed)
+        flipped = choose(p, image.shape)
+        salted = choose(q, image.shape)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip
