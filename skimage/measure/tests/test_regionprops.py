@@ -579,8 +579,7 @@ def test_regionprops_table():
 def test_regionprops_table_equal_to_original():
     regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
     out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
-                                  properties=COL_DTYPES.keys(),
-                                  separator="-")
+                                  properties=COL_DTYPES.keys())
 
     for prop, dtype in COL_DTYPES.items():
         for i, reg in enumerate(regions):
