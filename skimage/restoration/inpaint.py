@@ -40,7 +40,36 @@ def _get_neigh_coef(shape, center, coef_cache={}):
 
 def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                                       coef_vals, raveled_offsets, limits):
-    # Initialize sparse matrices
+    """Solve a (sparse) linear system corresponding to biharmonic inpainting.
+
+    This function creates a linear system of the form:
+
+    ``A @ u = b``
+
+    where ``A`` is a sparse matrix, ``b`` is a vector enforcing smoothness and
+    boundary constraints and ``u`` is the vector of inpainted values to be
+    (uniquely) determined by solving the linear system.
+
+    ``A`` is a sparse matrix of shape (n_mask, n_mask) where `n_mask``
+    corresponds to the number of non-zero values in ``mask`` (i.e. the number
+    of pixels to be inpainted). Each row in A will have a number of non-zero
+    values equal to the number of non-zero values in the biharmonic kernel,
+    ``neigh_coef_full``. In practice, biharmonic kernels with reduced extent
+    are used at the image borders. This matrix, ``A`` is the same for all
+    image channels (since the same inpainting mask is currently used for all
+    channels).
+
+    ``u`` is a dense matrix of shape ``(n_mask, n_channels)`` and represents
+    the vector of unknown values for each channel.
+
+    ``b`` is a dense matrix of shape ``(n_mask, n_channels)`` and represents
+    the desired output of convolving the solution with the biharmonic kernel.
+    At mask locations where there is no overlap with known values, ``b`` will
+    have a value of 0. This enforces the biharmonic smoothness constraint in
+    the interior of inpainting regions. For regions near the boundary that
+    overlap with known values, the entries in ``b`` enforce boundary conditions
+    designed to avoid discontinuity with the known values.
+    """
 
     n_channels = out.shape[-1]
     radius = neigh_coef_full.shape[0] // 2
@@ -156,6 +185,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # set use_umfpack to False so float32 data is supported
     result = spsolve(matrix_unknown, rhs, use_umfpack=False,
                      permc_spec='MMD_ATA')
+    1 / 0
     if result.ndim == 1:
         result = result[:, np.newaxis]
 
