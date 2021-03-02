@@ -185,7 +185,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # set use_umfpack to False so float32 data is supported
     result = spsolve(matrix_unknown, rhs, use_umfpack=False,
                      permc_spec='MMD_ATA')
-    1 / 0
     if result.ndim == 1:
         result = result[:, np.newaxis]
 
