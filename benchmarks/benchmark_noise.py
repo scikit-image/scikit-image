@@ -3,6 +3,7 @@
 import numpy as np
 from skimage import util
 
+
 class NoiseSuite:
     """Benchmark for noise routines in scikit-image."""
     params = ([0., 0.25, 0.50, 0.75, 1.], [0., 0.25, 0.50, 0.75, 1.])
