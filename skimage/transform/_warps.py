@@ -281,7 +281,7 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         if multichannel:
             scale = np.concatenate((scale, [1]))
     orig_shape = np.asarray(image.shape)
-    output_shape = np.round(scale * orig_shape)
+    output_shape = np.maximum(np.round(scale * orig_shape), 1)
     if multichannel:  # don't scale channel dimension
         output_shape[-1] = orig_shape[-1]
 
