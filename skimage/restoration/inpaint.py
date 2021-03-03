@@ -39,7 +39,7 @@ def _get_neigh_coef(shape, center, coef_cache={}, dtype=float):
 
 
 def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
-                                      coef_vals, raveled_offsets, limits):
+                                      coef_vals, raveled_offsets):
     """Solve a (sparse) linear system corresponding to biharmonic inpainting.
 
     This function creates a linear system of the form:
@@ -188,9 +188,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     if result.ndim == 1:
         result = result[:, np.newaxis]
 
-    # Handle enormous values on a per-channel basis
-    np.clip(result, a_min=limits[0], a_max=limits[1], out=result)
-
     out[mask_pts] = result
     return out
 
@@ -325,7 +322,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
             _inpaint_biharmonic_single_region(
                 image[roi_sl], mask_region, otmp,
-                neigh_coef_full, coef_vals, raveled_offsets, limits
+                neigh_coef_full, coef_vals, raveled_offsets
             )
             # assign output to the
             out[roi_sl] = otmp
@@ -341,9 +338,11 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         raveled_offsets = functools.reduce(operator.add, raveled_offsets)
 
         _inpaint_biharmonic_single_region(
-            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets,
-            limits
+            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
         )
+
+    # Handle enormous values on a per-channel basis
+    np.clip(out, a_min=limits[0], a_max=limits[1], out=out)
 
     if not multichannel:
         out = out[..., 0]
