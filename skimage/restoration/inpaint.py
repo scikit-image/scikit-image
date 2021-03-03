@@ -75,7 +75,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     radius = neigh_coef_full.shape[0] // 2
 
     edge_mask = np.ones(mask.shape, dtype=bool)
-    edge_mask[(slice(2, -2),) * mask.ndim] = 0
+    edge_mask[(slice(radius, -radius),) * mask.ndim] = 0
     boundary_mask = edge_mask * mask
     center_mask = ~edge_mask * mask
 
