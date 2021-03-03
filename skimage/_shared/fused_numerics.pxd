@@ -32,9 +32,3 @@ ctypedef fused np_real_numeric:
 ctypedef fused np_numeric:
     np_real_numeric
     np_complexes
-
-# Can't use const on fused types but instead must declare fused const types
-# See: https://github.com/cython/cython/issues/1772
-ctypedef fused const_floats:
-    const float
-    const double

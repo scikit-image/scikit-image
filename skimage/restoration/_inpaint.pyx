@@ -2,7 +2,7 @@ import numpy as np
 import cython
 
 cimport numpy as cnp
-from .._shared.fused_numerics cimport np_floats, const_floats
+from .._shared.fused_numerics cimport np_floats
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -16,9 +16,9 @@ cpdef Py_ssize_t _build_matrix_inner(
     # input arrays
     const Py_ssize_t[::1] center_i,
     const Py_ssize_t[::1] raveled_offsets,
-    const_floats[::1] coef_vals,
+    np_floats[::1] coef_vals,
     const short[::1] mask_flat,
-    const_floats[:, ::1] out_flat,
+    np_floats[:, ::1] out_flat,
     # output arrays
     Py_ssize_t[::1] row_idx_known,
     np_floats[:, ::1] data_known,
