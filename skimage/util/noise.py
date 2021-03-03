@@ -5,10 +5,9 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
-def choose(p, shape):
+def _bernoulli(p, shape):
     """
-    Function to return Bernoulli trials at a given probability
-    of a given size.
+    Bernoulli trails at a given probability of a given size.
 
     This function is meant as a lower-memory alternative to calls such as
     `np.random.choice([True, False], size=image.shape, p=[p, 1-p])`.
@@ -202,8 +201,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = choose(p, image.shape)
-        salted = choose(q, image.shape)
+        flipped = _bernoulli(p, image.shape)
+        salted = _bernoulli(q, image.shape)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip
