@@ -192,12 +192,15 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     return out
 
 
-def _get_ax_slices(props, axis, ndim, size, radius=2):
-    """Return slice objects to extract an ROI bounding box."""
+def _get_boundary_box_slices(mask_labeled, num_labels, radius):
+    """Return slices corresponding to bounding boxes for inpainting region."""
+    props = regionprops_table(mask_labeled, properties=('bbox',))
+    ndim = mask_labeled.ndim
     return [
-        slice(max(ax_start - radius, 0), min(ax_end + radius, size))
-        for ax_start, ax_end
-        in zip(props[f'bbox-{axis}'], props[f'bbox-{axis + ndim}'])
+        tuple([slice(max(props[f'bbox-{axis}'][i] - radius, 0),
+                     min(props[f'bbox-{axis + ndim}'][i] + radius, size))
+               for axis, size in enumerate(mask_labeled.shape)])
+        for i in range(num_labels)
     ]
 
 
@@ -260,23 +263,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     image = skimage.img_as_float(image)
     mask = mask.astype(bool)
 
-    if split_into_regions:
-        # Split inpainting mask into independent regions
-        mask = mask.astype(bool, copy=False)
-        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
-        mask_labeled, num_labels = label(mask_dilated, return_num=True)
-        mask_labeled *= mask
-
-        # create slices for cropping to each labeled region
-        props = regionprops_table(mask_labeled)
-        ndim = len(img_baseshape)
-
-        bbox_slices = list(
-            zip(*[_get_ax_slices(props, ax, ndim, img_baseshape[ax])
-                  for ax in range(ndim)])
-        )
-
     if not multichannel:
         image = image[..., np.newaxis]
     out = np.copy(image)
@@ -289,6 +275,17 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
                                                            coef_center,
                                                            coef_cache={},
                                                            dtype=out.dtype)
+
+    if split_into_regions:
+        # Split inpainting mask into independent regions
+        mask = mask.astype(bool, copy=False)
+        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
+        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+        mask_labeled, num_labels = label(mask_dilated, return_num=True)
+        mask_labeled *= mask
+
+        bbox_slices = _get_boundary_box_slices(mask_labeled, num_labels,
+                                               radius)
 
     # stride for the last spatial dimension
     channel_stride_bytes = out.strides[-2]
