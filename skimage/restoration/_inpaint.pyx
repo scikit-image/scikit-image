@@ -2,19 +2,7 @@ import numpy as np
 import cython
 
 cimport numpy as cnp
-from .._shared.fused_numerics cimport np_floats
-
-
- # Can't use "const np_floats[::1]", but instead must declare fused const types
- # See: https://github.com/cython/cython/issues/1772
-
-cdef fused const_float_1d_c:
-    const float[::1]
-    const double[::1]
-
-cdef fused const_floating_2d_c:
-    const float[:, ::1]
-    const double[:, ::1]
+from .._shared.fused_numerics cimport np_floats, const_floats
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -26,17 +14,17 @@ cpdef Py_ssize_t _build_matrix_inner(
     Py_ssize_t known_start_idx,
     Py_ssize_t unknown_start_idx,
     # input arrays
-    const Py_ssize_t [::1] center_i,
-    const Py_ssize_t [::1] raveled_offsets,
-    const_float_1d_c coef_vals,
-    const short [::1] mask_flat,
-    const_floating_2d_c out_flat,
+    const Py_ssize_t[::1] center_i,
+    const Py_ssize_t[::1] raveled_offsets,
+    const_floats[::1] coef_vals,
+    const short[::1] mask_flat,
+    const_floats[:, ::1] out_flat,
     # output arrays
-    Py_ssize_t [::1] row_idx_known,
-    np_floats [:, ::1] data_known,
-    Py_ssize_t [::1] row_idx_unknown,
-    Py_ssize_t [::1] col_idx_unknown,
-    np_floats [::1] data_unknown
+    Py_ssize_t[::1] row_idx_known,
+    np_floats[:, ::1] data_known,
+    Py_ssize_t[::1] row_idx_unknown,
+    Py_ssize_t[::1] col_idx_unknown,
+    np_floats[::1] data_unknown
 ):
     """Fill values in *_known and *_unkown"""
     cdef:
