@@ -7,7 +7,7 @@ In this tutorial, we explore interactively a biomedical image which has three
 spatial dimensions and three colour dimensions (channels).
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
-The data we use here correspond to kidney tissue which Genevieve Buckley
+The data we use here correspond to kidney tissue which was
 imaged with confocal fluorescence microscopy (more details at [1]_ under
 ``kidney-tissue-fluorescence.tif``).
 
@@ -67,10 +67,7 @@ px.imshow(data[n_plane // 2], zmax=vmax)
 # sphinx_gallery_thumbnail_number = 2
 
 #####################################################################
-# Here you go, *fluorescence* microscopy! Actually, kidney tissue is
-# well-known for making a good microscope test slide, precisely because it has
-# a great amount of auto-fluorescence: Everything will look fairly bright,
-# regardless of the microscope settings.
+# Here you go, *fluorescence* microscopy!
 
 #####################################################################
 # Normalize range for each channel
