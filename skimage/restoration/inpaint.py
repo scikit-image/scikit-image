@@ -80,8 +80,8 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     center_mask = ~edge_mask * mask
 
     boundary_pts = np.where(boundary_mask)
-    boundary_i = np.where(boundary_mask.ravel())[0]
-    center_i = np.where(center_mask.ravel())[0]
+    boundary_i = np.flatnonzero(boundary_mask)
+    center_i = np.flatnonzero(center_mask)
     mask_i = np.concatenate((boundary_i, center_i))
 
     center_pts = np.where(center_mask)
@@ -100,8 +100,9 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     # due to edge effects (the kernel itself gets shrunk in size near the
     # edges, but that isn't accounted for here). We can trim any excess entries
     # later.
-    n_mask = mask.sum()
-    nnz_rhs_vector_max = n_mask - (tmp == structure.sum()).sum()
+    n_mask = np.count_nonzero(mask)
+    n_struct = np.count_nonzero(structure)
+    nnz_rhs_vector_max = n_mask - np.count_nonzero(tmp == n_struct)
 
     # pre-allocate arrays storing sparse matrix indices and values
     row_idx_known = np.empty(nnz_rhs_vector_max, dtype=np.intp)
