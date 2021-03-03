@@ -153,7 +153,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     row_start = mask_pt_n + 1
     known_start_idx = idx_known
     unknown_start_idx = idx_unknown
-
     nnz_rhs = _build_matrix_inner(
         # starting indices
         row_start, known_start_idx, unknown_start_idx,
@@ -189,11 +188,9 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         result = result[:, np.newaxis]
 
     # Handle enormous values on a per-channel basis
-    for ch in range(n_channels):
-        result[..., ch] = np.clip(result[..., ch], *limits[ch])
+    np.clip(result, a_min=limits[0], a_max=limits[1], out=result)
 
     out[mask_pts] = result
-
     return out
 
 
@@ -300,10 +297,8 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     offsets = tuple(c - radius for c in coef_idx)
 
     # determine per-channel intensity limits
-    limits = []
-    for ch in range(out.shape[-1]):
-        known_points = image[..., ch][~mask]
-        limits.append((np.min(known_points), np.max(known_points)))
+    known_points = image[~mask]
+    limits = (known_points.min(axis=0), known_points.max(axis=0))
 
     if split_into_regions:
         for idx_region in range(1, num_labels + 1):
