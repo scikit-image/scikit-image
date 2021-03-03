@@ -32,11 +32,7 @@ def choose(p, shape):
         return np.zeros(shape, dtype=bool)
     if p == 1:
         return ~np.zeros(shape, dtype=bool)
-    PRNG = np.random.default_rng()
-    return PRNG.random(
-        size=shape,
-        dtype=np.float32,
-    ) <= p
+    return np.random.random(shape) <= p
 
 
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
