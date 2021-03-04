@@ -265,6 +265,16 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
                                                            coef_cache={},
                                                            dtype=out.dtype)
 
+    # stride for the last spatial dimension
+    channel_stride_bytes = out.strides[-2]
+
+    # offsets to all neighboring non-zero elements in the footprint
+    offsets = tuple(c - radius for c in coef_idx)
+
+    # determine per-channel intensity limits
+    known_points = image[~mask]
+    limits = (known_points.min(axis=0), known_points.max(axis=0))
+
     if split_into_regions:
         # Split inpainting mask into independent regions
         mask = mask.astype(bool, copy=False)
@@ -282,17 +292,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             for bb_slice in bbox_slices
         ]
 
-    # stride for the last spatial dimension
-    channel_stride_bytes = out.strides[-2]
-
-    # offsets to all neighboring non-zero elements in the footprint
-    offsets = tuple(c - radius for c in coef_idx)
-
-    # determine per-channel intensity limits
-    known_points = image[~mask]
-    limits = (known_points.min(axis=0), known_points.max(axis=0))
-
-    if split_into_regions:
         for idx_region in range(1, num_labels + 1):
 
             # extract only the region surrounding the label of interest
