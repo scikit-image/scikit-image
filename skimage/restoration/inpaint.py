@@ -193,18 +193,6 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     return out
 
 
-def _get_boundary_box_slices(mask_labeled, num_labels, radius):
-    """Return slices corresponding to bounding boxes for inpainting region."""
-    props = regionprops_table(mask_labeled, properties=('bbox',))
-    ndim = mask_labeled.ndim
-    return [
-        tuple([slice(max(props[f'bbox-{axis}'][i] - radius, 0),
-                     min(props[f'bbox-{axis + ndim}'][i] + radius, size))
-               for axis, size in enumerate(mask_labeled.shape)])
-        for i in range(num_labels)
-    ]
-
-
 def inpaint_biharmonic(image, mask, multichannel=False, *,
                        split_into_regions=False):
     """Inpaint masked points in image with biharmonic equations.
@@ -280,13 +268,19 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     if split_into_regions:
         # Split inpainting mask into independent regions
         mask = mask.astype(bool, copy=False)
-        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+        kernel = ndi.generate_binary_structure(mask.ndim, 1)
+        mask_dilated = ndi.binary_dilation(mask, structure=kernel)
         mask_labeled, num_labels = label(mask_dilated, return_num=True)
         mask_labeled *= mask
 
-        bbox_slices = _get_boundary_box_slices(mask_labeled, num_labels,
-                                               radius)
+        bbox_slices = ndi.find_objects(mask_labeled)
+        # expand object bounding boxes by the biharmonic kernel radius
+        bbox_slices = [
+            tuple(slice(max(sl.start - radius, 0),
+                        min(sl.stop + radius, size))
+                  for sl, size in zip(bb_slice, mask_labeled.shape))
+            for bb_slice in bbox_slices
+        ]
 
     # stride for the last spatial dimension
     channel_stride_bytes = out.strides[-2]
