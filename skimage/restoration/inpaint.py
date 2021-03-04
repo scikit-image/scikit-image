@@ -277,17 +277,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
                                                            coef_cache={},
                                                            dtype=out.dtype)
 
-    if split_into_regions:
-        # Split inpainting mask into independent regions
-        mask = mask.astype(bool, copy=False)
-        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
-        mask_labeled, num_labels = label(mask_dilated, return_num=True)
-        mask_labeled *= mask
-
-        bbox_slices = _get_boundary_box_slices(mask_labeled, num_labels,
-                                               radius)
-
     # stride for the last spatial dimension
     channel_stride_bytes = out.strides[-2]
 
@@ -299,6 +288,16 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     limits = (known_points.min(axis=0), known_points.max(axis=0))
 
     if split_into_regions:
+        # Split inpainting mask into independent regions
+        mask = mask.astype(bool, copy=False)
+        kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
+        mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+        mask_labeled, num_labels = label(mask_dilated, return_num=True)
+        mask_labeled *= mask
+
+        bbox_slices = _get_boundary_box_slices(mask_labeled, num_labels,
+                                               radius)
+
         for idx_region in range(1, num_labels + 1):
 
             # extract only the region surrounding the label of interest
