@@ -13,8 +13,8 @@ from ._inpaint import _build_matrix_inner
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
-    bounds_lo = tuple(max(p - radius, 0) for p in nd_idx)
-    bounds_hi = tuple(min(p + radius + 1, s) for p, s in zip(nd_idx, nd_shape))
+    bounds_lo = np.maximum(nd_idx - radius, 0)
+    bounds_hi = np.minimum(nd_idx + radius + 1, nd_shape)
     return bounds_lo, bounds_hi
 
 
@@ -33,6 +33,7 @@ def _get_neigh_coef(shape, center, coef_cache_dict=None, dtype=float):
         # extract non-zero locations and values
         coef_idx = np.where(neigh_coef)
         coef_vals = neigh_coef[coef_idx]
+        coef_idx = np.stack(coef_idx)
 
         # cache the result
         if use_cache:
@@ -122,20 +123,21 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     idx_known = 0
     idx_unknown = 0
     mask_pt_n = -1
-    for mask_pt_n, mask_pt_idx in enumerate(zip(*boundary_pts)):
+    boundary_pts = np.stack(boundary_pts, axis=1)
+    for mask_pt_n, nd_idx in enumerate(boundary_pts):
         # Get bounded neighborhood of selected radius
-        b_lo, b_hi = _get_neighborhood(mask_pt_idx, radius, out.shape)
+        b_lo, b_hi = _get_neighborhood(nd_idx, radius, mask.shape)
 
         # Create (truncated) biharmonic coefficients ndarray
-        coef_shape = tuple(hi - lo for lo, hi in zip(b_lo, b_hi))
-        coef_center = tuple(p - lo for p, lo in zip(mask_pt_idx, b_lo))
+        coef_shape = tuple(b_hi - b_lo)
+        coef_center = tuple(nd_idx - b_lo)
         neigh_coef, coef_idx, coefs = _get_neigh_coef(coef_shape,
                                                       coef_center,
                                                       coef_cache,
                                                       dtype=out.dtype)
 
         # compute corresponding 1d indices into the mask
-        coef_idx = tuple(c + b for c, b in zip(coef_idx, b_lo))
+        coef_idx = coef_idx + b_lo[:, np.newaxis]
         index1d = np.ravel_multi_index(coef_idx, mask.shape)
 
         # Iterate over masked point's neighborhood
@@ -270,7 +272,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     channel_stride_bytes = out.strides[-2]
 
     # offsets to all neighboring non-zero elements in the footprint
-    offsets = tuple(c - radius for c in coef_idx)
+    offsets = coef_idx - radius
 
     # determine per-channel intensity limits
     known_points = image[~mask]
@@ -298,13 +300,10 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             otmp = out[roi_sl].copy()
 
             # compute raveled offsets for the ROI
-            ostrides = tuple(s // channel_stride_bytes
-                             for s in otmp[..., 0].strides)
-            raveled_offsets = tuple(
-                ax_off * ax_stride
-                for ax_off, ax_stride in zip(offsets, ostrides)
-            )
-            raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+            ostrides = np.array([s // channel_stride_bytes
+                                 for s in otmp[..., 0].strides])
+            raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis],
+                                     axis=0)
 
             _inpaint_biharmonic_single_region(
                 image[roi_sl], mask_region, otmp,
@@ -313,15 +312,10 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
             # assign output to the
             out[roi_sl] = otmp
     else:
-        ostrides = tuple(s // channel_stride_bytes
-                         for s in out[..., 0].strides)
-
         # compute raveled offsets for output image
-        raveled_offsets = tuple(
-            ax_off * ax_stride
-            for ax_off, ax_stride in zip(offsets, ostrides)
-        )
-        raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+        ostrides = np.array([s // channel_stride_bytes
+                             for s in out[..., 0].strides])
+        raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis], axis=0)
 
         _inpaint_biharmonic_single_region(
             image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
