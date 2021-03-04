@@ -58,7 +58,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     ----------
     image : ndarray
         Input image.
-    sigma : float or tuple of float, optional
+    sigma : float or array-like of float, optional
         Standard deviation used for the Gaussian kernel, which is used as a
         weighting function for the local summation of squared differences.
         If sigma is a tuple, its length must be equal to `image.ndim` and each
