@@ -18,11 +18,12 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _get_neigh_coef(shape, center, coef_cache={}, dtype=float):
+def _get_neigh_coef(shape, center, coef_cache_dict=None, dtype=float):
     """Create biharmonic coefficients ndarray."""
+    use_cache = coef_cache_dict is not None
     key = (shape, center)
-    if key in coef_cache:
-        neigh_coef, coef_idx, coef_vals = coef_cache[key]
+    if use_cache and key in coef_cache_dict:
+        neigh_coef, coef_idx, coef_vals = coef_cache_dict[key]
     else:
         # Create biharmonic coefficients ndarray
         neigh_coef = np.zeros(shape, dtype=dtype)
@@ -34,7 +35,8 @@ def _get_neigh_coef(shape, center, coef_cache={}, dtype=float):
         coef_vals = neigh_coef[coef_idx]
 
         # cache the result
-        coef_cache[key] = (neigh_coef, coef_idx, coef_vals)
+        if use_cache:
+            coef_cache_dict[key] = (neigh_coef, coef_idx, coef_vals)
     return neigh_coef, coef_idx, coef_vals
 
 
@@ -262,7 +264,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     coef_center = (radius,) * mask.ndim
     neigh_coef_full, coef_idx, coef_vals = _get_neigh_coef(coef_shape,
                                                            coef_center,
-                                                           coef_cache={},
                                                            dtype=out.dtype)
 
     # stride for the last spatial dimension
