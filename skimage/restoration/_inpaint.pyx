@@ -17,7 +17,7 @@ cpdef Py_ssize_t _build_matrix_inner(
     const Py_ssize_t[::1] center_i,
     const Py_ssize_t[::1] raveled_offsets,
     np_floats[::1] coef_vals,
-    const short[::1] mask_flat,
+    const char[::1] mask_flat,
     np_floats[:, ::1] out_flat,
     # output arrays
     Py_ssize_t[::1] row_idx_known,
@@ -28,28 +28,25 @@ cpdef Py_ssize_t _build_matrix_inner(
 ):
     """Fill values in *_known and *_unkown"""
     cdef:
-        Py_ssize_t i, o, ch
+        Py_ssize_t ch
         Py_ssize_t row_idx, known_idx, unknown_idx, loc, n_known
-        Py_ssize_t num_offsets = len(raveled_offsets)
-        Py_ssize_t npix = len(center_i)
         np_floats cval
         int nchannels = data_known.shape[1]
 
     row_idx = row_start
     known_idx = known_start_idx
     unknown_idx = unknown_start_idx
-    for i in range(npix):
+
+    for c_i in center_i:
         n_known = 0
-        for o in range(num_offsets):
-            loc = center_i[i] + raveled_offsets[o]
-            cval = coef_vals[o]
+        for offset, cval in zip(raveled_offsets, coef_vals):
+            loc = c_i + offset
             if mask_flat[loc]:
                 data_unknown[unknown_idx] = cval
                 row_idx_unknown[unknown_idx] = row_idx
                 col_idx_unknown[unknown_idx] = loc
                 unknown_idx += 1
             else:
-                cval = coef_vals[o]
                 for ch in range(nchannels):
                     data_known[known_idx, ch] -= cval * out_flat[loc, ch]
                 n_known += 1

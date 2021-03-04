@@ -13,8 +13,8 @@ from ._inpaint import _build_matrix_inner
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
-    bounds_lo = tuple(max(p - radius, 0) for p in nd_idx)
-    bounds_hi = tuple(min(p + radius + 1, s) for p, s in zip(nd_idx, nd_shape))
+    bounds_lo = np.maximum(nd_idx - radius, 0)
+    bounds_hi = np.minimum(nd_idx + radius + 1, nd_shape)
     return bounds_lo, bounds_hi
 
 
@@ -115,7 +115,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     coef_cache = {}
 
     # Iterate over masked points near the boundary
-    mask_flat = mask.ravel()
+    mask_flat = mask.reshape(-1)
     out_flat = np.ascontiguousarray(out.reshape((-1, n_channels)))
     idx_known = 0
     idx_unknown = 0
@@ -133,7 +133,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
                                                       dtype=out.dtype)
 
         # compute corresponding 1d indices into the mask
-        coef_idx = [c + b for c, b in zip(coef_idx, b_lo)]
+        coef_idx += b_lo
         index1d = np.ravel_multi_index(coef_idx, mask.shape)
 
         # Iterate over masked point's neighborhood
@@ -159,7 +159,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         # starting indices
         row_start, known_start_idx, unknown_start_idx,
         # input arrays
-        center_i, raveled_offsets, coef_vals, mask_flat.astype(np.int16),
+        center_i, raveled_offsets, coef_vals, mask_flat,
         out_flat,
         # output arrays
         row_idx_known, data_known, row_idx_unknown, col_idx_unknown,
@@ -250,7 +250,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         raise TypeError('Masked arrays are not supported')
 
     image = skimage.img_as_float(image)
-    mask = mask.astype(bool)
+    mask = mask.astype(bool, copy=False)
 
     if not multichannel:
         image = image[..., np.newaxis]
@@ -269,7 +269,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     channel_stride_bytes = out.strides[-2]
 
     # offsets to all neighboring non-zero elements in the footprint
-    offsets = tuple(c - radius for c in coef_idx)
+    offsets = coef_idx - radius
 
     # determine per-channel intensity limits
     known_points = image[~mask]
@@ -277,39 +277,29 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
 
     if split_into_regions:
         # Split inpainting mask into independent regions
-        mask = mask.astype(bool, copy=False)
         kernel = ndi.generate_binary_structure(mask.ndim, 1)
         mask_dilated = ndi.binary_dilation(mask, structure=kernel)
         mask_labeled, num_labels = label(mask_dilated, return_num=True)
         mask_labeled *= mask
 
         bbox_slices = ndi.find_objects(mask_labeled)
-        # expand object bounding boxes by the biharmonic kernel radius
-        bbox_slices = [
-            tuple(slice(max(sl.start - radius, 0),
-                        min(sl.stop + radius, size))
-                  for sl, size in zip(bb_slice, mask_labeled.shape))
-            for bb_slice in bbox_slices
-        ]
 
-        for idx_region in range(1, num_labels + 1):
-
+        for idx_region, bb_slice in enumarate(bbox_slices, 1):
+            # expand object bounding boxes by the biharmonic kernel radius
+            roi_sl = tuple(slice(max(sl.start - radius, 0),
+                                 min(sl.stop + radius, size))
+                           for sl, size in zip(bb_slice, mask_labeled.shape))
             # extract only the region surrounding the label of interest
-            roi_sl = bbox_slices[idx_region - 1]
             mask_region = mask_labeled[roi_sl] == idx_region
             # add slice for axes
-            roi_sl = tuple(list(roi_sl) + [slice(None)])
+            roi_sl += (slice(None), )
             # copy for contiguity and to account for possible ROI overlap
             otmp = out[roi_sl].copy()
 
             # compute raveled offsets for the ROI
             ostrides = tuple(s // channel_stride_bytes
                              for s in otmp[..., 0].strides)
-            raveled_offsets = tuple(
-                ax_off * ax_stride
-                for ax_off, ax_stride in zip(offsets, ostrides)
-            )
-            raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+            raveled_offsets = np.multiply(offsets, ostrides).sum()
 
             _inpaint_biharmonic_single_region(
                 image[roi_sl], mask_region, otmp,
@@ -322,11 +312,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
                          for s in out[..., 0].strides)
 
         # compute raveled offsets for output image
-        raveled_offsets = tuple(
-            ax_off * ax_stride
-            for ax_off, ax_stride in zip(offsets, ostrides)
-        )
-        raveled_offsets = functools.reduce(operator.add, raveled_offsets)
+        raveled_offsets = np.multiply(offsets, ostrides).sum()
 
         _inpaint_biharmonic_single_region(
             image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
