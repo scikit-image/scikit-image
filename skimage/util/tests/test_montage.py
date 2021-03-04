@@ -52,7 +52,6 @@ def test_montage_simple_rgb(channel_pos=-1):
     assert_array_equal(arr_out, arr_ref)
 
 
-
 @testing.parametrize('channel_axis', (0, 1, 2, 3, -1, -2, -3, -4))
 def test_montage_simple_rgb_channel_axes(channel_axis):
     n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
@@ -88,7 +87,7 @@ def test_montage_simple_rgb_channel_axes(channel_axis):
 def test_montage_invalid_channel_axes(channel_axis):
     arr_in = np.arange(16, dtype=float).reshape(2, 2, 2, 2)
     with testing.raises(np.AxisError):
-        arr_out = montage(arr_in, channel_axis=channel_axis)
+        montage(arr_in, channel_axis=channel_axis)
 
 
 def test_montage_fill_gray():
@@ -123,7 +122,7 @@ def test_montage_grid_custom_gray():
 
     arr_out = montage(arr_in, grid_shape=(3, 2))
     arr_ref = np.array(
-	[[  0.,   1.,   4.,   5.],
+        [[  0.,   1.,   4.,   5.],
          [  2.,   3.,   6.,   7.],
          [  8.,   9.,  12.,  13.],
          [ 10.,  11.,  14.,  15.],
