@@ -241,7 +241,7 @@ class channel_as_last_axis():
                 raise ValueError(
                     "only a single channel axis is currently suported")
 
-            if channel_axis is (-1,):
+            if channel_axis == (-1,):
                 return func(*args, **kwargs)
 
             if self.arg_positions:
