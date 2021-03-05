@@ -161,8 +161,7 @@ class deprecate_kwarg:
 
 
 class deprecate_multichannel_kwarg(deprecate_kwarg):
-    """Decorator ensuring backward compatibility when argument names are
-    modified in a function definition.
+    """Decorator for deprecating multichannel keyword in favor of channel_axis.
 
     Parameters
     ----------
@@ -198,8 +197,11 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
 
 class channel_as_last_axis():
-    """Decorator for automatically reordering axes for compatibility with
-    functions that only support channels along the last axis.
+    """Decorator for automatically making channels axis last for all arrays.
+
+    This decorator reorders axes for compatibility with functions that only
+    support channels along the last axis. After the function call is complete
+    the channels axis is restored back to its original position.
 
     Parameters
     ----------
