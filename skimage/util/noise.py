@@ -7,7 +7,7 @@ __all__ = ['random_noise']
 
 def _bernoulli(p, shape):
     """
-    Bernoulli trails at a given probability of a given size.
+    Bernoulli trials at a given probability of a given size.
 
     This function is meant as a lower-memory alternative to calls such as
     `np.random.choice([True, False], size=image.shape, p=[p, 1-p])`.
@@ -30,7 +30,7 @@ def _bernoulli(p, shape):
     if p == 0:
         return np.zeros(shape, dtype=bool)
     if p == 1:
-        return ~np.zeros(shape, dtype=bool)
+        return np.ones(shape, dtype=bool)
     return np.random.random(shape) <= p
 
 
