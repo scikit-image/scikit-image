@@ -1,6 +1,3 @@
-import functools
-import operator
-
 import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
@@ -8,7 +5,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 
 import skimage
-from ..measure import label, regionprops_table
+from ..measure import label
 from ._inpaint import _build_matrix_inner
 
 
@@ -282,7 +279,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         # Split inpainting mask into independent regions
         kernel = ndi.generate_binary_structure(mask.ndim, 1)
         mask_dilated = ndi.binary_dilation(mask, structure=kernel)
-        mask_labeled, num_labels = label(mask_dilated, return_num=True)
+        mask_labeled = label(mask_dilated)
         mask_labeled *= mask
 
         bbox_slices = ndi.find_objects(mask_labeled)
