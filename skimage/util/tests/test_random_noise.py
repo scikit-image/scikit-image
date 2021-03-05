@@ -25,7 +25,7 @@ def test_salt():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
-    tolerance = 1e-1
+    tolerance = 1e-2
     assert abs(amount - proportion) <= tolerance
 
 
@@ -57,7 +57,7 @@ def test_pepper():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(peppermask.sum()) / (cam.shape[0] * cam.shape[1])
-    tolerance = 1e-1
+    tolerance = 1e-2
     assert abs(amount - proportion) <= tolerance
 
     # Check to make sure pepper gets added properly to signed images
@@ -86,7 +86,7 @@ def test_salt_and_pepper():
     # Ensure approximately correct amount of noise was added
     proportion = float(
         saltmask.sum() + peppermask.sum()) / (cam.shape[0] * cam.shape[1])
-    tolerance = 1e-1
+    tolerance = 1e-2
     assert abs(amount - proportion) <= tolerance
 
     # Verify the relative amount of salt vs. pepper is close to expected
