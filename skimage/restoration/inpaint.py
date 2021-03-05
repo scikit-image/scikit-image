@@ -15,26 +15,17 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _get_neigh_coef(shape, center, coef_cache_dict=None, dtype=float):
-    """Create biharmonic coefficients ndarray."""
-    use_cache = coef_cache_dict is not None
-    key = (shape, center)
-    if use_cache and key in coef_cache_dict:
-        neigh_coef, coef_idx, coef_vals = coef_cache_dict[key]
-    else:
-        # Create biharmonic coefficients ndarray
-        neigh_coef = np.zeros(shape, dtype=dtype)
-        neigh_coef[center] = 1
-        neigh_coef = laplace(laplace(neigh_coef))
+def _get_neigh_coef(shape, center, dtype=float):
+    # Create biharmonic coefficients ndarray
+    neigh_coef = np.zeros(shape, dtype=dtype)
+    neigh_coef[center] = 1
+    neigh_coef = laplace(laplace(neigh_coef))
 
-        # extract non-zero locations and values
-        coef_idx = np.where(neigh_coef)
-        coef_vals = neigh_coef[coef_idx]
-        coef_idx = np.stack(coef_idx)
+    # extract non-zero locations and values
+    coef_idx = np.where(neigh_coef)
+    coef_vals = neigh_coef[coef_idx]
 
-        # cache the result
-        if use_cache:
-            coef_cache_dict[key] = (neigh_coef, coef_idx, coef_vals)
+    coef_idx = np.stack(coef_idx, axis=0)
     return neigh_coef, coef_idx, coef_vals
 
 
@@ -128,10 +119,13 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
         # Create (truncated) biharmonic coefficients ndarray
         coef_shape = tuple(b_hi - b_lo)
         coef_center = tuple(nd_idx - b_lo)
-        neigh_coef, coef_idx, coefs = _get_neigh_coef(coef_shape,
-                                                      coef_center,
-                                                      coef_cache,
-                                                      dtype=out.dtype)
+        coef_idx, coefs = coef_cache.get((coef_shape, coef_center),
+                                         (None, None))
+        if coef_idx is None:
+            _ , coef_idx, coefs = _get_neigh_coef(coef_shape,
+                                                  coef_center,
+                                                  dtype=out.dtype)
+            coef_cache[(coef_shape, coef_center)] = (coef_idx, coefs)
 
         # compute corresponding 1d indices into the mask
         coef_idx = coef_idx + b_lo[:, np.newaxis]
