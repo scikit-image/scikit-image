@@ -16,7 +16,8 @@ def test_set_seed():
 def test_salt():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='salt', amount=0.15)
+    amount = 0.15
+    cam_noisy = random_noise(cam, seed=seed, mode='salt', amount=amount)
     saltmask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -24,7 +25,8 @@ def test_salt():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.16
+    tolerance = 1e-1
+    assert abs(amount - proportion) <= tolerance
 
 
 def test_salt_p1():
@@ -46,7 +48,8 @@ def test_pepper():
     cam = img_as_float(camera())
     data_signed = cam * 2. - 1.   # Same image, on range [-1, 1]
 
-    cam_noisy = random_noise(cam, seed=seed, mode='pepper', amount=0.15)
+    amount = 0.15
+    cam_noisy = random_noise(cam, seed=seed, mode='pepper', amount=amount)
     peppermask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -54,7 +57,8 @@ def test_pepper():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(peppermask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.16
+    tolerance = 1e-1
+    assert abs(amount - proportion) <= tolerance
 
     # Check to make sure pepper gets added properly to signed images
     orig_zeros = (data_signed == -1).sum()
@@ -63,13 +67,14 @@ def test_pepper():
 
     proportion = (float((cam_noisy_signed == -1).sum() - orig_zeros) /
                   (cam.shape[0] * cam.shape[1]))
-    assert 0.11 < proportion <= 0.16
+    assert abs(amount - proportion) <= tolerance
 
 
 def test_salt_and_pepper():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='s&p', amount=0.15,
+    amount = 0.15
+    cam_noisy = random_noise(cam, seed=seed, mode='s&p', amount=amount,
                              salt_vs_pepper=0.25)
     saltmask = np.logical_and(cam != cam_noisy, cam_noisy == 1.)
     peppermask = np.logical_and(cam != cam_noisy, cam_noisy == 0.)
@@ -81,7 +86,8 @@ def test_salt_and_pepper():
     # Ensure approximately correct amount of noise was added
     proportion = float(
         saltmask.sum() + peppermask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.18
+    tolerance = 1e-1
+    assert abs(amount - proportion) <= tolerance
 
     # Verify the relative amount of salt vs. pepper is close to expected
     assert 0.18 < saltmask.sum() / peppermask.sum() < 0.35
