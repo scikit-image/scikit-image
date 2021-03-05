@@ -60,7 +60,8 @@ def _ensure_dask_array(array, chunks=None):
 @utils.deprecate_multichannel_kwarg()
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
-                   multichannel=False, compute=None, channel_axis=None):
+                   compute=None, channel_axis=None,
+                   multichannel=False):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -100,6 +101,15 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
         .. versionadded:: 0.18
            ``dtype`` was added in 0.18.
+    compute : bool, optional
+        If ``True``, compute eagerly returning a NumPy Array.
+        If ``False``, compute lazily returning a Dask Array.
+        If ``None`` (default), compute based on array type provided
+        (eagerly for NumPy Arrays and lazily for Dask Arrays).
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
     multichannel : bool, optional
         If `chunks` is None and `multichannel` is True, this function will keep
         only a single chunk along the channels axis. When `depth` is specified
@@ -111,15 +121,6 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
         .. versionadded:: 0.18
            ``multichannel`` was added in 0.18.
-    compute : bool, optional
-        If ``True``, compute eagerly returning a NumPy Array.
-        If ``False``, compute lazily returning a Dask Array.
-        If ``None`` (default), compute based on array type provided
-        (eagerly for NumPy Arrays and lazily for Dask Arrays).
-    channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
-        Otherwise, this parameter indicates which axis of the array corresponds
-        to channels.
 
     Returns
     -------

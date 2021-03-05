@@ -22,8 +22,8 @@ def _match_cumulative_cdf(source, template):
 
 @utils.channel_as_last_axis(channel_arg_positions=(0, 1))
 @utils.deprecate_multichannel_kwarg()
-def match_histograms(image, reference, *, multichannel=False,
-                     channel_axis=None):
+def match_histograms(image, reference, *, channel_axis=None,
+                     multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
@@ -35,13 +35,13 @@ def match_histograms(image, reference, *, multichannel=False,
     reference : ndarray
         Image to match histogram of. Must have the same number of channels as
         image.
-    multichannel : bool, optional
-        Apply the matching separately for each channel. This argument is
-        deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
+    multichannel : bool, optional
+        Apply the matching separately for each channel. This argument is
+        deprecated: specify `channel_axis` instead.
 
     Returns
     -------
