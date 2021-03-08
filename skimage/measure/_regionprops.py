@@ -102,6 +102,7 @@ COL_DTYPES = {
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
+    'roundness': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -464,6 +465,14 @@ class RegionProperties:
     @only2d
     def perimeter_crofton(self):
         return perimeter_crofton(self.image, 4)
+    
+    @property
+    def roundness(self)
+        """
+        returns: int
+            parameter used for assessment of deviation from roundness, where 1 is a perfect circle.
+        """
+        return self.area/(self.major_axis_length/2*self.minor_axis_length/2*math.pi)
 
     @property
     def solidity(self):
