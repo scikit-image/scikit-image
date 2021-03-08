@@ -53,6 +53,7 @@ PROPS = {
     'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
+    'Roundness': 'roundness',
     'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
