@@ -469,9 +469,9 @@ class RegionProperties:
 
     @property
     def roundness(self):
-        return self.area / (self.major_axis_length /
-                            2 * self.minor_axis_length /
-                            2 * math.pi)
+        return self.area / (self.major_axis_length
+                            / 2 * self.minor_axis_length
+                            / 2 * math.pi)
 
     @property
     def solidity(self):
