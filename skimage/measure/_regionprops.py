@@ -465,12 +465,12 @@ class RegionProperties:
     @only2d
     def perimeter_crofton(self):
         return perimeter_crofton(self.image, 4)
-    
+
     @property
-    def roundness(self)
-        return self.area / (self.major_axis_length / 
-                            2*self.minor_axis_length / 
-                            2*math.pi)
+    def roundness(self):
+        return self.area / (self.major_axis_length /
+                            2 * self.minor_axis_length /
+                            2 * math.pi)
 
     @property
     def solidity(self):
