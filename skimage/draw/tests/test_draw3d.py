@@ -1,7 +1,8 @@
 import numpy as np
 from skimage._shared.testing import assert_array_equal, assert_allclose
 
-from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
+from skimage.draw import (ellipsoid, ellipsoid_coords, ellipsoid_stats,
+                          rectangle)
 from skimage._shared import testing
 
 
@@ -97,6 +98,60 @@ def test_ellipsoid_levelset():
 
     assert_allclose(test, expected)
     assert_allclose(test_anisotropic, expected)
+
+
+def test_ellipsoid_coords():
+    test = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(2, 2, 2, 2.2, 2.2, 2.2)
+    test[dd, rr, cc] = 1
+    test_anisotropic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(2, 2, 4, 2.2, 2.2, 4.4, spacing=(1., 1., 2.))
+    test_anisotropic[dd, rr, cc] = 1
+    test_rotate = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(2, 2, 2, 2.2, 2.2, 2.2,
+                                  rot_z=np.random.uniform(np.pi),
+                                  rot_y=np.random.uniform(np.pi),
+                                  rot_x=np.random.uniform(np.pi))
+    test_rotate[dd, rr, cc] = 1
+    test_rotate_anisotropic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(4, 2, 2, 2.2, 2.2, 4.4, rot_y=np.pi/2,
+                                  spacing=(2., 1., 1.))
+    test_rotate_anisotropic[dd, rr, cc] = 1
+
+    expected = np.array([[[0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 0.],
+                          [0., 0., 1., 0., 0.],
+                          [0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 0.]],
+
+                         [[0., 0., 0., 0., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 0., 0., 0., 0.]],
+
+                         [[0., 0., 1., 0., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [1., 1., 1., 1., 1.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 0., 1., 0., 0.]],
+
+                         [[0., 0., 0., 0., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 1., 1., 1., 0.],
+                          [0., 0., 0., 0., 0.]],
+
+                         [[0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 0.],
+                          [0., 0., 1., 0., 0.],
+                          [0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 0.]]])
+
+    assert_array_equal(test, expected)
+    assert_array_equal(test_anisotropic, expected)
+    assert_array_equal(test_rotate, expected)
+    assert_array_equal(test_rotate_anisotropic, expected)
 
 
 def test_ellipsoid_stats():
