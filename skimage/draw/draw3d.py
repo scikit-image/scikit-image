@@ -104,13 +104,13 @@ def ellipsoid_coords(d, r, c, d_radius, r_radius, c_radius, shape=None,
     sin_rot_y, cos_rot_y = np.sin(rot_y), np.cos(rot_y)
     sin_rot_x, cos_rot_x = np.sin(rot_x), np.cos(rot_x)
     rotation_z = np.array([[1, 0, 0],
-                           [0,  cos_rot_z,  sin_rot_z],
-                           [0, -sin_rot_z,  cos_rot_z]])
+                           [0, cos_rot_z, sin_rot_z],
+                           [0, -sin_rot_z, cos_rot_z]])
     rotation_y = np.array([[cos_rot_y, 0, -sin_rot_y],
                            [0, 1, 0],
-                           [sin_rot_y, 0,  cos_rot_y]])
+                           [sin_rot_y, 0, cos_rot_y]])
     rotation_x = np.array([[cos_rot_x, sin_rot_x, 0],
-                           [-sin_rot_x,  cos_rot_x, 0],
+                           [-sin_rot_x, cos_rot_x, 0],
                            [0, 0, 1]])
     rotation = rotation_z @ rotation_y @ rotation_x
 
@@ -145,15 +145,15 @@ def ellipsoid_coords(d, r, c, d_radius, r_radius, c_radius, shape=None,
     conversion_matrix = rotation_inv.dot(np.diag(spacing))
     d, r, c = (d_lim - d_org), (r_lim - r_org), (c_lim - c_org)
     distances = (
-        ((d * conversion_matrix[0, 0] +
-          r * conversion_matrix[0, 1] +
-          c * conversion_matrix[0, 2]) / d_rad) ** 2 +
-        ((d * conversion_matrix[1, 0] +
-          r * conversion_matrix[1, 1] +
-          c * conversion_matrix[1, 2]) / r_rad) ** 2 +
-        ((d * conversion_matrix[2, 0] +
-          r * conversion_matrix[2, 1] +
-          c * conversion_matrix[2, 2]) / c_rad) ** 2
+        ((d * conversion_matrix[0, 0]
+          + r * conversion_matrix[0, 1]
+          + c * conversion_matrix[0, 2]) / d_rad) ** 2 +
+        ((d * conversion_matrix[1, 0]
+          + r * conversion_matrix[1, 1]
+          + c * conversion_matrix[1, 2]) / r_rad) ** 2 +
+        ((d * conversion_matrix[2, 0]
+          + r * conversion_matrix[2, 1]
+          + c * conversion_matrix[2, 2]) / c_rad) ** 2
     )
     if distances.size == 0:
         return (np.empty(0, dtype=int),

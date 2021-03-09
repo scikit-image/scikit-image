@@ -114,7 +114,7 @@ def test_ellipsoid_coords():
                                   rot_x=np.random.uniform(np.pi))
     test_rotate[dd, rr, cc] = 1
     test_rotate_anisotropic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(4, 2, 2, 2.2, 2.2, 4.4, rot_y=np.pi/2,
+    dd, rr, cc = ellipsoid_coords(4, 2, 2, 2.2, 2.2, 4.4, rot_y=np.pi / 2,
                                   spacing=(2., 1., 1.))
     test_rotate_anisotropic[dd, rr, cc] = 1
 
