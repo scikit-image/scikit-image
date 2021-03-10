@@ -281,7 +281,7 @@ def _get_swaps(shp):
     swaps = []
 
     # Dimensions where the array is "flat"
-    ones = np.where(shp == 1)[0][::-1]
+    ones = np.where(shp <= 1)[0][::-1]
     # The other dimensions
     bigs = np.where(shp > 1)[0]
     # We now go from opposite directions and swap axes if an index of a flat
@@ -361,8 +361,6 @@ def label_cython(input_, background=None, return_num=False,
     data = np.array(input_, order='C', dtype=DTYPE)
     forest = np.arange(data.size, dtype=DTYPE)
 
-    print(forest.size)
-
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
     cdef DTYPE_t *data_p = <DTYPE_t*>cnp.PyArray_DATA(data)
 
@@ -371,6 +369,8 @@ def label_cython(input_, background=None, return_num=False,
 
     get_shape_info(shape, &shapeinfo)
     get_bginfo(background, &bg)
+
+    print(shapeinfo.z, shapeinfo.numels)
 
     if connectivity is None:
         # use the full connectivity by default
@@ -566,8 +566,6 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
         # BEGINNING of y = 0
         # BEGINNING of x = 0
         rindex = shapeinfo.ravel_index(0, 0, z, shapeinfo)
-        with gil:
-            print(z, '--', rindex)
         if data_p[rindex] != bgval:
             # Nothing to do if we are background
 
@@ -580,8 +578,6 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 if connectivity >= 3:
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
         # END of x = 0
-        with gil:
-            print(z, '--', shapeinfo.x)
 
         for x in range(1, shapeinfo.x - 1):
             rindex += 1
@@ -739,6 +735,3 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ef])
         # END of x = max
         # END of y = max
-
-    with gil:
-        print(2)

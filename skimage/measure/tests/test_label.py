@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from skimage import data
 from skimage.measure._label import _label_bool
 from skimage.measure._ccomp import label_cython as clabel
@@ -47,3 +48,8 @@ def test_connectivity():
             l_ndi = _label_bool(img, connectivity=c)
         with pytest.raises(ValueError):
             l_cy = clabel(img, connectivity=c)
+
+
+def test_zero_shape():
+    img = np.ones((300, 0, 300))
+    clabel(img)
