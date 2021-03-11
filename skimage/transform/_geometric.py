@@ -1056,9 +1056,10 @@ def _euler_rotation(axis, angle):
         The rotation matrix along axis `axis`.
     """
     i = axis
-    s, c = np.sin(angle), np.cos(angle)
-    R2 = np.array([[          c, (-1)**(i+1) * s],
-                   [(-1)**i * s,               c]])
+    s = (-1)**i * np.sin(angle)
+    c = np.cos(angle)
+    R2 = np.array([[c, -s],
+                   [s,  c]])
     Ri = np.eye(3)
     # We need the axes other than the rotation axis, in the right order:
     # 0 -> (1, 2); 1 -> (0, 2); 2 -> (0, 1).
