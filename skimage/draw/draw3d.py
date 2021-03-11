@@ -63,8 +63,8 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     return arr
 
 
-def ellipsoid_coords(d, r, c, d_radius, r_radius, c_radius, shape=None,
-                     rot_z=0., rot_y=0., rot_x=0., spacing=(1., 1., 1.)):
+def ellipsoid_coords(center, axis_lengths, *, shape=None,
+                     rotation=(0., 0., 0.), spacing=(1., 1., 1.)):
     """Generate coordinates of voxels within ellipsoid.
 
     Parameters
