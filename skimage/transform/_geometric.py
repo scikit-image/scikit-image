@@ -16,7 +16,7 @@ def _affine_matrix_from_vector(v):
         raise ValueError('Invalid number of elements for '
                          f'linearized matrix: {nparam}')
     matrix = np.eye(dimensionality + 1)
-    matrix[-1, :] = np.reshape(v, (dimensionality, dimensionality + 1))
+    matrix[:-1, :] = np.reshape(v, (dimensionality, dimensionality + 1))
     return matrix
 
 
