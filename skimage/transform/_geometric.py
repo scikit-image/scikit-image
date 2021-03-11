@@ -1089,7 +1089,7 @@ def _euler_rotation_matrix(angles, axes=None):
         The Euler rotation matrix.
     """
     if axes is None:
-        axes = list(range(3))
+        axes = range(3)
     dim = len(angles)
     R = np.eye(dim)
     for i, angle in zip(axes, angles):
