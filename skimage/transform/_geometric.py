@@ -1255,7 +1255,7 @@ class SimilarityTransform(EuclideanTransform):
         Scale factor. Implemented only for 2D and 3D.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
-        Implemented only for 2D and 3D. For 3D, this is given in XZX Euler
+        Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
     translation : (dim,) array-like, optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
