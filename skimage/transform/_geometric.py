@@ -804,8 +804,6 @@ class AffineTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array, optional
         Homogeneous transformation matrix. If this matrix is provided, it is an
         error to provide any of scale, rotation, shear, or translation.
-    matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
     scale : {s as float or (sx, sy) as array, list or tuple}, optional
         Scale factor(s). If a single value, it will be assigned to both
         sx and sy. Only available for 2D.
