@@ -62,6 +62,10 @@ def _center_and_normalize_points(points):
 
     # if all the points are the same, the transformation matrix cannot be
     # created. We return an equivalent matrix with np.nans as sentinel values.
+    # This obviates the need for try/except blocks in functions calling this
+    # one, and those are only needed when actual 0 is reached, rather than some
+    # small value; ie, we don't need to worry about numerical stability here,
+    # only actual 0.
     if rms == 0:
         return np.full((d + 1, d + 1), np.nan), np.full_like(points, np.nan)
 
