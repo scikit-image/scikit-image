@@ -19,7 +19,7 @@ def _affine_matrix_from_vector(v):
         v, (dimensionality, dimensionality + 1)
     )
     matrix = np.concatenate(
-        (part_matrix, np.eye(dimensionality + 1)[-1:]), axis=0
+        (part_matrix, np.eye(1, dimensionality + 1, dimensionality)), axis=0
     )
     return matrix
 
