@@ -259,8 +259,8 @@ class FundamentalMatrixTransform(GeometricTransform):
             matrix = np.eye(dimensionality + 1)
         else:
             dimensionality = matrix.shape[0] - 1
-        if matrix.shape != (dimensionality + 1, dimensionality + 1):
-            raise ValueError("Invalid shape of transformation matrix")
+            if matrix.shape != (dimensionality + 1, dimensionality + 1):
+                raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
         if dimensionality != 2:
             raise NotImplementedError(
