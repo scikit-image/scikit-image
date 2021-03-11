@@ -30,8 +30,8 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
         return result[0]
 
 
-@deprecate_kwarg({"input": "image"}, removed_version="1.0")
-def label(image, background=None, return_num=False, connectivity=None):
+@deprecate_kwarg({"input": "label_image"}, removed_version="1.0")
+def label(label_image, background=None, return_num=False, connectivity=None):
     r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -49,7 +49,7 @@ def label(image, background=None, return_num=False, connectivity=None):
 
     Parameters
     ----------
-    image : ndarray of dtype int
+    label_image : ndarray of dtype int
         Image to label.
     background : int, optional
         Consider all pixels with this value as background pixels, and label
@@ -115,8 +115,8 @@ def label(image, background=None, return_num=False, connectivity=None):
      [1 1 2]
      [0 0 0]]
     """
-    if image.dtype == bool:
-        return _label_bool(image, background=background,
+    if label_image.dtype == bool:
+        return _label_bool(label_image, background=background,
                            return_num=return_num, connectivity=connectivity)
     else:
-        return clabel(image, background, return_num, connectivity)
+        return clabel(label_image, background, return_num, connectivity)
