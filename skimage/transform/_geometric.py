@@ -559,13 +559,13 @@ class ProjectiveTransform(GeometricTransform):
     """
 
     def __init__(self, matrix=None, *, dimensionality=2):
-        if matrix is not None:
-            dimensionality = matrix.shape[0] - 1
         if matrix is None:
             # default to an identity transform
             matrix = np.eye(dimensionality + 1)
-        if matrix.shape != (dimensionality + 1, dimensionality + 1):
-            raise ValueError("invalid shape of transformation matrix")
+        else:
+            dimensionality = matrix.shape[0] - 1
+            if matrix.shape != (dimensionality + 1, dimensionality + 1):
+                raise ValueError("invalid shape of transformation matrix")
         self.params = matrix
         self._coeffs = range(matrix.size - 1)
 
