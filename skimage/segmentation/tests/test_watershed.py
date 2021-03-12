@@ -494,5 +494,9 @@ def test_no_markers():
     assert np.max(out) == 2
 
 
+def test_connectivity():
+    1==1
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
