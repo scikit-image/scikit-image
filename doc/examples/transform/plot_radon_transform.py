@@ -98,8 +98,7 @@ plt.show()
 # back projection is among the fastest methods of performing the inverse
 # Radon transform. The only tunable parameter for the FBP is the filter,
 # which is applied to the Fourier transformed projections. It may be used to
-# suppress high frequency noise in the reconstruction. ``skimage`` provides a
-# few different options for the filter.
+# suppress high frequency noise in the reconstruction. ``skimage`` provides 'ramp', 'shepp-logan', 'cosine', 'hamming', 'hann' as filters.
 
 from skimage.transform import iradon
 
