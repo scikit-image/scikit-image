@@ -3,6 +3,7 @@ from skimage._shared.testing import assert_array_equal, assert_allclose
 
 from skimage.draw import (ellipsoid, ellipsoid_coords, ellipsoid_stats,
                           rectangle)
+from skimage.draw.draw3d import _angles_to_rotmat
 from skimage._shared import testing
 
 
@@ -102,21 +103,44 @@ def test_ellipsoid_levelset():
 
 def test_ellipsoid_coords():
     test = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(2, 2, 2, 2.2, 2.2, 2.2)
+    dd, rr, cc = ellipsoid_coords((2, 2, 2), (2.2, 2.2, 2.2))
     test[dd, rr, cc] = 1
+    test_shape = np.zeros((3, 3, 3))
+    dd, rr, cc = ellipsoid_coords((2, 2, 2), (2.2, 2.2, 2.2),
+                                  shape=test_shape.shape)
+    test_shape[dd, rr, cc] = 1
     test_anisotropic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(2, 2, 4, 2.2, 2.2, 4.4, spacing=(1., 1., 2.))
+    dd, rr, cc = ellipsoid_coords((2, 2, 4), (2.2, 2.2, 4.4),
+                                  spacing=(1., 1., 2.))
     test_anisotropic[dd, rr, cc] = 1
-    test_rotate = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(2, 2, 2, 2.2, 2.2, 2.2,
-                                  rot_z=np.random.uniform(np.pi),
-                                  rot_y=np.random.uniform(np.pi),
-                                  rot_x=np.random.uniform(np.pi))
-    test_rotate[dd, rr, cc] = 1
-    test_rotate_anisotropic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(4, 2, 2, 2.2, 2.2, 4.4, rot_y=np.pi / 2,
-                                  spacing=(2., 1., 1.))
-    test_rotate_anisotropic[dd, rr, cc] = 1
+    test_rotate_intrinsic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(
+        (2, 2, 2), (2.2, 2.2, 2.2),
+        rotation_angles=np.random.uniform(0, np.pi, 3))
+    test_rotate_intrinsic[dd, rr, cc] = 1
+    test_rotate_extrinsic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(
+        (2, 2, 2), (2.2, 2.2, 2.2),
+        rotation_angles=np.random.uniform(0, np.pi, 3),
+        rotation_order='xyz', is_intrinsic=False)
+    test_rotate_extrinsic[dd, rr, cc] = 1
+    test_rotate_intrinsic_anisotropic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(
+        (4, 2, 2), (2.2, 2.2, 4.4),
+        rotation_angles=(np.random.uniform(0, np.pi), np.pi / 2, np.pi / 2),
+        spacing=(2., 1., 1.))
+    test_rotate_intrinsic_anisotropic[dd, rr, cc] = 1
+    test_rotate_extrinsic_anisotropic = np.zeros((5, 5, 5))
+    dd, rr, cc = ellipsoid_coords(
+        (4, 2, 2), (2.2, 2.2, 4.4),
+        rotation_angles=(0.0, np.pi / 2, 0.0),
+        rotation_order='xyz', is_intrinsic=False, spacing=(2., 1., 1.))
+    test_rotate_extrinsic_anisotropic[dd, rr, cc] = 1
+    test_rotaion_matrix = np.zeros((5, 5, 5))
+    rotmat = _angles_to_rotmat(np.random.uniform(0, np.pi, 3))
+    dd, rr, cc = ellipsoid_coords((2, 2, 2), (2.2, 2.2, 2.2),
+                                  rotation_matrix=rotmat)
+    test_rotaion_matrix[dd, rr, cc] = 1
 
     expected = np.array([[[0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 0.],
@@ -149,9 +173,13 @@ def test_ellipsoid_coords():
                           [0., 0., 0., 0., 0.]]])
 
     assert_array_equal(test, expected)
+    assert_array_equal(test_shape, expected[:3, :3, :3])
     assert_array_equal(test_anisotropic, expected)
-    assert_array_equal(test_rotate, expected)
-    assert_array_equal(test_rotate_anisotropic, expected)
+    assert_array_equal(test_rotate_intrinsic, expected)
+    assert_array_equal(test_rotate_extrinsic, expected)
+    assert_array_equal(test_rotate_intrinsic_anisotropic, expected)
+    assert_array_equal(test_rotate_extrinsic_anisotropic, expected)
+    assert_array_equal(test_rotaion_matrix, expected)
 
 
 def test_ellipsoid_stats():

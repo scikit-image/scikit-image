@@ -63,27 +63,253 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     return arr
 
 
-def ellipsoid_coords(center, axis_lengths, *, shape=None,
-                     rotation=(0., 0., 0.), spacing=(1., 1., 1.)):
-    """Generate coordinates of voxels within ellipsoid.
+def _rotate_axes_x(angle):
+    r"""Rotate the axes of a coordinate system about the x-axis.
+
+    .. math::
+
+        R(\theta) = \begin{bmatrix}
+                        \cos\theta & -\sin\theta & 0 \\
+                        \sin\theta &  \cos\theta & 0 \\
+                                 0 &           0 & 1 \\
+                    \end{bmatrix}
 
     Parameters
     ----------
-    d, r, c : float
-        Center coordinate of ellipsoid. The values will be divided by the
-        spacing parameter inside the function.
-    d_radius, r_radius, c_radius : float
-        Radii of ellipsoid. The values will be divided by the spacing
-        parameter inside the function.
-    shape : tuple, optional
+    angle : float
+        Angle to rotate the axes about the x-axis.
+
+    Returns
+    -------
+    rotation_matrix : (3, 3) ndarray of float
+        Rotation matrix to rotate the axes about the x-axis by `angle`.
+        The order of dimension is supposed to be ``(z, y, x)``.
+    """
+
+    sin, cos = np.sin(angle), np.cos(angle)
+    return np.array([[cos, -sin, 0],
+                     [sin, cos, 0],
+                     [0, 0, 1]])
+
+
+def _rotate_axes_y(angle):
+    r"""Rotate the axes of a coordinate system about the y-axis.
+
+    .. math::
+
+        R(\theta) = \begin{bmatrix}
+                         \cos\theta & 0 & \sin\theta \\
+                                  0 & 1 &          0 \\
+                        -\sin\theta & 0 & \cos\theta \\
+                    \end{bmatrix}
+
+    Parameters
+    ----------
+    angle : float
+        Angle to rotate the axes about the y-axis.
+
+    Returns
+    -------
+    rotation_matrix : (3, 3) ndarray of float
+        Rotation matrix to rotate the axes about the y-axis by ``angle``.
+        The order of dimension is supposed to be ``(z, y, x)``.
+    """
+
+    sin, cos = np.sin(angle), np.cos(angle)
+    return np.array([[cos, 0, sin],
+                     [0, 1, 0],
+                     [-sin, 0, cos]])
+
+
+def _rotate_axes_z(angle):
+    r"""Rotate the axes of a coordinate system about the z-axis.
+
+    .. math::
+
+        R(\theta) = \begin{bmatrix}
+                        1 &          0 &           0 \\
+                        0 & \cos\theta & -\sin\theta \\
+                        0 & \sin\theta &  \cos\theta \\
+                    \end{bmatrix}
+
+    Parameters
+    ----------
+    angle : float
+        Angle to rotate the axes about the z-axis.
+
+    Returns
+    -------
+    rotation_matrix : (3, 3) ndarray of float
+        Rotation matrix to rotate the axes about the z-axis by ``angle``.
+        The order of dimension is supposed to be ``(z, y, x)``.
+    """
+
+    sin, cos = np.sin(angle), np.cos(angle)
+    return np.array([[1, 0, 0],
+                     [0, cos, -sin],
+                     [0, sin, cos]])
+
+
+def _rotate_axes(about, angle):
+    """Rotate the axes of a coordinate system.
+
+    Parameters
+    ----------
+    about : {'x', 'y', 'z'},
+        Axis to rotate about.
+
+    angle : float
+        Angle to rotate the axes.
+
+    Returns
+    -------
+    rotation_matrix : (3, 3) ndarray of float
+        Rotation matrix to rotate the axes about the z-axis by ``angle``.
+        The order of dimension is supposed to be ``(z, y, x)``.
+    """
+
+    if about == 'x':
+        return _rotate_axes_x(angle)
+    elif about == 'y':
+        return _rotate_axes_y(angle)
+    elif about == 'z':
+        return _rotate_axes_z(angle)
+    else:
+        raise ValueError(f'about={about} is not supported.')
+
+
+def _angles_to_rotmat(angles, order='zxz', is_intrinsic=True):
+    r"""Calculate a rotation matrix from the Euler angles.
+
+    The Euler angles are defined based on ``order`` and ``is_intrinsic``.
+    The following example shows the ``zxz`` intrinsic rotations.
+
+    .. math::
+
+        R(\phi) = \begin{bmatrix}
+                      1 &        0 &         0 \\
+                      0 & \cos\phi & -\sin\phi \\
+                      0 & \sin\phi &  \cos\phi \\
+                  \end{bmatrix}
+
+        R(\theta) = \begin{bmatrix}
+                        \cos\theta & -\sin\theta & 0 \\
+                        \sin\theta &  \cos\theta & 0 \\
+                                 0 &           0 & 1 \\
+                    \end{bmatrix}
+
+        R(\psi) = \begin{bmatrix}
+                      1 &         0 &         0 \\
+                      0 &  \cos\psi & -\sin\psi \\
+                      0 &  \sin\psi &  \cos\psi \\
+                  \end{bmatrix}
+
+        \\
+
+        R(\phi, \theta, \psi) = (R(\psi)R(\theta)R(\phi))^\intercal
+
+    Parameters
+    ----------
+    angles : (3,) ndarray of float
+        Euler angles ``(phi, theta, psi)`` in this order.
+
+    order : str, length 3, optional (default 'zxz')
+        Order of rotations. Each character should be one of ``{'x', 'y', 'z'}``
+        and there should be no adjacent repeating characters.
+
+    is_intrinsic : bool optional (default True)
+        Specify if the rotations are intrinsic (``True``) or extrinsic
+        (``False``).
+
+        - *intrinsic*: rotations occur about the rotating coordinate system
+        - *extrinsic*: rotations occur about the original coordinate system
+
+    Returns
+    -------
+    rotation_matrix : (3, 3) ndarray of float
+        Rotation matrix calculated from the Euler angles.
+    """
+
+    if (not isinstance(order, str) or len(order) != 3 or order.strip('xyz')
+            or order[0] == order[1] or order[1] == order[2]):
+        raise ValueError(f'order: {order} is invalid')
+    angles %= np.pi
+    phi, theta, psi = angles
+    rotmat_phi = _rotate_axes(order[0], phi)
+    rotmat_theta = _rotate_axes(order[1], theta)
+    rotmat_psi = _rotate_axes(order[2], psi)
+    if is_intrinsic:
+        rotmat = (rotmat_psi @ rotmat_theta @ rotmat_phi).T
+    else:
+        rotmat = rotmat_psi.T @ rotmat_theta.T @ rotmat_phi.T
+    return rotmat
+
+
+def _is_valid_rotation_matrix(matrix):
+    r"""Determine if a rotation matrix is valid.
+
+    A rotation matrix is an orthogonal matrix whose determinant equals 1.
+
+    .. math::
+
+        RR^\intercal = I
+        \\
+        \det R = 1
+
+    Parameters
+    ----------
+    matrix : (3, 3) ndarray of float
+        Matrix to be evaluated.
+
+    Returns
+    -------
+    is_valid : bool
+        ``True`` if a matrix is a rotation matrix, ``False`` otherwise.
+    """
+
+    return (np.allclose(matrix @ matrix.T, np.identity(3)) and
+            np.allclose(np.linalg.det(matrix), 1))
+
+
+def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
+                     rotation_order='zxz', is_intrinsic=True,
+                     rotation_matrix=None, spacing=None):
+    r"""Generate coordinates of voxels within ellipsoid.
+
+    Parameters
+    ----------
+    center : (3,) array-like of float
+        Center coordinate of ellipsoid. The order is (z, y, x). The values will
+        be divided by ``spacing`` inside the function.
+    axis_lengths : (3,) array-like of float
+        Axis lengths of ellipsoid. The order is (z, y, x). The values will be
+        divided by ``spacing`` inside the function.
+    shape : tuple of int, length 3, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for ellipsoids which exceed the
-        image size.
-        By default the full extent of the ellipsoid is used.
-    rot_z, rot_y, rot_x : float, optional (default 0.)
-        Rotation for each axis.
-    spacing : (3,) array-like of float, optional (default (1., 1., 1.))
-        Spacing in (z, y, x) spatial dimensions in this order.
+        image size. By default the full extent of the ellipsoid is used.
+    rotation_angles : (3,) array-like of float, optional (default None)
+        Rotation angles to rotate the ellipsoid. The order of rotations is
+        specified by ``rotation_order``. Ignored if ``rotation_matrix`` is
+        specified. No rotation will be applied if both ``rotation_angles``
+        and ``rotation_matrix`` are ``None``.
+    rotation_order : str, length 3, optional (default 'zxz')
+        Order of rotations. Each character should be one of ``{'x', 'y', 'z'}``
+        and there should be no adjacent repeating characters.
+    is_intrinsic : bool optional (default True)
+        Specify if the rotations are intrinsic (``True``) or extrinsic
+        (``False``).
+
+        - *intrinsic*: rotations occur about the rotating coordinate system
+        - *extrinsic*: rotations occur about the original coordinate system
+    rotation_matrix : (3, 3) array-like of float, optional (default None)
+        Rotation matrix to rotate the ellipsoid. If both ``rotation_angles``
+        and ``rotation_matrix`` are specified, ``rotation_matrix`` has priority
+        over ``rotation_angles``. No rotation will be applied if both
+        ``rotation_angles`` and ``rotation_matrix`` are ``None``.
+    spacing : (3,) array-like of float, optional (default None)
+        Spacing in each spatial dimension. The order is (z, y, x). If
+        ``spacing`` is ``None``, ``1.`` is set to all dimensions.
 
     Returns
     -------
@@ -91,30 +317,93 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None,
         Voxel coordinates of ellipsoid.
         May be used to directl index into an array, e.g.
         ``img[dd, rr, cc] = 1``
+
+    Raises
+    ------
+    ValueError
+        If the length of ``center`` is not 3.
+    ValueError
+        If the length of ``axis_length`` is not 3.
+    ValueError
+        If the length of ``rotation_angles`` is not 3.
+    ValueError
+        If the length of ``spacing`` is not 3.
+    ValueError
+        If ``rotation_matrix`` is invalid.
+    ValueError
+        If ``rotation_order`` is invalid.
+
+    Notes
+    ------
+    ``rotation_angles`` are defined as the Euler angles based on
+    ``rotation_order`` and ``is_intrinsic``. The following example shows the
+    ``zxz`` intrinsic rotations.
+
+    .. math::
+
+        R(\phi) = \begin{bmatrix}
+                      1 &        0 &         0 \\
+                      0 & \cos\phi & -\sin\phi \\
+                      0 & \sin\phi &  \cos\phi \\
+                  \end{bmatrix}
+
+        R(\theta) = \begin{bmatrix}
+                        \cos\theta & -\sin\theta & 0 \\
+                        \sin\theta &  \cos\theta & 0 \\
+                                 0 &           0 & 1 \\
+                    \end{bmatrix}
+
+        R(\psi) = \begin{bmatrix}
+                      1 &        0 &         0 \\
+                      0 & \cos\psi & -\sin\psi \\
+                      0 & \sin\psi &  \cos\psi \\
+                           \end{bmatrix}
+
+        \\
+
+        R(\phi, \theta, \psi) = (R(\psi)R(\theta)R(\phi))^\intercal
+
     """
 
-    center = np.array([d, r, c])
-    radii = np.array([d_radius, r_radius, c_radius])
+    if len(center) != 3:
+        raise ValueError(f'len(center) should be 3 but got {len(center)}')
+    center = np.array(center)
 
-    # calculate a rotation matrix
-    rot_z %= np.pi
-    rot_y %= np.pi
-    rot_x %= np.pi
-    sin_rot_z, cos_rot_z = np.sin(rot_z), np.cos(rot_z)
-    sin_rot_y, cos_rot_y = np.sin(rot_y), np.cos(rot_y)
-    sin_rot_x, cos_rot_x = np.sin(rot_x), np.cos(rot_x)
-    rotation_z = np.array([[1, 0, 0],
-                           [0, cos_rot_z, sin_rot_z],
-                           [0, -sin_rot_z, cos_rot_z]])
-    rotation_y = np.array([[cos_rot_y, 0, -sin_rot_y],
-                           [0, 1, 0],
-                           [sin_rot_y, 0, cos_rot_y]])
-    rotation_x = np.array([[cos_rot_x, sin_rot_x, 0],
-                           [-sin_rot_x, cos_rot_x, 0],
-                           [0, 0, 1]])
-    rotation = rotation_z @ rotation_y @ rotation_x
+    if len(axis_lengths) != 3:
+        raise ValueError(
+            f'len(axis_lengths) should be 3 but got {len(axis_lengths)}')
+    axis_lengths = np.array(axis_lengths)
 
-    if len(spacing) != 3:
+    if rotation_matrix is not None:
+        if rotation_matrix.shape != (3, 3):
+            raise ValueError(
+                'rotation_matrix should have the shape (3, 3) but got',
+                rotation_matrix.shape)
+        elif not _is_valid_rotation_matrix(rotation_matrix):
+            raise ValueError(
+                'rotation_matrix should be an orthogonal matrix whose '
+                'determinant equals 1.')
+        rotmat = rotation_matrix
+    elif rotation_angles is not None:
+        if len(rotation_angles) != 3:
+            raise ValueError(
+                'len(rotation_angles) should be 3 but got',
+                len(rotation_angles))
+        if (not isinstance(rotation_order, str)
+            or len(rotation_order) != 3
+            or rotation_order.strip('xyz')
+            or rotation_order[0] == rotation_order[1]
+                or rotation_order[1] == rotation_order[2]):
+            raise ValueError(f'order: {rotation_order} is invalid')
+        rotation_angles = np.array(rotation_angles)
+        rotmat = _angles_to_rotmat(rotation_angles, order=rotation_order,
+                                   is_intrinsic=is_intrinsic)
+    else:
+        rotmat = np.eye(3)
+
+    if spacing is None:
+        spacing = np.ones(3)
+    elif len(spacing) != 3:
         raise ValueError(f'len(spacing) should be 3 but got {len(spacing)}')
     spacing = np.array(spacing)
     scaled_center = center / spacing
@@ -123,11 +412,11 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None,
     # containing the ellipsoid.
     factor = np.array([
         [i, j, k] for k in (-1, 1) for j in (-1, 1) for i in (-1, 1)]).T
-    radii_rot = np.abs(
-        np.diag(1. / spacing) @ (rotation @ (np.diag(radii) @ factor))
+    axis_lengths_rot = np.abs(
+        np.diag(1. / spacing) @ (rotmat @ (np.diag(axis_lengths) @ factor))
     ).max(axis=1)
-    upper_left_bottom = np.ceil(scaled_center - radii_rot).astype(int)
-    lower_right_top = np.floor(scaled_center + radii_rot).astype(int)
+    upper_left_bottom = np.ceil(scaled_center - axis_lengths_rot).astype(int)
+    lower_right_top = np.floor(scaled_center + axis_lengths_rot).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_ight by shape boundary.
@@ -140,9 +429,9 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None,
                                    0:float(bounding_shape[1]),
                                    0:float(bounding_shape[2])]
     d_org, r_org, c_org = scaled_center - upper_left_bottom
-    d_rad, r_rad, c_rad = radii
-    rotation_inv = np.linalg.inv(rotation)
-    conversion_matrix = rotation_inv.dot(np.diag(spacing))
+    d_rad, r_rad, c_rad = axis_lengths
+    rotmat_inv = np.linalg.inv(rotmat)
+    conversion_matrix = rotmat_inv @ np.diag(spacing)
     d, r, c = (d_lim - d_org), (r_lim - r_org), (c_lim - c_org)
     distances = (
         ((d * conversion_matrix[0, 0]
