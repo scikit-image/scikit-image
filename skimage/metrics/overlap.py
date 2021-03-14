@@ -50,7 +50,7 @@ class Rectangle():
         elif dimensions is not None:
             self._height, self._width = dimensions
             self._bottom_right = (self._r + self._height - 1,
-                                 self._c + self._width - 1)
+                                  self._c + self._width - 1)
 
     def __eq__(self, rectangle2):
         """Return true if 2 rectangles have the same position and dimension."""
@@ -80,105 +80,102 @@ class Rectangle():
         return self._height, self._width
 
 
-    @staticmethod
-    def is_intersecting(rectangle1, rectangle2):
-        """
-        Check if 2 rectangles are intersecting.
 
-        Adapted from post from Aman Gupta
-        at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
+def is_intersecting(rectangle1, rectangle2):
+    """
+    Check if 2 rectangles are intersecting.
 
-        Parameters
-        ----------
-        rectangle1 : a Rectangle object
-            First rectangle.
-        rectangle2 : a second Rectangle object
-            Second rectangle
+    Adapted from post from Aman Gupta
+    at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
 
-        Returns
-        -------
-        True if the rectangles are intersecting.
-        """
-        # If one rectangle is on left side of other
-        if (rectangle1._top_left[1] >= rectangle2._bottom_right[1] or
-           rectangle2._top_left[1] >= rectangle1._bottom_right[1]):
-            return False
+    Parameters
+    ----------
+    rectangle1 : a Rectangle object
+        First rectangle.
+    rectangle2 : a second Rectangle object
+        Second rectangle
 
-        # If one rectangle is above other
-        if (rectangle1._top_left[0] >= rectangle2._bottom_right[0] or
-           rectangle2._top_left[0] >= rectangle1._bottom_right[0]):
-            return False
+    Returns
+    -------
+    True if the rectangles are intersecting.
+    """
+    # If one rectangle is on left side of other
+    if (rectangle1._top_left[1] >= rectangle2._bottom_right[1] or
+       rectangle2._top_left[1] >= rectangle1._bottom_right[1]):
+        return False
 
-        return True
+    # If one rectangle is above other
+    if (rectangle1._top_left[0] >= rectangle2._bottom_right[0] or
+       rectangle2._top_left[0] >= rectangle1._bottom_right[0]):
+        return False
 
-    @staticmethod
-    def intersection_rectangles(rectangle1, rectangle2):
-        """
-        Return a Rectangle corresponding to the intersection between 2 rectangles.
+    return True
 
-        Parameters
-        ----------
-        rectangle1 : a Rectangle object
-            First rectangle.
-        rectangle2 : a second Rectangle object
-            Second rectangle
+def intersection_rectangles(rectangle1, rectangle2):
+    """
+    Return a Rectangle corresponding to the intersection between 2 rectangles.
 
-        Raises
-        ------
-        ValueError
-            If the rectangles are not intersecting.
-            Use is_intersecting to first test if the rectangles are intersecting.
+    Parameters
+    ----------
+    rectangle1 : a Rectangle object
+        First rectangle.
+    rectangle2 : a second Rectangle object
+        Second rectangle
 
-        Returns
-        -------
-        Rectangle object representing the intersection.
-        """
-        if not Rectangle.is_intersecting(rectangle1, rectangle2):
-            raise ValueError("""The rectangles are not intersecting.
-                             Use is_intersecting to first test if the rectangles are intersecting.""")
+    Raises
+    ------
+    ValueError
+        If the rectangles are not intersecting.
+        Use is_intersecting to first test if the rectangles are intersecting.
 
-        # determine the (r, c)-coordinates of the top left and bottom right corners
-        # for the intersection rectangle
-        r = max(rectangle1._r, rectangle2._r)
-        c = max(rectangle1._c, rectangle2._c)
-        bottom_right_r = min(rectangle1._bottom_right[0], rectangle2._bottom_right[0])
-        bottom_right_c = min(rectangle1._bottom_right[1], rectangle2._bottom_right[1])
+    Returns
+    -------
+    Rectangle object representing the intersection.
+    """
+    if not is_intersecting(rectangle1, rectangle2):
+        raise ValueError("""The rectangles are not intersecting.
+                         Use is_intersecting to first test if the rectangles are intersecting.""")
 
-        return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
+    # determine the (r, c)-coordinates of the top left and bottom right corners
+    # for the intersection rectangle
+    r = max(rectangle1._r, rectangle2._r)
+    c = max(rectangle1._c, rectangle2._c)
+    bottom_right_r = min(rectangle1._bottom_right[0], rectangle2._bottom_right[0])
+    bottom_right_c = min(rectangle1._bottom_right[1], rectangle2._bottom_right[1])
 
-    @staticmethod
-    def intersection_area(rectangle1, rectangle2):
-        """
-        Return the intersection area between 2 rectangles.
+    return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
 
-        Parameters
-        ----------
-        rectangle1 : Rectangle
-        rectangle2 : Rectangle
 
-        Returns
-        -------
-        Intersection, float
-            a float value corresponding to the intersection area.
-        """
-        if not Rectangle.is_intersecting(rectangle1, rectangle2):
-            return 0
+def intersection_area(rectangle1, rectangle2):
+    """
+    Return the intersection area between 2 rectangles.
 
-        # Compute area of the intersecting box
-        return Rectangle.intersection_rectangles(rectangle1, rectangle2).get_area()
+    Parameters
+    ----------
+    rectangle1 : Rectangle
+    rectangle2 : Rectangle
 
-    @staticmethod
-    def union_area(rectangle1, rectangle2):
-        """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
-        return (rectangle1.get_area()
-                + rectangle2.get_area()
-                - Rectangle.intersection_area(rectangle1, rectangle2))
+    Returns
+    -------
+    Intersection, float
+        a float value corresponding to the intersection area.
+    """
+    if not is_intersecting(rectangle1, rectangle2):
+        return 0
 
-    @staticmethod
-    def intersection_over_union(rectangle1, rectangle2):
-        """
-        Compute the ratio intersection aera over union area for a pair of rectangle.
+    # Compute area of the intersecting box
+    return intersection_rectangles(rectangle1, rectangle2).get_area()
 
-        The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
-        """
-        return Rectangle.intersection_area(rectangle1, rectangle2) / Rectangle.union_area(rectangle1, rectangle2)
+
+def union_area(rectangle1, rectangle2):
+    """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
+    return (rectangle1.get_area()
+            + rectangle2.get_area()
+            - intersection_area(rectangle1, rectangle2))
+
+def intersection_over_union(rectangle1, rectangle2):
+    """
+    Compute the ratio intersection aera over union area for a pair of rectangle.
+    The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
+    """
+    return intersection_area(rectangle1, rectangle2) / union_area(rectangle1, rectangle2)
