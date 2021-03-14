@@ -496,7 +496,8 @@ def test_no_markers():
 
 def test_connectivity():
     """
-    watershed segmentation should output different result for different connectivity
+    Watershed segmentation should output different result for 
+    different connectivity
     when markers are calculated where None is supplied.
     Issue = 5084
     """
@@ -514,15 +515,15 @@ def test_connectivity():
 
     # calcuate distance in discrete increase
     DummyBT = ndi.distance_transform_edt(image)
-    DummyBT_dis = np.around(DummyBT/12, decimals=0)*12
+    DummyBT_dis = np.around(DummyBT / 12, decimals = 0)*12
     # calculate the mask
-    Img_mask = np.where(DummyBT_dis==0, 0, 1)
+    Img_mask = np.where(DummyBT_dis == 0, 0, 1)
 
     # segments for connectivity 1 and 2
     labels_c1 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=1,
-                  compactness=0.01)
+                          compactness=0.01)
     labels_c2 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=2,
-                   compactness=0.01)
+                          compactness=0.01)
 
     # assertions
     assert np.unique(labels_c1).shape[0] == 6
