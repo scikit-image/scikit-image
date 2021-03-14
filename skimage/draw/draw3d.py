@@ -245,35 +245,8 @@ def _angles_to_rotmat(angles, order='zxz', is_intrinsic=True):
     return rotmat
 
 
-def _is_valid_rotation_matrix(matrix):
-    r"""Determine if a rotation matrix is valid.
-
-    A rotation matrix is an orthogonal matrix whose determinant equals 1.
-
-    .. math::
-
-        RR^\intercal = I
-        \\
-        \det R = 1
-
-    Parameters
-    ----------
-    matrix : (3, 3) ndarray of float
-        Matrix to be evaluated.
-
-    Returns
-    -------
-    is_valid : bool
-        ``True`` if a matrix is a rotation matrix, ``False`` otherwise.
-    """
-
-    return (np.allclose(matrix @ matrix.T, np.identity(3)) and
-            np.allclose(np.linalg.det(matrix), 1))
-
-
 def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
-                     rotation_order='zxz', is_intrinsic=True,
-                     rotation_matrix=None, spacing=None):
+                     rotation_order='zxz', is_intrinsic=True, spacing=None):
     r"""Generate coordinates of voxels within ellipsoid.
 
     Parameters
@@ -290,9 +263,8 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
         image size. By default the full extent of the ellipsoid is used.
     rotation_angles : (3,) array-like of float, optional (default None)
         Rotation angles to rotate the ellipsoid. The order of rotations is
-        specified by ``rotation_order``. Ignored if ``rotation_matrix`` is
-        specified. No rotation will be applied if both ``rotation_angles``
-        and ``rotation_matrix`` are ``None``.
+        specified by ``rotation_order``. No rotation will be applied if
+        ``rotation_angles`` is ``None``.
     rotation_order : str, length 3, optional (default 'zxz')
         Order of rotations. Each character should be one of ``{'x', 'y', 'z'}``
         and there should be no adjacent repeating characters.
@@ -302,11 +274,6 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
 
         - *intrinsic*: rotations occur about the rotating coordinate system
         - *extrinsic*: rotations occur about the original coordinate system
-    rotation_matrix : (3, 3) array-like of float, optional (default None)
-        Rotation matrix to rotate the ellipsoid. If both ``rotation_angles``
-        and ``rotation_matrix`` are specified, ``rotation_matrix`` has priority
-        over ``rotation_angles``. No rotation will be applied if both
-        ``rotation_angles`` and ``rotation_matrix`` are ``None``.
     spacing : (3,) array-like of float, optional (default None)
         Spacing in each spatial dimension. The order is (z, y, x). If
         ``spacing`` is ``None``, ``1.`` is set to all dimensions.
@@ -328,8 +295,6 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
         If the length of ``rotation_angles`` is not 3.
     ValueError
         If the length of ``spacing`` is not 3.
-    ValueError
-        If ``rotation_matrix`` is invalid.
     ValueError
         If ``rotation_order`` is invalid.
 
@@ -374,17 +339,7 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, rotation_angles=None,
             f'len(axis_lengths) should be 3 but got {len(axis_lengths)}')
     axis_lengths = np.array(axis_lengths)
 
-    if rotation_matrix is not None:
-        if rotation_matrix.shape != (3, 3):
-            raise ValueError(
-                'rotation_matrix should have the shape (3, 3) but got',
-                rotation_matrix.shape)
-        elif not _is_valid_rotation_matrix(rotation_matrix):
-            raise ValueError(
-                'rotation_matrix should be an orthogonal matrix whose '
-                'determinant equals 1.')
-        rotmat = rotation_matrix
-    elif rotation_angles is not None:
+    if rotation_angles is not None:
         if len(rotation_angles) != 3:
             raise ValueError(
                 'len(rotation_angles) should be 3 but got',
