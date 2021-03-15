@@ -164,7 +164,7 @@ def intersection_area(rectangle1, rectangle2):
         return 0
 
     # Compute area of the intersecting box
-    return intersection_rectangles(rectangle1, rectangle2).get_area()
+    return intersection_rectangle(rectangle1, rectangle2).get_area()
 
 
 def union_area(rectangle1, rectangle2):
