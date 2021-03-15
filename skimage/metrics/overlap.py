@@ -111,7 +111,7 @@ def is_intersecting(rectangle1, rectangle2):
 
     return True
 
-def intersection_rectangles(rectangle1, rectangle2):
+def intersection_rectangle(rectangle1, rectangle2):
     """
     Return a Rectangle corresponding to the intersection between 2 rectangles.
 

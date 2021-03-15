@@ -11,7 +11,7 @@ rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
 
 rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
 
-rect_inter13 = intersection_rectangles(rectangle1, rectangle3)
+rect_inter13 = intersection_rectangle(rectangle1, rectangle3)
 
 union_area13 = union_area(rectangle1, rectangle3)
 
@@ -41,7 +41,7 @@ def test_eq_operator():# Intersection rectangle and == comparison
     assert rect_inter13 == Rectangle((0, 0), bottom_right=(1, 2))
     assert rect_inter13 != 5
     with testing.raises(ValueError):
-        intersection_rectangles(rectangle1, rectangle2)
+        intersection_rectangle(rectangle1, rectangle2)
 
 
 def test_union():
