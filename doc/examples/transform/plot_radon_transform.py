@@ -104,10 +104,10 @@ plt.show()
 import matplotlib.pyplot as plt
 from skimage.transform.radon_transform import _get_fourier_filter
 
-filters = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann']
+filters = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
 for f in filters:
-    response = _get_fourier_filter(2000,f)
-    plt.plot(response, label= f)
+    response = _get_fourier_filter(2000, f)
+    plt.plot(response, label=f)
 plt.legend()
 plt.xlabel("position in pixel")
 plt.show()
