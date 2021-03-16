@@ -112,7 +112,8 @@ plt.legend()
 plt.xlabel("position in pixel")
 plt.show()
 
-## Applying the inverse radon transformation with the 'ramp' filter can be seen here:
+# Applying the inverse radon transformation with the 'ramp' filter can be
+# seen here:
 
 from skimage.transform import iradon
 
