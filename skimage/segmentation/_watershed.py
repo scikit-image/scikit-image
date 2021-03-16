@@ -73,7 +73,8 @@ def _validate_inputs(image, markers, mask, connectivity):
             raise ValueError(message)
     if markers is None:
         markers_bool = local_minima(image, connectivity=connectivity) * mask
-        markers = ndi.label(markers_bool)[0]
+        footprint = ndi.generate_binary_structure(markers_bool.ndim, connectivity)
+        markers = ndi.label(markers_bool, structure=footprint)[0]
     elif not isinstance(markers, (np.ndarray, list, tuple)):
         # not array-like, assume int
         # given int, assume that number of markers *within mask*.
