@@ -117,7 +117,8 @@ plt.show()
 
 from skimage.transform import iradon
 
-reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp', circle=True)
+reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp',
+                            circle=True)
 error = reconstruction_fbp - image
 print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 
