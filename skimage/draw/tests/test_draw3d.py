@@ -113,27 +113,24 @@ def test_ellipsoid_coords():
                                   spacing=(1., 1., 2.))
     test_anisotropic[dd, rr, cc] = 1
     test_rotate_intrinsic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(
-        (2, 2, 2), (2.2, 2.2, 2.2),
-        rotation_angles=np.random.uniform(0, np.pi, 3))
+    dd, rr, cc = ellipsoid_coords((2, 2, 2), (2.2, 2.2, 2.2),
+                                  angles=np.random.uniform(0, np.pi, 3))
     test_rotate_intrinsic[dd, rr, cc] = 1
     test_rotate_extrinsic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(
-        (2, 2, 2), (2.2, 2.2, 2.2),
-        rotation_angles=np.random.uniform(0, np.pi, 3),
-        rotation_order='xyz', is_intrinsic=False)
+    dd, rr, cc = ellipsoid_coords((2, 2, 2), (2.2, 2.2, 2.2),
+                                  angles=np.random.uniform(0, np.pi, 3),
+                                  intrinsic=False)
     test_rotate_extrinsic[dd, rr, cc] = 1
     test_rotate_intrinsic_anisotropic = np.zeros((5, 5, 5))
     dd, rr, cc = ellipsoid_coords(
         (4, 2, 2), (2.2, 2.2, 4.4),
-        rotation_angles=(np.random.uniform(0, np.pi), np.pi / 2, np.pi / 2),
-        spacing=(2., 1., 1.))
+        angles=(np.random.uniform(0, np.pi), np.pi / 2, np.pi / 2),
+        axes=[0, 2, 0], spacing=(2., 1., 1.))
     test_rotate_intrinsic_anisotropic[dd, rr, cc] = 1
     test_rotate_extrinsic_anisotropic = np.zeros((5, 5, 5))
-    dd, rr, cc = ellipsoid_coords(
-        (4, 2, 2), (2.2, 2.2, 4.4),
-        rotation_angles=(0.0, np.pi / 2, 0.0),
-        rotation_order='xyz', is_intrinsic=False, spacing=(2., 1., 1.))
+    dd, rr, cc = ellipsoid_coords((4, 2, 2), (2.2, 2.2, 4.4),
+                                  angles=(0.0, np.pi / 2, 0.0),
+                                  intrinsic=False, spacing=(2., 1., 1.))
     test_rotate_extrinsic_anisotropic[dd, rr, cc] = 1
 
     expected = np.array([[[0., 0., 0., 0., 0.],
