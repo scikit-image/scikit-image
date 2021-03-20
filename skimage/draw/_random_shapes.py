@@ -3,7 +3,7 @@ import numpy as np
 
 from . import (polygon as draw_polygon, disk as draw_disk,
                ellipse as draw_ellipse)
-from .._shared.utils import warn
+from .._shared.utils import deprecate_multichannel_kwarg, warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -290,6 +290,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
+@deprecate_multichannel_kwarg()
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,
@@ -301,7 +302,9 @@ def random_shapes(image_shape,
                   intensity_range=None,
                   allow_overlap=False,
                   num_trials=100,
-                  random_seed=None):
+                  random_seed=None,
+                  *,
+                  channel_axis=-1):
     """Generate an image with random shapes, labeled with bounding boxes.
 
     The image is populated with random shapes with random sizes, random
@@ -328,7 +331,8 @@ def random_shapes(image_shape,
         The maximum dimension of each shape to fit into the image.
     multichannel : bool, optional
         If True, the generated image has ``num_channels`` color channels,
-        otherwise generates grayscale image.
+        otherwise generates grayscale image. This argument is deprecated:
+        specify `channel_axis` instead.
     num_channels : int, optional
         Number of channels in the generated image. If 1, generate monochrome
         images, else color images with multiple channels. Ignored if
@@ -350,6 +354,13 @@ def random_shapes(image_shape,
     random_seed : int, optional
         Seed to initialize the random number generator.
         If `None`, a random seed from the operating system is used.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -381,7 +392,7 @@ def random_shapes(image_shape,
         raise ValueError('Minimum dimension must be less than ncols and nrows')
     max_size = max_size or max(image_shape[0], image_shape[1])
 
-    if not multichannel:
+    if channel_axis is None:
         num_channels = 1
 
     if intensity_range is None:
@@ -432,6 +443,9 @@ def random_shapes(image_shape,
             warn('Could not fit any shapes to image, '
                  'consider reducing the minimum dimension')
 
-    if not multichannel:
+    if channel_axis is None:
         image = np.squeeze(image, axis=2)
+    else:
+        image = np.moveaxis(image, -1, channel_axis)
+
     return image, labels
