@@ -171,15 +171,34 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
     """
 
-    def __init__(self, removed_version='1.0'):
+    def __init__(self, removed_version='1.0', multichannel_position=None):
         super().__init__(
             kwarg_mapping={'multichannel': 'channel_axis'},
             warning_msg=None,
             removed_version=removed_version)
+        self.position = multichannel_position
 
     def __call__(self, func):
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+
+            if self.position is not None and len(args) > self.position:
+                warning_msg = (
+                    "Providing the 'multichannel' argument positionally to "
+                    "{func_name} is deprecated. Use the 'channel_axis' kwarg "
+                    "instead."
+                )
+                warnings.warn(warning_msg.format(func_name=func.__name__),
+                              FutureWarning,
+                              stacklevel=2)
+                if 'channel_axis' in kwargs:
+                    raise ValueError(
+                        "Cannot provide both a 'channel_axis' kwarg and a "
+                        "positional 'multichannel' value."
+                    )
+                else:
+                    channel_axis = -1 if args[self.position] else None
+                    kwargs['channel_axis'] = channel_axis
 
             if 'multichannel' in kwargs:
                 #  warn that the function interface has changed:
@@ -190,6 +209,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
                 kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
+
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
