@@ -313,7 +313,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         computation_type = _dtype_itemsize(itemsize_in, dtype_out,
                                            np.float32, np.float64)
 
-        if kind_in == 'u':
+        if kind_in == 'u' or kind_in == 'i':
             # using np.divide or np.multiply doesn't copy the data
             # until the computation time
             image = np.multiply(image, 1. / imax_in,

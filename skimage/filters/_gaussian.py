@@ -10,7 +10,7 @@ __all__ = ['gaussian', 'difference_of_gaussians']
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=False, truncate=4.0):
+             multichannel=None, preserve_range=True, truncate=4.0):
     """Multi-dimensional Gaussian filter.
 
     Parameters
