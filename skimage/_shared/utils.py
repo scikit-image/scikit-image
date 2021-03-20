@@ -188,7 +188,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                     new_arg='channel_axis'), FutureWarning, stacklevel=2)
 
                 # multichannel = True -> last axis corresponds to channels
-                convert = {True: (-1,), False: None}
+                convert = {True: -1, False: None}
                 kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
 
             # Call the function with the fixed arguments
@@ -243,7 +243,7 @@ class channel_as_last_axis():
                 raise ValueError(
                     "only a single channel axis is currently suported")
 
-            if channel_axis == (-1,):
+            if channel_axis == (-1,) or channel_axis == -1:
                 return func(*args, **kwargs)
 
             if self.arg_positions:
