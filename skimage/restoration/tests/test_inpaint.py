@@ -2,8 +2,10 @@
 import numpy as np
 from skimage.restoration import inpaint
 
+from skimage import data, img_as_float
+from skimage.metrics import mean_squared_error
 from skimage._shared import testing
-from skimage._shared.testing import assert_allclose
+from skimage._shared.testing import assert_allclose, expected_warnings
 
 
 def test_inpaint_biharmonic_2d():
@@ -22,6 +24,47 @@ def test_inpaint_biharmonic_2d():
          [0., 0.0625, 0.25000000, 0.5625000, 1.00000000]]
     )
     assert_allclose(ref, out)
+
+
+@testing.parametrize('channel_axis', [0, 1, -1])
+def test_inpaint_biharmonic_2d_color(channel_axis):
+    img = img_as_float(data.astronaut()[:64, :64])
+
+    mask = np.zeros(img.shape[:2], dtype=np.bool)
+    mask[8:16, :16] = 1
+    img_defect = img * ~mask[..., np.newaxis]
+    mse_defect = mean_squared_error(img, img_defect)
+
+    img_defect = np.moveaxis(img_defect, -1, channel_axis)
+    img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
+                                              channel_axis=channel_axis)
+    img_restored = np.moveaxis(img_restored, channel_axis, -1)
+    mse_restored = mean_squared_error(img, img_restored)
+
+    assert mse_restored < 0.01 * mse_defect
+
+
+def test_inpaint_biharmonic_2d_color_deprecated():
+    img = img_as_float(data.astronaut()[:64, :64])
+
+    mask = np.zeros(img.shape[:2], dtype=np.bool)
+    mask[8:16, :16] = 1
+    img_defect = img * ~mask[..., np.newaxis]
+    mse_defect = mean_squared_error(img, img_defect)
+
+    with expected_warnings(["'multichannel' is a deprecated argument"]):
+        img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
+                                                  multichannel=True)
+    mse_restored = mean_squared_error(img, img_restored)
+
+    assert mse_restored < 0.01 * mse_defect
+
+    # providing multichannel argument positionally also warns
+    with expected_warnings(["Providing the 'multichannel' argument"]):
+        img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
+    mse_restored = mean_squared_error(img, img_restored)
+
+    assert mse_restored < 0.01 * mse_defect
 
 
 def test_inpaint_biharmonic_3d():

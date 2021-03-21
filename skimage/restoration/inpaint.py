@@ -5,6 +5,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
+from .._shared import utils
 from ..measure import label
 
 
@@ -73,7 +74,9 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     return out
 
 
-def inpaint_biharmonic(image, mask, multichannel=False):
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=2)
+def inpaint_biharmonic(image, mask, multichannel=False, *, channel_axis=None):
     """Inpaint masked points in image with biharmonic equations.
 
     Parameters
@@ -86,8 +89,15 @@ def inpaint_biharmonic(image, mask, multichannel=False):
         known pixels - with 0.
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial.
+        otherwise as spatial. This argument is deprecated: specify
+        `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
 
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
     Returns
     -------
     out : (M[, N[, ..., P]][, C]) ndarray
@@ -116,6 +126,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     if image.ndim < 1:
         raise ValueError('Input array has to be at least 1D')
 
+    multichannel = channel_axis is not None
     img_baseshape = image.shape[:-1] if multichannel else image.shape
     if img_baseshape != mask.shape:
         raise ValueError('Input arrays have to be the same shape')
