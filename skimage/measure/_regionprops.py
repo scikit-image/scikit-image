@@ -721,7 +721,8 @@ def regionprops_table(label_image, intensity_image=None,
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -883,7 +884,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
