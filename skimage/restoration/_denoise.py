@@ -1,13 +1,17 @@
+import functools
+from math import ceil
+import numbers
+
 import scipy.stats
 import numpy as np
-from math import ceil
+import pywt
+
 from .. import img_as_float
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from .._shared import utils
 from .._shared.utils import warn
-import pywt
 import skimage.color as color
 from skimage.color.colorconv import ycbcr_from_rgb
-import numbers
 
 
 def _gaussian_weight(array, sigma_squared, *, dtype=float):
@@ -691,10 +695,12 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
     return sigmas
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg()
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink',
-                    rescale_sigma=True):
+                    rescale_sigma=True, *, channel_axis=None):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -801,6 +807,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1, rescale_sigma=True)
 
     """
+    multichannel = channel_axis is not None
     if method not in ["BayesShrink", "VisuShrink"]:
         raise ValueError(
             ('Invalid method: {}. The currently supported methods are '
@@ -863,7 +870,9 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     return out
 
 
-def estimate_sigma(image, average_sigmas=False, multichannel=False):
+@utils.deprecate_multichannel_kwarg()
+def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
+                   channel_axis=None):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
@@ -906,17 +915,19 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     >>> img = img + sigma * np.random.standard_normal(img.shape)
     >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
-    if multichannel:
-        nchannels = image.shape[-1]
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
+        nchannels = image.shape[channel_axis]
         sigmas = [estimate_sigma(
-            image[..., c], multichannel=False) for c in range(nchannels)]
+            image[_at(c)], channel_axis=None) for c in range(nchannels)]
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
     elif image.shape[-1] <= 4:
-        msg = ("image is size {0} on the last axis, but multichannel is "
-               "False.  If this is a color image, please set multichannel "
-               "to True for proper noise estimation.")
+        msg = ("image is size {0} on the last axis, but channel_axis is "
+               "None.  If this is a color image, please set channel_axis=-1 "
+               "for proper noise estimation.")
         warn(msg.format(image.shape[-1]))
     coeffs = pywt.dwtn(image, wavelet='db2')
     detail_coeffs = coeffs['d' * image.ndim]

@@ -465,9 +465,11 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
+    channel_axis = -1 if multichannel else None
+
     # Verify that SNR is improved when true sigma is used
     denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                           multichannel=multichannel,
+                                           channel_axis=channel_axis,
                                            convert2ycbcr=convert2ycbcr,
                                            rescale_sigma=True)
     psnr_noisy = peak_signal_noise_ratio(img, noisy)
@@ -476,7 +478,7 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
 
     # Verify that SNR is improved with internally estimated sigma
     denoised = restoration.denoise_wavelet(noisy,
-                                           multichannel=multichannel,
+                                           channel_axis=channel_axis,
                                            convert2ycbcr=convert2ycbcr,
                                            rescale_sigma=True)
     psnr_noisy = peak_signal_noise_ratio(img, noisy)
@@ -485,7 +487,7 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
 
     # SNR is improved less with 1 wavelet level than with the default.
     denoised_1 = restoration.denoise_wavelet(noisy,
-                                             multichannel=multichannel,
+                                             channel_axis=channel_axis,
                                              wavelet_levels=1,
                                              convert2ycbcr=convert2ycbcr,
                                              rescale_sigma=True)
@@ -495,12 +497,34 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
 
     # Test changing noise_std (higher threshold, so less energy in signal)
     res1 = restoration.denoise_wavelet(noisy, sigma=2 * sigma,
-                                       multichannel=multichannel,
+                                       channel_axis=channel_axis,
                                        rescale_sigma=True)
     res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                       multichannel=multichannel,
+                                       channel_axis=channel_axis,
                                        rescale_sigma=True)
     assert_(np.sum(res1**2) <= np.sum(res2**2))
+
+
+@pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
+@pytest.mark.parametrize('convert2ycbcr', [False, True])
+def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
+    rstate = np.random.RandomState(1234)
+    sigma = 0.1
+    img = astro_odd
+    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = np.clip(noisy, 0, 1)
+
+    img = np.moveaxis(img, -1, channel_axis)
+    noisy = np.moveaxis(noisy, -1, channel_axis)
+
+    # Verify that SNR is improved when true sigma is used
+    denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
+                                           channel_axis=channel_axis,
+                                           convert2ycbcr=convert2ycbcr,
+                                           rescale_sigma=True)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
+    assert_(psnr_denoised > psnr_noisy)
 
 
 @pytest.mark.parametrize(
@@ -530,28 +554,28 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     noisy = np.clip(noisy, x.min(), x.max())
     noisy = noisy.astype(x.dtype)
 
-    multichannel = x.shape[-1] == 3
+    channel_axis = -1 if x.shape[-1] == 3 else None
 
     if estimate_sigma:
         sigma_est = restoration.estimate_sigma(noisy,
-                                               multichannel=multichannel)
+                                               channel_axis=channel_axis)
     else:
         sigma_est = None
 
-    if convert2ycbcr and not multichannel:
+    if convert2ycbcr and channel_axis is None:
         # YCbCr requires multichannel == True
         with testing.raises(ValueError):
             denoised = restoration.denoise_wavelet(noisy,
                                                    sigma=sigma_est,
                                                    wavelet='sym4',
-                                                   multichannel=multichannel,
+                                                   channel_axis=channel_axis,
                                                    convert2ycbcr=convert2ycbcr,
                                                    rescale_sigma=True)
         return
 
     denoised = restoration.denoise_wavelet(noisy, sigma=sigma_est,
                                            wavelet='sym4',
-                                           multichannel=multichannel,
+                                           channel_axis=channel_axis,
                                            convert2ycbcr=convert2ycbcr,
                                            rescale_sigma=True)
 
@@ -635,8 +659,8 @@ def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
     #   for some reason.
     # Verify that SNR is improved with internally estimated sigma
     denoised = restoration.denoise_wavelet(
-            noisy, method=method,
-            rescale_sigma=rescale_sigma)
+        noisy, method=method,
+        rescale_sigma=rescale_sigma)
     psnr_noisy = peak_signal_noise_ratio(img, noisy)
     psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
@@ -686,9 +710,9 @@ def test_wavelet_denoising_levels(rescale_sigma):
 
     with testing.raises(ValueError):
         restoration.denoise_wavelet(
-                noisy,
-                wavelet=wavelet, wavelet_levels=-1,
-                rescale_sigma=rescale_sigma)
+            noisy,
+            wavelet=wavelet, wavelet_levels=-1,
+            rescale_sigma=rescale_sigma)
 
 
 def test_estimate_sigma_gray():
@@ -699,7 +723,7 @@ def test_estimate_sigma_gray():
     # add noise to astronaut
     img += sigma * rstate.standard_normal(img.shape)
 
-    sigma_est = restoration.estimate_sigma(img, multichannel=False)
+    sigma_est = restoration.estimate_sigma(img, channel_axis=None)
     assert_almost_equal(sigma, sigma_est, decimal=2)
 
 
@@ -716,29 +740,32 @@ def test_estimate_sigma_masked_image():
 
     img[center_roi] = sigma * rstate.standard_normal(img[center_roi].shape)
 
-    sigma_est = restoration.estimate_sigma(img, multichannel=False)
+    sigma_est = restoration.estimate_sigma(img, channel_axis=None)
     assert_almost_equal(sigma, sigma_est, decimal=1)
 
 
-def test_estimate_sigma_color():
+@pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
+def test_estimate_sigma_color(channel_axis):
     rstate = np.random.RandomState(1234)
     # astronaut image
     img = astro.copy()
     sigma = 0.1
     # add noise to astronaut
     img += sigma * rstate.standard_normal(img.shape)
+    img = np.moveaxis(img, -1, channel_axis)
 
-    sigma_est = restoration.estimate_sigma(img, multichannel=True,
+    sigma_est = restoration.estimate_sigma(img, channel_axis=channel_axis,
                                            average_sigmas=True)
     assert_almost_equal(sigma, sigma_est, decimal=2)
 
-    sigma_list = restoration.estimate_sigma(img, multichannel=True,
+    sigma_list = restoration.estimate_sigma(img, channel_axis=channel_axis,
                                             average_sigmas=False)
-    assert_equal(len(sigma_list), img.shape[-1])
+    assert_equal(len(sigma_list), img.shape[channel_axis])
     assert_almost_equal(sigma_list[0], sigma_est, decimal=2)
 
-    # default multichannel=False should raise a warning about last axis size
-    assert_warns(UserWarning, restoration.estimate_sigma, img)
+    if channel_axis % img.ndim == 2:
+        # default channel_axis=None should raise a warning about last axis size
+        assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 
 @pytest.mark.parametrize('rescale_sigma', [True, False])
@@ -753,11 +780,12 @@ def test_wavelet_denoising_args(rescale_sigma):
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
+            channel_axis = -1 if multichannel else None
             if convert2ycbcr and not multichannel:
                 with testing.raises(ValueError):
                     restoration.denoise_wavelet(noisy,
                                                 convert2ycbcr=convert2ycbcr,
-                                                multichannel=multichannel,
+                                                channel_axis=channel_axis,
                                                 rescale_sigma=rescale_sigma)
                 continue
             for sigma in [0.1, [0.1, 0.1, 0.1], None]:
@@ -766,7 +794,7 @@ def test_wavelet_denoising_args(rescale_sigma):
                     continue
                 restoration.denoise_wavelet(noisy, sigma=sigma,
                                             convert2ycbcr=convert2ycbcr,
-                                            multichannel=multichannel,
+                                            channel_axis=channel_axis,
                                             rescale_sigma=rescale_sigma)
 
 
@@ -775,7 +803,7 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
     """Biorthogonal wavelets should raise a warning during thresholding."""
     img = astro_gray
     assert_warns(UserWarning, restoration.denoise_wavelet, img,
-                 wavelet='bior2.2', multichannel=False,
+                 wavelet='bior2.2', channel_axis=None,
                  rescale_sigma=rescale_sigma)
 
 
@@ -784,8 +812,8 @@ def test_cycle_spinning_multichannel(rescale_sigma):
     sigma = 0.1
     rstate = np.random.RandomState(1234)
 
-    for multichannel in True, False:
-        if multichannel:
+    for channel_axis in -1, None:
+        if channel_axis is not None:
             img = astro
             # can either omit or be 0 along the channels axis
             valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
@@ -805,14 +833,14 @@ def test_cycle_spinning_multichannel(rescale_sigma):
         noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
 
         denoise_func = restoration.denoise_wavelet
-        func_kw = dict(sigma=sigma, multichannel=multichannel,
+        func_kw = dict(sigma=sigma, channel_axis=channel_axis,
                        rescale_sigma=rescale_sigma)
 
         # max_shifts=0 is equivalent to just calling denoise_func
         with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
             dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
                                            func_kw=func_kw,
-                                           multichannel=multichannel)
+                                           channel_axis=channel_axis)
             dn = denoise_func(noisy, **func_kw)
         assert_equal(dn, dn_cc)
 
@@ -822,7 +850,7 @@ def test_cycle_spinning_multichannel(rescale_sigma):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
-                                               multichannel=multichannel)
+                                               channel_axis=channel_axis)
             psnr = peak_signal_noise_ratio(img, dn)
             psnr_cc = peak_signal_noise_ratio(img, dn_cc)
             assert_(psnr_cc > psnr)
@@ -833,7 +861,7 @@ def test_cycle_spinning_multichannel(rescale_sigma):
                                                max_shifts=2,
                                                shift_steps=shift_steps,
                                                func_kw=func_kw,
-                                               multichannel=multichannel)
+                                               channel_axis=channel_axis)
             psnr = peak_signal_noise_ratio(img, dn)
             psnr_cc = peak_signal_noise_ratio(img, dn_cc)
             assert_(psnr_cc > psnr)
@@ -843,14 +871,14 @@ def test_cycle_spinning_multichannel(rescale_sigma):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
-                                               multichannel=multichannel)
+                                               channel_axis=channel_axis)
         for shift_steps in invalid_steps:
             with testing.raises(ValueError):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=2,
                                                shift_steps=shift_steps,
                                                func_kw=func_kw,
-                                               multichannel=multichannel)
+                                               channel_axis=channel_axis)
 
 
 def test_cycle_spinning_num_workers():
@@ -860,21 +888,50 @@ def test_cycle_spinning_num_workers():
     noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
 
     denoise_func = restoration.denoise_wavelet
-    func_kw = dict(sigma=sigma, multichannel=True, rescale_sigma=True)
+    func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
 
     # same results are expected whether using 1 worker or multiple workers
     dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                    func_kw=func_kw, multichannel=False,
+                                    func_kw=func_kw, channel_axis=None,
                                     num_workers=1)
     with expected_warnings([DASK_NOT_INSTALLED_WARNING,]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                        func_kw=func_kw, multichannel=False,
+                                        func_kw=func_kw, channel_axis=None,
                                         num_workers=4)
         dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                        func_kw=func_kw, multichannel=False,
+                                        func_kw=func_kw, channel_axis=None,
                                         num_workers=None)
     assert_almost_equal(dn_cc1, dn_cc2)
     assert_almost_equal(dn_cc1, dn_cc3)
+
+
+def test_cycle_spinning_num_workers_deprecated_multichannel():
+    img = astro_gray[:32, :32]
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+    denoise_func = restoration.denoise_wavelet
+
+    func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
+
+    mc_warn_str = "'multichannel' is a deprecated argument"
+
+    # same results are expected whether using 1 worker or multiple workers
+    with expected_warnings([mc_warn_str]):
+        dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                        func_kw=func_kw, multichannel=False,
+                                        num_workers=1)
+
+    if DASK_NOT_INSTALLED_WARNING is None:
+        exp_warn = [mc_warn_str]
+    else:
+        exp_warn = [mc_warn_str, DASK_NOT_INSTALLED_WARNING]
+    with expected_warnings(exp_warn):
+        dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                        func_kw=func_kw, multichannel=False,
+                                        num_workers=2)
+    assert_almost_equal(dn_cc1, dn_cc2)
 
 
 if __name__ == "__main__":
