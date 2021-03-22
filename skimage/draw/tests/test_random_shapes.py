@@ -13,13 +13,20 @@ def test_generates_color_images_with_correct_shape():
 
 
 def test_generates_gray_images_with_correct_shape():
+    image, _ = random_shapes(
+        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None)
+    assert image.shape == (4567, 123)
+
+
+def test_generates_gray_images_with_correct_shape_deprecated_multichannel():
     with expected_warnings(["'multichannel' is a deprecated argument"]):
         image, _ = random_shapes(
             (4567, 123), min_shapes=3, max_shapes=20, multichannel=False)
     assert image.shape == (4567, 123)
 
-    image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None)
+    # repeat prior test, but check for positional multichannel warning
+    with expected_warnings(["Providing the 'multichannel' argument"]):
+        image, _ = random_shapes((4567, 123), 20, 3, 2, None, False)
     assert image.shape == (4567, 123)
 
 

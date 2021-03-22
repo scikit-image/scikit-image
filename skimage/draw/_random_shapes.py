@@ -290,7 +290,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
-@deprecate_multichannel_kwarg()
+@deprecate_multichannel_kwarg(multichannel_position=5)
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,

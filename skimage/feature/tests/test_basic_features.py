@@ -33,7 +33,7 @@ def test_multiscale_basic_features_deprecated_multichannel():
     assert features.shape[-1] == 5 * n_sigmas * 4
     assert features.shape[:-1] == img.shape[:-1]
 
-    #repeat prior test, but checked for positional multichannel warning
+    # repeat prior test, but check for positional multichannel warning
     with expected_warnings(["Providing the 'multichannel' argument"]):
         multiscale_basic_features(img, True, sigma_min=1, sigma_max=2)
     assert features.shape[-1] == 5 * n_sigmas * 4
