@@ -68,6 +68,7 @@ def test_multichannel(channel_axis):
     assert np.allclose(a.mean(axis=spatial_axes),
                        gaussian_rgb_a.mean(axis=spatial_axes))
 
+
 def test_deprecated_multichannel():
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
@@ -77,6 +78,11 @@ def test_deprecated_multichannel():
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
     assert np.allclose(a.mean(axis=(0, 1)), gaussian_rgb_a.mean(axis=(0, 1)))
+
+    # check positional multichannel argument warning
+    with expected_warnings(["Providing the 'multichannel' argument"]):
+        gaussian_rgb_a = gaussian(a, 1, None, 'reflect', 0, True)
+
 
 def test_preserve_range():
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
