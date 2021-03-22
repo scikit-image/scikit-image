@@ -198,7 +198,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg()
+@utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
