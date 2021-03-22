@@ -11,11 +11,7 @@ __all__ = ['gaussian', 'difference_of_gaussians']
 
 
 @utils.channel_as_last_axis()
-<<<<<<< HEAD
 @utils.deprecate_multichannel_kwarg(multichannel_position=5)
-=======
-@utils.deprecate_multichannel_kwarg()
->>>>>>> 4d1598092... filters: multichannel->channel_axis
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
              multichannel=None, preserve_range=False, truncate=4.0, *,
              channel_axis=None):
