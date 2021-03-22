@@ -84,6 +84,7 @@ jobs:
         run: |
             set -ex
             source tools/github/before_install.sh
+            set -ex
             python setup.py sdist
             if [[ $INSTALL_FROM_SDIST != "0" ]]; then
                 pip uninstall cython -y;
