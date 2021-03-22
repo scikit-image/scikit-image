@@ -97,7 +97,7 @@ def _mutiscale_basic_features_singlechannel(
     return features
 
 
-@utils.deprecate_multichannel_kwarg()
+@utils.deprecate_multichannel_kwarg(multichannel_position=1)
 def multiscale_basic_features(
     image,
     multichannel=False,
