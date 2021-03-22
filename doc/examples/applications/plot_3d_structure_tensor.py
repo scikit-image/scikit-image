@@ -6,8 +6,8 @@ Estimate anisotropy in a 3D microscopy image
 In this tutorial, we compute the structure tensor of a 3D image.
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
-The data we use here are sampled from an image of kidney tissue by Genevieve
-Buckley in confocal fluorescence microscopy (more details at [1]_ under
+The data we use here are sampled from an image of kidney tissue obtained by
+confocal fluorescence microscopy (more details at [1]_ under
 ``kidney-tissue-fluorescence.tif``).
 
 .. [1] https://gitlab.com/scikit-image/data/#data
