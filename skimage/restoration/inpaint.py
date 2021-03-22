@@ -98,6 +98,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *, channel_axis=None):
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
+
     Returns
     -------
     out : (M[, N[, ..., P]][, C]) ndarray
