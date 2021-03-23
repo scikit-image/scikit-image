@@ -62,7 +62,6 @@ def test_pyramid_expand_rgb():
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
 
-
 def test_pyramid_expand_rgb_deprecated_multichannel():
     rows, cols, dim = image.shape
     with expected_warnings(["'multichannel' is a deprecated argument"]):
