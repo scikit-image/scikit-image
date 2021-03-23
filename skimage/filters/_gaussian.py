@@ -281,9 +281,9 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                          'low_sigma for all axes')
 
     im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   multichannel=multichannel, truncate=truncate)
+                   multichannel=multichannel, truncate=truncate, preserve_range=False)
 
     im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   multichannel=multichannel, truncate=truncate)
+                   multichannel=multichannel, truncate=truncate, preserve_range=False)
 
     return im1 - im2
