@@ -1074,7 +1074,13 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
     assert_almost_equal(dn_cc1, dn_cc2)
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    mc_warn_str = "Providing the 'multichannel' argument"
+    if DASK_NOT_INSTALLED_WARNING is None:
+        exp_warn = [mc_warn_str]
+    else:
+        exp_warn = [mc_warn_str, DASK_NOT_INSTALLED_WARNING]
+
+    with expected_warnings(exp_warn):
         restoration.cycle_spin(noisy, denoise_func, 1, 1, None, False)
 
 
