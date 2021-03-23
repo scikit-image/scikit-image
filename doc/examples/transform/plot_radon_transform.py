@@ -98,12 +98,30 @@ plt.show()
 # back projection is among the fastest methods of performing the inverse
 # Radon transform. The only tunable parameter for the FBP is the filter,
 # which is applied to the Fourier transformed projections. It may be used to
-# suppress high frequency noise in the reconstruction. ``skimage`` provides a
-# few different options for the filter.
+# suppress high frequency noise in the reconstruction. ``skimage`` provides
+# the filters 'ramp', 'shepp-logan', 'cosine', 'hamming', and 'hann':
+
+import matplotlib.pyplot as plt
+from skimage.transform.radon_transform import _get_fourier_filter
+
+filters = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann']
+
+for ix, f in enumerate(filters):
+    response = _get_fourier_filter(2000, f)
+    plt.plot(response, label=f)
+
+plt.xlim([0, 1000])
+plt.xlabel('frequency')
+plt.legend()
+plt.show()
+
+######################################################################
+# Applying the inverse radon transformation with the 'ramp' filter, we get:
 
 from skimage.transform import iradon
 
-reconstruction_fbp = iradon(sinogram, theta=theta, circle=True)
+reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp',
+                            circle=True)
 error = reconstruction_fbp - image
 print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 
