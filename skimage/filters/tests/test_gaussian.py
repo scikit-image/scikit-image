@@ -62,8 +62,25 @@ def test_multichannel():
 
 
 def test_preserve_range():
+    """
+    Testing preserve_range param
+    """
+    ones = np.array([[1, 1], [1, 1]], dtype=np.int64)
+    filtered_ones = gaussian(ones, preserve_range=False)
+    assert(np.all(filtered_ones == filtered_ones[0]))
+
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
-    gaussian(img, 1, preserve_range=True)
+    gaussian(img, 1)
+
+
+def test_1d_ok():
+    """
+    Testing Gaussian Filter for 1D array.
+    With all positive integer values and only one zero, it should filter all values to be at least more than 0.1
+    """
+    nums = np.arange(7)
+    filtered = gaussian(nums)
+    assert(np.all(filtered > 0.1))
 
 
 def test_4d_ok():
