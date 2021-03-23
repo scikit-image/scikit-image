@@ -75,11 +75,13 @@ ax1.imshow(image, cmap=plt.cm.Greys_r)
 
 theta = np.linspace(0., 180., max(image.shape), endpoint=False)
 sinogram = radon(image, theta=theta, circle=True)
+dx, dy = 0.5 * 180.0 / max(image.shape), 0.5 / sinogram.shape[0]
 ax2.set_title("Radon transform\n(Sinogram)")
 ax2.set_xlabel("Projection angle (deg)")
 ax2.set_ylabel("Projection position (pixels)")
 ax2.imshow(sinogram, cmap=plt.cm.Greys_r,
-           extent=(0, 180, 0, sinogram.shape[0]), aspect='auto')
+           extent=(-dx, 180.0 + dx, -dy, sinogram.shape[0] + dy),
+           aspect='auto')
 
 fig.tight_layout()
 plt.show()
@@ -96,12 +98,30 @@ plt.show()
 # back projection is among the fastest methods of performing the inverse
 # Radon transform. The only tunable parameter for the FBP is the filter,
 # which is applied to the Fourier transformed projections. It may be used to
-# suppress high frequency noise in the reconstruction. ``skimage`` provides a
-# few different options for the filter.
+# suppress high frequency noise in the reconstruction. ``skimage`` provides
+# the filters 'ramp', 'shepp-logan', 'cosine', 'hamming', and 'hann':
+
+import matplotlib.pyplot as plt
+from skimage.transform.radon_transform import _get_fourier_filter
+
+filters = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann']
+
+for ix, f in enumerate(filters):
+    response = _get_fourier_filter(2000, f)
+    plt.plot(response, label=f)
+
+plt.xlim([0, 1000])
+plt.xlabel('frequency')
+plt.legend()
+plt.show()
+
+######################################################################
+# Applying the inverse radon transformation with the 'ramp' filter, we get:
 
 from skimage.transform import iradon
 
-reconstruction_fbp = iradon(sinogram, theta=theta, circle=True)
+reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp',
+                            circle=True)
 error = reconstruction_fbp - image
 print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 

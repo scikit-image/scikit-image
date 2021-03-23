@@ -5,7 +5,7 @@ import numpy as np
 from .._shared.utils import warn, change_default_value
 from ..util import img_as_float
 from . import rgb_colors
-from .colorconv import rgb2gray, gray2rgb
+from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
 
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
@@ -73,7 +73,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
 @change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
+              bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay',
+              *, saturation=0):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -102,6 +103,11 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         and overlays the colored labels over the original image. 'avg' replaces
         each labeled segment with its average color, for a stained-class or
         pastel painting appearance.
+    saturation : float [0, 1], optional
+        Parameter to control the saturation applied to the original image
+        between fully saturated (original RGB, `saturation=1`) and fully
+        unsaturated (grayscale, `saturation=0`). Only applies when
+        `kind='overlay'`.
 
     Returns
     -------
@@ -111,7 +117,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     """
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                  bg_color, image_alpha)
+                                  bg_color, image_alpha, saturation)
     elif kind == 'avg':
         return _label2rgb_avg(label, image, bg_label, bg_color)
     else:
@@ -119,7 +125,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
-                       bg_label=-1, bg_color=None, image_alpha=1):
+                       bg_label=-1, bg_color=None, image_alpha=1,
+                       saturation=0):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -128,7 +135,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         Integer array of labels with the same shape as `image`.
     image : array, shape (M, N, 3), optional
         Image used as underlay for labels. If the input is an RGB image, it's
-        converted to grayscale before coloring.
+        converted to grayscale before coloring, unless the `saturation` is
+        greater than 0.
     colors : list, optional
         List of colors. If the number of labels exceeds the number of colors,
         then the colors are cycled.
@@ -142,6 +150,10 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
+    saturation : float [0, 1], optional
+        Parameter to control the saturation applied to the original image
+        between fully saturated (original RGB, `saturation=1`) and fully
+        unsaturated (grayscale, `saturation=0`).
 
     Returns
     -------
@@ -149,6 +161,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    if not 0 <= saturation <= 1:
+        warn(f"saturation must be in range [0, 1], got {saturation}")
+
     if colors is None:
         colors = DEFAULT_COLORS
     colors = [_rgb_vector(c) for c in colors]
@@ -164,11 +179,14 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
 
+        image = img_as_float(image)
         if image.ndim > label.ndim:
-            image = img_as_float(rgb2gray(image))
-        else:
-            image = img_as_float(image)
-        image = gray2rgb(image) * image_alpha + (1 - image_alpha)
+            hsv = rgb2hsv(image)
+            hsv[..., 1] *= saturation
+            image = hsv2rgb(hsv)
+        elif image.ndim == label.ndim:
+            image = gray2rgb(image)
+        image = image * image_alpha + (1 - image_alpha)
 
     # Ensure that all labels are non-negative so we can index into
     # `label_to_color` correctly.
@@ -178,7 +196,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         bg_label -= offset
 
     new_type = np.min_scalar_type(int(label.max()))
-    if new_type == np.bool:
+    if new_type == bool:
         new_type = np.uint8
     label = label.astype(new_type)
 
@@ -188,7 +206,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     if len(mapped_labels_flat) == 0:
         return image
 
-    dense_labels = range(max(mapped_labels_flat) + 1)
+    dense_labels = range(np.max(mapped_labels_flat) + 1)
 
     label_to_color = np.stack([c for i, c in zip(dense_labels, color_cycle)])
 
@@ -223,7 +241,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     out : array, same shape and type as `image`
         The output visualization.
     """
-    out = np.zeros(label_field.shape + (3,))
+    out = np.zeros(label_field.shape + (3,), dtype=image.dtype)
     labels = np.unique(label_field)
     bg = (labels == bg_label)
     if bg.any():

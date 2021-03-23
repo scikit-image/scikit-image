@@ -43,7 +43,7 @@ def test_line_profile_rgb():
     for i in range(6):
         plugin.line_tool._thicken_scan_line()
     line_image, scan_data = plugin.output()
-    assert_equal(line_image[line_image == 128].size, 750)
+    assert_equal(line_image[line_image == 128].size, 906)
     assert_equal(line_image[line_image == 255].size, 151)
     assert_equal(line_image.shape, (300, 451))
     assert_equal(scan_data.shape, (151, 3))

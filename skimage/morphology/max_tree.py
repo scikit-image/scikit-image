@@ -233,7 +233,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the area opening:
 
@@ -323,7 +323,7 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the diameter opening:
 
@@ -435,7 +435,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the area closing:
 
@@ -543,7 +543,7 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the diameter closing:
 
@@ -650,7 +650,7 @@ def max_tree_local_maxima(image, connectivity=1,
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all local maxima:
 

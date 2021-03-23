@@ -115,6 +115,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     image : 2D, 3D or 4D ndarray
         Input image, which can be 2D or 3D, and grayscale or multichannel
         (see `multichannel` parameter).
+        Input image must either be NaN-free or the NaN's must be masked out
     n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
     compactness : float, optional
@@ -269,7 +270,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.ascontiguousarray(mask, dtype=np.bool).view('uint8')
+        mask = np.ascontiguousarray(mask, dtype=bool).view('uint8')
         if mask.ndim == 2:
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:

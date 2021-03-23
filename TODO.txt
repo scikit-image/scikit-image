@@ -31,8 +31,6 @@ Version 0.19
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
-* In ``skimage/measure/profile.py``, set default mode to 'reflect' in
-  `profile_line` and remove the deprecation warning.
 * In ``skimage/_shared/utils.py``, raise a ValueError instead of the
   warning when order > 0 and input array is bool in _set_order.
 * In ``skimage/transform/_warps.py``, raise a ValueError instead of the
@@ -73,41 +71,50 @@ Version 1.0
 
 * consider removing the argument `coordinates` in
   `skimage.segmentation.active_contour`, which has not effect.
+* In ``skimage/morphology/misc.py`` remove the deprecated parameter
+  ``in_place`` in remove_small_holes(), remove_small_objects() and
+  clear_border(), and update the tests.
+* Remove the deprecation warning for `input` kwarg of the `label`
+  function in `skimage/measure/_label.py`
 
-Other
------
-* Remove the conditional import and function call when ``numpy`` is set
-  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
-* Check whether imread wheels are available, then re-enable testing imread
-  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
-* When ``numpy`` is set to > 1.16, one may simplify the implementation of
-  of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
-  the minimum supported version of ``scipy`` reaches 1.4.
-* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
-  vectorized version of ``np.linspace``.
+Other (2021)
+------------
 * Monitor when multibuild devel gets merged into master for python 3.8
   compatibility https://github.com/matthew-brett/multibuild/issues/284
   and update osx_install to point to the correct branch
-* Remove pillow version related warning for MPO file format in
-  `io._plugins.pil_plugin.imread` when upgrading pillow min version to
-  6.0.0
-* Remove pillow version related warning for CVE when pillow > 7.1.0 in
-  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 * When ``numpy`` is set to >= 1.16, remove the warning assertion in
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``invalid value encountered in reduce``.
-* When ``numpy`` is set to >= 1.17, revisit the warning assertion in
-  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
-* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1.
-* Specify atol value in `cg` calls and remove condition on scipy's version in
-  ``skimage/segmentation/random_walker_segmentation.py`` when ``scipy`` upgrades
-  to 1.1.
-* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
-  when texlive 2020 is available.
+* When ``numpy`` is set to > 1.16, one may simplify the implementation of
+  of `feature.blob_log` using the vectorized version of ``np.logspace``.
+* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
+  vectorized version of ``np.linspace``.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
+* Remove pillow version related warning for MPO file format in
+  `io._plugins.pil_plugin.imread` when upgrading pillow min version to
+  6.0.0
+* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
+  when texlive 2020 is available.
+
+Other (2022)
+------------
+* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
+  the minimum supported version of ``scipy`` reaches 1.4.
+* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+
+Other (2023)
+------------
+* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
+  ``skimage.transform.resize``.
+* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
+  ``skimage._shared.utils._fix_ndimage_mode``
+
+Other
+-----
+* Check whether imread wheels are available, then re-enable testing imread
+  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).

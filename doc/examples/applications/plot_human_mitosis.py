@@ -22,13 +22,11 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import (
-    color, feature, filters, io, measure, morphology, segmentation, util
+    color, feature, filters, measure, morphology, segmentation, util
 )
-from skimage.data import image_fetcher
+from skimage.data import human_mitosis
 
-
-path = image_fetcher.fetch('data/mitosis.tif')
-image = io.imread(path)
+image = human_mitosis()
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
@@ -174,10 +172,10 @@ print(cleaned_dividing.max())
 
 distance = ndi.distance_transform_edt(cells)
 
-local_maxi = feature.peak_local_max(distance, indices=False,
-                                    min_distance=7)
-
-markers = measure.label(local_maxi)
+local_max_coords = feature.peak_local_max(distance, min_distance=7)
+local_max_mask = np.zeros(distance.shape, dtype=bool)
+local_max_mask[tuple(local_max_coords.T)] = True
+markers = measure.label(local_max_mask)
 
 segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
 

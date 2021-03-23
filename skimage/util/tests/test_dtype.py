@@ -110,7 +110,7 @@ def test_copy():
 
 
 def test_bool():
-    img_ = np.zeros((10, 10), np.bool_)
+    img_ = np.zeros((10, 10), bool)
     img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
     img8[1, 1] = True
@@ -149,7 +149,7 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+float_dtype_list = [float, float, np.double, np.single, np.float32,
                     np.float64, 'float32', 'float64']
 
 
@@ -157,7 +157,7 @@ def test_float_conversion_dtype():
     """Test any convertion from a float dtype to an other."""
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
@@ -172,7 +172,7 @@ def test_float_conversion_dtype_warns():
     from skimage.util.dtype import convert
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 

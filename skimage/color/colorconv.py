@@ -1163,7 +1163,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(float).eps
 
     # compute y_r and L
     xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
@@ -1234,7 +1234,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(float).eps
 
     # compute y
     y = L.copy()
@@ -1450,6 +1450,8 @@ def separate_stains(rgb, conv_matrix):
     log_adjust = np.log(1E-6)  # used to compensate the sum above
 
     stains = (np.log(rgb) / log_adjust) @ conv_matrix
+
+    np.maximum(stains, 0, out=stains)
 
     return stains
 

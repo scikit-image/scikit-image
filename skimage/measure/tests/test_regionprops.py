@@ -3,6 +3,8 @@ import math
 import numpy as np
 from numpy import array
 
+from skimage import data
+from skimage.segmentation import slic
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           perimeter_crofton, euler_number,
@@ -28,6 +30,7 @@ SAMPLE = np.array(
 )
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
+INTENSITY_FLOAT_SAMPLE = INTENSITY_SAMPLE.copy().astype(np.float64) / 10.0
 
 SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
 SAMPLE_MULTIPLE[3:5, 7:8] = 2
@@ -58,24 +61,24 @@ def test_all_props_3d():
 
 
 def test_dtype():
-    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
     with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.float))
+        regionprops(np.zeros((10, 10), dtype=float))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
     with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.bool))
+        regionprops(np.zeros((10, 10), dtype=bool))
 
 
 def test_ndim():
-    regionprops(np.zeros((10, 10), dtype=np.int))
-    regionprops(np.zeros((10, 10, 1), dtype=np.int))
-    regionprops(np.zeros((10, 10, 10), dtype=np.int))
-    regionprops(np.zeros((1, 1), dtype=np.int))
-    regionprops(np.zeros((1, 1, 1), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=int))
+    regionprops(np.zeros((10, 10, 1), dtype=int))
+    regionprops(np.zeros((10, 10, 10), dtype=int))
+    regionprops(np.zeros((1, 1), dtype=int))
+    regionprops(np.zeros((1, 1, 1), dtype=int))
     with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
+        regionprops(np.zeros((10, 10, 10, 2), dtype=int))
 
 
 def test_feret_diameter_max():
@@ -151,13 +154,11 @@ def test_centroid_3d():
 
 def test_convex_area():
     area = regionprops(SAMPLE)[0].convex_area
-    # determined with MATLAB
-    assert area == 124
+    assert area == 125
 
 
 def test_convex_image():
     img = regionprops(SAMPLE)[0].convex_image
-    # determined with MATLAB
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -167,7 +168,7 @@ def test_convex_image():
          [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
     )
     assert_array_equal(img, ref)
@@ -199,7 +200,7 @@ def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
     assert_almost_equal(eps, 0.814629313427)
 
-    img = np.zeros((5, 5), dtype=np.int)
+    img = np.zeros((5, 5), dtype=int)
     img[2, 2] = 1
     eps = regionprops(img)[0].eccentricity
     assert_almost_equal(eps, 0)
@@ -387,8 +388,7 @@ def test_perimeter_crofton():
 
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
-    # determined with MATLAB
-    assert_almost_equal(solidity, 0.580645161290323)
+    assert_almost_equal(solidity, 0.576)
 
 
 def test_weighted_moments_central():
@@ -454,7 +454,7 @@ def test_weighted_moments_normalized():
 
 
 def test_label_sequence():
-    a = np.empty((2, 2), dtype=np.int)
+    a = np.empty((2, 2), dtype=int)
     a[:, :] = 2
     ps = regionprops(a)
     assert len(ps) == 1
@@ -462,7 +462,7 @@ def test_label_sequence():
 
 
 def test_pure_background():
-    a = np.zeros((2, 2), dtype=np.int)
+    a = np.zeros((2, 2), dtype=int)
     ps = regionprops(a)
     assert len(ps) == 0
 
@@ -484,7 +484,7 @@ def test_invalid_size():
 
 
 def test_equals():
-    arr = np.zeros((100, 100), dtype=np.int)
+    arr = np.zeros((100, 100), dtype=int)
     arr[0:25, 0:25] = 1
     arr[50:99, 50:99] = 2
 
@@ -574,6 +574,26 @@ def test_regionprops_table():
     assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_regionprops_table_equal_to_original():
+    regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
+    out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
+                                  properties=COL_DTYPES.keys())
+
+    for prop, dtype in COL_DTYPES.items():
+        for i, reg in enumerate(regions):
+            rp = reg[prop]
+            if np.isscalar(rp) or \
+                    prop in OBJECT_COLUMNS or \
+                    dtype is np.object_:
+                assert_array_equal(rp, out_table[prop][i])
+            else:
+                shape = rp.shape if isinstance(rp, np.ndarray) else (len(rp),)
+                for ind in np.ndindex(shape):
+                    modified_prop = "-".join(map(str, (prop,) + ind))
+                    loc = ind if len(ind) > 1 else ind[0]
+                    assert_equal(rp[loc], out_table[modified_prop][i])
 
 
 def test_regionprops_table_no_regions():
@@ -693,3 +713,24 @@ def test_extra_properties_table():
                             )
     assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
     assert_array_equal(out['pixelcount'], array([10, 2]))
+
+
+def test_multichannel():
+    """Test that computing multichannel properties works."""
+    astro = data.astronaut()[::4, ::4]
+    astro_green = astro[..., 1]
+    labels = slic(astro.astype(float), start_label=1)
+
+    segment_idx = np.max(labels) // 2
+    region = regionprops(labels, astro_green)[segment_idx]
+    region_multi = regionprops(labels, astro)[segment_idx]
+    for prop in PROPS:
+        p = region[prop]
+        p_multi = region_multi[prop]
+        if np.shape(p) == np.shape(p_multi):
+            # property does not depend on multiple channels
+            assert_array_equal(p, p_multi)
+        else:
+            # property uses multiple channels, returns props stacked along
+            # final axis
+            assert_array_equal(p, np.asarray(p_multi)[..., 1])

@@ -57,4 +57,5 @@ __all__ = ['binary_erosion',
            'area_closing',
            'diameter_opening',
            'diameter_closing',
-           'max_tree_local_maxima']
+           'max_tree_local_maxima',
+           ]

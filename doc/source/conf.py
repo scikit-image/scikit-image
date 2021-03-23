@@ -72,6 +72,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
+# Changes to `root_doc` in newest versions of Sphinx (we're still on v2)
 master_doc = 'index'
 
 # General information about the project.
@@ -144,11 +145,16 @@ if v.release is None:
         'PEP440'.format(version))
 
 if v.is_devrelease:
-    binder_branch = 'master'
+    binder_branch = 'main'
 else:
     major, minor = v.release[:2]
     binder_branch = 'v{}.{}.x'.format(major, minor)
 
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery_png'
+from plotly.io._sg_scraper import plotly_sg_scraper
+image_scrapers = ('matplotlib', plotly_sg_scraper,)
 
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
@@ -158,6 +164,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
+    'image_scrapers': image_scrapers,
     # Default thumbnail size (400, 280)
     # Default CSS rescales (160, 112)
     # Size is decreased to reduce webpage loading time
@@ -188,6 +195,11 @@ sphinx_gallery_conf = {
     # Remove sphinx_gallery_thumbnail_number from generated files
     'remove_config_comments':True,
 }
+
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery'
+
 
 from sphinx_gallery.utils import _has_optipng
 if _has_optipng():
@@ -441,7 +453,7 @@ def linkcode_resolve(domain, info):
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "master/skimage/%s%s" % (fn, linespec))
+                "main/skimage/%s%s" % (fn, linespec))
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

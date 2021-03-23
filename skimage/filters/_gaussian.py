@@ -117,13 +117,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    if output is None:
-        output = np.empty_like(image)
-    elif not np.issubdtype(output.dtype, np.floating):
+    if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
         raise ValueError("Provided output data type is not float")
-    ndi.gaussian_filter(image, sigma, output=output, mode=mode, cval=cval,
-                        truncate=truncate)
-    return output
+    return ndi.gaussian_filter(image, sigma, output=output, 
+                               mode=mode, cval=cval, truncate=truncate)
 
 
 def _guess_spatial_dimensions(image):
@@ -143,8 +140,10 @@ def _guess_spatial_dimensions(image):
     Raises
     ------
     ValueError
-        If the image array has less than two or more than four dimensions.
+        If the image array has less than four dimensions.
     """
+    if image.ndim == 1:
+        return 1
     if image.ndim == 2:
         return 2
     if image.ndim == 3 and image.shape[-1] != 3:
@@ -154,7 +153,7 @@ def _guess_spatial_dimensions(image):
     if image.ndim == 4 and image.shape[-1] == 3:
         return 3
     else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+        raise ValueError("Expected 1D, 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
 def difference_of_gaussians(image, low_sigma, high_sigma=None, *,

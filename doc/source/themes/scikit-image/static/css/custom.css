@@ -98,6 +98,14 @@ h6:hover .headerlink {
     text-decoration: none;
 }
 
+.forum {
+    margin-top: 30px;
+    padding: 5px 10px;
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    font-weight: bold;
+}
 .footer {
     margin-top: 30px;
     padding: 5px 10px;
@@ -131,7 +139,7 @@ table.docutils td, table.docutils th {
     margin-right: -15px;
 }
 
-/* master content table */
+/* main content table */
 .contentstable.docutils, .contentstable.docutils td {
     border-color: transparent;
 }

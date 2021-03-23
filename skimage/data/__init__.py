@@ -5,6 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
+from distutils.version import LooseVersion
 from warnings import warn
 import numpy as np
 import shutil
@@ -17,6 +18,7 @@ from .. import __version__
 
 import os.path as osp
 import os
+import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -27,6 +29,7 @@ __all__ = ['data_dir',
            'camera',
            'cat',
            'cell',
+           'cells3d',
            'checkerboard',
            'chelsea',
            'clock',
@@ -38,6 +41,7 @@ __all__ = ['data_dir',
            'gravel',
            'horse',
            'hubble_deep_field',
+           'human_mitosis',
            'immunohistochemistry',
            'kidney',
            'lbp_frontal_face_cascade_filename',
@@ -50,8 +54,8 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
-           'rough_wall',
            'shepp_logan_phantom',
+           'skin',
            'stereo_motorcycle']
 
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
@@ -111,6 +115,13 @@ def _has_hash(path, expected_hash):
 def create_image_fetcher():
     try:
         import pooch
+        pooch_version = pooch.__version__.lstrip('v')
+        retry = {'retry_if_failed': 3}
+        # Keep version check in synch with
+        # scikit-image/requirements/optional.txt
+        if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+            # we need a more recent version of pooch to retry
+            retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
@@ -121,8 +132,13 @@ def create_image_fetcher():
     # remove `.dev` with a `+` if it exists.
     # This helps pooch understand that it should look in master
     # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+    skimage_version_for_pooch = __version__.replace('.dev', '+')
+    if '+' in skimage_version_for_pooch:
+        url = ("https://github.com/scikit-image/scikit-image/raw/"
+               "{version}/skimage/")
+    else:
+        url = ("https://github.com/scikit-image/scikit-image/raw/"
+               "v{version}/skimage/")
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -134,10 +150,15 @@ def create_image_fetcher():
         # With a version qualifier
         path=pooch.os_cache("scikit-image"),
         base_url=url,
-        version=pooch_version,
+        version=skimage_version_for_pooch,
+        version_dev="main",
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
+        # Note: this should read `retry_if_failed=3,`, but we generate that
+        # dynamically at import time above, in case installed pooch is a less
+        # recent version
+        **retry,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
@@ -234,8 +255,17 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
+
+    # Copy in the README.txt if it doesn't already exist.
+    # If the file was originally copied to the data cache directory read-only
+    # then we cannot overwrite it, nor do we need to copy on every init.
+    # In general, as the data cache directory contains the scikit-image version
+    # it should not be necessary to overwrite this file as it should not
+    # change.
+    dest_path = osp.join(data_dir, 'README.txt')
+    if not os.path.isfile(dest_path):
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     dest_path)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
@@ -362,7 +392,6 @@ def camera():
     .. [1] https://github.com/scikit-image/scikit-image/issues/3927
     """
     return _load("data/camera.png")
-
 
 
 def eagle():
@@ -606,6 +635,64 @@ def checkerboard():
         Checkerboard image.
     """
     return _load("data/chessboard_GRAY.png")
+
+
+def cells3d():
+    """3D fluorescence microscopy image of cells.
+
+    The returned data is a 3D multichannel array with dimensions provided in
+    ``(z, c, y, x)`` order. Each voxel has a size of ``(0.29 0.26 0.26)``
+    micrometer. Channel 0 contains cell membranes, channel 1 contains nuclei.
+
+    Returns
+    -------
+    cells3d: (60, 2, 256, 256) uint16 ndarray
+        The volumetric images of cells taken with an optical microscope.
+
+    Notes
+    -----
+    The data for this was provided by the Allen Institute for Cell Science.
+
+    It has been downsampled by a factor of 4 in the row and column dimensions
+    to reduce computational time.
+
+    The microscope reports the following voxel spacing in microns:
+
+        * Original voxel size is ``(0.290, 0.065, 0.065)``.
+        * Scaling factor is ``(1, 4, 4)`` in each dimension.
+        * After rescaling the voxel size is ``(0.29 0.26 0.26)``.
+    """
+
+    return _load("data/cells3d.tif")
+
+
+def human_mitosis():
+    """Image of human cells undergoing mitosis.
+
+    Returns
+    -------
+    human_mitosis: (512, 512) uint8 ndimage
+        Data of human cells undergoing mitosis taken during the preperation
+        of the manuscript in [1]_.
+
+    Notes
+    -----
+    Copyright David Root. Licensed under CC-0 [2]_.
+
+    References
+    ----------
+    .. [1] Moffat J, Grueneberg DA, Yang X, Kim SY, Kloepfer AM, Hinkle G,
+           Piqani B, Eisenhaure TM, Luo B, Grenier JK, Carpenter AE, Foo SY,
+           Stewart SA, Stockwell BR, Hacohen N, Hahn WC, Lander ES,
+           Sabatini DM, Root DE (2006) A lentiviral RNAi library for human and
+           mouse genes applied to an arrayed viral high-content screen. Cell,
+           124(6):1283-98 / :DOI: `10.1016/j.cell.2006.01.040` PMID 16564017
+
+    .. [2] GitHub licensing discussion
+           https://github.com/CellProfiler/examples/issues/41
+
+    """
+    return _load('data/mitosis.tif')
 
 
 def cell():
@@ -1069,6 +1156,30 @@ def lfw_subset():
     return np.load(_fetch('data/lfw_subset.npy'))
 
 
+def skin():
+    """Microscopy image of dermis and epidermis (skin layers).
+
+    Hematoxylin and eosin stained slide at 10x of normal epidermis and dermis
+    with a benign intradermal nevus.
+
+    Notes
+    -----
+    This image requires an Internet connection the first time it is called,
+    and to have the ``pooch`` package installed, in order to fetch the image
+    file from the scikit-image datasets repository.
+
+    The source of this image is
+    https://en.wikipedia.org/wiki/File:Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG
+
+    The image was released in the public domain by its author Kilbad.
+
+    Returns
+    -------
+    skin : (960, 1280, 3) RGB image of uint8
+    """
+    return _load('data/skin.jpg')
+
+
 def brain():
     """Subset of data from the University of North Carolina Volume Rendering
     Test Data Set.
@@ -1089,3 +1200,26 @@ def brain():
 
     """
     return _load("data/brain.tiff")
+
+
+def vortex():
+    """Case B1 image pair from the first PIV challenge.
+
+    Returns
+    -------
+    image0, image1 : (512, 512) grayscale images
+        A pair of images featuring synthetic moving particles.
+
+    Notes
+    -----
+    This image was licensed as CC0 by its author, Prof. Koji Okamoto, with
+    thanks to Prof. Jun Sakakibara, who maintains the PIV Challenge site.
+
+    References
+    ----------
+    .. [1] Particle Image Velocimetry (PIV) Challenge site
+           http://pivchallenge.org
+    .. [2] 1st PIV challenge Case B: http://pivchallenge.org/pub/index.html#b
+    """
+    return (_load('data/pivchallenge-B-B001_1.tif'),
+            _load('data/pivchallenge-B-B001_2.tif'))

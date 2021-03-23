@@ -123,7 +123,8 @@ class TestSimpleImage():
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
 
-    def test_threshold_local_gaussian(self):
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_gaussian(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -131,14 +132,26 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='gaussian')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+            block_sizes = [3, (3,) * image.ndim]
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+            block_sizes = [3, (3,) * image.ndim,
+                           (3,) * (image.ndim - 1) + (1,)]
 
-        out = threshold_local(self.image, 3, method='gaussian',
-                              param=1./3.)
-        assert_equal(ref, self.image > out)
+        for block_size in block_sizes:
+            out = threshold_local(image, block_size, method='gaussian',
+                                  mode='reflect')
+            assert_equal(ref, image > out)
 
-    def test_threshold_local_mean(self):
+        out = threshold_local(image, 3, method='gaussian', mode='reflect',
+                              param=1 / 3)
+        assert_equal(ref, image > out)
+
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_mean(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -146,10 +159,29 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='mean')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+            block_sizes = [3, (3,) * image.ndim]
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+            # Given the same data at each z location, the following block sizes
+            # will all give an equivalent result.
+            block_sizes = [3, (3,) * image.ndim,
+                           (3,) * (image.ndim - 1) + (1,)]
+        for block_size in block_sizes:
+            out = threshold_local(image, block_size, method='mean',
+                                  mode='reflect')
+            assert_equal(ref, image > out)
 
-    def test_threshold_local_median(self):
+    @pytest.mark.parametrize('block_size', [(3, ), (3, 3, 3)])
+    def test_threshold_local_invalid_block_size(self, block_size):
+        # len(block_size) != image.ndim
+        with pytest.raises(ValueError):
+            threshold_local(self.image, block_size, method='mean')
+
+    @pytest.mark.parametrize('ndim', [2, 3])
+    def test_threshold_local_median(self, ndim):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False, False],
@@ -157,8 +189,13 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_local(self.image, 3, method='median')
-        assert_equal(ref, self.image > out)
+        if ndim == 2:
+            image = self.image
+        else:
+            image = np.stack((self.image, ) * 5, axis=-1)
+            ref = np.stack((ref, ) * 5, axis=-1)
+        out = threshold_local(image, 3, method='median', mode='reflect')
+        assert_equal(ref, image > out)
 
     def test_threshold_local_median_constant_mode(self):
         out = threshold_local(self.image, 3, method='median',
@@ -223,6 +260,15 @@ def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 101 < threshold_otsu(camera) < 103
 
+def test_otsu_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=hist) < 103
+
+def test_otsu_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 101 < threshold_otsu(hist=counts) < 103
 
 def test_otsu_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -343,6 +389,16 @@ def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 145 < threshold_yen(camera) < 147
 
+def test_yen_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=hist) < 147
+
+def test_yen_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    assert 145 < threshold_yen(hist=counts) < 147
+
 
 def test_yen_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -369,6 +425,18 @@ def test_isodata_camera_image():
     assert threshold == 102
 
     assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
+
+def test_isodata_camera_image_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=hist)
+    assert threshold == 102
+
+def test_isodata_camera_image_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_isodata(hist=counts)
+    assert threshold == 102
 
 
 def test_isodata_coins_image():
@@ -435,6 +503,17 @@ def test_threshold_minimum():
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+def test_threshold_minimum_histogram():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=hist)
+    assert_equal(threshold, 85)
+
+def test_threshold_minimum_counts():
+    camera = util.img_as_ubyte(data.camera())
+    counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
+    threshold = threshold_minimum(hist=counts)
+    assert_equal(threshold, 85)
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
@@ -470,12 +549,12 @@ def test_triangle_float_images():
     int_bins = text.max() - text.min() + 1
     # Set nbins to match the uint case and threshold as float.
     assert(round(threshold_triangle(
-        text.astype(np.float), nbins=int_bins)) == 104)
+        text.astype(float), nbins=int_bins)) == 104)
     # Check that rescaling image to floats in unit interval is equivalent.
     assert(round(threshold_triangle(text / 255., nbins=int_bins) * 255) == 104)
     # Repeat for inverted image.
     assert(round(threshold_triangle(
-        np.invert(text).astype(np.float), nbins=int_bins)) == 151)
+        np.invert(text).astype(float), nbins=int_bins)) == 151)
     assert (round(threshold_triangle(
         np.invert(text) / 255., nbins=int_bins) * 255) == 151)
 

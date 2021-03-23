@@ -29,7 +29,7 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     gt_flow = np.zeros_like(grid)
     gt_flow[0, ...] = (np.sin(grid[0] / grid[0].max() * npics * np.pi)
                        * max_motion)
-    image1 = warp(image0, grid - gt_flow, mode='nearest')
+    image1 = warp(image0, grid - gt_flow, mode='edge')
     return gt_flow, image1
 
 
@@ -52,7 +52,7 @@ def test_2d_motion(gaussian, prefilter):
 def test_3d_motion(gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
-    image0 = rnd.normal(size=(64, 80, 96))
+    image0 = rnd.normal(size=(50, 55, 60))
     gt_flow, image1 = _sin_flow_gen(image0, npics=3)
     # Estimate the flow
     flow = optical_flow_ilk(image0, image1, radius=5,
@@ -73,7 +73,7 @@ def test_no_motion_2d():
 
 def test_no_motion_3d():
     rnd = np.random.RandomState(0)
-    img = rnd.normal(size=(128, 128, 128))
+    img = rnd.normal(size=(64, 64, 64))
 
     flow = optical_flow_ilk(img, img)
 
