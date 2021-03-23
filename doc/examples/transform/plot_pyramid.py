@@ -18,7 +18,7 @@ from skimage.transform import pyramid_gaussian
 
 image = data.astronaut()
 rows, cols, dim = image.shape
-pyramid = tuple(pyramid_gaussian(image, downscale=2, multichannel=True))
+pyramid = tuple(pyramid_gaussian(image, downscale=2, channel_axis=-1))
 
 composite_image = np.zeros((rows, cols + cols // 2, 3), dtype=np.double)
 

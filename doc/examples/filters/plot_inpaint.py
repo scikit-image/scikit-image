@@ -43,8 +43,7 @@ image_defect = image_orig.copy()
 for layer in range(image_defect.shape[-1]):
     image_defect[np.where(mask)] = 0
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask,
-                                          multichannel=True)
+image_result = inpaint.inpaint_biharmonic(image_defect, mask, channel_axis=-1)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
 ax = axes.ravel()
