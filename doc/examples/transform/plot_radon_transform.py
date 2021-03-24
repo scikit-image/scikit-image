@@ -29,7 +29,7 @@ and reconstructing the original image are compared: The Filtered Back
 Projection (FBP) and the Simultaneous Algebraic Reconstruction
 Technique (SART).
 
-For further information on tomographic reconstruction, see
+For further information on tomographic reconstruction, see:
 
 .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
        IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
@@ -157,7 +157,7 @@ plt.show()
 #
 # ``skimage`` provides one of the more popular variations of the algebraic
 # reconstruction techniques: the Simultaneous Algebraic Reconstruction
-# Technique (SART) [1]_ [4]_. It uses Kaczmarz' method [3]_ as the iterative
+# Technique (SART) [4]_. It uses Kaczmarz' method as the iterative
 # solver. A good reconstruction is normally obtained in a single iteration,
 # making the method computationally effective. Running one or more extra
 # iterations will normally improve the reconstruction of sharp, high
