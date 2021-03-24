@@ -84,7 +84,9 @@ def test_inpaint_biharmonic_2d_color_deprecated():
     assert mse_restored < 0.01 * mse_defect
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the `multichannel` argument"]):
+    channel_warning = "Providing the `multichannel` argument"
+    matrix_warning = "the matrix subclass is not the recommended way"
+    with expected_warnings([channel_warning + '|' + matrix_warning]):
         img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
     mse_restored = mean_squared_error(img, img_restored)
 
