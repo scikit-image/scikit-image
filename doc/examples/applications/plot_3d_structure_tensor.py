@@ -42,7 +42,7 @@ print(f'dtype: {data.dtype}')
 # channel, which leaves us with a 3D single-channel image. What is the range
 # of values?
 
-n_plane, n_row, n_col, n_chan = data.shape
+n_plane, n_Y, n_X, n_chan = data.shape
 v_min, v_max = data[:, :, :, 1].min(), data[:, :, :, 1].max()
 print(f'range: ({v_min}, {v_max})')
 
@@ -53,7 +53,7 @@ px.imshow(
     data[n_plane // 2, :, :, 1],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'row', 'y': 'col', 'color': 'intensity'}
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'}
 )
 
 #####################################################################
@@ -79,8 +79,8 @@ for it, (ax, image) in enumerate(zip(axes.flatten(), sample[::step])):
 #
 #     import plotly.graph_objects as go
 #
-#     (n_Z, n_X, n_Y) = sample.shape
-#     Z, X, Y = np.mgrid[:n_Z, :n_X, :n_Y]
+#     (n_Z, n_Y, n_X) = sample.shape
+#     Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
 #
 #     fig = go.Figure(
 #         data=go.Volume(
@@ -105,16 +105,15 @@ px.imshow(
     sample[0, :, :],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'row', 'y': 'col', 'color': 'intensity'},
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
     title='Interactive view of bottom slice of sample data.'
 )
 
 #####################################################################
-# About the brightest region (i.e., at row ~ 17 and column ~ 22), we can see
+# About the brightest region (i.e., at X ~ 22 and Y ~ 17), we can see
 # variations (and, hence, strong gradients) over 2 or 3 (resp. 1 or 2) pixels
-# across rows (resp. columns). We may thus choose, say, ``sigma = 1.5`` for
-# the window function.
-# Alternatively, we can pass sigma on a per-axis basis, e.g.,
+# along X (resp. Y). We may thus choose, say, ``sigma = 1.5`` for the window
+# function. Alternatively, we can pass sigma on a per-axis basis, e.g.,
 # ``sigma = (1, 2, 3)``. Note that size 1 sounds reasonable along the first
 # (Z, plane) axis, since the latter is of size 8 (13 - 5). Viewing slices in
 # the X-Z or Y-Z planes confirms it is reasonable.
@@ -138,7 +137,7 @@ coords
 #####################################################################
 # .. note::
 #    The reader may check how robust this result (coordinates
-#    ``(plane, row, column) = coords[1:]``) is to varying ``sigma``.
+#    ``(Z, Y, X) = coords[1:]``) is to varying ``sigma``.
 #
 # Let us view the spatial distribution of the eigenvalues in the X-Y plane
 # where the maximum eigenvalue is found (i.e., ``Z = coords[1]``).
@@ -146,7 +145,7 @@ coords
 px.imshow(
     eigen[:, coords[1], :, :],
     facet_col=0,
-    labels={'x': 'row', 'y': 'col', 'facet_col': 'rank'},
+    labels={'x': 'Y', 'y': 'X', 'facet_col': 'rank'},
     title=f'Eigenvalues for plane Z = {coords[1]}.'
 )
 
@@ -176,7 +175,7 @@ px.imshow(
     sample[coords[1], :, :],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'row', 'y': 'col', 'color': 'intensity'},
+    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
     title=f'Interactive view of plane Z = {coords[1]}.'
 )
 
@@ -187,7 +186,7 @@ px.imshow(
 # along the Z axis (corresponding to longitudinal structures in the kidney
 # tissue), especially in the Y-Z plane (``longitudinal=1``).
 
-subplots = np.dstack((sample[:, :, coords[3]], sample[:, coords[2], :]))
+subplots = np.dstack((sample[:, coords[2], :], sample[:, :, coords[3]]))
 px.imshow(
     subplots,
     zmin=v_min,
@@ -197,8 +196,7 @@ px.imshow(
 )
 
 #####################################################################
-# As a conclusion, the region about voxel
-# ``(plane, row, column) = coords[1:]`` is
+# As a conclusion, the region about voxel ``(Z, Y, X) = coords[1:]`` is
 # anisotropic in 3D: There is an order of magnitude between the third-largest
 # eigenvalues on one hand, and the largest and second-largest eigenvalues on
 # the other hand. We could see this at first glance in figure `Eigenvalues for
@@ -210,7 +208,7 @@ px.imshow(
 # less than 2 between the second-largest and largest eigenvalues.
 # This description is compatible with what we are seeing in the image, i.e., a
 # stronger gradient across a direction (which, here, would be relatively close
-# to the column axis) and a weaker gradient perpendicular to it.
+# to the X axis) and a weaker gradient perpendicular to it.
 
 #####################################################################
 # In an ellipsoidal representation of the 3D structure tensor [2]_,
