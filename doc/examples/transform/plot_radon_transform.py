@@ -29,7 +29,7 @@ and reconstructing the original image are compared: The Filtered Back
 Projection (FBP) and the Simultaneous Algebraic Reconstruction
 Technique (SART).
 
-For further information on tomographic reconstruction, see
+For further information on tomographic reconstruction, see:
 
 .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
        IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
@@ -74,7 +74,7 @@ ax1.set_title("Original")
 ax1.imshow(image, cmap=plt.cm.Greys_r)
 
 theta = np.linspace(0., 180., max(image.shape), endpoint=False)
-sinogram = radon(image, theta=theta, circle=True)
+sinogram = radon(image, theta=theta)
 dx, dy = 0.5 * 180.0 / max(image.shape), 0.5 / sinogram.shape[0]
 ax2.set_title("Radon transform\n(Sinogram)")
 ax2.set_xlabel("Projection angle (deg)")
@@ -120,8 +120,7 @@ plt.show()
 
 from skimage.transform import iradon
 
-reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp',
-                            circle=True)
+reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp')
 error = reconstruction_fbp - image
 print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 
@@ -158,7 +157,7 @@ plt.show()
 #
 # ``skimage`` provides one of the more popular variations of the algebraic
 # reconstruction techniques: the Simultaneous Algebraic Reconstruction
-# Technique (SART) [1]_ [4]_. It uses Kaczmarz' method [3]_ as the iterative
+# Technique (SART) [4]_. It uses Kaczmarz' method as the iterative
 # solver. A good reconstruction is normally obtained in a single iteration,
 # making the method computationally effective. Running one or more extra
 # iterations will normally improve the reconstruction of sharp, high
