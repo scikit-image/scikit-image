@@ -72,6 +72,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
+# Changes to `root_doc` in newest versions of Sphinx (we're still on v2)
 master_doc = 'index'
 
 # General information about the project.
@@ -144,7 +145,7 @@ if v.release is None:
         'PEP440'.format(version))
 
 if v.is_devrelease:
-    binder_branch = 'master'
+    binder_branch = 'main'
 else:
     major, minor = v.release[:2]
     binder_branch = 'v{}.{}.x'.format(major, minor)
@@ -444,7 +445,7 @@ def linkcode_resolve(domain, info):
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "master/skimage/%s%s" % (fn, linespec))
+                "main/skimage/%s%s" % (fn, linespec))
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
