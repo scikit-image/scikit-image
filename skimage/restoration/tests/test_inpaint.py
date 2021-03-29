@@ -52,7 +52,10 @@ def test_inpaint_biharmonic_2d_color_deprecated():
     img_defect = img * ~mask[..., np.newaxis]
     mse_defect = mean_squared_error(img, img_defect)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    # providing multichannel argument positionally also warns
+    channel_warning = "'multichannel' is a deprecated argument"
+    matrix_warning = "the matrix subclass is not the recommended way"
+    with expected_warnings([channel_warning + '|' + matrix_warning]):
         img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
                                                   multichannel=True)
     mse_restored = mean_squared_error(img, img_restored)
@@ -61,7 +64,6 @@ def test_inpaint_biharmonic_2d_color_deprecated():
 
     # providing multichannel argument positionally also warns
     channel_warning = "Providing the 'multichannel' argument"
-    matrix_warning = "the matrix subclass is not the recommended way"
     with expected_warnings([channel_warning + '|' + matrix_warning]):
         img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
     mse_restored = mean_squared_error(img, img_restored)
