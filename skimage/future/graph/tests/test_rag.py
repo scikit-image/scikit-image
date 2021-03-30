@@ -47,8 +47,9 @@ def test_rag_merge():
     assert sorted(g.nodes[n]['labels']) == list(range(5))
     assert list(g.edges()) == []
 
+
 @pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1,5)]
+    "img_channels", [channels for channels in range(1, 5)]
 )
 def test_threshold_cut(img_channels):
 
@@ -73,8 +74,9 @@ def test_threshold_cut(img_channels):
     # Two labels
     assert new_labels.max() == 1
 
+
 @pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1,5)]
+    "img_channels", [channels for channels in range(1, 5)]
 )
 def test_cut_normalized(img_channels):
 
