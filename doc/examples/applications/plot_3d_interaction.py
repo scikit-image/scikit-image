@@ -38,9 +38,9 @@ print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')
 
 #####################################################################
-# Dimensions are provided in the following order: ``(z, x, y, c)``.
+# Dimensions are provided in the following order: ``(z, y, x, c)``.
 
-n_plane, n_row, n_col, n_chan = data.shape
+n_plane, n_Y, n_X, n_chan = data.shape
 
 #####################################################################
 # Let us consider only a slice (2D plane) of the data for now. More
