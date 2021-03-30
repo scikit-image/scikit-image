@@ -304,11 +304,11 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
     Parameters
     ----------
-    image : ndarray, shape(M, N, [..., P,] 3)
+    image : ndarray, shape(M, N, [..., P,] C)
         Input image.
     labels : ndarray, shape(M, N, [..., P])
         The labelled image. This should have one dimension less than
-        `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
+        `image`. If `image` has dimensions `(M, N, C)` `labels` should have
         dimensions `(M, N)`.
     connectivity : int, optional
         Pixels with a squared distance less than `connectivity` from each other
@@ -354,11 +354,12 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     """
     graph = RAG(labels, connectivity=connectivity)
 
+    img_channels = image.shape[-1]
+
     for n in graph:
         graph.nodes[n].update({'labels': [n],
                                'pixel count': 0,
-                               'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
+                               'total color': np.zeros(img_channels)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
