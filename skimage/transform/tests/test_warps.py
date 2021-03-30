@@ -475,6 +475,13 @@ def test_downscale_anti_aliasing():
     assert_equal(scaled[:, 3:].sum(), 0)
 
 
+def test_downscale_to_the_limit():
+    img = np.random.rand(3, 4)
+    out = rescale(img, 1e-3)
+
+    assert out.size == 1
+
+
 def test_downscale_local_mean():
     image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))

@@ -74,6 +74,8 @@ Version 1.0
 * In ``skimage/morphology/misc.py`` remove the deprecated parameter
   ``in_place`` in remove_small_holes(), remove_small_objects() and
   clear_border(), and update the tests.
+* Remove the deprecation warning for `input` kwarg of the `label`
+  function in `skimage/measure/_label.py`
 
 Other (2021)
 ------------
