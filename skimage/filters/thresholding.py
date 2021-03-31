@@ -53,6 +53,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Compute the image histogram for better performances
+    nbins = 256  # Default in threshold functions
+    hist = histogram(image.ravel(), nbins, source_range='image')
+
     # Handle default value
     methods = methods or {}
 
@@ -68,7 +72,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     for name, func in methods.items():
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, hist=hist), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
