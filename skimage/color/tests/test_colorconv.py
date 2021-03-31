@@ -335,7 +335,9 @@ class TestColorconv(TestCase):
 
         # Test the conversion with the rest of the illuminants.
         for I in ["A", "B", "C", "d50", "d55", "d65", "d75", "E"]:
+            I = I.lower()
             for obs in ["2", "10", "R"]:
+                obs = obs.lower()
                 fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
