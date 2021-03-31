@@ -63,13 +63,13 @@ class Rectangle:
         # use negative indexing in anticipation of nD hyperrectangles.
         return self.bottom_right[-1] - self.top_left[-1] + 1
 
-    def __eq__(self, rectangle2: Rectangle):
+    def __eq__(self, other: Rectangle):
         """Return true if 2 rectangles have the same position and dimension."""
-        if not isinstance(rectangle2, Rectangle):
+        if not isinstance(other, Rectangle):
             return False
 
-        if (self.top_left == rectangle2.top_left and
-           self.bottom_right == rectangle2.bottom_right):
+        if (self.top_left == other.top_left and
+           self.bottom_right == other.bottom_right):
             return True
 
         return False
