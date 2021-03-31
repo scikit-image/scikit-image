@@ -218,7 +218,7 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    scharr, prewitt, canny
+    scharr, prewitt, feature.canny
 
     References
     ----------
@@ -334,7 +334,7 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, prewitt, canny
+    sobel, prewitt, feature.canny
 
     Notes
     -----
@@ -706,7 +706,7 @@ def farid(image, *, mask=None):
 
     See also
     --------
-    sobel, prewitt, canny
+    sobel, prewitt, feature.canny
 
     Notes
     -----
