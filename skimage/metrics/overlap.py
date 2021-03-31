@@ -103,17 +103,12 @@ def is_intersecting(rectangle1, rectangle2):
     -------
     True if the rectangles are intersecting.
     """
-    # If one rectangle is on left side of other
-    if (rectangle1.top_left[1] >= rectangle2.bottom_right[1] or
-       rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
-        return False
+    disjoint = (
+            np.any(rectangle1.bottom_right <= rectangle2.top_left)
+            or np.any(rectangle2.bottom_right <= rectangle1.top_left)
+            )
+    return not disjoint
 
-    # If one rectangle is above other
-    if (rectangle1.top_left[0] >= rectangle2.bottom_right[0] or
-       rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
-        return False
-
-    return True
 
 def intersection_rectangle(rectangle1, rectangle2):
     """
