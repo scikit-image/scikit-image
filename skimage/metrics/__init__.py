@@ -1,18 +1,33 @@
 from ._adapted_rand_error import adapted_rand_error
 from ._variation_of_information import variation_of_information
 from ._contingency_table import contingency_table
+from .overlap import (
+        Rectangle,
+        intersection_area,
+        intersection_over_union,
+        intersection_rectangle,
+        is_intersecting,
+        union_area,
+        )
 from .simple_metrics import (mean_squared_error,
                              normalized_root_mse,
                              peak_signal_noise_ratio)
 from ._structural_similarity import structural_similarity
 from .set_metrics import hausdorff_distance
 
-__all__ = ['adapted_rand_error',
-           'variation_of_information',
-           'contingency_table',
-           'mean_squared_error',
-           'normalized_root_mse',
-           'peak_signal_noise_ratio',
-           'structural_similarity',
-           'hausdorff_distance'
-           ]
+__all__ = [
+        'adapted_rand_error',
+        'variation_of_information',
+        'contingency_table',
+        'mean_squared_error',
+        'normalized_root_mse',
+        'peak_signal_noise_ratio',
+        'structural_similarity',
+        'hausdorff_distance',
+        'Rectangle',
+        'intersection_area',
+        'intersection_over_union',
+        'intersection_rectangle',
+        'is_intersecting',
+        'union_area',
+        ]
