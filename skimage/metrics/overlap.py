@@ -66,7 +66,9 @@ class Rectangle:
     def __eq__(self, other: Rectangle):
         """Return true if 2 rectangles have the same position and dimension."""
         if not isinstance(other, Rectangle):
-            return False
+            raise TypeError(
+                    'Equality can only be checked with another Rectangle'
+                    )
 
         if (self.top_left == other.top_left and
            self.bottom_right == other.bottom_right):

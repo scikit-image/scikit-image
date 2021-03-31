@@ -44,6 +44,11 @@ def test_eq_operator():# Intersection rectangle and == comparison
         intersection_rectangle(rectangle1, rectangle2)
 
 
+def test_eq_other_obj():
+    with testing.raises(TypeError):
+        _ = rectangle2 == (1, 2, 3, 4)
+
+
 def test_union():
     assert union_area13 == (rectangle1.area + rectangle3.area - rect_inter13.area)
 
