@@ -32,7 +32,7 @@ class Rectangle():
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
-        self._top_left = top_left
+        self.top_left = top_left
         self._r = top_left[0]
         self._c = top_left[1]
 
@@ -43,13 +43,13 @@ class Rectangle():
             raise ValueError("Either specify the bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
-            self._bottom_right = bottom_right
-            self._height = self._bottom_right[0] - self._top_left[0] + 1
-            self._width  = self._bottom_right[1] - self._top_left[1] + 1
+            self.bottom_right = bottom_right
+            self._height = self.bottom_right[0] - self.top_left[0] + 1
+            self._width  = self.bottom_right[1] - self.top_left[1] + 1
 
         elif dimensions is not None:
             self._height, self._width = dimensions
-            self._bottom_right = (self._r + self._height - 1,
+            self.bottom_right = (self._r + self._height - 1,
                                   self._c + self._width - 1)
 
     def __eq__(self, rectangle2):
@@ -57,19 +57,11 @@ class Rectangle():
         if not isinstance(rectangle2, Rectangle):
             return False
 
-        if (self._top_left == rectangle2._top_left and
-           self._bottom_right == rectangle2._bottom_right):
+        if (self.top_left == rectangle2.top_left and
+           self.bottom_right == rectangle2.bottom_right):
             return True
 
         return False
-
-    def get_top_left(self):
-        """Return the (r,c)-coordinates for the top left corner."""
-        return self._top_left
-
-    def get_bottom_right(self):
-        """Return the (r,c)-coordinates for the bottom right corner."""
-        return self._bottom_right
 
     def get_area(self):
         """Return the rectangle area in pixels."""
@@ -100,13 +92,13 @@ def is_intersecting(rectangle1, rectangle2):
     True if the rectangles are intersecting.
     """
     # If one rectangle is on left side of other
-    if (rectangle1._top_left[1] >= rectangle2._bottom_right[1] or
-       rectangle2._top_left[1] >= rectangle1._bottom_right[1]):
+    if (rectangle1.top_left[1] >= rectangle2.bottom_right[1] or
+       rectangle2.top_left[1] >= rectangle1.bottom_right[1]):
         return False
 
     # If one rectangle is above other
-    if (rectangle1._top_left[0] >= rectangle2._bottom_right[0] or
-       rectangle2._top_left[0] >= rectangle1._bottom_right[0]):
+    if (rectangle1.top_left[0] >= rectangle2.bottom_right[0] or
+       rectangle2.top_left[0] >= rectangle1.bottom_right[0]):
         return False
 
     return True
@@ -140,8 +132,8 @@ def intersection_rectangle(rectangle1, rectangle2):
     # for the intersection rectangle
     r = max(rectangle1._r, rectangle2._r)
     c = max(rectangle1._c, rectangle2._c)
-    bottom_right_r = min(rectangle1._bottom_right[0], rectangle2._bottom_right[0])
-    bottom_right_c = min(rectangle1._bottom_right[1], rectangle2._bottom_right[1])
+    bottom_right_r = min(rectangle1.bottom_right[0], rectangle2.bottom_right[0])
+    bottom_right_c = min(rectangle1.bottom_right[1], rectangle2.bottom_right[1])
 
     return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
 

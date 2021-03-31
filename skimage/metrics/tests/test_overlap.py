@@ -23,12 +23,12 @@ def test_area():
 
 
 def test_constructor_size():
-    assert rectangle1.get_top_left() == (0, 0)
-    assert rectangle1.get_bottom_right() == (1, 3)
+    assert rectangle1.top_left == (0, 0)
+    assert rectangle1.bottom_right == (1, 3)
 
 
 def test_constructor_bottom_corner():
-    assert rectangle3.get_top_left() == (0, 0)
+    assert rectangle3.top_left == (0, 0)
     assert rectangle3.get_dimensions() == (3, 3)
 
 
