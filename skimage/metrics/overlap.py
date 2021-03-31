@@ -135,14 +135,11 @@ def intersection_rectangle(rectangle1, rectangle2):
         raise ValueError("""The rectangles are not intersecting.
                          Use is_intersecting to first test if the rectangles are intersecting.""")
 
-    # determine the (r, c)-coordinates of the top left and bottom right corners
-    # for the intersection rectangle
-    r = max(rectangle1._r, rectangle2._r)
-    c = max(rectangle1._c, rectangle2._c)
-    bottom_right_r = min(rectangle1.bottom_right[0], rectangle2.bottom_right[0])
-    bottom_right_c = min(rectangle1.bottom_right[1], rectangle2.bottom_right[1])
-
-    return Rectangle((r, c), bottom_right=(bottom_right_r, bottom_right_c))
+    new_top_left = np.maximum(rectangle1.top_left, rectangle2.top_left)
+    new_bottom_right = np.minimum(
+            rectangle1.bottom_right, rectangle2.bottom_right
+            )
+    return Rectangle(new_top_left, bottom_right=new_bottom_right)
 
 
 def intersection_area(rectangle1, rectangle2):
