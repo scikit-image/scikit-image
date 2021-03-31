@@ -87,13 +87,11 @@ px.imshow(
 
 #####################################################################
 # What is the range of values for each colour channel?
+# We check by taking the min and max across all non-channel
+# axes.
 
-(vmin_0, vmin_1, vmin_2) = (data[:, :, :, 0].min(),
-                            data[:, :, :, 1].min(),
-                            data[:, :, :, 2].min())
-(vmax_0, vmax_1, vmax_2) = (data[:, :, :, 0].max(),
-                            data[:, :, :, 1].max(),
-                            data[:, :, :, 2].max())
+vmin_0, vmin_1, vmin_2 = np.min(data, axis=(0, 1, 2))
+vmax_0, vmax_1, vmax_2 = np.max(data, axis=(0, 1, 2))
 print(f'range for channel 0: ({vmin_0}, {vmax_0})')
 print(f'range for channel 1: ({vmin_1}, {vmax_1})')
 print(f'range for channel 2: ({vmin_2}, {vmax_2})')
@@ -109,7 +107,7 @@ px.imshow(
 
 #####################################################################
 # Plotly lets you interact with this visualization by panning, zooming in and
-# out, let alone exporting the desired figure as a static image in PNG format.
+# out, and exporting the desired figure as a static image in PNG format.
 
 #####################################################################
 # Explore slices as animation frames
