@@ -1,3 +1,13 @@
+scikit-image 0.18.1
+===================
+
+This is a bug fix release and contains the following two bug fixes:
+
+- Fix indexing error for labelling in large (>2GB) arrays (#5143, #5151)
+- Only use retry_if_failed with recent pooch (#5148)
+
+See below for the new features and API changes in 0.18.0.
+
 Announcement: scikit-image 0.18.0
 =================================
 
