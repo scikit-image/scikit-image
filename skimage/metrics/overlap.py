@@ -37,14 +37,12 @@ class Rectangle:
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
         self.top_left = np.asarray(top_left)
-        self._r = top_left[0]
-        self._c = top_left[1]
 
         if (bottom_right is None) and (dimensions is None):
-            raise ValueError("One of bottom_right or dimensions argument should be provided.")
+            raise ValueError("Specify one of bottom_right or dimensions.")
 
         if (bottom_right is not None) and (dimensions is not None):
-            raise ValueError("Either specify the bottom_right or dimensions, not both.")
+            raise ValueError("Specify bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
             self.bottom_right = np.asarray(bottom_right)
@@ -86,22 +84,23 @@ class Rectangle:
 
 
 def is_intersecting(rectangle1, rectangle2):
-    """
-    Check if 2 rectangles are intersecting.
+    """Check whether two rectangles intersect.
 
-    Adapted from post from Aman Gupta
-    at https://www.geeksforgeeks.org/find-two-rectangles-overlap/.
+    Adapted from post from Aman Gupta [1]_.
 
     Parameters
     ----------
-    rectangle1 : a Rectangle object
-        First rectangle.
-    rectangle2 : a second Rectangle object
-        Second rectangle
+    rectangle1, rectangle2 : Rectangle
+        Input rectangles.
 
     Returns
     -------
-    True if the rectangles are intersecting.
+    intersecting : bool
+        True if the rectangles are intersecting.
+
+    References
+    ----------
+    .. [1] https://www.geeksforgeeks.org/find-two-rectangles-overlap/
     """
     disjoint = (
             np.any(rectangle1.bottom_right <= rectangle2.top_left)
@@ -116,24 +115,26 @@ def intersection_rectangle(rectangle1, rectangle2):
 
     Parameters
     ----------
-    rectangle1 : a Rectangle object
-        First rectangle.
-    rectangle2 : a second Rectangle object
-        Second rectangle
+    rectangle1, rectangle2 : Rectangle
+        Input rectangles.
+
+    Returns
+    -------
+    intersected : Rectangle
+        The rectangle produced by intersecting ``rectangle1`` and
+        ``rectangle2``.
 
     Raises
     ------
     ValueError
         If the rectangles are not intersecting.
         Use is_intersecting to first test if the rectangles are intersecting.
-
-    Returns
-    -------
-    Rectangle object representing the intersection.
     """
     if not is_intersecting(rectangle1, rectangle2):
-        raise ValueError("""The rectangles are not intersecting.
-                         Use is_intersecting to first test if the rectangles are intersecting.""")
+        raise ValueError(
+                'The rectangles are not intersecting. Use is_intersecting '
+                'to first test if the rectangles are intersecting.'
+                )
 
     new_top_left = np.maximum(rectangle1.top_left, rectangle2.top_left)
     new_bottom_right = np.minimum(
@@ -143,18 +144,17 @@ def intersection_rectangle(rectangle1, rectangle2):
 
 
 def intersection_area(rectangle1, rectangle2):
-    """
-    Return the intersection area between 2 rectangles.
+    """Compute the intersection area between 2 rectangles.
 
     Parameters
     ----------
-    rectangle1 : Rectangle
-    rectangle2 : Rectangle
+    rectangle1, rectangle2 : Rectangle
+        Input rectangles.
 
     Returns
     -------
-    Intersection, float
-        a float value corresponding to the intersection area.
+    intersection : float
+        The intersection area.
     """
     if not is_intersecting(rectangle1, rectangle2):
         return 0
@@ -164,14 +164,37 @@ def intersection_area(rectangle1, rectangle2):
 
 
 def union_area(rectangle1, rectangle2):
-    """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
-    return (rectangle1.area
-            + rectangle2.area
+    """Compute the area corresponding to the union of 2 rectangles.
+
+    Parameters
+    ----------
+    rectangle1, rectangle2 : Rectangle
+        Input rectangles.
+
+    Returns
+    -------
+    union : float
+        The union area.
+    """
+    return (rectangle1.area + rectangle2.area
             - intersection_area(rectangle1, rectangle2))
 
+
 def intersection_over_union(rectangle1, rectangle2):
+    """Ratio intersection area over union area for a pair of rectangles.
+
+    The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full
+    overlap).
+
+    Parameters
+    ----------
+    rectangle1, rectangle2: Rectangle
+        The input rectangles.
+
+    Returns
+    -------
+    iou : float
+        The intersection over union value.
     """
-    Compute the ratio intersection aera over union area for a pair of rectangle.
-    The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full overlap).
-    """
-    return intersection_area(rectangle1, rectangle2) / union_area(rectangle1, rectangle2)
+    return (intersection_area(rectangle1, rectangle2)
+            / union_area(rectangle1, rectangle2))
