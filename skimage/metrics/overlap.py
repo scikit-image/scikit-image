@@ -3,6 +3,8 @@ Module defining a number of functions to quantify the overlap between shapes.
 for instance rectangles representing detections by bounding-boxes.
 
 """
+from functools import reduce
+
 
 class Rectangle():
     """
@@ -73,7 +75,7 @@ class Rectangle():
 
     def get_area(self):
         """Return the rectangle area in pixels."""
-        return self.height * self.width
+        return reduce(lambda a, b: a * b, self.get_dimensions())
 
     def get_dimensions(self):
         """Return the (height, width) dimensions in pixels."""
