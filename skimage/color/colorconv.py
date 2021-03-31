@@ -454,7 +454,8 @@ def get_xyz_coords(illuminant, observer, dtype=float):
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10", "R"}, optional
-        The aperture angle of the observer.
+        One of: 2-degree observer, 10-degree observer, or 'R' observer as in
+        R function grDevices::convertColor.
     dtype: dtype, optional
         Output data type.
 
@@ -929,7 +930,8 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10", "R"}, optional
-        The aperture angle of the observer.
+        One of: 2-degree observer, 10-degree observer, or 'R' observer as in
+        R function grDevices::convertColor.
 
     Returns
     -------
