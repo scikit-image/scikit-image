@@ -49,7 +49,7 @@ def test_rag_merge():
 
 
 @pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1, 4)]
+    "img_channels", [channels for channels in range(1, 5)]
 )
 def test_threshold_cut(img_channels):
 
@@ -76,7 +76,7 @@ def test_threshold_cut(img_channels):
 
 
 @pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1, 4)]
+    "img_channels", [channels for channels in range(1, 5)]
 )
 def test_cut_normalized(img_channels):
 
@@ -133,20 +133,18 @@ def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
                                     in_place_merge, _pre_merge_mean_color,
                                     _weight_mean_color)
 
-@pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1, 4)]
-)
-def test_rag_hierarchical(img_channels):
-    img = np.zeros((8, 8, img_channels), dtype='uint8')
+
+def test_rag_hierarchical():
+    img = np.zeros((8, 8, 3), dtype='uint8')
     labels = np.zeros((8, 8), dtype='uint8')
 
     img[:, :, :] = 31
     labels[:, :] = 1
 
-    img[0:4, 0:4, :] = 10
+    img[0:4, 0:4, :] = 10, 10, 10
     labels[0:4, 0:4] = 2
 
-    img[4:, 0:4, :] = 20
+    img[4:, 0:4, :] = 20, 20, 20
     labels[4:, 0:4] = 3
 
     g = graph.rag_mean_color(img, labels)
@@ -165,13 +163,11 @@ def test_rag_hierarchical(img_channels):
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
 
-@pytest.mark.parametrize(
-    "img_channels", [channels for channels in range(1, 4)]
-)
-def test_ncut_stable_subgraph(img_channels):
+
+def test_ncut_stable_subgraph():
     """ Test to catch an error thrown when subgraph has all equal edges. """
 
-    img = np.zeros((100, 100, img_channels), dtype='uint8')
+    img = np.zeros((100, 100, 3), dtype='uint8')
 
     labels = np.zeros((100, 100), dtype='uint8')
     labels[:50, :50] = 1
