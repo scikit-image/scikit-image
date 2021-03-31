@@ -73,11 +73,13 @@ class Rectangle:
 
         return False
 
-    def get_area(self):
+    @property
+    def area(self):
         """Return the rectangle area in pixels."""
-        return reduce(lambda a, b: a * b, self.get_dimensions())
+        return reduce(lambda a, b: a * b, self.dimensions)
 
-    def get_dimensions(self):
+    @property
+    def dimensions(self):
         """Return the (height, width) dimensions in pixels."""
         return tuple(
                 bottom - top + 1
@@ -169,13 +171,13 @@ def intersection_area(rectangle1, rectangle2):
         return 0
 
     # Compute area of the intersecting box
-    return intersection_rectangle(rectangle1, rectangle2).get_area()
+    return intersection_rectangle(rectangle1, rectangle2).area
 
 
 def union_area(rectangle1, rectangle2):
     """Compute the area for the rectangle corresponding to the union of 2 rectangles."""
-    return (rectangle1.get_area()
-            + rectangle2.get_area()
+    return (rectangle1.area
+            + rectangle2.area
             - intersection_area(rectangle1, rectangle2))
 
 def intersection_over_union(rectangle1, rectangle2):

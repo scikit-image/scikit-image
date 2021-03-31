@@ -17,9 +17,9 @@ union_area13 = union_area(rectangle1, rectangle3)
 
 
 def test_area():
-    assert rectangle1.get_area() == height1 * width1
-    assert rectangle2.get_area() == height2 * width2
-    assert rectangle3.get_area() == 3*3
+    assert rectangle1.area == height1 * width1
+    assert rectangle2.area == height2 * width2
+    assert rectangle3.area == 3*3
 
 
 def test_constructor_size():
@@ -29,7 +29,7 @@ def test_constructor_size():
 
 def test_constructor_bottom_corner():
     assert rectangle3.top_left == (0, 0)
-    assert rectangle3.get_dimensions() == (3, 3)
+    assert rectangle3.dimensions == (3, 3)
 
 
 def test_intersection():
@@ -45,8 +45,8 @@ def test_eq_operator():# Intersection rectangle and == comparison
 
 
 def test_union():
-    assert union_area13 == (rectangle1.get_area() + rectangle3.get_area() - rect_inter13.get_area())
+    assert union_area13 == (rectangle1.area + rectangle3.area - rect_inter13.area)
 
 
 def test_IoU():
-    assert intersection_over_union(rectangle1, rectangle3) == rect_inter13.get_area()/union_area13
+    assert intersection_over_union(rectangle1, rectangle3) == rect_inter13.area/union_area13
