@@ -1,4 +1,10 @@
-from skimage.metrics.overlap import *
+from skimage.metrics.overlap import (
+        Rectangle,
+        intersection_over_union,
+        intersection_rectangle,
+        is_intersecting,
+        union_area,
+        )
 from skimage._shared import testing
 
 height1, width1 = 2, 4
