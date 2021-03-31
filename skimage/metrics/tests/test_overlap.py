@@ -23,13 +23,13 @@ def test_area():
 
 
 def test_constructor_size():
-    assert rectangle1.top_left == (0, 0)
-    assert rectangle1.bottom_right == (1, 3)
+    assert tuple(rectangle1.top_left) == (0, 0)
+    assert tuple(rectangle1.bottom_right) == (1, 3)
 
 
 def test_constructor_bottom_corner():
-    assert rectangle3.top_left == (0, 0)
-    assert rectangle3.dimensions == (3, 3)
+    assert tuple(rectangle3.top_left) == (0, 0)
+    assert tuple(rectangle3.dimensions) == (3, 3)
 
 
 def test_intersection():

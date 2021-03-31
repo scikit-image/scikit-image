@@ -4,7 +4,8 @@ for instance rectangles representing detections by bounding-boxes.
 
 """
 from __future__ import annotations
-from functools import reduce
+
+import numpy as np
 
 
 class Rectangle:
@@ -35,7 +36,7 @@ class Rectangle:
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
-        self.top_left = top_left
+        self.top_left = np.asarray(top_left)
         self._r = top_left[0]
         self._c = top_left[1]
 
@@ -46,11 +47,11 @@ class Rectangle:
             raise ValueError("Either specify the bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
-            self.bottom_right = bottom_right
+            self.bottom_right = np.asarray(bottom_right)
 
         elif dimensions is not None:
-            self.bottom_right = tuple(
-                    top + size - 1 for top, size in zip(top_left, dimensions)
+            self.bottom_right = np.asarray(
+                    [top + size - 1 for top, size in zip(top_left, dimensions)]
                     )
 
     @property
@@ -70,22 +71,18 @@ class Rectangle:
                     'Equality can only be checked with another Rectangle'
                     )
 
-        return (self.top_left == other.top_left
-                and self.bottom_right == other.bottom_right)
+        return (np.all(self.top_left == other.top_left)
+                and np.all(self.bottom_right == other.bottom_right))
 
     @property
     def area(self):
         """Return the rectangle area in pixels."""
-        return reduce(lambda a, b: a * b, self.dimensions)
+        return np.prod(self.dimensions)
 
     @property
     def dimensions(self):
         """Return the (height, width) dimensions in pixels."""
-        return tuple(
-                bottom - top + 1
-                for top, bottom in zip(self.top_left, self.bottom_right)
-                )
-
+        return self.bottom_right - self.top_left + 1
 
 
 def is_intersecting(rectangle1, rectangle2):
