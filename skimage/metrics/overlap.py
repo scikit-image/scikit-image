@@ -77,7 +77,10 @@ class Rectangle():
 
     def get_dimensions(self):
         """Return the (height, width) dimensions in pixels."""
-        return self.height, self.width
+        return tuple(
+                bottom - top + 1
+                for top, bottom in zip(self.top_left, self.bottom_right)
+                )
 
 
 
