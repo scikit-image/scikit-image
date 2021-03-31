@@ -44,13 +44,21 @@ class Rectangle():
 
         if bottom_right is not None:
             self.bottom_right = bottom_right
-            self._height = self.bottom_right[0] - self.top_left[0] + 1
-            self._width  = self.bottom_right[1] - self.top_left[1] + 1
 
         elif dimensions is not None:
-            self._height, self._width = dimensions
-            self.bottom_right = (self._r + self._height - 1,
-                                  self._c + self._width - 1)
+            self.bottom_right = tuple(
+                    top + size - 1 for top, size in zip(top_left, dimensions)
+                    )
+
+    @property
+    def height(self):
+        # use negative indexing in anticipation of nD hyperrectangles.
+        return self.bottom_right[-2] - self.top_left[-2] + 1
+
+    @property
+    def width(self):
+        # use negative indexing in anticipation of nD hyperrectangles.
+        return self.bottom_right[-1] - self.top_left[-1] + 1
 
     def __eq__(self, rectangle2):
         """Return true if 2 rectangles have the same position and dimension."""
@@ -65,11 +73,11 @@ class Rectangle():
 
     def get_area(self):
         """Return the rectangle area in pixels."""
-        return self._height * self._width
+        return self.height * self.width
 
     def get_dimensions(self):
         """Return the (height, width) dimensions in pixels."""
-        return self._height, self._width
+        return self.height, self.width
 
 
 
