@@ -6,7 +6,7 @@ for instance rectangles representing detections by bounding-boxes.
 from functools import reduce
 
 
-class Rectangle():
+class Rectangle:
     """
     Construct a rectangle using the (r,c) coordinates for the top left corner,
     and either the coordinates of the botton right corner
