@@ -3,6 +3,7 @@ Module defining a number of functions to quantify the overlap between shapes.
 for instance rectangles representing detections by bounding-boxes.
 
 """
+from __future__ import annotations
 from functools import reduce
 
 
@@ -62,7 +63,7 @@ class Rectangle:
         # use negative indexing in anticipation of nD hyperrectangles.
         return self.bottom_right[-1] - self.top_left[-1] + 1
 
-    def __eq__(self, rectangle2):
+    def __eq__(self, rectangle2: Rectangle):
         """Return true if 2 rectangles have the same position and dimension."""
         if not isinstance(rectangle2, Rectangle):
             return False
