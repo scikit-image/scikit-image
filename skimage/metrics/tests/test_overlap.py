@@ -39,7 +39,6 @@ def test_intersection():
 
 def test_eq_operator():# Intersection rectangle and == comparison
     assert rect_inter13 == Rectangle((0, 0), bottom_right=(1, 2))
-    assert rect_inter13 != 5
     with testing.raises(ValueError):
         intersection_rectangle(rectangle1, rectangle2)
 
