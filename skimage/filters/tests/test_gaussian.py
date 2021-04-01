@@ -72,7 +72,7 @@ def test_multichannel(channel_axis):
 def test_deprecated_multichannel():
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
                                   multichannel=True)
     # Check that the mean value is conserved in each channel
@@ -80,7 +80,7 @@ def test_deprecated_multichannel():
     assert np.allclose(a.mean(axis=(0, 1)), gaussian_rgb_a.mean(axis=(0, 1)))
 
     # check positional multichannel argument warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         gaussian_rgb_a = gaussian(a, 1, None, 'reflect', 0, True)
 
 
@@ -157,7 +157,7 @@ def test_dog_invalid_sigma_dims():
     with testing.raises(ValueError):
         difference_of_gaussians(image, 1, (3, 4))
     with testing.raises(ValueError):
-        with expected_warnings(["'multichannel' is a deprecated argument"]):
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
             difference_of_gaussians(image, (1, 2, 3), multichannel=True)
     with testing.raises(ValueError):
         difference_of_gaussians(image, (1, 2, 3), channel_axis=-1)

@@ -93,7 +93,7 @@ def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
     dtype = np.int16
     array = (np.random.random(shape) * 5 + offset).astype(dtype)
     negative = np.any(array < 0)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         output = unsharp_mask(array, radius, amount, multichannel=multichannel,
                               preserve_range=preserve)
     if preserve is False:
@@ -105,5 +105,5 @@ def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
     assert output.shape == shape
 
     # providing multichannel positionally also raises a warning
-    with expected_warnings(["Providing the 'multichannel'"]):
+    with expected_warnings(["Providing the `multichannel`"]):
         output = unsharp_mask(array, radius, amount, multichannel, preserve)
