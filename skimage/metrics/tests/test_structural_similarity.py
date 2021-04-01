@@ -146,7 +146,7 @@ def test_structural_similarity_multichannel_deprecated():
     # replicate across three channels.  should get identical value
     Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
     Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3)
     assert_almost_equal(S1, S2)
 
