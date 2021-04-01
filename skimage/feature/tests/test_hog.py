@@ -253,13 +253,13 @@ def test_hog_output_equivariance_deprecated_multichannel():
         hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
 
     for n in (1, 2):
-        with expected_warnings(["'multichannel' is a deprecated argument"]):
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
             hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
                                    block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)
 
         # repeat prior test, but check for positional multichannel warning
-        with expected_warnings(["Providing the 'multichannel' argument"]):
+        with expected_warnings(["Providing the `multichannel` argument"]):
             hog_fact = feature.hog(np.roll(img, n, axis=2), 9, (8, 8), (3, 3),
                                    'L1', False, False, True, True)
         assert_almost_equal(hog_ref, hog_fact)

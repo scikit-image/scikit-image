@@ -155,13 +155,13 @@ def multiscale_basic_features(
     Returns
     -------
     features : np.ndarray
-        Array of shape ``image.shape + (n_features,)``. When channel_axis is
+        Array of shape ``image.shape + (n_features,)``. When `channel_axis` is
         not None, all channels are concatenated along the features dimension.
         (i.e. ``n_features == n_features_singlechannel * n_channels``)
     """
     if not any([intensity, edges, texture]):
         raise ValueError(
-            "At least one of ``intensity``, ``edges`` or ``textures``"
+            "At least one of `intensity`, `edges` or `textures`"
             "must be True for features to be computed."
         )
     if channel_axis is None:
