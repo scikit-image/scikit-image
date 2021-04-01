@@ -15,12 +15,12 @@ image_gray = image[..., 0]
 
 def test_pyramid_reduce_rgb_deprecated_multichannel():
     rows, cols, dim = image.shape
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         out = pyramids.pyramid_reduce(image, downscale=2, multichannel=True)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         out = pyramids.pyramid_reduce(image, 2, None, 1, 'reflect', 0, True)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
@@ -64,12 +64,12 @@ def test_pyramid_expand_rgb():
 
 def test_pyramid_expand_rgb_deprecated_multichannel():
     rows, cols, dim = image.shape
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         out = pyramids.pyramid_expand(image, upscale=2, multichannel=True)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         out = pyramids.pyramid_expand(image, 2, None, 1, 'reflect', 0, True)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
@@ -101,7 +101,7 @@ def test_build_gaussian_pyramid_rgb():
 
 def test_build_gaussian_pyramid_rgb_deprecated_multichannel():
     rows, cols, dim = image.shape
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         pyramid = pyramids.pyramid_gaussian(image, downscale=2,
                                             multichannel=True)
     for layer, out in enumerate(pyramid):
@@ -109,7 +109,7 @@ def test_build_gaussian_pyramid_rgb_deprecated_multichannel():
         assert_array_equal(out.shape, layer_shape)
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         pyramid = pyramids.pyramid_gaussian(image, -1, 2, None, 1, 'reflect',
                                             0, True)
     for layer, out in enumerate(pyramid):
@@ -148,7 +148,7 @@ def test_build_laplacian_pyramid_rgb():
 
 def test_build_laplacian_pyramid_rgb_deprecated_multichannel():
     rows, cols, dim = image.shape
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         pyramid = pyramids.pyramid_laplacian(image, downscale=2,
                                              multichannel=True)
     for layer, out in enumerate(pyramid):
@@ -156,7 +156,7 @@ def test_build_laplacian_pyramid_rgb_deprecated_multichannel():
         assert_array_equal(out.shape, layer_shape)
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         pyramid = pyramids.pyramid_laplacian(image, -1, 2, None, 1, 'reflect',
                                              0, True)
     for layer, out in enumerate(pyramid):
