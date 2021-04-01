@@ -81,12 +81,12 @@ def test_denoise_tv_chambolle_multichannel(channel_axis):
 def test_denoise_tv_chambolle_multichannel_deprecation():
     denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         denoised = restoration.denoise_tv_chambolle(astro, weight=0.1,
                                                     multichannel=True)
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         denoised = restoration.denoise_tv_chambolle(astro, 0.1, 2e-4, 200,
                                                     True)
 
@@ -211,7 +211,7 @@ def test_denoise_tv_bregman_3d_multichannel(channel_axis):
 def test_denoise_tv_bregman_3d_multichannel_deprecation():
     img_astro = astro.copy()
     denoised0 = restoration.denoise_tv_bregman(img_astro[..., 0], weight=60.0)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         denoised = restoration.denoise_tv_bregman(img_astro, weight=60.0,
                                                   multichannel=True)
 
@@ -321,11 +321,11 @@ def test_denoise_bilateral_multichannel_deprecation():
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
                                              sigma_spatial=10,
                                              multichannel=True)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
                                              sigma_spatial=20,
                                              multichannel=True)
@@ -432,7 +432,7 @@ def test_denoise_nl_means_2d_multichannel_deprecated():
     imgn = np.clip(imgn, 0, 1)
 
     psnr_noisy = peak_signal_noise_ratio(img, imgn)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         denoised = restoration.denoise_nl_means(imgn,
                                                 3, 5, h=0.75 * sigma,
                                                 multichannel=True,
@@ -443,7 +443,7 @@ def test_denoise_nl_means_2d_multichannel_deprecated():
     assert_(psnr_denoised > psnr_noisy)
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         restoration.denoise_nl_means(imgn, 3, 5, 0.75 * sigma, True,
                                      sigma=sigma)
 
@@ -633,7 +633,7 @@ def test_wavelet_denoising_deprecated():
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         # Verify that SNR is improved when true sigma is used
         denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
                                                multichannel=True,
@@ -643,7 +643,7 @@ def test_wavelet_denoising_deprecated():
     assert_(psnr_denoised > psnr_noisy)
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         restoration.denoise_wavelet(noisy, sigma, 'db1', 'soft', None, True,
                                     rescale_sigma=True)
 
@@ -897,13 +897,13 @@ def test_estimate_sigma_color_deprecated_multichannel():
     # add noise to astronaut
     img += sigma * rstate.standard_normal(img.shape)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         sigma_est = restoration.estimate_sigma(img, multichannel=True,
                                                average_sigmas=True)
     assert_almost_equal(sigma, sigma_est, decimal=2)
 
     # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         sigma_est = restoration.estimate_sigma(img, True, True)
     assert_almost_equal(sigma, sigma_est, decimal=2)
 
@@ -1055,7 +1055,7 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
 
     func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
 
-    mc_warn_str = "'multichannel' is a deprecated argument"
+    mc_warn_str = "`multichannel` is a deprecated argument"
 
     # same results are expected whether using 1 worker or multiple workers
     with expected_warnings([mc_warn_str]):
@@ -1074,7 +1074,7 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
     assert_almost_equal(dn_cc1, dn_cc2)
 
     # providing multichannel argument positionally also warns
-    mc_warn_str = "Providing the 'multichannel' argument"
+    mc_warn_str = "Providing the `multichannel` argument"
     if DASK_NOT_INSTALLED_WARNING is None:
         exp_warn = [mc_warn_str]
     else:
