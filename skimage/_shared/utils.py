@@ -184,8 +184,8 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
             if self.position is not None and len(args) > self.position:
                 warning_msg = (
-                    "Providing the 'multichannel' argument positionally to "
-                    "{func_name} is deprecated. Use the 'channel_axis' kwarg "
+                    "Providing the `multichannel` argument positionally to "
+                    "{func_name} is deprecated. Use the `channel_axis` kwarg "
                     "instead."
                 )
                 warnings.warn(warning_msg.format(func_name=func.__name__),
@@ -193,8 +193,8 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                               stacklevel=2)
                 if 'channel_axis' in kwargs:
                     raise ValueError(
-                        "Cannot provide both a 'channel_axis' kwarg and a "
-                        "positional 'multichannel' value."
+                        "Cannot provide both a `channel_axis` kwarg and a "
+                        "positional `multichannel` value."
                     )
                 else:
                     channel_axis = -1 if args[self.position] else None
