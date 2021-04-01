@@ -80,7 +80,7 @@ def test_gray_2d_deprecated_multichannel():
     img += 0.0033 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         seg = slic(img, sigma=0, n_segments=4, compactness=1,
                    multichannel=False, convert2lab=False, start_label=0)
 
@@ -91,7 +91,7 @@ def test_gray_2d_deprecated_multichannel():
     assert_equal(seg[:10, 10:], 1)
     assert_equal(seg[10:, 10:], 3)
 
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         seg = slic(img, 4, 1, 10, 0, None, False, convert2lab=False,
                    start_label=0)
 

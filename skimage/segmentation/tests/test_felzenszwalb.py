@@ -62,9 +62,9 @@ def test_3D(channel_axis):
 
 def test_3D_multichannel_deprecation():
     rgb_img = np.zeros((10, 10, 3))
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         felzenszwalb(rgb_img, multichannel=True)
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         felzenszwalb(rgb_img, 1, 0.8, 2, True)
 
 

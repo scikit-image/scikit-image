@@ -258,7 +258,7 @@ def test_multispectral_2d_deprecated():
 
     # checking for multichannel kwarg warning
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "'multichannel' is a deprecated argument",
+                           "`multichannel` is a deprecated argument",
                             NUMPY_MATRIX_WARNING,
                             'The probability range is outside']):
         multi_labels = random_walker(data, labels, mode='cg',
@@ -267,7 +267,7 @@ def test_multispectral_2d_deprecated():
 
     # checking for positional multichannel warning
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "Providing the 'multichannel' argument",
+                           "Providing the `multichannel` argument",
                             NUMPY_MATRIX_WARNING,
                             'The probability range is outside']):
         multi_labels = random_walker(data, labels, 130, 'cg', 1.e-3, True,
