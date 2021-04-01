@@ -134,12 +134,12 @@ class deprecate_kwarg:
     def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
         self.kwarg_mapping = kwarg_mapping
         if warning_msg is None:
-            self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+            self.warning_msg = ("`{old_arg}` is a deprecated argument name "
                                 "for `{func_name}`. ")
             if removed_version is not None:
                 self.warning_msg += ("It will be removed in version {}. "
                                      .format(removed_version))
-            self.warning_msg += "Please use '{new_arg}' instead."
+            self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
 
@@ -176,8 +176,6 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
             kwarg_mapping={'multichannel': 'channel_axis'},
             warning_msg=None,
             removed_version=removed_version)
-        self.warning_msg = ("`{old_arg}` is a deprecated argument name "
-                            "for `{func_name}`. ")
         self.position = multichannel_position
 
     def __call__(self, func):
