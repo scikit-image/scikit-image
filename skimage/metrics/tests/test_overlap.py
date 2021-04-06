@@ -26,7 +26,7 @@ def test_area():
 
 def test_constructor_dimensions():
     assert tuple(rectangle1.top_left) == (0, 0)
-    assert tuple(rectangle1.bottom_right) == (2, 4)
+    assert tuple(rectangle1.bottom_right) == (height1, width1)
 
 
 def test_constructor_bottom_corner():
