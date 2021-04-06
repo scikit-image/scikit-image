@@ -24,7 +24,7 @@ def test_area():
     assert rectangle3.area == 2 * 2
 
 
-def test_constructor_size():
+def test_constructor_dimensions():
     assert tuple(rectangle1.top_left) == (0, 0)
     assert tuple(rectangle1.bottom_right) == (2, 4)
 
