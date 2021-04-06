@@ -53,10 +53,15 @@ class Rectangle:
             raise ValueError("Specify bottom_right or dimensions, not both.")
 
         if bottom_right is not None:
+            if not np.all(top_left <= bottom_right):
+                raise ValueError("Bottom right corner should have coordinates larger or equal to the top left corner.")
             self.bottom_right = np.asarray(bottom_right)
 
         elif dimensions is not None:
-            self.bottom_right = self.top_left + np.asarray(dimensions)
+            dimensions = np.asarray(dimensions)
+            if not (dimensions >= 0).all():
+                raise ValueError("Dimensions should be positive.")
+            self.bottom_right = self.top_left + dimensions
 
     @property
     def height(self):
