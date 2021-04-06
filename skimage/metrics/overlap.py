@@ -116,7 +116,7 @@ def _disjoint(rectangle1, rectangle2):
     Returns
     -------
     disjoint : bool
-        True if the rectangles are don't share any points.
+        True if the rectangles don't share any points.
 
     References
     ----------
