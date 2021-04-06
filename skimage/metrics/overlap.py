@@ -16,13 +16,13 @@ class Rectangle:
 
     Parameters
     ----------
-    top_left : tuple of 2 ints
+    top_left : array-like of ints or floats
         (r,c)-coordinates for the top left corner of the rectangle.
 
-    bottom_right : tuple of 2 ints, optional, default=None
+    bottom_right : array-like of ints or floats, optional
         (r,c)-coordinates for the bottom right corner of the rectangle.
 
-    dimensions : tuple of 2 ints, optional, default=None
+    dimensions : array-like of ints or floats, optional
         dimensions of the rectangle (height, width). The default is None.
 
     Raises
@@ -55,12 +55,12 @@ class Rectangle:
     @property
     def height(self):
         # use negative indexing in anticipation of nD hyperrectangles.
-        return self.bottom_right[-2] - self.top_left[-2] + 1
+        return self.bottom_right[-2] - self.top_left[-2]
 
     @property
     def width(self):
         # use negative indexing in anticipation of nD hyperrectangles.
-        return self.bottom_right[-1] - self.top_left[-1] + 1
+        return self.bottom_right[-1] - self.top_left[-1]
 
     def __eq__(self, other: Rectangle):
         """Return true if 2 rectangles have the same position and dimension."""
@@ -80,7 +80,7 @@ class Rectangle:
     @property
     def dimensions(self):
         """Return the (height, width) dimensions in pixels."""
-        return self.bottom_right - self.top_left + 1
+        return self.bottom_right - self.top_left
 
 
 def is_intersecting(rectangle1, rectangle2):
