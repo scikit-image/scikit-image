@@ -3,11 +3,8 @@ from ._variation_of_information import variation_of_information
 from ._contingency_table import contingency_table
 from .overlap import (
         Rectangle,
-        intersection_area,
+        intersect,
         intersection_over_union,
-        intersection_rectangle,
-        is_intersecting,
-        union_area,
         )
 from .simple_metrics import (mean_squared_error,
                              normalized_mutual_information,
@@ -27,11 +24,8 @@ __all__ = [
         'peak_signal_noise_ratio',
         'structural_similarity',
         'hausdorff_distance',
-        'hausdorff_pair'
+        'hausdorff_pair',
         'Rectangle',
-        'intersection_area',
+        'intersect',
         'intersection_over_union',
-        'intersection_rectangle',
-        'is_intersecting',
-        'union_area',
         ]

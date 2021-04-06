@@ -60,6 +60,13 @@ class Rectangle:
         # use negative indexing in anticipation of nD hyperrectangles.
         return self.bottom_right[-1] - self.top_left[-1]
 
+    @property
+    def ndim(self):
+        return len(self.top_left)
+
+    def __bool__(self):
+        return bool(self.area > 0)  # cast needed to avoid np.bool_
+
     def __eq__(self, other: Rectangle):
         """Return true if 2 rectangles have the same position and dimension."""
         if not isinstance(other, Rectangle):
@@ -81,8 +88,8 @@ class Rectangle:
         return self.bottom_right - self.top_left
 
 
-def is_intersecting(rectangle1, rectangle2):
-    """Check whether two rectangles intersect.
+def _disjoint(rectangle1, rectangle2):
+    """Check whether two rectangles are disjoint
 
     Adapted from post from Aman Gupta [1]_.
 
@@ -93,23 +100,22 @@ def is_intersecting(rectangle1, rectangle2):
 
     Returns
     -------
-    intersecting : bool
-        True if the rectangles are intersecting.
+    disjoint : bool
+        True if the rectangles are don't share any points.
 
     References
     ----------
     .. [1] https://www.geeksforgeeks.org/find-two-rectangles-overlap/
     """
     disjoint = (
-            np.any(rectangle1.bottom_right <= rectangle2.top_left)
-            or np.any(rectangle2.bottom_right <= rectangle1.top_left)
+            np.any(rectangle1.bottom_right < rectangle2.top_left)
+            or np.any(rectangle2.bottom_right < rectangle1.top_left)
             )
-    return not disjoint
+    return disjoint
 
 
-def intersection_rectangle(rectangle1, rectangle2):
-    """
-    Return a Rectangle corresponding to the intersection between 2 rectangles.
+def intersect(rectangle1, rectangle2):
+    """Return a Rectangle corresponding to the intersection between 2 rectangles.
 
     Parameters
     ----------
@@ -128,54 +134,15 @@ def intersection_rectangle(rectangle1, rectangle2):
         If the rectangles are not intersecting.
         Use is_intersecting to first test if the rectangles are intersecting.
     """
-    if not is_intersecting(rectangle1, rectangle2):
-        raise ValueError(
-                'The rectangles are not intersecting. Use is_intersecting '
-                'to first test if the rectangles are intersecting.'
-                )
-
+    if _disjoint(rectangle1, rectangle2):
+        # return the "null rectangle" if they are disjoint
+        ndim = rectangle1.ndim
+        return Rectangle((0,) * ndim, bottom_right=(0,) * ndim)
     new_top_left = np.maximum(rectangle1.top_left, rectangle2.top_left)
     new_bottom_right = np.minimum(
             rectangle1.bottom_right, rectangle2.bottom_right
             )
     return Rectangle(new_top_left, bottom_right=new_bottom_right)
-
-
-def intersection_area(rectangle1, rectangle2):
-    """Compute the intersection area between 2 rectangles.
-
-    Parameters
-    ----------
-    rectangle1, rectangle2 : Rectangle
-        Input rectangles.
-
-    Returns
-    -------
-    intersection : float
-        The intersection area.
-    """
-    if not is_intersecting(rectangle1, rectangle2):
-        return 0
-
-    # Compute area of the intersecting box
-    return intersection_rectangle(rectangle1, rectangle2).area
-
-
-def union_area(rectangle1, rectangle2):
-    """Compute the area corresponding to the union of 2 rectangles.
-
-    Parameters
-    ----------
-    rectangle1, rectangle2 : Rectangle
-        Input rectangles.
-
-    Returns
-    -------
-    union : float
-        The union area.
-    """
-    return (rectangle1.area + rectangle2.area
-            - intersection_area(rectangle1, rectangle2))
 
 
 def intersection_over_union(rectangle1, rectangle2):
@@ -194,5 +161,6 @@ def intersection_over_union(rectangle1, rectangle2):
     iou : float
         The intersection over union value.
     """
-    return (intersection_area(rectangle1, rectangle2)
-            / union_area(rectangle1, rectangle2))
+    intersection_area = intersect(rectangle1, rectangle2).area
+    union_area = rectangle1.area + rectangle2.area - intersection_area
+    return intersection_area / union_area

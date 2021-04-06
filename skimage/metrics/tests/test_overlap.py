@@ -1,9 +1,7 @@
 from skimage.metrics.overlap import (
         Rectangle,
+        intersect,
         intersection_over_union,
-        intersection_rectangle,
-        is_intersecting,
-        union_area,
         )
 from skimage._shared import testing
 
@@ -17,9 +15,7 @@ rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
 
 rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
 
-rect_inter13 = intersection_rectangle(rectangle1, rectangle3)
-
-union_area13 = union_area(rectangle1, rectangle3)
+rect_inter13 = intersect(rectangle1, rectangle3)
 
 
 def test_area():
@@ -39,14 +35,12 @@ def test_constructor_bottom_corner():
 
 
 def test_intersection():
-    assert not is_intersecting(rectangle1, rectangle2)
-    assert is_intersecting(rectangle1, rectangle3)
+    assert not intersect(rectangle1, rectangle2)
+    assert intersect(rectangle1, rectangle3)
 
 
 def test_eq_operator():  # Intersection rectangle and == comparison
     assert rect_inter13 == Rectangle((0, 0), bottom_right=(2, 2))
-    with testing.raises(ValueError):
-        intersection_rectangle(rectangle1, rectangle2)
 
 
 def test_eq_other_obj():
@@ -54,9 +48,6 @@ def test_eq_other_obj():
         _ = rectangle2 == (1, 2, 3, 4)
 
 
-def test_union():
-    assert union_area13 == (rectangle1.area + rectangle3.area - rect_inter13.area)
-
-
 def test_IoU():
-    assert intersection_over_union(rectangle1, rectangle3) == rect_inter13.area/union_area13
+    union_area13 = rectangle1.area + rectangle3.area - rect_inter13.area
+    assert intersection_over_union(rectangle1, rectangle3) == rect_inter13.area / union_area13
