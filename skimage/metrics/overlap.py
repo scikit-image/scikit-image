@@ -9,10 +9,11 @@ import numpy as np
 
 
 class Rectangle:
-    """
-    Construct a rectangle using the (r,c) coordinates for the top left corner,
-    and either the coordinates of the botton right corner
-    or the rectangle dimensions (height, width).
+    """Construct a rectangle consisting of top left and bottom right corners.
+
+    The contructor uses the (r,c) coordinates for the top left corner and
+    either the coordinates of the botton right corner or the rectangle
+    dimensions (height, width).
 
     Parameters
     ----------
@@ -28,11 +29,18 @@ class Rectangle:
     Raises
     ------
     ValueError
-        If none or both of bottom_right and dimensions are provided.
+        If neither or both of bottom_right and dimensions are provided.
 
-    Returns
-    -------
-    Rectangle object.
+    Attributes
+    ----------
+    top_left : array of int or float
+        The top left corner of the rectangle.
+    bottom_right : array of int or float
+        The bottom right corner of the rectangle.
+
+    Notes
+    -----
+    ``bool(rectangle)`` will be False when the rectangle has area 0.
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
@@ -77,6 +85,13 @@ class Rectangle:
         return (np.all(self.top_left == other.top_left)
                 and np.all(self.bottom_right == other.bottom_right))
 
+    def __repr__(self):
+        return (f'Rectangle({tuple(self.top_left)}, '
+                f'bottom_right={tuple(self.bottom_right)})')
+
+    def __str__(self):
+        return self.__repr__()
+
     @property
     def area(self):
         """Return the rectangle area in pixels."""
@@ -115,7 +130,10 @@ def _disjoint(rectangle1, rectangle2):
 
 
 def intersect(rectangle1, rectangle2):
-    """Return a Rectangle corresponding to the intersection between 2 rectangles.
+    """Return the Rectangle corresponding to the intersection of the inputs.
+
+    If the two inputs are disjoint, the returned rectangle is the "null"
+    rectangle, with top left corner at (0, 0) and dimensions (0, 0).
 
     Parameters
     ----------
@@ -128,11 +146,20 @@ def intersect(rectangle1, rectangle2):
         The rectangle produced by intersecting ``rectangle1`` and
         ``rectangle2``.
 
-    Raises
-    ------
-    ValueError
-        If the rectangles are not intersecting.
-        Use is_intersecting to first test if the rectangles are intersecting.
+    Examples
+    --------
+    >>> r0 = Rectangle((0, 0), bottom_right=(2, 3))
+    >>> r1 = Rectangle((1, 2), bottom_right=(4, 4))
+    >>> intersect(r0, r1)
+    Rectangle((1, 2), bottom_right=(2, 3))
+
+    Since 0-area rectangles evaluate to False, this function can be used to
+    test for disjoint rectangles.
+
+    >>> r2 = Rectangle((10, 10), dimensions=(3, 3))
+    >>> if not intersect(r1, r2):
+    ...     print('r1 and r2 are disjoint')
+    r1 and r2 are disjoint
     """
     if _disjoint(rectangle1, rectangle2):
         # return the "null rectangle" if they are disjoint
