@@ -48,6 +48,10 @@ def test_eq_other_obj():
         _ = rectangle2 == (1, 2, 3, 4)
 
 
+def test_str():
+    assert str(rectangle3) == 'Rectangle((0, 0), bottom_right=(2, 2))'
+
+
 def test_IoU():
     union_area13 = rectangle1.area + rectangle3.area - rect_inter13.area
     assert intersection_over_union(rectangle1, rectangle3) == rect_inter13.area / union_area13
