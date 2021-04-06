@@ -1,5 +1,6 @@
 import itertools
 import math
+import inspect
 import numpy as np
 from scipy import ndimage as ndi
 from collections import OrderedDict
@@ -70,9 +71,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
+        # Use precomputed histogram for supporting functions.
+        sig = inspect.signature(func)
+        _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
+
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image, hist=hist), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
