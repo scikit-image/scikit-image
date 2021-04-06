@@ -48,9 +48,7 @@ class Rectangle:
             self.bottom_right = np.asarray(bottom_right)
 
         elif dimensions is not None:
-            self.bottom_right = np.asarray(
-                    [top + size - 1 for top, size in zip(top_left, dimensions)]
-                    )
+            self.bottom_right = self.top_left + np.asarray(dimensions)
 
     @property
     def height(self):
