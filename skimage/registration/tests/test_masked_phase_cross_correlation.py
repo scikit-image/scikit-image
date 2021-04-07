@@ -222,7 +222,7 @@ def test_cross_correlate_masked_over_axes():
     m2 = np.random.choice([True, False], arr2.shape)
 
     # Loop over last axis
-    with_loop = np.empty_like(arr1, dtype=np.complex)
+    with_loop = np.empty_like(arr1, dtype=complex)
     for index in range(arr1.shape[-1]):
         with_loop[:, :, index] = cross_correlate_masked(arr1[:, :, index],
                                                         arr2[:, :, index],
