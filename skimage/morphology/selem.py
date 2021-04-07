@@ -366,4 +366,4 @@ def _default_selem(ndim):
         are 1 and 0 otherwise.
 
     """
-    return ndi.morphology.generate_binary_structure(ndim, 1)
+    return ndi.generate_binary_structure(ndim, 1)
