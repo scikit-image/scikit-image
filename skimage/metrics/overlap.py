@@ -54,7 +54,8 @@ class Rectangle:
 
         if bottom_right is not None:
             if not np.all(top_left <= bottom_right):
-                raise ValueError("Bottom right corner should have coordinates larger or equal to the top left corner.")
+                raise ValueError("Bottom right corner should have coordinates "
+                                 "larger or equal to the top left corner.")
             self.bottom_right = np.asarray(bottom_right)
 
         elif dimensions is not None:
