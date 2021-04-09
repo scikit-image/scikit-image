@@ -42,7 +42,7 @@ def test_intersection():
 
 
 def test_eq_operator():  # Intersection rectangle and == comparison
-    assert rect_inter13 == Rectangle((0, 0), bottom_right=(2, 2))
+    assert rect_inter13 == rectangle3
 
 
 def test_eq_other_obj():
