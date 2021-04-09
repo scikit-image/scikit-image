@@ -60,7 +60,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     Returns
     -------
     reconstructed : ndarray
-       The result of morphological reconstruction.
+        The result of morphological reconstruction.
 
     Examples
     --------
