@@ -106,9 +106,10 @@ class _Lddmm:
         # Constant inputs.
 
         # Images.
-        self.reference_image = _validate_ndarray(reference_image, dtype=float)
+        self.float_dtype = np.float32 if reference_image.dtype == np.float32 else np.float64
+        self.reference_image = _validate_ndarray(reference_image, dtype=self.float_dtype)
         self.moving_image = _validate_ndarray(
-            moving_image, dtype=float, required_ndim=self.reference_image.ndim
+            moving_image, dtype=self.float_dtype, required_ndim=self.reference_image.ndim
         )
 
         # spacing.
@@ -117,12 +118,12 @@ class _Lddmm:
             if reference_image_spacing is not None
             else 1,
             self.reference_image.ndim,
-            float,
+            self.float_dtype,
         )
         self.moving_image_spacing = _validate_scalar_to_multi(
             moving_image_spacing if moving_image_spacing is not None else 1,
             self.moving_image.ndim,
-            float,
+            self.float_dtype,
         )
 
         # Iterations.
@@ -265,17 +266,22 @@ class _Lddmm:
 
         # Constants.
         self.reference_image_axes = _compute_axes(
-            self.reference_image.shape, self.reference_image_spacing
+            self.reference_image.shape, self.reference_image_spacing,
+            dtype=self.float_dtype
         )
         self.reference_image_coords = _compute_coords(
-            self.reference_image.shape, self.reference_image_spacing
+            self.reference_image.shape, self.reference_image_spacing,
+            dtype=self.float_dtype
         )
         self.moving_image_axes = _compute_axes(
-            self.moving_image.shape, self.moving_image_spacing
+            self.moving_image.shape, self.moving_image_spacing,
+            dtype=self.float_dtype
         )
         self.moving_image_coords = _compute_coords(
-            self.moving_image.shape, self.moving_image_spacing
+            self.moving_image.shape, self.moving_image_spacing,
+            dtype=self.float_dtype
         )
+
         self.artifact_mean_value = np.max(self.moving_image)
         self.background_mean_value = np.min(self.moving_image)
         self.delta_t = 1 / self.num_timesteps
@@ -284,6 +290,7 @@ class _Lddmm:
             self.reference_image.shape,
             1 / (self.reference_image_spacing * self.reference_image.shape),
             origin="zero",
+            dtype=self.float_dtype,
         )
         self.fourier_high_pass_filter = (
             1
@@ -307,6 +314,7 @@ class _Lddmm:
             self.reference_image.shape,
             1 / (self.reference_image_spacing * self.reference_image.shape),
             origin="zero",
+            dtype=self.float_dtype,
         )
         self.low_pass_filter = 1 / (
             (
@@ -359,6 +367,7 @@ class _Lddmm:
             self.moving_image.shape,
             1 / (self.moving_image_spacing * self.moving_image.shape),
             origin="zero",
+            dtype=self.float_dtype,
         )
         self.contrast_high_pass_filter = (
             1
@@ -383,14 +392,15 @@ class _Lddmm:
 
         # Dynamics.
         if initial_affine is None:
-            initial_affine = np.eye(reference_image.ndim + 1)
+            initial_affine = np.eye(reference_image.ndim + 1,
+                                    dtype=self.float_dtype)
         self.affine = _validate_ndarray(
             initial_affine,
             required_shape=(
                 self.reference_image.ndim + 1,
                 self.reference_image.ndim + 1,
             ),
-        )
+        ).astype(self.float_dtype, copy=False)
         if initial_velocity_fields is not None:
             self.velocity_fields = _validate_ndarray(
                 initial_velocity_fields,
@@ -399,14 +409,15 @@ class _Lddmm:
                     self.num_timesteps,
                     self.reference_image.ndim,
                 ),
-            )
+            ).astype(self.float_dtype, copy=False)
         else:
             self.velocity_fields = np.zeros(
                 (
                     *self.reference_image.shape,
                     self.num_timesteps,
                     self.reference_image.ndim,
-                )
+                ),
+                dtype=self.float_dtype,
             )
         # Note: If a transformation T maps a point in the space of the
         # reference_image to a point in the space of the moving_image, as
@@ -433,8 +444,10 @@ class _Lddmm:
         # is used for transforming images in reference_image-space to
         # moving_image-space by interpolation.
         self.phi_inv_affine_inv = np.copy(self.moving_image_coords)
+        self.complex_float_dtype = np.promote_types(self.float_dtype,
+                                                    np.complex64)
         self.fourier_velocity_fields = np.zeros_like(
-            self.velocity_fields, np.complex128
+            self.velocity_fields, self.complex_float_dtype
         )
         self.matching_weights = np.ones_like(self.moving_image)
         self.deformed_reference_image_to_time = []
@@ -448,7 +461,8 @@ class _Lddmm:
         if spatially_varying_contrast_map:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros(
-                    (*self.moving_image.shape, self.contrast_order + 1)
+                    (*self.moving_image.shape, self.contrast_order + 1),
+                    dtype=self.float_dtype,
                 )
             else:
                 self.contrast_coefficients = _validate_ndarray(
@@ -457,15 +471,16 @@ class _Lddmm:
                         *self.moving_image.shape,
                         self.contrast_order + 1,
                     ),
-                )
+                ).astype(self.float_dtype, copy=False)
         else:
             if initial_contrast_coefficients is None:
-                self.contrast_coefficients = np.zeros(self.contrast_order + 1)
+                self.contrast_coefficients = np.zeros(self.contrast_order + 1,
+                                                      dtype=self.float_dtype)
             else:
                 self.contrast_coefficients = _validate_ndarray(
                     initial_contrast_coefficients,
                     required_shape=(self.contrast_order + 1),
-                )
+                ).astype(self.float_dtype, copy=False)
         self.contrast_coefficients[..., 0] = np.mean(
             self.moving_image
         ) - np.mean(self.reference_image) * np.std(self.moving_image) / np.std(
@@ -476,7 +491,8 @@ class _Lddmm:
                 self.moving_image
             ) / np.std(self.reference_image)
         self.contrast_polynomial_basis = np.empty(
-            (*self.moving_image.shape, self.contrast_order + 1)
+            (*self.moving_image.shape, self.contrast_order + 1),
+            dtype=self.float_dtype,
         )
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = (
@@ -1071,7 +1087,7 @@ class _Lddmm:
             * self.matching_weights
             / self.sigma_matching ** 2
         )
-        contrast_map_prime = np.zeros_like(self.moving_image, float)
+        contrast_map_prime = np.zeros_like(self.moving_image, self.float_dtype)
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += (
                 power
@@ -1143,7 +1159,8 @@ class _Lddmm:
                 "be of use in determining optimal parameter values."
             ) from exception
         # Append a row of zeros at the end of the 0th dimension.
-        zeros = np.zeros((1, self.moving_image.ndim + 1))
+        zeros = np.zeros((1, self.moving_image.ndim + 1),
+                         dtype=self.float_dtype)
         affine_inv_gradient = np.concatenate((affine_inv_gradient, zeros), 0)
 
         return affine_inv_gradient
@@ -1826,20 +1843,21 @@ def diffeomorphic_metric_mapping(
 
     # Validate images and spacings.
     # Images.
-    reference_image = _validate_ndarray(reference_image, dtype=float)
+    float_dtype = np.float32 if reference_image.dtype == np.float32 else np.float64
+    reference_image = _validate_ndarray(reference_image, dtype=float_dtype)
     moving_image = _validate_ndarray(
-        moving_image, dtype=float, required_ndim=reference_image.ndim
+        moving_image, dtype=float_dtype, required_ndim=reference_image.ndim
     )
     # spacing.
     reference_image_spacing = _validate_scalar_to_multi(
         reference_image_spacing if reference_image_spacing is not None else 1,
         reference_image.ndim,
-        float,
+        float_dtype,
     )
     moving_image_spacing = _validate_scalar_to_multi(
         moving_image_spacing if moving_image_spacing is not None else 1,
         moving_image.ndim,
-        float,
+        float_dtype,
     )
 
     # Unpack multiscale-relevant kwargs.
@@ -1930,7 +1948,7 @@ def diffeomorphic_metric_mapping(
         # reference_image.
         reference_image_scale = (
             np.round(scale * reference_image.shape) / reference_image.shape
-        )
+        ).astype(float_dtype, copy=False)
         scaled_reference_image = rescale(
             reference_image, reference_image_scale
         )
@@ -1940,7 +1958,7 @@ def diffeomorphic_metric_mapping(
         # moving_image.
         moving_image_scale = (
             np.round(scale * moving_image.shape) / moving_image.shape
-        )
+        ).astype(float_dtype, copy=False)
         scaled_moving_image = rescale(moving_image, moving_image_scale)
         scaled_moving_image_spacing = moving_image_spacing / moving_image_scale
 
@@ -2040,7 +2058,6 @@ def diffeomorphic_metric_mapping(
                     reference_image.ndim,
                 ),
             )
-
         # End multiscales loop.
 
     # If map_coordinates_ify, convert centered, physical-space position-fields

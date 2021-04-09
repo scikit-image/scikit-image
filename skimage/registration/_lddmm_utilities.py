@@ -234,7 +234,7 @@ def _validate_spacing(spacing, ndim, dtype=float):
     return spacing
 
 
-def _compute_axes(shape, spacing=1, origin="center"):
+def _compute_axes(shape, spacing=1, origin="center", dtype=float):
     """
     Returns the real_axes defining an image with the given shape
     at the given spacing as a list of numpy arrays.
@@ -251,7 +251,7 @@ def _compute_axes(shape, spacing=1, origin="center"):
     # axes is a list of arrays matching each shape element from shape, spaced
     # by the corresponding spacing.
     axes = [
-        np.arange(dim_size) * dim_res
+        np.arange(dim_size, dtype=dtype) * dim_res
         for dim_size, dim_res in zip(shape, spacing)
     ]
 
@@ -274,13 +274,13 @@ def _compute_axes(shape, spacing=1, origin="center"):
     return axes
 
 
-def _compute_coords(shape, spacing=1, origin="center"):
+def _compute_coords(shape, spacing=1, origin="center", dtype=float):
     """
     Returns the real_coordinates of an image with the given shape at the given
     spacing as a single numpy array of shape (*shape, len(shape)).
     """
 
-    axes = _compute_axes(shape, spacing, origin)
+    axes = _compute_axes(shape, spacing, origin, dtype)
 
     meshes = np.meshgrid(*axes, indexing="ij")
 
