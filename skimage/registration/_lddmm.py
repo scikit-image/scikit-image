@@ -30,7 +30,6 @@ from skimage.transform import resize, rescale
 
 from ._lddmm_utilities import _validate_scalar_to_multi
 from ._lddmm_utilities import _validate_ndarray
-from ._lddmm_utilities import _validate_spacing
 from ._lddmm_utilities import _compute_axes
 from ._lddmm_utilities import _compute_coords
 from ._lddmm_utilities import _multiply_coords_by_affine
@@ -185,7 +184,10 @@ class _Lddmm:
         )
 
         # Contrast map specifiers.
-        self.contrast_order = int(contrast_order) if contrast_order is not None else 1
+        self.contrast_order = (
+            int(contrast_order) if contrast_order is not None else 1
+        )
+
         if self.contrast_order < 1:
             raise ValueError(
                 "contrast_order must be at least 1.\n"
@@ -937,9 +939,6 @@ class _Lddmm:
             # self.spatially_varying_contrast_map == False.
 
             # Ravel necessary components for convenient matrix multiplication.
-            deformed_reference_image_ravel = np.ravel(
-                self.deformed_reference_image
-            )
             moving_image_ravel = np.ravel(self.moving_image)
             matching_weights_ravel = np.ravel(self.matching_weights)
             contrast_polynomial_basis_semi_ravel = np.reshape(

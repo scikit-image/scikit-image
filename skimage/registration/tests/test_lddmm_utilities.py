@@ -480,8 +480,7 @@ class Test__multiply_coords_by_affine:
         affine = np.eye(4)
         array = np.arange(4 * 5 * 6 * 2).reshape(4, 5, 6, 2)
         expected_exception = ValueError
-        match = "array is incompatible with affine. The length of the last \
-dimension of array should be 1 less than the length of affine."
+        match = "array is incompatible with affine"
         with pytest.raises(expected_exception, match=match):
             _multiply_coords_by_affine(affine, array)
 
@@ -491,8 +490,7 @@ dimension of array should be 1 less than the length of affine."
         affine = np.ones((4, 4))
         array = np.arange(4 * 5 * 6 * 3).reshape(4, 5, 6, 3)
         expected_warning = RuntimeWarning
-        match = "affine is not in homogenous coordinates.\naffine\[-1] \
-should be zeros with a 1 on the right."
+        match = ("affine is not in homogenous coordinates")
         with pytest.warns(expected_warning, match=match):
             _multiply_coords_by_affine(affine, array)
 
@@ -697,7 +695,6 @@ class Test_resample:
 """
 Test sinc_resample.
 """
-# @pytest.mark.skip
 class Test_sinc_resample:
 
     # Test shape of an upsample.

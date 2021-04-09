@@ -1,11 +1,8 @@
-import pytest
 from itertools import product
 import numpy as np
 
 from scipy.ndimage import rotate
 from scipy.ndimage import map_coordinates
-
-from skimage.registration import _lddmm_utilities
 
 from skimage.registration._lddmm import diffeomorphic_metric_mapping
 
