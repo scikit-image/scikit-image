@@ -13,8 +13,6 @@ rectangle2 = Rectangle((2, 3), dimensions=(height2, width2))
 
 rectangle3 = Rectangle((0, 0), bottom_right=(2, 2))
 
-rectangle4 = Rectangle((10, 10), dimensions=(5, 5))
-
 rect_inter13 = intersect(rectangle1, rectangle3)
 
 
