@@ -5,15 +5,17 @@ from scipy.ndimage import rotate
 from scipy.ndimage import map_coordinates
 
 from skimage.registration._lddmm import diffeomorphic_metric_mapping
+from skimage.metrics import normalized_root_mse
 
 """
 Test diffeomorphic_metric_mapping.
 """
 
 
-class Test_diffeomorphic_metric_mapping:
+class TestDiffeomorphicMetricMapping:
+
     def _test_diffeomorphic_metric_mapping(
-        self, rtol=0, atol=1 - 1e-9, **diffeomorphic_metric_mapping_kwargs
+        self, max_nrmse=0.25, **diffeomorphic_metric_mapping_kwargs
     ):
         """
         A helper method for this class to verify registrations once they are
@@ -30,18 +32,6 @@ class Test_diffeomorphic_metric_mapping:
         moving_image = diffeomorphic_metric_mapping_kwargs[
             "moving_image"
         ].astype(float)
-        reference_image_spacing = (
-            diffeomorphic_metric_mapping_kwargs["reference_image_spacing"]
-            if "reference_image_spacing"
-            in diffeomorphic_metric_mapping_kwargs.keys()
-            else 1
-        )
-        moving_image_spacing = (
-            diffeomorphic_metric_mapping_kwargs["moving_image_spacing"]
-            if "moving_image_spacing"
-            in diffeomorphic_metric_mapping_kwargs.keys()
-            else 1
-        )
 
         # Applying the transforms using map_coordinates assumes
         # map_coordinates_ify was left as True.
@@ -55,13 +45,14 @@ class Test_diffeomorphic_metric_mapping:
             input=reference_image,
             coordinates=lddmm_output.reference_image_to_moving_image_transform,
         )
+        nrmse_moving_to_ref = normalized_root_mse(reference_image,
+                                                  deformed_moving_image)
+        assert nrmse_moving_to_ref < max_nrmse
 
-        assert np.allclose(
-            deformed_reference_image, moving_image, rtol=rtol, atol=atol
-        )
-        assert np.allclose(
-            deformed_moving_image, reference_image, rtol=rtol, atol=atol
-        )
+        nrmse_ref_to_moving = normalized_root_mse(moving_image,
+                                                  deformed_reference_image)
+        assert nrmse_ref_to_moving < max_nrmse
+
 
     def test_2D_identity_registration(self):
 
@@ -90,13 +81,15 @@ class Test_diffeomorphic_metric_mapping:
                 reference_image[tuple(indices)] = 1
         moving_image = np.copy(reference_image)
 
+        float_type = np.float32
         diffeomorphic_metric_mapping_kwargs = dict(
-            reference_image=reference_image,
-            moving_image=moving_image,
-            num_iterations=1,
+            reference_image=reference_image.astype(float_type),
+            moving_image=moving_image.astype(float_type),
+            num_iterations=1
         )
 
         self._test_diffeomorphic_metric_mapping(
+            max_nrmse=1e-14,  # should be near zero error for identity case
             **diffeomorphic_metric_mapping_kwargs
         )
 
@@ -134,6 +127,7 @@ class Test_diffeomorphic_metric_mapping:
         )
 
         self._test_diffeomorphic_metric_mapping(
+            max_nrmse=1e-14,  # should be near zero error for identity case
             **diffeomorphic_metric_mapping_kwargs
         )
 
@@ -171,6 +165,7 @@ class Test_diffeomorphic_metric_mapping:
         )
 
         self._test_diffeomorphic_metric_mapping(
+            max_nrmse=1e-14,  # should be near zero error for identity case
             **diffeomorphic_metric_mapping_kwargs
         )
 
@@ -192,6 +187,7 @@ class Test_diffeomorphic_metric_mapping:
         )
 
         self._test_diffeomorphic_metric_mapping(
+            max_nrmse=1e-14,  # should be near zero error for identity case
             **diffeomorphic_metric_mapping_kwargs
         )
 
@@ -373,5 +369,6 @@ class Test_diffeomorphic_metric_mapping:
         )
 
         self._test_diffeomorphic_metric_mapping(
+            max_nrmse=1e-14,  # should be near zero error for identity case
             **diffeomorphic_metric_mapping_kwargs
         )
