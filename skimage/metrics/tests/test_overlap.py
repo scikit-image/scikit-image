@@ -30,11 +30,13 @@ def test_constructor_dimensions():
     with testing.raises(ValueError):
         Rectangle((0, 0), dimensions=(-5, 5))
 
+
 def test_constructor_bottom_corner():
     assert tuple(rectangle3.top_left) == (0, 0)
     assert tuple(rectangle3.dimensions) == (2, 2)
     with testing.raises(ValueError):
         Rectangle((2,2), bottom_right=(0, 0))
+
 
 def test_intersection():
     assert not intersect(rectangle1, rectangle2)
