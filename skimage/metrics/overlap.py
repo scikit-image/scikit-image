@@ -100,12 +100,19 @@ class Rectangle:
 
     @property
     def area(self):
-        """Return the rectangle area in pixels."""
+        """Return the rectangle area."""
         return np.prod(self.dimensions)
 
     @property
     def dimensions(self):
-        """Return the (height, width) dimensions in pixels."""
+        """Return the dimensions of the rectangle as an array.
+
+        Examples
+        --------
+        >>> r = Rectangle((1, 1), bottom_right=(2, 3))
+        >>> r.dimensions
+        array([1, 2])
+        """
         return self.bottom_right - self.top_left
 
 
