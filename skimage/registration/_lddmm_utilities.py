@@ -4,6 +4,7 @@ import warnings
 from scipy.linalg import inv
 from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
+from skimage._shared.fft import fftmodule
 
 
 def _validate_scalar_to_multi(value, size=None, dtype=None, reject_nans=True):
@@ -496,8 +497,8 @@ def sinc_resample(array, new_shape):
     resampled_array = np.copy(array)
 
     for dim in range(array.ndim):
-        fourier_transformed_array = np.fft.rfft(resampled_array, axis=dim)
-        resampled_array = np.fft.irfft(
+        fourier_transformed_array = fftmodule.rfft(resampled_array, axis=dim)
+        resampled_array = fftmodule.irfft(
             fourier_transformed_array, axis=dim, n=new_shape[dim]
         )
     resampled_array *= resampled_array.size / array.size

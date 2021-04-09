@@ -35,6 +35,7 @@ from ._lddmm_utilities import _compute_coords
 from ._lddmm_utilities import _multiply_coords_by_affine
 from ._lddmm_utilities import _compute_tail_determinant
 from ._lddmm_utilities import sinc_resample
+from skimage._shared.fft import fftmodule
 
 r"""
   _            _       _
@@ -845,26 +846,26 @@ class _Lddmm:
             )
 
             # Reformulate with block elimination.
-            high_pass_contrast_coefficients = np.fft.ifftn(
-                np.fft.fftn(
+            high_pass_contrast_coefficients = fftmodule.ifftn(
+                fftmodule.fftn(
                     self.contrast_coefficients, axes=range(spatial_ndim)
                 )
                 * self.contrast_high_pass_filter[..., None],
                 axes=range(spatial_ndim),
             ).real
-            low_pass_right_hand_side = np.fft.ifftn(
-                np.fft.fftn(right_hand_side, axes=range(spatial_ndim))
+            low_pass_right_hand_side = fftmodule.ifftn(
+                fftmodule.fftn(right_hand_side, axes=range(spatial_ndim))
                 / self.contrast_high_pass_filter[..., None],
                 axes=range(spatial_ndim),
             ).real
             for _ in range(self.contrast_iterations):
                 linear_operator_high_pass_contrast_coefficients = (
-                    np.fft.ifftn(
-                        np.fft.fftn(
+                    fftmodule.ifftn(
+                        fftmodule.fftn(
                             (
                                 np.sum(
-                                    np.fft.ifftn(
-                                        np.fft.fftn(
+                                    fftmodule.ifftn(
+                                        fftmodule.fftn(
                                             high_pass_contrast_coefficients,
                                             axes=range(spatial_ndim),
                                         )
@@ -892,12 +893,12 @@ class _Lddmm:
                 )
                 # Compute the optimal step size.
                 linear_operator_residual = (
-                    np.fft.ifftn(
-                        np.fft.fftn(
+                    fftmodule.ifftn(
+                        fftmodule.fftn(
                             (
                                 np.sum(
-                                    np.fft.ifftn(
-                                        np.fft.fftn(
+                                    fftmodule.ifftn(
+                                        fftmodule.fftn(
                                             residual, axes=range(spatial_ndim)
                                         )
                                         / self.contrast_high_pass_filter[
@@ -926,8 +927,8 @@ class _Lddmm:
                     optimal_stepsize * residual / 2
                 )
 
-            self.contrast_coefficients = np.fft.ifftn(
-                np.fft.fftn(
+            self.contrast_coefficients = fftmodule.ifftn(
+                fftmodule.fftn(
                     high_pass_contrast_coefficients, axes=range(spatial_ndim)
                 )
                 / self.contrast_high_pass_filter[..., None],
@@ -1326,7 +1327,7 @@ class _Lddmm:
             # To convert from derivative to gradient we smooth by applying a
             # physical-unit low-pass filter in the frequency domain.
             matching_cost_at_t_gradient = (
-                np.fft.fftn(
+                fftmodule.fftn(
                     d_matching_d_velocity_at_t,
                     axes=tuple(range(self.reference_image.ndim)),
                 )
@@ -1334,7 +1335,7 @@ class _Lddmm:
             )
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += (
-                np.fft.fftn(
+                fftmodule.fftn(
                     self.velocity_fields[..., timestep, :],
                     axes=tuple(range(self.reference_image.ndim)),
                 )
@@ -1345,7 +1346,7 @@ class _Lddmm:
                 self.preconditioner_low_pass_filter, -1
             )
             # Invert fourier transform back to the spatial domain.
-            d_matching_d_velocity_at_t = np.fft.ifftn(
+            d_matching_d_velocity_at_t = fftmodule.ifftn(
                 matching_cost_at_t_gradient,
                 axes=tuple(range(self.reference_image.ndim)),
             ).real
