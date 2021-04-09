@@ -24,7 +24,7 @@ import warnings
 import numpy as np
 from collections import namedtuple
 
-from scipy.interpolate import interpn
+import scipy.ndimage as ndi
 from scipy.linalg import inv, solve, det, svd
 from skimage.transform import resize, rescale
 
@@ -451,13 +451,14 @@ class _Lddmm:
         )
         self.matching_weights = np.ones_like(self.moving_image)
         self.deformed_reference_image_to_time = []
-        self.deformed_reference_image = interpn(
-            points=self.reference_image_axes,
-            values=self.reference_image,
-            xi=self.phi_inv_affine_inv,
-            bounds_error=False,
-            fill_value=None,
+        self.deformed_reference_image = ndi.map_coordinates(
+            self.reference_image,
+            self._normalize_coords(self.phi_inv_affine_inv),
+            order=1,
+            mode='nearest',
+            output=self.float_dtype,
         )
+
         if spatially_varying_contrast_map:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros(
@@ -609,25 +610,22 @@ class _Lddmm:
                 self.reference_image_coords
                 - self.velocity_fields[..., timestep, :] * self.delta_t
             )
-            self.phi_inv = (
-                interpn(
-                    points=self.reference_image_axes,
-                    values=self.phi_inv - self.reference_image_coords,
-                    xi=sample_coords,
-                    bounds_error=False,
-                    fill_value=None,
-                )
-                + sample_coords
-            )
+            for i in range(self.reference_image.ndim):
+                self.phi_inv[..., i] = ndi.map_coordinates(
+                    self.phi_inv[..., i] - self.reference_image_coords[..., i],
+                    self._normalize_coords(sample_coords),
+                    order=1,
+                    mode='nearest',
+                    output=self.float_dtype,
+                ) + sample_coords[..., i]
 
-            # Compute deformed_reference_image_to_time
             self.deformed_reference_image_to_time.append(
-                interpn(
-                    points=self.reference_image_axes,
-                    values=self.reference_image,
-                    xi=self.phi_inv,
-                    bounds_error=False,
-                    fill_value=None,
+                ndi.map_coordinates(
+                    self.reference_image,
+                    self._normalize_coords(self.phi_inv),
+                    order=1,
+                    mode='nearest',
+                    output=self.float_dtype,
                 )
             )
 
@@ -638,27 +636,38 @@ class _Lddmm:
             inv(self.affine), self.moving_image_coords
         )
 
-        # Apply phi_inv to affine_inv_moving_image_coords.
-        self.phi_inv_affine_inv = (
-            interpn(
-                points=self.reference_image_axes,
-                values=self.phi_inv - self.reference_image_coords,
-                xi=affine_inv_moving_image_coords,
-                bounds_error=False,
-                fill_value=None,
-            )
-            + affine_inv_moving_image_coords
+        coords = self._normalize_coords(affine_inv_moving_image_coords)
+        for i in range(self.reference_image.ndim):
+            self.phi_inv_affine_inv[..., i] = ndi.map_coordinates(
+                self.phi_inv[..., i] - self.reference_image_coords[..., i],
+                coords,
+                order=1,
+                mode='nearest',
+                output=self.float_dtype,
+            ) + affine_inv_moving_image_coords[..., i]
+
+        self.deformed_reference_image = ndi.map_coordinates(
+            self.reference_image,
+            self._normalize_coords(self.phi_inv_affine_inv),
+            order=1,
+            mode='nearest',
+            output=self.float_dtype,
         )
 
-        # Apply phi_inv_affine_inv to reference_image.
-        # deformed_reference_image is sampled at the coordinates of the
-        # moving_image.
-        self.deformed_reference_image = interpn(
-            points=self.reference_image_axes,
-            values=self.reference_image,
-            xi=self.phi_inv_affine_inv,
-            bounds_error=False,
-            fill_value=None,
+    def _normalize_coords(self, coords):
+        """
+        Normalize coordinates relative to spacing of 1 for the reference image.
+
+        This normalization allows use of scipy.ndimage.map_coordinates where
+        the input image coordinates are assumed to correspond to integer
+        coordinate locations.
+        """
+        return np.stack(
+            [((coords[..., i] - self.reference_image_axes[i][0])
+              / self.reference_image_spacing[i])
+             for i in range(self.reference_image.ndim)
+            ],
+            axis=0
         )
 
     def _apply_contrast_map(self):
@@ -1021,12 +1030,12 @@ class _Lddmm:
 
         # Generate the reference_image image deformed by phi_inv but not
         # affected by the affine.
-        non_affine_deformed_reference_image = interpn(
-            points=self.reference_image_axes,
-            values=self.reference_image,
-            xi=self.phi_inv,
-            bounds_error=False,
-            fill_value=None,
+        non_affine_deformed_reference_image = ndi.map_coordinates(
+            self.reference_image,
+            self._normalize_coords(self.phi_inv),
+            order=1,
+            mode='nearest',
+            output=self.float_dtype,
         )
 
         # Compute the gradient of non_affine_deformed_reference_image.
@@ -1043,13 +1052,19 @@ class _Lddmm:
         sample_coords = _multiply_coords_by_affine(
             inv(self.affine), self.moving_image_coords
         )
-        deformed_reference_image_gradient = interpn(
-            points=self.reference_image_axes,
-            values=non_affine_deformed_reference_image_gradient,
-            xi=sample_coords,
-            bounds_error=False,
-            fill_value=None,
+        coords = self._normalize_coords(sample_coords)
+        deformed_reference_image_gradient = np.empty(
+            sample_coords.shape,
+            dtype=non_affine_deformed_reference_image_gradient.dtype
         )
+        for i in range(self.reference_image.ndim):
+            deformed_reference_image_gradient[..., i] = ndi.map_coordinates(
+                non_affine_deformed_reference_image_gradient[..., i],
+                coords,
+                order=1,
+                mode='nearest',
+                output=self.float_dtype,
+            )
 
         # Reshape and broadcast deformed_reference_image_gradient from shape
         # (x,y,z,3) to (x,y,z,3,1) to (x,y,z,3,4) - for a 3D example.
@@ -1248,7 +1263,7 @@ class _Lddmm:
             * self.matching_weights
             / self.sigma_matching ** 2
         )
-        contrast_map_prime = np.zeros_like(self.moving_image, float)
+        contrast_map_prime = np.zeros_like(self.moving_image, self.float_dtype)
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += (
                 power
@@ -1278,16 +1293,14 @@ class _Lddmm:
                 self.reference_image_coords
                 + self.velocity_fields[..., timestep, :] * self.delta_t
             )
-            self.phi = (
-                interpn(
-                    points=self.reference_image_axes,
-                    values=self.phi - self.reference_image_coords,
-                    xi=sample_coords,
-                    bounds_error=False,
-                    fill_value=None,
-                )
-                + sample_coords
-            )
+            for i in range(self.reference_image.ndim):
+                self.phi[..., i] = ndi.map_coordinates(
+                    self.phi[..., i] - self.reference_image_coords[..., i],
+                    self._normalize_coords(sample_coords),
+                    order=1,
+                    mode='nearest',
+                    output=self.float_dtype,
+                ) + sample_coords[..., i]
 
             # Apply affine by multiplication.
             # This transforms error in the moving_image space back to time t.
@@ -1307,16 +1320,23 @@ class _Lddmm:
             )
             det_grad_phi = _compute_tail_determinant(grad_phi)
 
-            # Transform error in moving_image space back to time t.
-            error_at_t = interpn(
-                points=_compute_axes(
-                    d_matching_d_deformed_reference_image_padded.shape,
-                    self.moving_image_spacing,
-                ),
-                values=d_matching_d_deformed_reference_image_padded,
-                xi=self.affine_phi,
-                bounds_error=False,
-                fill_value=None,
+            _coords = _compute_axes(
+                d_matching_d_deformed_reference_image_padded.shape,
+                self.moving_image_spacing,
+                dtype=self.float_dtype,
+            )
+            # Normalize coordinates relative to spacing of 1 for
+            # d_matching_d_deformed_reference_image_padded
+            coords = [
+                ((self.affine_phi[..., i] - _coords[i][0]) /
+                 self.moving_image_spacing[i])
+                for i in range(self.reference_image.ndim)]
+            error_at_t = ndi.map_coordinates(
+                d_matching_d_deformed_reference_image_padded,
+                coords,
+                order=1,
+                mode='nearest',
+                output=self.float_dtype,
             )
 
             # The gradient of the reference_image image deformed to time t.
@@ -1462,16 +1482,15 @@ class _Lddmm:
                 self.reference_image_coords
                 + self.velocity_fields[..., timestep, :] * self.delta_t
             )
-            self.phi = (
-                interpn(
-                    points=self.reference_image_axes,
-                    values=self.phi - self.reference_image_coords,
-                    xi=sample_coords,
-                    bounds_error=False,
-                    fill_value=None,
-                )
-                + sample_coords
-            )
+            for i in range(self.reference_image.ndim):
+                self.phi[..., i] = ndi.map_coordinates(
+                    self.phi[..., i] - self.reference_image_coords[..., i],
+                    self._normalize_coords(sample_coords),
+                    order=1,
+                    mode='nearest',
+                    output=self.float_dtype,
+                ) + sample_coords[..., i]
+
 
             # Apply affine by multiplication.
             # This transforms error in the moving_image space back to time t.
