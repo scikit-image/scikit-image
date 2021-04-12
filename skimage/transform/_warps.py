@@ -69,7 +69,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         the image to avoid aliasing artifacts. Default is True if down-scaling
         and image data type is not bool, and False otherwise.
     anti_aliasing_sigma : {float, tuple of floats}, optional
-        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
         down-scaling factor, where s > 1. For the up-size case, s < 1, no
         anti-aliasing is performed prior to rescaling.
