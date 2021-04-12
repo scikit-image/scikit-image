@@ -139,7 +139,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         # The grid_mode kwarg was introduced in SciPy 1.6.0
         order = _validate_interpolation_order(image.dtype, order)
         zoom_factors = [1 / f for f in factors]
-        image = convert_to_float(image, preserve_range)
+        if order > 0:
+            image = convert_to_float(image, preserve_range)
         out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
         _clip_warp_output(image, out, order, mode, cval, clip)
