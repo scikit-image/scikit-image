@@ -4,9 +4,11 @@ from skimage.restoration import inpaint
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_allclose
+from skimage._shared.utils import _supported_float_type
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('dtype',
+                     [np.float16, np.float32, np.float64, np.float128])
 def test_inpaint_biharmonic_2d(dtype):
     img = np.tile(np.square(np.linspace(0, 1, 5, dtype=dtype)), (5, 1))
     mask = np.zeros_like(img)
@@ -15,7 +17,7 @@ def test_inpaint_biharmonic_2d(dtype):
     mask[0, 4:] = 1
     img[np.where(mask)] = 0
     out = inpaint.inpaint_biharmonic(img, mask)
-    assert out.dtype == img.dtype
+    assert out.dtype == _supported_float_type(img)
     ref = np.array(
         [[0., 0.0625, 0.25000000, 0.5625000, 0.73925058],
          [0., 0.0625, 0.25000000, 0.5478048, 0.76557821],

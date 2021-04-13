@@ -3,7 +3,7 @@ import numpy as np
 from math import ceil
 from .. import img_as_float
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import _float_type, warn
+from .._shared.utils import _supported_float_type, warn
 import pywt
 import skimage.color as color
 from skimage.color.colorconv import ycbcr_from_rgb
@@ -468,6 +468,10 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     im_type = image.dtype
     if not im_type.kind == 'f':
         image = img_as_float(image)
+
+    # enforce float16->float32 and float128->float64
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     if multichannel:
         out = np.zeros_like(image)

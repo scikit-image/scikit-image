@@ -5,6 +5,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage import laplace
 import skimage
+from .._shared.utils import _supported_float_type
 from ..measure import label
 
 
@@ -124,6 +125,11 @@ def inpaint_biharmonic(image, mask, multichannel=False):
         raise TypeError('Masked arrays are not supported')
 
     image = skimage.img_as_float(image)
+
+    # float16->float32 and float128->float64
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     mask = mask.astype(bool)
 
     # Split inpainting mask into independent regions

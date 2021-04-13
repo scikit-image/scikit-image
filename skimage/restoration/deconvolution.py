@@ -6,7 +6,7 @@ import numpy.random as npr
 from scipy.signal import convolve
 
 from . import uft
-from .._shared.utils import _float_type
+from .._shared.utils import _supported_float_type
 
 __keywords__ = "restoration, image, deconvolution"
 
@@ -117,7 +117,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
-    float_type = _float_type(image)
+    float_type = _supported_float_type(image.dtype)
     image = image.astype(float_type, copy=False)
     psf = psf.real.astype(float_type, copy=False)
     reg = reg.real.astype(float_type, copy=False)
@@ -250,13 +250,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
-    float_type = _float_type(image)
+    float_type = _supported_float_type(image.dtype)
     image = image.astype(float_type, copy=False)
     psf = psf.real.astype(float_type, copy=False)
     reg = reg.real.astype(float_type, copy=False)
 
     if psf.shape != reg.shape:
-        trans_fct = uft.ir2tf(psf, image.shape,  is_real=is_real)
+        trans_fct = uft.ir2tf(psf, image.shape, is_real=is_real)
     else:
         trans_fct = psf
 
@@ -389,7 +389,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    float_type = _float_type(image)
+    float_type = _supported_float_type(image.dtype)
     image = image.astype(float_type, copy=False)
     psf = psf.astype(float_type, copy=False)
     im_deconv = np.full(image.shape, 0.5, dtype=float_type)
@@ -398,8 +398,9 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     for _ in range(iterations):
         conv = convolve(im_deconv, psf, mode='same')
         if filter_epsilon:
-            relative_blur = np.where(conv < filter_epsilon, 0,
-                                     image / conv)
+            with np.errstate(invalid='ignore'):
+                relative_blur = np.where(conv < filter_epsilon, 0,
+                                         image / conv)
         else:
             relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')

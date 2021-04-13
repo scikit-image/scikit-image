@@ -11,7 +11,7 @@ import pywt
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_warns, assert_)
-from skimage._shared.utils import _float_type
+from skimage._shared.utils import _supported_float_type
 from skimage._shared._warnings import expected_warnings
 from distutils.version import LooseVersion as Version
 
@@ -36,7 +36,8 @@ astro_gray_odd = astro_gray[:, :-1]
 astro_odd = astro[:, :-1]
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('dtype',
+                     [np.float16, np.float32, np.float64, np.float128])
 def test_denoise_tv_chambolle_2d(dtype):
     # astronaut image
     img = astro_gray.astype(dtype, copy=True)
@@ -46,15 +47,19 @@ def test_denoise_tv_chambolle_2d(dtype):
     img = np.clip(img, 0, 1)
     # denoise
     denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.1)
-    assert denoised_astro.dtype == _float_type(img)
-    # which dtype?
-    assert_(denoised_astro.dtype in [float, np.float32, np.float64])
+    assert denoised_astro.dtype == _supported_float_type(img)
+
     from scipy import ndimage as ndi
+
+    # Convert to a floating point type supported by scipy.ndimage
+    float_dtype = _supported_float_type(img)
+    img = img.astype(float_dtype, copy=False)
+
     grad = ndi.morphological_gradient(img, size=((3, 3)))
     grad_denoised = ndi.morphological_gradient(denoised_astro, size=((3, 3)))
     # test if the total variation has decreased
-    assert_(grad_denoised.dtype == _float_type(img))
-    assert_(np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()))
+    assert grad_denoised.dtype == float_dtype
+    assert np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum())
 
 
 def test_denoise_tv_chambolle_multichannel():
@@ -557,7 +562,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                            multichannel=multichannel,
                                            convert2ycbcr=convert2ycbcr,
                                            rescale_sigma=True)
-    assert denoised.dtype == _float_type(noisy)
+    assert denoised.dtype == _supported_float_type(noisy)
 
     data_range = x.max() - x.min()
     psnr_noisy = peak_signal_noise_ratio(x, noisy, data_range=data_range)

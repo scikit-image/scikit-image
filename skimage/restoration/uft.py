@@ -22,6 +22,7 @@ References
 
 import numpy as np
 from .._shared.fft import fftmodule as fft
+from .._shared.utils import _supported_float_type
 
 __keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
@@ -390,7 +391,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     if not dim:
         dim = imp_resp.ndim
     # Zero padding and fill
-    irpadded_dtype = imp_resp.dtype if imp_resp.dtype.kind == 'f' else float
+    irpadded_dtype = _supported_float_type(imp_resp)
     irpadded = np.zeros(shape, dtype=irpadded_dtype)
     irpadded[tuple([slice(0, s) for s in imp_resp.shape])] = imp_resp
     # Roll for zero convention of the fft to avoid the phase
@@ -400,10 +401,9 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
             irpadded = np.roll(irpadded,
                                shift=-int(np.floor(axis_size / 2)),
                                axis=axis)
-    if is_real:
-        out = fft.rfftn(irpadded, axes=range(-dim, 0))
-    else:
-        out = fft.fftn(irpadded, axes=range(-dim, 0))
+
+    func = fft.rfftn if is_real else fft.fftn
+    out = func(irpadded, axes=(range(-dim, 0)))
 
     # TODO: remove .astype call onces SciPy >= 1.4 is required
     cplx_dtype = np.promote_types(irpadded_dtype, np.complex64)

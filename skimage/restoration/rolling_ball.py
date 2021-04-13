@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.utils import _float_type
+from .._shared.utils import _supported_float_type
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
@@ -79,7 +79,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
     """
 
     image = np.asarray(image)
-    float_type = _float_type(image)
+    float_type = _supported_float_type(image.dtype)
     img = image.astype(float_type, copy=False)
 
     if num_threads is None:
