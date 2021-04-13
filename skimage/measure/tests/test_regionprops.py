@@ -722,9 +722,16 @@ def test_multichannel():
     labels = slic(astro.astype(float), start_label=1)
 
     segment_idx = np.max(labels) // 2
-    region = regionprops(labels, astro_green)[segment_idx]
-    region_multi = regionprops(labels, astro)[segment_idx]
-    for prop in PROPS:
+    region = regionprops(labels,
+                         astro_green,
+                         extra_properties=[median_intensity]
+                         )[segment_idx]
+    region_multi = regionprops(labels,
+                               astro,
+                               extra_properties=[median_intensity]
+                               )[segment_idx]
+
+    for prop in list(PROPS.keys()) + ["median_intensity"]:
         p = region[prop]
         p_multi = region_multi[prop]
         if np.shape(p) == np.shape(p_multi):
