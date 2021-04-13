@@ -412,7 +412,7 @@ def inertia_tensor(image, mu=None):
     if mu is None:
         mu = moments_central(image, order=2)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
-    result = np.zeros((image.ndim, image.ndim))
+    result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
 
     # nD expression to get coordinates ([2, 0], [0, 2]) (2D),
     # ([2, 0, 0], [0, 2, 0], [0, 0, 2]) (3D), etc.
