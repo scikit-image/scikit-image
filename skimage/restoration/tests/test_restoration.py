@@ -53,7 +53,7 @@ def test_wiener(dtype):
 
 
 @testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64, np.float128])
+                     [np.float16, np.float32, np.float64])
 def test_unsupervised_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
@@ -116,8 +116,7 @@ def test_richardson_lucy():
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
-@pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64,
-                                         np.float128])
+@pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('dtype_psf', [np.float32, np.float64])
 def test_richardson_lucy_filtered(dtype_image, dtype_psf):
     if dtype_image == np.float64:
