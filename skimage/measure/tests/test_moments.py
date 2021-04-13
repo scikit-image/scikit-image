@@ -10,6 +10,7 @@ from skimage.measure import (moments, moments_central, moments_coords,
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_allclose)
+from skimage._shared.utils import _supported_float_type
 
 
 def test_moments():
@@ -55,6 +56,23 @@ def test_moments_coords():
     coords = np.array([[r, c] for r in range(13, 17)
                        for c in range(13, 17)], dtype=np.double)
     mu_coords = moments_coords(coords)
+    assert_almost_equal(mu_coords, mu_image)
+
+
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_moments_coords_dtype(dtype):
+    image = np.zeros((20, 20), dtype=dtype)
+    image[13:17, 13:17] = 1
+
+    expected_dtype = _supported_float_type(dtype)
+    mu_image = moments(image)
+    assert mu_image.dtype == expected_dtype
+
+    coords = np.array([[r, c] for r in range(13, 17)
+                       for c in range(13, 17)], dtype=dtype)
+    mu_coords = moments_coords(coords)
+    assert mu_coords.dtype == expected_dtype
+
     assert_almost_equal(mu_coords, mu_image)
 
 
@@ -133,15 +151,20 @@ def test_moments_hu():
     assert_almost_equal(hu, hu2, decimal=1)
 
 
-@pytest.mark.parametrize('dtype', ['float32', 'float64'])
-def test_moments_hu_dtype(dtype):
-    image = np.zeros((20, 20), dtype=np.double)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_moments_dtype(dtype):
+    image = np.zeros((20, 20), dtype=dtype)
     image[13:15, 13:17] = 1
-    mu = moments_central(image, (13.5, 14.5))
-    nu = moments_normalized(mu)
-    hu = moments_hu(nu.astype(dtype))
 
-    assert hu.dtype == dtype
+    expected_dtype = _supported_float_type(image)
+    mu = moments_central(image, (13.5, 14.5))
+    assert mu.dtype == expected_dtype
+
+    nu = moments_normalized(mu)
+    assert nu.dtype == expected_dtype
+
+    hu = moments_hu(nu)
+    assert hu.dtype == expected_dtype
 
 
 def test_centroid():
