@@ -25,7 +25,7 @@ def _get_rtol_atol(dtype):
 
 
 @testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64, np.float128])
+                     [np.float16, np.float32, np.float64])
 def test_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')

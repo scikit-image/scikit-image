@@ -36,8 +36,14 @@ astro_gray_odd = astro_gray[:, :-1]
 astro_odd = astro[:, :-1]
 
 
-@testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64, np.float128])
+float_dtypes = [np.float16, np.float32, np.float64]
+try:
+    float_dtypes += [np.float128]
+except AttributeError:
+    pass
+
+
+@testing.parametrize('dtype',float_dtypes)
 def test_denoise_tv_chambolle_2d(dtype):
     # astronaut image
     img = astro_gray.astype(dtype, copy=True)

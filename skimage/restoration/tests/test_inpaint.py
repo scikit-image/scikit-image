@@ -8,7 +8,7 @@ from skimage._shared.utils import _supported_float_type
 
 
 @testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64, np.float128])
+                     [np.float16, np.float32, np.float64])
 def test_inpaint_biharmonic_2d(dtype):
     img = np.tile(np.square(np.linspace(0, 1, 5, dtype=dtype)), (5, 1))
     mask = np.zeros_like(img)
