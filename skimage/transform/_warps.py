@@ -108,18 +108,18 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     if anti_aliasing is None:
         anti_aliasing = (not input_type == bool and
-                         any(x < y for x,y in zip(output_shape, input_shape)))
+                         any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution is not defined "
              "with bool data type. Please set anti_aliasing to False or "
-             "explicitely cast input image to another data type. Starting "
+             "explicitly cast input image to another data type. Starting "
              "from version 0.19 a ValueError will be raised instead of this "
              "warning.", FutureWarning, stacklevel=2)
 
     factors = np.divide(input_shape, output_shape)
     image = convert_to_float(image, preserve_range)
-    # create copy so input values range stays accessible through image for clip
+    # create copy so input value range stays accessible through image for clip
     img_in = image
 
     # Translate modes used by np.pad to those used by scipy.ndimage
