@@ -688,7 +688,7 @@ def test_boll_array_warnings():
         warp(img, np.eye(3), order=1)
 
 
-@pytest.mark.parametrize("dtype", [np.uint8, bool, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])
 def test_order_0_warp_dtype(dtype):
 
     img = _convert(astronaut()[:10, :10, 0], dtype)
