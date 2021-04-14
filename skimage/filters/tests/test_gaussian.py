@@ -78,7 +78,7 @@ def test_1d_ok():
     """
     nums = np.arange(7)
     filtered = gaussian(nums)
-    assert(np.all(filtered > 0.1))
+    assert np.all(filtered > 0.1)
 
 
 def test_4d_ok():
