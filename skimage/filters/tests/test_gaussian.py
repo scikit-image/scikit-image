@@ -72,9 +72,9 @@ def test_preserve_range():
 
 
 def test_1d_ok():
-    """
-    Testing Gaussian Filter for 1D array.
-    With all positive integer values and only one zero, it should filter all values to be at least more than 0.1
+    """Testing Gaussian Filter for 1D array.
+    With any array consisting of positive integers and only one zero - it should filter all values
+    to be at least more than 0.1
     """
     nums = np.arange(7)
     filtered = gaussian(nums)
