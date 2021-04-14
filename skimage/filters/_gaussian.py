@@ -10,7 +10,7 @@ __all__ = ['gaussian', 'difference_of_gaussians']
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=True, truncate=4.0):
+             multichannel=None, preserve_range=None, truncate=4.0):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -39,9 +39,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
     preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of ``img_as_float``.
-        Also see
+        If True (by default) - keep the original range of values.
+        Otherwise, the input 'image' is converted according to the conventions of ``img_as_float``
+        (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on dtype of input)
+
+        For more information, see:
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     truncate : float, optional
         Truncate the filter at this many standard deviations.
@@ -96,6 +98,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
 
     """
+    if preserve_range is None:
+        msg = ('The default value of preserve_range will change '
+               'to "True" in version 1.0')
+        warn(msg, DeprecationWarning)
+        preserve_range = True
 
     spatial_dims = None
     try:

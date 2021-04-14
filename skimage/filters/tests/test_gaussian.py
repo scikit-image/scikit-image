@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 
 import numpy as np
@@ -48,7 +50,7 @@ def test_multichannel():
     assert np.allclose([a[..., i].mean() for i in range(3)],
                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
     # Test multichannel = None
-    with expected_warnings(['multichannel']):
+    with expected_warnings(['multichannel', 'preserve_range']):
         gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect')
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
