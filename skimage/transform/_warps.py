@@ -25,7 +25,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     Performs interpolation to up-size or down-size N-dimensional images. Note
     that anti-aliasing should be enabled when down-sizing images to avoid
-    aliasing artifacts. For down-sampling with an integer factor also see
+    aliasing artifacts. For down-sizing with an integer factor also see
     `skimage.transform.downscale_local_mean`.
 
     Parameters
@@ -65,13 +65,13 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
-        to down-scaling. It is crucial to filter when down-sampling
+        to down-sizing. It is crucial to filter when down-sizing
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when down-sizing an image of which data type is not bool.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
-        down-scaling factor, where s > 1. For the up-size case, s < 1, no
+        down-sizing factor, where s > 1. For the up-size case, s < 1, no
         anti-aliasing is performed prior to rescaling.
 
     Notes
