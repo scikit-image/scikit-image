@@ -46,8 +46,7 @@ def label_points(coords, output_shape):
     if np.any(coords < 0):
         raise ValueError("Coordinates should be positive and start from 0")
 
-    np_indices = tuple(np.transpose(np.round(coords).astype(np.int,
-                                                            copy=False)))
+    np_indices = tuple(np.transpose(np.round(coords).astype(int, copy=False)))
     labels = np.zeros(output_shape, dtype=np.uint64)
     labels[np_indices] = np.arange(1, coords.shape[0] + 1)
     return labels

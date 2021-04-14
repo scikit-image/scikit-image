@@ -1,6 +1,10 @@
 import numpy as np
 import re
 from skimage.transform._geometric import GeometricTransform
+from skimage.transform._geometric import (
+    _center_and_normalize_points, _euler_rotation_matrix,
+    _affine_matrix_from_vector,
+)
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
@@ -490,6 +494,17 @@ def test_degenerate():
         assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
 
 
+def test_normalize_degenerate_points():
+    """Return nan matrix *of appropriate size* when point is repeated."""
+    pts = np.array([[73.42834308, 94.2977623 ],] * 3)
+    mat, pts_tf = _center_and_normalize_points(pts)
+    assert np.all(np.isnan(mat))
+    assert np.all(np.isnan(pts_tf))
+    assert mat.shape == (3, 3)
+    assert pts_tf.shape == pts.shape
+
+
+
 def test_projective_repr():
     tform = ProjectiveTransform()
     want = re.escape(textwrap.dedent(
@@ -521,3 +536,119 @@ def test_projective_str():
     want = want.replace('1\\.', ' *1\\.')
     print(want)
     assert re.match(want, str(tform))
+
+
+def _assert_least_squares(tf, src, dst):
+    baseline = np.sum((tf(src) - dst) ** 2)
+    for i in range(tf.params.size):
+        for update in [0.001, -0.001]:
+            params = np.copy(tf.params)
+            params.flat[i] += update
+            new_tf = tf.__class__(matrix=params)
+            new_ssq = np.sum((new_tf(src) - dst) ** 2)
+            assert new_ssq > baseline
+
+
+def test_estimate_affine_3d():
+    ndim = 3
+    src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
+    matrix = np.array(
+        [[4.8, 0.1, 0.2, 25],
+         [0.0, 1.0, 0.1, 30],
+         [0.0, 0.0, 1.0, -2],
+         [0.0, 0.0, 0.0, 1.]]
+    )
+    tf = AffineTransform(matrix=matrix)
+    dst = tf(src)
+    dst_noisy = dst + np.random.random((25, ndim))
+    tf2 = AffineTransform(dimensionality=ndim)
+    tf2.estimate(src, dst_noisy)
+    # we check rot/scale/etc more tightly than translation because translation
+    # estimation is on the 1 pixel scale
+    assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)
+    assert_almost_equal(tf2.params[:, -1], matrix[:, -1], decimal=0)
+    _assert_least_squares(tf2, src, dst_noisy)
+
+
+def test_fundamental_3d_not_implemented():
+    with testing.raises(NotImplementedError):
+        _ = FundamentalMatrixTransform(dimensionality=3)
+    with testing.raises(NotImplementedError):
+        _ = FundamentalMatrixTransform(np.eye(4))
+
+
+def test_array_protocol():
+    mat = np.eye(4)
+    tf = ProjectiveTransform(mat)
+    assert_equal(np.array(tf), mat)
+    assert_equal(np.array(tf, dtype=int), mat.astype(int))
+
+
+def test_affine_transform_from_linearized_parameters():
+    mat = np.concatenate(
+        (np.random.random((3, 4)), np.eye(4)[-1:]), axis=0
+    )
+    v = mat[:-1].ravel()
+    mat_from_v = _affine_matrix_from_vector(v)
+    tf = AffineTransform(matrix=mat_from_v)
+    assert_equal(np.array(tf), mat)
+    # incorrect number of parameters
+    with testing.raises(ValueError):
+        _ = _affine_matrix_from_vector(v[:-1])
+    with testing.raises(ValueError):
+        _ = AffineTransform(matrix=v[:-1])
+
+
+def test_affine_params_nD_error():
+    with testing.raises(ValueError):
+        _ = AffineTransform(scale=5, dimensionality=3)
+
+
+def test_euler_rotation():
+    v = [0, 10, 0]
+    angles = np.radians([90, 45, 45])
+    expected = [-5, -5, 7.1]
+    R = _euler_rotation_matrix(angles)
+    assert_almost_equal(R @ v, expected, decimal=1)
+
+
+def test_euclidean_param_defaults():
+    # 2D rotation is 0 when only translation is given
+    tf = EuclideanTransform(translation=(5, 5))
+    assert np.array(tf)[0, 1] == 0
+    # off diagonals are 0 when only translation is given
+    tf = EuclideanTransform(translation=(4, 5, 9), dimensionality=3)
+    assert_equal(np.array(tf)[[0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1]], 0)
+    with testing.raises(ValueError):
+        # specifying parameters for D>3 is not supported
+        _ = EuclideanTransform(translation=(5, 6, 7, 8), dimensionality=4)
+    with testing.raises(ValueError):
+        # incorrect number of angles for given dimensionality
+        _ = EuclideanTransform(rotation=(4, 8), dimensionality=3)
+    # translation is 0 when rotation is given
+    tf = EuclideanTransform(rotation=np.pi * np.arange(3), dimensionality=3)
+    assert_equal(np.array(tf)[:-1, 3], 0)
+
+
+def test_similarity_transform_params():
+    with testing.raises(ValueError):
+        _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
+    tf = SimilarityTransform(scale=4, dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+
+
+def test_euler_angle_consistency():
+    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    euclid = EuclideanTransform(rotation=angles, dimensionality=3)
+    similar = SimilarityTransform(rotation=angles, dimensionality=3)
+    testing.assert_array_almost_equal(euclid, similar)
+
+
+def test_2D_only_implementations():
+    with testing.raises(NotImplementedError):
+        _ = PolynomialTransform(dimensionality=3)
+    tf = AffineTransform(dimensionality=3)
+    with testing.raises(NotImplementedError):
+        _ = tf.rotation
+    with testing.raises(NotImplementedError):
+        _ = tf.shear

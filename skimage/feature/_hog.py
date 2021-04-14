@@ -1,5 +1,6 @@
 import numpy as np
 from . import _hoghistogram
+from .._shared import utils
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -43,9 +44,11 @@ def _hog_channel_gradient(channel):
     return g_row, g_col
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=8)
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm='L2-Hys', visualize=False, transform_sqrt=False,
-        feature_vector=True, multichannel=None):
+        feature_vector=True, multichannel=None, *, channel_axis=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -96,7 +99,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         just before returning.
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial.
+        otherwise as spatial. This argument is deprecated: specify
+        `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           `channel_axis` was added in 0.19.
 
     Returns
     -------
@@ -141,9 +152,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     """
     image = np.atleast_2d(image)
 
-    if multichannel is None:
-        multichannel = (image.ndim == 3)
-
+    multichannel = channel_axis is not None
     ndim_spatial = image.ndim - 1 if multichannel else image.ndim
     if ndim_spatial != 2:
         raise ValueError('Only images with 2 spatial dimensions are '

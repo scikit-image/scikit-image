@@ -3,7 +3,7 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
-from scipy.ndimage.filters import laplace
+from scipy.ndimage import laplace
 import skimage
 from ..measure import label
 
@@ -127,8 +127,8 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     mask = mask.astype(bool)
 
     # Split inpainting mask into independent regions
-    kernel = ndi.morphology.generate_binary_structure(mask.ndim, 1)
-    mask_dilated = ndi.morphology.binary_dilation(mask, structure=kernel)
+    kernel = ndi.generate_binary_structure(mask.ndim, 1)
+    mask_dilated = ndi.binary_dilation(mask, structure=kernel)
     mask_labeled, num_labels = label(mask_dilated, return_num=True)
     mask_labeled *= mask
 

@@ -106,7 +106,7 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
                                    dtype=dtype, multichannel=True)
 

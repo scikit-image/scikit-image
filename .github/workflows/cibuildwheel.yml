@@ -17,7 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04]
-        cibw_python: [ "cp37-*", "cp38-*", "cp39-*" ]
+        cibw_python: [ "cp37-*", "cp38-*" ]
+        cibw_manylinux: [ manylinux1 ]
+        include:
+          - os: ubuntu-18.04
+            cibw_python: "cp39-*"
+            cibw_manylinux: manylinux2010
     steps:
       - uses: actions/checkout@v2
         with:
@@ -39,8 +44,8 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_LINUX: auto aarch64
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
           CIBW_TEST_COMMAND: pytest --pyargs skimage
       - uses: actions/upload-artifact@v2
