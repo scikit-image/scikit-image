@@ -63,7 +63,7 @@ def test_multichannel():
 
 def test_preserve_range():
     """Test preserve_range parameter."""
-    ones = np.array([[1, 1], [1, 1]], dtype=np.int64)
+    ones = np.ones((2, 2), dtype=np.int64)
     filtered_ones = gaussian(ones, preserve_range=False)
     assert(np.all(filtered_ones == filtered_ones[0]))
 
