@@ -677,7 +677,7 @@ def test_bool_img_resize():
     assert_equal(res, expected)
 
 
-def test_boll_array_warnings():
+def test_bool_array_warnings():
     img = np.zeros((10, 10), dtype=bool)
 
     with expected_warnings(['Input image dtype is bool']):
