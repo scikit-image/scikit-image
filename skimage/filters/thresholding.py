@@ -277,7 +277,7 @@ def _validate_image_histogram(image, hist, nbins=None):
             bin_centers = np.arange(counts.size)
     else:
         counts, bin_centers = histogram(
-                image.ravel(), nbins, source_range='image'
+            image.ravel(), nbins, source_range='image'
             )
     return counts.astype(float), bin_centers
 
@@ -1243,56 +1243,56 @@ argmax = lambda x, f: np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
 clip = lambda z: np.maximum(1e-30, z)
 
 
-def _preliminaries(n, x= None):
-  """calculate preliminary values to be utlized in the core GHT/TGH algorithm
-  
-  Parameters
-  ----------------------------
-  n : ndarray 
-      Each element is the number of pixels falling in each intensity bin.
-  x : ndaarray, optional
-      Each element is the value corresponding to the center of each intensity bin.
-  
-  Returns
-  ----------------------------
-  x  : ndarray 
-      value corresponding the center of each intensity bin
-  w0 : ndarray 
-      sums of histogram count in n below each split  , size =len(x) -1
-  w1 : ndarray
-      sums of histogram count in n above each split, size = len(x) -1
-  p0 : ndarray
-       weighted mean of all elemnts of x below each split, size = len(x) -1
-  p1 : ndarray
-      weighted mean of all elemnts of x above each split, size = len(x) -1
-  mu0: ndarray
-      weighted distrotion  of all elemnts of x below each split, size = len(x) -1
-  mu1: ndarray
-       weighted distrotion of all elemnts of x above each split, size = len(x) -1
-  d0 : ndarray
-      complex definition
-  d1 : ndarray
-      complex definition
-  
-  References
-  -------------------
-  .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
-         Jonathan T. Barron, ECCV, 2020
+def _preliminaries(n, x=None):
+    """calculate preliminary values to be utlized in the core GHT/TGH algorithm
 
-  """
-  assert np.all(n >= 0)
-  x = np.arange(len(n), dtype=n.dtype) if x is None else x
-  assert np.all(x[1:] >= x[:-1])
-    
-  w0 = clip(csum(n))
-  w1 = clip(dsum(n))
-  p0 = w0 / (w0 + w1)
-  p1 = w1 / (w0 + w1)
-  mu0 = csum(n * x) / w0
-  mu1 = dsum(n * x) / w1
-  d0 = csum(n * x**2) - w0 * mu0**2
-  d1 = dsum(n * x**2) - w1 * mu1**2
-  return x, w0, w1, p0, p1, mu0, mu1, d0, d1
+    Parameters
+    ----------------------------
+    n : ndarray
+      Each element is the number of pixels falling in each intensity bin.
+    x : ndaarray, optional
+      Each element is the value corresponding to the center of each intensity bin.
+
+    Returns
+    ----------------------------
+    x  : ndarray
+      value corresponding the center of each intensity bin
+    w0 : ndarray
+      sums of histogram count in n below each split  , size =len(x) -1
+    w1 : ndarray
+      sums of histogram count in n above each split, size = len(x) -1
+    p0 : ndarray
+       weighted mean of all elemnts of x below each split, size = len(x) -1
+    p1 : ndarray
+      weighted mean of all elemnts of x above each split, size = len(x) -1
+    mu0: ndarray
+      weighted distrotion  of all elemnts of x below each split, size = len(x) -1
+    mu1: ndarray
+       weighted distrotion of all elemnts of x above each split, size = len(x) -1
+    d0 : ndarray
+      complex definition
+    d1 : ndarray
+      complex definition
+
+    References
+    -------------------
+    .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
+            Jonathan T. Barron, ECCV, 2020
+
+    """
+    assert np.all(n >= 0)
+    x = np.arange(len(n), dtype=n.dtype) if x is None else x
+    assert np.all(x[1:] >= x[:-1])
+
+    w0 = clip(csum(n))
+    w1 = clip(dsum(n))
+    p0 = w0 / (w0 + w1)
+    p1 = w1 / (w0 + w1)
+    mu0 = csum(n * x) / w0
+    mu1 = dsum(n * x) / w1
+    d0 = csum(n * x**2) - w0 * mu0**2
+    d1 = dsum(n * x**2) - w1 * mu1**2
+    return x, w0, w1, p0, p1, mu0, mu1, d0, d1
 
 
 def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
@@ -1301,7 +1301,7 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
 
     Parameters
     ----------------------------
-    n : ndarray 
+    n : ndarray
       Each element is the number of pixels falling in each intensity bin.
     x : ndaarray, optional
       Each element is the value corresponding to the center of each intensity bin.
@@ -1318,7 +1318,7 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     ----------------------------
     t  : float
         Threshold bin value, corresponding to maximum score
-    score : ndarray 
+    score : ndarray
         all possible values of score for each possible threshold value
 
 
@@ -1326,23 +1326,24 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     -------------------
     .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
          Jonathan T. Barron, ECCV, 2020
-    
+
     Examples
     ----------------
-    
+
     >>> from skimage.data import camera
     >>> from skimage.exposure import histogram
     >>> from skimage.filters import theshold_generalized_histogram
-    
+    >>>
     >>> data = camera()
     >>> counts, bin_centers = histogram(data.ravel(), 256, source_range = "image" )
-
+    >>>
     >>> default_nu = np.sum(counts)
     >>> default_tau = np.sqrt(1/12)
     >>> default_kappa = np.sum(counts)
     >>> default_omega = 0.5
-
-    >>> t, score = theshold_generalized_histogram(counts, bin_centers, default_nu, default_tau, default_kappa, default_omega)
+    >>>
+    >>> t, score = theshold_generalized_histogram(counts, bin_centers,
+            default_nu, default_tau, default_kappa, default_omega)
     >>> binary = data<=t
     """
     assert nu >= 0
@@ -1355,4 +1356,3 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa *      omega)  * np.log(w0)
     f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) * np.log(w1)
     return argmax(x, f0 + f1), f0 + f1
-

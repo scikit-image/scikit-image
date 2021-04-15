@@ -712,27 +712,23 @@ def test_multiotsu_lut():
 def test_theshold_generalized_histogram():
     """
     tests for generalized histogram thresholding algorithm
-    """ 
-    from skimage.data import camera
-    from skimage.filters import theshold_generalized_histogram
-    from skimage.exposure import histogram
-    
-    data = camera()
-    counts, bin_centers = histogram(data.ravel(), 256, source_range = "image" )
+    """
+
+    image = data.camera()
+    counts, bin_centers = histogram(image.ravel(), 256, source_range="image")
 
     # (nu, tau, kappa, omega, threshold)
     possible_values = [
-        (262144, 0.288675, 262144, 0.5 , 71),
+        (262144, 0.288675, 262144, 0.5, 71),
         (262144, 1, 262144, 0.5, 70),
         (0.0001, 1, 262144, 0.5, 71),
         (0.0001, 1, 0.1, 0.5, 65),
         (0.0001, 1, 0.1, 0.5, 65),
-        ( 1e30, 1e-30, 1e-30, 0.5, 254),  # otsu
+        (1e30, 1e-30, 1e-30, 0.5, 254),  # otsu
         (1e-30, 1.0, 1e-30, 0.5, 65),   #met
         (1e-30, 1.0, 1e30, 0.5, 152),    # percentile
     ]
 
-
     for nu, tau, kappa, omega, threshold in possible_values:
-        t, scores  = theshold_generalized_histogram(counts, bin_centers, nu, tau, kappa, omega)
-        assert int(t)== int(threshold)
+        t, _  = theshold_generalized_histogram(counts, bin_centers, nu, tau, kappa, omega)
+        assert int(t)==int(threshold)
