@@ -1259,7 +1259,7 @@ def _preliminaries(n, x=None):
     n : ndarray
       Each element is the number of pixels falling in each intensity bin.
     x : ndaarray, optional
-      Each element is the value corresponding to the center of each 
+      Each element is the value corresponding to the center of each
       intensity bin.
 
     Returns
@@ -1275,10 +1275,10 @@ def _preliminaries(n, x=None):
     p1 : ndarray
         weighted mean of all elemnts of x above each split, size = len(x) -1
     mu0: ndarray
-        weighted distrotion  of all elemnts of x below each split, 
+        weighted distrotion  of all elemnts of x below each split,
         size = len(x) -1
     mu1: ndarray
-        weighted distrotion of all elemnts of x above each split, 
+        weighted distrotion of all elemnts of x above each split,
         size = len(x) -1
     d0 : ndarray
         complex definition
@@ -1313,17 +1313,17 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     Parameters
     ----------------------------
     n : ndarray
-        Each element is the number of pixels falling in each 
-        intensity bin.
+        Each element is the number of pixels falling in each
+         intensity bin.
     x : ndaarray, optional
-        Each element is the value corresponding to the center of 
-        each intensity bin.
+        Each element is the value corresponding to the center of
+         each intensity bin.
     nu : Float
-        Degree of freedom , positive integer, scaled inverse chi-squared 
-        distribution parameter
+        Degree of freedom , positive integer, scaled inverse chi-squared
+         distribution parameter
     tau : Float
-        scaling parameter, positve integer, scaled inverse 
-        chi-squared distribution
+        scaling parameter, positve integer, scaled inverse
+         chi-squared distribution
     kappa : Float
         concentration, positive integer, beta distribution
     omega : Float
@@ -1350,7 +1350,7 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     >>> from skimage.filters import theshold_generalized_histogram
     >>>
     >>> data = camera()
-    >>> counts, bin_centers = histogram(data.ravel(), 256, source_range = "image" )
+    >>> counts, bin_centers = histogram(data.ravel(), 256, source_range="image")
     >>>
     >>> default_nu = np.sum(counts)
     >>> default_tau = np.sqrt(1/12)
@@ -1370,5 +1370,5 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
     f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa * omega) * np.log(w0)
     f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) *
-         np.log(w1)
+        np.log(w1)
     return _argmax(x, f0 + f1), f0 + f1
