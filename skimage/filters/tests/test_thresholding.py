@@ -706,9 +706,6 @@ def test_multiotsu_lut():
             assert np.array_equal(result_lut, result)
 
 
-
-
-
 def test_theshold_generalized_histogram():
     """
     tests for generalized histogram thresholding algorithm
@@ -730,5 +727,5 @@ def test_theshold_generalized_histogram():
     ]
 
     for nu, tau, kappa, omega, threshold in possible_values:
-        t, _  = theshold_generalized_histogram(counts, bin_centers, nu, tau, kappa, omega)
-        assert int(t)==int(threshold)
+        t, _ = theshold_generalized_histogram(counts, bin_centers, nu, tau, kappa, omega)
+        assert np.array_equal(t, threshold)

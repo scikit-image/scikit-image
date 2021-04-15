@@ -1235,12 +1235,14 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     return thresh
 
 
-
-
-csum = lambda z: np.cumsum(z)[:-1]
-dsum = lambda z: np.cumsum(z[::-1])[-2::-1]
-argmax = lambda x, f: np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
-clip = lambda z: np.maximum(1e-30, z)
+def _csum(z): 
+    return np.cumsum(z)[:-1]
+def _dsum(z):
+    return np.cumsum(z[::-1])[-2::-1]
+def _argmax(x,f):
+    return np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
+def _clip(z):
+    return np.maximum(1e-30, z)
 
 
 def _preliminaries(n, x=None):
@@ -1284,14 +1286,14 @@ def _preliminaries(n, x=None):
     x = np.arange(len(n), dtype=n.dtype) if x is None else x
     assert np.all(x[1:] >= x[:-1])
 
-    w0 = clip(csum(n))
-    w1 = clip(dsum(n))
+    w0 = _clip(_csum(n))
+    w1 = _clip(_dsum(n))
     p0 = w0 / (w0 + w1)
     p1 = w1 / (w0 + w1)
-    mu0 = csum(n * x) / w0
-    mu1 = dsum(n * x) / w1
-    d0 = csum(n * x**2) - w0 * mu0**2
-    d1 = dsum(n * x**2) - w1 * mu1**2
+    mu0 = _csum(n * x) / w0
+    mu1 = _dsum(n * x) / w1
+    d0 = _csum(n * x**2) - w0 * mu0**2
+    d1 = _dsum(n * x**2) - w1 * mu1**2
     return x, w0, w1, p0, p1, mu0, mu1, d0, d1
 
 
@@ -1351,8 +1353,8 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     assert kappa >= 0
     assert omega >= 0 and omega <= 1
     x, w0, w1, p0, p1, _, _, d0, d1 = _preliminaries(n, x)
-    v0 = clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
-    v1 = clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
-    f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa *      omega)  * np.log(w0)
+    v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
+    v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
+    f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa * omega) * np.log(w0)
     f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) * np.log(w1)
-    return argmax(x, f0 + f1), f0 + f1
+    return _argmax(x, f0 + f1), f0 + f1
