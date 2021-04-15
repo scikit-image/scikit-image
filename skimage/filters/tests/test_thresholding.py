@@ -722,10 +722,11 @@ def test_theshold_generalized_histogram():
         (0.0001, 1, 0.1, 0.5, 65),
         (0.0001, 1, 0.1, 0.5, 65),
         (1e30, 1e-30, 1e-30, 0.5, 254),  # otsu
-        (1e-30, 1.0, 1e-30, 0.5, 65),   #met
+        (1e-30, 1.0, 1e-30, 0.5, 65),   # met
         (1e-30, 1.0, 1e30, 0.5, 152),    # percentile
     ]
 
     for nu, tau, kappa, omega, threshold in possible_values:
-        t, _ = theshold_generalized_histogram(counts, bin_centers, nu, tau, kappa, omega)
+        t, _ = theshold_generalized_histogram(counts, bin_centers, 
+            nu, tau, kappa, omega)
         assert np.array_equal(t, threshold)

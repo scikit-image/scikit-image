@@ -1235,12 +1235,18 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     return thresh
 
 
-def _csum(z): 
+def _csum(z):
     return np.cumsum(z)[:-1]
+
+
 def _dsum(z):
     return np.cumsum(z[::-1])[-2::-1]
+
+
 def _argmax(x,f):
     return np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
+
+
 def _clip(z):
     return np.maximum(1e-30, z)
 
