@@ -727,6 +727,6 @@ def test_theshold_generalized_histogram():
     ]
 
     for nu, tau, kappa, omega, threshold in possible_values:
-        t, _ = theshold_generalized_histogram(counts, bin_centers, 
-            nu, tau, kappa, omega)
+        t, _ = theshold_generalized_histogram(counts, bin_centers,
+                nu, tau, kappa, omega)
         assert np.array_equal(t, threshold)

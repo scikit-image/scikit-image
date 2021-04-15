@@ -1243,7 +1243,7 @@ def _dsum(z):
     return np.cumsum(z[::-1])[-2::-1]
 
 
-def _argmax(x,f):
+def _argmax(x, f):
     return np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
 
 
@@ -1259,28 +1259,31 @@ def _preliminaries(n, x=None):
     n : ndarray
       Each element is the number of pixels falling in each intensity bin.
     x : ndaarray, optional
-      Each element is the value corresponding to the center of each intensity bin.
+      Each element is the value corresponding to the center of each 
+      intensity bin.
 
     Returns
     ----------------------------
     x  : ndarray
-      value corresponding the center of each intensity bin
+        value corresponding the center of each intensity bin
     w0 : ndarray
-      sums of histogram count in n below each split  , size =len(x) -1
+        sums of histogram count in n below each split  , size =len(x) -1
     w1 : ndarray
-      sums of histogram count in n above each split, size = len(x) -1
+        sums of histogram count in n above each split, size = len(x) -1
     p0 : ndarray
-       weighted mean of all elemnts of x below each split, size = len(x) -1
+        weighted mean of all elemnts of x below each split, size = len(x) -1
     p1 : ndarray
-      weighted mean of all elemnts of x above each split, size = len(x) -1
+        weighted mean of all elemnts of x above each split, size = len(x) -1
     mu0: ndarray
-      weighted distrotion  of all elemnts of x below each split, size = len(x) -1
+        weighted distrotion  of all elemnts of x below each split, 
+        size = len(x) -1
     mu1: ndarray
-       weighted distrotion of all elemnts of x above each split, size = len(x) -1
+        weighted distrotion of all elemnts of x above each split, 
+        size = len(x) -1
     d0 : ndarray
-      complex definition
+        complex definition
     d1 : ndarray
-      complex definition
+        complex definition
 
     References
     -------------------
@@ -1310,17 +1313,21 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     Parameters
     ----------------------------
     n : ndarray
-      Each element is the number of pixels falling in each intensity bin.
+        Each element is the number of pixels falling in each 
+        intensity bin.
     x : ndaarray, optional
-      Each element is the value corresponding to the center of each intensity bin.
+        Each element is the value corresponding to the center of 
+        each intensity bin.
     nu : Float
-        Degree of freedom , positive integer, scaled inverse chi-squared distribution parameter
+        Degree of freedom , positive integer, scaled inverse chi-squared 
+        distribution parameter
     tau : Float
-        scaling parameter, positve integer, scaled inverse chi-squared distribution
+        scaling parameter, positve integer, scaled inverse 
+        chi-squared distribution
     kappa : Float
         concentration, positive integer, beta distribution
     omega : Float
-            mode   , beta distribution ,  0 <= omega <= 1
+        mode   , beta distribution ,  0 <= omega <= 1
 
     Returns
     ----------------------------
@@ -1362,5 +1369,6 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
     v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
     f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa * omega) * np.log(w0)
-    f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) * np.log(w1)
+    f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) *
+         np.log(w1)
     return _argmax(x, f0 + f1), f0 + f1
