@@ -1369,6 +1369,5 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
     v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
     f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa * omega) * np.log(w0)
-    f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) *
-        np.log(w1)
+    f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) * np.log(w1)
     return _argmax(x, f0 + f1), f0 + f1
