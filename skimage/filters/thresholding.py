@@ -1308,9 +1308,9 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     nu : Float
         Degree of freedom , positive integer, scaled inverse chi-squared distribution parameter
     tau : Float
-        scaling parameter, scaled inverse chi-squared distribution
+        scaling parameter, positve integer, scaled inverse chi-squared distribution
     kappa : Float
-        concentration , beta distribution
+        concentration, positive integer, beta distribution
     omega : Float
             mode   , beta distribution ,  0 <= omega <= 1
 
@@ -1331,6 +1331,9 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     ----------------
     
     >>> from skimage.data import camera
+    >>> from skimage.exposure import histogram
+    >>> from skimage.filters import theshold_generalized_histogram
+    
     >>> data = camera()
     >>> counts, bin_centers = histogram(data.ravel(), 256, source_range = "image" )
 
