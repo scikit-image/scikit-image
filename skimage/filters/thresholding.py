@@ -1291,9 +1291,13 @@ def _preliminaries(n, x=None):
             Jonathan T. Barron, ECCV, 2020
 
     """
-    assert np.all(n >= 0)
+    if not np.all(n >= 0):
+        raise ValueError("number of pixels in the histogram can't be negative")
     x = np.arange(len(n), dtype=n.dtype) if x is None else x
-    assert np.all(x[1:] >= x[:-1])
+
+    if not np.all(x[1:] >= x[:-1]):
+        raise ValueError("consecutive bin intensity should be in increasing order")
+
 
     w0 = _clip(_csum(n))
     w1 = _clip(_dsum(n))
@@ -1389,7 +1393,7 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
         raise ValueError("kappa needs to be a postive number or zero")
     if omega < 0:
         raise ValueError("omega needs to be a postive number between zero and one included")
-    
+
     x, w0, w1, p0, p1, _, _, d0, d1 = _preliminaries(n, x)
     v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
     v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
