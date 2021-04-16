@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import fftconvolve
 
-from .._shared.utils import check_nD, _float_type
+from .._shared.utils import check_nD, _supported_float_type
 
 
 def _window_sum_2d(image, window_shape):
@@ -120,8 +120,8 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     image_shape = image.shape
 
-    float_dtype = _float_type(image)
-    image = np.array(image, dtype=float_dtype, copy=False)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
