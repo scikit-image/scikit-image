@@ -1,9 +1,10 @@
 from collections.abc import Iterable
+
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
-from .._shared.utils import warn, convert_to_float
+from .._shared.utils import _supported_float_type, convert_to_float, warn
 
 
 __all__ = ['gaussian', 'difference_of_gaussians']
@@ -117,9 +118,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
         raise ValueError("Provided output data type is not float")
-    return ndi.gaussian_filter(image, sigma, output=output, 
+    return ndi.gaussian_filter(image, sigma, output=output,
                                mode=mode, cval=cval, truncate=truncate)
 
 
