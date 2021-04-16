@@ -199,7 +199,7 @@ def test_int_to_float():
     """
     int_list = np.arange(9, dtype=np.int64)
     converted = img_as_float(int_list)
-    assert(np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1))
+    assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
 
     ii32 = np.iinfo(np.int32)
     ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
