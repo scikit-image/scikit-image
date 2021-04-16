@@ -13,7 +13,6 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import convolve, binary_erosion
 
-from .. import img_as_float
 from .._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
 
