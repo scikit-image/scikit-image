@@ -2,6 +2,8 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
+from skimage._shared import testing
+from skimage._shared.utils import _supported_float_type
 from skimage.filters._gabor import gabor_kernel, gabor, _sigma_prefactor
 
 
@@ -28,6 +30,19 @@ def test_gabor_kernel_bandwidth():
 
     kernel = gabor_kernel(0.5, bandwidth=1)
     assert_equal(kernel.shape, (9, 9))
+
+
+@testing.parametrize('dtype', [np.complex64, np.complex128])
+def test_gabor_kernel_dtype(dtype):
+    kernel = gabor_kernel(1, bandwidth=1, dtype=dtype)
+    assert kernel.dtype == dtype
+
+
+@testing.parametrize('dtype', [np.uint8, np.float32])
+def test_gabor_kernel_invalid_dtype(dtype):
+    with testing.raises(ValueError):
+        kernel = gabor_kernel(1, bandwidth=1, dtype=dtype)
+        assert kernel.dtype == dtype
 
 
 def test_sigma_prefactor():
@@ -75,6 +90,13 @@ def test_gabor():
     assert responses[1, 1] > responses[0, 1]
     assert responses[0, 0] > responses[1, 0]
     assert responses[1, 1] > responses[1, 0]
+
+
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_gabor_dtype(dtype):
+    image = np.ones((16, 16), dtype=dtype)
+    y = gabor(image, 0.3)
+    assert all(arr.dtype == _supported_float_type(image.dtype) for arr in y)
 
 
 if __name__ == "__main__":
