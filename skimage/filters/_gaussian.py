@@ -100,7 +100,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     """
     if preserve_range is None:
         msg = ('The default value of preserve_range will change '
-               'to "True" in version 1.0')
+               'to True in version 1.0')
         warn(msg, DeprecationWarning)
         preserve_range = True
 
