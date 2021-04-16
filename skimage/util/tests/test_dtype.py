@@ -194,9 +194,7 @@ def test_subclass_conversion():
 
 
 def test_int_to_float():
-    """
-    Check Normalization when casting img_as_float from int types to float
-    """
+    """Check Normalization when casting img_as_float from int types to float"""
     int_list = np.arange(9, dtype=np.int64)
     converted = img_as_float(int_list)
     assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
