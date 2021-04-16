@@ -218,7 +218,8 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    scharr, prewitt, canny
+    sobel_h, sobel_v : horizontal and vertical edge detection.
+    scharr, prewitt, farid, skimage.feature.canny
 
     References
     ----------
@@ -334,7 +335,8 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, prewitt, canny
+    scharr_h, scharr_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
@@ -464,7 +466,8 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, scharr
+    prewitt_h, prewitt_v : horizontal and vertical edge detection.
+    sobel, scharr, farid, skimage.feature.canny
 
     Notes
     -----
@@ -510,9 +513,9 @@ def prewitt_h(image, mask=None):
     -----
     We use the following kernel::
 
-      1   1   1
-      0   0   0
-     -1  -1  -1
+      1/3   1/3   1/3
+       0     0     0
+     -1/3  -1/3  -1/3
 
     """
     check_nD(image, 2)
@@ -540,9 +543,9 @@ def prewitt_v(image, mask=None):
     -----
     We use the following kernel::
 
-      1   0  -1
-      1   0  -1
-      1   0  -1
+      1/3   0  -1/3
+      1/3   0  -1/3
+      1/3   0  -1/3
 
     """
     check_nD(image, 2)
@@ -568,7 +571,8 @@ def roberts(image, mask=None):
 
     See also
     --------
-    sobel, scharr, prewitt, feature.canny
+    roberts_pos_diag, roberts_neg_diag : diagonal edge detection.
+    sobel, scharr, prewitt, skimage.feature.canny
 
     Examples
     --------
@@ -706,7 +710,8 @@ def farid(image, *, mask=None):
 
     See also
     --------
-    sobel, prewitt, canny
+    farid_h, farid_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----

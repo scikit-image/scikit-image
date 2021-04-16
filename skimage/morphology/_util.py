@@ -170,7 +170,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         selem = ndi.generate_binary_structure(ndim, connectivity)
     else:
         # Validate custom structured element
-        selem = np.asarray(selem, dtype=np.bool)
+        selem = np.asarray(selem, dtype=bool)
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(
@@ -218,7 +218,7 @@ def _fast_pad(image, value, *, order="C"):
     image : ndarray
         Image to pad.
     value : scalar
-         The value to use. Should be compatible with `image`'s dtype.
+        The value to use. Should be compatible with `image`'s dtype.
     order : "C" or "F"
         Specify the memory layout of the padded image (C or Fortran style).
 

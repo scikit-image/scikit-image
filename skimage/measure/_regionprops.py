@@ -93,9 +93,9 @@ COL_DTYPES = {
     'label': int,
     'local_centroid': float,
     'major_axis_length': float,
-    'max_intensity': int,
+    'max_intensity': float,
     'mean_intensity': float,
-    'min_intensity': int,
+    'min_intensity': float,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -255,7 +255,14 @@ class RegionProperties:
             # determine whether func requires intensity image
             if n_args == 2:
                 if self._intensity_image is not None:
-                    return func(self.image, self.intensity_image)
+                    if self._multichannel:
+                        multichannel_list = [func(self.image,
+                                                  self.intensity_image[..., i])
+                                             for i in range(
+                            self.intensity_image.shape[-1])]
+                        return np.stack(multichannel_list, axis=-1)
+                    else:
+                        return func(self.image, self.intensity_image)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"
@@ -398,7 +405,8 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0)
+        return np.max(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def mean_intensity(self):
@@ -406,7 +414,8 @@ class RegionProperties:
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0)
+        return np.min(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def major_axis_length(self):
@@ -1116,7 +1125,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        if np.issubdtype(label_image.dtype, np.bool_):
+        if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
                     'use skimage.measure.label to label the connected'

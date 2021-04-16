@@ -1,6 +1,7 @@
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose)
+                                     assert_allclose,
+                                     assert_array_almost_equal)
 from skimage._shared import testing
 
 from skimage.util import img_as_ubyte, img_as_float
@@ -12,20 +13,6 @@ from skimage.filters.rank import subtract_mean
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, parametrize, fetch
 import pytest
-
-# To be removed along with tophat and bottomhat functions.
-all_rank_filters.remove('tophat')
-all_rank_filters.remove('bottomhat')
-
-
-def test_deprecation():
-    selem = disk(3)
-    image = img_as_ubyte(data.camera()[:50, :50])
-
-    with expected_warnings(['rank.tophat is deprecated.']):
-        rank.tophat(image, selem)
-    with expected_warnings(['rank.bottomhat is deprecated.']):
-        rank.bottomhat(image, selem)
 
 
 def test_otsu_edge_case():
@@ -69,14 +56,10 @@ def test_subtract_mean_underflow_correction(dtype):
     assert np.all(result == expected_val)
 
 
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
-
-
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
+# Note: Explicitly read all values into a dict. Otherwise, stochastic test
+#       failures related to I/O can occur during parallel test cases.
+ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
+ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
 class TestRank():
@@ -91,8 +74,8 @@ class TestRank():
         np.random.seed(0)
         self.selem = morphology.disk(1)
         self.selem_3d = morphology.ball(1)
-        self.refs = np.load(fetch('data/rank_filter_tests.npz'))
-        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
+        self.refs = ref_data
+        self.refs_3d = ref_data_3d
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
@@ -119,9 +102,9 @@ class TestRank():
                 # reason.
                 assert result[19, 18] in [141, 172]
                 result[19, 18] = 172
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
             else:
-                assert_array_equal(expected, result)
+                assert_array_almost_equal(expected, result)
 
         check()
 
@@ -135,7 +118,7 @@ class TestRank():
         def check():
             expected = self.refs_3d[filter]
             result = getattr(rank, filter)(self.volume, self.selem_3d)
-            assert_array_equal(expected, result)
+            assert_array_almost_equal(expected, result)
 
         check()
 
@@ -627,7 +610,7 @@ class TestRank():
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (np.bool_, np.uint8, np.uint16, np.int32, np.int64,
+        for dtype in (bool, np.uint8, np.uint16, np.int32, np.int64,
                       np.float32, np.float64):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
             rank.mean(image=image, selem=elem, out=out, mask=mask,
@@ -820,7 +803,7 @@ class TestRank():
         assert_equal(image.dtype, out.dtype)
 
     def test_input_boolean_dtype(self):
-        image = (np.random.rand(100, 100) * 256).astype(np.bool_)
-        elem = np.ones((3, 3), dtype=np.bool_)
+        image = (np.random.rand(100, 100) * 256).astype(bool)
+        elem = np.ones((3, 3), dtype=bool)
         with testing.raises(ValueError):
             rank.maximum(image=image, selem=elem)

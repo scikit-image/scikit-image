@@ -76,7 +76,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
                                              [1] + reference_image.ndim * [3])
 
         image1_warp = warp(moving_image, get_warp_points(grid, flow_current),
-                           mode='nearest')
+                           mode='edge')
         grad = np.array(np.gradient(image1_warp))
         NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
@@ -275,10 +275,10 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     for _ in range(num_warp):
         if prefilter:
-            flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
+            flow = ndi.median_filter(flow, (1, ) + ndim * (3, ))
 
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
-                                 mode='nearest')
+                                 mode='edge')
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
         error_image = ((grad * flow).sum(axis=0)
                        + reference_image - moving_image_warp)

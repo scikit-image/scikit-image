@@ -67,7 +67,7 @@ def test_each_channel_with_filter_argument():
 
 
 def test_each_channel_with_asymmetric_kernel():
-    mask = np.triu(np.ones(COLOR_IMAGE.shape[:2], dtype=np.bool_))
+    mask = np.triu(np.ones(COLOR_IMAGE.shape[:2], dtype=bool))
     mask_each(COLOR_IMAGE, mask)
 
 

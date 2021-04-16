@@ -78,7 +78,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
     """
 
     image = np.asarray(image)
-    img = image.astype(np.float_)
+    img = image.astype(float)
 
     if num_threads is None:
         num_threads = 0

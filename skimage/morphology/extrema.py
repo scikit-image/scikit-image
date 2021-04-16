@@ -75,11 +75,11 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The local maxima of height >= h and the global maxima.
-       The resulting image is a binary image, where pixels belonging to
-       the determined maxima take value 1, the others take value 0.
+        The local maxima of height >= h and the global maxima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined maxima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.local_maxima
@@ -103,7 +103,7 @@ def h_maxima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all maxima with a height of at least 40:
 
@@ -140,7 +140,7 @@ def h_maxima(image, h, selem=None):
                  'floating point. To silence this warning, '
                  'ensure image and h have same data type.',
                  stacklevel=2)
-            image = image.astype(np.float_)
+            image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
@@ -203,11 +203,11 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The local minima of depth >= h and the global minima.
-       The resulting image is a binary image, where pixels belonging to
-       the determined minima take value 1, the others take value 0.
+        The local minima of depth >= h and the global minima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined minima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_maxima
     skimage.morphology.extrema.local_maxima
@@ -231,7 +231,7 @@ def h_minima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 160; f[2:4,7:9] = 140; f[7:9,2:4] = 120; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all minima with a depth of at least 40:
 
@@ -249,7 +249,7 @@ def h_minima(image, h, selem=None):
                  'floating point. To silence this warning, '
                  'ensure image and h have same data type.',
                  stacklevel=2)
-            image = image.astype(np.float_)
+            image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
@@ -383,7 +383,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
             # Make sure that output is a tuple of 1 empty array per dimension
             return np.nonzero(image)
         else:
-            return np.zeros(image.shape, dtype=np.bool)
+            return np.zeros(image.shape, dtype=bool)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
@@ -429,7 +429,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     if indices:
         return np.nonzero(flags)
     else:
-        return flags.view(np.bool)
+        return flags.view(bool)
 
 
 def local_minima(image, selem=None, connectivity=None, indices=False,

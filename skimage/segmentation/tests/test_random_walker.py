@@ -183,6 +183,24 @@ def test_2d_inactive():
     return data, labels
 
 
+def test_2d_laplacian_size():
+    # test case from: https://github.com/scikit-image/scikit-image/issues/5034
+    # The markers here were modified from the ones in the original issue to
+    # avoid a singular matrix, but still reproduce the issue.
+    data = np.asarray([[12823, 12787, 12710],
+                       [12883, 13425, 12067],
+                       [11934, 11929, 12309]])
+    markers = np.asarray([[0, -1, 2],
+                          [0, -1, 0],
+                          [1, 0, -1]])
+    expected_labels = np.asarray([[1, -1, 2],
+                                  [1, -1, 2],
+                                  [1, 1, -1]])
+    labels = random_walker(data, markers, beta=10)
+    np.testing.assert_array_equal(labels, expected_labels)
+    return data, labels
+
+
 def test_3d():
     n = 30
     lx, ly, lz = n, n, n
@@ -499,3 +517,15 @@ def test_prob_tol():
         res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
+
+
+def test_umfpack_import():
+    from skimage.segmentation import random_walker_segmentation
+    UmfpackContext = random_walker_segmentation.UmfpackContext
+    try:
+        # when scikit-umfpack is installed UmfpackContext should not be None
+        import scikits.umfpack
+        assert UmfpackContext is not None
+    except ImportError:
+        assert UmfpackContext is None
+    return

@@ -300,11 +300,11 @@ def _hough_line(cnp.ndarray img,
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
     cdef Py_ssize_t max_distance, offset
 
-    max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                             img.shape[1] * img.shape[1]))
+    offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
+                                   img.shape[1] * img.shape[1]))
+    max_distance = 2 * offset + 1
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
-    offset = max_distance / 2
+    bins = np.linspace(-offset, offset, max_distance)
 
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
