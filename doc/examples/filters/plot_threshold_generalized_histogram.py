@@ -3,21 +3,27 @@
 Generalized Histogram Thresholding (GHT)
 ================================================================
 
+
 Thresholding is used to create a binary image from a grayscale image [1]_.
 
-There are number of histograms based methods such as Otsu's method,
-Minimum Error Thresholding and weighted percentile thresholding.
-GHT provides an generalized framework to cover above 3 standard methods as special cases
+There are number of histograms based methods such as Otsu’s method,
+ Minimum Error Thresholding and weighted percentile Thresholding. 
 
+GHT provides a generalized framework to integrate all 3 techniques in one method. 
 GHT works by performing approximate maximum of a posteriori estimation
-of a mixture of Gaussians with appropriate priors [2]_.
+ of a mixture of Gaussians with appropriate priors [2]_.
 
-One drawback of this approach is that user has to control 4 parameters
-and find the best combination suited for the problem at hand. However The algorithm provides
-Thoritical gaurantees that the said solution with provide better or atleast same quality of results
-as compare to other 3 Methods.
+One drawback of this approach is that the user has to control of 4 parameters
+ and find the best combination suited for the problem at hand. 
+ However the algorithm provides theoretical guarantees that the said solution
+  with provide outperforms or matches of results as compare to other three 
+ independent Methods.
 
 
+Here we demonstrate How to use this method. We generate result from GHT algorithm
+ for “camera” image using different hyper parameters 
+ and compare the results with the result of other implementation of
+ Otsu's Method.
 
 .. [1] https://en.wikipedia.org/wiki/Thresholding_%28image_processing%29
 

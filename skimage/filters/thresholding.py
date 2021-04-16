@@ -1345,13 +1345,13 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     -------------------
     .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
          Jonathan T. Barron, ECCV, 2020
-    
+
     Insights in GHT and its hyperparameter behaviour:
     -------------------------------------------------------
     1) GHT doesn't require the histogram to be normalized.
     2) tau, τ  hypterparameter serves a similar purpose as
         coarsing, blurring the input histogram.
-    
+
     Special Case : Minimum Error Thresholding
         set nu and kappa  as zero
         tau and omega doesn't matter
@@ -1392,7 +1392,8 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     if kappa < 0:
         raise ValueError("kappa needs to be a postive number or zero")
     if omega < 0:
-        raise ValueError("omega needs to be a postive number between zero and one included")
+        raise ValueError("""omega needs to be a postive number between 
+                zero and one included""")
 
     x, w0, w1, p0, p1, _, _, d0, d1 = _preliminaries(n, x)
     v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))

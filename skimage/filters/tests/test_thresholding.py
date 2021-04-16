@@ -706,7 +706,7 @@ def test_multiotsu_lut():
             assert np.array_equal(result_lut, result)
 
 
-@pytest.mark.parametrize("nu, tau, kappa, omega, threshold",[
+@pytest.mark.parametrize("nu, tau, kappa, omega, threshold", [
         (262144, 0.288675, 262144, 0.5, 71),
         (262144, 1, 262144, 0.5, 70),
         (0.0001, 1, 262144, 0.5, 71),
