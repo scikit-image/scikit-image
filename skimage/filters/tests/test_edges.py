@@ -6,22 +6,28 @@ from skimage.filters.edges import _mask_filter_result
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal,
                                      assert_, assert_allclose)
+from skimage._shared.utils import _supported_float_type
 
 
-def test_roberts_zeros():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_roberts_zeros(dtype):
     """Roberts' filter on an array of all zeros."""
-    result = filters.roberts(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.roberts(np.zeros((10, 10), dtype=dtype),
+                             np.ones((10, 10), bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert (np.all(result == 0))
 
 
-def test_roberts_diagonal1():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_roberts_diagonal1(dtype):
     """Roberts' filter on a diagonal edge should be a diagonal line."""
-    image = np.tri(10, 10, 0)
+    image = np.tri(10, 10, 0, dtype=dtype)
     expected = ~(np.tri(10, 10, -1).astype(bool) |
                  np.tri(10, 10, -2).astype(bool).transpose())
     expected[-1, -1] = 0  # due to 'reflect' & image shape, last pixel not edge
-    result = filters.roberts(image).astype(bool)
-    assert_array_almost_equal(result, expected)
+    result = filters.roberts(image)
+    assert result.dtype == _supported_float_type(dtype)
+    assert_array_almost_equal(result.astype(bool), expected)
 
 
 def test_roberts_diagonal2():
@@ -40,10 +46,12 @@ def test_sobel_zeros():
     assert (np.all(result == 0))
 
 
-def test_sobel_mask():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_sobel_mask(dtype):
     """Sobel on a masked array should be zero."""
-    result = filters.sobel(np.random.uniform(size=(10, 10)),
+    result = filters.sobel(np.random.uniform(size=(10, 10)).astype(dtype),
                            np.zeros((10, 10), dtype=bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert (np.all(result == 0))
 
 
@@ -134,10 +142,12 @@ def test_scharr_zeros():
     assert (np.all(result < 1e-16))
 
 
-def test_scharr_mask():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_scharr_mask(dtype):
     """Scharr on a masked array should be zero."""
-    result = filters.scharr(np.random.uniform(size=(10, 10)),
+    result = filters.scharr(np.random.uniform(size=(10, 10)).astype(dtype),
                             np.zeros((10, 10), dtype=bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert_allclose(result, 0)
 
 
@@ -231,10 +241,12 @@ def test_prewitt_zeros():
     assert_allclose(result, 0)
 
 
-def test_prewitt_mask():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_prewitt_mask(dtype):
     """Prewitt on a masked array should be zero."""
-    result = filters.prewitt(np.random.uniform(size=(10, 10)),
+    result = filters.prewitt(np.random.uniform(size=(10, 10)).astype(dtype),
                              np.zeros((10, 10), dtype=bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert_allclose(np.abs(result), 0)
 
 
@@ -339,13 +351,15 @@ def test_laplace_zeros():
     assert_allclose(result, check_result)
 
 
-def test_laplace_mask():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_laplace_mask(dtype):
     """Laplace on a masked array should be zero."""
     # Create a synthetic 2D image
-    image = np.zeros((9, 9))
+    image = np.zeros((9, 9), dtype=dtype)
     image[3:-3, 3:-3] = 1
     # Define the mask
     result = filters.laplace(image, ksize=3, mask=np.zeros((9, 9), dtype=bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert (np.all(result == 0))
 
 
@@ -356,10 +370,12 @@ def test_farid_zeros():
     assert (np.all(result == 0))
 
 
-def test_farid_mask():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_farid_mask(dtype):
     """Farid on a masked array should be zero."""
-    result = filters.farid(np.random.uniform(size=(10, 10)),
+    result = filters.farid(np.random.uniform(size=(10, 10)).astype(dtype),
                            mask=np.zeros((10, 10), dtype=bool))
+    assert result.dtype == _supported_float_type(dtype)
     assert (np.all(result == 0))
 
 
