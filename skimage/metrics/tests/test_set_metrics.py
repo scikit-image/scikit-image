@@ -7,6 +7,7 @@ import itertools
 import pytest
 
 from skimage._shared.testing import parametrize
+from skimage._shared._warnings import expected_warnings
 from skimage.metrics import hausdorff_distance, hausdorff_pair
 
 
@@ -15,11 +16,14 @@ def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=bool)
     non_empty = np.zeros((3, 2), dtype=bool)
     assert hausdorff_distance(empty, non_empty) == 0.
-    assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
+    with expected_warnings(["One or both of the images is empty"]):
+        assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
     assert hausdorff_distance(non_empty, empty) == 0.
-    assert_array_equal(hausdorff_pair(non_empty, empty), [(), ()])
+    with expected_warnings(["One or both of the images is empty"]):
+        assert_array_equal(hausdorff_pair(non_empty, empty), [(), ()])
     assert hausdorff_distance(empty, non_empty) == 0.
-    assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
+    with expected_warnings(["One or both of the images is empty"]):
+        assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
 
 
 def test_hausdorff_simple():
