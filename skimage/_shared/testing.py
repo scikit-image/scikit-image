@@ -201,13 +201,23 @@ def setup_test():
 
     warnings.simplefilter('error')
 
+    # do not error on specific warnings from the skimage.io module
+    warnings.filterwarnings(
+        'default', message='TiffFile:', category=DeprecationWarning,
+    )
+    warnings.filterwarnings(
+        'default', category=ResourceWarning, module='skimage.io'
+    )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
 
     Restore warnings to default behavior
     """
+    warnings.resetwarnings()
     warnings.simplefilter('default')
+
 
 
 def fetch(data_filename):
