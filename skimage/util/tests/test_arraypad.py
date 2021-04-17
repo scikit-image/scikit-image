@@ -1,4 +1,4 @@
-from distutils.version import LooseVersion
+import warnings
 
 import numpy as np
 import pytest
@@ -997,7 +997,7 @@ class ValueError3(TestCase):
         with testing.raises(ValueError):
             np.pad(arr, 4, mode='mean', reflect_type='odd')
 
-    @testing.skipif(LooseVersion(np.__version__) >= LooseVersion('1.17'),
+    @testing.skipif(np.lib.NumpyVersion(np.__version__) >= '1.17.0',
                     reason='Error removed in NumPy 1.17')
     def test_mode_not_set(self):
         arr = np.arange(30).reshape(5, 6)
@@ -1056,5 +1056,9 @@ class TypeError1(TestCase):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(3, ))
-        with testing.raises(TypeError):
-            np.pad(arr, ((2, 3, 4), (3, 2)), **kwargs)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore', category=np.VisibleDeprecationWarning
+            )
+            with testing.raises(TypeError):
+                np.pad(arr, ((2, 3, 4), (3, 2)), **kwargs)
