@@ -209,6 +209,9 @@ def setup_test():
         'default', category=ResourceWarning, module='skimage.io'
     )
 
+    # ignore known FutureWarnings from viewer module
+    warnings.filterwarnings('ignore', category=FutureWarning,
+                            module='skimage.viewer')
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
