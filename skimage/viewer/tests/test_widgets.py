@@ -108,7 +108,7 @@ def test_save_buttons():
     sv.save_to_stack()
     sv.save_to_file(filename)
 
-    img = data.imread(filename)
+    img = io.imread(filename)
 
     assert_almost_equal(img, img_as_uint(viewer.image))
 
