@@ -118,8 +118,11 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
 
     if in_place:
         out = ar
-    elif out is None:
-        out = ar.copy()
+    else:
+        if out is None:
+            out = ar.copy()
+        else:
+            out[:] = ar
 
     if min_size == 0:  # shortcut for efficiency
         return out
