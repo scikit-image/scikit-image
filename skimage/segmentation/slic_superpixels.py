@@ -157,7 +157,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         in most of the cases.
     slic_zero : bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
-    start_label: int, optional
+    start_label : int, optional
         The labels' index start. Should be 0 or 1.
 
         .. versionadded:: 0.17

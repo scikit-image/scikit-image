@@ -491,8 +491,8 @@ def convert_to_float(image, preserve_range):
         using img_as_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
-    Notes:
-    ------
+    Notes
+    -----
     * Input images with `float32` data type are not upcast.
 
     Returns
