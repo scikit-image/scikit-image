@@ -221,18 +221,17 @@ def setup_test():
 
     warnings.filterwarnings(
         'default', message='the matrix subclass is not the recommended way',
-         category=PendingDeprecationWarning, module='numpy')
+        category=PendingDeprecationWarning, module='numpy')
 
     warnings.filterwarnings(
         'default', message='Your installed pillow version',
-         category=UserWarning, module='skimage.io')
+        category=UserWarning, module='skimage.io')
 
     warnings.filterwarnings(
         'default', message='Viewer requires Qt', category=UserWarning)
 
     warnings.filterwarnings(
         'default', message='numpy.ufunc size changed', category=RuntimeWarning)
-
 
 
 def teardown_test():
