@@ -54,7 +54,7 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50):
 
     Parameters
     ----------
-    coord : array_like
+    coords : array_like
         The coordinates of the considered points.
     spacing : float
         the maximum allowed spacing between the points.

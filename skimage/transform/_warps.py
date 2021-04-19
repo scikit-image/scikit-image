@@ -139,7 +139,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         # The grid_mode kwarg was introduced in SciPy 1.6.0
         order = _validate_interpolation_order(image.dtype, order)
         zoom_factors = [1 / f for f in factors]
-        image = convert_to_float(image, preserve_range)
+        if order > 0:
+            image = convert_to_float(image, preserve_range)
         out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
         _clip_warp_output(image, out, order, mode, cval, clip)
@@ -827,7 +828,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
 
     order = _validate_interpolation_order(image.dtype, order)
 
-    image = convert_to_float(image, preserve_range)
+    if order > 0:
+        image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)
 
@@ -849,7 +851,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
              "skimage's implementation is fixed, we recommend "
              "to use bi-linear or bi-cubic interpolation instead.")
 
-    if order in (0, 1, 3) and not map_args:
+    if order in (1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
 
         matrix = None
