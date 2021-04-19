@@ -207,7 +207,7 @@ def setup_test():
         'default', message='TiffFile:', category=DeprecationWarning)
 
     warnings.filterwarnings(
-        'default', category=ResourceWarning, module='skimage.io')
+        'default', message='unclosed file', category=ResourceWarning)
 
     # ignore known FutureWarnings from viewer module
     warnings.filterwarnings('ignore', category=FutureWarning,
