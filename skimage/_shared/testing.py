@@ -202,16 +202,38 @@ def setup_test():
     warnings.simplefilter('error')
 
     # do not error on specific warnings from the skimage.io module
+    # https://github.com/scikit-image/scikit-image/issues/5337
     warnings.filterwarnings(
-        'default', message='TiffFile:', category=DeprecationWarning,
-    )
+        'default', message='TiffFile:', category=DeprecationWarning)
+
     warnings.filterwarnings(
-        'default', category=ResourceWarning, module='skimage.io'
-    )
+        'default', category=ResourceWarning, module='skimage.io')
 
     # ignore known FutureWarnings from viewer module
     warnings.filterwarnings('ignore', category=FutureWarning,
                             module='skimage.viewer')
+
+    # Ignore other warnings only seen when using older versions of
+    # dependencies.
+    warnings.filterwarnings(
+        'default', message='Conversion of the second argument of issubdtype',
+        category=FutureWarning)
+
+    warnings.filterwarnings(
+        'default', message='the matrix subclass is not the recommended way',
+         category=PendingDeprecationWarning, module='numpy')
+
+    warnings.filterwarnings(
+        'default', message='Your installed pillow version',
+         category=UserWarning, module='skimage.io')
+
+    warnings.filterwarnings(
+        'default', message='Viewer requires Qt', category=UserWarning)
+
+    warnings.filterwarnings(
+        'default', message='numpy.ufunc size changed', category=RuntimeWarning)
+
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
