@@ -30,10 +30,9 @@ New Features
 Documentation
 -------------
 
-- A new doc tutorial presenting a cell biology example has been added to the
-  gallery (#4648). The scientific content benefited from a much appreciated
-  review by Pierre Poulain and Fred Bernard, both assistant professors at
-  Université de Paris and Institut Jacques Monod.
+- A new doc tutorial presenting a 3D biomedical imaging example has been added
+  to the gallery (#4946). The technical content benefited from conversations
+  with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
 - New tutorial on `visualizing 3D data <https://scikit-image.org/docs/dev/auto_examples/applications/plot_3d_image_processing.html>`_ (#4850)
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
