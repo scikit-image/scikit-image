@@ -66,7 +66,5 @@ from skimage.filters import try_all_threshold
 
 img = data.page()
 
-# Here, we specify a radius for local thresholding algorithms.
-# If it is not specified, only global algorithms are called.
 fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
 plt.show()

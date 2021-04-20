@@ -136,14 +136,16 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
             elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
-        img_in = ndi.gaussian_filter(img_in, anti_aliasing_sigma,
+        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                      cval=cval, mode=ndi_mode)
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
         order = _validate_interpolation_order(input_type, order)
         zoom_factors = [1 / f for f in factors]
-        out = ndi.zoom(img_in, zoom_factors, order=order, mode=ndi_mode,
+        if order > 0:
+            image = convert_to_float(image, preserve_range)
+        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
@@ -175,7 +177,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         tform.params[1, 0] = 0
 
         # clip outside of warp to clip w.r.t input values, not filtered values.
-        out = warp(img_in, tform, output_shape=output_shape, order=order,
+        out = warp(image, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=False,
                    preserve_range=preserve_range)
 
@@ -189,10 +191,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                                          sparse=False,
                                          indexing='ij'))
 
-        out = ndi.map_coordinates(img_in, coord_map, order=order,
+        out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-    _clip_warp_output(image, out, mode, cval, clip)
+    _clip_warp_output(img_in, out, mode, cval, clip)
 
     return out
 
@@ -282,7 +284,7 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         if multichannel:
             scale = np.concatenate((scale, [1]))
     orig_shape = np.asarray(image.shape)
-    output_shape = np.round(scale * orig_shape)
+    output_shape = np.maximum(np.round(scale * orig_shape), 1)
     if multichannel:  # don't scale channel dimension
         output_shape[-1] = orig_shape[-1]
 
@@ -825,7 +827,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
 
     order = _validate_interpolation_order(image.dtype, order)
 
-    image = convert_to_float(image, preserve_range)
+    if order > 0:
+        image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)
 
@@ -847,7 +850,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
              "skimage's implementation is fixed, we recommend "
              "to use bi-linear or bi-cubic interpolation instead.")
 
-    if order in (0, 1, 3) and not map_args:
+    if order in (1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
 
         matrix = None

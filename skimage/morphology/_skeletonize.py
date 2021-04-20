@@ -34,7 +34,7 @@ def skeletonize(image, *, method=None):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -47,7 +47,6 @@ def skeletonize(image, *, method=None):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -108,7 +107,7 @@ def skeletonize_2d(image):
     skeleton : ndarray
         A matrix containing the thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -132,7 +131,6 @@ def skeletonize_2d(image):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -264,7 +262,6 @@ def thin(image, max_iter=None):
     ----------
     image : binary (M, N) ndarray
         The image to be thinned.
-
     max_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -276,7 +273,7 @@ def thin(image, max_iter=None):
     out : ndarray of bool
         Thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 
@@ -383,7 +380,7 @@ def medial_axis(image, mask=None, return_distance=False):
         Distance transform of the image (only returned if `return_distance`
         is True)
 
-    See also
+    See Also
     --------
     skeletonize
 
@@ -532,8 +529,6 @@ def _table_lookup(image, table):
     table : ndarray
         A 512-element table giving the transform of each pixel given
         the values of that pixel and its 8-connected neighbors.
-    border_value : bool
-        The value of pixels beyond the border of the image.
 
     Returns
     -------
@@ -543,7 +538,6 @@ def _table_lookup(image, table):
     Notes
     -----
     The pixels are numbered like this::
-
 
       0 1 2
       3 4 5
@@ -593,7 +587,7 @@ def skeletonize_3d(image):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 

@@ -18,6 +18,7 @@ from .. import __version__
 
 import os.path as osp
 import os
+import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -150,6 +151,7 @@ def create_image_fetcher():
         path=pooch.os_cache("scikit-image"),
         base_url=url,
         version=skimage_version_for_pooch,
+        version_dev="main",
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
@@ -253,8 +255,17 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
+
+    # Copy in the README.txt if it doesn't already exist.
+    # If the file was originally copied to the data cache directory read-only
+    # then we cannot overwrite it, nor do we need to copy on every init.
+    # In general, as the data cache directory contains the scikit-image version
+    # it should not be necessary to overwrite this file as it should not
+    # change.
+    dest_path = osp.join(data_dir, 'README.txt')
+    if not os.path.isfile(dest_path):
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     dest_path)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default

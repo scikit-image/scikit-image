@@ -1,22 +1,23 @@
 """
-==============================================
-Immunohistochemical staining colors separation
-==============================================
+===============================================
+Separate colors in immunohistochemical staining
+===============================================
 
-Color deconvolution consists of the separation of features by their colors.
+Color deconvolution consists in the separation of features by their colors.
 
 In this example we separate the immunohistochemical (IHC) staining from the
 hematoxylin counterstaining. The separation is achieved with the method
-described in [1]_, known as "color deconvolution".
+described in [1]_ and known as "color deconvolution".
 
 The IHC staining expression of the FHL2 protein is here revealed with
-Diaminobenzidine (DAB) which gives a brown color.
+diaminobenzidine (DAB) which gives a brown color.
 
 
 .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
-       staining by color deconvolution.," Analytical and quantitative
+       staining by color deconvolution," Analytical and quantitative
        cytology and histology / the International Academy of Cytology [and]
        American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+       PMID: 11531144
 
 """
 import numpy as np
@@ -60,22 +61,23 @@ fig.tight_layout()
 
 
 ######################################################################
-# Now we can easily manipulate the hematoxylin and DAB "channels":
+# Now we can easily manipulate the hematoxylin and DAB channels:
 
 from skimage.exposure import rescale_intensity
 
-# Rescale hematoxylin and DAB signals and give them a fluorescence look
+# Rescale hematoxylin and DAB channels and give them a fluorescence look
 h = rescale_intensity(ihc_hed[:, :, 0], out_range=(0, 1),
                       in_range=(0, np.percentile(ihc_hed[:, :, 0], 99)))
 d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1),
                       in_range=(0, np.percentile(ihc_hed[:, :, 2], 99)))
 
-# Put the two channels into an RGB image as green and blue channels
+# Cast the two channels into an RGB image, as the blue and green channels
+# respectively
 zdh = np.dstack((null, d, h))
 
 fig = plt.figure()
 axis = plt.subplot(1, 1, 1, sharex=ax[0], sharey=ax[0])
 axis.imshow(zdh)
-axis.set_title("Stain separated image (rescaled)")
+axis.set_title('Stain-separated image (rescaled)')
 axis.axis('off')
 plt.show()

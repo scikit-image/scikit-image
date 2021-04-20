@@ -483,6 +483,8 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
+    if shapeinfo.numels == 0:
+        return
     # Initialize the first row
     cdef DTYPE_t x, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
@@ -503,6 +505,8 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 2D array.
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
@@ -555,6 +559,8 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     Perform forward scan on a 3D array.
 
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     # Handle first plane
