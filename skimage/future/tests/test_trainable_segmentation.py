@@ -50,10 +50,14 @@ def test_trainable_segmentation_multichannel():
     labels[:2] = 1
     labels[-2:] = 2
     clf = DummyNNClassifier()
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        features = multiscale_basic_features(
-            img, edges=False, texture=False, sigma_min=0.5, sigma_max=2,
-            multichannel=True)
+    features = multiscale_basic_features(
+        img,
+        edges=False,
+        texture=False,
+        sigma_min=0.5,
+        sigma_max=2,
+        channel_axis=-1,
+    )
     clf = fit_segmenter(labels, features, clf)
     out = predict_segmenter(features, clf)
     assert np.all(out[:10] == 1)
