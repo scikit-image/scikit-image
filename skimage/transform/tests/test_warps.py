@@ -364,7 +364,10 @@ def test_resize_dtype():
 @pytest.mark.parametrize('dtype', [np.float64, np.uint8])
 def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     # test if clip as expected
-    expected_max = 255.0 if (dtype == np.uint8 and preserve_range) else 1.0
+    if dtype == np.uint8 and (preserve_range or order==0):
+        expected_max = 255
+    else:
+        expected_max = 1.0
     x = np.ones((5, 5), dtype=dtype)
     if dtype == np.uint8:
         x *= 255
