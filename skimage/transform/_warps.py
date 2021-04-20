@@ -118,7 +118,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
              "warning.", FutureWarning, stacklevel=2)
 
     factors = np.divide(input_shape, output_shape)
-    image = convert_to_float(image, preserve_range)
+    order = _validate_interpolation_order(input_type, order)
+    if order > 0:
+        image = convert_to_float(image, preserve_range)
     # create copy so input value range stays accessible through image for clip
     img_in = image
 
@@ -141,10 +143,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
-        order = _validate_interpolation_order(input_type, order)
         zoom_factors = [1 / f for f in factors]
-        if order > 0:
-            image = convert_to_float(image, preserve_range)
         out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
 
