@@ -84,8 +84,6 @@ Other (2021)
   and update osx_install to point to the correct branch
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
-  vectorized version of ``np.linspace``.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
 * Remove pillow version related warning for MPO file format in
