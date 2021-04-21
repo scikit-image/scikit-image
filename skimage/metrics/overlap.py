@@ -117,7 +117,7 @@ class Rectangle:
 
 
 def _disjoint(rectangle1, rectangle2):
-    """Check whether two rectangles are disjoint
+    """Check whether two rectangles are disjoint.
 
     Adapted from post from Aman Gupta [1]_.
 
@@ -145,8 +145,7 @@ def _disjoint(rectangle1, rectangle2):
 def intersect(rectangle1, rectangle2):
     """Return the Rectangle corresponding to the intersection of the inputs.
 
-    If the two inputs are disjoint, the returned rectangle is the "null"
-    rectangle, with top left corner at (0, 0) and dimensions (0, 0).
+    Return None if the two rectangles are disjoint.
 
     Parameters
     ----------
@@ -157,7 +156,7 @@ def intersect(rectangle1, rectangle2):
     -------
     intersected : Rectangle
         The rectangle produced by intersecting ``rectangle1`` and
-        ``rectangle2``.
+        ``rectangle2`` or None if the rectangles are disjoint.
 
     Examples
     --------
@@ -166,18 +165,14 @@ def intersect(rectangle1, rectangle2):
     >>> intersect(r0, r1)
     Rectangle((1, 2), bottom_right=(2, 3))
 
-    Since 0-area rectangles evaluate to False, this function can be used to
-    test for disjoint rectangles.
-
     >>> r2 = Rectangle((10, 10), dimensions=(3, 3))
-    >>> if not intersect(r1, r2):
+    >>> if intersect(r1, r2) is None:
     ...     print('r1 and r2 are disjoint')
     r1 and r2 are disjoint
     """
     if _disjoint(rectangle1, rectangle2):
-        # return the "null rectangle" if they are disjoint
-        ndim = rectangle1.ndim
-        return Rectangle((0,) * ndim, bottom_right=(0,) * ndim)
+        return None
+
     new_top_left = np.maximum(rectangle1.top_left, rectangle2.top_left)
     new_bottom_right = np.minimum(
             rectangle1.bottom_right, rectangle2.bottom_right
@@ -201,6 +196,8 @@ def intersection_over_union(rectangle1, rectangle2):
     iou : float
         The intersection over union value.
     """
-    intersection_area = intersect(rectangle1, rectangle2).area
-    union_area = rectangle1.area + rectangle2.area - intersection_area
-    return intersection_area / union_area
+    intersection = intersect(rectangle1, rectangle2)
+    if intersection is None:
+        return 0
+    union_area = rectangle1.area + rectangle2.area - intersection.area
+    return intersection.area / union_area
