@@ -141,3 +141,5 @@ px.imshow(
 # ``channel=2``) are kidney glomeruli [2]_.
 #
 # .. [2] https://en.wikipedia.org/wiki/Glomerulus_(kidney)
+
+plt.show()
