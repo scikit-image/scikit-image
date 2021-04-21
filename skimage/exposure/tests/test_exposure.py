@@ -306,16 +306,8 @@ def test_rescale_nan_warning(in_range, out_range):
         r" Rescaling will broadcast NaN to the full image\."
     )
 
-    # 2019/11/10 Passing NaN to np.clip raises a DeprecationWarning for
-    # versions above 1.17
-    # TODO: Remove once NumPy removes this DeprecationWarning
-    numpy_warning_1_17_plus = (
-        r"Passing `np.nan` to mean no clipping in np.clip "
-        r"has always been unreliable|\A\Z"
-    )
-
     with expected_warnings(
-            [msg, numpy_warning_1_17_plus]
+            [msg]
     ):
         exposure.rescale_intensity(image, in_range, out_range)
 
