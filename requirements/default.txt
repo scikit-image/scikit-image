@@ -1,5 +1,5 @@
 numpy>=1.16.5
-scipy>=1.2.3
+scipy>=1.5.4
 matplotlib>=3.0.3
 networkx>=2.2
 pillow>=5.4.0,!=7.1.0,!=7.1.1
