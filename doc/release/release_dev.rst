@@ -35,9 +35,6 @@ Documentation
   with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
-- An example showing how to explore interactively the properties of labelled
-  regions `has been added <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_regionprops.html>`_
-  (#5010).
 
 
 Improvements
