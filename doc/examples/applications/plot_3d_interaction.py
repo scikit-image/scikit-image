@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
+import plotly
 import plotly.express as px
 from skimage import data
 
@@ -64,7 +65,8 @@ print(f'range: ({vmin}, {vmax})')
 # <https://plotly.com/python/imshow/#defining-the-data-range-covered-by-the-color-range-with-zmin-and-zmax>`_
 # beyond ``(0.0, 1.0)`` for floats and ``(0, 255)`` for integers.
 
-px.imshow(data[n_plane // 2], zmax=vmax)
+fig = px.imshow(data[n_plane // 2], zmax=vmax)
+plotly.io.show(fig)
 # sphinx_gallery_thumbnail_number = 2
 
 #####################################################################
@@ -78,12 +80,13 @@ px.imshow(data[n_plane // 2], zmax=vmax)
 # This way, we get three single-channel images, where the max value of each
 # image is used:
 
-px.imshow(
+fig = px.imshow(
     data[n_plane // 2],
     facet_col=2,
     binary_string=True,
     labels={'facet_col': 'channel'}
 )
+plotly.io.show(fig)
 
 #####################################################################
 # What is the range of values for each colour channel?
@@ -99,11 +102,12 @@ print(f'range for channel 2: ({vmin_2}, {vmax_2})')
 #####################################################################
 # Let us be very specific and pass value ranges on a per-channel basis:
 
-px.imshow(
+fig = px.imshow(
     data[n_plane // 2],
     zmin=[vmin_0, vmin_1, vmin_2],
     zmax=[vmax_0, vmax_1, vmax_2]
 )
+plotly.io.show(fig)
 
 #####################################################################
 # Plotly lets you interact with this visualization by panning, zooming in and
@@ -115,7 +119,7 @@ px.imshow(
 # Click the play button to move along the ``z`` axis, through the stack of all
 # 16 slices.
 
-px.imshow(
+fig = px.imshow(
     data,
     zmin=[vmin_0, vmin_1, vmin_2],
     zmax=[vmax_0, vmax_1, vmax_2],
@@ -123,18 +127,20 @@ px.imshow(
     binary_string=True,
     labels={'animation_frame': 'plane'}
 )
+plotly.io.show(fig)
 
 #####################################################################
 # Combine channel facetting and slice animation
 # =============================================
 
-px.imshow(
+fig = px.imshow(
     data,
     animation_frame=0,
     facet_col=3,
     binary_string=True,
     labels={'facet_col': 'channel', 'animation_frame': 'plane'}
 )
+plotly.io.show(fig)
 
 #####################################################################
 # The biologist's eye can spot that the two bright blobs (best seen in
