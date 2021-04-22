@@ -11,7 +11,7 @@ from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
 from .corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import safe_as_int
+from .._shared.utils import _supported_float_type, safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
@@ -192,6 +192,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     """
 
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
@@ -204,7 +206,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
-
     return H_elems
 
 
@@ -245,6 +246,8 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     computed the Hessian and took its determinant.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     if image.ndim == 2 and approximate:
         integral = integral_image(image)
         return np.array(_hessian_matrix_det(integral, sigma))
@@ -304,7 +307,8 @@ def _symmetric_image(S_elems):
         containing the matrix corresponding to each coordinate.
     """
     image = S_elems[0]
-    symmetric_image = np.zeros(image.shape + (image.ndim, image.ndim))
+    symmetric_image = np.zeros(image.shape + (image.ndim, image.ndim),
+                               dtype=S_elems[0].dtype)
     for idx, (row, col) in \
             enumerate(combinations_with_replacement(range(image.ndim), 2)):
         symmetric_image[..., row, col] = S_elems[idx]
@@ -527,6 +531,9 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
            :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     imy, imx = _compute_derivatives(image, mode=mode, cval=cval)
     imxy, imxx = _compute_derivatives(imx, mode=mode, cval=cval)
     imyy, imyx = _compute_derivatives(imy, mode=mode, cval=cval)
@@ -534,7 +541,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     numerator = (imxx * imy ** 2 + imyy * imx ** 2 - 2 * imxy * imx * imy)
     denominator = (imx ** 2 + imy ** 2)
 
-    response = np.zeros_like(image, dtype=np.double)
+    response = np.zeros_like(image, dtype=float_dtype)
 
     mask = denominator != 0
     response[mask] = numerator[mask] / denominator[mask]
@@ -757,8 +764,8 @@ def corner_foerstner(image, sigma=1):
     # trace
     traceA = Arr + Acc
 
-    w = np.zeros_like(image, dtype=np.double)
-    q = np.zeros_like(image, dtype=np.double)
+    w = np.zeros_like(image, dtype=detA.dtype)
+    q = np.zeros_like(w)
 
     mask = traceA != 0
 
@@ -895,16 +902,18 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # window extent in one direction
     wext = (window_size - 1) // 2
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     image = np.pad(image, pad_width=wext, mode='constant', constant_values=0)
 
     # add pad width, make sure to not modify the input values in-place
     corners = safe_as_int(corners + wext)
 
     # normal equation arrays
-    N_dot = np.zeros((2, 2), dtype=np.double)
-    N_edge = np.zeros((2, 2), dtype=np.double)
-    b_dot = np.zeros((2, ), dtype=np.double)
-    b_edge = np.zeros((2, ), dtype=np.double)
+    N_dot = np.zeros((2, 2), dtype=float_dtype)
+    N_edge = np.zeros((2, 2), dtype=float_dtype)
+    b_dot = np.zeros((2, ), dtype=float_dtype)
+    b_edge = np.zeros((2, ), dtype=float_dtype)
 
     # critical statistical test values
     redundancy = window_size ** 2 - 2
@@ -914,7 +923,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # coordinates of pixels within window
     y, x = np.mgrid[- wext:wext + 1, - wext:wext + 1]
 
-    corners_subpix = np.zeros_like(corners, dtype=np.double)
+    corners_subpix = np.zeros_like(corners, dtype=float_dtype)
 
     for i, (y0, x0) in enumerate(corners):
 
@@ -1158,7 +1167,10 @@ def corner_moravec(image, window_size=1):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]])
     """
-    return _corner_moravec(image, window_size)
+    image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+    return _corner_moravec(np.ascontiguousarray(image), window_size)
 
 
 def corner_orientations(image, corners, mask):
