@@ -70,6 +70,9 @@ def test_preserve_range():
     assert np.all(filtered_ones == filtered_ones[0, 0])
     assert filtered_ones[0, 0] < 1e-10
 
+    filtered_preserved = gaussian(ones, preserve_range=True)
+    assert np.all(filtered_preserved == 1.)
+
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
     gaussian(img, 1)
 
@@ -80,7 +83,7 @@ def test_1d_ok():
     to be greater than 0.1
     """
     nums = np.arange(7)
-    filtered = gaussian(nums)
+    filtered = gaussian(nums, preserve_range=True)
     assert np.all(filtered > 0.1)
 
 

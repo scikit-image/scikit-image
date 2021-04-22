@@ -102,7 +102,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         msg = ('The default value of preserve_range will change '
                'to True in version 1.0')
         warn(msg, DeprecationWarning)
-        preserve_range = True
+        preserve_range = False
 
     spatial_dims = None
     try:
