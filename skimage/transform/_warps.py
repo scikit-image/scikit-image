@@ -1188,11 +1188,24 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     output_shape : tuple or ndarray
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved. In case the
-        number of input channels does not equal the number of output channels a
-        n-dimensional interpolation is applied.
+        number of input channels does not equal the number of output channels
+        an n-dimensional interpolation is applied.
     grid_mode : bool, optional
-        Whether to use grid data model of pixel/voxel model for
-        average weights computation.
+        If False, the distance from the pixel centers is zoomed. Otherwise, the
+        distance including the full pixel extent is used. For example, a 1d
+        signal of length 5 is considered to have length 4 when `grid_mode` is
+        False, but length 5 when `grid_mode` is True. See the following
+        visual illustration:
+
+        .. code-block:: text
+
+                | pixel 1 | pixel 2 | pixel 3 | pixel 4 | pixel 5 |
+                     |<-------------------------------------->|
+                                        vs.
+                |<----------------------------------------------->|
+
+        The starting point of the arrow in the diagram above corresponds to
+        coordinate location 0 in each mode.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
@@ -1203,6 +1216,22 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     -------
     resized : ndarray
         Resized version of the input.
+
+    See Also
+    --------
+    resize, downscale_local_mean
+
+    Notes
+    -----
+    This method is sometimes referred to as "area-based" interpolation or
+    "pixel mixing" interpolation [1]_. When `grid_mode` is True, it is
+    equivalent to using OpenCV's resize with `INTER_AREA` interpolation mode.
+    It is commonly used for image downsizing. If the downsizing factors are
+    integers, then ``downscale_local_mean`` should be preferred instead.
+
+    References
+    ----------
+    .. [1] http://entropymine.com/imageworsener/pixelmixing/
 
     Examples
     --------
