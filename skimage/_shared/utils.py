@@ -603,8 +603,8 @@ def _supported_float_type(input_dtype, allow_complex=False):
     complex256 is demoted to complex128.
     Other types are cast to float64.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     input_dtype : np.dtype or Iterable of np.dtype
         The input dtype. If a sequence of multiple dtypes is provided, each
         dtype is first converted to a supported floating point type and the
@@ -613,7 +613,7 @@ def _supported_float_type(input_dtype, allow_complex=False):
     allow_complex : bool, optional
         If False, raise a ValueError on complex-valued inputs.
 
-    Retruns
+    Returns
     -------
     float_type : dtype
         Floating-point dtype for the image.
