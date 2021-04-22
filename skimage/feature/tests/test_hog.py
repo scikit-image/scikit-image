@@ -1,13 +1,17 @@
+import os
+
 import numpy as np
 from scipy import ndimage as ndi
+
 from skimage import color
 from skimage import data
+from skimage import draw
 from skimage import feature
 from skimage import img_as_float
-from skimage import draw
-from skimage._shared.testing import assert_almost_equal, fetch
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import assert_allclose, assert_almost_equal, fetch
+from skimage._shared.utils import _supported_float_type
 
 
 def test_hog_output_size():
@@ -19,14 +23,16 @@ def test_hog_output_size():
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
 
-def test_hog_output_correctness_l1_norm():
-    img = color.rgb2gray(data.astronaut())
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_hog_output_correctness_l1_norm(dtype):
+    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L1',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
+    assert output.dtype == _supported_float_type(dtype)
     assert_almost_equal(output, correct_output)
 
 
