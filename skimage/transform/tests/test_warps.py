@@ -711,18 +711,32 @@ def test_resize_local_mean2d():
     assert_almost_equal(resized, ref)
 
 
-def test_resize_local_mean3d_keep():
+@testing.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
+def test_resize_local_mean3d_keep(channel_axis):
     # keep 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    nch = 3
+    x = np.zeros((5, 5, nch), dtype=np.double)
     x[1, 1, :] = 1
-    resized = resize_local_mean(x, (10, 10))
+    # move channels to expected dimension
+    x = np.moveaxis(x, -1, channel_axis)
+    resized = resize_local_mean(x, (10, 10), channel_axis=channel_axis)
+    # move channels back to last axis to match the reference image
+    resized = np.moveaxis(resized, channel_axis, -1)
     with testing.raises(ValueError):
         # output_shape too short
         resize_local_mean(x, (10, ))
-    ref = np.zeros((10, 10, 3))
+    ref = np.zeros((10, 10, nch))
     ref[2:4, 2:4, :] = 1
     assert_almost_equal(resized, ref)
-    resized = resize_local_mean(x, (10, 10, 3))
+
+    channel_axis = channel_axis % x.ndim
+    spatial_shape = (10, 10)
+    out_shape = (
+        spatial_shape[:channel_axis] + (nch,) + spatial_shape[channel_axis:]
+    )
+    resized = resize_local_mean(x, out_shape)
+    # move channels back to last axis to match the reference image
+    resized = np.moveaxis(resized, channel_axis, -1)
     assert_almost_equal(resized, ref)
 
 
@@ -734,6 +748,10 @@ def test_resize_local_mean3d_resize():
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
+
+    # can't resize along specified channel axis
+    with testing.raises(ValueError):
+        resize_local_mean(x, (10, 10, 1), channel_axis=-1)
 
 
 def test_resize_local_mean3d_2din_3dout():

@@ -10,7 +10,8 @@ from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
-                             _validate_interpolation_order)
+                             _validate_interpolation_order,
+                             channel_as_last_axis)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -1178,18 +1179,21 @@ def _local_mean_weights(old_size, new_size, grid_mode, dtype):
 
 
 def resize_local_mean(image, output_shape, grid_mode=True,
-                      preserve_range=False):
+                      preserve_range=False, *, channel_axis=None):
     """Resize an array with the local mean / bilinear scaling.
 
     Parameters
     ----------
     image : ndarray
-        Input image.
+        Input image. If this is a multichannel image, the axis corresponding
+        to channels should be specified using `channel_axis`
     output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols[, ...][, dim])`. If
-        `dim` is not provided, the number of channels is preserved. In case the
-        number of input channels does not equal the number of output channels
-        an n-dimensional interpolation is applied.
+        Size of the generated output image. When `channel_axis` is not None,
+        the `channel_axis` should either be omitted from `output_shape` or the
+        ``output_shape[channel_axis]`` must match
+        ``image.shape[channel_axis]``. If the length of `output_shape` exceeds
+        image.ndim, additional singleton dimensions will be appended to the
+        input ``image`` as needed.
     grid_mode : bool, optional
         If False, the distance from the pixel centers is zoomed. Otherwise, the
         distance including the full pixel extent is used. For example, a 1d
@@ -1227,7 +1231,7 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     "pixel mixing" interpolation [1]_. When `grid_mode` is True, it is
     equivalent to using OpenCV's resize with `INTER_AREA` interpolation mode.
     It is commonly used for image downsizing. If the downsizing factors are
-    integers, then ``downscale_local_mean`` should be preferred instead.
+    integers, then `downscale_local_mean` should be preferred instead.
 
     References
     ----------
@@ -1242,9 +1246,39 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     (100, 100)
 
     """
-    resized, output_shape = _preprocess_resize_output_shape(image,
-                                                            output_shape)
+    if channel_axis is not None:
+        if channel_axis < -image.ndim or channel_axis >= image.ndim:
+            raise ValueError("invalid channel_axis")
 
+        # move channels to last position
+        image = np.moveaxis(image, channel_axis, -1)
+        nc = image.shape[-1]
+
+        output_ndim = len(output_shape)
+        if output_ndim == image.ndim - 1:
+            # insert channels dimension at the end
+            output_shape = output_shape + (nc,)
+        elif output_ndim == image.ndim:
+            if output_shape[channel_axis] != nc:
+                raise ValueError(
+                    "Cannot reshape along the channel_axis. Use "
+                    "channel_axis=None to reshape along all axes."
+                )
+            # move channels to last position in output_shape
+            channel_axis = channel_axis % image.ndim
+            output_shape = (
+                output_shape[:channel_axis] + output_shape[channel_axis:] +
+                (nc,)
+            )
+        else:
+            raise ValueError(
+                "len(output_shape) must be image.ndim or (image.ndim - 1) "
+                "when a channel_axis is specified."
+            )
+        resized = image
+    else:
+        resized, output_shape = _preprocess_resize_output_shape(image,
+                                                                output_shape)
     resized = convert_to_float(resized, preserve_range)
     dtype = resized.dtype
 
@@ -1255,5 +1289,9 @@ def resize_local_mean(image, output_shape, grid_mode=True,
         weights = _local_mean_weights(old_size, new_size, grid_mode, dtype)
         product = np.tensordot(resized, weights, [[axis], [-1]])
         resized = np.moveaxis(product, -1, axis)
+
+    if channel_axis is not None:
+        # restore channels to original axis
+        resized = np.moveaxis(resized, -1, channel_axis)
 
     return resized
