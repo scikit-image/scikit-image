@@ -1451,6 +1451,8 @@ def separate_stains(rgb, conv_matrix):
 
     stains = (np.log(rgb) / log_adjust) @ conv_matrix
 
+    np.maximum(stains, 0, out=stains)
+
     return stains
 
 

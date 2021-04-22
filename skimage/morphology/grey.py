@@ -196,7 +196,6 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-
     image : ndarray
         Image array.
     selem : ndarray, optional
@@ -376,7 +375,7 @@ def white_tophat(image, selem=None, out=None):
     out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
-    See also
+    See Also
     --------
     black_tophat
 
@@ -451,7 +450,7 @@ def black_tophat(image, selem=None, out=None):
     out : array, same shape and type as `image`
         The result of the morphological black top hat.
 
-    See also
+    See Also
     --------
     white_tophat
 

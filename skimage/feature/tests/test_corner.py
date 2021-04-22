@@ -94,6 +94,20 @@ def test_structure_tensor_orders():
     assert_array_equal(A_elems_xy, A_elems_rc[::-1])
 
 
+@pytest.mark.parametrize('ndim', [2, 3])
+def test_structure_tensor_sigma(ndim):
+    img = np.zeros((5,) * ndim)
+    img[[2] * ndim] = 1
+    A_default = structure_tensor(img, sigma=0.1)
+    A_tuple = structure_tensor(img, sigma=(0.1,) * ndim)
+    A_list = structure_tensor(img, sigma=[0.1] * ndim)
+    assert_array_equal(A_tuple, A_default)
+    assert_array_equal(A_list, A_default)
+    with testing.raises(ValueError):
+        structure_tensor(img, sigma=(0.1,) * (ndim - 1))
+    with testing.raises(ValueError):
+        structure_tensor(img, sigma=[0.1] * (ndim + 1))
+
 def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 4

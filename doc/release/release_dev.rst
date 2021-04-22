@@ -30,31 +30,11 @@ New Features
 Documentation
 -------------
 
-- A new doc tutorial presenting a cell biology example has been added to the
-  gallery (#4648). The scientific content benefited from a much appreciated
-  review by Pierre Poulain and Fred Bernard, both assistant professors at
-  Université de Paris and Institut Jacques Monod.
-- New tutorial on `visualizing 3D data <https://scikit-image.org/docs/dev/auto_examples/applications/plot_3d_image_processing.html>`_ (#4850)
+- A new doc tutorial presenting a 3D biomedical imaging example has been added
+  to the gallery (#4946). The technical content benefited from conversations
+  with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
-- Automatic formatting of docstrings for improved consistency (#4849)
-- Improved docstring for ``rgb2lab`` (#4839) and ``marching_cubes`` (#4846)
-- Improved docstring for ``measure.marching_cubes``, mentioning how to decimate a
-  mesh using mayavi (#4846)
-- Improved docstring for ``util.random_noise`` (#5001)
-- Improved docstrings for ``morphology.h_maxima`` and ``morphology.h_minima``
-  (#4929).
-- Improved docstring for ``util.img_as_int`` (#4888).
-- An example showing how to explore interactively the properties of labelled
-  regions `has been added <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_regionprops.html>`_
-  (#5010).
-- Documentation has been added to explain
-  `how to download example datasets <https://scikit-image.org/docs/dev/install.html#downloading-all-demo-datasets>`_
-  which are not installed with scikit-image (#4984). Similarly, the contributor
-  guide has been updated to mention how to host new datasets in a gitlab
-  repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
-  has been expanded (#4905).
 
 
 Improvements
