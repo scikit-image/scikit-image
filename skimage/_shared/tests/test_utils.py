@@ -131,8 +131,8 @@ def test_deprecated_kwarg():
         assert foo(0, old_arg1=1) == (0, 1, None)
         assert bar(0, old_arg1=1) == (0, 1, None)
 
-    msg = ("'old_arg1' is a deprecated argument name "
-           "for `foo`. Please use 'new_arg1' instead.")
+    msg = ("`old_arg1` is a deprecated argument name "
+           "for `foo`. Please use `new_arg1` instead.")
     assert str(record[0].message) == msg
     assert str(record[1].message) == "Custom warning message"
 

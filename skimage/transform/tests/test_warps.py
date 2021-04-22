@@ -1,9 +1,10 @@
+import pytest
 import numpy as np
 import pytest
 from scipy.ndimage import map_coordinates
 
 from skimage.data import checkerboard, astronaut
-from skimage.util.dtype import img_as_float
+from skimage.util.dtype import img_as_float, _convert
 from skimage.color.colorconv import rgb2gray
 from skimage.draw.draw import circle_perimeter_aa
 from skimage.feature.peak import peak_local_max
@@ -162,7 +163,8 @@ def test_rotate_resize_center():
     ref_x45[6, 0] = 1
     ref_x45[7, 0] = 1
 
-    x45 = rotate(x, 45, resize=True, center=(3, 3), order=0)
+    x45 = rotate(x, 45, resize=True, center=(3, 3), order=0,
+                 mode='reflect')
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)
     assert_equal(x45, ref_x45)
@@ -351,8 +353,8 @@ def test_resize_dtype():
     assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
     assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
     assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
-    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
-    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == bool
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == bool
     assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
@@ -477,6 +479,13 @@ def test_downscale_anti_aliasing():
     assert_equal(scaled[:, 3:].sum(), 0)
 
 
+def test_downscale_to_the_limit():
+    img = np.random.rand(3, 4)
+    out = rescale(img, 1e-3)
+
+    assert out.size == 1
+
+
 def test_downscale_local_mean():
     image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
@@ -530,7 +539,7 @@ def test_keep_range():
                   mode='constant', multichannel=False, anti_aliasing=False,
                   clip=True, order=0)
     assert out.min() == 0
-    assert out.max() == 2 / 255.0
+    assert out.max() == 2
 
 
 def test_zero_image_size():
@@ -640,6 +649,18 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
 
 
+@pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])
+def test_order_0_warp_dtype(dtype):
+
+    img = _convert(astronaut()[:10, :10, 0], dtype)
+
+    assert resize(img, (12, 12), order=0).dtype == dtype
+    assert rescale(img, 0.5, order=0).dtype == dtype
+    assert rotate(img, 45, order=0).dtype == dtype
+    assert warp_polar(img, order=0).dtype == dtype
+    assert swirl(img, order=0).dtype == dtype
+
+
 def test_resize_local_mean2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
@@ -722,7 +743,6 @@ def test_resize_local_mean3d():
     ref[1, 3, :] = ref[3, 1, :] = 0.1640625
     ref[2, 3, :] = ref[3, 2, :] = 0.4375
     assert_almost_equal(resized, ref)
-
 
 def test_resize_local_mean_dtype():
     x = np.zeros((5, 5))

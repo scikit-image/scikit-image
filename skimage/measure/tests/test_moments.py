@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import draw
@@ -9,7 +10,6 @@ from skimage.measure import (moments, moments_central, moments_coords,
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_allclose)
-from skimage._shared._warnings import expected_warnings
 
 
 def test_moments():
@@ -131,6 +131,17 @@ def test_moments_hu():
     hu2 = moments_hu(nu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(hu, hu2, decimal=1)
+
+
+@pytest.mark.parametrize('dtype', ['float32', 'float64'])
+def test_moments_hu_dtype(dtype):
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:15, 13:17] = 1
+    mu = moments_central(image, (13.5, 14.5))
+    nu = moments_normalized(mu)
+    hu = moments_hu(nu.astype(dtype))
+
+    assert hu.dtype == dtype
 
 
 def test_centroid():

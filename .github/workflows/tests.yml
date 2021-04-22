@@ -7,7 +7,7 @@ jobs:
 
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
@@ -16,7 +16,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         QT: ["PyQt5"]
@@ -84,8 +84,9 @@ jobs:
         run: |
             set -ex
             source tools/github/before_install.sh
+            set -ex
             python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST ]]; then
+            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
                 pip uninstall cython -y;
                 pip install dist/scikit-image-*.tar.gz;
             else
@@ -127,24 +128,24 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
         QT: ["PyQt5"]
         BUILD_DOCS: [1]
         TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: 3.6
-            OPTIONAL_DEPS: 0 
+          - python-version: 3.7
+            OPTIONAL_DEPS: 0
           - python-version: 3.9
-            OPTIONAL_DEPS: 0 
+            OPTIONAL_DEPS: 0
         exclude:
-          - python-version: 3.6
+          - python-version: 3.7
             OPTIONAL_DEPS: 1
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-    
+
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0

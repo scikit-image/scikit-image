@@ -1,3 +1,13 @@
+scikit-image 0.18.1
+===================
+
+This is a bug fix release and contains the following two bug fixes:
+
+- Fix indexing error for labelling in large (>2GB) arrays (#5143, #5151)
+- Only use retry_if_failed with recent pooch (#5148)
+
+See below for the new features and API changes in 0.18.0.
+
 Announcement: scikit-image 0.18.0
 =================================
 
@@ -6,6 +16,11 @@ We're happy to announce the release of scikit-image v0.18.0!
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
+
+This release of scikit-image drops support for Python 3.6 in accordance with
+the `NEP-29 Python and Numpy version support community standard
+<https://numpy.org/neps/nep-0029-deprecation_policy.html>`_: Python 3.7 or
+newer is required to run this version.
 
 For more information, examples, and documentation, please visit our website:
 
@@ -73,8 +88,12 @@ Documentation
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_
   has been expanded (#4905).
+- Added links to the image.sc forum in example pages (#5094, #5096)
+- Added missing datasets to gallery examples (#5116, #5118)
+- Add farid filters in __all__, to populate the documentation (#5128, #5129)
+- Proofread gallery example for rank filters. (#5126, #5136)
 
 Improvements
 ------------
@@ -103,25 +122,26 @@ Improvements
   inequalities in sequence (#5020)
 - Polygon rasterization is more precise and will no longer potentially exclude
   input vertices. (#5029)
+- Add data optional requirements to allow pip install scikit-image[data]
+  (#5105, #5111)
+- OpenMP support in MSVC (#4924, #5111)
+- Restandardize handling of Multi-Image files (#2815, #5132)
+- Consistent zoom boundary behavior across SciPy versions (#5131, #5133)
 
 API Changes
 -----------
 
 - ``skimage.restoration.richardson_lucy`` returns a single-precision output
   when the input is single-precision. Prior to this release, double-precision
-  was always used.
+  was always used. (#4880)
 - The default value of ``threshold_rel`` in ``skimage.feature.corner`` has
-  changed from 0.1 to None, which corresponds to letting 
+  changed from 0.1 to None, which corresponds to letting
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
-- ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
-  descriptive name.
-- The ``level`` parameter of ``measure.find_contours`` is now a keyword
-  argument, with a default value set to (max(image) - min(image)) / 2.
-- ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
-  to add support for Minkowski distances.
 - In ``measure.label``, the deprecated ``neighbors`` parameter has been
   removed. (#4942)
+- The image returned by ``data.camera`` has changed because of copyright
+  issues (#4913).
 
 Bug fixes
 ---------
@@ -134,12 +154,12 @@ Bug fixes
 - Fix bug in ``random_walker`` when input labels have negative values (#4771)
 - PSF flipping is now correct for Richardson-Lucy deconvolution work in >2D (#4823)
 - Fix equalize_adapthist (CLAHE) for clip value 1.0 (#4828)
-- For the RANSAC algorithm, improved the case where all data points are 
-  outliers, which was previously raising an error 
+- For the RANSAC algorithm, improved the case where all data points are
+  outliers, which was previously raising an error
   (#4844)
 - An error-causing bug has been corrected for the ``bg_color`` parameter in
   ``label2rgb`` when its value is a string (#4840)
-- A normalization bug was fixed in ``metrics.variation_of_information`` 
+- A normalization bug was fixed in ``metrics.variation_of_information``
   (#4875)
 - Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
   for 3D objects, since it did not take tunnels into account. A new implementation
@@ -157,6 +177,8 @@ Bug fixes
   Before this fix, an incorrect value could be returned where the input images
   had NaNs (#4886).
 - Fix edge filters not respecting padding mode (#4907)
+- Use v{} for version tags with pooch (#5104, #5110)
+- Fix compilation error in XCode 12 (#5107, #5111)
 
 Deprecations
 ------------
@@ -174,7 +196,7 @@ Deprecations
   `plotly <https://plotly.com>`_. In a similar vein, the ``qt`` and ``skivi``
   plugins of ``skimage.io`` have been deprecated
   and will be removed in version 0.20. (#4941, #4954)
-- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and
   ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 - The explicit setting ``threshold_rel=0` was removed from the Examples of the
   following docstrings: ``skimage.feature.BRIEF``,
@@ -209,6 +231,8 @@ Development process
 - We now build our wheels on GitHub Actions on the main repo using
   cibuildwheel. Many thanks to the matplotlib and scikit-learn developers for
   paving the way for us! (#5080)
+- Disable Travis-CI builds (#5099, #5111)
+- Improvements to CircleCI build: no parallelization and caching) (#5097, #5119)
 
 Other Pull Requests
 -------------------
@@ -313,12 +337,16 @@ Other Pull Requests
 - Some minor tweaks to CI (#5079)
 - removed usage of numpy's private functions from util.arraycrop (#5081)
 - peak_local_max: remove deprecated `indices` argument from examples (#5082)
+- Replace np.bool, np.float, and np.int with bool, float, and int (#5103, #5108)
+- change plausible script to track outbound links (#5115, #5123)
+- Remove Python 3.6 support (#5117, #5125)
+- Optimize ensure_spacing (#5062, #5135)
 
 
 52 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 
-A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package. 
+A warm thank you to all contributors who added to this release. A fraction of contributors were first-time contributors to open source and a much larger fraction first-time contributors to scikit-image. It's a great feeling for maintainers to welcome new contributors, and the diversity of scikit-image contributors is surely a big strength of the package.
 
 - Abhishek Arya
 - Abhishek Patil

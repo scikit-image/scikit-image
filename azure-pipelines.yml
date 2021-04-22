@@ -8,15 +8,6 @@ jobs:
   strategy:
     maxParallel: 10
     matrix:
-      Python36:
-        PYTHON_VERSION: '3.6'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python36-x64:
-        PYTHON_VERSION: '3.6'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        BUILD_DOCS: 'true'
       Python37:
         PYTHON_VERSION: '3.7'
         ARCH: 'x86'
@@ -35,6 +26,7 @@ jobs:
         ARCH: 'x64'
         PIP_FLAGS: ''
         TEST_EXAMPLES: 'true'
+        BUILD_DOCS: 'true'
       # build pre release packages on Python 3.8 since it has been out long
       # enough for wheels to be built for packages that need to be compiled.
       Python38-x64-pre:
