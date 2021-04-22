@@ -35,6 +35,15 @@ def test_keypoints_orb_desired_no_of_keypoints(dtype):
                              0.56637459, 0.52248355, 0.43696175, 0.42992376,
                              0.37700486, 0.36126832])
 
+    if np.dtype(dtype) == np.float32:
+        assert detector_extractor.scales.dtype == np.float32
+        assert detector_extractor.responses.dtype == np.float32
+        assert detector_extractor.orientations.dtype == np.float32
+    else:
+        assert detector_extractor.scales.dtype == np.float64
+        assert detector_extractor.responses.dtype == np.float64
+        assert detector_extractor.orientations.dtype == np.float64
+
     assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
     assert_almost_equal(exp_scales, detector_extractor.scales)
