@@ -281,6 +281,10 @@ class channel_as_last_axis():
             for name in self.kwarg_names:
                 kwargs[name] = np.moveaxis(kwargs[name], channel_axis[0], -1)
 
+            # now that we have moved the channels axis to the last position,
+            # change the channel_axis argument to -1
+            kwargs["channel_axis"] = -1
+
             # Call the function with the fixed arguments
             out = func(*new_args, **kwargs)
             if self.multichannel_output:
