@@ -649,6 +649,47 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
 
 
+def test_bool_img_rescale():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = rescale(img, 0.5)
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_bool_img_resize():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = resize(img, (6, 9))
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_bool_array_warnings():
+    img = np.zeros((10, 10), dtype=bool)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        warp(img, np.eye(3), order=1)
+
+
 @pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])
 def test_order_0_warp_dtype(dtype):
 
