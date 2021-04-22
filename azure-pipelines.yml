@@ -75,22 +75,22 @@ jobs:
       displayName: Cache pip packages
 
     - bash: |
-        set -ex
-        PYTHON="$(python.pythonLocation)\\python.exe"
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Update pip
       $PYTHON -m pip install -U pip setuptools wheel
 
-        # print out the pip cache dir followed by the variable defined above
-	# to confirm that they match
-        $PYTHON -m pip cache dir
-        echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
+      # print out the pip cache dir followed by the variable defined above
+      # to confirm that they match
+      $PYTHON -m pip cache dir
+      echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
-        # Check that we have the expected version and architecture for Python
-        $PYTHON --version
-        $PYTHON -m pip --version
-        $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-        $PYTHON -m pip list
+      # Check that we have the expected version and architecture for Python
+      $PYTHON --version
+      $PYTHON -m pip --version
+      $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+      $PYTHON -m pip list
 
       # Install the build and runtime dependencies of the project
       $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
