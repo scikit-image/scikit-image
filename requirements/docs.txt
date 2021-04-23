@@ -16,3 +16,4 @@ ipywidgets
 ipykernel
 plotly>=5.10
 kaleido
+scikit-learn>=0.24.0

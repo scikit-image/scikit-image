@@ -14,6 +14,8 @@
   `skimage.metrics.adapted_rand_error`
   `skimage.metrics.contingency_table`
 - A new example of plotting these evaluation metrics has been added to the docs.
+- An implementation of the Fisher vector is now available in:
+  ``skimage.feature.fisher_vector``
 
 # Version 0.15
 
