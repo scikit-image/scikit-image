@@ -333,3 +333,5 @@ fig.update_layout(
 # Drop animation buttons
 fig['layout'].pop('updatemenus')
 fig
+
+plt.show()
