@@ -1,14 +1,15 @@
 import itertools
-import pytest
+import warnings
 
 import numpy as np
-from skimage.color.colorlabel import label2rgb
-from skimage.color.colorconv import rgb2hsv, hsv2rgb
+import pytest
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal,
                                      assert_array_equal, assert_warns,
                                      assert_no_warnings)
+from skimage.color.colorconv import rgb2hsv, hsv2rgb
+from skimage.color.colorlabel import label2rgb
 
 
 def test_deprecation_warning():
@@ -250,12 +251,12 @@ def test_overlay_custom_saturation():
     assert_array_almost_equal(saturaded_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
 
-@pytest.mark.filterwarnings("error")
 def test_saturation_warning():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
-    with pytest.raises(UserWarning):
+    with testing.expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=2)
+    with testing.expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=-1)

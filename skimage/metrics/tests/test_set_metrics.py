@@ -11,7 +11,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage.metrics import hausdorff_distance, hausdorff_pair
 
 
-@pytest.mark.filterwarnings("ignore:One or both")
 def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=bool)
     non_empty = np.zeros((3, 2), dtype=bool)
