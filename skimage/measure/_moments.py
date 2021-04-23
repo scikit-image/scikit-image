@@ -246,7 +246,9 @@ def moments_central(image, center=None, order=3, **kwargs):
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float_dtype) - center[dim]
-        powers_of_delta = delta[:, np.newaxis] ** np.arange(order + 1)
+        powers_of_delta = (
+            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+        )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
         calc = np.rollaxis(calc, -1, dim)
