@@ -221,7 +221,7 @@ def optical_flow_tvl1(reference_image, moving_image,
                      tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
-    if dtype != _supported_float_type(dtype):
+    if np.dtype(dtype) != _supported_float_type(dtype):
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
@@ -377,7 +377,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
     solver = partial(_ilk, radius=radius, num_warp=num_warp, gaussian=gaussian,
                      prefilter=prefilter)
 
-    if dtype != _supported_float_type(dtype):
+    if np.dtype(dtype) != _supported_float_type(dtype):
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
