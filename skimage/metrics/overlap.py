@@ -143,9 +143,23 @@ def _disjoint(rectangle1, rectangle2):
 
 
 def intersect(rectangle1, rectangle2):
-    """Return the Rectangle corresponding to the intersection of the inputs.
+    """
+    Return True if the 2 rectangles share at least one point.
 
-    Return None if the two rectangles are disjoint.
+    intersect is thus True whenever the rectangles are not disjoint.
+    However intersecting rectangles may not overlap (ex: when only a corner or border is common).
+    """
+    return not _disjoint(rectangle1, rectangle2)
+
+
+def overlap(rectangle1, rectangle2):
+    """
+    Return the Rectangle corresponding to the region of overlap between 2 rectangles,
+    when the intersection of rectangles is more than 1-dimensional.
+    Rectangles with one corner or one side in common thus intersect but do not overlap.
+    However overlapping rectangles always intersect.
+
+    Return None if the two rectangles do not overlap.
 
     Parameters
     ----------
@@ -154,9 +168,9 @@ def intersect(rectangle1, rectangle2):
 
     Returns
     -------
-    intersected : Rectangle
-        The rectangle produced by intersecting ``rectangle1`` and
-        ``rectangle2`` or None if the rectangles are disjoint.
+    overlap : Rectangle
+        The rectangle produced by the overlap of ``rectangle1`` and
+        ``rectangle2`` or None if the rectangles are not overlapping.
 
     Examples
     --------
@@ -166,12 +180,13 @@ def intersect(rectangle1, rectangle2):
     Rectangle((1, 2), bottom_right=(2, 3))
 
     >>> r2 = Rectangle((10, 10), dimensions=(3, 3))
-    >>> if intersect(r1, r2) is None:
-    ...     print('r1 and r2 are disjoint')
-    r1 and r2 are disjoint
+    >>> if overlap(r1, r2) is None:
+    ...     print('r1 and r2 are not overlapping')
+    r1 and r2 are not overlapping
     """
-    if _disjoint(rectangle1, rectangle2):
-        return None
+    if (np.any(rectangle1.bottom_right <= rectangle2.top_left) or
+        np.any(rectangle2.bottom_right <= rectangle1.top_left)):
+        return None  # below or equal contrary to disjoint: strictly below
 
     new_top_left = np.maximum(rectangle1.top_left, rectangle2.top_left)
     new_bottom_right = np.minimum(
@@ -196,7 +211,7 @@ def intersection_over_union(rectangle1, rectangle2):
     iou : float
         The intersection over union value.
     """
-    intersection = intersect(rectangle1, rectangle2)
+    intersection = overlap(rectangle1, rectangle2)
     if intersection is None:
         return 0
     union_area = rectangle1.area + rectangle2.area - intersection.area
