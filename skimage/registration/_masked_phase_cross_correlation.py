@@ -13,6 +13,7 @@ import numpy as np
 from functools import partial
 
 from .._shared.fft import fftmodule, next_fast_len
+from .._shared.utils import _supported_float_type
 
 
 def _masked_phase_cross_correlation(reference_image, moving_image,
@@ -152,8 +153,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
 
     fixed_image = np.asarray(arr1)
     moving_image = np.asarray(arr2)
-    float_dtype = np.result_type(fixed_image.dtype, moving_image.dtype,
-                                 np.float32)
+    float_dtype = _supported_float_type(
+        [fixed_image.dtype, moving_image.dtype]
+    )
     if float_dtype.kind == 'c':
         raise ValueError("complex-valued arr1, arr2 are not supported")
 
