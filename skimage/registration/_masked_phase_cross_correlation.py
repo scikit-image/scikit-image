@@ -8,9 +8,9 @@ IEEE Transactions on Image Processing (2012)
 and the author's original MATLAB implementation, available on this website:
 http://www.dirkpadfield.com/
 """
+from functools import partial
 
 import numpy as np
-from functools import partial
 
 from .._shared.fft import fftmodule, next_fast_len
 from .._shared.utils import _supported_float_type

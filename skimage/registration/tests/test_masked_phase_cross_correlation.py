@@ -1,15 +1,17 @@
 import numpy as np
 from scipy.ndimage import fourier_shift
+
 from skimage._shared import testing
+from skimage._shared.fft import fftmodule as fft
 from skimage._shared.testing import assert_equal, fetch, expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, stereo_motorcycle
-from skimage.registration import phase_cross_correlation
+from skimage.feature import masked_register_translation as _deprecated
+from skimage.io import imread
 from skimage.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
     cross_correlate_masked)
-from skimage.io import imread
-from skimage._shared.fft import fftmodule as fft
-from skimage.feature import masked_register_translation as _deprecated
+from skimage.registration import phase_cross_correlation
 
 
 def test_detrecated_masked_register_translation():
@@ -123,7 +125,7 @@ def test_masked_registration_padfield_data():
         assert_equal((shift_x, shift_y), (-xi, yi))
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_cross_correlate_masked_output_shape(dtype):
     """Masked normalized cross-correlation should return a shape
     of N + M + 1 for each transform axis."""
@@ -138,15 +140,17 @@ def test_cross_correlate_masked_output_shape(dtype):
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
 
+    float_dtype = _supported_float_type(dtype)
+
     full_xcorr = cross_correlate_masked(
         arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
     assert_equal(full_xcorr.shape, expected_full_shape)
-    assert full_xcorr.dtype == dtype
+    assert full_xcorr.dtype == float_dtype
 
     same_xcorr = cross_correlate_masked(
         arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
     assert_equal(same_xcorr.shape, expected_same_shape)
-    assert same_xcorr.dtype == dtype
+    assert same_xcorr.dtype == float_dtype
 
 
 

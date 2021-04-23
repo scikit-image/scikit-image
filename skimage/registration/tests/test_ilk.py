@@ -1,25 +1,33 @@
 import numpy as np
 import pytest
+
 from skimage._shared import testing
+from skimage._shared.utils import _supported_float_type
 from skimage.registration import optical_flow_ilk
 from test_tvl1 import _sin_flow_gen
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 @testing.parametrize('gaussian', [True, False])
 @testing.parametrize('prefilter', [True, False])
 def test_2d_motion(dtype, gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
-    image0 = rnd.normal(size=(256, 256)).astype(dtype, copy=False)
+    image0 = rnd.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     image1 = image1.astype(dtype, copy=False)
+    float_dtype = _supported_float_type(dtype)
     # Estimate the flow
     flow = optical_flow_ilk(image0, image1, gaussian=gaussian,
-                            prefilter=prefilter, dtype=dtype)
-    assert flow.dtype == dtype
+                            prefilter=prefilter, dtype=float_dtype)
+    assert flow.dtype == _supported_float_type(dtype)
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow).mean() < 0.5
+
+    if dtype != float_dtype:
+        with testing.raises(ValueError):
+            optical_flow_ilk(image0, image1, gaussian=gaussian,
+                             prefilter=prefilter, dtype=dtype)
 
 
 @testing.parametrize('gaussian', [True, False])

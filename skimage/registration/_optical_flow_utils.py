@@ -5,6 +5,7 @@
 
 import numpy as np
 from scipy import ndimage as ndi
+
 from ..transform import pyramid_reduce
 from ..util.dtype import _convert
 

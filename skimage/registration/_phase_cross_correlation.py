@@ -11,6 +11,7 @@ except ImportError:
     # scipy < 1.4 does not have an fft module
     from scipy.fftpack import fftn, ifftn
 from scipy.fftpack import fftfreq
+
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 

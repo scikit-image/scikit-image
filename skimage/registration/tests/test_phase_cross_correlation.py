@@ -1,14 +1,15 @@
 import numpy as np
-from skimage._shared import testing
-from skimage._shared.testing import assert_allclose
-
-from skimage.registration._phase_cross_correlation import (
-    phase_cross_correlation, _upsampled_dft)
-from skimage.data import camera, binary_blobs
 from scipy.ndimage import fourier_shift
-from skimage.util.dtype import img_as_float
+
+from skimage import img_as_float
 from skimage._shared import testing
 from skimage._shared.fft import fftmodule as fft
+from skimage._shared.testing import assert_allclose
+from skimage._shared.utils import _supported_float_type
+from skimage.data import camera, binary_blobs
+from skimage.registration._phase_cross_correlation import (
+    phase_cross_correlation, _upsampled_dft
+)
 
 
 def test_correlation():
@@ -36,7 +37,7 @@ def test_subpixel_precision():
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_real_input(dtype):
     reference_image = camera().astype(dtype, copy=False)
     subpixel_shift = (-2.4, 1.32)
@@ -47,7 +48,7 @@ def test_real_input(dtype):
     result, error, diffphase = phase_cross_correlation(reference_image,
                                                        shifted_image,
                                                        upsample_factor=100)
-    assert result.dtype == dtype
+    assert result.dtype == _supported_float_type(dtype)
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
