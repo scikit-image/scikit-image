@@ -4,6 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
+# TODO: remove except case once minimum SciPy is >= 1.4
 try:
     from scipy.fft import fftn, ifftn
 except ImportError:
