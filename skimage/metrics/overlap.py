@@ -100,7 +100,27 @@ class Rectangle:
 
     @property
     def area(self):
-        """Return the rectangle area."""
+        """Return the area of a 2D rectangle."""
+        if self.ndim == 2:
+            return self.integral
+
+        raise NotImplementedError("Area is only defined for 2D.")
+
+    @property
+    def volume(self):
+        """Return the volume of a 3D rectangle."""
+        if self.ndim == 3:
+            return self.integral
+
+        raise NotImplementedError("Volume is only defined for 3D.")
+
+    @property
+    def integral(self):
+        """
+        Return the integral of the shape along all dimensions of the shape.
+
+        For 2D/3D shapes, the integral corresponds respectively to the area/volume.
+        """
         return np.prod(self.dimensions)
 
     @property
