@@ -1,34 +1,34 @@
 """
 Module defining a number of functions to quantify the overlap between shapes.
-for instance BBoxes representing detections by bounding-boxes.
 
+For instance BoundingBoxes used for object-detection.
 """
 from __future__ import annotations
 
 import numpy as np
 
 
-class BBox:
+class BoundingBox:
     """
     Construct an axis-aligned Bounding-Box
     consisting of top left and bottom right corners.
 
     The contructor uses the (r,c,..) coordinates for the top left corner and
-    either the coordinates of the botton right corner or the BBox
+    either the coordinates of the botton right corner or the BoundingBox
     dimensions (height, width,...).
 
-    BBoxes can have 2 (rectangle), 3 (3D BBox) or more dimensions.
+    BoundingBoxes can have 2 (rectangle), 3 (3D BoundingBox) or more dimensions.
 
     Parameters
     ----------
     top_left : array-like of ints or floats
-        (r,c)-coordinates for the top left corner of the BBox.
+        (r,c)-coordinates for the top left corner of the BoundingBox.
 
     bottom_right : array-like of ints or floats, optional
-        (r,c)-coordinates for the bottom right corner of the BBox.
+        (r,c)-coordinates for the bottom right corner of the BoundingBox.
 
     dimensions : array-like of ints or floats, optional
-        dimensions of the BBox (height, width). The default is None.
+        dimensions of the BoundingBox (height, width). The default is None.
 
     Raises
     ------
@@ -38,13 +38,13 @@ class BBox:
     Attributes
     ----------
     top_left : array of int or float
-        The top left corner of the BBox.
+        The top left corner of the BoundingBox.
     bottom_right : array of int or float
-        The bottom right corner of the BBox.
+        The bottom right corner of the BoundingBox.
 
     Notes
     -----
-    ``bool(BBox)`` will be False when the BBox has area 0.
+    ``bool(BoundingBox)`` will be False when the BoundingBox has area 0.
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
@@ -70,12 +70,12 @@ class BBox:
 
     @property
     def height(self):
-        # use negative indexing in anticipation of nD hyperBBoxes.
+        # use negative indexing in anticipation of nD hyperBoundingBoxes.
         return self.bottom_right[-2] - self.top_left[-2]
 
     @property
     def width(self):
-        # use negative indexing in anticipation of nD hyperBBoxes.
+        # use negative indexing in anticipation of nD hyperBoundingBoxes.
         return self.bottom_right[-1] - self.top_left[-1]
 
     @property
@@ -85,18 +85,18 @@ class BBox:
     def __bool__(self):
         return bool(self.area > 0)  # cast needed to avoid np.bool_
 
-    def __eq__(self, other: BBox):
-        """Return true if 2 BBoxes have the same position and dimension."""
-        if not isinstance(other, BBox):
+    def __eq__(self, other: BoundingBox):
+        """Return true if 2 BoundingBoxes have the same position and dimension."""
+        if not isinstance(other, BoundingBox):
             raise TypeError(
-                    'Equality can only be checked with another BBox'
+                    'Equality can only be checked with another BoundingBox'
                     )
 
         return (np.all(self.top_left == other.top_left)
                 and np.all(self.bottom_right == other.bottom_right))
 
     def __repr__(self):
-        return (f'BBox({tuple(self.top_left)}, '
+        return (f'BoundingBox({tuple(self.top_left)}, '
                 f'bottom_right={tuple(self.bottom_right)})')
 
     def __str__(self):
@@ -104,7 +104,7 @@ class BBox:
 
     @property
     def area(self):
-        """Return the area of a 2D BBox."""
+        """Return the area of a 2D BoundingBox."""
         if self.ndim == 2:
             return self.integral
 
@@ -112,7 +112,7 @@ class BBox:
 
     @property
     def volume(self):
-        """Return the volume of a 3D BBox."""
+        """Return the volume of a 3D BoundingBox."""
         if self.ndim == 3:
             return self.integral
 
@@ -129,81 +129,81 @@ class BBox:
 
     @property
     def dimensions(self):
-        """Return the dimensions of the BBox as an array.
+        """Return the dimensions of the BoundingBox as an array.
 
         Examples
         --------
-        >>> r = BBox((1, 1), bottom_right=(2, 3))
+        >>> r = BoundingBox((1, 1), bottom_right=(2, 3))
         >>> r.dimensions
         array([1, 2])
         """
         return self.bottom_right - self.top_left
 
 
-def _disjoint(BBox1, BBox2):
-    """Check whether two BBoxs are disjoint.
+def disjoint(bbox1, bbox2):
+    """Check whether two BoundingBoxes are disjoint.
 
     Adapted from post from Aman Gupta [1]_.
 
     Parameters
     ----------
-    BBox1, BBox2 : BBox
-        Input BBoxes.
+    bbox1, bbox2 : BoundingBox
+        Input BoundingBoxes.
 
     Returns
     -------
     disjoint : bool
-        True if the BBoxes don't share any points.
+        True if the BoundingBoxes don't share any points.
 
     References
     ----------
     .. [1] https://www.geeksforgeeks.org/find-two-rectangles-overlap/
     """
     disjoint = (
-            np.any(BBox1.bottom_right < BBox2.top_left)
-            or np.any(BBox2.bottom_right < BBox1.top_left)
+            np.any(bbox1.bottom_right < bbox2.top_left)
+            or np.any(bbox2.bottom_right < bbox1.top_left)
             )
     return disjoint
 
 
 def intersect(bbox1, bbox2):
     """
-    Return True if the 2 BBoxes share at least one point.
+    Return True if the 2 BoundingBoxes share at least one point.
 
-    intersect is thus True whenever the BBoxes are not disjoint.
-    However intersecting BBoxes may not overlap (ex: when only a corner or border is common).
+    intersect is thus True whenever the BoundingBoxes are not disjoint.
+    However intersecting BoundingBoxes may not overlap (ex: when only a corner or border is common).
     """
-    return not _disjoint(bbox1, bbox2)
+    return not disjoint(bbox1, bbox2)
 
 
 def overlap(bbox1, bbox2):
     """
-    Return the BBox corresponding to the region of overlap between 2 BBoxes,
-    when the intersection of BBoxes is more than 1-dimensional.
-    BBoxes with one corner or one side in common thus intersect but do not overlap.
-    However overlapping BBoxes always intersect.
+    Return the BoundingBox corresponding to the region of overlap between 2 BoundingBoxes,
+    when the intersection of BoundingBoxes is more than 1-dimensional.
+    BoundingBoxes with one corner or one side in common thus intersect but do not overlap.
+    However overlapping BoundingBoxes always intersect.
 
-    Return None if the two BBoxes do not overlap.
+    Return None if the two BoundingBoxes do not overlap.
 
     Parameters
     ----------
-    bbox1, bbox2 : BBox
-        Input BBoxes.
+    bbox1, bbox2 : BoundingBox
+        Input BoundingBoxes.
 
     Returns
     -------
-    overlap : BBox
-        The BBox produced by the overlap of ``bbox1`` and
-        ``bbox2`` or None if the BBoxes are not overlapping.
+    overlap : BoundingBox
+        The BoundingBox produced by the overlap of ``bbox1`` and
+        ``bbox2`` or None if the BoundingBoxes are not overlapping.
 
     Examples
     --------
-    >>> r0 = BBox((0, 0), bottom_right=(2, 3))
-    >>> r1 = BBox((1, 2), bottom_right=(4, 4))
+    >>> r0 = BoundingBox((0, 0), bottom_right=(2, 3))
+    >>> r1 = BoundingBox((1, 2), bottom_right=(4, 4))
     >>> intersect(r0, r1)
-    BBox((1, 2), bottom_right=(2, 3))
+    BoundingBox((1, 2), bottom_right=(2, 3))
 
-    >>> r2 = BBox((10, 10), dimensions=(3, 3))
+    >>> r2 = BoundingBox((10, 10), dimensions=(3, 3))
     >>> if overlap(r1, r2) is None:
     ...     print('r1 and r2 are not overlapping')
     r1 and r2 are not overlapping
@@ -216,23 +216,23 @@ def overlap(bbox1, bbox2):
     new_bottom_right = np.minimum(
             bbox1.bottom_right, bbox2.bottom_right
             )
-    return BBox(new_top_left, bottom_right=new_bottom_right)
+    return BoundingBox(new_top_left, bottom_right=new_bottom_right)
 
 
 def intersection_over_union(bbox1, bbox2):
     """
-    Ratio intersection over union for a pair of BBoxes.
+    Ratio intersection over union for a pair of BoundingBoxes.
 
     The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full
     overlap) and has no unit.
-    For 2D BBoxes, the IoU corresponds to a ratio of areas.
-    For 3D BBoxes, the IoU corresponds to a ratio of volumes.
-    For higher dimensions, the IoU corresponds to a ratio of the BBox integrals.
+    For 2D BoundingBoxes, the IoU corresponds to a ratio of areas.
+    For 3D BoundingBoxes, the IoU corresponds to a ratio of volumes.
+    For higher dimensions, the IoU corresponds to a ratio of the BoundingBox integrals.
 
     Parameters
     ----------
-    bbox1, bbox2: BBox
-        The input BBoxes.
+    bbox1, bbox2: BoundingBox
+        The input BoundingBoxes.
 
     Returns
     -------
