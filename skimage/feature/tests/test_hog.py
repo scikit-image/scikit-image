@@ -30,19 +30,25 @@ def test_hog_output_correctness_l1_norm(dtype):
                          cells_per_block=(3, 3), block_norm='L1',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
-    assert output.dtype == _supported_float_type(dtype)
-    assert_almost_equal(output, correct_output)
+    float_dtype = _supported_float_type(dtype)
+    assert output.dtype == float_dtype
+    decimal = 7 if float_dtype == np.float64 else 5
+    assert_almost_equal(output, correct_output, decimal=decimal)
 
 
-def test_hog_output_correctness_l2hys_norm():
-    img = color.rgb2gray(data.astronaut())
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_hog_output_correctness_l2hys_norm(dtype):
+    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L2-Hys',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
-    assert_almost_equal(output, correct_output)
+    float_dtype = _supported_float_type(dtype)
+    assert output.dtype == float_dtype
+    decimal = 7 if float_dtype == np.float64 else 5
+    assert_almost_equal(output, correct_output, decimal=decimal)
 
 
 def test_hog_image_size_cell_size_mismatch():
