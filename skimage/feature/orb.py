@@ -83,8 +83,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> from skimage.feature import ORB, match_descriptors
     >>> img1 = np.zeros((100, 100))
     >>> img2 = np.zeros_like(img1)
-    >>> np.random.seed(1)
-    >>> square = np.random.rand(20, 20)
+    >>> rng = np.random.default_rng()
+    >>> square = rng.random((20, 20))
     >>> img1[40:60, 40:60] = square
     >>> img2[53:73, 53:73] = square
     >>> detector_extractor1 = ORB(n_keypoints=5)

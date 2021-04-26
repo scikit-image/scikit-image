@@ -37,7 +37,7 @@ class BRIEF(DescriptorExtractor):
         If `sample_seed` is None the `numpy.random.Generator` singleton is
         used.
         If `sample_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
+        seeded with `sample_seed`.
         If `sample_seed` is already a ``Generator`` instance then that instance
         is used.
 

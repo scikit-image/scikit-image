@@ -2,7 +2,6 @@
 
 
 import numpy as np
-import numpy.random as npr
 from scipy.signal import convolve
 
 from . import uft
@@ -60,7 +59,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.wiener(img, psf, 1100)
 
     Notes
@@ -138,7 +138,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
 
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
-                        clip=True):
+                        clip=True, random_seed=None):
     """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -163,6 +163,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
+    random_seed : {None, int, `numpy.random.Generator`}, optional
+        If `random_seed` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_seed` is an int, a new ``Generator`` instance is used,
+        seeded with `random_seed`.
+        If `random_seed` is already a ``Generator`` instance then that instance
+        is used.
 
     Returns
     -------
@@ -202,7 +209,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.unsupervised_wiener(img, psf)
 
     Notes
@@ -267,6 +275,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         data_spectrum = uft.ufft2(image.astype(float))
 
+    rng = np.random.default_rng(random_seed)
+
     # Gibbs sampling
     for iteration in range(params['max_iter']):
         # Sample of Eq. 27 p(circX^k | gn^k-1, gx^k-1, y).
@@ -274,8 +284,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         # weighting (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
         excursion = np.sqrt(0.5) / np.sqrt(precision) * (
-            np.random.standard_normal(data_spectrum.shape) +
-            1j * np.random.standard_normal(data_spectrum.shape))
+            rng.standard_normal(data_spectrum.shape) +
+            1j * rng.standard_normal(data_spectrum.shape))
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
@@ -286,13 +296,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(npr.gamma(image.size / 2,
+        gn_chain.append(rng.gamma(image.size / 2,
                                   2 / uft.image_quad_norm(data_spectrum -
                                                           x_sample *
                                                           trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(npr.gamma((image.size - 1) / 2,
+        gx_chain.append(rng.gamma((image.size - 1) / 2,
                                   2 / uft.image_quad_norm(x_sample * reg)))
 
         # current empirical average
@@ -357,7 +367,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
-    >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+    >>> rng = np.random.default_rng()
+    >>> camera += 0.1 * camera.std() * rng.standard_normal(camera.shape)
     >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
 
     References

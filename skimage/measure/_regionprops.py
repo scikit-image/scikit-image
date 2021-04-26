@@ -162,9 +162,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
     propmasks = [(sample == n) for n in labels]
+
+    rng = np.random.default_rng()
+
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, np.random.random(sample.shape))
+            return func(mask, rng.random(sample.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)

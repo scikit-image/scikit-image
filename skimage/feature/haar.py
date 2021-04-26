@@ -260,7 +260,7 @@ def draw_haar_like_feature(image, r, c, width, height,
         If `random_state` is None the `numpy.random.Generator` singleton is
         used.
         If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
+        seeded with `random_state`.
         If `random_state` is already a ``Generator`` instance then that
         instance is used.
 

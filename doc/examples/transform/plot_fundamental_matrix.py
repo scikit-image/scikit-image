@@ -27,8 +27,6 @@ from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
 import matplotlib.pyplot as plt
 
-np.random.seed(0)
-
 img_left, img_right, groundtruth_disp = data.stereo_motorcycle()
 img_left, img_right = map(rgb2gray, (img_left, img_right))
 

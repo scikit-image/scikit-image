@@ -707,7 +707,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If `random_state` is None the `numpy.random.Generator` singleton is
         used.
         If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
+        seeded with `random_state`.
         If `random_state` is already a ``Generator`` instance then that
         instance is used.
     initial_inliers : array-like of bool, shape (N,), optional

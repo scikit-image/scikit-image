@@ -33,11 +33,13 @@ import matplotlib.pyplot as plt
 
 from skimage import color, data, restoration
 
+rng = np.random.default_rng()
+
 astro = color.rgb2gray(data.astronaut())
 from scipy.signal import convolve2d as conv2
 psf = np.ones((5, 5)) / 25
 astro = conv2(astro, psf, 'same')
-astro += 0.1 * astro.std() * np.random.standard_normal(astro.shape)
+astro += 0.1 * astro.std() * rng.standard_normal(astro.shape)
 
 deconvolved, _ = restoration.unsupervised_wiener(astro, psf)
 

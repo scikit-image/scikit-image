@@ -37,8 +37,8 @@ from scipy import ndimage as ndi
 image = data.camera()
 shift = (-22, 13)
 
-corrupted_pixels = np.random.choice([False, True], size=image.shape,
-                                    p=[0.25, 0.75])
+rng = np.random.default_rng()
+corrupted_pixels = rng.choice([False, True], size=image.shape, p=[0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
