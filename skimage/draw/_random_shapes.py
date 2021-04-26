@@ -286,7 +286,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
         intensity_range = (intensity_range, )
     elif len(intensity_range) == 1:
         intensity_range = intensity_range * num_channels
-    colors = [random.integers(r[0], r[1]+1, size=num_colors)
+    colors = [random.integers(r[0], r[1] + 1, size=num_colors)
               for r in intensity_range]
     return np.transpose(colors)
 

@@ -104,8 +104,8 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         used.
         If `random_state` is an int, a new ``Generator`` instance is used,
         seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that instance
-        is used.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
 
         The `random_state` is used for the starting point
         of `scipy.sparse.linalg.eigsh`.

@@ -283,9 +283,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
         # weighting (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
-        excursion = np.sqrt(0.5) / np.sqrt(precision) * (
-            rng.standard_normal(data_spectrum.shape) +
-            1j * rng.standard_normal(data_spectrum.shape))
+        excursion = (np.sqrt(0.5) / np.sqrt(precision)
+                     * (rng.standard_normal(data_spectrum.shape)
+                        + 1j * rng.standard_normal(data_spectrum.shape)))
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
@@ -297,9 +297,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
         gn_chain.append(rng.gamma(image.size / 2,
-                                  2 / uft.image_quad_norm(data_spectrum -
-                                                          x_sample *
-                                                          trans_fct)))
+                                  2 / uft.image_quad_norm(data_spectrum
+                                                          - x_sample
+                                                          * trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
         gx_chain.append(rng.gamma((image.size - 1) / 2,
@@ -313,8 +313,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             current = x_postmean / (iteration - params['burnin'])
             previous = prev_x_postmean / (iteration - params['burnin'] - 1)
 
-            delta = np.sum(np.abs(current - previous)) / \
-                np.sum(np.abs(x_postmean)) / (iteration - params['burnin'])
+            delta = (np.sum(np.abs(current - previous))
+                     / np.sum(np.abs(x_postmean))
+                     / (iteration - params['burnin']))
 
         prev_x_postmean = x_postmean
 
