@@ -1,8 +1,10 @@
 import numpy as np
+from scipy import ndimage as ndi
+
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal, \
                                     parametrize, assert_array_equal
-from scipy import ndimage as ndi
+from skimage._shared.utils import _supported_float_type
 from skimage.filters import correlate_sparse
 
 
@@ -23,17 +25,22 @@ def test_correlate_sparse_valid_mode():
 
 
 @parametrize("mode", ["nearest", "reflect", "mirror"])
-def test_correlate_sparse(mode):
+@parametrize("dtype", [np.uint16, np.int32, np.float16, np.float32,
+                       np.float64])
+def test_correlate_sparse(mode, dtype):
     image = np.array([[0, 0, 1, 3, 5],
                       [0, 1, 4, 3, 4],
                       [1, 2, 5, 4, 1],
                       [2, 4, 5, 2, 1],
-                      [4, 5, 1, 0, 0]], dtype=float)
+                      [4, 5, 1, 0, 0]], dtype=dtype)
 
     kernel = np.array([0, 1, 2, 4, 8, 16, 32, 64, 128]).reshape((3, 3))
 
     cs_output = correlate_sparse(image, kernel, mode=mode)
-    ndi_output = ndi.correlate(image, kernel, mode=mode)
+    assert cs_output.dtype == _supported_float_type(image.dtype)
+    ndi_output = ndi.correlate(
+        image.astype(float, copy=False), kernel, mode=mode
+    )
     assert_equal(cs_output, ndi_output)
 
 
@@ -48,4 +55,4 @@ def test_correlate_sparse_invalid_kernel(mode):
     invalid_kernel = np.array([0, 1, 2, 4]).reshape((2, 2))
     with testing.raises(ValueError):
         correlate_sparse(image, invalid_kernel, mode=mode)
-    
+
