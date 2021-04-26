@@ -216,10 +216,14 @@ def overlap(rectangle1, rectangle2):
 
 
 def intersection_over_union(rectangle1, rectangle2):
-    """Ratio intersection area over union area for a pair of rectangles.
+    """
+    Ratio intersection over union for a pair of rectangles.
 
     The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full
-    overlap).
+    overlap) and has no unit.
+    For 2D rectangles, the IoU corresponds to a ratio of areas.
+    For 3D rectangles, the IoU corresponds to a ratio of volumes.
+    For higher dimensions, the IoU corresponds to a ratio of the shape integrals.
 
     Parameters
     ----------
@@ -231,8 +235,11 @@ def intersection_over_union(rectangle1, rectangle2):
     iou : float
         The intersection over union value.
     """
-    intersection = overlap(rectangle1, rectangle2)
-    if intersection is None:
+    overlap_rectangle = overlap(rectangle1, rectangle2)
+    if overlap_rectangle is None:
         return 0
-    union_area = rectangle1.area + rectangle2.area - intersection.area
-    return intersection.area / union_area
+    union_integral = (rectangle1.integral +
+                      rectangle2.integral -
+                      overlap_rectangle.integral)
+
+    return overlap_rectangle.integral / union_integral
