@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -10,7 +8,7 @@ from skimage import feature
 from skimage import img_as_float
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import assert_allclose, assert_almost_equal, fetch
+from skimage._shared.testing import assert_almost_equal, fetch
 from skimage._shared.utils import _supported_float_type
 
 

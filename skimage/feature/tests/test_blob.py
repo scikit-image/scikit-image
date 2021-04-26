@@ -65,8 +65,9 @@ def test_blob_dog(dtype):
         # account for internal scaling to [0, 1] by img_as_float
         threshold /= img.ptp()
 
-    blobs = blob_dog(im3, min_sigma=3, max_sigma=10,
-                          sigma_ratio=1.2, threshold=threshold)
+    blobs = blob_dog(
+        im3, min_sigma=3, max_sigma=10, sigma_ratio=1.2, threshold=threshold
+    )
     b = blobs[0]
 
     assert b.shape == (4,)
@@ -204,7 +205,7 @@ def test_blob_log(dtype):
     assert abs(radius(b) - 30) <= thresh
 
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100))
     assert blob_log(img_empty).size == 0
 
 
@@ -393,7 +394,7 @@ def test_blob_doh_log_scale():
 
 def test_blob_doh_no_peaks():
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100))
     assert blob_doh(img_empty).size == 0
 
 

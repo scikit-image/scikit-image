@@ -1,5 +1,4 @@
 from random import shuffle
-from itertools import chain
 
 import pytest
 

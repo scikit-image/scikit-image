@@ -7,7 +7,6 @@ from skimage.feature import match_template, peak_local_max
 from skimage._shared import testing
 
 
-
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_template(dtype):
     size = 100

@@ -5,7 +5,6 @@ from skimage._shared.testing import expected_warnings
 from skimage.feature import multiscale_basic_features
 
 
-
 @pytest.mark.parametrize('edges', (False, True))
 @pytest.mark.parametrize('texture', (False, True))
 def test_multiscale_basic_features(edges, texture):
@@ -18,7 +17,9 @@ def test_multiscale_basic_features(edges, texture):
 
     n_sigmas = 6
     intensity = True
-    assert features.shape[-1] == 3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
+    assert features.shape[-1] == (
+        3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
+    )
     assert features.shape[:-1] == img.shape[:-1]
 
 

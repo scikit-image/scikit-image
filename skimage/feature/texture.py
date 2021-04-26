@@ -3,7 +3,6 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-import warnings
 from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb

@@ -1,5 +1,3 @@
-import functools
-
 import numpy as np
 import pytest
 
@@ -315,10 +313,11 @@ def test_square_image():
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 @testing.parametrize(
     'func',
-    [corner_moravec,
-     corner_harris,
-     corner_shi_tomasi,
-     corner_kitchen_rosenfeld,
+    [
+        corner_moravec,
+        corner_harris,
+        corner_shi_tomasi,
+        corner_kitchen_rosenfeld,
     ]
 )
 def test_corner_dtype(dtype, func):
