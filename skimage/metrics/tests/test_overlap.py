@@ -1,5 +1,5 @@
 from skimage.metrics.overlap import (
-        Rectangle,
+        BBox,
         intersect,
         overlap,
         intersection_over_union,
@@ -7,12 +7,12 @@ from skimage.metrics.overlap import (
 from skimage._shared import testing
 
 height1, width1 = 2, 4
-r1 = Rectangle((0, 0), dimensions=(height1, width1))
+r1 = BBox((0, 0), dimensions=(height1, width1))
 
 height2 = width2 = 3
-r2 = Rectangle((2, 3), dimensions=(height2, width2))  # share part of top side with r1
+r2 = BBox((2, 3), dimensions=(height2, width2))  # share part of top side with r1
 
-r3 = Rectangle((0, 0), bottom_right=(2, 3))  # included in r1, intersect with r2 in (2,3)
+r3 = BBox((0, 0), bottom_right=(2, 3))  # included in r1, intersect with r2 in (2,3)
 
 rect_inter13 = overlap(r1, r3)
 
@@ -27,14 +27,14 @@ def test_constructor_dimensions():
     assert tuple(r1.top_left) == (0, 0)
     assert tuple(r1.bottom_right) == (height1, width1)
     with testing.raises(ValueError):
-        Rectangle((0, 0), dimensions=(-5, 5))
+        BBox((0, 0), dimensions=(-5, 5))
 
 
 def test_constructor_bottom_corner():
     assert tuple(r3.top_left) == (0, 0)
     assert tuple(r3.dimensions) == (2, 3)
     with testing.raises(ValueError):
-        Rectangle((2, 2), bottom_right=(0, 0))
+        BBox((2, 2), bottom_right=(0, 0))
 
 
 def test_intersection():
@@ -63,7 +63,7 @@ def test_eq_other_obj():
 
 
 def test_str():
-    assert str(r3) == 'Rectangle((0, 0), bottom_right=(2, 3))'
+    assert str(r3) == 'BBox((0, 0), bottom_right=(2, 3))'
 
 
 def test_IoU():
