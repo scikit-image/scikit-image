@@ -5,7 +5,8 @@ import numpy.testing as npt
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
-                                   _supported_float_type)
+                                   _supported_float_type,
+                                   channel_as_last_axis)
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
@@ -236,6 +237,28 @@ def test_supported_float_dtype_input_kinds(dtype):
 def test_supported_float_dtype_sequence(dtypes, expected):
     float_dtype = _supported_float_type(dtypes)
     assert float_dtype == expected
+
+
+@channel_as_last_axis(multichannel_output=False)
+def _decorated_channel_axis_size(x, *, channel_axis=None):
+    if channel_axis is None:
+        return None
+    assert channel_axis == -1
+    return x.shape[-1]
+
+
+@testing.parametrize('channel_axis', [None, 0, 1, 2, -1, -2, -3])
+def test_decorated_channel_axis_shape(channel_axis):
+    # Verify that channel_as_last_axis modifies the channel_axis as expected
+
+    # need unique size per axis here
+    x = np.zeros((2, 3, 4))
+
+    size = _decorated_channel_axis_size(x, channel_axis=channel_axis)
+    if channel_axis is None:
+        assert size is None
+    else:
+        assert size == x.shape[channel_axis]
 
 
 if __name__ == "__main__":
