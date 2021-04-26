@@ -10,6 +10,7 @@ from ..lpi_filter import LPIFilter2D, inverse, wiener
 
 have_scipy_fft = np.lib.NumpyVersion(scipy.__version__) >= '1.4.0'
 
+
 class TestLPIFilter2D:
 
     img = camera()[:50, :50]
