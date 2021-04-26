@@ -1,6 +1,7 @@
 import numpy as np
 from skimage.filters import unsharp_mask
 from skimage._shared.testing import parametrize
+from skimage._shared.utils import _supported_float_type
 
 
 @parametrize("shape,multichannel",
@@ -67,4 +68,25 @@ def test_unsharp_masking_with_different_ranges(shape, offset,
         if negative is False:
             assert np.any(output >= 0)
     assert output.dtype in [np.float32, np.float64]
+    assert output.shape == shape
+
+
+@parametrize("shape,multichannel",
+             [((16, 16), False),
+              ((15, 15, 2), True),
+              ((13, 17, 3), True)])
+@parametrize("preserve", [False, True])
+@parametrize("dtype", [np.uint8, np.float16, np.float32, np.float64])
+def test_unsharp_masking_dtypes(shape, multichannel, preserve, dtype):
+    radius = 2.0
+    amount = 1.0
+    array = (np.random.random(shape) * 10).astype(dtype, copy=False)
+    negative = np.any(array < 0)
+    output = unsharp_mask(array, radius, amount, multichannel, preserve)
+    if preserve is False:
+        assert np.any(output <= 1)
+        assert np.any(output >= -1)
+        if negative is False:
+            assert np.any(output >= 0)
+    assert output.dtype == _supported_float_type(dtype)
     assert output.shape == shape

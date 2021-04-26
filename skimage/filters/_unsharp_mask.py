@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from skimage import img_as_float
+from .._shared.utils import _supported_float_type
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):
@@ -115,10 +116,11 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
 
     """
     vrange = None  # Range for valid values; used for clipping.
+    float_dtype = _supported_float_type(image.dtype)
     if preserve_range:
-        fimg = image.astype(float)
+        fimg = image.astype(float_dtype, copy=False)
     else:
-        fimg = img_as_float(image)
+        fimg = img_as_float(image).astype(float_dtype, copy=False)
         negative = np.any(fimg < 0)
         if negative:
             vrange = [-1., 1.]
@@ -126,7 +128,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
             vrange = [0., 1.]
 
     if multichannel:
-        result = np.empty_like(fimg, dtype=float)
+        result = np.empty_like(fimg, dtype=float_dtype)
         for channel in range(image.shape[-1]):
             result[..., channel] = _unsharp_mask_single_channel(
                 fimg[..., channel], radius, amount, vrange)
