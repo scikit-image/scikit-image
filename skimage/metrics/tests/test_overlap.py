@@ -38,19 +38,16 @@ def test_constructor_bottom_corner():
 
 
 def test_intersection():
+    assert intersect(r1, r1)  # self-intersection is true
     assert intersect(r1, r2)
     assert intersect(r1, r3)
 
 
 def test_overlap():
-    assert not overlap(r1, r2)   # border intersection only
-    assert not overlap(r2, r3)   # corner intersection only
+    assert overlap(r1, r1) == r1  # self-overlap  = self
+    assert not overlap(r1, r2)    # border intersection only
+    assert not overlap(r2, r3)    # corner intersection only
     # test when included see test_eq_operator
-
-
-def test_full_overlap():
-    assert overlap(r1, r1) == r1
-    assert intersection_over_union(r1, r1) == 1
 
 
 def test_eq_operator():  # Intersection rectangle and == comparison
@@ -67,5 +64,7 @@ def test_str():
 
 
 def test_IoU():
+    intersection_over_union(r1, r1) == 1
+
     union_area13 = r1.area + r3.area - rect_inter13.area
     assert intersection_over_union(r1, r3) == rect_inter13.area / union_area13
