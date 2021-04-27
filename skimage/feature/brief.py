@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
-from skimage.feature.util import (DescriptorExtractor, _mask_border_keypoints,
+from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
-from skimage.feature.brief_cy import _brief_loop
-from skimage._shared.utils import check_nD
+from .brief_cy import _brief_loop
+from .._shared.utils import check_nD
 
 
 class BRIEF(DescriptorExtractor):
@@ -118,7 +118,7 @@ class BRIEF(DescriptorExtractor):
     """
 
     def __init__(self, descriptor_size=256, patch_size=49,
-                 mode='normal', sigma=1, sample_seed=None):
+                 mode='normal', sigma=1, sample_seed=1):
 
         mode = mode.lower()
         if mode not in ('normal', 'uniform'):
