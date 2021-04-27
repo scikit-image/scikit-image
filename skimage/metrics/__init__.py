@@ -26,7 +26,7 @@ __all__ = [
         'structural_similarity',
         'hausdorff_distance',
         'hausdorff_pair',
-        'Rectangle',
+        'BoundingBox',
         'intersect',
         'disjoint',
         'intersection_over_union',
