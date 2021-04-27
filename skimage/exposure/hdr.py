@@ -58,7 +58,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
         Images some times have these in the exif information.
     radiance_map : numpy array
         Array (idx) mapping counts to radiance value, if input is RGB this must
-        be Nx3. See get_crf
+        be Nx3. See `get_crf`.
     depth : int, optional
         Pixel depth.
 
