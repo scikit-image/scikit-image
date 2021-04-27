@@ -102,7 +102,7 @@ Other (2022)
 ------------
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
   the minimum supported version of ``scipy`` reaches 1.4.
-* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
 Other (2023)
