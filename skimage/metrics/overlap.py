@@ -3,8 +3,6 @@ Module defining a number of functions to quantify the overlap between shapes.
 
 For instance BoundingBoxes used for object-detection.
 """
-from __future__ import annotations
-
 import numpy as np
 
 
