@@ -265,7 +265,7 @@ def intersection_over_union(bbox1, bbox2):
     For 3D BoundingBoxes, the IoU corresponds to a ratio of volumes.
     For higher dimensions, the IoU corresponds to a ratio of the BoundingBox integrals.
 
-    The IoU of a BoundingBox with an integral value of 0 with itself is 0.
+    The IoU of a BoundingBox with itself is always 1, even for 0-integral BoundingBox.
 
     Parameters
     ----------
@@ -277,6 +277,10 @@ def intersection_over_union(bbox1, bbox2):
     iou : float
         The intersection over union value.
     """
+
+    if (bbox1 == bbox2): # also prevent issue with IoU of 0-integral BoundingBox with themselves
+        return 1
+
     intersection = intersect(bbox1, bbox2)
 
     if (intersection is None) or (intersection.integral) == 0:

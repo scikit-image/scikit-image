@@ -62,8 +62,9 @@ def test_str():
 
 
 def test_IoU():
+    # IoU for BBox with themselves
     intersection_over_union(r1, r1) == 1
-    intersection_over_union(r4, r4) == 0  # a 0-area rectangle has an IoU of 0 with itself
+    intersection_over_union(r4, r4) == 1  # also for 0-area rectangles
     intersection_over_union(r1, r5) == 0
 
     union_area13 = r1.area + r3.area - rect_inter13.area
