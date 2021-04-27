@@ -41,10 +41,6 @@ class BoundingBox:
         The top left corner of the BoundingBox.
     bottom_right : array of int or float
         The bottom right corner of the BoundingBox.
-
-    Notes
-    -----
-    ``bool(BoundingBox)`` will be False when the BoundingBox has area 0.
     """
 
     def __init__(self, top_left, *, bottom_right=None, dimensions=None):
@@ -83,7 +79,7 @@ class BoundingBox:
         return len(self.top_left)
 
     def __bool__(self):
-        return bool(self.area > 0)  # cast needed to avoid np.bool_
+        return True
 
     def __eq__(self, other: BoundingBox):
         """Return true if 2 BoundingBoxes have the same position and dimension."""
