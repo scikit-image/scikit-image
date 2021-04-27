@@ -138,7 +138,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
 
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
-                        clip=True, random_seed=None):
+                        clip=True, *, random_state=None):
     """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -163,13 +163,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    random_seed : {None, int, `numpy.random.Generator`}, optional
-        If `random_seed` is None the `numpy.random.Generator` singleton is
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
         used.
-        If `random_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `random_seed`.
-        If `random_seed` is already a ``Generator`` instance then that instance
-        is used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
 
     Returns
     -------
@@ -275,7 +275,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         data_spectrum = uft.ufft2(image.astype(float))
 
-    rng = np.random.default_rng(random_seed)
+    rng = np.random.default_rng(random_state)
 
     # Gibbs sampling
     for iteration in range(params['max_iter']):

@@ -167,8 +167,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         kwargs.setdefault(kw, kwdefaults[kw])
 
     if mode == 'gaussian':
-        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5,
-                                 image.shape)
+        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5, image.shape)
         out = image + noise
 
     elif mode == 'localvar':
@@ -198,20 +197,20 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = _bernoulli(p, image.shape, seed)
-        salted = _bernoulli(q, image.shape, seed)
+        flipped = _bernoulli(p, image.shape, rng)
+        salted = _bernoulli(q, image.shape, rng)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip
