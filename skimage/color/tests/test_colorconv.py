@@ -10,9 +10,10 @@ Authors
 
 import numpy as np
 import pytest
-from skimage._shared.testing import assert_equal, assert_almost_equal
-from skimage._shared.testing import assert_array_almost_equal, fetch
-from skimage._shared.testing import TestCase
+from skimage._shared.testing import (assert_allclose, assert_equal,
+                                     assert_almost_equal,
+                                     assert_array_almost_equal, fetch,
+                                     TestCase)
 
 from skimage.util import img_as_float, img_as_ubyte, img_as_float32
 from skimage.color import (rgb2hsv, hsv2rgb,
@@ -35,7 +36,9 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb, gray2rgba)
 
+from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage import data
 import colorsys
 
@@ -785,3 +788,44 @@ def test_rgba2rgb_nD(shape):
     expected_shape = shape[:-1] + (3, )
 
     assert out.shape == expected_shape
+
+
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_rgba2rgb_dtypes(dtype):
+    rgba = np.array([[[0, 0.5, 1, 0],
+                      [0, 0.5, 1, 1],
+                      [0, 0.5, 1, 0.5]]]).astype(dtype=dtype)
+    rgb = rgba2rgb(rgba)
+    float_dtype = _supported_float_type(rgba.dtype)
+    assert rgb.dtype == float_dtype
+    expected = np.array([[[1, 1, 1],
+                          [0, 0.5, 1],
+                          [0.5, 0.75, 1]]]).astype(float)
+    assert rgb.shape == expected.shape
+    assert_almost_equal(rgb, expected)
+
+
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_lab_lch_roundtrip_dtypes(dtype):
+    rgb = img_as_float(data.colorwheel()).astype(dtype=dtype, copy=False)
+    lab = rgb2lab(rgb)
+    float_dtype = _supported_float_type(dtype)
+    assert lab.dtype == float_dtype
+    lab2 = lch2lab(lab2lch(lab))
+    decimal = 4 if float_dtype == np.float32 else 7
+    assert_array_almost_equal(lab2, lab, decimal=decimal)
+
+
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_rgb2hsv_dtypes(dtype):
+    rgb = img_as_float(data.colorwheel())[::16, ::16]
+    rgb = rgb.astype(dtype=dtype, copy=False)
+    hsv = rgb2hsv(rgb).reshape(-1, 3)
+    float_dtype = _supported_float_type(dtype)
+    assert hsv.dtype == float_dtype
+    # ground truth from colorsys
+    gt = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
+                   for pt in rgb.reshape(-1, 3)]
+                  )
+    decimal = 3 if float_dtype == np.float32 else 7
+    assert_array_almost_equal(hsv, gt, decimal=decimal)

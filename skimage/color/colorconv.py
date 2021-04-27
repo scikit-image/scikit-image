@@ -55,6 +55,7 @@ import numpy as np
 from warnings import warn
 from scipy import linalg
 from ..util import dtype, dtype_limits
+from .._shared.utils import _supported_float_type
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -125,7 +126,12 @@ def _prepare_colorarray(arr, force_copy=False):
         raise ValueError("Input array must have a shape == (..., 3)), "
                          f"got {arr.shape}")
 
-    return dtype.img_as_float(arr, force_copy=force_copy)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        _func = dtype.img_as_float32
+    else:
+        _func = dtype.img_as_float64
+    return _func(arr, force_copy=force_copy)
 
 
 def rgba2rgb(rgba, background=(1, 1, 1)):
@@ -167,7 +173,11 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
                f"got {arr.shape}")
         raise ValueError(msg)
 
-    arr = dtype.img_as_float(arr)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        arr = dtype.img_as_float32(arr)
+    else:
+        arr = dtype.img_as_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -1637,7 +1647,12 @@ def _prepare_lab_array(arr, force_copy=True):
     shape = arr.shape
     if shape[-1] < 3:
         raise ValueError('Input array has less than 3 color channels')
-    return dtype.img_as_float(arr, force_copy=force_copy)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        _func = dtype.img_as_float32
+    else:
+        _func = dtype.img_as_float64
+    return _func(arr, force_copy=force_copy)
 
 
 def rgb2yuv(rgb):
