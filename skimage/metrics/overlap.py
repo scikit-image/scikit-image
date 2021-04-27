@@ -261,9 +261,11 @@ def intersection_over_union(bbox1, bbox2):
     overlap) and has no unit.
     For 2D BoundingBoxes, the IoU corresponds to a ratio of areas.
     For 3D BoundingBoxes, the IoU corresponds to a ratio of volumes.
-    For higher dimensions, the IoU corresponds to a ratio of the BoundingBox integrals.
+    For higher dimensions, the IoU corresponds to a ratio of the BoundingBox
+    integrals.
 
-    The IoU of a BoundingBox with itself is always 1, even for 0-integral BoundingBox.
+    The IoU of a BoundingBox with itself is always 1, even for 0-integral
+    BoundingBox.
 
     Parameters
     ----------
@@ -276,7 +278,8 @@ def intersection_over_union(bbox1, bbox2):
         The intersection over union value.
     """
 
-    if (bbox1 == bbox2): # also prevent issue with IoU of 0-integral BoundingBox with themselves
+    if (bbox1 == bbox2):
+        # Prevent issue with IoU of 0-integral BoundingBox with themselves
         return 1
 
     intersection = intersect(bbox1, bbox2)
@@ -284,8 +287,6 @@ def intersection_over_union(bbox1, bbox2):
     if (intersection is None) or (intersection.integral) == 0:
         return 0
 
-    union_integral = (bbox1.integral +
-                      bbox2.integral -
-                      intersection.integral)
+    union_integral = bbox1.integral + bbox2.integral - intersection.integral
 
     return intersection.integral / union_integral
