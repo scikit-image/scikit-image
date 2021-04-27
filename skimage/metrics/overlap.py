@@ -207,52 +207,6 @@ def intersect(bbox1, bbox2):
                        bottom_right=new_bottom_right)
 
 
-
-# def overlap(bbox1, bbox2):
-#     """
-#     Return the BoundingBox corresponding to the region of overlap between 2 BoundingBoxes,
-#     when the intersection of BoundingBoxes is more than 1-dimensional.
-#     BoundingBoxes with one corner or one side in common thus intersect but do not overlap.
-#     However overlapping BoundingBoxes always intersect.
-
-#     Return None if the two BoundingBoxes do not overlap.
-#     With the current definition, a 0-area rectangle also does not overlap with itself.
-
-#     Parameters
-#     ----------
-#     bbox1, bbox2 : BoundingBox
-#         Input BoundingBoxes.
-
-#     Returns
-#     -------
-#     overlap : BoundingBox
-#         The BoundingBox produced by the overlap of ``bbox1`` and
-#         ``bbox2`` or None if the BoundingBoxes are not overlapping.
-
-#     Examples
-#     --------
-#     >>> r0 = BoundingBox((0, 0), bottom_right=(2, 3))
-#     >>> r1 = BoundingBox((1, 2), bottom_right=(4, 4))
-#     >>> intersect(r0, r1)
-#     BoundingBox((1, 2), bottom_right=(2, 3))
-
-#     >>> r2 = BoundingBox((10, 10), dimensions=(3, 3))
-#     >>> if overlap(r1, r2) is None:
-#     ...     print('r1 and r2 are not overlapping')
-#     r1 and r2 are not overlapping
-#     """
-
-#     if (np.any(bbox1.bottom_right <= bbox2.top_left) or
-#         np.any(bbox2.bottom_right <= bbox1.top_left)):
-#         return None  # below or equal contrary to disjoint: strictly below
-
-#     new_top_left = np.maximum(bbox1.top_left, bbox2.top_left)
-#     new_bottom_right = np.minimum(
-#             bbox1.bottom_right, bbox2.bottom_right
-#             )
-#     return BoundingBox(new_top_left, bottom_right=new_bottom_right)
-
-
 def intersection_over_union(bbox1, bbox2):
     """
     Ratio intersection over union for a pair of BoundingBoxes.
