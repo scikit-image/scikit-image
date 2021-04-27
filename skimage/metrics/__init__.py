@@ -5,6 +5,7 @@ from .overlap import (
         BoundingBox,
         intersect,
         intersection_over_union,
+        disjoint,
         )
 from .simple_metrics import (mean_squared_error,
                              normalized_mutual_information,
@@ -27,5 +28,6 @@ __all__ = [
         'hausdorff_pair',
         'Rectangle',
         'intersect',
+        'disjoint',
         'intersection_over_union',
         ]
