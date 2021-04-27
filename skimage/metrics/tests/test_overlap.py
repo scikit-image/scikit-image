@@ -1,7 +1,6 @@
 from skimage.metrics.overlap import (
         BoundingBox,
         intersect,
-        overlap,
         intersection_over_union,
         )
 from skimage._shared import testing
@@ -13,8 +12,10 @@ height2 = width2 = 3
 r2 = BoundingBox((2, 3), dimensions=(height2, width2))  # share part of top side with r1
 
 r3 = BoundingBox((0, 0), bottom_right=(2, 3))  # included in r1, intersect with r2 in (2,3)
+r4 = BoundingBox((2, 3), dimensions=(0, 0))    # 0-area rectangle
+r5 = BoundingBox((5, 5), dimensions=(5, 5))
 
-rect_inter13 = overlap(r1, r3)
+rect_inter13 = intersect(r1, r3)
 
 
 def test_area():
@@ -38,16 +39,13 @@ def test_constructor_bottom_corner():
 
 
 def test_intersection():
-    assert intersect(r1, r1)  # self-intersection is true
-    assert intersect(r1, r2)
-    assert intersect(r1, r3)
-
-
-def test_overlap():
-    assert overlap(r1, r1) == r1  # self-overlap  = self
-    assert not overlap(r1, r2)    # border intersection only
-    assert not overlap(r2, r3)    # corner intersection only
-    # test when included see test_eq_operator
+    assert intersect(r1, r1) == r1      # self-intersection is self
+    assert intersect(r4, r4) == r4      # also for 0-area rectangles
+    assert intersect(r1, r2).area == 0  # edge intersection
+    assert intersect(r2, r3).area == 0  # corner intersection
+    assert intersect(r2, r4) == r4      # corner intersection with 0-area rectangle
+    assert intersect(r1, r4) == r4      # 0-area rectangle included within another rectangle
+    assert intersect(r1, r5) is None
 
 
 def test_eq_operator():  # Intersection rectangle and == comparison
@@ -65,6 +63,8 @@ def test_str():
 
 def test_IoU():
     intersection_over_union(r1, r1) == 1
+    intersection_over_union(r4, r4) == 0  # a 0-area rectangle has an IoU of 0 with itself
+    intersection_over_union(r1, r5) == 0
 
     union_area13 = r1.area + r3.area - rect_inter13.area
     assert intersection_over_union(r1, r3) == rect_inter13.area / union_area13

@@ -3,7 +3,6 @@ from ._variation_of_information import variation_of_information
 from ._contingency_table import contingency_table
 from .overlap import (
         BoundingBox,
-        overlap,
         intersect,
         intersection_over_union,
         )
