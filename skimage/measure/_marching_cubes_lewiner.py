@@ -1,51 +1,161 @@
-import sys
+import warnings
 import base64
-import dis
-import inspect
 
 import numpy as np
 
-if sys.version_info >= (3, ):
-    base64decode = base64.decodebytes
-    ordornot = lambda x:x
-else:
-    base64decode = base64.decodestring
-    ordornot = ord
-
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
-from .._shared.utils import skimage_deprecation, warn
+from ._marching_cubes_classic import _marching_cubes_classic
 
 
-def _expected_output_args():
-    """ Get number of expected output args.
-
-    Please don't use this to influence the algorithmic bahaviour of a function.
-    For ``a, b, rest*, c = ...`` syntax, returns n + 0.1 (3.1 in this example).
-    """
-    f = inspect.currentframe().f_back.f_back
-    i = f.f_lasti + 3
-    bytecode = f.f_code.co_code
-    instruction = ordornot(bytecode[i])
-    while True:
-        if instruction == dis.opmap['DUP_TOP']:
-            if ordornot(bytecode[i + 1]) == dis.opmap['UNPACK_SEQUENCE']:
-                return ordornot(bytecode[i + 2])
-            i += 4
-            instruction = ordornot(bytecode[i])
-            continue
-        if instruction == dis.opmap['STORE_NAME']:
-            return 1
-        if instruction == dis.opmap['UNPACK_SEQUENCE']:
-            return ordornot(bytecode[i + 1])
-        if instruction == dis.opmap.get('UNPACK_EX', -1):  # py3k
-            return ordornot(bytecode[i + 1]) + ordornot(bytecode[i + 2]) + 0.1
-        return 0
-
-
-def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
+def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                    gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, use_classic=False):
+                   allow_degenerate=True, method='lewiner', mask=None):
+    """Marching cubes algorithm to find surfaces in 3d volumetric data.
+
+    In contrast with Lorensen et al. approach [2]_, Lewiner et
+    al. algorithm is faster, resolves ambiguities, and guarantees
+    topologically correct results. Therefore, this algorithm generally
+    a better choice.
+
+    Parameters
+    ----------
+    volume : (M, N, P) array
+        Input data volume to find isosurfaces. Will internally be
+        converted to float32 if necessary.
+    level : float, optional
+        Contour value to search for isosurfaces in `volume`. If not
+        given or None, the average of the min and max of vol is used.
+    spacing : length-3 tuple of floats, optional
+        Voxel spacing in spatial dimensions corresponding to numpy array
+        indexing dimensions (M, N, P) as in `volume`.
+    gradient_direction : string, optional
+        Controls if the mesh was generated from an isosurface with gradient
+        descent toward objects of interest (the default), or the opposite,
+        considering the *left-hand* rule.
+        The two options are:
+        * descent : Object was greater than exterior
+        * ascent : Exterior was greater than object
+    step_size : int, optional
+        Step size in voxels. Default 1. Larger steps yield faster but
+        coarser results. The result will always be topologically correct
+        though.
+    allow_degenerate : bool, optional
+        Whether to allow degenerate (i.e. zero-area) triangles in the
+        end-result. Default True. If False, degenerate triangles are
+        removed, at the cost of making the algorithm slower.
+    method: str, optional
+        One of 'lewiner', 'lorensen' or '_lorensen'. Specify which of
+        Lewiner et al. or Lorensen et al. method will be used. The
+        '_lorensen' flag correspond to an old implementation that will
+        be deprecated in version 0.19.
+    mask : (M, N, P) array, optional
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
+
+    Returns
+    -------
+    verts : (V, 3) array
+        Spatial coordinates for V unique mesh vertices. Coordinate order
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
+    faces : (F, 3) array
+        Define triangular faces via referencing vertex indices from ``verts``.
+        This algorithm specifically outputs triangles, so each face has
+        exactly three indices.
+    normals : (V, 3) array
+        The normal direction at each vertex, as calculated from the
+        data.
+    values : (V, ) array
+        Gives a measure for the maximum value of the data in the local region
+        near each vertex. This can be used by visualization tools to apply
+        a colormap to the mesh.
+
+    See Also
+    --------
+    skimage.measure.mesh_surface_area
+    skimage.measure.find_contours
+
+    Notes
+    -----
+    The algorithm [1]_ is an improved version of Chernyaev's Marching
+    Cubes 33 algorithm. It is an efficient algorithm that relies on
+    heavy use of lookup tables to handle the many different cases,
+    keeping the algorithm relatively easy. This implementation is
+    written in Cython, ported from Lewiner's C++ implementation.
+
+    To quantify the area of an isosurface generated by this algorithm, pass
+    verts and faces to `skimage.measure.mesh_surface_area`.
+
+    Regarding visualization of algorithm output, to contour a volume
+    named `myvolume` about the level 0.0, using the ``mayavi`` package::
+
+      >>>
+      >> from mayavi import mlab
+      >> verts, faces, _, _ = marching_cubes(myvolume, 0.0)
+      >> mlab.triangular_mesh([vert[0] for vert in verts],
+                              [vert[1] for vert in verts],
+                              [vert[2] for vert in verts],
+                              faces)
+      >> mlab.show()
+
+    Similarly using the ``visvis`` package::
+
+      >>>
+      >> import visvis as vv
+      >> verts, faces, normals, values = marching_cubes(myvolume, 0.0)
+      >> vv.mesh(np.fliplr(verts), faces, normals, values)
+      >> vv.use().Run()
+
+    To reduce the number of triangles in the mesh for better performance,
+    see this `example
+    <https://docs.enthought.com/mayavi/mayavi/auto/example_julia_set_decimation.html#example-julia-set-decimation>`_
+    using the ``mayavi`` package.
+
+    References
+    ----------
+    .. [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan
+           Tavares. Efficient implementation of Marching Cubes' cases with
+           topological guarantees. Journal of Graphics Tools 8(2)
+           pp. 1-15 (december 2003).
+           :DOI:`10.1080/10867651.2003.10487582`
+    .. [2] Lorensen, William and Harvey E. Cline. Marching Cubes: A High
+           Resolution 3D Surface Construction Algorithm. Computer Graphics
+           (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
+           :DOI:`10.1145/37401.37422`
+
+    """
+
+    if method == 'lewiner':
+        return _marching_cubes_lewiner(volume, level, spacing,
+                                       gradient_direction, step_size,
+                                       allow_degenerate, use_classic=False,
+                                       mask=mask)
+    elif method == 'lorensen':
+        return _marching_cubes_lewiner(volume, level, spacing,
+                                       gradient_direction, step_size,
+                                       allow_degenerate, use_classic=True,
+                                       mask=mask)
+    elif method == '_lorensen':
+        if mask is not None:
+            raise NotImplementedError(
+                'Parameter `mask` is not implemented for method "_lorensen" '
+                'and will be ignored.'
+            )
+        return _marching_cubes_classic(volume, level, spacing,
+                                       gradient_direction)
+    else:
+        raise ValueError("method should be one of 'lewiner', 'lorensen' or "
+                         "'_lorensen'.")
+
+
+def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
+                           gradient_direction='descent', step_size=1,
+                           allow_degenerate=True, use_classic=False, mask=None):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -87,12 +197,20 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
         produce a topologically correct result. The results with using
         this option are *not* generally the same as the
         ``marching_cubes_classic()`` function.
+    mask : (M, N, P) array
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
 
     Returns
     -------
     verts : (V, 3) array
         Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
@@ -120,7 +238,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     named `myvolume` about the level 0.0, using the ``mayavi`` package::
 
       >>> from mayavi import mlab # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
       >>> mlab.triangular_mesh([vert[0] for vert in verts],
       ...                      [vert[1] for vert in verts],
       ...                      [vert[2] for vert in verts],
@@ -130,7 +248,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     Similarly using the ``visvis`` package::
 
       >>> import visvis as vv # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes_classic(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
       >>> vv.mesh(np.fliplr(verts), faces, normals, values) # doctest: +SKIP
       >>> vv.use().Run() # doctest: +SKIP
 
@@ -140,34 +258,30 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
            Tavares. Efficient implementation of Marching Cubes' cases with
            topological guarantees. Journal of Graphics Tools 8(2)
            pp. 1-15 (december 2003).
-           DOI: 10.1080/10867651.2003.10487582
+           :DOI:`10.1080/10867651.2003.10487582`
 
     See Also
     --------
-    skimage.measure.marching_cubes_classic
+    skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
+
     """
 
-    # This signature (output args) of this func changed after 0.12
-    try:
-        nout = _expected_output_args()
-    except Exception:
-        nout = 0  # always warn if, for whaterver reason, the black magic in above call fails
-    if nout <= 2:
-        warn(skimage_deprecation('`marching_cubes` now uses a better and '
-                                 'faster algorithm, and returns four instead '
-                                 'of two outputs (see docstring for details). '
-                                 'Backwards compatibility with 0.12 and prior '
-                                 'is available with `marching_cubes_classic`.'))
+    # Deprecate the function in favor of marching_cubes
+    warnings.warn("marching_cubes_lewiner is deprecated in favor of "
+                  "marching_cubes. marching_cubes_lewiner will "
+                  "be removed in version 0.19",
+                  FutureWarning, stacklevel=2)
 
-    return marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                                  step_size, allow_degenerate, use_classic)
+    return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
+                                   step_size, allow_degenerate, use_classic, mask)
 
 
-def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False):
-    """ Alias for ``marching_cubes()``.
+def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
+                            step_size, allow_degenerate, use_classic, mask):
+    """Lewiner et al. algorithm for marching cubes. See
+    marching_cubes_lewiner for documentation.
+
     """
 
     # Check volume and ensure its in the format that the alg needs
@@ -175,7 +289,8 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         raise ValueError('Input volume should be a 3D numpy array.')
     if volume.shape[0] < 2 or volume.shape[1] < 2 or volume.shape[2] < 2:
         raise ValueError("Input array must be at least 2x2x2.")
-    volume = np.ascontiguousarray(volume, np.float32)  # no copy if not necessary
+    volume = np.ascontiguousarray(volume,
+                                  np.float32)  # no copy if not necessary
 
     # Check/convert other inputs:
     # level
@@ -198,9 +313,15 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     # Get LutProvider class (reuse if possible)
     L = _get_mc_luts()
 
+    # Check if a mask array is passed
+    if mask is not None:
+        if not mask.shape == volume.shape:
+            raise ValueError('volume and mask must have the same shape.')
+
     # Apply algorithm
     func = _marching_cubes_lewiner_cy.marching_cubes
-    vertices, faces , normals, values = func(volume, level, L, step_size, use_classic)
+    vertices, faces, normals, values = func(volume, level, L,
+                                            step_size, use_classic, mask)
 
     if not len(vertices):
         raise RuntimeError('No surface found at the given iso value.')
@@ -212,24 +333,25 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     # Finishing touches to output
     faces.shape = -1, 3
     if gradient_direction == 'descent':
-        # MC implementation is right-handed, but gradient_direction is left-handed
+        # MC implementation is right-handed, but gradient_direction is
+        # left-handed
         faces = np.fliplr(faces)
     elif not gradient_direction == 'ascent':
         raise ValueError("Incorrect input %s in `gradient_direction`, see "
                          "docstring." % (gradient_direction))
-    if spacing != (1, 1, 1):
+    if not np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 
     if allow_degenerate:
         return vertices, faces, normals, values
     else:
         fun = _marching_cubes_lewiner_cy.remove_degenerate_faces
-        return fun(vertices, faces, normals, values)
+        return fun(vertices.astype(np.float32), faces, normals, values)
 
 
 def _to_array(args):
     shape, text = args
-    byts = base64decode(text.encode('utf-8'))
+    byts = base64.decodebytes(text.encode('utf-8'))
     ar = np.frombuffer(byts, dtype='int8')
     ar.shape = shape
     return ar

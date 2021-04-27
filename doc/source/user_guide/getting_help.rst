@@ -19,7 +19,7 @@ closer to one's image processing applications.
 Users are warmly encouraged to report on their use of ``skimage`` on the
 :ref:`mailing_list`, in order to propose more examples in the future.
 Contributing examples to the gallery can be done on github (see
-:ref:`howto_contribute`).
+:doc:`../contribute`).
 
 Search field
 ------------
@@ -27,6 +27,25 @@ Search field
 The ``quick search`` field located in the navigation bar of the html
 documentation can be used to search for specific keywords (segmentation,
 rescaling, denoising, etc.).
+
+API Discovery
+-------------
+
+NumPy provides a ``lookfor`` function to search API functions. 
+By default ``lookfor`` will search the NumPy API.
+NumPy lookfor example:
+```np.lookfor('eigenvector') ```
+
+But it can be used to search in modules, by passing in the module
+name as a string:
+
+``` np.lookfor('boundaries', 'skimage') ```
+
+or the module itself.
+```
+> import skimage
+> np.lookfor('boundaries', skimage)
+```
 
 Docstrings
 ----------
@@ -46,7 +65,7 @@ Mailing-list
 
 The scikit-image mailing-list is scikit-image@python.org (users
 should `join
-<https://mail.python.org/mailman/listinfo/scikit-image>`_ before posting). This
+<https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ before posting). This
 mailing-list is shared by users and developers, and it is the right
 place to ask any question about ``skimage``, or in general, image
 processing using Python.  Posting snippets of code with minimal examples

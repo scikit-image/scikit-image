@@ -1,11 +1,8 @@
 import numpy as np
-import collections
-
-from .._shared.utils import warn
 
 
-def integral_image(img):
-    """Integral image / summed area table.
+def integral_image(image):
+    r"""Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
     left of it, i.e.:
@@ -16,7 +13,7 @@ def integral_image(img):
 
     Parameters
     ----------
-    img : ndarray
+    image : ndarray
         Input image.
 
     Returns
@@ -30,13 +27,13 @@ def integral_image(img):
            ACM SIGGRAPH Computer Graphics, vol. 18, 1984, pp. 207-212.
 
     """
-    S = img
-    for i in range(img.ndim):
+    S = image
+    for i in range(image.ndim):
         S = S.cumsum(axis=i)
     return S
 
 
-def integrate(ii, start, end, *args):
+def integrate(ii, start, end):
     """Use an integral image to integrate over a given window.
 
     Parameters
@@ -51,11 +48,6 @@ def integrate(ii, start, end, *args):
         Coordinates of bottom right corner of window(s).
         Each tuple in the list containing the end row, col, ... index i.e
         `[(row_win1, col_win1, ...), (row_win2, col_win2, ...), ...]`.
-    args: optional
-        For backward compatibility with versions prior to 0.12.
-        The earlier function signature was `integrate(ii, r0, c0, r1, c1)`,
-        where `r0`, `c0` are int(lists) specifying start coordinates
-        of window(s) to be integrated and `r1`, `c1` the end coordinates.
 
     Returns
     -------
@@ -65,33 +57,19 @@ def integrate(ii, start, end, *args):
 
     Examples
     --------
-    >>> arr = np.ones((5, 6), dtype=np.float)
+    >>> arr = np.ones((5, 6), dtype=float)
     >>> ii = integral_image(arr)
     >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)
-    array([ 3.])
+    array([3.])
     >>> integrate(ii, [(3, 3)], [(4, 5)])  # sum from (3, 3) to (4, 5)
-    array([ 6.])
+    array([6.])
     >>> # sum from (1, 0) to (1, 2) and from (3, 3) to (4, 5)
     >>> integrate(ii, [(1, 0), (3, 3)], [(1, 2), (4, 5)])
-    array([ 3.,  6.])
+    array([3., 6.])
     """
-    rows = 1
-    # handle input from new input format
-    if len(args) == 0:
-        start = np.atleast_2d(np.array(start))
-        end = np.atleast_2d(np.array(end))
-        rows = start.shape[0]
-    # handle deprecated input format
-    else:
-        warn("The syntax 'integrate(ii, r0, c0, r1, c1)' is "
-             "deprecated, and will be phased out in release 0.14. "
-             "The new syntax is "
-             "'integrate(ii, (r0, c0), (r1, c1))'.")
-        if isinstance(start, collections.Iterable):
-            rows = len(start)
-        args = (start, end) + args
-        start = np.array(args[:int(len(args)/2)]).T
-        end = np.array(args[int(len(args)/2):]).T
+    start = np.atleast_2d(np.array(start))
+    end = np.atleast_2d(np.array(end))
+    rows = start.shape[0]
 
     total_shape = ii.shape
     total_shape = np.tile(total_shape, [rows, 1])

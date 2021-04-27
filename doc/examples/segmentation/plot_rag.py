@@ -55,6 +55,7 @@ def display(g, title):
     plt.figure()
     plt.title(title)
     nx.draw(g, pos)
+    nx.draw_networkx_labels(g, pos)
     nx.draw_networkx_edge_labels(g, pos, font_size=20)
 
 
@@ -67,7 +68,7 @@ g.add_edge(1, 3, weight=50)
 
 # Assigning dummy labels.
 for n in g.nodes():
-    g.node[n]['labels'] = [n]
+    g.nodes[n]['labels'] = [n]
 
 gc = g.copy()
 

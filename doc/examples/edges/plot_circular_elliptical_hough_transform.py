@@ -4,7 +4,7 @@ Circular and Elliptical Hough Transforms
 ========================================
 
 The Hough transform in its simplest form is a `method to detect
-straight lines <http://en.wikipedia.org/wiki/Hough_transform>`__
+straight lines <https://en.wikipedia.org/wiki/Hough_transform>`__
 but it can also be used to detect circles or ellipses.
 The algorithm assumes that the edge is detected and it is robust against
 noise or missing points.
@@ -38,43 +38,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, color
-from skimage.transform import hough_circle
-from skimage.feature import peak_local_max, canny
+from skimage.transform import hough_circle, hough_circle_peaks
+from skimage.feature import canny
 from skimage.draw import circle_perimeter
 from skimage.util import img_as_ubyte
 
 
 # Load picture and detect edges
-image = img_as_ubyte(data.coins()[0:95, 70:370])
+image = img_as_ubyte(data.coins()[160:230, 70:270])
 edges = canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
-fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(5, 2))
 
 # Detect two radii
-hough_radii = np.arange(15, 30, 2)
+hough_radii = np.arange(20, 35, 2)
 hough_res = hough_circle(edges, hough_radii)
 
-centers = []
-accums = []
-radii = []
+# Select the most prominent 3 circles
+accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
+                                           total_num_peaks=3)
 
-for radius, h in zip(hough_radii, hough_res):
-    # For each radius, extract two circles
-    num_peaks = 2
-    peaks = peak_local_max(h, num_peaks=num_peaks)
-    centers.extend(peaks)
-    accums.extend(h[peaks[:, 0], peaks[:, 1]])
-    radii.extend([radius] * num_peaks)
-
-# Draw the most prominent 5 circles
+# Draw them
+fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
 image = color.gray2rgb(image)
-for idx in np.argsort(accums)[::-1][:5]:
-    center_x, center_y = centers[idx]
-    radius = radii[idx]
-    cx, cy = circle_perimeter(center_y, center_x, radius)
-    image[cy, cx] = (220, 20, 20)
+for center_y, center_x, radius in zip(cy, cx, radii):
+    circy, circx = circle_perimeter(center_y, center_x, radius,
+                                    shape=image.shape)
+    image[circy, circx] = (220, 20, 20)
 
 ax.imshow(image, cmap=plt.cm.gray)
+plt.show()
 
 
 ######################################################################
@@ -104,7 +96,7 @@ ax.imshow(image, cmap=plt.cm.gray)
 
 import matplotlib.pyplot as plt
 
-from skimage import data, color
+from skimage import data, color, img_as_ubyte
 from skimage.feature import canny
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
@@ -131,14 +123,12 @@ orientation = best[5]
 # Draw the ellipse on the original image
 cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
 image_rgb[cy, cx] = (0, 0, 255)
-# The edge in white
-edges = color.gray2rgb(edges).astype('uint8') * 255
-# The resulting ellipse in red
+# Draw the edge (white) and the resulting ellipse (red)
+edges = color.gray2rgb(img_as_ubyte(edges))
 edges[cy, cx] = (250, 0, 0)
 
-fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True,
-                                sharey=True,
-                                subplot_kw={'adjustable':'box-forced'})
+fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
+                                sharex=True, sharey=True)
 
 ax1.set_title('Original picture')
 ax1.imshow(image_rgb)

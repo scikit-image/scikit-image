@@ -1,14 +1,17 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal, assert_array_less
-from numpy.testing import assert_raises
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.transform import AffineTransform
 from skimage.measure.fit import _dynamic_max_trials
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_array_less, xfail, arch32)
 from skimage._shared._warnings import expected_warnings
 
 
 def test_line_model_invalid_input():
-    assert_raises(ValueError, LineModelND().estimate, np.empty((1, 3)))
+    with testing.raises(ValueError):
+        LineModelND().estimate(np.empty((1, 3)))
 
 
 def test_line_model_predict():
@@ -19,62 +22,50 @@ def test_line_model_predict():
     assert_almost_equal(x, model.predict_x(y))
 
 
-def test_line_model_estimate():
-    # generate original data without noise
-    model0 = LineModelND()
-    model0.params = ((0, 0), (1, 1))
-    x0 = np.arange(-100, 100)
-    y0 = model0.predict_y(x0)
+def test_line_model_nd_invalid_input():
+    with testing.raises(ValueError):
+        LineModelND().predict_x(np.zeros(1))
 
-    data = np.column_stack([x0, y0])
+    with testing.raises(ValueError):
+        LineModelND().predict_y(np.zeros(1))
 
-    # estimate parameters of noisy data
-    model_est = LineModelND()
-    model_est.estimate(data)
+    with testing.raises(ValueError):
+        LineModelND().predict_x(np.zeros(1), np.zeros(1))
 
-    # test whether estimated parameters almost equal original parameters
-    random_state = np.random.RandomState(1234)
-    x = random_state.rand(100, 2)
-    assert_almost_equal(model0.predict(x), model_est.predict(x), 1)
+    with testing.raises(ValueError):
+        LineModelND().predict_y(np.zeros(1))
 
+    with testing.raises(ValueError):
+        LineModelND().predict_y(np.zeros(1), np.zeros(1))
 
-def test_line_model_residuals():
-    model = LineModelND()
-    model.params = (np.array([0, 0]), np.array([0, 1]))
-    assert_equal(model.residuals(np.array([[0, 0]])), 0)
-    assert_equal(model.residuals(np.array([[0, 10]])), 0)
-    assert_equal(model.residuals(np.array([[10, 0]])), 10)
-    model.params = (np.array([-2, 0]), np.array([1, 1])  / np.sqrt(2))
-    assert_equal(model.residuals(np.array([[0, 0]])), np.sqrt(2))
-    assert_almost_equal(model.residuals(np.array([[-4, 0]])), np.sqrt(2))
+    with testing.raises(ValueError):
+        LineModelND().estimate(np.empty((1, 3)))
 
+    with testing.raises(ValueError):
+        LineModelND().residuals(np.empty((1, 3)))
 
-def test_line_model_under_determined():
     data = np.empty((1, 2))
-    assert_raises(ValueError, LineModelND().estimate, data)
+    with testing.raises(ValueError):
+        LineModelND().estimate(data)
 
 
-def test_line_modelND_invalid_input():
-    assert_raises(ValueError, LineModelND().estimate, np.empty((5, 1)))
-
-
-def test_line_modelND_predict():
+def test_line_model_nd_predict():
     model = LineModelND()
-    model.params = (np.array([0, 0]), np.array([0.2, 0.98]))
+    model.params = (np.array([0, 0]), np.array([0.2, 0.8]))
     x = np.arange(-10, 10)
     y = model.predict_y(x)
     assert_almost_equal(x, model.predict_x(y))
 
 
-def test_line_modelND_estimate():
+def test_line_model_nd_estimate():
     # generate original data without noise
     model0 = LineModelND()
-    model0.params = (np.array([0,0,0], dtype='float'),
-                         np.array([1,1,1], dtype='float')/np.sqrt(3))
+    model0.params = (np.array([0, 0, 0], dtype='float'),
+                     np.array([1, 1, 1], dtype='float')/np.sqrt(3))
     # we scale the unit vector with a factor 10 when generating points on the
     # line in order to compensate for the scale of the random noise
     data0 = (model0.params[0] +
-             10 * np.arange(-100,100)[...,np.newaxis] * model0.params[1])
+             10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
     random_state = np.random.RandomState(1234)
@@ -83,6 +74,7 @@ def test_line_modelND_estimate():
     # estimate parameters of noisy data
     model_est = LineModelND()
     model_est.estimate(data)
+    # assert_almost_equal(model_est.residuals(data0), np.zeros(len(data)), 1)
 
     # test whether estimated parameters are correct
     # we use the following geometric property: two aligned vectors have
@@ -97,21 +89,27 @@ def test_line_modelND_estimate():
     assert_almost_equal(np.linalg.norm(np.cross(model0.params[1], a)), 0, 1)
 
 
-def test_line_modelND_residuals():
+def test_line_model_nd_residuals():
     model = LineModelND()
     model.params = (np.array([0, 0, 0]), np.array([0, 0, 1]))
     assert_equal(abs(model.residuals(np.array([[0, 0, 0]]))), 0)
     assert_equal(abs(model.residuals(np.array([[0, 0, 1]]))), 0)
     assert_equal(abs(model.residuals(np.array([[10, 0, 0]]))), 10)
+    # test params argument in model.rediduals
+    data = np.array([[10, 0, 0]])
+    params = (np.array([0, 0, 0]), np.array([2, 0, 0]))
+    assert_equal(abs(model.residuals(data, params=params)), 30)
 
 
 def test_line_modelND_under_determined():
     data = np.empty((1, 3))
-    assert_raises(ValueError, LineModelND().estimate, data)
+    with testing.raises(ValueError):
+        LineModelND().estimate(data)
 
 
 def test_circle_model_invalid_input():
-    assert_raises(ValueError, CircleModel().estimate, np.empty((5, 3)))
+    with testing.raises(ValueError):
+        CircleModel().estimate(np.empty((5, 3)))
 
 
 def test_circle_model_predict():
@@ -140,7 +138,7 @@ def test_circle_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params, model_est.params, 1)
+    assert_almost_equal(model0.params, model_est.params, 0)
 
 
 def test_circle_model_residuals():
@@ -153,12 +151,12 @@ def test_circle_model_residuals():
 
 
 def test_ellipse_model_invalid_input():
-    assert_raises(ValueError, EllipseModel().estimate, np.empty((5, 3)))
+    with testing.raises(ValueError):
+        EllipseModel().estimate(np.empty((5, 3)))
 
 
 def test_ellipse_model_predict():
     model = EllipseModel()
-    r = 5
     model.params = (0, 0, 5, 10, 0)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
@@ -167,22 +165,27 @@ def test_ellipse_model_predict():
 
 
 def test_ellipse_model_estimate():
-    # generate original data without noise
-    model0 = EllipseModel()
-    model0.params = (10, 20, 15, 25, 0)
-    t = np.linspace(0, 2 * np.pi, 100)
-    data0 = model0.predict_xy(t)
+    for angle in range(0, 180, 15):
+        rad = np.deg2rad(angle)
+        # generate original data without noise
+        model0 = EllipseModel()
+        model0.params = (10, 20, 15, 25, rad)
+        t = np.linspace(0, 2 * np.pi, 100)
+        data0 = model0.predict_xy(t)
 
-    # add gaussian noise to data
-    random_state = np.random.RandomState(1234)
-    data = data0 + random_state.normal(size=data0.shape)
+        # add gaussian noise to data
+        random_state = np.random.RandomState(1234)
+        data = data0 + random_state.normal(size=data0.shape)
 
-    # estimate parameters of noisy data
-    model_est = EllipseModel()
-    model_est.estimate(data)
+        # estimate parameters of noisy data
+        model_est = EllipseModel()
+        model_est.estimate(data)
 
-    # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params[:4], model_est.params[:4], 0)
+        # test whether estimated parameters almost equal original parameters
+        assert_almost_equal(model0.params[:2], model_est.params[:2], 0)
+        res = model_est.residuals(data0)
+        assert_array_less(res, np.ones(res.shape))
+
 
 def test_ellipse_model_estimate_from_data():
     data = np.array([
@@ -208,14 +211,30 @@ def test_ellipse_model_estimate_from_data():
         [643, 926], [644, 975], [643, 655], [646, 705], [651, 664], [651, 984],
         [647, 665], [651, 715], [651, 725], [651, 734], [647, 809], [651, 825],
         [651, 873], [647, 900], [652, 917], [651, 944], [652, 742], [648, 811],
-        [651, 994], [652, 783], [650, 911], [654, 879]])
+        [651, 994], [652, 783], [650, 911], [654, 879]], dtype=np.int32)
 
     # estimate parameters of real data
     model = EllipseModel()
     model.estimate(data)
 
     # test whether estimated parameters are smaller then 1000, so means stable
-    assert_array_less(np.abs(model.params[:4]), np.array([2e3] * 4))
+    assert_array_less(model.params[:4], np.full(4, 1000))
+
+    # test whether all parameters are more than 0. Negative values were the
+    # result of an integer overflow
+    assert_array_less(np.zeros(4), np.abs(model.params[:4]))
+
+
+@xfail(condition=arch32,
+       reason=('Known test failure on 32-bit platforms. See links for '
+               'details: '
+               'https://github.com/scikit-image/scikit-image/issues/3091 '
+               'https://github.com/scikit-image/scikit-image/issues/2670'))
+def test_ellipse_model_estimate_failers():
+    # estimate parameters of real data
+    model = EllipseModel()
+    assert not model.estimate(np.ones((5, 2)))
+    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 
 def test_ellipse_model_residuals():
@@ -241,11 +260,10 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5,
-                                random_state=1)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, random_state=1)
 
     # test whether estimated parameters equal original parameters
-    assert_equal(model0.params, model_est.params)
+    assert_almost_equal(model0.params, model_est.params)
     for outlier in outliers:
         assert outlier not in inliers
 
@@ -275,8 +293,8 @@ def test_ransac_geometric():
 
 
 def test_ransac_is_data_valid():
-
-    is_data_valid = lambda data: data.shape[0] > 2
+    def is_data_valid(data):
+        return data.shape[0] > 2
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
                             is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
@@ -284,7 +302,6 @@ def test_ransac_is_data_valid():
 
 
 def test_ransac_is_model_valid():
-
     def is_model_valid(model, data):
         return False
     model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
@@ -326,13 +343,60 @@ def test_ransac_dynamic_max_trials():
 
 
 def test_ransac_invalid_input():
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, max_trials=-1)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, stop_probability=-1)
-    assert_raises(ValueError, ransac, np.zeros((10, 2)), None, min_samples=2,
-                  residual_threshold=0, stop_probability=1.01)
+    # `residual_threshold` must be greater than zero
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=-0.5)
+    # "`max_trials` must be greater than zero"
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, max_trials=-1)
+    # `stop_probability` must be in range (0, 1)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, stop_probability=-1)
+    # `stop_probability` must be in range (0, 1)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=0, stop_probability=1.01)
+    # `min_samples` as ratio must be in range (0, nb)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=0,
+               residual_threshold=0)
+    # `min_samples` as ratio must be in range (0, nb)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=10,
+               residual_threshold=0)
+    # `min_samples` must be greater than zero
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=-1,
+               residual_threshold=0)
 
 
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+def test_ransac_sample_duplicates():
+    class DummyModel(object):
+
+        """Dummy model to check for duplicates."""
+
+        def estimate(self, data):
+            # Assert that all data points are unique.
+            assert_equal(np.unique(data).size, data.size)
+            return True
+
+        def residuals(self, data):
+            return np.ones(len(data), dtype=np.double)
+
+    # Create dataset with four unique points. Force 10 iterations
+    # and check that there are no duplicated data points.
+    data = np.arange(4)
+    ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
+           max_trials=10)
+
+
+def test_ransac_with_no_final_inliers():
+    data = np.random.rand(5, 2)
+    with expected_warnings(['No inliers found. Model not fitted']):
+        model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
+                                residual_threshold=0, random_state=1523427)
+    assert inliers is None
+    assert model is None

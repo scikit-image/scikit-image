@@ -3,8 +3,8 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j 1
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXOPTS    ?= -j auto
+SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 
@@ -38,7 +38,7 @@ clean:
 	-rm -rf $(DEST)
 	-rm -rf api
 	-rm -rf source/api
-	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+	-find ./source/auto_examples/* -type f | grep -v blank | xargs -r rm -f
 
 api:
 	@mkdir -p source/api
@@ -47,7 +47,12 @@ api:
 
 release_notes:
 	@echo "Copying release notes"
-	@tail -n +4 `ls release/*.rst | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.rst
+	@tail -n +4 release/release_$$(\
+		ls release/release_*.*.* \
+			| sed s:release/release_:: \
+			| sort -nrt. -k1,1 -k2,2 \
+			| head -n 1) \
+		> release/_release_notes_for_docs.rst
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
@@ -129,8 +134,8 @@ gh-pages:
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
-	--project-url=http://scikit-image.org \
-	--project-ml-url=https://mail.python.org/mailman/listinfo/scikit-image \
+	--project-url=https://scikit-image.org \
+	--project-ml-url=https://mail.python.org/mailman3/lists/scikit-image.python.org/ \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \
 	--source-suffix=.rst

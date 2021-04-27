@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Colour Mixer
+"""Color Mixer
 
 NumPy does not do overflow checking when adding or multiplying
 integers, so currently the only way to clip results efficiently
@@ -11,16 +11,16 @@ integers, so currently the only way to clip results efficiently
 one.
 
 """
-import cython
 
 cimport numpy as cnp
 from libc.math cimport exp, pow
+cnp.import_array()
 
 
 def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
         cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
         Py_ssize_t channel, Py_ssize_t amount):
-    """Add a given amount to a colour channel of `stateimg`, and
+    """Add a given amount to a color channel of `stateimg`, and
     store the result in `img`.  Overflow is clipped.
 
     Parameters
@@ -66,7 +66,7 @@ def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
              cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
              Py_ssize_t channel, float amount):
-    """Multiply a colour channel of `stateimg` by a certain amount, and
+    """Multiply a color channel of `stateimg` by a certain amount, and
     store the result in `img`.  Overflow is clipped.
 
     Parameters
@@ -359,7 +359,7 @@ def py_hsv_2_rgb(H, S, V):
         Each from 0 - 255
 
     conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
+    https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
     cdef float HSV[3]
@@ -398,7 +398,7 @@ def py_rgb_2_hsv(R, G, B):
         Ranges (0...360), (0...1), (0...1)
 
     conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
+    https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
     cdef float HSV[3]

@@ -28,11 +28,10 @@ image = color.gray2rgb(grayscale_image)
 red_multiplier = [1, 0, 0]
 yellow_multiplier = [1, 1, 0]
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4),
+                               sharex=True, sharey=True)
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
-ax1.set_adjustable('box-forced')
-ax2.set_adjustable('box-forced')
 
 ######################################################################
 # In many cases, dealing with RGB values may not be ideal. Because of that,
@@ -47,7 +46,7 @@ ax2.set_adjustable('box-forced')
 # to 1, so that hue, saturation, and value all share the same scale.
 #
 # .. _color spaces:
-#     http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
+#     https://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
 #
 # Below, we plot a linear gradient in the hue, with the saturation and value
 # turned all the way up:
@@ -61,7 +60,8 @@ all_hues = color.hsv2rgb(hsv)
 
 fig, ax = plt.subplots(figsize=(5, 2))
 # Set image extent so hues go from 0 to 1 and the image is a nice aspect ratio.
-ax.imshow(all_hues, extent=(0, 1, 0, 0.2))
+ax.imshow(all_hues, extent=(0 - 0.5 / len(hue_gradient),
+                            1 + 0.5 / len(hue_gradient), 0, 0.2))
 ax.set_axis_off()
 
 ######################################################################
@@ -69,7 +69,7 @@ ax.set_axis_off()
 # reflects the fact that the hues wrap around like the color wheel (see HSV_
 # for more info).
 #
-# .. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
+# .. _HSV: https://en.wikipedia.org/wiki/HSL_and_HSV
 #
 # Now, let's create a little utility function to take an RGB image and:
 #
@@ -105,7 +105,6 @@ for ax, hue in zip(axes.flat, hue_rotations):
     tinted_image = colorize(image, hue, saturation=0.3)
     ax.imshow(tinted_image, vmin=0, vmax=1)
     ax.set_axis_off()
-    ax.set_adjustable('box-forced')
 fig.tight_layout()
 
 ######################################################################
@@ -118,8 +117,8 @@ fig.tight_layout()
 from skimage.filters import rank
 
 # Square regions defined as slices over the first two dimensions.
-top_left = (slice(100),) * 2
-bottom_right = (slice(-100, None),) * 2
+top_left = (slice(25),) * 2
+bottom_right = (slice(-25, None),) * 2
 
 sliced_image = image.copy()
 sliced_image[top_left] = colorize(image[top_left], 0.82, saturation=0.5)
@@ -127,18 +126,17 @@ sliced_image[bottom_right] = colorize(image[bottom_right], 0.5, saturation=0.5)
 
 # Create a mask selecting regions with interesting texture.
 noisy = rank.entropy(grayscale_image, np.ones((9, 9)))
-textured_regions = noisy > 4
+textured_regions = noisy > 4.25
 # Note that using `colorize` here is a bit more difficult, since `rgb2hsv`
 # expects an RGB image (height x width x channel), but fancy-indexing returns
 # a set of RGB pixels (# pixels x channel).
 masked_image = image.copy()
 masked_image[textured_regions, :] *= red_multiplier
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
+                               sharex=True, sharey=True)
 ax1.imshow(sliced_image)
 ax2.imshow(masked_image)
-ax1.set_adjustable('box-forced')
-ax2.set_adjustable('box-forced')
 
 plt.show()
 

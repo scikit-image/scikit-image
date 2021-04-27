@@ -1,4 +1,3 @@
-from __future__ import division
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -13,8 +12,8 @@ def _find_boundaries_subpixel(label_img):
     Notes
     -----
     This function puts in an empty row and column between each *actual*
-    row and column of the image, for a corresponding shape of $2s - 1$
-    for every image dimension of size $s$. These "interstitial" rows
+    row and column of the image, for a corresponding shape of ``2s - 1``
+    for every image dimension of size ``s``. These "interstitial" rows
     and columns are filled as ``True`` if they separate two labels in
     `label_img`, ``False`` otherwise.
 
@@ -27,7 +26,7 @@ def _find_boundaries_subpixel(label_img):
 
     label_img_expanded = np.zeros([(2 * s - 1) for s in label_img.shape],
                                   label_img.dtype)
-    pixels = [slice(None, None, 2)] * ndim
+    pixels = (slice(None, None, 2), ) * ndim
     label_img_expanded[pixels] = label_img
 
     edges = np.ones(label_img_expanded.shape, dtype=bool)
@@ -54,14 +53,14 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     label_img : array of int or bool
         An array in which different regions are labeled with either different
         integers or boolean values.
-    connectivity: int in {1, ..., `label_img.ndim`}, optional
+    connectivity : int in {1, ..., `label_img.ndim`}, optional
         A pixel is considered a boundary pixel if any of its neighbors
         has a different label. `connectivity` controls which pixels are
         considered neighbors. A connectivity of 1 (default) means
         pixels sharing an edge (in 2D) or a face (in 3D) will be
         considered neighbors. A connectivity of `label_img.ndim` means
         pixels sharing a corner will be considered neighbors.
-    mode: string in {'thick', 'inner', 'outer', 'subpixel'}
+    mode : string in {'thick', 'inner', 'outer', 'subpixel'}
         How to mark the boundaries:
 
         - thick: any pixel not completely surrounded by pixels of the
@@ -74,7 +73,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
           marked.
         - subpixel: return a doubled image, with pixels *between* the
           original pixels marked as boundary where appropriate.
-    background: int, optional
+    background : int, optional
         For modes 'inner' and 'outer', a definition of a background
         label is required. See `mode` for descriptions of these two.
 
@@ -148,13 +147,14 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     ...                        [False, False, False, False, False],
     ...                        [False, False,  True,  True,  True],
     ...                        [False, False,  True,  True,  True],
-    ...                        [False, False,  True,  True,  True]], dtype=np.bool)
+    ...                        [False, False,  True,  True,  True]],
+    ...                       dtype=bool)
     >>> find_boundaries(bool_image)
     array([[False, False, False, False, False],
            [False, False,  True,  True,  True],
            [False,  True,  True,  True,  True],
            [False,  True,  True, False, False],
-           [False,  True,  True, False, False]], dtype=bool)
+           [False,  True,  True, False, False]])
     """
     if label_img.dtype == 'bool':
         label_img = label_img.astype(np.uint8)
@@ -221,7 +221,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         # the RGB information. ``ndi.zoom`` then performs the (cubic)
         # interpolation, filling in the values of the interposed pixels
         marked = ndi.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
-                          mode='reflect')
+                          mode='mirror')
     boundaries = find_boundaries(label_img, mode=mode,
                                  background=background_label)
     if outline_color is not None:

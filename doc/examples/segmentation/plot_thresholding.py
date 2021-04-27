@@ -9,9 +9,14 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 .. seealso::
     A more comprehensive presentation on
-    :ref:`sphx_glr_auto_examples_xx_applications_plot_thresholding.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_thresholding.py`
 
 """
+
+
+import matplotlib.pyplot as plt
+from skimage import data
+from skimage.filters import threshold_otsu
 
 ######################################################################
 # We illustrate how to apply one of these thresholding algorithms.
@@ -20,13 +25,8 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 # which are separated by the threshold. Equivalently, this threshold minimizes
 # the intra-class variance.
 #
-# .. [2] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
-
-import matplotlib.pyplot as plt
-from skimage import data
-from skimage.filters import threshold_otsu
-
 
 image = data.camera()
 thresh = threshold_otsu(image)
@@ -34,9 +34,9 @@ binary = image > thresh
 
 fig, axes = plt.subplots(ncols=3, figsize=(8, 2.5))
 ax = axes.ravel()
-ax[0] = plt.subplot(1, 3, 1, adjustable='box-forced')
+ax[0] = plt.subplot(1, 3, 1)
 ax[1] = plt.subplot(1, 3, 2)
-ax[2] = plt.subplot(1, 3, 3, sharex=ax[0], sharey=ax[0], adjustable='box-forced')
+ax[2] = plt.subplot(1, 3, 3, sharex=ax[0], sharey=ax[0])
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Original')
@@ -58,7 +58,7 @@ plt.show()
 # underlying assumptions, it is often difficult to know which algorithm will give
 # the best results. Therefore, Scikit-image includes a function to evaluate
 # thresholding algorithms provided by the library. At a glance, you can select
-# the best algorithm for you data without a deep understanding of their
+# the best algorithm for your data without a deep understanding of their
 # mechanisms.
 #
 
@@ -66,7 +66,5 @@ from skimage.filters import try_all_threshold
 
 img = data.page()
 
-# Here, we specify a radius for local thresholding algorithms.
-# If it is not specified, only global algorithms are called.
 fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
 plt.show()

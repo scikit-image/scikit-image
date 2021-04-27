@@ -1,58 +1,45 @@
-from io import BytesIO
-
 import numpy as np
-import six
 
 from ..io.manage_plugins import call_plugin
-from ..color import rgb2grey
+from ..color.colorconv import rgb2gray, rgba2rgb
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
-from .._shared.utils import all_warnings, warn
+from .._shared.utils import warn
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',
            'imread_collection', 'imshow_collection']
 
 
-def imread(fname, as_grey=False, plugin=None, flatten=None,
-           **plugin_args):
+def imread(fname, as_gray=False, plugin=None, **plugin_args):
     """Load an image from file.
 
     Parameters
     ----------
     fname : string
         Image file name, e.g. ``test.jpg`` or URL.
-    as_grey : bool
-        If True, convert color images to grey-scale (64-bit floats).
-        Images that are already in grey-scale format are not converted.
-    plugin : str
+    as_gray : bool, optional
+        If True, convert color images to gray-scale (64-bit floats).
+        Images that are already in gray-scale format are not converted.
+    plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
 
     Other Parameters
     ----------------
-    flatten : bool
-        Backward compatible keyword, superseded by `as_grey`.
+    plugin_args : keywords
+        Passed to the given plugin.
 
     Returns
     -------
     img_array : ndarray
-        The different colour bands/channels are stored in the
-        third dimension, such that a grey-image is MxN, an
+        The different color bands/channels are stored in the
+        third dimension, such that a gray-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
-    Other parameters
-    ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
-
     """
-    # Backward compatibility
-    if flatten is not None:
-        as_grey = flatten
-
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
@@ -68,8 +55,10 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
             img = np.swapaxes(img, -1, -3)
             img = np.swapaxes(img, -2, -3)
 
-        if as_grey:
-            img = rgb2grey(img)
+        if as_gray:
+            if img.shape[2] == 4:
+                img = rgba2rgb(img)
+            img = rgb2gray(img)
 
     return img
 
@@ -94,7 +83,7 @@ def imread_collection(load_pattern, conserve_memory=True,
     ic : ImageCollection
         Collection of images.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -104,7 +93,7 @@ def imread_collection(load_pattern, conserve_memory=True,
                        plugin=plugin, **plugin_args)
 
 
-def imsave(fname, arr, plugin=None, **plugin_args):
+def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     """Save an image to file.
 
     Parameters
@@ -113,22 +102,36 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Target filename.
     arr : ndarray of shape (M,N) or (M,N,3) or (M,N,4)
         Image data.
-    plugin : str
+    plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
+    check_contrast : bool, optional
+        Check for low contrast and print warning (default: True).
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
 
+    Notes
+    -----
+    When saving a JPEG, the compression ratio may be controlled using the
+    ``quality`` keyword argument which is an integer with values in [1, 100]
+    where 1 is worst quality and smallest file size, and 100 is best quality
+    and largest file size (default 75).  This is only available when using
+    the PIL and imageio plugins.
     """
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
-    if is_low_contrast(arr):
+    if arr.dtype == bool:
+        warn('%s is a boolean image: setting True to 255 and False to 0. '
+             'To silence this warning, please convert the image using '
+             'img_as_ubyte.' % fname, stacklevel=2)
+        arr = arr.astype('uint8') * 255
+    if check_contrast and is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
@@ -142,16 +145,16 @@ def imshow(arr, plugin=None, **plugin_args):
         Image data or name of image file.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
 
     """
-    if isinstance(arr, six.string_types):
+    if isinstance(arr, str):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 
@@ -167,7 +170,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
         Name of plugin to use.  By default, the different plugins are
         tried until a suitable candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.

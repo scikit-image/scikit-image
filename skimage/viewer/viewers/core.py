@@ -6,13 +6,14 @@ import numpy as np
 from ... import io, img_as_float
 from ...util.dtype import dtype_range
 from ...exposure import rescale_intensity
-from ..qt import QtWidgets, Qt, Signal
+from ..qt import QtWidgets, QtGui, Qt, Signal
 from ..widgets import Slider
 from ..utils import (dialogs, init_qtapp, figimage, start_qtapp,
                      update_axes_image)
 from ..utils.canvas import BlitManager, EventManager
 from ..plugins.base import Plugin
 
+from warnings import warn
 
 __all__ = ['ImageViewer', 'CollectionViewer']
 
@@ -89,11 +90,17 @@ class ImageViewer(QtWidgets.QMainWindow):
     original_image_changed = Signal(np.ndarray)
 
     def __init__(self, image, useblit=True):
+
+        warn('`viewer` is deprecated and will be removed in 0.20. '
+             'For alternatives, refer to '
+             'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+             FutureWarning, stacklevel=2)
+
         # Start main loop
         init_qtapp()
         super(ImageViewer, self).__init__()
 
-        #TODO: Add ImageViewer to skimage.io window manager
+        # TODO: Add ImageViewer to skimage.io window manager
 
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
@@ -347,6 +354,11 @@ class CollectionViewer(ImageViewer):
     """
 
     def __init__(self, image_collection, update_on='move', **kwargs):
+        warn('`CollectionViewer` is deprecated and will be removed in 0.20. '
+             'For alternatives, refer to '
+             'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+             FutureWarning, stacklevel=2)
+
         self.image_collection = image_collection
         self.index = 0
         self.num_images = len(self.image_collection)
@@ -361,7 +373,7 @@ class CollectionViewer(ImageViewer):
         self.slider = Slider('frame', **slider_kws)
         self.layout.addWidget(self.slider)
 
-        #TODO: Adjust height to accomodate slider; the following doesn't work
+        # TODO: Adjust height to accommodate slider; the following doesn't work
         # s_size = self.slider.sizeHint()
         # cs_size = self.canvas.sizeHint()
         # self.resize(cs_size.width(), cs_size.height() + s_size.height())
@@ -382,11 +394,11 @@ class CollectionViewer(ImageViewer):
         self.update_image(self.image_collection[index])
 
     def keyPressEvent(self, event):
-        if type(event) == QtWidgets.QKeyEvent:
+        if type(event) == QtGui.QKeyEvent:
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:
-                index = 0.1 * int(key - 48) * self.num_images
+                index = int(0.1 * (key - 48) * self.num_images)
                 self.update_index('', index)
                 event.accept()
             else:

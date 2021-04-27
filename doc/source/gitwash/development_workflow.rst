@@ -11,10 +11,10 @@ git by following :ref:`configure-git`.  Now you are ready for some real work.
 Workflow summary
 ================
 
-In what follows we'll refer to the upstream scikit-image ``master`` branch, as
+In what follows we'll refer to the upstream scikit-image ``main`` branch, as
 "trunk".
 
-* Don't use your ``master`` branch for anything.  Consider deleting it.
+* Don't use your ``main`` branch for anything.  Consider deleting it.
 * When you are starting a new set of changes, fetch any changes from trunk,
   and start a new *feature branch* from that.
 * Make a new branch for each separable set of changes |emdash| "one task, one
@@ -33,12 +33,12 @@ what you've done, and why you did it.
 
 See `linux git workflow`_ and `ipython git workflow`_ for some explanation.
 
-Consider deleting your master branch
+Consider deleting your main branch
 ====================================
 
-It may sound strange, but deleting your own ``master`` branch can help reduce
+It may sound strange, but deleting your own ``main`` branch can help reduce
 confusion about which branch you are on.  See `deleting master on github`_ for
-details.
+details (replacing `master` with `main`).
 
 .. _update-mirror-trunk:
 
@@ -53,8 +53,8 @@ From time to time you should fetch the upstream (trunk) changes from github::
 
 This will pull down any commits you don't have, and set the remote branches to
 point to the right commit.  For example, 'trunk' is the branch referred to by
-(remote/branchname) ``upstream/master`` - and if there have been commits since
-you last checked, ``upstream/master`` will change after you do the fetch.
+(remote/branchname) ``upstream/main`` - and if there have been commits since
+you last checked, ``upstream/main`` will change after you do the fetch.
 
 .. _make-feature-branch:
 
@@ -77,7 +77,7 @@ what the changes in the branch are for.  For example ``add-ability-to-fly``, or
     # Update the mirror of trunk
     git fetch upstream
     # Make new feature branch starting at current trunk
-    git branch my-new-feature upstream/master
+    git branch my-new-feature upstream/main
     git checkout my-new-feature
 
 Generally, you will want to keep your feature branches on your public github_
@@ -150,7 +150,7 @@ Ask for your changes to be reviewed or merged
 When you are ready to ask for someone to review your code and consider a merge:
 
 #. Go to the URL of your forked repo, say
-   ``http://github.com/your-user-name/scikit-image``.
+   ``https://github.com/your-user-name/scikit-image``.
 #. Use the 'Switch Branches' dropdown menu near the top left of the page to
    select the branch with your changes:
 
@@ -176,14 +176,14 @@ Delete a branch on github
 
 ::
 
-   git checkout master
+   git checkout main
    # delete branch locally
    git branch -D my-unwanted-branch
    # delete branch on github
    git push origin :my-unwanted-branch
 
 (Note the colon ``:`` before ``test-branch``.  See also:
-http://github.com/guides/remove-a-remote-branch
+https://help.github.com/en/github/using-git/managing-remote-repositories
 
 Several people sharing a single repository
 ------------------------------------------
@@ -195,7 +195,7 @@ share it via github.
 First fork scikit-image into your account, as from :ref:`forking`.
 
 Then, go to your forked repository github page, say
-``http://github.com/your-user-name/scikit-image``
+``https://github.com/your-user-name/scikit-image``
 
 Click on the 'Admin' button, and add anyone else to the repo as a
 collaborator:
@@ -213,7 +213,7 @@ Your collaborators can then commit directly into that repo with the
 usual::
 
      git commit -am 'ENH - much better code'
-     git push origin master # pushes directly into your repo
+     git push origin main # pushes directly into your repo
 
 Explore your repository
 -----------------------
@@ -276,12 +276,12 @@ To do a rebase on trunk::
     # make a backup in case you mess up
     git branch tmp cool-feature
     # rebase cool-feature onto trunk
-    git rebase --onto upstream/master upstream/master cool-feature
+    git rebase --onto upstream/main upstream/main cool-feature
 
 In this situation, where you are already on branch ``cool-feature``, the last
 command can be written more succinctly as::
 
-    git rebase upstream/master
+    git rebase upstream/main
 
 When all looks good you can delete your backup branch::
 
@@ -334,7 +334,7 @@ Rewriting commit history
 
    Do this only for your own feature branches.
 
-There's an embarassing typo in a commit you made? Or perhaps the you
+There's an embarrassing typo in a commit you made? Or perhaps the you
 made several false starts you would like the posterity not to see.
 
 This can be done via *interactive rebasing*.

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-# deconvolution.py --- Image deconvolution
-
 """Implementations restoration functions"""
 
-from __future__ import division
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import fftconvolve, convolve
+from scipy.signal import convolve
 
 from . import uft
 
@@ -15,7 +11,7 @@ __keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
-    """Wiener-Hunt deconvolution
+    r"""Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach (i.e. with
     Fourier diagonalisation).
@@ -78,12 +74,12 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
-       \Lambda_H^\dag F y
+       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \Lambda_H^\dagger F y
 
-    where :math:`F` and :math:`F^\dag` are the Fourier and inverse
-    Fourier transfroms respectively, :math:`\Lambda_H` the transfer
-    function (or the Fourier transfrom of the PSF, see [Hunt] below)
+    where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
+    Fourier transforms respectively, :math:`\Lambda_H` the transfer
+    function (or the Fourier transform of the PSF, see [Hunt] below)
     and :math:`\Lambda_D` the filter to penalize the restored image
     frequencies (Laplacian by default, that is penalization of high
     frequency). The parameter :math:`\lambda` tunes the balance
@@ -108,7 +104,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
-           http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+           https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
 
@@ -162,7 +158,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
-    user_params : dict
+    user_params : dict, optional
        Dictionary of parameters for the Gibbs sampler. See below.
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
@@ -186,12 +182,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
        samples, see Notes section). 1e-4 by default.
     burnin : int
        The number of sample to ignore to start computation of the
-       mean. 100 by default.
+       mean. 15 by default.
     min_iter : int
        The minimum number of iterations. 30 by default.
     max_iter : int
        The maximum number of iterations if ``threshold`` is not
-       satisfied. 150 by default.
+       satisfied. 200 by default.
     callback : callable (None by default)
        A user provided callable to which is passed, if the function
        exists, the current image sample for whatever purpose. The user
@@ -230,7 +226,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
-           http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+           https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
     """
@@ -264,12 +260,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     areg2 = np.abs(reg) ** 2
     atf2 = np.abs(trans_fct) ** 2
 
-    # The Fourier transfrom may change the image.size attribut, so we
+    # The Fourier transform may change the image.size attribute, so we
     # store it.
     if is_real:
-        data_spectrum = uft.urfft2(image.astype(np.float))
+        data_spectrum = uft.urfft2(image.astype(float))
     else:
-        data_spectrum = uft.ufft2(image.astype(np.float))
+        data_spectrum = uft.ufft2(image.astype(float))
 
     # Gibbs sampling
     for iteration in range(params['max_iter']):
@@ -330,7 +326,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def richardson_lucy(image, psf, iterations=50, clip=True):
+def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -339,12 +335,15 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
        Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
-    iterations : int
+    iterations : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
+    filter_epsilon: float, optional
+       Value below which intermediate results become 0 to avoid division
+       by small numbers.
 
     Returns
     -------
@@ -353,8 +352,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     Examples
     --------
-    >>> from skimage import color, data, restoration
-    >>> camera = color.rgb2gray(data.camera())
+    >>> from skimage import img_as_float, data, restoration
+    >>> camera = img_as_float(data.camera())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
@@ -363,31 +362,21 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    # compute the times for direct convolution and the fft method. The fft is of
-    # complexity O(N log(N)) for each dimension and the direct method does
-    # straight arithmetic (and is O(n*k) to add n elements k times)
-    direct_time = np.prod(image.shape + psf.shape)
-    fft_time =  np.sum([n*np.log(n) for n in image.shape + psf.shape])
-
-    # see whether the fourier transform convolution method or the direct
-    # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 40.032 * fft_time / direct_time
-
-    if time_ratio <= 1 or len(image.shape) > 2:
-        convolve_method = fftconvolve
-    else:
-        convolve_method = convolve
-
-    image = image.astype(np.float)
-    psf = psf.astype(np.float)
-    im_deconv = 0.5 * np.ones(image.shape)
-    psf_mirror = psf[::-1, ::-1]
+    float_type = np.promote_types(image.dtype, np.float32)
+    image = image.astype(float_type, copy=False)
+    psf = psf.astype(float_type, copy=False)
+    im_deconv = np.full(image.shape, 0.5, dtype=float_type)
+    psf_mirror = np.flip(psf)
 
     for _ in range(iterations):
-        relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
+        conv = convolve(im_deconv, psf, mode='same')
+        if filter_epsilon:
+            relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
+        else:
+            relative_blur = image / conv
+        im_deconv *= convolve(relative_blur, psf_mirror, mode='same')
 
     if clip:
         im_deconv[im_deconv > 1] = 1

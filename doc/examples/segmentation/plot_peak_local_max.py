@@ -4,9 +4,9 @@ Finding local maxima
 ====================
 
 The ``peak_local_max`` function returns the coordinates of local peaks (maxima)
-in an image. A maximum filter is used for finding local maxima. This operation
-dilates the original image and merges neighboring local maxima closer than the
-size of the dilation. Locations where the original image is equal to the
+in an image. Internally, a maximum filter is used for finding local maxima. This
+operation dilates the original image and merges neighboring local maxima closer
+than the size of the dilation. Locations where the original image is equal to the
 dilated image are returned as local maxima.
 
 """
@@ -25,8 +25,7 @@ image_max = ndi.maximum_filter(im, size=20, mode='constant')
 coordinates = peak_local_max(im, min_distance=20)
 
 # display results
-fig, axes = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True)
 ax = axes.ravel()
 ax[0].imshow(im, cmap=plt.cm.gray)
 ax[0].axis('off')

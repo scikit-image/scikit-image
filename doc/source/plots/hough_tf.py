@@ -19,9 +19,13 @@ fix, axes = plt.subplots(1, 2, figsize=(7, 4))
 axes[0].imshow(img, cmap=plt.cm.gray)
 axes[0].set_title('Input image')
 
-axes[1].imshow(
-    out, cmap=plt.cm.bone,
-    extent=(np.rad2deg(angles[-1]), np.rad2deg(angles[0]), d[-1], d[0]))
+angle_step = 0.5 * np.rad2deg(np.diff(angles).mean())
+d_step = 0.5 * np.diff(d).mean()
+bounds = (np.rad2deg(angles[0]) - angle_step,
+          np.rad2deg(angles[-1]) + angle_step,
+          d[-1] + d_step, d[0] - d_step)
+
+axes[1].imshow(out, cmap=plt.cm.bone, extent=bounds)
 axes[1].set_title('Hough transform')
 axes[1].set_xlabel('Angle (degree)')
 axes[1].set_ylabel('Distance (pixel)')

@@ -25,7 +25,7 @@ def binary_erosion(image, selem=None, out=None):
         Binary input image.
     selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped structuring element (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -38,8 +38,8 @@ def binary_erosion(image, selem=None, out=None):
 
     """
     if out is None:
-        out = np.empty(image.shape, dtype=np.bool)
-    ndi.binary_erosion(image, structure=selem, output=out)
+        out = np.empty(image.shape, dtype=bool)
+    ndi.binary_erosion(image, structure=selem, output=out, border_value=True)
     return out
 
 
@@ -56,14 +56,13 @@ def binary_dilation(image, selem=None, out=None):
 
     Parameters
     ----------
-
     image : ndarray
         Binary input image.
     selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped structuring element (connectivity=1).
     out : ndarray of bool, optional
-        The array to store the result of the morphology. If None, is
+        The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
 
     Returns
@@ -73,7 +72,7 @@ def binary_dilation(image, selem=None, out=None):
         ``[False, True]``.
     """
     if out is None:
-        out = np.empty(image.shape, dtype=np.bool)
+        out = np.empty(image.shape, dtype=bool)
     ndi.binary_dilation(image, structure=selem, output=out)
     return out
 
@@ -96,7 +95,7 @@ def binary_opening(image, selem=None, out=None):
         Binary input image.
     selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped structuring element (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -130,7 +129,7 @@ def binary_closing(image, selem=None, out=None):
         Binary input image.
     selem : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped structuring element (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.

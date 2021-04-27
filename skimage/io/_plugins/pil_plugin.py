@@ -1,10 +1,22 @@
 __all__ = ['imread', 'imsave']
 
+from distutils.version import LooseVersion
+import warnings
 import numpy as np
-from six import string_types
-from PIL import Image
+from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
+
+# Check CVE-2020-10379
+from distutils.version import LooseVersion
+if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+    from warnings import warn
+    warn('Your installed pillow version is < 7.1.0. '
+         'Several security issues (CVE-2020-11538, '
+         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
+         'have been fixed in pillow 7.1.0 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -13,34 +25,39 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
+        Specifies data type of array elements.
     img_num : int, optional
-       Specifies which image to read in a file with multiple images
-       (zero-indexed).
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through.
 
     Notes
     -----
-    Files are read using the Python Imaging Libary.
+    Files are read using the Python Imaging Library.
     See PIL docs [1]_ for a list of supported formats.
 
     References
     ----------
     .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
-    if isinstance(fname, string_types):
+    if isinstance(fname, str):
         with open(fname, 'rb') as f:
             im = Image.open(f)
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
         im = Image.open(fname)
+        if im.format == 'MPO' and LooseVersion(pil_version) < '6.0.0':
+            warnings.warn("You are trying to read a MPO image. "
+                          "To ensure a good support of this format, "
+                          "please upgrade pillow to 6.0.0 version or later.",
+                          stacklevel=2)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
-def pil_to_ndarray(im, dtype=None, img_num=None):
+def pil_to_ndarray(image, dtype=None, img_num=None):
     """Import a PIL Image object to an ndarray, in memory.
 
     Parameters
@@ -50,59 +67,59 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
     """
     try:
         # this will raise an IOError if the file is not readable
-        im.getdata()[0]
+        image.getdata()[0]
     except IOError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
         error_message = ('Could not load "%s" \n'
                          'Reason: "%s"\n'
                          'Please see documentation at: %s'
-                         % (im.filename, pillow_error_message, site))
+                         % (image.filename, pillow_error_message, site))
         raise ValueError(error_message)
     frames = []
     grayscale = None
     i = 0
     while 1:
         try:
-            im.seek(i)
+            image.seek(i)
         except EOFError:
             break
 
-        frame = im
+        frame = image
 
         if img_num is not None and img_num != i:
-            im.getdata()[0]
+            image.getdata()[0]
             i += 1
             continue
 
-        if im.format == 'PNG' and im.mode == 'I' and dtype is None:
+        if image.format == 'PNG' and image.mode == 'I' and dtype is None:
             dtype = 'uint16'
 
-        if im.mode == 'P':
+        if image.mode == 'P':
             if grayscale is None:
-                grayscale = _palette_is_grayscale(im)
+                grayscale = _palette_is_grayscale(image)
 
             if grayscale:
-                frame = im.convert('L')
+                frame = image.convert('L')
             else:
-                if im.format == 'PNG' and 'transparency' in im.info:
-                    frame = im.convert('RGBA')
+                if image.format == 'PNG' and 'transparency' in image.info:
+                    frame = image.convert('RGBA')
                 else:
-                    frame = im.convert('RGB')
+                    frame = image.convert('RGB')
 
-        elif im.mode == '1':
-            frame = im.convert('L')
+        elif image.mode == '1':
+            frame = image.convert('L')
 
-        elif 'A' in im.mode:
-            frame = im.convert('RGBA')
+        elif 'A' in image.mode:
+            frame = image.convert('RGBA')
 
-        elif im.mode == 'CMYK':
-            frame = im.convert('RGB')
+        elif image.mode == 'CMYK':
+            frame = image.convert('RGB')
 
-        if im.mode.startswith('I;16'):
-            shape = im.size
-            dtype = '>u2' if im.mode.endswith('B') else '<u2'
-            if 'S' in im.mode:
+        if image.mode.startswith('I;16'):
+            shape = image.size
+            dtype = '>u2' if image.mode.endswith('B') else '<u2'
+            if 'S' in image.mode:
                 dtype = dtype.replace('u', 'i')
             frame = np.fromstring(frame.tobytes(), dtype)
             frame.shape = shape[::-1]
@@ -116,8 +133,8 @@ def pil_to_ndarray(im, dtype=None, img_num=None):
         if img_num is not None:
             break
 
-    if hasattr(im, 'fp') and im.fp:
-        im.fp.close()
+    if hasattr(image, 'fp') and image.fp:
+        image.fp.close()
 
     if img_num is None and len(frames) > 1:
         return np.array(frames)
@@ -140,12 +157,13 @@ def _palette_is_grayscale(pil_image):
     is_grayscale : bool
         True if all colors in image palette are gray.
     """
-    assert pil_image.mode == 'P'
+    if pil_image.mode != 'P':
+        raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
     palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
-    valid_palette = palette[start:stop]
+    valid_palette = palette[start:stop + 1]
     # Image is grayscale if channel differences (R - G and G - B)
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)
@@ -225,7 +243,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
 
     Notes
     -----
-    Use the Python Imaging Libary.
+    Use the Python Imaging Library.
     See PIL docs [1]_ for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGs have the following behavior:
@@ -237,10 +255,10 @@ def imsave(fname, arr, format_str=None, **kwargs):
     .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
     # default to PNG if file-like object
-    if not isinstance(fname, string_types) and format_str is None:
+    if not isinstance(fname, str) and format_str is None:
         format_str = "PNG"
     # Check for png in filename
-    if (isinstance(fname, string_types)
+    if (isinstance(fname, str)
             and fname.lower().endswith(".png")):
         format_str = "PNG"
 

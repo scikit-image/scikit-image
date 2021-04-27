@@ -26,7 +26,7 @@ def approximate_polygon(coords, tolerance):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+    .. [1] https://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
     """
     if tolerance <= 0:
         return coords
@@ -146,8 +146,8 @@ def subdivide_polygon(coords, degree=2, preserve_ends=False):
 
     mask_even, mask_odd = _SUBDIVISION_MASKS[degree]
     # divide by total weight
-    mask_even = np.array(mask_even, np.float) / (2 ** degree)
-    mask_odd = np.array(mask_odd, np.float) / (2 ** degree)
+    mask_even = np.array(mask_even, float) / (2 ** degree)
+    mask_odd = np.array(mask_odd, float) / (2 ** degree)
 
     even = signal.convolve2d(coords.T, np.atleast_2d(mask_even), mode=method,
                              boundary='wrap')

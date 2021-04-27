@@ -1,12 +1,8 @@
-
-try:
-    import networkx as nx
-except ImportError:
-    from ..._shared.utils import warn
-    warn('RAGs require networkx')
+import networkx as nx
 import numpy as np
 from . import _ncut
 from . import _ncut_cy
+from ..._shared.utils import check_random_state
 from scipy.sparse import linalg
 
 
@@ -49,14 +45,14 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+           :DOI:`10.1109/83.841950`
 
     """
     if not in_place:
         rag = rag.copy()
 
     # Because deleting edges while iterating through them produces an error.
-    to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
+    to_remove = [(x, y) for x, y, d in rag.edges(data=True)
                  if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
 
@@ -68,14 +64,17 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     map_array = np.arange(labels.max() + 1, dtype=labels.dtype)
     for i, nodes in enumerate(comps):
         for node in nodes:
-            for label in rag.node[node]['labels']:
+            for label in rag.nodes[node]['labels']:
                 map_array[label] = i
 
     return map_array[labels]
 
 
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0):
+                   max_edge=1.0,
+                   *,
+                   random_state=None,
+                   ):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -96,11 +95,17 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The number or N-cuts to perform before determining the optimal one.
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
-        set a new attribute ``rag.node[n]['ncut label']``.
+        set a new attribute ``rag.nodes[n]['ncut label']``.
     max_edge : float, optional
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
+    random_state : int, RandomState instance or None, optional
+        If int, random_state is the seed used by the random number generator;
+        If RandomState instance, random_state is the random number generator;
+        If None, the random number generator is the RandomState instance used
+        by `np.random`. The random state is used for the starting point
+        of `scipy.sparse.linalg.eigsh`.
 
     Returns
     -------
@@ -112,7 +117,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     >>> from skimage import data, segmentation
     >>> from skimage.future import graph
     >>> img = data.astronaut()
-    >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
+    >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
     >>> new_labels = graph.cut_normalized(labels, rag)
 
@@ -123,24 +128,25 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
+    random_state = check_random_state(random_state)
     if not in_place:
         rag = rag.copy()
 
-    for node in rag.nodes_iter():
+    for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
-    _ncut_relabel(rag, thresh, num_cuts)
+    _ncut_relabel(rag, thresh, num_cuts, random_state)
 
     map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
     # Mapping from old labels to new
-    for n, d in rag.nodes_iter(data=True):
+    for n, d in rag.nodes(data=True):
         map_array[d['labels']] = d['ncut label']
 
     return map_array[labels]
 
 
 def partition_by_cut(cut, rag):
-    """Compute resulting subgraphs from given bi-parition.
+    """Compute resulting subgraphs from given bi-partition.
 
     Parameters
     ----------
@@ -202,7 +208,7 @@ def get_min_ncut(ev, d, w, num_cuts):
     # If all values in `ev` are equal, it implies that the graph can't be
     # further sub-divided. In this case the bi-partition is the the graph
     # itself and an empty set.
-    min_mask = np.zeros_like(ev, dtype=np.bool)
+    min_mask = np.zeros_like(ev, dtype=bool)
     if np.allclose(mn, mx):
         return min_mask, mcut
 
@@ -230,13 +236,13 @@ def _label_all(rag, attr_name):
     attr_name : string
         The attribute to which a unique integer is assigned.
     """
-    node = rag.nodes()[0]
-    new_label = rag.node[node]['labels'][0]
-    for n, d in rag.nodes_iter(data=True):
+    node = min(rag.nodes())
+    new_label = rag.nodes[node]['labels'][0]
+    for n, d in rag.nodes(data=True):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts):
+def _ncut_relabel(rag, thresh, num_cuts, random_state):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, until further subdivision
@@ -246,8 +252,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
     Parameters
     ----------
-    labels : ndarray
-        The array of labels.
     rag : RAG
         The region adjacency graph.
     thresh : float
@@ -255,9 +259,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
-    map_array : array
-        The array which maps old labels to new ones. This is modified inside
-        the function.
+    random_state : RandomState instance
+        Provides initial values for eigenvalue solver.
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
@@ -269,7 +272,10 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2001, Equation 7, Page 891
-        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
+        A = d2 * (d - w) * d2
+        # Initialize the vector to ensure reproducibility.
+        v0 = random_state.rand(A.shape[0])
+        vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
                                      k=min(100, m - 2))
 
         # Pick second smallest eigenvector.
@@ -284,8 +290,8 @@ def _ncut_relabel(rag, thresh, num_cuts):
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts)
-            _ncut_relabel(sub2, thresh, num_cuts)
+            _ncut_relabel(sub1, thresh, num_cuts, random_state)
+            _ncut_relabel(sub2, thresh, num_cuts, random_state)
             return
 
     # The N-cut wasn't small enough, or could not be computed.
