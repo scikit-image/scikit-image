@@ -6,15 +6,15 @@ from .._shared import utils
 
 def _hog_normalize_block(block, method, eps=1e-5):
     if method == 'L1':
-        out = block / (np.sum(np.abs(block), dtype=float) + eps)
+        out = block / (np.sum(np.abs(block)) + eps)
     elif method == 'L1-sqrt':
-        out = np.sqrt(block / (np.sum(np.abs(block), dtype=float) + eps))
+        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
     elif method == 'L2':
-        out = block / np.sqrt(np.sum(block ** 2, dtype=float) + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
     elif method == 'L2-Hys':
-        out = block / np.sqrt(np.sum(block ** 2, dtype=float) + eps ** 2)
+        out = block / np.sqrt(np.sum(block ** 2) + eps ** 2)
         out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sum(out ** 2, dtype=float) + eps ** 2)
+        out = out / np.sqrt(np.sum(out ** 2) + eps ** 2)
     else:
         raise ValueError('Selected block normalization method is invalid.')
 
@@ -231,7 +231,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     # compute orientations integral images
     orientation_histogram = np.zeros((n_cells_row, n_cells_col, orientations),
-                                     dtype=float_dtype)
+                                     dtype=float)
+    g_row = g_row.astype(float, copy=False)
+    g_col = g_col.astype(float, copy=False)
 
     _hoghistogram.hog_histograms(g_col, g_row, c_col, c_row, s_col, s_row,
                                  n_cells_col, n_cells_row,
