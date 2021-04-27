@@ -5,7 +5,7 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
-def _bernoulli(p, shape, seed):
+def _bernoulli(p, shape, *, random_state):
     """
     Bernoulli trials at a given probability of a given size.
 
