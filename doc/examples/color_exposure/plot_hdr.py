@@ -45,10 +45,7 @@ plt.show()
 hdr_im = hdr.make_hdr(ims, exp, radiance_map, depth=8)
 
 # Normalise the hdr image
-hdr_norm = np.zeros_like(hdr_im)
-norm = np.max(np.nan_to_num(hdr_im.flatten()))
-for ii in range(3):
-    hdr_norm[:, :, ii] = hdr_im[:, :, ii] / norm
+hdr_norm = hdr_im / np.nanmax(hdr_im)
 
 
 fig, axes = plt.subplots(nrows=1, ncols=2)
