@@ -43,7 +43,7 @@ image = data.page()
 titles = ["Original", "A Good Threshold", "Otsu's Method", "MET", "Percentile",
 			"A random threshold", "Otsu explict implementation"
 			]
-			
+
 # (nu, tau, kappa, omega,)
 hyperparameters = [
 			(1e-30, 12.589254, 1e+30, 0.11),  # a good Threshold
@@ -52,24 +52,33 @@ hyperparameters = [
 			(1e-30, 1.0, 1e30, 0.5),  # percentile
 			(73533, 0.28867513459481287, 73533.0, 0.5)  # a random
 					]
+
+
 # create histogram
 counts, bin_centers = histogram(image.ravel(), 256, source_range="image")
 
-#creating images
+# creating images
 imgs = [image]
+thresholds = [0]
+
 for nu, tau, kappa, omega in hyperparameters:
 	t, _ = theshold_generalized_histogram(counts, bin_centers,
 				nu, tau, kappa, omega)
 	imgs.append(image >= t)
+	thresholds.append(t)
+
 imgs.append(image > threshold_otsu(image))
+thresholds.append(threshold_otsu(image))
+
 
 fig, axes = plt.subplots(4, 2, figsize=(8, 8))
 ax = axes.ravel()
 
 for i in range(0, len(imgs)):
 	ax[i].imshow(imgs[i], cmap=plt.cm.gray)
-	ax[i].set_title(titles[i])
+	ax[i].set_title(titles[i]+" : " + str(thresholds[i]))
 	ax[i].axis('off')
 
+ax[7].axis('off')
 plt.tight_layout()
 plt.show()
