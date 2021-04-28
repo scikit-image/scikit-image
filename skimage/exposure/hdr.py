@@ -1,49 +1,6 @@
 import numpy as np
 
 
-def get_radiance(images, exposure, radiance_map):
-    """
-    Return the radiance image for a series of images based upon a camera
-    response function.
-
-    Parameters
-    ----------
-    images: list
-        List of images in the for of numpy arrays. Either mono or color
-        (RGB, MxNx3).
-    exposure : numpy 1D array
-        Array of exposure times in seconds.
-    radiance_map : numpy array
-        Array mapping the counts to radiance
-
-    Returns
-    -------
-    hdr : numpy array
-        Resulting image with radiance values.
-    """
-
-    den = np.ones(images[0].shape)
-    num = np.zeros(images[0].shape)
-    wf = np.vectorize(_weight_func)
-    for idx, im in enumerate(images):
-        gij = im.copy()
-        # For colour
-        if im.ndim == 3:
-            for ii in range(im.shape[2]):
-                gij[:, :, ii] = radiance_map[im[:, :, ii] + 1, ii]
-        else:
-            gij[:, :] = radiance_map[im[:, :, ii] + 1]
-        gij = gij - np.log(exposure[idx])
-
-        mask = gij > 2**(depth - 1)
-        wij = gij.copy()
-        wij[mask] = 2 ** depth - 1 - gij[mask]
-        num = num + wij * gij
-        den = den + wij
-
-    return num / den
-
-
 def make_hdr(images, exposure, radiance_map, depth=16):
     """
     Compute the HDR image from a series of images with a given radiance
@@ -71,11 +28,15 @@ def make_hdr(images, exposure, radiance_map, depth=16):
 
     References
     ----------
-    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
-            August, 3-8. DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
+       photographs" (1997). DOI:10.1145/258734.258884
+
+    .. [2] https://en.wikipedia.org/wiki/Radiance
     """
+    # Calculating the logarithm of the exposure
     B = np.log(exposure)
 
+    # Initialization for RBG or greyscale images
     if images[0].ndim == 3:
         sx, sy, sc = np.shape(images[0])
         hdr = np.zeros([sx, sy, sc], dtype=np.float)
@@ -85,15 +46,19 @@ def make_hdr(images, exposure, radiance_map, depth=16):
         hdr = np.zeros([sx, sy], dtype=np.float)
         gray = True
 
+    # Making sure the images are uint64
+    # TODO: this should handle float images
     images = np.asarray(images, dtype=np.uint64)
 
-    sx, sy, sz = np.shape(images[0])
+    # Calculating the weight
     w = _weight_func_arr(images, depth)
+    # Initializing variables for the numerator and denominator
+    num = np.zeros_like(hdr)
+    den = np.zeros_like(hdr)
 
     if gray:
-        num = np.zeros_like(hdr)
-        den = np.zeros_like(hdr)
-
+        # Looping over the images and computing the camera response
+        # function for each of them.
         for kk in range(images.shape[0]):
             g = np.reshape(
                 radiance_map[images[kk, :, :].flatten()], [sx, sy])
@@ -101,15 +66,17 @@ def make_hdr(images, exposure, radiance_map, depth=16):
             den[:, :] += w[kk, :, :]
         hdr = num / den
     else:
-        num = np.zeros_like(hdr)
-        den = np.zeros_like(hdr)
+        # Looping over the colours
         for cc in range(sc):
+            # Looping over the images and computing the camera response
+            # function for each of them.
             for kk in range(images.shape[0]):
                 g = np.reshape(
                     radiance_map[images[kk, :, :, cc].flatten(), cc], [sx, sy])
                 num[:, :,
                     cc] += w[kk, :, :, cc] * (g - B[kk])
                 den[:, :, cc] += w[kk, :, :, cc]
+        # Calculating the HDR image
         hdr = num / den
 
     return np.exp(hdr)
@@ -133,7 +100,7 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
         Can help to increase this for better smoothness in large bit depths
         (depth_max > 10).
     depth_max : int, optional
-        Depth used for the SVC is reduced to this if depth is larger.
+        Depth used for the SVC, depth will be reduced to depth_max if larger.
         Used to reduce the size of the matrix solved by the SVC for
         images with more than 8 bits per colour channel.
         Note that the scaling of memory requirements and computational
@@ -150,8 +117,8 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
 
     References
     ----------
-    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
-            August, 3-8. DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
+       photographs" (1997). DOI:10.1145/258734.258884
     """
 
     # Calculate number of samples from image necessary for an overdetermined
@@ -219,8 +186,8 @@ def _gsolve(Z, B, l, depth=16, depth_max=12):
 
     References
     ----------
-    .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
-            August, 3-8. DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
+       photographs" (1997). DOI:10.1145/258734.258884
     """
     # Reduce the bit depth to preserve memory and computational time
     if depth > depth_max:
