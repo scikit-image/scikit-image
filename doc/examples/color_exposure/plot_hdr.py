@@ -60,22 +60,23 @@ plt.show()
 
 # Below follows a commented out example for saving the image as a hdr image
 # importable by other processing software
-# from skimage.io import imsave
-# imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
+"""
+.. code-block:: python
+   from skimage.io import imsave
+  imsave(fname, hdr_norm.astype(np.float32), plugin='tifffile')
 
-
-# # Plotting a histogram equalised  hdr image.
-# from matplotlib.colors import LogNorm
-#
-# from skimage.exposure import equalize_hi
-#
-# tone_mapped = np.zeros_like(hdr_im)
-# for ii in range(3):
-#     tone_mapped[:, :, ii] = equalize_hist(np.nan_to_num(hdr_im[:, :, ii]))
-#
-# fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
-# axes[0].imshow(hdr_im, 'gray', norm=LogNorm())
-# axes[0].set_title("HDR on log norm")
-# axes[1].imshow(tone_mapped)
-# axes[1].set_title("Tone mapped")
-# plt.show()
+   # Plotting a histogram equalised  hdr image.
+   from matplotlib.colors import LogNorm
+   from skimage.exposure import equalize_hi
+   
+   tone_mapped = np.zeros_like(hdr_im)
+   for ii in range(3):
+       tone_mapped[..., ii] = equalize_hist(np.nan_to_num(hdr_im[..., ii]))
+   
+   fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
+   axes[0].imshow(hdr_im, 'gray', norm=LogNorm())
+   axes[0].set_title("HDR on log norm")
+   axes[1].imshow(tone_mapped)
+   axes[1].set_title("Tone mapped")
+   plt.show()
+"""
