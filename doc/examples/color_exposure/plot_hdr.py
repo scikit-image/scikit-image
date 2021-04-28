@@ -12,7 +12,8 @@ to create a HDR image.
 References
 ----------
 
-.. [1] Debevec and Malik, J. (1997). DOI:10.1145/258734.258884
+.. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
+       photographs" (1997). DOI:10.1145/258734.258884
 
 .. [2] https://en.wikipedia.org/wiki/High-dynamic-range_imaging
 """
