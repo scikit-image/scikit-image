@@ -10,9 +10,6 @@ from warnings import warn
 import numpy as np
 import shutil
 
-from .. import data_dir
-from ..io import imread, imread_collection, use_plugin
-from .._shared._warnings import expected_warnings
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
 from ._registry import registry, legacy_registry, registry_urls

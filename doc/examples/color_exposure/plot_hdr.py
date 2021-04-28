@@ -35,10 +35,9 @@ radiance_map = hdr.get_crf(ims, exp, depth=8, l=100)
 plt.title('Camera response function')
 plt.xlabel('Counts')
 plt.ylabel('Radiance')
-colors = ['r', 'g', 'b']
-for ii in range(radiance_map.shape[1]):
-    plt.plot(radiance_map[:, ii], colors[ii])
-plt.legend(['Red', 'Green', 'Blue'], loc='best')
+for ii, color in enumerate(['Red', 'Green', 'Blue']):
+    plt.plot(radiance_map[:, ii], color[0].lower(), label=color)
+plt.legend()
 plt.show()
 
 # Make the HDR image

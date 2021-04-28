@@ -35,7 +35,9 @@ def get_radiance(images, exposure, radiance_map):
             gij[:, :] = radiance_map[im[:, :, ii] + 1]
         gij = gij - np.log(exposure[idx])
 
-        wij = wf(gij)
+        mask = gij > 2**(depth - 1)
+        wij = gij.copy()
+        wij[mask] = 2 ** depth - 1 - gij[mask]
         num = num + wij * gij
         den = den + wij
 
@@ -72,7 +74,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
     .. [1]  Debevec, P. E., & Malik, J. (1997). SIGGRAPH 97 Conf. Proc.,
             August, 3-8. DOI:10.1145/258734.258884
     """
-    B = np.log(np.array(exposure))
+    B = np.log(exposure)
 
     if images[0].ndim == 3:
         sx, sy, sc = np.shape(images[0])
