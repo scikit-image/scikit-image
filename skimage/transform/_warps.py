@@ -34,8 +34,8 @@ def _preprocess_resize_output_shape(image, output_shape):
     Returns
     -------
     image: ndarray
-        The input image reshaped if its number of dimensions is not
-        equal to output_shape_length.
+        The input image, but with additional singleton dimensions appended in
+        the case where ``len(output_shape) > input.ndim``.
     output_shape: tuple
         The output image converted to tuple.
 
