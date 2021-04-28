@@ -68,11 +68,11 @@ plt.show()
    # Plotting a histogram equalised  hdr image.
    from matplotlib.colors import LogNorm
    from skimage.exposure import equalize_hi
-   
+
    tone_mapped = np.zeros_like(hdr_im)
    for ii in range(3):
        tone_mapped[..., ii] = equalize_hist(np.nan_to_num(hdr_im[..., ii]))
-   
+
    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 20))
    axes[0].imshow(hdr_im, 'gray', norm=LogNorm())
    axes[0].set_title("HDR on log norm")

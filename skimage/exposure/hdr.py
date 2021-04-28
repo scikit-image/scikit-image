@@ -28,8 +28,8 @@ def make_hdr(images, exposure, radiance_map, depth=16):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
-       photographs" (1997). DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+       from photographs" (1997). DOI:10.1145/258734.258884
 
     .. [2] https://en.wikipedia.org/wiki/Radiance
     """
@@ -82,7 +82,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
     return np.exp(hdr)
 
 
-def get_crf(images, exposure, depth=16, l=200, depth_max=10):
+def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
     """
     Compute the camera response function from a set of images and exposures.
 
@@ -95,7 +95,7 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
         Array of exposure times in seconds.
     depth : int, optional
         Pixel depth.
-    l : int, optional
+    lambd : int, optional
         Smoothness parameter, default 200, increase for noisy images.
         Can help to increase this for better smoothness in large bit depths
         (depth_max > 10).
@@ -117,8 +117,8 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
-       photographs" (1997). DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+       from photographs" (1997). DOI:10.1145/258734.258884
     """
 
     # Calculate number of samples from image necessary for an overdetermined
@@ -147,17 +147,17 @@ def get_crf(images, exposure, depth=16, l=200, depth_max=10):
 
             for jj in range(len(images)):
                 Z[:, jj] = images[jj][:, :, ii].flatten()[rand_idx]
-            radiance_map[:, ii], LE = _gsolve(Z, B, l, depth, depth_max)
+            radiance_map[:, ii], LE = _gsolve(Z, B, lambd, depth, depth_max)
 
     else:
         for jj in range(len(images)):
             Z[:, jj] = images[jj][:, :].flatten()[rand_idx]
-        radiance_map, LE = _gsolve(Z, B, l, depth, depth_max)
+        radiance_map, LE = _gsolve(Z, B, lambd, depth, depth_max)
 
     return radiance_map
 
 
-def _gsolve(Z, B, l, depth=16, depth_max=12):
+def _gsolve(Z, B, lambd, depth=16, depth_max=12):
     """
     Solves for the camera response function.
 
@@ -167,8 +167,8 @@ def _gsolve(Z, B, l, depth=16, depth_max=12):
         2D array (i,j) with pixel i in image j.
     B : numpy array
         The ln of the shutter speed for image j.
-    l : int
-        l determines the amount of smoothness.
+    lambd : int
+        lambd determines the amount of smoothness.
     depth : int, optional
         Pixel depth, default=16
     depth_max : int, optional
@@ -186,8 +186,8 @@ def _gsolve(Z, B, l, depth=16, depth_max=12):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps from
-       photographs" (1997). DOI:10.1145/258734.258884
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+       from photographs" (1997). DOI:10.1145/258734.258884
     """
     # Reduce the bit depth to preserve memory and computational time
     if depth > depth_max:
@@ -213,9 +213,9 @@ def _gsolve(Z, B, l, depth=16, depth_max=12):
     k += 1
 
     for ii in range(n - 2):
-        A[k, ii] = l * _weight_func(ii + 1, depth - div)
-        A[k, ii + 1] = -2 * l * _weight_func(ii + 1, depth - div)
-        A[k, ii + 2] = l * _weight_func(ii + 1, depth - div)
+        A[k, ii] = lambd * _weight_func(ii + 1, depth - div)
+        A[k, ii + 1] = -2 * lambd * _weight_func(ii + 1, depth - div)
+        A[k, ii + 2] = lambd * _weight_func(ii + 1, depth - div)
         k += 1
 
     # Solve the equations with SVD
