@@ -198,7 +198,7 @@ def rgb2hsv(rgb):
 
     Returns
     -------
-    out : (..., 3) ndarray
+    hsv : (..., 3) ndarray
         The image in HSV format. Same dimensions as input.
 
     Raises
@@ -249,7 +249,7 @@ def hsv2rgb(hsv):
 
     Returns
     -------
-    out : (..., 3) ndarray
+    rgb : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
