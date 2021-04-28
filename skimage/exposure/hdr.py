@@ -28,7 +28,7 @@ def make_hdr(images, exposure, radiance_map, depth=16):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps
        from photographs" (1997). DOI:10.1145/258734.258884
 
     .. [2] https://en.wikipedia.org/wiki/Radiance
@@ -117,7 +117,7 @@ def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps
        from photographs" (1997). DOI:10.1145/258734.258884
     """
 
@@ -186,7 +186,7 @@ def _gsolve(Z, B, lambd, depth=16, depth_max=12):
 
     References
     ----------
-    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps 
+    .. [1] Debevec and Malik, J. "Recovering high dynamic range radiance maps
        from photographs" (1997). DOI:10.1145/258734.258884
     """
     # Reduce the bit depth to preserve memory and computational time
