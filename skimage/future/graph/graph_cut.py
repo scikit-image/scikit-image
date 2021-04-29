@@ -277,7 +277,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         # Refer Shi & Malik 2001, Equation 7, Page 891
         A = d2 * (d - w) * d2
         # Initialize the vector to ensure reproducibility.
-        v0 = random_state.rand(A.shape[0])
+        v0 = random_state.random(A.shape[0])
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
                                      k=min(100, m - 2))
 

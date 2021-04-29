@@ -105,7 +105,7 @@ def test_gaussian():
 
 
 def test_localvar():
-    seed = 42
+    seed = 23703
     data = np.zeros((128, 128)) + 0.5
     local_vars = np.zeros((128, 128)) + 0.001
     local_vars[:64, 64:] = 0.1

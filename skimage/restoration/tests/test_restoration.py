@@ -34,8 +34,9 @@ def test_wiener():
 def test_unsupervised_wiener():
     psf = np.ones((5, 5)) / 25
     data = convolve2d(test_img, psf, 'same')
-    np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    seed = 16829302
+    rng = np.random.RandomState(seed)
+    data += 0.1 * data.std() * rng.standard_normal(data.shape)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf)
 
     path = fetch('restoration/tests/camera_unsup.npy')
@@ -43,10 +44,10 @@ def test_unsupervised_wiener():
 
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
-    np.random.seed(0)
     deconvolved = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"callback": lambda x: None})[0]
+        user_params={"callback": lambda x: None},
+        random_state=seed)[0]
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved),
                                np.load(path),

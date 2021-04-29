@@ -33,7 +33,7 @@ def _bernoulli(p, shape, *, random_state):
         return np.zeros(shape, dtype=bool)
     if p == 1:
         return np.ones(shape, dtype=bool)
-    return seed.random(shape) <= p
+    return random_state.random(shape) <= p
 
 
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
@@ -209,8 +209,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = _bernoulli(p, image.shape, rng)
-        salted = _bernoulli(q, image.shape, rng)
+        flipped = _bernoulli(p, image.shape, random_state=rng)
+        salted = _bernoulli(q, image.shape, random_state=rng)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip
