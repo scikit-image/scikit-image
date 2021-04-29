@@ -736,7 +736,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> x = xc + a * np.cos(t)
     >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(203560)  # do not copy this value
     >>> data += rng.normal(size=data.shape)
 
     Add some faulty data:
@@ -758,7 +758,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
     >>> abs(np.round(ransac_model.params))
-    array([20., 30.,  5., 10.,  0.])
+    array([20., 30., 10.,  6.,  2.])
     >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
