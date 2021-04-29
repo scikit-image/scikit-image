@@ -1,6 +1,7 @@
 
 import numpy as np
 from scipy import ndimage as ndi
+
 from .._shared.utils import _supported_float_type
 from ..morphology import dilation, erosion, square
 from ..util import img_as_float, view_as_windows
