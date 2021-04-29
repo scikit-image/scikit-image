@@ -3,6 +3,7 @@ import functools
 import numbers
 import sys
 import warnings
+from collections.abc import Iterable
 
 import numpy as np
 from numpy.lib import NumpyVersion
@@ -280,6 +281,10 @@ class channel_as_last_axis():
             for name in self.kwarg_names:
                 kwargs[name] = np.moveaxis(kwargs[name], channel_axis[0], -1)
 
+            # now that we have moved the channels axis to the last position,
+            # change the channel_axis argument to -1
+            kwargs["channel_axis"] = -1
+
             # Call the function with the fixed arguments
             out = func(*new_args, **kwargs)
             if self.multichannel_output:
@@ -491,8 +496,8 @@ def convert_to_float(image, preserve_range):
         using img_as_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
-    Notes:
-    ------
+    Notes
+    -----
     * Input images with `float32` data type are not upcast.
 
     Returns
@@ -579,3 +584,47 @@ def _fix_ndimage_mode(mode):
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         mode = grid_modes.get(mode, mode)
     return mode
+
+
+new_float_type = {
+    # preserved types
+    np.float32().dtype.char: np.float32,
+    np.float64().dtype.char: np.float64,
+    np.complex64().dtype.char: np.complex64,
+    np.complex128().dtype.char: np.complex128,
+    # altered types
+    np.float16().dtype.char: np.float32,
+    'g': np.float64,      # np.float128 ; doesn't exist on windows
+    'G': np.complex128,   # np.complex256 ; doesn't exist on windows
+}
+
+
+def _supported_float_type(input_dtype, allow_complex=False):
+    """Return an appropriate floating-point dtype for a given dtype.
+
+    float32, float64, complex64, complex128 are preserved.
+    float16 is promoted to float32.
+    complex256 is demoted to complex128.
+    Other types are cast to float64.
+
+    Parameters
+    ----------
+    input_dtype : np.dtype or Iterable of np.dtype
+        The input dtype. If a sequence of multiple dtypes is provided, each
+        dtype is first converted to a supported floating point type and the
+        final dtype is then determined by applying `np.result_type` on the
+        sequence of supported floating point types.
+    allow_complex : bool, optional
+        If False, raise a ValueError on complex-valued inputs.
+
+    Returns
+    -------
+    float_type : dtype
+        Floating-point dtype for the image.
+    """
+    if isinstance(input_dtype, Iterable) and not isinstance(input_dtype, str):
+        return np.result_type(*(_supported_float_type(d) for d in input_dtype))
+    input_dtype = np.dtype(input_dtype)
+    if not allow_complex and input_dtype.kind == 'c':
+        raise ValueError("complex valued input is not supported")
+    return new_float_type.get(input_dtype.char, np.float64)

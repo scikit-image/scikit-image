@@ -1,6 +1,11 @@
 import numpy as np
 from skimage.data import camera
-from skimage import restoration, data, io
+from skimage import restoration, data, color
+from skimage.morphology import binary_dilation
+try:
+    from skimage.morphology import disk
+except ImportError:
+    from skimage.morphology import circle as disk
 import scipy.ndimage as ndi
 
 
@@ -148,3 +153,49 @@ class RollingBall(object):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
     time_rollingball_threads.params = range(0, 9)
     time_rollingball_threads.param_names = ["threads"]
+
+
+class Inpaint(object):
+    """Benchmark inpainting algorithm."""
+
+    def setup(self):
+        image = data.astronaut()
+
+        # Create mask with six block defect regions
+        mask = np.zeros(image.shape[:-1], dtype=bool)
+        mask[20:60, :20] = 1
+        mask[160:180, 70:155] = 1
+        mask[30:60, 170:195] = 1
+        mask[-60:-30, 170:195] = 1
+        mask[-180:-160, 70:155] = 1
+        mask[-60:-20, :20] = 1
+
+        # add a few long, narrow defects
+        mask[200:205, -200:] = 1
+        mask[150:255, 20:23] = 1
+        mask[365:368, 60:130] = 1
+
+        # add randomly positioned small point-like defects
+        rstate = np.random.RandomState(0)
+        for radius in [0, 2, 4]:
+            # larger defects are less common
+            thresh = 2.75 + 0.25 * radius  # larger defects are less commmon
+            tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
+            if radius > 0:
+                tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+            mask[tmp_mask] = 1
+
+        for layer in range(image.shape[-1]):
+            image[np.where(mask)] = 0
+
+        self.image_defect = image
+        self.image_defect_gray = color.rgb2gray(image)
+        self.mask = mask
+
+    def time_inpaint_rgb(self):
+        restoration.inpaint_biharmonic(self.image_defect, self.mask,
+                                       multichannel=True)
+
+    def time_inpaint_grey(self):
+        restoration.inpaint_biharmonic(self.image_defect_gray, self.mask,
+                                       multichannel=False)

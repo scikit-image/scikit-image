@@ -245,7 +245,7 @@ def draw_haar_like_feature(image, r, c, width, height,
         needs to be an array containing the type of each feature, as returned
         by :func:`haar_like_feature_coord`. By default, all coordinates are
         computed.
-    color_positive_rectangle : tuple of 3 floats
+    color_positive_block : tuple of 3 floats
         Floats specifying the color for the positive block. Corresponding
         values define (R, G, B) values. Default value is red (1, 0, 0).
     color_negative_block : tuple of 3 floats

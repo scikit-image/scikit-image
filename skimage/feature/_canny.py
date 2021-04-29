@@ -49,6 +49,15 @@ def _preprocess(image, mask, sigma, mode):
     eroded_mask : ndarray
         The eroded mask.
 
+    Notes
+    -----
+    This function calculates the fractional contribution of masked pixels
+    by applying the function to the mask (which gets you the fraction of
+    the pixel data that's due to significant points). We then mask the image
+    and apply the function. The resulting values will be lower by the
+    bleed-over fraction, so you can recalibrate by dividing by the function
+    on the mask to recover the effect of smoothing from just the significant
+    pixels.
     """
 
     if mask is None:
@@ -194,7 +203,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     """Edge filter an image using the Canny algorithm.
 
     Parameters
-    -----------
+    ----------
     image : 2D array
         Grayscale input image to detect edges on; can be of any dtype.
     sigma : float, optional
@@ -249,7 +258,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
       low threshold that is 8-connected to a labeled point as an edge.
 
     References
-    -----------
+    ----------
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
            :DOI:`10.1109/TPAMI.1986.4767851`
