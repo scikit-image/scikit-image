@@ -466,7 +466,9 @@ def test_gray_3d_mask():
         assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
 
 
-@pytest.mark.parametrize("dtype", ['float32', 'float64', 'uint8', 'int'])
+@pytest.mark.parametrize(
+    "dtype", ['float16', 'float32', 'float64', 'uint8', 'int']
+)
 def test_dtype_support(dtype):
     img = np.random.rand(28, 28).astype(dtype)
 
