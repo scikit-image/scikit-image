@@ -16,8 +16,6 @@ New Features
 ------------
 
 
-
-
 Documentation
 -------------
 
