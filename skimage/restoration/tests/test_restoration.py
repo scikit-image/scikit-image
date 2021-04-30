@@ -37,8 +37,8 @@ def test_unsupervised_wiener():
     seed = 16829302
     rng = np.random.RandomState(seed)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
-    deconvolved, _ = restoration.unsupervised_wiener(data, psf)
-
+    deconvolved, _ = restoration.unsupervised_wiener(data, psf,
+                                                     random_state=seed)
     path = fetch('restoration/tests/camera_unsup.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 

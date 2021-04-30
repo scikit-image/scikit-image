@@ -143,8 +143,8 @@ registry = {
     "restoration/tests/astronaut_rl.npy":
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
-    "restoration/tests/camera_unsup.npy": "401e512f7becec46c3379f34dbd7956a02a4f2e68f802a8d5bd605d355588880",
-    "restoration/tests/camera_unsup2.npy": "cc4b31ea2a6ebe07bc7529174677b3e94eae4b7679fd822d3e721a9c8d4854d1",
+    "restoration/tests/camera_unsup.npy": "3de10a0b97267352b18886b25d66a967f9e1d78ada61050577d78586cab82baa",
+    "restoration/tests/camera_unsup2.npy": "29cdc60605eb528c5f014baa8564d7d1ba0bd4b3170a66522058cbe5aed0960b",
     "restoration/tests/camera_wiener.npy": "4505ea8b0d63d03250c6d756560d615751b76dd6ffc4a95972fa260c0c84633e",
     "registration/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
     "registration/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
