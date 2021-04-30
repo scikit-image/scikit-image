@@ -39,22 +39,23 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
         The matching points from coords1 the closer to coords0.
 
     """
-    y, x = np.mgrid[-radius:radius+1, -radius:radius+1]
-    weights = np.exp(-0.5 * (x**2 / sigma**2 + y**2 / sigma**2))
+    y, x = np.mgrid[-radius:radius + 1, -radius:radius + 1]
+    weights = np.exp(-0.5 * (x ** 2 + y ** 2) / sigma ** 2)
     weights /= 2 * np.pi * sigma * sigma
 
     match_list = []
     for r0, c0 in coords0:
-        roi0 = img0[r0-radius:r0+radius+1, c0-radius:c0+radius+1]
-        roi1_list = [img1[r1-radius:r1+radius+1, c1-radius:c1+radius+1]
-                     for r1, c1 in coords1]
+        roi0 = img0[r0 - radius:r0 + radius + 1, c0 - radius:c0 + radius + 1]
+        roi1_list = [img1[r1 - radius:r1 + radius + 1,
+                          c1 - radius:c1 + radius + 1] for r1, c1 in coords1]
         # sum of squared differences
-        ssd_list = [np.sum(weights*(roi0 - roi1)**2) for roi1 in roi1_list]
+        ssd_list = [np.sum(weights * (roi0 - roi1) ** 2) for roi1 in roi1_list]
         match_list.append(coords1[np.argmin(ssd_list)])
 
     return np.array(match_list)
 
-################################################################################
+
+############################################################################
 # For this example, a set of noisy images slightly tilted is generated
 
 img = moon()
@@ -62,10 +63,10 @@ img = moon()
 angle_list = [5, 6, -2, 3, -4]
 center_list = [(10, 10), (5, 12), (11, 21), (21, 17), (43, 15)]
 
-ref_img = img_as_float(img[40:240, 50:350])
-img_list = [ref_img.copy()] + [
-    rotate(img, angle=a, center =c)[40:240, 50:350]
-    for a, c in zip(angle_list, center_list)]
+i0, j0, i1, j1 = 40, 50, 240, 350
+ref_img = img_as_float(img[i0:i1, j0:j1])
+img_list = [ref_img.copy()] + [rotate(img, angle=a, center=c)[i0:i1, j0:j1]
+                               for a, c in zip(angle_list, center_list)]
 
 sigma = 0.015
 img_list = [random_noise(gaussian(im, 1.2), var=sigma ** 2, seed=12)
@@ -103,9 +104,8 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
     ax1.imshow(warp(im, trfm), cmap="gray", vmin=0, vmax=1)
 
     if idx == 0:
-        ax1.set_title(f"Registered")
         ax0.set_title(f"Input (PSNR={psnr_ref:.2f})")
-        ax0.set_ylabel(f"")
+        ax1.set_title(f"Registered")
 
     ax0.set_axis_off()
     ax1.set_axis_off()
