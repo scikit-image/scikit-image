@@ -1,17 +1,18 @@
-import pytest
 import numpy as np
+import pytest
 from scipy.ndimage import map_coordinates
 
-from skimage.data import checkerboard, astronaut
-from skimage.util.dtype import img_as_float, _convert
+from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_allclose,
+                                     assert_array_almost_equal,
+                                     assert_array_equal,
+                                     test_parallel)
+from skimage._shared.utils import _supported_float_type
 from skimage.color.colorconv import rgb2gray
+from skimage.data import checkerboard, astronaut
 from skimage.draw.draw import circle_perimeter_aa
 from skimage.feature.peak import peak_local_max
-from skimage._shared import testing
-from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
-from skimage._shared._warnings import expected_warnings
-
 from skimage.transform._warps import (_stackcopy,
                                       _linear_polar_mapping,
                                       _log_polar_mapping, warp,
@@ -21,6 +22,7 @@ from skimage.transform._warps import (_stackcopy,
 from skimage.transform._geometric import (AffineTransform,
                                           ProjectiveTransform,
                                           SimilarityTransform)
+from skimage.util.dtype import img_as_float, _convert
 
 
 np.random.seed(0)
@@ -32,7 +34,7 @@ def test_stackcopy():
     y = np.eye(3, 3)
     _stackcopy(x, y)
     for i in range(layers):
-        assert_almost_equal(x[..., i], y)
+        assert_array_almost_equal(x[..., i], y)
 
 
 def test_warp_tform():
@@ -42,10 +44,10 @@ def test_warp_tform():
     tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
 
     x90 = warp(x, tform, order=1)
-    assert_almost_equal(x90, np.rot90(x))
+    assert_array_almost_equal(x90, np.rot90(x))
 
     x90 = warp(x, tform.inverse, order=1)
-    assert_almost_equal(x90, np.rot90(x))
+    assert_array_almost_equal(x90, np.rot90(x))
 
 
 def test_warp_callable():
@@ -58,7 +60,7 @@ def test_warp_callable():
         return xy + 1
 
     outx = warp(x, shift, order=1)
-    assert_almost_equal(outx, refx)
+    assert_array_almost_equal(outx, refx)
 
 
 @test_parallel()
@@ -72,7 +74,7 @@ def test_warp_matrix():
 
     # _warp_fast
     outx = warp(x, matrix, order=1)
-    assert_almost_equal(outx, refx)
+    assert_array_almost_equal(outx, refx)
     # check for ndimage.map_coordinates
     outx = warp(x, matrix, order=5)
 
@@ -93,7 +95,7 @@ def test_warp_nd():
 
         outx = warp(x, coords, order=0, cval=0)
 
-        assert_almost_equal(outx, refx)
+        assert_array_almost_equal(outx, refx)
 
 
 def test_warp_clip():
@@ -106,8 +108,8 @@ def test_warp_clip():
 
     outx = rescale(x, 3, order=3, clip=True, anti_aliasing=False,
                    mode='constant')
-    assert_almost_equal(outx.min(), 0)
-    assert_almost_equal(outx.max(), 1)
+    assert_array_almost_equal(outx.min(), 0)
+    assert_array_almost_equal(outx.max(), 1)
 
 
 def test_homography():
@@ -121,14 +123,16 @@ def test_homography():
     x90 = warp(x,
                inverse_map=ProjectiveTransform(M).inverse,
                order=1)
-    assert_almost_equal(x90, np.rot90(x))
+    assert_array_almost_equal(x90, np.rot90(x))
 
 
-def test_rotate():
-    x = np.zeros((5, 5), dtype=np.double)
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_rotate(dtype):
+    x = np.zeros((5, 5), dtype=dtype)
     x[1, 1] = 1
     x90 = rotate(x, 90)
-    assert_almost_equal(x90, np.rot90(x))
+    assert x90.dtype == _supported_float_type(dtype)
+    assert_array_almost_equal(x90, np.rot90(x))
 
 
 def test_rotate_resize():
@@ -148,9 +152,9 @@ def test_rotate_center():
     refx = np.zeros((10, 10), dtype=np.double)
     refx[2, 5] = 1
     x20 = rotate(x, 20, order=0, center=(0, 0))
-    assert_almost_equal(x20, refx)
+    assert_array_almost_equal(x20, refx)
     x0 = rotate(x20, -20, order=0, center=(0, 0))
-    assert_almost_equal(x0, x)
+    assert_array_almost_equal(x0, x)
 
 
 def test_rotate_resize_center():
@@ -165,7 +169,7 @@ def test_rotate_resize_center():
                  mode='reflect')
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)
-    assert_equal(x45, ref_x45)
+    assert_array_equal(x45, ref_x45)
 
 
 def test_rotate_resize_90():
@@ -181,7 +185,7 @@ def test_rescale():
                      channel_axis=None, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
-    assert_almost_equal(scaled, ref)
+    assert_array_almost_equal(scaled, ref)
 
     # different scale factors
     x = np.zeros((5, 5), dtype=np.double)
@@ -191,7 +195,7 @@ def test_rescale():
                      channel_axis=None, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
-    assert_almost_equal(scaled, ref)
+    assert_array_almost_equal(scaled, ref)
 
 
 def test_rescale_invalid_scale():
@@ -209,31 +213,31 @@ def test_rescale_multichannel():
     x = np.zeros((8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 3))
+    assert scaled.shape == (16, 3)
     # 2D
     scaled = rescale(x, 2, order=0, channel_axis=None, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 6))
+    assert scaled.shape == (16, 6)
 
     # 2D + channels
     x = np.zeros((8, 8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 16, 3))
+    assert scaled.shape == (16, 16, 3)
     # 3D
     scaled = rescale(x, 2, order=0, channel_axis=None, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 16, 6))
+    assert scaled.shape == (16, 16, 6)
 
     # 3D + channels
     x = np.zeros((8, 8, 8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 16, 16, 3))
+    assert scaled.shape == (16, 16, 16, 3)
     # 4D
     scaled = rescale(x, 2, order=0, channel_axis=None, anti_aliasing=False,
                      mode='constant')
-    assert_equal(scaled.shape, (16, 16, 16, 6))
+    assert scaled.shape == (16, 16, 16, 6)
 
 
 def test_rescale_multichannel_deprecated_multiscale():
@@ -241,13 +245,13 @@ def test_rescale_multichannel_deprecated_multiscale():
     with expected_warnings(["`multichannel` is a deprecated argument"]):
         scaled = rescale(x, (2, 1), order=0, multichannel=True,
                          anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (10, 5, 3))
+    assert scaled.shape == (10, 5, 3)
 
     # repeat prior test, but check for positional multichannel _warnings
     with expected_warnings(["Providing the `multichannel` argument"]):
         scaled = rescale(x, (2, 1), 0, 'constant', 0, True, False, True,
                          anti_aliasing=False)
-    assert_equal(scaled.shape, (10, 5, 3))
+    assert scaled.shape == (10, 5, 3)
 
 
 @testing.parametrize('channel_axis', [0, 1, 2, -1])
@@ -257,17 +261,17 @@ def test_rescale_channel_axis_multiscale(channel_axis):
     scaled = rescale(x, scale=(2, 1), order=0, channel_axis=channel_axis,
                      anti_aliasing=False, mode='constant')
     scaled = np.moveaxis(scaled, channel_axis, -1)
-    assert_equal(scaled.shape, (10, 5, 3))
+    assert scaled.shape == (10, 5, 3)
 
 
 def test_rescale_multichannel_defaults():
     x = np.zeros((8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 6))
+    assert scaled.shape == (16, 6)
 
     x = np.zeros((8, 8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 16, 6))
+    assert scaled.shape == (16, 16, 6)
 
 
 def test_resize2d():
@@ -277,7 +281,7 @@ def test_resize2d():
                      mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize3d_keep():
@@ -291,10 +295,10 @@ def test_resize3d_keep():
         resize(x, (10, ), order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
     resized = resize(x, (10, 10, 3), order=0, anti_aliasing=False,
                      mode='constant')
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize3d_resize():
@@ -305,7 +309,7 @@ def test_resize3d_resize():
                      mode='constant')
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize3d_2din_3dout():
@@ -316,7 +320,7 @@ def test_resize3d_2din_3dout():
                      mode='constant')
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize2d_4d():
@@ -328,7 +332,7 @@ def test_resize2d_4d():
                      mode='constant')
     ref = np.zeros(out_shape)
     ref[2:4, 2:4, ...] = 1
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize_nd():
@@ -339,7 +343,7 @@ def test_resize_nd():
         resized = resize(x, out_shape, order=0, mode='reflect',
                          anti_aliasing=False)
         expected_shape = 1.5 * shape
-        assert_equal(resized.shape, expected_shape)
+        assert_array_equal(resized.shape, expected_shape)
         assert np.all(resized == 1)
 
 
@@ -355,7 +359,7 @@ def test_resize3d_bilinear():
     ref[1:5, 2:4, :] = 0.09375
     ref[2:4, 1:5, :] = 0.09375
     ref[2:4, 2:4, :] = 0.28125
-    assert_almost_equal(resized, ref)
+    assert_array_almost_equal(resized, ref)
 
 
 def test_resize_dtype():
@@ -374,14 +378,17 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
-def test_swirl():
-    image = img_as_float(checkerboard())
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_swirl(dtype):
+    image = img_as_float(checkerboard()).astype(dtype, copy=False)
+    float_dtype = _supported_float_type(dtype)
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
         swirled = swirl(image, strength=10, **swirl_params)
         unswirled = swirl(swirled, strength=-10, **swirl_params)
+        assert swirled.dtype == unswirled.dtype == float_dtype
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
@@ -390,6 +397,7 @@ def test_swirl():
     with expected_warnings(['Bi-quadratic.*bug']):
         swirled = swirl(image, strength=10, **swirl_params)
         unswirled = swirl(swirled, strength=-10, **swirl_params)
+        assert swirled.dtype == unswirled.dtype == float_dtype
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
@@ -423,24 +431,29 @@ def test_warp_coords_example():
     map_coordinates(image[:, :, 0], coords[:2])
 
 
-def test_downsize():
-    x = np.zeros((10, 10), dtype=np.double)
+@testing.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_downsize(dtype):
+    x = np.zeros((10, 10), dtype=dtype)
     x[2:4, 2:4] = 1
     scaled = resize(x, (5, 5), order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (5, 5))
-    assert_equal(scaled[1, 1], 1)
-    assert_equal(scaled[2:, :].sum(), 0)
-    assert_equal(scaled[:, 2:].sum(), 0)
+    expected_dtype = np.float32 if dtype == np.float16 else dtype
+    assert scaled.dtype == expected_dtype
+    assert scaled.shape == (5, 5)
+    assert scaled[1, 1] == 1
+    assert scaled[2:, :].sum() == 0
+    assert scaled[:, 2:].sum() == 0
 
 
 def test_downsize_anti_aliasing():
     x = np.zeros((10, 10), dtype=np.double)
     x[2, 2] = 1
     scaled = resize(x, (5, 5), order=1, anti_aliasing=True, mode='constant')
-    assert_equal(scaled.shape, (5, 5))
+    assert scaled.shape == (5, 5)
     assert np.all(scaled[:3, :3] > 0)
-    assert_equal(scaled[3:, :].sum(), 0)
-    assert_equal(scaled[:, 3:].sum(), 0)
+    assert scaled[3:, :].sum() == 0
+    assert scaled[:, 3:].sum() == 0
 
     sigma = 0.125
     out_size = (5, 5)
@@ -472,15 +485,20 @@ def test_downsize_anti_aliasing_invalid_stddev():
                anti_aliasing_sigma=(0, 1), mode="reflect")
 
 
-def test_downscale():
-    x = np.zeros((10, 10), dtype=np.double)
+@testing.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_downscale(dtype):
+    x = np.zeros((10, 10), dtype=dtype)
     x[2:4, 2:4] = 1
     scaled = rescale(x, 0.5, order=0, anti_aliasing=False,
                      channel_axis=None, mode='constant')
-    assert_equal(scaled.shape, (5, 5))
-    assert_equal(scaled[1, 1], 1)
-    assert_equal(scaled[2:, :].sum(), 0)
-    assert_equal(scaled[:, 2:].sum(), 0)
+    expected_dtype = np.float32 if dtype == np.float16 else dtype
+    assert scaled.dtype == expected_dtype
+    assert scaled.shape == (5, 5)
+    assert scaled[1, 1] == 1
+    assert scaled[2:, :].sum() == 0
+    assert scaled[:, 2:].sum() == 0
 
 
 def test_downscale_anti_aliasing():
@@ -488,10 +506,10 @@ def test_downscale_anti_aliasing():
     x[2, 2] = 1
     scaled = rescale(x, 0.5, order=1, anti_aliasing=True,
                      channel_axis=None, mode='constant')
-    assert_equal(scaled.shape, (5, 5))
+    assert scaled.shape == (5, 5)
     assert np.all(scaled[:3, :3] > 0)
-    assert_equal(scaled[3:, :].sum(), 0)
-    assert_equal(scaled[:, 3:].sum(), 0)
+    assert scaled[3:, :].sum() == 0
+    assert scaled[:, 3:].sum() == 0
 
 
 def test_downscale_to_the_limit():
@@ -501,18 +519,26 @@ def test_downscale_to_the_limit():
     assert out.size == 1
 
 
-def test_downscale_local_mean():
-    image1 = np.arange(4 * 6).reshape(4, 6)
+@testing.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_downscale_local_mean(dtype):
+    image1 = np.arange(4 * 6, dtype=dtype).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
+    float_dtype = dtype if np.dtype(dtype).kind == 'f' else np.float64
+    assert out1.dtype == float_dtype
+
     expected1 = np.array([[4., 7.],
                           [16., 19.]])
-    assert_equal(expected1, out1)
+    assert_array_equal(expected1, out1)
 
-    image2 = np.arange(5 * 8).reshape(5, 8)
+    image2 = np.arange(5 * 8, dtype=dtype).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
+    assert out2.dtype == float_dtype
     expected2 = np.array([[14., 10.8],
                           [8.5, 5.7]])
-    assert_equal(expected2, out2)
+    rtol = 1e-3 if dtype == np.float16 else 1e-7
+    assert_allclose(expected2, out2, rtol=rtol)
 
 
 def test_invalid():
@@ -525,7 +551,7 @@ def test_inverse():
     tform = SimilarityTransform(scale=0.5, rotation=0.1)
     inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
     image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
-    assert_equal(warp(image, inverse_tform), warp(image, tform.inverse))
+    assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
 def test_slow_warp_nonint_oshape():
@@ -620,19 +646,23 @@ def test_log_polar_mapping():
     assert np.allclose(coords, ground_truth)
 
 
-def test_linear_warp_polar():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_linear_warp_polar(dtype):
     radii = [5, 10, 15, 20]
     image = np.zeros([51, 51])
     for rad in radii:
         rr, cc, val = circle_perimeter_aa(25, 25, rad)
         image[rr, cc] = val
+    image = image.astype(dtype, copy=False)
     warped = warp_polar(image, radius=25)
+    assert warped.dtype == _supported_float_type(dtype)
     profile = warped.mean(axis=0)
     peaks = peak_local_max(profile)
     assert np.alltrue([peak in radii for peak in peaks])
 
 
-def test_log_warp_polar():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_log_warp_polar(dtype):
     radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
              np.exp(5)-1, np.exp(5)+1]
     radii = [int(x) for x in radii]
@@ -640,7 +670,9 @@ def test_log_warp_polar():
     for rad in radii:
         rr, cc, val = circle_perimeter_aa(150, 150, rad)
         image[rr, cc] = val
+    image = image.astype(dtype, copy=False)
     warped = warp_polar(image, radius=200, scaling='log')
+    assert warped.dtype == _supported_float_type(dtype)
     profile = warped.mean(axis=0)
     peaks_coord = peak_local_max(profile)
     peaks_coord.sort(axis=0)
@@ -672,7 +704,7 @@ def test_bool_img_rescale():
     expected = np.ones((6, 9))
     expected[1:-1, 2:-2] = False
 
-    assert_equal(res, expected)
+    assert_array_equal(res, expected)
 
 
 def test_bool_img_resize():
@@ -683,7 +715,7 @@ def test_bool_img_resize():
     expected = np.ones((6, 9))
     expected[1:-1, 2:-2] = False
 
-    assert_equal(res, expected)
+    assert_array_equal(res, expected)
 
 
 def test_boll_array_warnings():
@@ -715,3 +747,20 @@ def test_order_0_warp_dtype(dtype):
     assert rotate(img, 45, order=0).dtype == dtype
     assert warp_polar(img, order=0).dtype == dtype
     assert swirl(img, order=0).dtype == dtype
+
+
+@pytest.mark.parametrize('dtype',
+    [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('order', [1, 3, 5])
+def test_nonzero_order_warp_dtype(dtype, order):
+
+    img = _convert(astronaut()[:10, :10, 0], dtype)
+
+    float_dtype = _supported_float_type(dtype)
+
+    assert resize(img, (12, 12), order=order).dtype == float_dtype
+    assert rescale(img, 0.5, order=order).dtype == float_dtype
+    assert rotate(img, 45, order=order).dtype == float_dtype
+    assert warp_polar(img, order=order).dtype == float_dtype
+    assert swirl(img, order=order).dtype == float_dtype
