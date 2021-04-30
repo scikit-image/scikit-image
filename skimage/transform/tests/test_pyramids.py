@@ -207,9 +207,12 @@ def test_check_factor():
 @pytest.mark.parametrize(
     'dtype', ['float16', 'float32', 'float64', 'uint8', 'int64']
 )
-def test_pyramid_gaussian_dtype_support(dtype):
+@pytest.mark.parametrize(
+    'pyramid_func', [pyramids.pyramid_gaussian, pyramids.pyramid_laplacian]
+)
+def test_pyramid_dtype_support(pyramid_func, dtype):
     img = np.random.randn(32, 8).astype(dtype)
-    pyramid = pyramids.pyramid_gaussian(img)
+    pyramid = pyramid_func(img)
 
     float_dtype  = _supported_float_type(dtype)
     assert np.all([im.dtype == float_dtype for im in pyramid])
