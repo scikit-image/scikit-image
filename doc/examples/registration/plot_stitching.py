@@ -1,4 +1,10 @@
-"""Simulate a set of noisy images slightly shifted and rotated.
+"""
+======================
+Simple image stitching
+======================
+
+This example demonstrate how a set of images can be assembled under
+the hypothesis of rigid body motions.
 
 """
 
