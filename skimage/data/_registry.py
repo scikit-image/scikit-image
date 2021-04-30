@@ -138,7 +138,7 @@ registry = {
     "data/diamond-matlab-output.npz": "02fca68907e2b252b501dfe977eef71ae39fadaaa3702ebdc855195422ae1cc2",
     "data/bw_text.png": "308c2b09f8975a69b212e103b18520e8cbb7a4eccfce0f757836cd371f1b9094",
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
-    "data/_blobs_3d_fiji_skeleton.tif": "5182a2a94f240528985b8d15ec2aebbd5ca3c6b9214beff1eb6099c431e12b7b",
+    "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
     "restoration/tests/astronaut_rl.npy":
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
