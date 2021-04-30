@@ -1,14 +1,14 @@
 import itertools
-import pytest
 
 import numpy as np
+import pytest
+
+from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import test_parallel
+from skimage._shared.utils import _supported_float_type, convert_to_float
 from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, iradon, iradon_sart, rescale
-
-from skimage._shared.utils import convert_to_float
-from skimage._shared import testing
-from skimage._shared.testing import test_parallel
-from skimage._shared._warnings import expected_warnings
 
 
 PHANTOM = shepp_logan_phantom()[::2, ::2]
@@ -72,6 +72,7 @@ def check_radon_center(shape, circle, dtype, preserve_range):
     theta = np.linspace(0., 180., max(shape), endpoint=False)
     sinogram = radon(image, theta=theta, circle=circle,
                      preserve_range=preserve_range)
+    assert sinogram.dtype == _supported_float_type(sinogram.dtype)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
     print(sinogram_max)
@@ -80,7 +81,9 @@ def check_radon_center(shape, circle, dtype, preserve_range):
 
 @testing.parametrize("shape", [(16, 16), (17, 17)])
 @testing.parametrize("circle", [False, True])
-@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize(
+    "dtype", [np.float64, np.float32, np.float16, np.uint8, bool]
+)
 @testing.parametrize("preserve_range", [False, True])
 def test_radon_center(shape, circle, dtype, preserve_range):
     check_radon_center(shape, circle, dtype, preserve_range)
