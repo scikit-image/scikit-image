@@ -1310,18 +1310,42 @@ def _preliminaries(n, x=None):
     return x, w0, w1, p0, p1, mu0, mu1, d0, d1
 
 
-def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
+def theshold_generalized_histogram(image=None, nbins=256, hist=None, nu=1e50,
+                                   tau=0.01, kappa=0, omega=0.5):
     """Compute the generalized histogram threshold for a histogram
+     based on nu, tau, kappa, omega hyperparameters, defaults to Otsu's
 
+    Either image or hist must be provided. If hist is provided, the actual
+    histogram of the image is ignored.
+
+    1) GHT doesn't require the histogram to be normalized.
+    2) tau, τ  hypterparameter serves a similar purpose as
+        coarsing, blurring the input histogram.
+
+    Special Case : Minimum Error Thresholding
+        set nu and kappa  as zero
+        tau and omega doesn't matter
+
+    Special Case :  Otsu's method
+        set nu as approaching infinity.
+        tau as approaching zero.
+        Kappa is zero
+
+    Special Case : Weighted percentile
+        set kappa as a large value
+        set nu as approaching zero.
 
     Parameters
     ----------------------------
-    n : ndarray
-        Each element is the number of pixels falling in each
-         intensity bin.
-    x : ndaarray, optional
-        Each element is the value corresponding to the center of
-         each intensity bin.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
     nu : Float
         Degree of freedom , positive integer, scaled inverse chi-squared
          distribution parameter
@@ -1346,25 +1370,6 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
          Jonathan T. Barron, ECCV, 2020
 
-    Insights in GHT and its hyperparameter behaviour:
-    -------------------------------------------------------
-    1) GHT doesn't require the histogram to be normalized.
-    2) tau, τ  hypterparameter serves a similar purpose as
-        coarsing, blurring the input histogram.
-
-    Special Case : Minimum Error Thresholding
-        set nu and kappa  as zero
-        tau and omega doesn't matter
-
-    Special Case :  Otsu's method
-        set nu as approaching infinity.
-        tau as approaching zero.
-        Kappa is zero
-
-    Special Case : Weighted percentile
-        set kappa as a large value
-        set nu as approaching zero.
-
 
     Examples
     ----------------
@@ -1374,17 +1379,30 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     >>> from skimage.filters import theshold_generalized_histogram
     >>>
     >>> data = camera()
-    >>> counts, bin_centers = histogram(data.ravel(), 256, source_range="image")
     >>>
-    >>> default_nu = np.sum(counts)
-    >>> default_tau = np.sqrt(1/12)
-    >>> default_kappa = np.sum(counts)
-    >>> default_omega = 0.5
-    >>>
-    >>> t, score = theshold_generalized_histogram(counts, bin_centers,
-            default_nu, default_tau, default_kappa, default_omega)
+    >>> #defaults to Otsu's
+    >>> t, score = theshold_generalized_histogram(image=image)
     >>> binary = data<=t
     """
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
+
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
+
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
+    n = counts
+    x = bin_centers
+
+
+
+
     if nu < 0:
         raise ValueError("nu needs to be a postive number or zero")
     if tau < 0:
@@ -1392,7 +1410,7 @@ def theshold_generalized_histogram(n, x=None, nu=0, tau=0, kappa=0, omega=0.5):
     if kappa < 0:
         raise ValueError("kappa needs to be a postive number or zero")
     if omega < 0:
-        raise ValueError("""omega needs to be a postive number between 
+        raise ValueError("""omega needs to be a postive number between
                 zero and one included""")
 
     x, w0, w1, p0, p1, _, _, d0, d1 = _preliminaries(n, x)

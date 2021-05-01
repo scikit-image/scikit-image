@@ -712,11 +712,11 @@ def test_multiotsu_lut():
         (0.0001, 1, 262144, 0.5, 71),
         (0.0001, 1, 0.1, 0.5, 65),
         (0.0001, 1, 0.1, 0.5, 65),
-        (1e30, 1e-30, 1e-30, 0.5, 254),  # otsu
+        (1e50, 0.01, 0, 0.5, 102),  # otsu
         (1e-30, 1.0, 1e-30, 0.5, 65),   # met
         (1e-30, 1.0, 1e30, 0.5, 152),    # percentile
-                    ])
-def test_theshold_generalized_histogram(nu, tau, kappa, omega, threshold):
+])
+def test_threshold_generalized_histogram(nu, tau, kappa, omega, threshold):
     """
     tests for generalized histogram thresholding algorithm
     """
@@ -724,6 +724,16 @@ def test_theshold_generalized_histogram(nu, tau, kappa, omega, threshold):
     image = data.camera()
     counts, bin_centers = histogram(image.ravel(), 256, source_range="image")
 
-    t, _ = theshold_generalized_histogram(counts, bin_centers,
-                nu, tau, kappa, omega)
+    t, _ = theshold_generalized_histogram(image=image,
+                                          nu=nu,
+                                          tau=tau,
+                                          kappa=kappa,
+                                          omega=omega)
+    assert np.array_equal(t, threshold)
+
+    t, _ = theshold_generalized_histogram(hist=(counts, bin_centers),
+                                          nu=nu,
+                                          tau=tau,
+                                          kappa=kappa,
+                                          omega=omega)
     assert np.array_equal(t, threshold)
