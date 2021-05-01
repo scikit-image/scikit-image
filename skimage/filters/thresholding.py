@@ -1409,7 +1409,7 @@ def theshold_generalized_histogram(image=None, nbins=256, hist=None, nu=1e50,
         raise ValueError("tau needs to be a postive number or zero")
     if kappa < 0:
         raise ValueError("kappa needs to be a postive number or zero")
-    if omega < 0:
+    if omega < 0 or omega > 1:
         raise ValueError("""omega needs to be a postive number between
                 zero and one included""")
 
