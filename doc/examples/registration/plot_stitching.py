@@ -42,7 +42,9 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
     Returns:
     --------
     match_coords: (2, m) array
-        The matching points from coords1 closer to coords0.
+        The points in `coords1` that are the closest corresponding match to
+        those in `coords0` as determined by the (Gaussian weighted) sum of
+        squared differences between patches surrounding each point.
 
     """
     y, x = np.mgrid[-radius:radius + 1, -radius:radius + 1]
