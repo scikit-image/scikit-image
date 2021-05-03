@@ -122,8 +122,8 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
 fig.tight_layout()
 
 ############################################################################
-# A composite image can be optained using the relative positions of
-# the registred images to the reference one. To do so, we can define a
+# A composite image can be obtained using the relative positions of
+# the registered images to the reference one. To do so, we can define a
 # global domain around the reference image and position the other
 # images in this domain:
 #
