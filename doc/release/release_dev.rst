@@ -25,6 +25,10 @@ New Features
   (#4922), TODO for other images 
   Also note that the image for ``data.camera`` has been changed due to
   copyright issues (#4913).
+- Added a new keyword only parameter ``random_state`` to
+  ``morphology.medial_axis`` and ``restoration.unsupervised_wiener``.
+- Seeding random number generators will not give the same results as the
+  underlying generator was updated to use ``numpy.random.Generator``.
 
 
 Documentation
