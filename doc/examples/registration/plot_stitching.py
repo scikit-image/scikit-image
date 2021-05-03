@@ -33,7 +33,7 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
     coords0 : (2, m) array_like
         Centers of the reference patches in img0.
     coords1 : (2, n) array_like
-        centers of the candidate patches in img1.
+        Centers of the candidate patches in `img1`.
     radius : int
         Radius of the considered patches
     sigma : float
