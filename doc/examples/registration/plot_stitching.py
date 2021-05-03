@@ -35,7 +35,7 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
     coords1 : (2, n) array_like
         Centers of the candidate patches in `img1`.
     radius : int
-        Radius of the considered patches
+        Radius of the considered patches.
     sigma : float
         Standard deviation of the gaussian kernel centred over the patches.
 
