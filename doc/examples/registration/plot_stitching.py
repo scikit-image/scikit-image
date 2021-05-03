@@ -3,7 +3,7 @@
 Simple image stitching
 ======================
 
-This example demonstrate how a set of images can be assembled under
+This example demonstrates how a set of images can be assembled under
 the hypothesis of rigid body motions.
 
 """
