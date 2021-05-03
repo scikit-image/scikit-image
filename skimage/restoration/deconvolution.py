@@ -171,6 +171,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         If `random_state` is already a ``Generator`` instance then that
         instance is used.
 
+        .. versionadded:: 0.19
+
     Returns
     -------
     x_postmean : (M, N) ndarray

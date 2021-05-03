@@ -378,6 +378,8 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
         If `random_state` is already a ``Generator`` instance then that
         instance is used.
 
+        .. versionadded:: 0.19
+
     Returns
     -------
     out : ndarray of bools
