@@ -86,9 +86,6 @@ Other (2021)
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
-* Remove pillow version related warning for MPO file format in
-  `io._plugins.pil_plugin.imread` when upgrading pillow min version to
-  6.0.0
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 
@@ -96,7 +93,7 @@ Other (2022)
 ------------
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
   the minimum supported version of ``scipy`` reaches 1.4.
-* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
 Other (2023)
