@@ -218,7 +218,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5, *, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
-    Blobs are found using the Difference of Gaussian (DoG) method [1]_.
+    Blobs are found using the Difference of Gaussian (DoG) method [1]_, [2]_.
     For each blob found, the method returns its coordinates and the standard
     deviation of the Gaussian kernel that detected the blob.
 
@@ -276,7 +276,11 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
-    .. [2] https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
+    .. [2] Lowe, D.G. Distinctive Image Features from Scale-Invariant
+        Keypoints. International Journal of Computer Vision 60, 91–110 (2004).
+        https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
+        DOI:10.1023/B:VISI.0000029664.99615.94
+
     Examples
     --------
     >>> from skimage import data, feature
