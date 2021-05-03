@@ -214,5 +214,5 @@ def test_pyramid_dtype_support(pyramid_func, dtype):
     img = np.random.randn(32, 8).astype(dtype)
     pyramid = pyramid_func(img)
 
-    float_dtype  = _supported_float_type(dtype)
+    float_dtype = _supported_float_type(dtype)
     assert np.all([im.dtype == float_dtype for im in pyramid])

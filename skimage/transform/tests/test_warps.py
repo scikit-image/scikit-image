@@ -749,7 +749,8 @@ def test_order_0_warp_dtype(dtype):
     assert swirl(img, order=0).dtype == dtype
 
 
-@pytest.mark.parametrize('dtype',
+@pytest.mark.parametrize(
+    'dtype',
     [np.uint8, np.float16, np.float32, np.float64]
 )
 @pytest.mark.parametrize('order', [1, 3, 5])
