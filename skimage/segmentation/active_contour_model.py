@@ -150,13 +150,13 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     eye_n = np.eye(n, dtype=float)
     a = np.roll(eye_n, -1, axis=0) + \
         np.roll(eye_n, -1, axis=1) - \
-        2*eye_n  # second order derivative, central difference
+        2 * eye_n  # second order derivative, central difference
     b = np.roll(eye_n, -2, axis=0) + \
         np.roll(eye_n, -2, axis=1) - \
-        4*np.roll(eye_n, -1, axis=0) - \
-        4*np.roll(eye_n, -1, axis=1) + \
-        6*eye_n  # fourth order derivative, central difference
-    A = -alpha*a + beta*b
+        4 * np.roll(eye_n, -1, axis=0) - \
+        4 * np.roll(eye_n, -1, axis=1) + \
+        6 * eye_n  # fourth order derivative, central difference
+    A = -alpha * a + beta * b
 
     # Impose boundary conditions different from periodic:
     sfixed = False
@@ -187,7 +187,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         efree = True
 
     # Only one inversion is needed for implicit spline energy minimization:
-    inv = np.linalg.inv(A + gamma*eye_n)
+    inv = np.linalg.inv(A + gamma * eye_n)
     # can use float_dtype once we have computed the inverse in double precision
     inv = inv.astype(float_dtype, copy=False)
 
@@ -213,8 +213,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         yn = inv @ (gamma*y + fy)
 
         # Movements are capped to max_px_move per iteration:
-        dx = max_px_move*np.tanh(xn - x)
-        dy = max_px_move*np.tanh(yn - y)
+        dx = max_px_move * np.tanh(xn - x)
+        dy = max_px_move * np.tanh(yn - y)
         if sfixed:
             dx[0] = 0
             dy[0] = 0
@@ -231,8 +231,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
             xsave[j, :] = x
             ysave[j, :] = y
         else:
-            dist = np.min(np.max(np.abs(xsave - x[None, :]) +
-                                 np.abs(ysave - y[None, :]), 1))
+            dist = np.min(np.max(np.abs(xsave - x[None, :])
+                                 + np.abs(ysave - y[None, :]), 1))
             if dist < convergence:
                 break
 

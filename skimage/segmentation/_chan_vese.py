@@ -118,7 +118,8 @@ def _cv_reset_level_set(phi):
 def _cv_checkerboard(image_size, square_size, dtype=np.float64):
     """Generates a checkerboard level set function.
 
-    According to Pascal Getreuer, such a level set function has fast convergence.
+    According to Pascal Getreuer, such a level set function has fast
+    convergence.
     """
     yv = np.arange(image_size[0], dtype=dtype).reshape(image_size[0], 1)
     xv = np.arange(image_size[1], dtype=dtype)
@@ -151,7 +152,7 @@ def _cv_small_disk(image_size):
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
     radius = float(min(centerX, centerY)) / 2.0
-    return (radius - distance(res)) / (radius*3)
+    return (radius - distance(res)) / (radius * 3)
 
 
 def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
