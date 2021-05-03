@@ -12,8 +12,8 @@ def _find_boundaries_subpixel(label_img):
     Notes
     -----
     This function puts in an empty row and column between each *actual*
-    row and column of the image, for a corresponding shape of $2s - 1$
-    for every image dimension of size $s$. These "interstitial" rows
+    row and column of the image, for a corresponding shape of ``2s - 1``
+    for every image dimension of size ``s``. These "interstitial" rows
     and columns are filled as ``True`` if they separate two labels in
     `label_img`, ``False`` otherwise.
 
@@ -147,7 +147,8 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     ...                        [False, False, False, False, False],
     ...                        [False, False,  True,  True,  True],
     ...                        [False, False,  True,  True,  True],
-    ...                        [False, False,  True,  True,  True]], dtype=np.bool)
+    ...                        [False, False,  True,  True,  True]],
+    ...                       dtype=bool)
     >>> find_boundaries(bool_image)
     array([[False, False, False, False, False],
            [False, False,  True,  True,  True],
@@ -220,7 +221,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         # the RGB information. ``ndi.zoom`` then performs the (cubic)
         # interpolation, filling in the values of the interposed pixels
         marked = ndi.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
-                          mode='reflect')
+                          mode='mirror')
     boundaries = find_boundaries(label_img, mode=mode,
                                  background=background_label)
     if outline_color is not None:

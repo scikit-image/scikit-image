@@ -1,49 +1,30 @@
-from warnings import warn
+__all__ = ['imread', 'imsave']
 
-try:
-    from tifffile import TiffFile, imsave, parse_kwargs
-except ImportError:
-    from ...external.tifffile import TiffFile, imsave, parse_kwargs
+from tifffile import imwrite as imsave, imread as tifffile_imread
 
 
-def imread(fname, dtype=None, **kwargs):
+def imread(fname, **kwargs):
     """Load a tiff image from file.
 
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
-    dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
-       Will be removed from version 0.17.
+        File name or file-like-object.
     kwargs : keyword pairs, optional
         Additional keyword arguments to pass through (see ``tifffile``'s
         ``imread`` function).
 
     Notes
     -----
-    Provided by Christophe Golhke's tifffile.py [1]_, and supports many
+    Provided by the tifffile library [1]_, and supports many
     advanced image types including multi-page and floating point.
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py
+    .. [1] https://pypi.org/project/tifffile/
 
     """
-    if dtype is not None:
-        warn('The dtype argument was always silently ignored. It will be '
-             'removed from scikit-image version 0.17. To avoid this '
-             'warning, do not specify it in your function call.',
-             UserWarning, stacklevel=2)
-
     if 'img_num' in kwargs:
         kwargs['key'] = kwargs.pop('img_num')
 
-    # parse_kwargs will extract keyword arguments intended for the TiffFile
-    # class and remove them from the kwargs dictionary in-place
-    tiff_keys = ['multifile', 'multifile_close', 'fastij', 'is_ome']
-    kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
-
-    # read and return tiff as numpy array
-    with TiffFile(fname, **kwargs_tiff) as tif:
-        return tif.asarray(**kwargs)
+    return tifffile_imread(fname, **kwargs)

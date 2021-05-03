@@ -1,8 +1,12 @@
-import warnings
+import inspect
 import functools
-import sys
-import numpy as np
 import numbers
+import sys
+import warnings
+
+import numpy as np
+from numpy.lib import NumpyVersion
+import scipy
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
@@ -19,13 +23,103 @@ class skimage_deprecation(Warning):
     pass
 
 
+class change_default_value:
+    """Decorator for changing the default value of an argument.
+
+    Parameters
+    ----------
+    arg_name: str
+        The name of the argument to be updated.
+    new_value: any
+        The argument new value.
+    changed_version : str
+        The package version in which the change will be introduced.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
+
+    """
+
+    def __init__(self, arg_name, *, new_value, changed_version,
+                 warning_msg=None):
+        self.arg_name = arg_name
+        self.new_value = new_value
+        self.warning_msg = warning_msg
+        self.changed_version = changed_version
+
+    def __call__(self, func):
+        parameters = inspect.signature(func).parameters
+        arg_idx = list(parameters.keys()).index(self.arg_name)
+        old_value = parameters[self.arg_name].default
+
+        if self.warning_msg is None:
+            self.warning_msg = (
+                f"The new recommended value for {self.arg_name} is "
+                f"{self.new_value}. Until version {self.changed_version}, "
+                f"the default {self.arg_name} value is {old_value}. "
+                f"From version {self.changed_version}, the {self.arg_name} "
+                f"default value will be {self.new_value}. To avoid "
+                f"this warning, please explicitly set {self.arg_name} value.")
+
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
+                # warn that arg_name default value changed:
+                warnings.warn(self.warning_msg, FutureWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return fixed_func
+
+
+class remove_arg:
+    """Decorator to remove an argument from function's signature.
+
+    Parameters
+    ----------
+    arg_name: str
+        The name of the argument to be removed.
+    changed_version : str
+        The package version in which the warning will be replaced by
+        an error.
+    help_msg: str
+        Optional message appended to the generic warning message.
+
+    """
+
+    def __init__(self, arg_name, *, changed_version, help_msg=None):
+        self.arg_name = arg_name
+        self.help_msg = help_msg
+        self.changed_version = changed_version
+
+    def __call__(self, func):
+        parameters = inspect.signature(func).parameters
+        arg_idx = list(parameters.keys()).index(self.arg_name)
+        warning_msg = (
+            f"{self.arg_name} argument is deprecated and will be removed "
+            f"in version {self.changed_version}. To avoid this warning, "
+            f"please do not use the {self.arg_name} argument. Please "
+            f"see {func.__name__} documentation for more details.")
+
+        if self.help_msg is not None:
+            warning_msg += f" {self.help_msg}"
+
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            if len(args) > arg_idx or self.arg_name in kwargs.keys():
+                # warn that arg_name is deprecated
+                warnings.warn(warning_msg, FutureWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return fixed_func
+
+
 class deprecate_kwarg:
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
     Parameters
     ----------
-    arg_mapping: dict
+    kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
     warning_msg: str
@@ -286,3 +380,73 @@ def convert_to_float(image, preserve_range):
     else:
         image = img_as_float(image)
     return image
+
+
+def _validate_interpolation_order(image_dtype, order):
+    """Validate and return spline interpolation's order.
+
+    Parameters
+    ----------
+    image_dtype : dtype
+        Image dtype.
+    order : int, optional
+        The order of the spline interpolation. The order has to be in
+        the range 0-5. See `skimage.transform.warp` for detail.
+
+    Returns
+    -------
+    order : int
+        if input order is None, returns 0 if image_dtype is bool and 1
+        otherwise. Otherwise, image_dtype is checked and input order
+        is validated accordingly (order > 0 is not supported for bool
+        image dtype)
+
+    """
+
+    if order is None:
+        return 0 if image_dtype == bool else 1
+
+    if order < 0 or order > 5:
+        raise ValueError("Spline interpolation order has to be in the "
+                         "range 0-5.")
+
+    if image_dtype == bool and order != 0:
+        warn("Input image dtype is bool. Interpolation is not defined "
+             "with bool data type. Please set order to 0 or explicitely "
+             "cast input image to another data type. Starting from version "
+             "0.19 a ValueError will be raised instead of this warning.",
+             FutureWarning, stacklevel=2)
+
+    return order
+
+
+def _to_np_mode(mode):
+    """Convert padding modes from `ndi.correlate` to `np.pad`."""
+    mode_translation_dict = dict(nearest='edge', reflect='symmetric',
+                                 mirror='reflect')
+    if mode in mode_translation_dict:
+        mode = mode_translation_dict[mode]
+    return mode
+
+
+def _to_ndimage_mode(mode):
+    """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
+    mode_translation_dict = dict(constant='constant', edge='nearest',
+                                 symmetric='reflect', reflect='mirror',
+                                 wrap='wrap')
+    if mode not in mode_translation_dict:
+        raise ValueError(
+            ("Unknown mode: '{}', or cannot translate mode. The "
+             "mode should be one of 'constant', 'edge', 'symmetric', "
+             "'reflect', or 'wrap'. See the documentation of numpy.pad for"
+             "more info.").format(mode))
+    return _fix_ndimage_mode(mode_translation_dict[mode])
+
+
+def _fix_ndimage_mode(mode):
+    # SciPy 1.6.0 introduced grid variants of constant and wrap which
+    # have less surprising behavior for images. Use these when available
+    grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
+    if NumpyVersion(scipy.__version__) >= '1.6.0':
+        mode = grid_modes.get(mode, mode)
+    return mode

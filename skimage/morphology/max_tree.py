@@ -208,19 +208,19 @@ def area_opening(image, area_threshold=64, connectivity=1,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-           DOI:10.1007/978-3-662-05088-0
+           :DOI:10.1007/978-3-662-05088-0
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           DOI:10.1109/83.663500
+           :DOI:10.1109/83.663500
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           DOI:10.1109/TIP.2006.877518
+           :DOI:10.1109/TIP.2006.877518
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
@@ -233,7 +233,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the area opening:
 
@@ -323,7 +323,7 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the diameter opening:
 
@@ -435,7 +435,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the area closing:
 
@@ -543,7 +543,7 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
     >>> f[9:10,9:11] = 100; f[10,10] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate the diameter closing:
 
@@ -650,7 +650,7 @@ def max_tree_local_maxima(image, connectivity=1,
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all local maxima:
 

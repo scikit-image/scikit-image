@@ -20,7 +20,7 @@ from .._shared.utils import warn
 # https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
 # https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
-    from scipy.sparse.linalg.dsolve import umfpack
+    from scipy.sparse.linalg.dsolve.linsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
 
     def new_del(self):
@@ -42,12 +42,6 @@ except ImportError:
 from ..util import img_as_float
 
 from scipy.sparse.linalg import cg, spsolve
-import scipy
-from distutils.version import LooseVersion as Version
-import functools
-
-if Version(scipy.__version__) >= Version('1.1'):
-    cg = functools.partial(cg, atol=0)
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
@@ -183,7 +177,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn('"cg" mode may be slow because UMFPACK is not availabel. '
+                warn('"cg" mode may be slow because UMFPACK is not available. '
                      'Consider building Scipy with UMFPACK or use a '
                      'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
                      stacklevel=2)
@@ -191,12 +185,14 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
         else:
+            # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
             ml = ruge_stuben_solver(lap_sparse)
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, i].toarray(),
+               tol=tol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])]
         if np.any([info > 0 for _, info in cg_out]):
             warn("Conjugate gradient convergence to tolerance not achieved. "
@@ -263,7 +259,8 @@ def _preprocess(labels):
 
 
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None):
+                  multichannel=False, return_full_prob=False, spacing=None,
+                  *, prob_tol=1e-3):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -307,9 +304,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
           requires that the pyamg module is installed.
-
     tol : float, optional
-        tolerance to achieve when solving the linear system using
+        Tolerance to achieve when solving the linear system using
         the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
     copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
@@ -325,6 +321,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
+    prob_tol : float, optional
+        Tolerance on the resulting probability to be in the interval [0, 1].
+        If the tolerance is not satisfied, a warning is displayed.
 
     Returns
     -------
@@ -338,9 +337,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           probability that label `label_nb` reaches the pixel `(i, j)`
           first.
 
-    See also
+    See Also
     --------
-    skimage.morphology.watershed: watershed segmentation
+    skimage.morphology.watershed : watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 
@@ -416,10 +415,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', 'cg_j', None):
+    if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
             "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bicgstab', 'bf' and None".format(mode=mode))
+            " 'cg', 'cg_j', 'bf' and None".format(mode=mode))
 
     # Spacing kwarg checks
     if spacing is None:
@@ -484,14 +483,20 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # first at pixel j by anisotropic diffusion.
     X = _solve_linear_system(lap_sparse, B, tol, mode)
 
+    if X.min() < -prob_tol or X.max() > 1 + prob_tol:
+        warn('The probability range is outside [0, 1] given the tolerance '
+             '`prob_tol`. Consider decreasing `beta` and/or decreasing '
+             '`tol`.')
+
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds
     labels[inds_isolated_seeds] = isolated_values
     labels = labels.reshape(labels_shape)
 
-    if return_full_prob:
-        mask = labels == 0
+    mask = labels == 0
+    mask[inds_isolated_seeds] = False
 
+    if return_full_prob:
         out = np.zeros((nlabels,) + labels_shape)
         for lab, (label_prob, prob) in enumerate(zip(out, X), start=1):
             label_prob[mask] = prob
@@ -499,6 +504,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     else:
         X = np.argmax(X, axis=0) + 1
         out = labels.astype(labels_dtype)
-        out[labels == 0] = X
+        out[mask] = X
 
     return out

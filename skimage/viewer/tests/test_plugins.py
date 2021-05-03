@@ -32,8 +32,8 @@ def test_line_profile():
                 scan_data.size]:
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
-    assert_allclose(scan_data.max(), 0.9176, rtol=1e-3)
-    assert_allclose(scan_data.mean(), 0.2812, rtol=1e-3)
+    assert_allclose(scan_data.max(), 0.886275, rtol=1e-3)
+    assert_allclose(scan_data.mean(), 0.247834, rtol=1e-3)
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
@@ -43,7 +43,7 @@ def test_line_profile_rgb():
     for i in range(6):
         plugin.line_tool._thicken_scan_line()
     line_image, scan_data = plugin.output()
-    assert_equal(line_image[line_image == 128].size, 750)
+    assert_equal(line_image[line_image == 128].size, 906)
     assert_equal(line_image[line_image == 255].size, 151)
     assert_equal(line_image.shape, (300, 451))
     assert_equal(scan_data.shape, (151, 3))
@@ -98,7 +98,7 @@ def test_canny():
     canny_edges = viewer.show(False)
     viewer.close()
     edges = canny_edges[0][0]
-    assert edges.sum() == 2846
+    assert edges.sum() == 1958
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")

@@ -11,7 +11,7 @@
 .. _`numpy mailing list`: http://mail.scipy.org/mailman/listinfo/numpy-discussion
 
 .. scipy
-.. _scipy: http://www.scipy.org
+.. _scipy: https://www.scipy.org
 .. _`scipy github`: https://github.com/scipy/scipy
 .. _`scipy mailing list`: http://mail.scipy.org/mailman/listinfo/scipy-dev
 
