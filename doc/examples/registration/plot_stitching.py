@@ -28,21 +28,21 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
 
     Parameters:
     -----------
-    img0, img1: 2D array
-        input images.
-    coords0: (2, m) array_like
-        centers of the reference patches in img0.
-    coords1: (2, n) array_like
+    img0, img1 : 2D array
+        Input images.
+    coords0 : (2, m) array_like
+        Centers of the reference patches in img0.
+    coords1 : (2, n) array_like
         centers of the candidate patches in img1.
-    radius: int
-        radius of the considered patches
-    sigma: float
-        std of the gaussian kernel centred over the patches.
+    radius : int
+        Radius of the considered patches
+    sigma : float
+        Standard deviation of the gaussian kernel centred over the patches.
 
     Returns:
     --------
     match_coords: (2, m) array
-        The matching points from coords1 the closer to coords0.
+        The matching points from coords1 closer to coords0.
 
     """
     y, x = np.mgrid[-radius:radius + 1, -radius:radius + 1]
@@ -80,11 +80,13 @@ img_list = [random_noise(gaussian(im, 1.2), var=sigma ** 2, seed=12)
 
 psnr_ref = peak_signal_noise_ratio(ref_img, img_list[0])
 
+############################################################################
 # Reference points are detected over all the set images
 corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
                             min_distance=5)
                for img in img_list]
 
+############################################################################
 # The Harris corner detected in the first image are choosen as
 # references. Then the detected points on the other images are
 # matched to the reference points.
@@ -94,6 +96,7 @@ coords0 = corner_list[0]
 matching_corners = [match_locations(img0, img1, coords0, coords1)
                     for img1, coords1 in zip(img_list[1:], corner_list[1:])]
 
+############################################################################
 # Once all the points are registred to the reference points, robust
 # relative affine transformations can be estimated using RANSAC method
 src = np.array(coords0)
@@ -118,19 +121,21 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
 
 fig.tight_layout()
 
+############################################################################
 # A composite image can be optained using the relative positions of
 # the registred images to the reference one. To do so, we can define a
 # global domain around the reference image and position the other
 # images in this domain:
+#
+# A global transormation is defined to move the reference image in the
+# global domain image as a simple translation
 margin = 50
 height, width = img_list[0].shape
 out_shape = height + 2 * margin, width + 2 * margin
-
-# A global transormation is defined to move the reference image in the
-# global domain image as a simple translation
 glob_trfm = np.eye(3)
 glob_trfm[:2, 2] = -margin, -margin
 
+############################################################################
 # Now, the relative position of the other images in the global domain
 # are obtained by composing the global transformation with the
 # relative transformations
