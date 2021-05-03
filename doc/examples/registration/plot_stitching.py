@@ -62,7 +62,7 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
 
 
 ############################################################################
-# For this example, a set of noisy images slightly tilted is generated
+# For this example, a set of slightly tilted noisy images are generated
 
 img = moon()
 
