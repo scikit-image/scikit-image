@@ -37,7 +37,7 @@ def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
     radius : int
         Radius of the considered patches.
     sigma : float
-        Standard deviation of the gaussian kernel centred over the patches.
+        Standard deviation of the Gaussian kernel centered over the patches.
 
     Returns:
     --------
