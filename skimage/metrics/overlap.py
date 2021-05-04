@@ -88,6 +88,9 @@ class BoundingBox:
                     'Equality can only be checked with another BoundingBox'
                     )
 
+        if self.ndim != other.ndim:
+            return False
+
         return (np.all(self.top_left == other.top_left)
                 and np.all(self.bottom_right == other.bottom_right))
 
