@@ -9,7 +9,7 @@ def make_hdr(images, exposure, radiance_map, depth=16, channel_axis=None):
 
     Parameters
     ----------
-    images: list of numpy arrays, or numpy ndarray or ImageCollection 
+    images: list of numpy arrays, or numpy ndarray or ImageCollection
         List of images in the form of numpy arrays, or a numpy array with the
         first dimension being the different images.
         Either greyscale or colour (RGB). Can't be float images
@@ -27,8 +27,8 @@ def make_hdr(images, exposure, radiance_map, depth=16, channel_axis=None):
     channel_axis : int or None, optional
         If None, the images are assumed to be greyscale images.
         Otherwise, this parameter indicates which axis of the array corresponds
-        to channels. This includes the list index, meaning the images 
-        with "normal" axis (X, Y, C) should set `channel_axis=3` 
+        to channels. This includes the list index, meaning the images
+        with "normal" axis (X, Y, C) should set `channel_axis=3`
 
     Returns
     -------
@@ -68,14 +68,14 @@ converted to int before using this method.""")
 
         srow, scol, sch = np.shape(images[0])
         if sch > 3:
-            warnings.warn("The specified colour channel has a length of " +
-                          str(sch) + """ which is greater than the expected 3
+            warnings.warn("The specified colour channel has a length of "
+                          + str(sch) + """ which is greater than the expected 3
 (RGB).""")
         hdr = np.zeros([srow, scol, sch], dtype=np.float64)
         grey = False
     elif images.ndim > 4:
-        raise ValueError("""Individual images have more than 3 dimensions, which
-                         is not supported""")
+        raise ValueError("""Individual images have more than 3 dimensions,
+which is not supported""")
 
     # Calculating the weight
     w = _weight_func_arr(images, depth)
@@ -101,9 +101,9 @@ converted to int before using this method.""")
             # function for each of them.
             for kk in range(images.shape[0]):
                 g = np.reshape(
-                    radiance_map[images[kk, :, :, cc].flatten(), cc], [srow, scol])
-                num[:, :,
-                    cc] += w[kk, :, :, cc] * (g - B[kk])
+                    radiance_map[images[kk, :, :, cc].flatten(), cc],
+                    [srow, scol])
+                num[:, :, cc] += w[kk, :, :, cc] * (g - B[kk])
                 den[:, :, cc] += w[kk, :, :, cc]
         # Calculating the HDR image
         print(np.min(den))
@@ -112,13 +112,14 @@ converted to int before using this method.""")
     return np.exp(hdr)
 
 
-def get_crf(images, exposure, depth=16, lambd=200, depth_max=10, channel_axis=None):
+def get_crf(images, exposure, depth=16, lambd=200, depth_max=10,
+            channel_axis=None):
     """
     Compute the camera response function from a set of images and exposures.
 
     Parameters
     ----------
-    images: list of numpy arrays or numpy ndarray or ImageCollection 
+    images: list of numpy arrays or numpy ndarray or ImageCollection
         List of images in the form of numpy arrays, or a numpy array with the
         first dimension being the different images.
         Either greyscale or colour (RGB). Can't be float images
@@ -141,8 +142,8 @@ def get_crf(images, exposure, depth=16, lambd=200, depth_max=10, channel_axis=No
     channel_axis : int or None, optional
         If None, the images are assumed to be greyscale images.
         Otherwise, this parameter indicates which axis of the array corresponds
-        to channels. This includes the list index, meaning the images 
-        with "normal" axis (X, Y, C) should set `channel_axis=3` 
+        to channels. This includes the list index, meaning the images
+        with "normal" axis (X, Y, C) should set `channel_axis=3`
 
     Returns
     -------
@@ -180,17 +181,17 @@ converted to int before using this method.""")
 
         si, srow, scol, sch = images.shape
         if sch > 3:
-            warnings.warn("The specified colour channel has a length of " +
-                          str(sch) + """ which is greater than the expected 3
+            warnings.warn("The specified colour channel has a length of "
+                          + str(sch) + """ which is greater than the expected 3
 (RGB).""")
         grey = False
     elif images.ndim > 4:
-        raise ValueError("""Individual images have more than 3 dimensions, which
-is not supported""")
+        raise ValueError("""Individual images have more than 3 dimensions,
+which is not supported""")
 
     # Calculate number of samples from image necessary for an overdetermined
-    # scolstem (assuming Z_min = 0). We are using four times the minimum requirement
-    # in the article
+    # scolstem (assuming Z_min = 0). We are using four times the minimum
+    # requirement in the article
 
     if depth > depth_max:
         div = depth - depth_max
