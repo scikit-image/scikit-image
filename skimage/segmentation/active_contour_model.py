@@ -148,14 +148,14 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     # Build snake shape matrix for Euler equation in double precision
     eye_n = np.eye(n, dtype=float)
-    a = np.roll(eye_n, -1, axis=0) + \
-        np.roll(eye_n, -1, axis=1) - \
-        2 * eye_n  # second order derivative, central difference
-    b = np.roll(eye_n, -2, axis=0) + \
-        np.roll(eye_n, -2, axis=1) - \
-        4 * np.roll(eye_n, -1, axis=0) - \
-        4 * np.roll(eye_n, -1, axis=1) + \
-        6 * eye_n  # fourth order derivative, central difference
+    a = (np.roll(eye_n, -1, axis=0)
+         + np.roll(eye_n, -1, axis=1)
+         - 2 * eye_n)  # second order derivative, central difference
+    b = (np.roll(eye_n, -2, axis=0)
+         + np.roll(eye_n, -2, axis=1)
+         - 4 * np.roll(eye_n, -1, axis=0)
+         - 4 * np.roll(eye_n, -1, axis=1)
+         + 6 * eye_n)  # fourth order derivative, central difference
     A = -alpha * a + beta * b
 
     # Impose boundary conditions different from periodic:
