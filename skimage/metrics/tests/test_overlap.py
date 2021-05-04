@@ -1,5 +1,6 @@
 from skimage.metrics.overlap import (
         BoundingBox,
+        disjoint,
         intersect,
         intersection_over_union,
         )
@@ -37,6 +38,8 @@ def test_constructor_bottom_corner():
     with testing.raises(ValueError):
         BoundingBox((2, 2), bottom_right=(0, 0))
 
+def test_disjoint():
+    assert disjoint(r1, r5)
 
 def test_intersection():
     assert intersect(r1, r1) == r1      # self-intersection is self
