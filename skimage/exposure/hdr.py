@@ -1,15 +1,19 @@
 import numpy as np
+import warnings
 
 
-def make_hdr(images, exposure, radiance_map, depth=16):
+def make_hdr(images, exposure, radiance_map, depth=16, channel_axis=None):
     """
     Compute the HDR image from a series of images with a given radiance
     mapping.
 
     Parameters
     ----------
-    images: list or ImageCollection
-        List of images as numpy arrays. Either grayscale or color
+    images: list of numpy arrays, or numpy ndarray or ImageCollection 
+        List of images in the form of numpy arrays, or a numpy array with the
+        first dimension being the different images.
+        Either greyscale or colour (RGB). Can't be float images
+        List of images as numpy arrays. Either greyscale or colour
         (RGB).
         Can also be an ImageCollection
     exposure : numpy 1D array
@@ -20,11 +24,16 @@ def make_hdr(images, exposure, radiance_map, depth=16):
         be Nx3. See `get_crf`.
     depth : int, optional
         Pixel depth.
+    channel_axis : int or None, optional
+        If None, the images are assumed to be greyscale images.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels. This includes the list index, meaning the images 
+        with "normal" axis (X, Y, C) should set `channel_axis=3` 
 
     Returns
     -------
     hdr : numpy array
-        The HDR image, either grayscale or RGB depending on input, in ln(E).
+        The HDR image, either greyscale or RGB depending on input, in ln(E).
 
     References
     ----------
@@ -33,70 +42,92 @@ def make_hdr(images, exposure, radiance_map, depth=16):
 
     .. [2] https://en.wikipedia.org/wiki/Radiance
     """
+    # Check that we are not dealing with float images
+    if np.issubdtype(images[0].dtype, float):
+        raise ValueError("""Images can't be float images, they need to be
+converted to int before using this method.""")
+
     # Calculating the logarithm of the exposure
     B = np.log(exposure)
 
-    # Initialization for RBG or greyscale images
-    if images[0].ndim == 3:
-        sx, sy, sc = np.shape(images[0])
-        hdr = np.zeros([sx, sy, sc], dtype=np.float)
-        gray = False
-    else:
-        sx, sy = np.shape(images[0])
-        hdr = np.zeros([sx, sy], dtype=np.float)
-        gray = True
-
     # Making sure the images are uint64
-    # TODO: this should handle float images
     images = np.asarray(images, dtype=np.uint64)
+
+    # Initialization for RBG or greyscale images
+    if channel_axis is None:
+        # We have greyscale images
+        srow, scol = np.shape(images[0])
+        hdr = np.zeros([srow, scol], dtype=np.float64)
+        grey = True
+    elif images.ndim == 4:
+        # We have a colour image
+        # No check that the last index is colour:
+        if channel_axis != 3:
+            # It is not, we need to create one that has it in the correct place
+            images = np.moveaxis(images, channel_axis, 3)
+
+        srow, scol, sch = np.shape(images[0])
+        if sch > 3:
+            warnings.warn("The specified colour channel has a length of " +
+                          str(sch) + """ which is greater than the expected 3
+(RGB).""")
+        hdr = np.zeros([srow, scol, sch], dtype=np.float64)
+        grey = False
+    elif images.ndim > 4:
+        raise ValueError("""Individual images have more than 3 dimensions, which
+                         is not supported""")
 
     # Calculating the weight
     w = _weight_func_arr(images, depth)
+
     # Initializing variables for the numerator and denominator
     num = np.zeros_like(hdr)
     den = np.zeros_like(hdr)
 
-    if gray:
+    if grey:
         # Looping over the images and computing the camera response
         # function for each of them.
         for kk in range(images.shape[0]):
             g = np.reshape(
-                radiance_map[images[kk, :, :].flatten()], [sx, sy])
+                radiance_map[images[kk, :, :].flatten()], [srow, scol])
             num[:, :] += w[kk, :, :] * (g - B[kk])
             den[:, :] += w[kk, :, :]
+        print(np.min(den))
         hdr = num / den
     else:
         # Looping over the colours
-        for cc in range(sc):
+        for cc in range(sch):
             # Looping over the images and computing the camera response
             # function for each of them.
             for kk in range(images.shape[0]):
                 g = np.reshape(
-                    radiance_map[images[kk, :, :, cc].flatten(), cc], [sx, sy])
+                    radiance_map[images[kk, :, :, cc].flatten(), cc], [srow, scol])
                 num[:, :,
                     cc] += w[kk, :, :, cc] * (g - B[kk])
                 den[:, :, cc] += w[kk, :, :, cc]
         # Calculating the HDR image
+        print(np.min(den))
         hdr = num / den
 
     return np.exp(hdr)
 
 
-def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
+def get_crf(images, exposure, depth=16, lambd=200, depth_max=10, channel_axis=None):
     """
     Compute the camera response function from a set of images and exposures.
 
     Parameters
     ----------
-    images: list
-        List of images in the for of numpy arrays. Either grayscale or color
-        (RGB).
+    images: list of numpy arrays or numpy ndarray or ImageCollection 
+        List of images in the form of numpy arrays, or a numpy array with the
+        first dimension being the different images.
+        Either greyscale or colour (RGB). Can't be float images
     exposure: numpy 1D array
         Array of exposure times in seconds.
     depth : int, optional
         Pixel depth.
     lambd : int, optional
-        Smoothness parameter, default 200, increase for noisy images.
+        Smoothness parameter, default 200, increase for noiscol images.
         Can help to increase this for better smoothness in large bit depths
         (depth_max > 10).
     depth_max : int, optional
@@ -107,6 +138,11 @@ def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
         time with this parameter is highly non-linear.
         The resulting radiance is interpolated up to depth before being
         returned.
+    channel_axis : int or None, optional
+        If None, the images are assumed to be greyscale images.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels. This includes the list index, meaning the images 
+        with "normal" axis (X, Y, C) should set `channel_axis=3` 
 
     Returns
     -------
@@ -121,8 +157,39 @@ def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
        from photographs" (1997). DOI:10.1145/258734.258884
     """
 
+    # Check that we are not dealing with float images
+    if np.issubdtype(images[0].dtype, float):
+        raise ValueError("""Images can't be float images, they need to be
+converted to int before using this method.""")
+
+    # Making sure the images are uint64 and an array
+    images = np.asanyarray(images, dtype=np.uint64)
+    print(images.shape)
+
+    # Determine which type of images we are working with
+    if channel_axis is None:
+        # We have greyscale images
+        si, srow, scol = images.shape
+        grey = True
+    elif images.ndim == 4:
+        # We have a colour image
+        # No check that the last index is colour:
+        if channel_axis != 3:
+            # It is not, we need to create one that has it in the correct place
+            images = np.moveaxis(images, channel_axis, 3)
+
+        si, srow, scol, sch = images.shape
+        if sch > 3:
+            warnings.warn("The specified colour channel has a length of " +
+                          str(sch) + """ which is greater than the expected 3
+(RGB).""")
+        grey = False
+    elif images.ndim > 4:
+        raise ValueError("""Individual images have more than 3 dimensions, which
+is not supported""")
+
     # Calculate number of samples from image necessary for an overdetermined
-    # system (assuming Z_min = 0) using the four times the minimum requirement
+    # scolstem (assuming Z_min = 0). We are using four times the minimum requirement
     # in the article
 
     if depth > depth_max:
@@ -130,29 +197,31 @@ def get_crf(images, exposure, depth=16, lamad=200, depth_max=10):
     else:
         div = 0
 
-    samples = int(4 * (2**(depth - div)) / (len(images) - 1))
-
-    # Find if it is grayscale or colour
-    colour = (images[0].ndim == 3)
-
+    samples = np.int32(4 * (2**(depth - div)) / (si - 1))
     # Compute the camera response function
-    rand_idx = np.floor(np.random.randn(samples) * 2**depth).astype(np.int)
+    rng = np.random.default_rng()
+
+    rand_idx = rng.choice(srow*scol, samples)
     B = np.log(np.array(exposure))
+    print(B)
 
-    Z = np.zeros([rand_idx.size, len(images)])
+    Z = np.zeros([len(rand_idx), si])
 
-    if colour:
-        radiance_map = np.zeros([2**depth, 3])
-        for ii in range(3):
-
-            for jj in range(len(images)):
-                Z[:, jj] = images[jj][:, :, ii].flatten()[rand_idx]
-            radiance_map[:, ii], LE = _gsolve(Z, B, lambd, depth, depth_max)
-
-    else:
-        for jj in range(len(images)):
-            Z[:, jj] = images[jj][:, :].flatten()[rand_idx]
+    if grey:
+        # Working with a greyscale image
+        for jj in range(si):
+            Z[:, jj] = images[jj, :, :].flatten()[rand_idx]
         radiance_map, LE = _gsolve(Z, B, lambd, depth, depth_max)
+    else:
+        # Working with a colour image
+        radiance_map = np.zeros([2**depth, sch])
+        # Looping over the colours
+        for ii in range(sch):
+            # Looping over the images
+            for jj in range(si):
+                Z[:, jj] = images[jj, :, :, ii].flatten()[rand_idx]
+            print(Z.shape)
+            radiance_map[:, ii], LE = _gsolve(Z, B, lambd, depth, depth_max)
 
     return radiance_map
 
@@ -197,6 +266,7 @@ def _gsolve(Z, B, lambd, depth=16, depth_max=12):
     n = 2**(depth - div)
     Z = np.array(Z / (2**div), dtype=np.int64)  # Make sure it stays int
 
+    print(B)
     A = np.zeros([Z.size + n + 1, n + Z.shape[0]])
     b = np.zeros(A.shape[0])
     k = 0
@@ -209,7 +279,7 @@ def _gsolve(Z, B, lambd, depth=16, depth_max=12):
             k += 1
 
     #  Fix the curve by setting its middle value to 0 = ln(1)
-    A[k, int(n / 2)] = 1
+    A[k, np.int32(n / 2)] = 1
     k += 1
 
     for ii in range(n - 2):
@@ -219,7 +289,7 @@ def _gsolve(Z, B, lambd, depth=16, depth_max=12):
         k += 1
 
     # Solve the equations with SVD
-    x, residuals, rank, s = np.linalg.lstsq(A, b)
+    x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
     g = x[:n]
     LE = x[n::]
 
