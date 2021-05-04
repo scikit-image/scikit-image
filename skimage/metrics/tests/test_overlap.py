@@ -16,6 +16,8 @@ r3 = BoundingBox((0, 0), bottom_right=(2, 3))  # included in r1, intersect with 
 r4 = BoundingBox((2, 3), dimensions=(0, 0))    # 0-area rectangle
 r5 = BoundingBox((5, 5), dimensions=(5, 5))
 
+r3D = BoundingBox((1,2,3), dimensions=(2,2,2))
+
 rect_inter13 = intersect(r1, r3)
 
 
@@ -23,7 +25,13 @@ def test_area():
     assert r1.area == height1 * width1
     assert r2.area == height2 * width2
     assert r3.area == 2 * 3
+    with testing.raises(NotImplementedError):
+        r3D.area
 
+def test_volume():
+    assert r3D.volume == 2**3
+    with testing.raises(NotImplementedError):
+        r1.volume
 
 def test_constructor_dimensions():
     assert tuple(r1.top_left) == (0, 0)
@@ -53,7 +61,7 @@ def test_intersection():
 
 def test_eq_operator():  # Intersection rectangle and == comparison
     assert rect_inter13 == r3
-
+    assert r1 != r3D  # BoundingBoxes of different dimensions
 
 def test_eq_other_obj():
     with testing.raises(TypeError):
