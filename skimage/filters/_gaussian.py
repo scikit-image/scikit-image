@@ -3,14 +3,15 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
-from .._shared.utils import warn, convert_to_float
+from .._shared.utils import warn, convert_to_float, change_default_value
 
 
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
+@change_default_value('preserve_range', new_value=True, changed_version='1.0')
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=None, truncate=4.0):
+             multichannel=None, preserve_range=False, truncate=4.0):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -98,12 +99,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
 
     """
-    if preserve_range is None:
-        msg = ('The default value of preserve_range will change '
-               'to True in version 1.0')
-        warn(msg, DeprecationWarning)
-        preserve_range = False
-
     spatial_dims = None
     try:
         spatial_dims = _guess_spatial_dimensions(image)
