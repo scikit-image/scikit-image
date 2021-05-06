@@ -64,9 +64,9 @@ def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.0):
     * A band-pass filter can be achieved by combining a high pass and low pass filter
     * cutoff_frequency_ratio and order both affect slope at the cut-off region. If a specific slope is desired in this region, its absolute value is approximately equal to $order / factor * 2^(-2.5)$
 
-    See also
+    Reference
     --------
-    <https://en.wikipedia.org/wiki/Butterworth_filter>
+    Butterworth, Stephen. "On the theory of filter amplifiers." Wireless Engineer 7.6 (1930): 536-541.
     """
     if image.ndim > 2:
         raise ValueError("Only single channel images supported")
