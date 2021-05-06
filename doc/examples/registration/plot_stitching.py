@@ -68,23 +68,21 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 
 img = moon()
 
-angle_list = [5, 6, -2, 3, -4]
-center_list = [(10, 10), (5, 12), (11, 21), (21, 17), (43, 15)]
+angle_list = [0, 5, 6, -2, 3, -4]
+center_list = [(0, 0), (10, 10), (5, 12), (11, 21), (21, 17), (43, 15)]
 
-i0, j0, i1, j1 = 40, 50, 240, 350
-ref_img = img_as_float(img[i0:i1, j0:j1])
-img_list = [ref_img.copy()] + [rotate(img, angle=a, center=c)[i0:i1, j0:j1]
-                               for a, c in zip(angle_list, center_list)]
+img_list = [rotate(img, angle=a, center=c)[40:240, 50:350]
+            for a, c in zip(angle_list, center_list)]
+ref_img = img_list[0].copy()
 
-sigma = 0.025
-img_list = [random_noise(gaussian(im, 1.2), var=sigma ** 2, seed=seed)
+img_list = [random_noise(gaussian(im, 1.1), var=5e-4, seed=seed)
             for seed, im in enumerate(img_list)]
 
 psnr_ref = peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
 # Reference points are detected over all the set images
-min_dist = 4
+min_dist = 5
 corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
                             min_distance=min_dist)
                for img in img_list]
@@ -142,6 +140,9 @@ glob_trfm[:2, 2] = -margin, -margin
 global_img_list = [warp(img, trfm.dot(glob_trfm), output_shape=out_shape,
                         mode="constant", cval=np.nan)
                    for img, trfm in zip(img_list, trfm_list)]
+
+all_nan_mask = np.all([np.isnan(img) for img in global_img_list], axis=0)
+global_img_list[0][all_nan_mask] = 1.
 
 composit_img = np.nanmean(global_img_list, 0)
 psnr_composit = peak_signal_noise_ratio(ref_img,
