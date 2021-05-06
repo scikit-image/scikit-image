@@ -12,14 +12,14 @@ from matplotlib import pyplot as plt
 import numpy as np
 from skimage.data import moon
 from skimage.util import random_noise, img_as_float
-from skimage.transform import warp, AffineTransform, rotate
+from skimage.transform import warp, EuclideanTransform, rotate
 from skimage.feature import corner_harris, corner_peaks
 from skimage.measure import ransac
 from skimage.filters import gaussian
 from skimage.metrics import peak_signal_noise_ratio
 
 
-def match_locations(img0, img1, coords0, coords1, radius=7, sigma=3):
+def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
     """Image locations matching using SSD minimization.
 
     Areas from `img0` are matched with areas from `img1`. These areas
@@ -74,15 +74,16 @@ ref_img = img_as_float(img[i0:i1, j0:j1])
 img_list = [ref_img.copy()] + [rotate(img, angle=a, center=c)[i0:i1, j0:j1]
                                for a, c in zip(angle_list, center_list)]
 
-sigma = 0.015
-img_list = [random_noise(gaussian(im, 1.2), var=sigma ** 2, seed=12)
-            for im in img_list]
+sigma = 0.025
+img_list = [random_noise(gaussian(im, 1.2), var=sigma ** 2, seed=seed)
+            for seed, im in enumerate(img_list)]
 
 psnr_ref = peak_signal_noise_ratio(ref_img, img_list[0])
 
 # Reference points are detected over all the set images
+min_dist = 4
 corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
-                            min_distance=5)
+                            min_distance=min_dist)
                for img in img_list]
 
 # The Harris corner detected in the first image are choosen as
@@ -91,18 +92,15 @@ corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
 
 img0 = img_list[0]
 coords0 = corner_list[0]
-matching_corners = [match_locations(img0, img1, coords0, coords1)
-                    for img1, coords1 in zip(img_list[1:], corner_list[1:])]
+matching_corners = [match_locations(img0, img1, coords0, coords1, min_dist)
+                    for img1, coords1 in zip(img_list, corner_list)]
 
 # Once all the points are registred to the reference points, robust
 # relative affine transformations can be estimated using RANSAC method
 src = np.array(coords0)
-trfm_list = [ransac((dst, src), AffineTransform, min_samples=3,
+trfm_list = [ransac((dst, src), EuclideanTransform, min_samples=3,
                     residual_threshold=2, max_trials=100)[0].params
              for dst in matching_corners]
-
-matching_corners = [coords0] + matching_corners
-trfm_list = [np.eye(3)] + trfm_list
 
 fig, ax_list = plt.subplots(6, 2, figsize=(4, 6), sharex=True, sharey=True)
 for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
