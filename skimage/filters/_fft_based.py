@@ -27,8 +27,8 @@ def _get_2D_butterworth_filter(nx, ny, factor, order, high_pass):
     """
     lsize = np.array([nx, ny]) * factor
     # start and stop is to ensure center of mask aligns with center of fft
-    gx = np.arange(-(nx-1)//2, (nx-1)//2+1) / lsize[0]
-    gy = np.arange(-(ny-1)//2, (ny-1)//2+1) / lsize[1]
+    gx = np.arange(-(nx - 1) // 2, (nx - 1) // 2 + 1) / lsize[0]
+    gy = np.arange(-(ny - 1) // 2, (ny - 1) // 2 + 1) / lsize[1]
     qxa, qya = np.meshgrid(gx, gy)
     q2 = np.sqrt(np.square(qxa) + np.square(qya))
     wfilt = 1 / np.sqrt(1 + np.power(q2, order))
@@ -37,9 +37,9 @@ def _get_2D_butterworth_filter(nx, ny, factor, order, high_pass):
     return wfilt
 
 
-def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.):
+def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.0):
     """
-    This function applies a Butterworth Fourier filter to a 2D image for 
+    This function applies a Butterworth Fourier filter to a 2D image for
     enhancing high or low frequency features.
 
     Parameters
