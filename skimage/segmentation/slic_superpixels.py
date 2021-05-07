@@ -1,14 +1,16 @@
 import warnings
 from collections.abc import Iterable
-import numpy as np
-from scipy import ndimage as ndi
-from scipy.spatial.distance import pdist, squareform
-from scipy.cluster.vq import kmeans2
-from numpy import random
 
-from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
+import numpy as np
+from numpy import random
+from scipy import ndimage as ndi
+from scipy.cluster.vq import kmeans2
+from scipy.spatial.distance import pdist, squareform
+
+from .._shared.utils import _supported_float_type
 from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
+from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
 
 
 def _get_mask_centroids(mask, n_centroids, multichannel):
@@ -230,6 +232,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     """
 
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     use_mask = mask is not None
     dtype = image.dtype
 
