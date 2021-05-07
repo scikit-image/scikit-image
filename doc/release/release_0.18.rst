@@ -7,8 +7,8 @@ scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
-This release mostly serves to add wheels for the aarch64 architecture, as well
-as fixing a couple of minor bugs.
+This release mostly serves to add wheels for the aarch64 architecture; it also
+fixes a couple of minor bugs.
 
 For more information, examples, and documentation, please visit our website:
 
