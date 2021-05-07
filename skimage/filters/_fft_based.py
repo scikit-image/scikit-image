@@ -17,8 +17,8 @@ def _get_2D_butterworth_filter(nx, ny, factor, order, high_pass):
     order : float
         controls the slope in the cutoff region
     high_pass : bool
-        whether the filter is high pass (low frequencies attenuated) or low pass
-        (high frequencies are attenuated)
+        whether the filter is high pass (low frequencies attenuated) or
+        low pass (high frequencies are attenuated)
 
     Returns
     -------
@@ -37,7 +37,10 @@ def _get_2D_butterworth_filter(nx, ny, factor, order, high_pass):
     return wfilt
 
 
-def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.0):
+def butterworth(image,
+                cutoff_frequency_ratio=0.005,
+                high_pass=True,
+                order=2.0):
     """
     This function applies a Butterworth Fourier filter to a 2D image for
     enhancing high or low frequency features.
@@ -52,7 +55,8 @@ def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.0):
     high_pass : bool, optional
         Whether to perform a high pass filter, if not a low pass filter
     order : float, optional
-        Order of the filter which affects the slope near the cut-off. Higher order means steeper slope.
+        Order of the filter which affects the slope near the cut-off.
+        Higher order means steeper slope.
 
     Returns
     -------
@@ -61,17 +65,22 @@ def butterworth(image, cutoff_frequency_ratio=0.005, high_pass=True, order=2.0):
 
     Notes
     -----
-    * A band-pass filter can be achieved by combining a high pass and low pass filter
-    * cutoff_frequency_ratio and order both affect slope at the cut-off region. If a specific slope is desired in this region, its absolute value is approximately equal to $order / factor * 2^(-2.5)$
+    * A band-pass filter can be achieved by combining a high pass and low
+    pass filter
+    * cutoff_frequency_ratio and order both affect slope at the cut-off
+    region. If a specific slope is desired in this region, its absolute value
+    is approximately equal to $order / factor * 2^(-2.5)$
 
     Reference
     --------
-    Butterworth, Stephen. "On the theory of filter amplifiers." Wireless Engineer 7.6 (1930): 536-541.
+    Butterworth, Stephen. "On the theory of filter amplifiers."
+    Wireless Engineer 7.6 (1930): 536-541.
     """
     if image.ndim > 2:
         raise ValueError("Only single channel images supported")
     (Ny, Nx) = image.shape
-    wfilt = _get_2D_butterworth_filter(Nx, Ny, cutoff_frequency_ratio, order, high_pass)
+    wfilt = _get_2D_butterworth_filter(Nx, Ny, cutoff_frequency_ratio,
+                                       order, high_pass)
     im_fft = fft.fftn(image)
     im_fft = fft.fftshift(im_fft)
     filtered = fft.ifftshift(wfilt * im_fft)
