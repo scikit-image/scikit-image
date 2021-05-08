@@ -6,8 +6,7 @@ from ..util import dtype_limits
 
 
 def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
-    """
-    Create a N-dimensional Butterworth mask for an FFT
+    """Create a N-dimensional Butterworth mask for an FFT
 
     Parameters
     ----------
@@ -88,16 +87,27 @@ def butterworth(
 
     Notes
     -----
-    * A band-pass filter can be achieved by combining a high pass and low
-    pass filter
-    * cutoff_frequency_ratio and order both affect slope at the cut-off
+    A band-pass filter can be achieved by combining a high pass and low
+    pass filter.
+
+    ``cutoff_frequency_ratio`` and ``order`` both affect slope at the cut-off
     region. If a specific slope is desired in this region, its absolute value
-    is approximately equal to $order / factor * 2^(-2.5)$
+    is approximately equal to ``2^(-2.5) * order / cutoff_frequency_ratio``.
+
+    Examples
+    --------
+    Apply a high pass and low pass Butterworth filter to a grayscale and
+    color image respectively:
+
+    >>> from skimage.data import camera, astronaut
+    >>> from skimage.filters import butterworth
+    >>> high_pass = butterworth(camera(), 0.07, True, 8)
+    >>> low_pass = butterworth(astronaut(), 0.01, False, 4, channel_axis=-1)
 
     Reference
     --------
-    Butterworth, Stephen. "On the theory of filter amplifiers."
-    Wireless Engineer 7.6 (1930): 536-541.
+    .. [1] Butterworth, Stephen. "On the theory of filter amplifiers."
+           Wireless Engineer 7.6 (1930): 536-541.
     """
     fft_shape = (image.shape if channel_axis is None
                  else np.delete(image.shape, channel_axis))
@@ -105,22 +115,20 @@ def butterworth(
     wfilt = _get_ND_butterworth_filter(
         fft_shape, cutoff_frequency_ratio, order, high_pass, is_real
     )
-    if is_real:
-        fftf = fft.rfftn
-        ifftf = fft.irfftn
-    else:
-        fftf = fft.fftn
-        ifftf = fft.ifftn
     axes = np.arange(image.ndim)
     if channel_axis is not None:
+        axes = np.delete(axes, channel_axis)
         abs_channel = channel_axis % image.ndim
         post = image.ndim - abs_channel - 1
         sl = ((slice(None),) * abs_channel + (np.newaxis,) +
               (slice(None),) * post)
-        axes = np.delete(axes, channel_axis)
         wfilt = wfilt[sl]
-    butterfilt = ifftf(wfilt * fftf(image, axes=axes), s=fft_shape, axes=axes)
     if is_real:
+        butterfilt = fft.irfftn(wfilt * fft.rfftn(image, axes=axes),
+                                s=fft_shape, axes=axes)
         out_range = dtype_limits(image) if preserve_range else (0.0, 1.0)
         butterfilt = rescale_intensity(butterfilt, out_range=out_range)
+    else:
+        butterfilt = fft.ifftn(wfilt * fft.fftn(image, axes=axes),
+                               s=fft_shape, axes=axes)
     return butterfilt
