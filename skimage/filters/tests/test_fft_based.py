@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from skimage.filters import butterworth
+from .. import butterworth
 
 
 def test_butterworth_2D():
@@ -25,10 +25,10 @@ def test_butterworth_4D():
 
 
 @pytest.mark.parametrize(
-        "chan",
-        [0, 1, 2, 3]
-        )
-def test_butterworth_4D_channel(chan):
-    im = np.zeros((3, 4, 5, 6))
+    "chan, dtype",
+    [(0, np.float), (1, np.complex128), (2, np.uint8), (3, np.complex256)],
+)
+def test_butterworth_4D_channel(chan, dtype):
+    im = np.zeros((3, 4, 5, 6), dtype=dtype)
     filtered = butterworth(im, channel_axis=chan)
     assert filtered.shape == im.shape
