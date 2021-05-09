@@ -105,7 +105,7 @@ def butterworth(
     >>> low_pass = butterworth(astronaut(), 0.01, False, 4, channel_axis=-1)
 
     Reference
-    --------
+    ---------
     .. [1] Butterworth, Stephen. "On the theory of filter amplifiers."
            Wireless Engineer 7.6 (1930): 536-541.
     """
