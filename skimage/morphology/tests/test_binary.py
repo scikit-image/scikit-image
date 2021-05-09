@@ -1,12 +1,11 @@
 import numpy as np
-from numpy import testing
-
-from skimage import data, color
-from skimage.util import img_as_bool
-from skimage.morphology import binary, grey, selem
 from scipy import ndimage as ndi
 
-import pytest
+from skimage import data, color
+from skimage._shared import testing
+from skimage.util import img_as_bool
+from skimage.morphology import binary, grey, selem
+
 
 img = color.rgb2gray(data.astronaut())
 bw_img = img > 100 / 255.
@@ -37,7 +36,7 @@ def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
     grey_res = img_as_bool(grey.closing(bw_img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    testing.assert_
 
 
 def test_binary_opening():
@@ -45,6 +44,38 @@ def test_binary_opening():
     binary_res = binary.binary_opening(bw_img, strel)
     grey_res = img_as_bool(grey.opening(bw_img, strel))
     testing.assert_array_equal(binary_res, grey_res)
+
+
+@testing.parametrize("function", ["binary_erosion", "binary_dilation"])
+def test_iterated_binary_erosion_and_dilation(function):
+    strel = selem.square(3)
+    iterations = 3
+    binary_func = getattr(binary, function)
+    expected = bw_img
+    for i in range(iterations):
+        expected = binary_func(expected, strel)
+    result = binary_func(bw_img, strel, iterations=iterations)
+    testing.assert_array_equal(expected, result)
+
+
+@testing.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_closing"]
+)
+def test_iterated_binary_vs_scipy(function):
+    strel = selem.square(3)
+    iterations = 3
+
+    scipy_func = getattr(ndi, function)
+    scipy_result = scipy_func(bw_img, strel, iterations=iterations)
+
+    # omit border from comparison due to differences in border_value setting
+    # for erosion vs. dilation within opening/closing operations in SciPy
+    center = (slice(iterations, -iterations),) * bw_img.ndim
+
+    skimage_func = getattr(binary, function)
+    skimage_result = skimage_func(bw_img, strel, iterations=iterations)
+    testing.assert_array_equal(skimage_result[center], scipy_result[center])
 
 
 def test_selem_overflow():
@@ -71,7 +102,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
                     binary.binary_opening, binary.binary_closing]
 
 
-@pytest.mark.parametrize("function", binary_functions)
+@testing.parametrize("function", binary_functions)
 def test_default_selem(function):
     strel = selem.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -107,7 +138,7 @@ def test_3d_fallback_default_selem():
 binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
 
 
-@pytest.mark.parametrize("function", binary_3d_fallback_functions)
+@testing.parametrize("function", binary_3d_fallback_functions)
 def test_3d_fallback_cube_selem(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)

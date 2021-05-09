@@ -9,7 +9,7 @@ from .misc import default_selem
 # The default_selem decorator provides a diamond structuring element as default
 # with the same dimension as the input image and size 3 along each axis.
 @default_selem
-def binary_erosion(image, selem=None, out=None):
+def binary_erosion(image, selem=None, out=None, *, iterations=1):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as greyscale erosion but performs
@@ -39,12 +39,13 @@ def binary_erosion(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_erosion(image, structure=selem, output=out, border_value=True)
+    ndi.binary_erosion(image, structure=selem, output=out, border_value=True,
+                       iterations=iterations)
     return out
 
 
 @default_selem
-def binary_dilation(image, selem=None, out=None):
+def binary_dilation(image, selem=None, out=None, *, iterations=1):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as greyscale dilation but performs
@@ -73,12 +74,13 @@ def binary_dilation(image, selem=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_dilation(image, structure=selem, output=out)
+    ndi.binary_dilation(image, structure=selem, output=out,
+                        iterations=iterations)
     return out
 
 
 @default_selem
-def binary_opening(image, selem=None, out=None):
+def binary_opening(image, selem=None, out=None, *, iterations=1):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as greyscale opening but performs
@@ -106,13 +108,13 @@ def binary_opening(image, selem=None, out=None):
         The result of the morphological opening.
 
     """
-    eroded = binary_erosion(image, selem)
-    out = binary_dilation(eroded, selem, out=out)
+    eroded = binary_erosion(image, selem, iterations=iterations)
+    out = binary_dilation(eroded, selem, out=out, iterations=iterations)
     return out
 
 
 @default_selem
-def binary_closing(image, selem=None, out=None):
+def binary_closing(image, selem=None, out=None, *, iterations=1):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as greyscale closing but performs
@@ -140,6 +142,6 @@ def binary_closing(image, selem=None, out=None):
         The result of the morphological closing.
 
     """
-    dilated = binary_dilation(image, selem)
-    out = binary_erosion(dilated, selem, out=out)
+    dilated = binary_dilation(image, selem, iterations=iterations)
+    out = binary_erosion(dilated, selem, out=out, iterations=iterations)
     return out
