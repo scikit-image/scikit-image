@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import color
@@ -8,6 +7,7 @@ from skimage import img_as_float
 from skimage import draw
 from skimage._shared.testing import assert_almost_equal, fetch
 from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
 
 
 def test_hog_output_size():
@@ -242,15 +242,37 @@ def test_hog_block_normalization_incorrect_error():
 def test_hog_incorrect_dimensions(shape, multichannel):
     img = np.zeros(shape)
     with testing.raises(ValueError):
-        feature.hog(img, multichannel=multichannel, block_norm='L1')
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            feature.hog(img, multichannel=multichannel, block_norm='L1')
 
 
-def test_hog_output_equivariance_multichannel():
+def test_hog_output_equivariance_deprecated_multichannel():
     img = data.astronaut()
     img[:, :, (1, 2)] = 0
-    hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
 
     for n in (1, 2):
-        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
-                               block_norm='L1')
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
+                                   block_norm='L1')
+        assert_almost_equal(hog_ref, hog_fact)
+
+        # repeat prior test, but check for positional multichannel warning
+        with expected_warnings(["Providing the `multichannel` argument"]):
+            hog_fact = feature.hog(np.roll(img, n, axis=2), 9, (8, 8), (3, 3),
+                                   'L1', False, False, True, True)
+        assert_almost_equal(hog_ref, hog_fact)
+
+
+@testing.parametrize('channel_axis', [0, 1, -1, -2])
+def test_hog_output_equivariance_channel_axis(channel_axis):
+    img = data.astronaut()[:64, :32]
+    img[:, :, (1, 2)] = 0
+    img = np.moveaxis(img, -1, channel_axis)
+    hog_ref = feature.hog(img, channel_axis=channel_axis, block_norm='L1')
+
+    for n in (1, 2):
+        hog_fact = feature.hog(np.roll(img, n, axis=channel_axis),
+                               channel_axis=channel_axis, block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)

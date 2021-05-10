@@ -34,7 +34,7 @@ def imsave(fname, arr, format_str=None):
         Name of destination file.
     arr : ndarray of uint8 or uint16
         Array (image) to save.
-    format_str: str,optional
+    format_str : str,optional
         Format to save as.
 
     Notes

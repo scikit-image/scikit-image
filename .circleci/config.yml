@@ -12,6 +12,8 @@ jobs:
       - restore_cache:
           keys:
               - data-v1-{{ checksum "skimage/data/_registry.py" }}
+      - restore_cache:
+          keys:
               - packages-v1-{{ checksum "requirements/all_requirements" }}
       - run:
           name: install dependencies and package

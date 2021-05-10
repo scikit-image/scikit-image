@@ -255,7 +255,14 @@ class RegionProperties:
             # determine whether func requires intensity image
             if n_args == 2:
                 if self._intensity_image is not None:
-                    return func(self.image, self.image_intensity)
+                    if self._multichannel:
+                        multichannel_list = [func(self.image,
+                                                  self.image_intensity[..., i])
+                                             for i in range(
+                            self.image_intensity.shape[-1])]
+                        return np.stack(multichannel_list, axis=-1)
+                    else:
+                        return func(self.image, self.image_intensity)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"

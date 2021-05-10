@@ -58,9 +58,12 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     ----------
     image : ndarray
         Input image.
-    sigma : float, optional
+    sigma : float or array-like of float, optional
         Standard deviation used for the Gaussian kernel, which is used as a
         weighting function for the local summation of squared differences.
+        If sigma is an iterable, its length must be equal to `image.ndim` and
+        each element is used for the Gaussian kernel applied along its
+        respective axis.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
     cval : float, optional
@@ -115,6 +118,12 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
             order = 'xy'
         else:
             order = 'rc'
+
+    if not np.isscalar(sigma):
+        sigma = tuple(sigma)
+        if len(sigma) != image.ndim:
+            raise ValueError('sigma must have as many elements as image '
+                             'has axes')
 
     image = _prepare_grayscale_input_nD(image)
 
