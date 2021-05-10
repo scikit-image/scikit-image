@@ -724,14 +724,14 @@ def test_multichannel():
     segment_idx = np.max(labels) // 2
     region = regionprops(labels,
                          astro_green,
-                         extra_properties=[median_intensity]
+                         extra_properties=[intensity_median]
                          )[segment_idx]
     region_multi = regionprops(labels,
                                astro,
-                               extra_properties=[median_intensity]
+                               extra_properties=[intensity_median]
                                )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["median_intensity"]:
+    for prop in list(PROPS.keys()) + ["intensity_median"]:
         p = region[prop]
         p_multi = region_multi[prop]
         if np.shape(p) == np.shape(p_multi):
