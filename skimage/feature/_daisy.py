@@ -35,7 +35,7 @@ def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,
         Radius (in pixels) of the outermost ring.
     rings : int, optional
         Number of rings.
-    histograms  : int, optional
+    histograms : int, optional
         Number of histograms sampled per ring.
     orientations : int, optional
         Number of orientations (bins) per histogram.

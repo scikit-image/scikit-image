@@ -275,7 +275,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     for _ in range(num_warp):
         if prefilter:
-            flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
+            flow = ndi.median_filter(flow, (1, ) + ndim * (3, ))
 
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
                                  mode='edge')
