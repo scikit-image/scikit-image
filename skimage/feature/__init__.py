@@ -4,6 +4,7 @@ from ._canny import canny
 from ._cascade import Cascade
 from ._daisy import daisy
 from ._hog import hog
+from ._kadir_brady import saliency_kadir_brady
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
@@ -55,6 +56,7 @@ __all__ = ['canny',
            'Cascade',
            'daisy',
            'hog',
+           'saliency_kadir_brady',
            'greycomatrix',
            'greycoprops',
            'local_binary_pattern',
