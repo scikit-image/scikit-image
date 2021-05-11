@@ -70,7 +70,7 @@ plot_comparison(orig_phantom, eroded, 'erosion')
 ######################################################################
 # Notice how the white boundary of the image disappears or gets eroded as we
 # increase the size of the disk. Also notice the increase in size of the two
-# black ellipses in the center and the disappearance of the 3 light grey
+# black ellipses in the center and the disappearance of the 3 light gray
 # patches in the lower part of the image.
 #
 #Dilation
@@ -86,7 +86,7 @@ plot_comparison(orig_phantom, dilated, 'dilation')
 ######################################################################
 # Notice how the white boundary of the image thickens, or gets dilated, as we
 #increase the size of the disk. Also notice the decrease in size of the two
-#black ellipses in the centre, and the thickening of the light grey circle
+#black ellipses in the centre, and the thickening of the light gray circle
 #in the center and the 3 patches in the lower part of the image.
 #
 #Opening

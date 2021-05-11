@@ -40,7 +40,7 @@ plt.show()
 # `mitosis <https://en.wikipedia.org/wiki/Mitosis>`_ (cell division).
 
 #####################################################################
-# Another way of visualizing a greyscale image is contour plotting:
+# Another way of visualizing a grayscale image is contour plotting:
 
 fig, ax = plt.subplots(figsize=(5, 5))
 qcs = ax.contour(image, origin='image')
