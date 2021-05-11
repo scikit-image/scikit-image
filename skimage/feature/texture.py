@@ -12,12 +12,12 @@ from ._texture import (_glcm_loop,
                        _multiblock_lbp)
 
 
-def greycomatrix(image, distances, angles, levels=None, symmetric=False,
+def graycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
-    """Calculate the grey-level co-occurrence matrix.
+    """Calculate the gray-level co-occurrence matrix.
 
-    A grey level co-occurrence matrix is a histogram of co-occurring
-    greyscale values at a given offset over an image.
+    A gray level co-occurrence matrix is a histogram of co-occurring
+    grayscale values at a given offset over an image.
 
     Parameters
     ----------
@@ -30,7 +30,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         List of pixel pair angles in radians.
     levels : int, optional
         The input image should contain integers in [0, `levels`-1],
-        where levels indicate the number of grey-levels counted
+        where levels indicate the number of gray-levels counted
         (typically 256 for an 8-bit image). This argument is required for
         16-bit images or higher and is typically the maximum of the image.
         As the output matrix is at least `levels` x `levels`, it might
@@ -50,10 +50,10 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     Returns
     -------
     P : 4-D ndarray
-        The grey-level co-occurrence histogram. The value
-        `P[i,j,d,theta]` is the number of times that grey-level `j`
+        The gray-level co-occurrence histogram. The value
+        `P[i,j,d,theta]` is the number of times that gray-level `j`
         occurs at a distance `d` and at an angle `theta` from
-        grey-level `i`. If `normed` is `False`, the output is of
+        gray-level `i`. If `normed` is `False`, the output is of
         type uint32, otherwise it is float64. The dimensions are:
         levels x levels x number of distances x number of angles.
 
@@ -79,7 +79,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> result = greycomatrix(image, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4],
+    >>> result = graycomatrix(image, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4],
     ...                       levels=4)
     >>> result[:, :, 0, 0]
     array([[2, 2, 1, 0],
@@ -112,7 +112,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     image_max = image.max()
 
     if np.issubdtype(image.dtype, np.floating):
-        raise ValueError("Float images are not supported by greycomatrix. "
+        raise ValueError("Float images are not supported by graycomatrix. "
                          "Convert the image to an unsigned integer type.")
 
     # for image type > 8bit, levels must be set.
@@ -155,10 +155,10 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     return P
 
 
-def greycoprops(P, prop='contrast'):
+def graycoprops(P, prop='contrast'):
     """Calculate texture properties of a GLCM.
 
-    Compute a feature of a grey level co-occurrence matrix to serve as
+    Compute a feature of a gray level co-occurrence matrix to serve as
     a compact summary of the matrix. The properties are computed as
     follows:
 
@@ -177,11 +177,11 @@ def greycoprops(P, prop='contrast'):
     Parameters
     ----------
     P : ndarray
-        Input array. `P` is the grey-level co-occurrence histogram
+        Input array. `P` is the gray-level co-occurrence histogram
         for which to compute the specified property. The value
-        `P[i,j,d,theta]` is the number of times that grey-level j
+        `P[i,j,d,theta]` is the number of times that gray-level j
         occurs at a distance d and at an angle theta from
-        grey-level i.
+        gray-level i.
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
@@ -206,9 +206,9 @@ def greycoprops(P, prop='contrast'):
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
+    >>> g = graycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
     ...                  normed=True, symmetric=True)
-    >>> contrast = greycoprops(g, 'contrast')
+    >>> contrast = graycoprops(g, 'contrast')
     >>> contrast
     array([[0.58333333, 1.        ],
            [1.25      , 2.75      ]])
