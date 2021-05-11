@@ -75,7 +75,7 @@ def _invert_selem(selem):
 
     References
     ----------
-    .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
     """
     inverted = selem[(slice(None, None, -1),) * selem.ndim]
     return inverted
@@ -126,6 +126,7 @@ def pad_for_eccentric_selems(func):
             out = out_temp
         return out
     return func_out
+
 
 @default_selem
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
@@ -243,7 +244,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     # eg. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
     # this author (@jni). To "patch" this behaviour, we invert our own
     # selem before passing it to `ndi.grey_dilation`.
-    # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285
+    # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
     selem = _invert_selem(selem)
     if out is None:
         out = np.empty_like(image)
