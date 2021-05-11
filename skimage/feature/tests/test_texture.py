@@ -21,7 +21,9 @@ class TestGLCM():
 
     @test_parallel()
     def test_output_angles(self):
-        result = graycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
+        result = graycomatrix(
+            self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4
+        )
         assert result.shape == (4, 4, 1, 4)
         expected1 = np.array([[2, 2, 1, 0],
                              [0, 2, 0, 0],
@@ -77,7 +79,9 @@ class TestGLCM():
             graycomatrix(self.image - 1, [1], [np.pi], 3)
 
     def test_image_data_types(self):
-        for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]:
+        for dtype in [
+            np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64
+        ]:
             img = self.image.astype(dtype)
             result = graycomatrix(img, [1], [np.pi / 2], 4,
                                   symmetric=True)
@@ -132,7 +136,6 @@ class TestGLCM():
         result = graycomatrix(self.image, [10], [0], 4, normed=True)
         np.testing.assert_array_equal(result[:, :, 0, 0],
                                       np.zeros((4, 4), dtype=np.uint32))
-
 
     def test_normed_symmetric(self):
         result = graycomatrix(self.image, [1, 2, 3],
@@ -228,7 +231,8 @@ class TestLBP():
                                [  8,   0, 159,  50,  255,  30],
                                [167, 255,  63,  40,  128, 255],
                                [  0, 255,  30,  34,  255,  24],
-                               [146, 241, 255,   0,  189, 126]], dtype='double')
+                               [146, 241, 255,   0,  189, 126]],
+                              dtype='double')
 
     @test_parallel()
     def test_default(self):
