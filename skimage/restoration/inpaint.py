@@ -205,12 +205,11 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         known pixels - with 0.
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial.
+        otherwise as spatial. This argument is deprecated: specify
+        `channel_axis` instead.
     split_into_regions : boolean, optional
         If True, inpainting is performed on a region-by-region basis. This is
         likely to be slower, but will have reduced memory requirements.
-        otherwise as spatial. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
