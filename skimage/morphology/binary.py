@@ -12,7 +12,7 @@ from .misc import default_selem
 def binary_erosion(image, selem=None, out=None):
     """Return fast binary morphological erosion of an image.
 
-    This function returns the same result as greyscale erosion but performs
+    This function returns the same result as grayscale erosion but performs
     faster for binary images.
 
     Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
@@ -47,7 +47,7 @@ def binary_erosion(image, selem=None, out=None):
 def binary_dilation(image, selem=None, out=None):
     """Return fast binary morphological dilation of an image.
 
-    This function returns the same result as greyscale dilation but performs
+    This function returns the same result as grayscale dilation but performs
     faster for binary images.
 
     Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
@@ -81,7 +81,7 @@ def binary_dilation(image, selem=None, out=None):
 def binary_opening(image, selem=None, out=None):
     """Return fast binary morphological opening of an image.
 
-    This function returns the same result as greyscale opening but performs
+    This function returns the same result as grayscale opening but performs
     faster for binary images.
 
     The morphological opening on an image is defined as an erosion followed by
@@ -115,7 +115,7 @@ def binary_opening(image, selem=None, out=None):
 def binary_closing(image, selem=None, out=None):
     """Return fast binary morphological closing of an image.
 
-    This function returns the same result as greyscale closing but performs
+    This function returns the same result as grayscale closing but performs
     faster for binary images.
 
     The morphological closing on an image is defined as a dilation followed by
