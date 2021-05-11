@@ -6,7 +6,7 @@ from skimage._shared import testing
 
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
-from skimage.morphology import grey, disk, ball
+from skimage.morphology import gray, disk, ball
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
@@ -169,7 +169,7 @@ class TestRank():
                                  selem=elem, shift_x=+1, shift_y=+1, p0=.1, p1=.9)
             assert_equal(image16.shape, out16.shape)
 
-    def test_compare_with_grey_dilation(self):
+    def test_compare_with_gray_dilation(self):
         # compare the result of maximum filter with dilate
 
         image = (np.random.rand(100, 100) * 256).astype(np.uint8)
@@ -179,10 +179,10 @@ class TestRank():
         for r in range(3, 20, 2):
             elem = np.ones((r, r), dtype=np.uint8)
             rank.maximum(image=image, selem=elem, out=out, mask=mask)
-            cm = grey.dilation(image=image, selem=elem)
+            cm = gray.dilation(image=image, selem=elem)
             assert_equal(out, cm)
 
-    def test_compare_with_grey_erosion(self):
+    def test_compare_with_gray_erosion(self):
         # compare the result of maximum filter with erode
 
         image = (np.random.rand(100, 100) * 256).astype(np.uint8)
@@ -192,7 +192,7 @@ class TestRank():
         for r in range(3, 20, 2):
             elem = np.ones((r, r), dtype=np.uint8)
             rank.minimum(image=image, selem=elem, out=out, mask=mask)
-            cm = grey.erosion(image=image, selem=elem)
+            cm = gray.erosion(image=image, selem=elem)
             assert_equal(out, cm)
 
     def test_bitdepth(self):
