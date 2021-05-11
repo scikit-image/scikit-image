@@ -110,7 +110,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     Notes
     -----
-    The algorithm is taken from [1]_. Applications for greyscale reconstruction
+    The algorithm is taken from [1]_. Applications for grayscale reconstruction
     are discussed in [2]_ and [3]_.
 
     References
@@ -131,9 +131,9 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         raise ValueError("Intensity of seed image must be greater than that "
                          "of the mask image for reconstruction by erosion.")
     try:
-        from ._greyreconstruct import reconstruction_loop
+        from ._grayreconstruct import reconstruction_loop
     except ImportError:
-        raise ImportError("_greyreconstruct extension not available.")
+        raise ImportError("_grayreconstruct extension not available.")
 
     if selem is None:
         selem = np.ones([3] * seed.ndim, dtype=bool)
