@@ -107,7 +107,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         to channels.
 
         .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
+           `channel_axis` was added in 0.19.
 
     Returns
     -------

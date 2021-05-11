@@ -37,7 +37,7 @@ def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
 
     Parameters
     ----------
-     bins : int
+    bins : int
         Number of discrete values for Gaussian weights of color filtering.
         A larger value results in improved accuracy.
     sigma : float

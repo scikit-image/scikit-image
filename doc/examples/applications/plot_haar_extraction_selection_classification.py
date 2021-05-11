@@ -73,7 +73,7 @@ feature_types = ['type-2-x', 'type-2-y']
 X = delayed(extract_feature_image(img, feature_types) for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_full_feature_comp = time() - t_start
 
 # Label images (100 faces and 100 non-faces)
@@ -145,7 +145,7 @@ X = delayed(extract_feature_image(img, feature_type_sel, feature_coord_sel)
             for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_subs_feature_comp = time() - t_start
 
 y = np.array([1] * 100 + [0] * 100)

@@ -6,8 +6,8 @@ Estimate anisotropy in a 3D microscopy image
 In this tutorial, we compute the structure tensor of a 3D image.
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
-The data we use here are sampled from an image of kidney tissue by Genevieve
-Buckley in confocal fluorescence microscopy (more details at [1]_ under
+The data we use here are sampled from an image of kidney tissue obtained by
+confocal fluorescence microscopy (more details at [1]_ under
 ``kidney-tissue-fluorescence.tif``).
 
 .. [1] https://gitlab.com/scikit-image/data/#data
@@ -42,7 +42,7 @@ print(f'dtype: {data.dtype}')
 # channel, which leaves us with a 3D single-channel image. What is the range
 # of values?
 
-n_plane, n_Y, n_X, n_chan = data.shape
+n_plane, n_row, n_col, n_chan = data.shape
 v_min, v_max = data[:, :, :, 1].min(), data[:, :, :, 1].max()
 print(f'range: ({v_min}, {v_max})')
 
@@ -53,7 +53,7 @@ px.imshow(
     data[n_plane // 2, :, :, 1],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'}
+    labels={'x': 'col', 'y': 'row', 'color': 'intensity'}
 )
 
 #####################################################################
@@ -105,14 +105,15 @@ px.imshow(
     sample[0, :, :],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
+    labels={'x': 'col', 'y': 'row', 'color': 'intensity'},
     title='Interactive view of bottom slice of sample data.'
 )
 
 #####################################################################
-# About the brightest region (i.e., at X ~ 22 and Y ~ 17), we can see
+# About the brightest region (i.e., at row ~ 22 and column ~ 17), we can see
 # variations (and, hence, strong gradients) over 2 or 3 (resp. 1 or 2) pixels
-# along X (resp. Y). We may thus choose, say, ``sigma = 1.5`` for the window
+# across columns (resp. rows). We may thus choose, say, ``sigma = 1.5`` for
+# the window
 # function. Alternatively, we can pass sigma on a per-axis basis, e.g.,
 # ``sigma = (1, 2, 3)``. Note that size 1 sounds reasonable along the first
 # (Z, plane) axis, since the latter is of size 8 (13 - 5). Viewing slices in
@@ -137,7 +138,7 @@ coords
 #####################################################################
 # .. note::
 #    The reader may check how robust this result (coordinates
-#    ``(Z, Y, X) = coords[1:]``) is to varying ``sigma``.
+#    ``(plane, row, column) = coords[1:]``) is to varying ``sigma``.
 #
 # Let us view the spatial distribution of the eigenvalues in the X-Y plane
 # where the maximum eigenvalue is found (i.e., ``Z = coords[1]``).
@@ -145,7 +146,7 @@ coords
 px.imshow(
     eigen[:, coords[1], :, :],
     facet_col=0,
-    labels={'x': 'Y', 'y': 'X', 'facet_col': 'rank'},
+    labels={'x': 'col', 'y': 'row', 'facet_col': 'rank'},
     title=f'Eigenvalues for plane Z = {coords[1]}.'
 )
 
@@ -175,7 +176,7 @@ px.imshow(
     sample[coords[1], :, :],
     zmin=v_min,
     zmax=v_max,
-    labels={'x': 'Y', 'y': 'X', 'color': 'intensity'},
+    labels={'x': 'col', 'y': 'row', 'color': 'intensity'},
     title=f'Interactive view of plane Z = {coords[1]}.'
 )
 
@@ -196,7 +197,8 @@ px.imshow(
 )
 
 #####################################################################
-# As a conclusion, the region about voxel ``(Z, Y, X) = coords[1:]`` is
+# As a conclusion, the region about voxel
+# ``(plane, row, column) = coords[1:]`` is
 # anisotropic in 3D: There is an order of magnitude between the third-largest
 # eigenvalues on one hand, and the largest and second-largest eigenvalues on
 # the other hand. We could see this at first glance in figure `Eigenvalues for
@@ -208,11 +210,10 @@ px.imshow(
 # less than 2 between the second-largest and largest eigenvalues.
 # This description is compatible with what we are seeing in the image, i.e., a
 # stronger gradient across a direction (which, here, would be relatively close
-# to the X axis) and a weaker gradient perpendicular to it.
+# to the row axis) and a weaker gradient perpendicular to it.
 
 #####################################################################
 # In an ellipsoidal representation of the 3D structure tensor [2]_,
-# we would get the pancake situation. The gradient directions are spread out
-# (here, in the X-Y plane) and perpendicular to Z.
+# we would get the pancake situation.
 #
 # .. [2] https://en.wikipedia.org/wiki/Structure_tensor#Interpretation_2

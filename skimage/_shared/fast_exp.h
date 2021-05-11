@@ -14,7 +14,7 @@
 /* For min. mean relative error */
 /* #define EXP_BC 1072625005 */        /* 1023*2^20 - 68243 */
 
-__inline double fast_exp (double y)
+__inline double _fast_exp (double y)
 {
     union
     {
@@ -41,7 +41,7 @@ __inline double fast_exp (double y)
     return _eco.d;
 }
 
-__inline float fast_expf (float y)
+__inline float _fast_expf (float y)
 {
-  return (float)fast_exp((double)y);
+  return (float)_fast_exp((double)y);
 }

@@ -35,7 +35,9 @@ def test_imageio_palette():
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
-    with testing.raises(SyntaxError):
+    # The exception type changed from SyntaxError to OSError in PIL 8.2.0, so
+    # allow for either to be raised.
+    with testing.raises((OSError, SyntaxError)):
         imread(fetch('data/truncated.jpg'))
 
 

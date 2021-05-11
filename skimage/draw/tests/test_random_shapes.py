@@ -19,13 +19,13 @@ def test_generates_gray_images_with_correct_shape():
 
 
 def test_generates_gray_images_with_correct_shape_deprecated_multichannel():
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         image, _ = random_shapes(
             (4567, 123), min_shapes=3, max_shapes=20, multichannel=False)
     assert image.shape == (4567, 123)
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         image, _ = random_shapes((4567, 123), 20, 3, 2, None, False)
     assert image.shape == (4567, 123)
 
@@ -167,7 +167,7 @@ def test_can_generate_one_by_one_rectangle():
 
 def test_throws_when_intensity_range_out_of_range():
     with testing.raises(ValueError):
-        with expected_warnings(["'multichannel' is a deprecated argument"]):
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
             random_shapes((1000, 1234), max_shapes=1, multichannel=False,
                           intensity_range=(0, 256))
     with testing.raises(ValueError):

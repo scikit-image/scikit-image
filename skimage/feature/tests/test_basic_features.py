@@ -12,7 +12,7 @@ def test_multiscale_basic_features(edges, texture):
     img = np.zeros((20, 20, 3))
     img[:10] = 1
     img += 0.05 * np.random.randn(*img.shape)
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         features = multiscale_basic_features(img, edges=edges, texture=texture,
                                              multichannel=True)
 
@@ -27,14 +27,14 @@ def test_multiscale_basic_features_deprecated_multichannel():
     img[:10] = 1
     img += 0.05 * np.random.randn(*img.shape)
     n_sigmas = 2
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         features = multiscale_basic_features(img, sigma_min=1, sigma_max=2,
                                              multichannel=True)
     assert features.shape[-1] == 5 * n_sigmas * 4
     assert features.shape[:-1] == img.shape[:-1]
 
     # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the 'multichannel' argument"]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         multiscale_basic_features(img, True, sigma_min=1, sigma_max=2)
     assert features.shape[-1] == 5 * n_sigmas * 4
     assert features.shape[:-1] == img.shape[:-1]
