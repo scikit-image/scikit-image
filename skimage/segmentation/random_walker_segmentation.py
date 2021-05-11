@@ -49,11 +49,11 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 
     Parameters
     ----------
-    n_x : integer
+    n_x: integer
         The size of the grid in the x direction.
-    n_y : integer
+    n_y: integer
         The size of the grid in the y direction
-    n_z : integer
+    n_z: integer
         The size of the grid in the z direction
 
     Returns

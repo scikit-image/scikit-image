@@ -84,9 +84,8 @@ jobs:
         run: |
             set -ex
             source tools/github/before_install.sh
-            set -ex
             python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
+            if [[ $INSTALL_FROM_SDIST ]]; then
                 pip uninstall cython -y;
                 pip install dist/scikit-image-*.tar.gz;
             else
@@ -145,7 +144,7 @@ jobs:
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-
+    
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0

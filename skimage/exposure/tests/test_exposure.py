@@ -310,15 +310,13 @@ def test_rescale_nan_warning(in_range, out_range):
     # versions above 1.17
     # TODO: Remove once NumPy removes this DeprecationWarning
     numpy_warning_1_17_plus = (
-        "Passing `np.nan` to mean no clipping in np.clip"
+        r"Passing `np.nan` to mean no clipping in np.clip "
+        r"has always been unreliable|\A\Z"
     )
 
-    if in_range == "image":
-        exp_warn = [msg, numpy_warning_1_17_plus]
-    else:
-        exp_warn = [msg]
-
-    with expected_warnings(exp_warn):
+    with expected_warnings(
+            [msg, numpy_warning_1_17_plus]
+    ):
         exposure.rescale_intensity(image, in_range, out_range)
 
 

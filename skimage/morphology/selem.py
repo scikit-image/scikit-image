@@ -57,6 +57,7 @@ def rectangle(nrows, ncols, dtype=np.uint8):
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
+
     Notes
     -----
     - The use of ``width`` and ``height`` has been deprecated in
@@ -85,6 +86,7 @@ def diamond(radius, dtype=np.uint8):
 
     Returns
     -------
+
     selem : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
@@ -212,6 +214,7 @@ def octahedron(radius, dtype=np.uint8):
 
     Returns
     -------
+
     selem : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
@@ -363,4 +366,4 @@ def _default_selem(ndim):
         are 1 and 0 otherwise.
 
     """
-    return ndi.generate_binary_structure(ndim, 1)
+    return ndi.morphology.generate_binary_structure(ndim, 1)

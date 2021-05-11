@@ -5,35 +5,6 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
-def _bernoulli(p, shape):
-    """
-    Bernoulli trials at a given probability of a given size.
-
-    This function is meant as a lower-memory alternative to calls such as
-    `np.random.choice([True, False], size=image.shape, p=[p, 1-p])`.
-    While `np.random.choice` can handle many classes, for the 2-class case
-    (Bernoulli trials), this function is much more efficient.
-
-    Parameters
-    ----------
-    p : float
-        The probability that any given trial returns `True`.
-    shape : int or tuple of ints
-        The shape of the ndarray to return.
-
-    Returns
-    -------
-    out : ndarray[bool]
-        The results of Bernoulli trials in the given `size` where success
-        occurs with probability `p`.
-    """
-    if p == 0:
-        return np.zeros(shape, dtype=bool)
-    if p == 1:
-        return np.ones(shape, dtype=bool)
-    return np.random.random(shape) <= p
-
-
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
@@ -201,8 +172,10 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = _bernoulli(p, image.shape)
-        salted = _bernoulli(q, image.shape)
+        flipped = np.random.choice([True, False], size=image.shape,
+                                   p=[p, 1 - p])
+        salted = np.random.choice([True, False], size=image.shape,
+                                  p=[q, 1 - q])
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip

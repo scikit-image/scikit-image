@@ -99,12 +99,10 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     npoints = int(np.ceil(np.max(np.abs(stop - start))))
     if endpoint:
         npoints += 1
-
-    coords = np.linspace(start, stop, num=npoints, endpoint=endpoint).T
-    if integer:
-        for dim in range(len(start)):
-            coords[dim, :] = _round_safe(coords[dim, :])
-
-        coords = coords.astype(int)
-
+    coords = []
+    for dim in range(len(start)):
+        dimcoords = np.linspace(start[dim], stop[dim], npoints, endpoint)
+        if integer:
+            dimcoords = _round_safe(dimcoords).astype(int)
+        coords.append(dimcoords)
     return tuple(coords)

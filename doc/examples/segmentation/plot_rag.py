@@ -55,7 +55,6 @@ def display(g, title):
     plt.figure()
     plt.title(title)
     nx.draw(g, pos)
-    nx.draw_networkx_labels(g, pos)
     nx.draw_networkx_edge_labels(g, pos, font_size=20)
 
 

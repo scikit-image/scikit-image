@@ -242,24 +242,24 @@ def test_hog_block_normalization_incorrect_error():
 def test_hog_incorrect_dimensions(shape, multichannel):
     img = np.zeros(shape)
     with testing.raises(ValueError):
-        with expected_warnings(["`multichannel` is a deprecated argument"]):
+        with expected_warnings(["'multichannel' is a deprecated argument"]):
             feature.hog(img, multichannel=multichannel, block_norm='L1')
 
 
 def test_hog_output_equivariance_deprecated_multichannel():
     img = data.astronaut()
     img[:, :, (1, 2)] = 0
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
+    with expected_warnings(["'multichannel' is a deprecated argument"]):
         hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
 
     for n in (1, 2):
-        with expected_warnings(["`multichannel` is a deprecated argument"]):
+        with expected_warnings(["'multichannel' is a deprecated argument"]):
             hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
                                    block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)
 
         # repeat prior test, but check for positional multichannel warning
-        with expected_warnings(["Providing the `multichannel` argument"]):
+        with expected_warnings(["Providing the 'multichannel' argument"]):
             hog_fact = feature.hog(np.roll(img, n, axis=2), 9, (8, 8), (3, 3),
                                    'L1', False, False, True, True)
         assert_almost_equal(hog_ref, hog_fact)

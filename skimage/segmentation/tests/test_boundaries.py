@@ -1,9 +1,7 @@
 import numpy as np
 from skimage.segmentation import find_boundaries, mark_boundaries
 
-from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_allclose
-from skimage._shared.utils import _supported_float_type
 
 
 white = (1, 1, 1)
@@ -41,9 +39,8 @@ def test_find_boundaries_bool():
     assert_array_equal(result, ref)
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-def test_mark_boundaries(dtype):
-    image = np.zeros((10, 10), dtype=dtype)
+def test_mark_boundaries():
+    image = np.zeros((10, 10))
     label_image = np.zeros((10, 10), dtype=np.uint8)
     label_image[2:7, 2:7] = 1
 
@@ -59,7 +56,6 @@ def test_mark_boundaries(dtype):
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
     marked = mark_boundaries(image, label_image, color=white, mode='thick')
-    assert marked.dtype == _supported_float_type(dtype)
     result = np.mean(marked, axis=-1)
     assert_array_equal(result, ref)
 
@@ -100,8 +96,7 @@ def test_mark_boundaries_bool():
     assert_array_equal(result, ref)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_mark_boundaries_subpixel(dtype):
+def test_mark_boundaries_subpixel():
     labels = np.array([[0, 0, 0, 0],
                        [0, 0, 5, 0],
                        [0, 1, 5, 0],
@@ -109,9 +104,7 @@ def test_mark_boundaries_subpixel(dtype):
                        [0, 0, 0, 0]], dtype=np.uint8)
     np.random.seed(0)
     image = np.round(np.random.rand(*labels.shape), 2)
-    image = image.astype(dtype, copy=False)
     marked = mark_boundaries(image, labels, color=white, mode='subpixel')
-    assert marked.dtype == _supported_float_type(dtype)
     marked_proj = np.round(np.mean(marked, axis=-1), 2)
 
     ref_result = np.array(

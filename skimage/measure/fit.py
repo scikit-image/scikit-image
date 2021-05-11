@@ -589,7 +589,6 @@ class EllipseModel(BaseModel):
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     """Determine number trials such that at least one outlier-free subset is
     sampled for the given inlier/outlier ratio.
-
     Parameters
     ----------
     n_inliers : int
@@ -600,7 +599,6 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         Minimum number of samples chosen randomly from original data.
     probability : float
         Probability (confidence) that one outlier-free sample is generated.
-
     Returns
     -------
     trials : int

@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.ndimage import distance_transform_edt as distance
 
-from .._shared.utils import _supported_float_type
-
 
 def _cv_curvature(phi):
     """Returns the 'curvature' of a level set 'phi'.
@@ -115,18 +113,15 @@ def _cv_reset_level_set(phi):
     return phi
 
 
-def _cv_checkerboard(image_size, square_size, dtype=np.float64):
+def _cv_checkerboard(image_size, square_size):
     """Generates a checkerboard level set function.
 
-    According to Pascal Getreuer, such a level set function has fast
-    convergence.
+    According to Pascal Getreuer, such a level set function has fast convergence.
     """
-    yv = np.arange(image_size[0], dtype=dtype).reshape(image_size[0], 1)
-    xv = np.arange(image_size[1], dtype=dtype)
-    sf = np.pi / square_size
-    xv *= sf
-    yv *= sf
-    return np.sin(yv) * np.sin(xv)
+    yv = np.arange(image_size[0]).reshape(image_size[0], 1)
+    xv = np.arange(image_size[1])
+    return (np.sin(np.pi/square_size*yv) *
+            np.sin(np.pi/square_size*xv))
 
 
 def _cv_large_disk(image_size):
@@ -139,7 +134,7 @@ def _cv_large_disk(image_size):
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
     radius = float(min(centerX, centerY))
-    return (radius - distance(res)) / radius
+    return (radius-distance(res)) / radius
 
 
 def _cv_small_disk(image_size):
@@ -152,15 +147,15 @@ def _cv_small_disk(image_size):
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
     radius = float(min(centerX, centerY)) / 2.0
-    return (radius - distance(res)) / (radius * 3)
+    return (radius-distance(res)) / (radius*3)
 
 
-def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
+def _cv_init_level_set(init_level_set, image_shape):
     """Generates an initial level set function conditional on input arguments.
     """
     if type(init_level_set) == str:
         if init_level_set == 'checkerboard':
-            res = _cv_checkerboard(image_shape, 5, dtype)
+            res = _cv_checkerboard(image_shape, 5)
         elif init_level_set == 'disk':
             res = _cv_large_disk(image_shape)
         elif init_level_set == 'small disk':
@@ -169,7 +164,7 @@ def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
             raise ValueError("Incorrect name for starting level set preset.")
     else:
         res = init_level_set
-    return res.astype(dtype, copy=False)
+    return res
 
 
 def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
@@ -302,14 +297,12 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
 
-    float_dtype = _supported_float_type(image)
-    phi = _cv_init_level_set(init_level_set, image.shape, dtype=float_dtype)
+    phi = _cv_init_level_set(init_level_set, image.shape)
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
         raise ValueError("The dimensions of initial level set do not "
                          "match the dimensions of image.")
 
-    image = image.astype(float_dtype, copy=False)
     image = image - np.min(image)
     if np.max(image) != 0:
         image = image / np.max(image)

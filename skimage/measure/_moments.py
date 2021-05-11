@@ -1,5 +1,5 @@
 import numpy as np
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import check_nD
 from . import _moments_cy
 import itertools
 
@@ -115,17 +115,15 @@ def moments_coords_central(coords, center=None, order=3):
         coords = np.stack(coords, axis=-1)
     check_nD(coords, 2)
     ndim = coords.shape[1]
-
-    float_type = _supported_float_type(coords.dtype)
     if center is None:
-        center = np.mean(coords, axis=0, dtype=float)
+        center = np.mean(coords, axis=0)
 
     # center the coordinates
-    coords = coords.astype(float_type, copy=False) - center
+    coords = coords.astype(float) - center
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
-    coords = np.stack([coords ** c for c in range(order + 1)], axis=-1)
+    coords = coords[..., np.newaxis] ** np.arange(order + 1)
 
     # add extra dimensions for proper broadcasting
     coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
@@ -242,13 +240,10 @@ def moments_central(image, center=None, order=3, **kwargs):
     """
     if center is None:
         center = centroid(image)
-    float_dtype = _supported_float_type(image.dtype)
-    calc = image.astype(float_dtype, copy=False)
+    calc = image.astype(float)
     for dim, dim_length in enumerate(image.shape):
-        delta = np.arange(dim_length, dtype=float_dtype) - center[dim]
-        powers_of_delta = (
-            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
-        )
+        delta = np.arange(dim_length, dtype=float) - center[dim]
+        powers_of_delta = delta[:, np.newaxis] ** np.arange(order + 1)
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
         calc = np.rollaxis(calc, -1, dim)
@@ -350,8 +345,7 @@ def moments_hu(nu):
     array([7.45370370e-01, 3.51165981e-01, 1.04049179e-01, 4.06442107e-02,
            2.64312299e-03, 2.40854582e-02, 4.33680869e-19])
     """
-    dtype = np.float32 if nu.dtype == 'float32' else np.float64
-    return _moments_cy.moments_hu(nu.astype(dtype, copy=False))
+    return _moments_cy.moments_hu(nu.astype(np.double))
 
 
 def centroid(image):
@@ -412,7 +406,7 @@ def inertia_tensor(image, mu=None):
     if mu is None:
         mu = moments_central(image, order=2)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
-    result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
+    result = np.zeros((image.ndim, image.ndim))
 
     # nD expression to get coordinates ([2, 0], [0, 2]) (2D),
     # ([2, 0, 0], [0, 2, 0], [0, 0, 2]) (3D), etc.

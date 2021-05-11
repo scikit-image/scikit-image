@@ -56,6 +56,7 @@ def binary_dilation(image, selem=None, out=None):
 
     Parameters
     ----------
+
     image : ndarray
         Binary input image.
     selem : ndarray, optional

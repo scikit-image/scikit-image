@@ -75,11 +75,11 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-        The local maxima of height >= h and the global maxima.
-        The resulting image is a binary image, where pixels belonging to
-        the determined maxima take value 1, the others take value 0.
+       The local maxima of height >= h and the global maxima.
+       The resulting image is a binary image, where pixels belonging to
+       the determined maxima take value 1, the others take value 0.
 
-    See Also
+    See also
     --------
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.local_maxima
@@ -203,11 +203,11 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-        The local minima of depth >= h and the global minima.
-        The resulting image is a binary image, where pixels belonging to
-        the determined minima take value 1, the others take value 0.
+       The local minima of depth >= h and the global minima.
+       The resulting image is a binary image, where pixels belonging to
+       the determined minima take value 1, the others take value 0.
 
-    See Also
+    See also
     --------
     skimage.morphology.extrema.h_maxima
     skimage.morphology.extrema.local_maxima

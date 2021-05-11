@@ -78,6 +78,7 @@ def max_tree(image, connectivity=1):
     parent : ndarray, int64
         Array of same shape as image. The value of each pixel is the index of
         its parent in the ravelled array.
+
     tree_traverser : 1D array, int64
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
@@ -188,7 +189,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
     output : ndarray
         Output image of the same shape and type as the input image.
 
-    See Also
+    See also
     --------
     skimage.morphology.area_closing
     skimage.morphology.diameter_opening
@@ -196,6 +197,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
     skimage.morphology.max_tree
     skimage.morphology.remove_small_objects
     skimage.morphology.remove_small_holes
+
 
     References
     ----------
@@ -222,6 +224,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
 
     Examples
     --------
+
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
 
@@ -290,7 +293,7 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
     output : ndarray
         Output image of the same shape and type as the input image.
 
-    See Also
+    See also
     --------
     skimage.morphology.area_opening
     skimage.morphology.area_closing
@@ -389,7 +392,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
     output : ndarray
         Output image of the same shape and type as input image.
 
-    See Also
+    See also
     --------
     skimage.morphology.area_opening
     skimage.morphology.diameter_opening
@@ -421,6 +424,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
            Processing, 23(9), 3885-3895.
            :DOI:`10.1109/TIP.2014.2336551`
 
+
     Examples
     --------
     We create an image (quadratic function with a minimum in the center and
@@ -439,6 +443,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
 
     All small minima are removed, and the remaining minima have at least
     a size of 8.
+
 
     Notes
     -----
@@ -508,7 +513,7 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     output : ndarray
         Output image of the same shape and type as input image.
 
-    See Also
+    See also
     --------
     skimage.morphology.area_opening
     skimage.morphology.area_closing
@@ -546,6 +551,7 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
 
     All small minima with a maximal extension of 2 or less are removed.
     The remaining minima have all a maximal extension of at least 3.
+
 
     Notes
     -----
@@ -590,14 +596,14 @@ def max_tree_local_maxima(image, connectivity=1,
     ----------
     image : ndarray
         The input image for which the maxima are to be calculated.
-    connectivity : unsigned int, optional
+    connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent: ndarray, int64, optional
         The value of each pixel is the index of its parent in the ravelled
         array.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser: 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -607,7 +613,7 @@ def max_tree_local_maxima(image, connectivity=1,
     local_max : ndarray, uint64
         Labeled local maxima of the image.
 
-    See Also
+    See also
     --------
     skimage.morphology.local_maxima
     skimage.morphology.max_tree
