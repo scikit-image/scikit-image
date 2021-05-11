@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
 
 from skimage import color, data, transform
@@ -7,7 +8,7 @@ from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_equal,
-                                     TestCase, parametrize, fetch)
+                                     TestCase, fetch)
 
 
 class TestMorphology(TestCase):
@@ -103,7 +104,7 @@ grey_functions = [grey.erosion, grey.dilation,
                   grey.white_tophat, grey.black_tophat]
 
 
-@parametrize("function", grey_functions)
+@pytest.mark.parametrize("function", grey_functions)
 def test_default_selem(function):
     strel = selem.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -140,7 +141,7 @@ def test_3d_fallback_default_selem():
 grey_3d_fallback_functions = [grey.closing, grey.opening]
 
 
-@parametrize("function", grey_3d_fallback_functions)
+@pytest.mark.parametrize("function", grey_3d_fallback_functions)
 def test_3d_fallback_cube_selem(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)

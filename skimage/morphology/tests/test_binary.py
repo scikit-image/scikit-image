@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
 
 from skimage import data, color
@@ -36,7 +37,7 @@ def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
     grey_res = img_as_bool(grey.closing(bw_img, strel))
-    testing.assert_
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 def test_binary_opening():
@@ -46,7 +47,7 @@ def test_binary_opening():
     testing.assert_array_equal(binary_res, grey_res)
 
 
-@testing.parametrize("function", ["binary_erosion", "binary_dilation"])
+@pytest.mark.parametrize("function", ["binary_erosion", "binary_dilation"])
 def test_iterated_binary_erosion_and_dilation(function):
     strel = selem.square(3)
     iterations = 3
@@ -58,7 +59,7 @@ def test_iterated_binary_erosion_and_dilation(function):
     testing.assert_array_equal(expected, result)
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     "function",
     ["binary_erosion", "binary_dilation", "binary_closing", "binary_closing"]
 )
@@ -102,7 +103,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
                     binary.binary_opening, binary.binary_closing]
 
 
-@testing.parametrize("function", binary_functions)
+@pytest.mark.parametrize("function", binary_functions)
 def test_default_selem(function):
     strel = selem.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -138,7 +139,7 @@ def test_3d_fallback_default_selem():
 binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
 
 
-@testing.parametrize("function", binary_3d_fallback_functions)
+@pytest.mark.parametrize("function", binary_3d_fallback_functions)
 def test_3d_fallback_cube_selem(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
