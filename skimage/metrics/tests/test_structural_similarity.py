@@ -96,7 +96,8 @@ def test_structural_similarity_dtype():
     assert S2 < 0.1
 
 
-def test_structural_similarity_multichannel():
+@testing.parametrize('channel_axis', [0, 1, 2, -1])
+def test_structural_similarity_multichannel(channel_axis):
     N = 100
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
@@ -106,26 +107,48 @@ def test_structural_similarity_multichannel():
     # replicate across three channels.  should get identical value
     Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
     Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
-    S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3)
+
+    # move channels from last position to specified channel_axis
+    Xc, Yc = (np.moveaxis(_arr, -1, channel_axis) for _arr in (Xc, Yc))
+
+    S2 = structural_similarity(Xc, Yc, channel_axis=channel_axis, win_size=3)
     assert_almost_equal(S1, S2)
 
     # full case should return an image as well
-    m, S3 = structural_similarity(Xc, Yc, multichannel=True, full=True)
+    m, S3 = structural_similarity(Xc, Yc, channel_axis=channel_axis, full=True)
     assert_equal(S3.shape, Xc.shape)
 
     # gradient case
-    m, grad = structural_similarity(Xc, Yc, multichannel=True, gradient=True)
+    m, grad = structural_similarity(Xc, Yc, channel_axis=channel_axis,
+                                    gradient=True)
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
-    m, grad, S3 = structural_similarity(
-        Xc, Yc, multichannel=True, full=True, gradient=True)
+    m, grad, S3 = structural_similarity(Xc, Yc,
+                                        channel_axis=channel_axis,
+                                        full=True,
+                                        gradient=True)
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
     with testing.raises(ValueError):
-        structural_similarity(Xc, Yc, win_size=7, multichannel=False)
+        structural_similarity(Xc, Yc, win_size=7, channel_axis=None)
+
+
+def test_structural_similarity_multichannel_deprecated():
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    S1 = structural_similarity(X, Y, win_size=3)
+
+    # replicate across three channels.  should get identical value
+    Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
+    Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3)
+    assert_almost_equal(S1, S2)
 
 
 def test_structural_similarity_nD():
@@ -148,13 +171,13 @@ def test_structural_similarity_multichannel_chelsea():
     Yc = Yc.astype(Xc.dtype)
 
     # multichannel result should be mean of the individual channel results
-    mssim = structural_similarity(Xc, Yc, multichannel=True)
+    mssim = structural_similarity(Xc, Yc, channel_axis=-1)
     mssim_sep = [structural_similarity(
         Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
     assert_almost_equal(mssim, np.mean(mssim_sep))
 
     # structural_similarity of image with itself should be 1.0
-    assert_equal(structural_similarity(Xc, Xc, multichannel=True), 1.0)
+    assert_equal(structural_similarity(Xc, Xc, channel_axis=-1), 1.0)
 
 
 def test_gaussian_structural_similarity_vs_IPOL():

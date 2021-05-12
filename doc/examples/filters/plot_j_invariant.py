@@ -39,10 +39,10 @@ noisy = random_noise(image, var=sigma ** 2)
 parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
                     'wavelet': ['db1', 'db2'],
                     'convert2ycbcr': [True, False],
-                    'multichannel': [True]}
+                    'channel_axis': [-1]}
 
 # Denoised image using default parameters of `denoise_wavelet`
-default_output = denoise_wavelet(noisy, multichannel=True, rescale_sigma=True)
+default_output = denoise_wavelet(noisy, channel_axis=-1, rescale_sigma=True)
 
 # Calibrate denoiser
 calibrated_denoiser = calibrate_denoiser(noisy,

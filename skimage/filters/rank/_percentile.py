@@ -47,12 +47,12 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
 
 def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0, p1=1):
-    """Return greyscale local autolevel of an image.
+    """Return grayscale local autolevel of an image.
 
-    This filter locally stretches the histogram of greyvalues to cover the
+    This filter locally stretches the histogram of grayvalues to cover the
     entire range of values from "white" to "black".
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -89,7 +89,7 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
                         shift_y=False, p0=0, p1=1):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -126,7 +126,7 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
     """Return local mean of an image.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -163,7 +163,7 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
                              shift_x=False, shift_y=False, p0=0, p1=1):
     """Return image subtracted from its local mean.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -200,11 +200,11 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
                                 shift_x=False, shift_y=False, p0=0, p1=1):
     """Enhance contrast of an image.
 
-    This replaces each pixel by the local maximum if the pixel greyvalue is
+    This replaces each pixel by the local maximum if the pixel grayvalue is
     closer to the local maximum than the local minimum. Otherwise it is
     replaced by the local minimum.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -241,10 +241,10 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
                p0=0):
     """Return local percentile of an image.
 
-    Returns the value of the p0 lower percentile of the local greyvalue
+    Returns the value of the p0 lower percentile of the local grayvalue
     distribution.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -283,7 +283,7 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
     The number of pixels is defined as the number of pixels which are included
     in the structuring element and the mask.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
@@ -320,7 +320,7 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local sum of pixels.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Note that the sum may overflow depending on the data type of the input
     array.
@@ -360,10 +360,10 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
     """Local threshold of an image.
 
-    The resulting binary mask is True if the greyvalue of the center pixel is
+    The resulting binary mask is True if the grayvalue of the center pixel is
     greater than the local mean.
 
-    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+    Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------

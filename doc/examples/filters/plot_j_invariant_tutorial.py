@@ -44,10 +44,10 @@ noisy = random_noise(image, var=sigma ** 2)
 parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
                     'wavelet': ['db1', 'db2'],
                     'convert2ycbcr': [True, False],
-                    'multichannel': [True]}
+                    'channel_axis': [-1]}
 
 # Denoised image using default parameters of `denoise_wavelet`
-default_output = denoise_wavelet(noisy, multichannel=True, rescale_sigma=True)
+default_output = denoise_wavelet(noisy, channel_axis=-1, rescale_sigma=True)
 
 # Calibrate denoiser
 calibrated_denoiser = calibrate_denoiser(noisy,
@@ -100,7 +100,7 @@ from skimage.restoration.j_invariant import _invariant_denoise
 sigma_range = np.arange(sigma/2, 1.5*sigma, 0.025)
 
 parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
-                      'multichannel': True}
+                      'channel_axis': -1}
                      for sigma in sigma_range]
 
 denoised_invariant = [_invariant_denoise(noisy, _denoise_wavelet,
@@ -170,7 +170,7 @@ for spine in ax_image[1].spines.values():
 #
 
 parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
-                      'wavelet': 'db2', 'multichannel': True}
+                      'wavelet': 'db2', 'channel_axis': -1}
                      for sigma in sigma_range]
 
 denoised_original = [_denoise_wavelet(noisy, **params)

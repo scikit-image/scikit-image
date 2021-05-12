@@ -1,14 +1,16 @@
 import warnings
 from collections.abc import Iterable
-import numpy as np
-from scipy import ndimage as ndi
-from scipy.spatial.distance import pdist, squareform
-from scipy.cluster.vq import kmeans2
-from numpy import random
 
-from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
-from ..util import img_as_float, regular_grid
+import numpy as np
+from numpy import random
+from scipy import ndimage as ndi
+from scipy.cluster.vq import kmeans2
+from scipy.spatial.distance import pdist, squareform
+
+from .._shared import utils
 from ..color import rgb2lab
+from ..util import img_as_float, regular_grid
+from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
 
 
 def _get_mask_centroids(mask, n_centroids, multichannel):
@@ -104,17 +106,20 @@ def _get_grid_centroids(image, n_centroids):
     return centroids, steps
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=None, mask=None):
+         slic_zero=False, start_label=None, mask=None, *,
+         channel_axis=-1):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
     ----------
     image : 2D, 3D or 4D ndarray
         Input image, which can be 2D or 3D, and grayscale or multichannel
-        (see `multichannel` parameter).
+        (see `channel_axis` parameter).
         Input image must either be NaN-free or the NaN's must be masked out
     n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
@@ -141,11 +146,12 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         and x during k-means clustering.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+        channels or another spatial dimension. This argument is deprecated:
+        specify `channel_axis` instead.
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. The input image *must* be RGB. Highly recommended.
-        This option defaults to ``True`` when ``multichannel=True`` *and*
+        This option defaults to ``True`` when ``channel_axis` is not None *and*
         ``image.shape[-1] == 3``.
     enforce_connectivity : bool, optional
         Whether the generated segments are connected or not
@@ -169,6 +175,13 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
         .. versionadded:: 0.17
            ``mask`` was introduced in 0.17
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -197,7 +210,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
-      `multichannel=False`.
+      `channel_axis=-1`.
 
     * `start_label` is introduced to handle the issue [4]_. The labels
       indexing starting at 0 will be deprecated in future versions. If
@@ -230,11 +243,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     """
 
     image = img_as_float(image)
+    float_dtype = utils._supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     use_mask = mask is not None
     dtype = image.dtype
 
     is_2d = False
 
+    multichannel = channel_axis is not None
     if image.ndim == 2:
         # 2D grayscale image
         image = image[np.newaxis, ..., np.newaxis]
@@ -248,9 +265,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         image = image[..., np.newaxis]
 
     if multichannel and (convert2lab or convert2lab is None):
-        if image.shape[-1] != 3 and convert2lab:
+        if image.shape[channel_axis] != 3 and convert2lab:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
-        elif image.shape[-1] == 3:
+        elif image.shape[channel_axis] == 3:
             image = rgb2lab(image)
 
     if start_label is None:
