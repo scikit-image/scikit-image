@@ -602,23 +602,6 @@ class ProjectiveTransform(GeometricTransform):
     def __call__(self, coords):
         """Apply forward transformation.
 
-        The call method enables Python programmers to write classes,
-        where the instances behave like functions and
-        can be called like a function.
-
-
-        class example:
-            def __init__(self):
-                print("Instance created")
-            def __call__(self):
-                print("instance called as special method/function")
-        ex=example()
-        ex()
-
-        output:
-        Instance created
-        instance called as special method/function
-
         Parameters
         ----------
         coords : (N, D) array
@@ -628,6 +611,20 @@ class ProjectiveTransform(GeometricTransform):
         -------
         coords_out : (N, D) array
             Destination coordinates.
+
+        Examples
+        --------
+        The call method enables the class instance
+        to behave like functions. The user can call
+        these instances like functions.
+
+        matrix=[[1 2 3]
+                [4 5 6]
+                [7 8 9]].
+        
+        A=ProjectiveTransform(matrix)  #instance created.
+        B=A(coords)    #calling instance A as a function
+                        with "coords" as argument.
 
         """
         return self._apply_mat(coords, self.params)
