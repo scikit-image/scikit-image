@@ -65,16 +65,22 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
     return data, seeds
 
 
-def test_2d_bf():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_2d_bf(dtype):
     lx = 70
     ly = 100
+
+    # have to use a smaller beta to avoid warning with lower precision input
+    beta = 90 if dtype == np.float64 else 25
+
     data, labels = make_2d_syntheticdata(lx, ly)
+    data = data.astype(dtype, copy=False)
     with expected_warnings([NUMPY_MATRIX_WARNING]):
-        labels_bf = random_walker(data, labels, beta=90, mode='bf')
+        labels_bf = random_walker(data, labels, beta=beta, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
     with expected_warnings([NUMPY_MATRIX_WARNING]):
-        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+        full_prob_bf = random_walker(data, labels, beta=beta, mode='bf',
                                      return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
@@ -82,7 +88,7 @@ def test_2d_bf():
     # Now test with more than two labels
     labels[55, 80] = 3
     with expected_warnings([NUMPY_MATRIX_WARNING]):
-        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+        full_prob_bf = random_walker(data, labels, beta=beta, mode='bf',
                                      return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
@@ -90,10 +96,12 @@ def test_2d_bf():
     assert data.shape == labels.shape
 
 
-def test_2d_cg():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_2d_cg(dtype):
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
+    data = data.astype(dtype, copy=False)
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING]):
         labels_cg = random_walker(data, labels, beta=90, mode='cg')
@@ -109,10 +117,12 @@ def test_2d_cg():
     return data, labels_cg
 
 
-def test_2d_cg_mg():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_2d_cg_mg(dtype):
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
+    data = data.astype(dtype, copy=False)
     anticipated_warnings = [
         'scipy.sparse.sparsetools|%s' % PYAMG_OR_SCIPY_WARNING,
         NUMPY_MATRIX_WARNING]
@@ -129,10 +139,12 @@ def test_2d_cg_mg():
     return data, labels_cg_mg
 
 
-def test_2d_cg_j():
+@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_2d_cg_j(dtype):
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
+    data = data.astype(dtype, copy=False)
     with expected_warnings([NUMPY_MATRIX_WARNING]):
         labels_cg = random_walker(data, labels, beta=90, mode='cg_j')
     assert (labels_cg[25:45, 40:60] == 2).all()
@@ -201,10 +213,12 @@ def test_2d_laplacian_size():
     return data, labels
 
 
-def test_3d():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_3d(dtype):
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
+    data = data.astype(dtype, copy=False)
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING]):
         labels = random_walker(data, labels, mode='cg')
@@ -228,15 +242,22 @@ def test_3d_inactive():
     return data, labels, old_labels, after_labels
 
 
-def test_multispectral_2d():
+@testing.parametrize('channel_axis', [0, 1, -1])
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_multispectral_2d(dtype, channel_axis):
     lx, ly = 70, 100
     data, labels = make_2d_syntheticdata(lx, ly)
+    data = data.astype(dtype, copy=False)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
+
+    data = np.moveaxis(data, -1, channel_axis)
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING,
                             'The probability range is outside']):
         multi_labels = random_walker(data, labels, mode='cg',
-                                     multichannel=True)
+                                     channel_axis=channel_axis)
+    data = np.moveaxis(data, channel_axis, -1)
+
     assert data[..., 0].shape == labels.shape
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING]):
@@ -246,15 +267,47 @@ def test_multispectral_2d():
     return data, multi_labels, single_labels, labels
 
 
-def test_multispectral_3d():
+def test_multispectral_2d_deprecated():
+    lx, ly = 70, 100
+    data, labels = make_2d_syntheticdata(lx, ly)
+    data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
+
+    # checking for multichannel kwarg warning
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                           "`multichannel` is a deprecated argument",
+                            NUMPY_MATRIX_WARNING,
+                            'The probability range is outside']):
+        multi_labels = random_walker(data, labels, mode='cg',
+                                     multichannel=True)
+    assert data[..., 0].shape == labels.shape
+
+    # checking for positional multichannel warning
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                           "Providing the `multichannel` argument",
+                            NUMPY_MATRIX_WARNING,
+                            'The probability range is outside']):
+        multi_labels = random_walker(data, labels, 130, 'cg', 1.e-3, True,
+                                     True)
+    assert data[..., 0].shape == labels.shape
+
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
+        single_labels = random_walker(data[..., 0], labels, mode='cg')
+    assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
+    assert data[..., 0].shape == labels.shape
+    return data, multi_labels, single_labels, labels
+
+
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_multispectral_3d(dtype):
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
+    data = data.astype(dtype, copy=False)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING]):
-        multi_labels = random_walker(data, labels, mode='cg',
-                                     multichannel=True)
+        multi_labels = random_walker(data, labels, mode='cg', channel_axis=-1)
     assert data[..., 0].shape == labels.shape
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING]):
@@ -410,7 +463,7 @@ def test_bad_inputs():
     with testing.raises(ValueError):
         random_walker(img, labels)
     with testing.raises(ValueError):
-        random_walker(img, labels, multichannel=True)
+        random_walker(img, labels, channel_axis=-1)
 
     # Too many dimensions
     np.random.seed(42)
@@ -419,7 +472,7 @@ def test_bad_inputs():
     with testing.raises(ValueError):
         random_walker(img, labels)
     with testing.raises(ValueError):
-        random_walker(img, labels, multichannel=True)
+        random_walker(img, labels, channel_axis=-1)
 
     # Spacing incorrect length
     img = np.random.normal(size=(10, 10))

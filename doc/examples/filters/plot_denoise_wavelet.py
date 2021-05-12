@@ -46,25 +46,25 @@ fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5),
 plt.gray()
 
 # Estimate the average noise standard deviation across color channels.
-sigma_est = estimate_sigma(noisy, multichannel=True, average_sigmas=True)
+sigma_est = estimate_sigma(noisy, channel_axis=-1, average_sigmas=True)
 # Due to clipping in random_noise, the estimate will be a bit smaller than the
 # specified sigma.
 print(f"Estimated Gaussian noise standard deviation = {sigma_est}")
 
-im_bayes = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
+im_bayes = denoise_wavelet(noisy, channel_axis=-1, convert2ycbcr=True,
                            method='BayesShrink', mode='soft',
                            rescale_sigma=True)
-im_visushrink = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
+im_visushrink = denoise_wavelet(noisy, channel_axis=-1, convert2ycbcr=True,
                                 method='VisuShrink', mode='soft',
                                 sigma=sigma_est, rescale_sigma=True)
 
 # VisuShrink is designed to eliminate noise with high probability, but this
 # results in a visually over-smooth appearance.  Repeat, specifying a reduction
 # in the threshold by factors of 2 and 4.
-im_visushrink2 = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
+im_visushrink2 = denoise_wavelet(noisy, channel_axis=-1, convert2ycbcr=True,
                                  method='VisuShrink', mode='soft',
                                  sigma=sigma_est/2, rescale_sigma=True)
-im_visushrink4 = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
+im_visushrink4 = denoise_wavelet(noisy, channel_axis=-1, convert2ycbcr=True,
                                  method='VisuShrink', mode='soft',
                                  sigma=sigma_est/4, rescale_sigma=True)
 
