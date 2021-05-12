@@ -1,19 +1,23 @@
-from warnings import warn
+import functools
+
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
+from .._shared import utils
+from .._shared.utils import check_shape_equality, _supported_float_type, warn
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared.utils import _supported_float_type, warn, check_shape_equality
+
 
 __all__ = ['structural_similarity']
 
 
+@utils.deprecate_multichannel_kwarg()
 def structural_similarity(im1, im2,
                           *,
                           win_size=None, gradient=False, data_range=None,
-                          multichannel=False, gaussian_weights=False,
-                          full=False, **kwargs):
+                          channel_axis=None, multichannel=False,
+                          gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
 
@@ -31,9 +35,17 @@ def structural_similarity(im1, im2,
         The data range of the input image (distance between minimum and
         maximum possible values). By default, this is estimated from the image
         data-type.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
     multichannel : bool, optional
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
+        This argument is deprecated: specify `channel_axis` instead.
     gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
@@ -89,32 +101,35 @@ def structural_similarity(im1, im2,
     check_shape_equality(im1, im2)
     float_type = _supported_float_type(im1.dtype)
 
-    if multichannel:
+    if channel_axis is not None:
         # loop over channels
         args = dict(win_size=win_size,
                     gradient=gradient,
                     data_range=data_range,
-                    multichannel=False,
+                    channel_axis=None,
                     gaussian_weights=gaussian_weights,
                     full=full)
         args.update(kwargs)
-        nch = im1.shape[-1]
+        nch = im1.shape[channel_axis]
         mssim = np.empty(nch, dtype=float_type)
+
         if gradient:
             G = np.empty(im1.shape, dtype=float_type)
         if full:
             S = np.empty(im1.shape, dtype=float_type)
+        channel_axis = channel_axis % im1.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[..., ch],
-                                              im2[..., ch], **args)
+            ch_result = structural_similarity(im1[_at(ch)],
+                                              im2[_at(ch)], **args)
             if gradient and full:
-                mssim[..., ch], G[..., ch], S[..., ch] = ch_result
+                mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
-                mssim[..., ch], G[..., ch] = ch_result
+                mssim[ch], G[_at(ch)] = ch_result
             elif full:
-                mssim[..., ch], S[..., ch] = ch_result
+                mssim[ch], S[_at(ch)] = ch_result
             else:
-                mssim[..., ch] = ch_result
+                mssim[ch] = ch_result
         mssim = mssim.mean()
         if gradient and full:
             return mssim, G, S
@@ -152,7 +167,8 @@ def structural_similarity(im1, im2,
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
             "win_size exceeds image extent.  If the input is a multichannel "
-            "(color) image, set multichannel=True.")
+            "(color) image, set channel_axis to the axis number corresponding "
+            "to the channels.")
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')

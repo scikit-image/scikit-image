@@ -129,7 +129,7 @@ def pad_for_eccentric_selems(func):
 
 @default_selem
 def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
-    """Return greyscale morphological erosion of an image.
+    """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
     in the neighborhood centered at (i,j). Erosion shrinks bright regions and
@@ -188,7 +188,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
 
 @default_selem
 def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
-    """Return greyscale morphological dilation of an image.
+    """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
     in the neighborhood centered at (i,j). Dilation enlarges bright regions
@@ -254,7 +254,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 @default_selem
 @pad_for_eccentric_selems
 def opening(image, selem=None, out=None):
-    """Return greyscale morphological opening of an image.
+    """Return grayscale morphological opening of an image.
 
     The morphological opening on an image is defined as an erosion followed by
     a dilation. Opening can remove small bright spots (i.e. "salt") and connect
@@ -304,7 +304,7 @@ def opening(image, selem=None, out=None):
 @default_selem
 @pad_for_eccentric_selems
 def closing(image, selem=None, out=None):
-    """Return greyscale morphological closing of an image.
+    """Return grayscale morphological closing of an image.
 
     The morphological closing on an image is defined as a dilation followed by
     an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
@@ -385,15 +385,15 @@ def white_tophat(image, selem=None, out=None):
 
     Examples
     --------
-    >>> # Subtract grey background from bright peak
+    >>> # Subtract gray background from bright peak
     >>> import numpy as np
     >>> from skimage.morphology import square
-    >>> bright_on_grey = np.array([[2, 3, 3, 3, 2],
+    >>> bright_on_gray = np.array([[2, 3, 3, 3, 2],
     ...                            [3, 4, 5, 4, 3],
     ...                            [3, 5, 9, 5, 3],
     ...                            [3, 4, 5, 4, 3],
     ...                            [2, 3, 3, 3, 2]], dtype=np.uint8)
-    >>> white_tophat(bright_on_grey, square(3))
+    >>> white_tophat(bright_on_gray, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
@@ -411,7 +411,7 @@ def white_tophat(image, selem=None, out=None):
         return out
     elif out is None:
         out = np.empty_like(image)
-    # work-around for NumPy deprecation warning for arithmetic 
+    # work-around for NumPy deprecation warning for arithmetic
     # operations on bool arrays
     if isinstance(image, np.ndarray) and image.dtype == bool:
         image_ = image.view(dtype=np.uint8)
@@ -463,12 +463,12 @@ def black_tophat(image, selem=None, out=None):
     >>> # Change dark peak to bright peak and subtract background
     >>> import numpy as np
     >>> from skimage.morphology import square
-    >>> dark_on_grey = np.array([[7, 6, 6, 6, 7],
+    >>> dark_on_gray = np.array([[7, 6, 6, 6, 7],
     ...                          [6, 5, 4, 5, 6],
     ...                          [6, 4, 0, 4, 6],
     ...                          [6, 5, 4, 5, 6],
     ...                          [7, 6, 6, 6, 7]], dtype=np.uint8)
-    >>> black_tophat(dark_on_grey, square(3))
+    >>> black_tophat(dark_on_gray, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
