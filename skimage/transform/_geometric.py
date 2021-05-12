@@ -603,7 +603,8 @@ class ProjectiveTransform(GeometricTransform):
         """Apply forward transformation.
 
         The call method enables Python programmers to write classes,
-        where the instances behave like functions and can be called like a function.
+        where the instances behave like functions and
+        can be called like a function.
 
 
         class example:
