@@ -281,6 +281,10 @@ class channel_as_last_axis():
             for name in self.kwarg_names:
                 kwargs[name] = np.moveaxis(kwargs[name], channel_axis[0], -1)
 
+            # now that we have moved the channels axis to the last position,
+            # change the channel_axis argument to -1
+            kwargs["channel_axis"] = -1
+
             # Call the function with the fixed arguments
             out = func(*new_args, **kwargs)
             if self.multichannel_output:
@@ -426,6 +430,31 @@ def check_shape_equality(im1, im2):
     if not im1.shape == im2.shape:
         raise ValueError('Input images must have the same dimensions.')
     return
+
+
+def slice_at_axis(sl, axis):
+    """
+    Construct tuple of slices to slice an array in the given dimension.
+
+    Parameters
+    ----------
+    sl : slice
+        The slice for the given dimension.
+    axis : int
+        The axis to which `sl` is applied. All other dimensions are left
+        "unsliced".
+
+    Returns
+    -------
+    sl : tuple of slices
+        A tuple with slices matching `shape` in length.
+
+    Examples
+    --------
+    >>> _slice_at_axis(slice(None, 3, -1), 1)
+    (slice(None, None, None), slice(None, 3, -1), (...,))
+    """
+    return (slice(None),) * axis + (sl,) + (...,)
 
 
 def check_nD(array, ndim, arg_name='image'):

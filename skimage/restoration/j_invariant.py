@@ -118,7 +118,8 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     if 'multichannel' in denoiser_kwargs:
         multichannel = denoiser_kwargs['multichannel']
     else:
-        multichannel = False
+        multichannel = denoiser_kwargs.get('channel_axis', None) is not None
+
     interp = _interpolate_image(image, multichannel=multichannel)
     output = np.zeros_like(image)
 
@@ -290,7 +291,8 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
         if 'multichannel' in denoiser_kwargs:
             multichannel = denoiser_kwargs['multichannel']
         else:
-            multichannel = False
+            multichannel = \
+                denoiser_kwargs.get('channel_axis', None) is not None
         if not approximate_loss:
             denoised = _invariant_denoise(
                 image, denoise_function,

@@ -115,7 +115,7 @@ def _get_display_range(image):
 def imshow(image, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
-    By default, the image is displayed in greyscale, rather than
+    By default, the image is displayed in grayscale, rather than
     the matplotlib default colormap.
 
     Images are assumed to have standard range for their type. For

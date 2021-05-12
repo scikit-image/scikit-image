@@ -3,14 +3,18 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
+from .._shared import utils
 from .._shared.utils import warn, convert_to_float
 
 
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=False, truncate=4.0):
+             multichannel=None, preserve_range=False, truncate=4.0, *,
+             channel_axis=None):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -28,7 +32,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
-        'constant'. Default is 'nearest'.
+        'constant'. Default is 'nearest'. This argument is deprecated:
+        specify `channel_axis` instead.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
@@ -38,6 +43,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         not mixed together). Only 3 channels are supported. If ``None``,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
+        This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of ``img_as_float``.
@@ -45,6 +51,13 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     truncate : float, optional
         Truncate the filter at this many standard deviations.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -96,21 +109,15 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
 
     """
-
-    spatial_dims = None
-    try:
-        spatial_dims = _guess_spatial_dimensions(image)
-    except ValueError:
-        spatial_dims = image.ndim
-    if spatial_dims is None and multichannel is None:
+    if image.ndim == 3 and image.shape[-1] == 3 and channel_axis is None:
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
                "by default. Use `multichannel=False` to interpret as "
                "3D image with last dimension of length 3.")
         warn(RuntimeWarning(msg))
-        multichannel = True
+        channel_axis = -1
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
-    if multichannel:
+    if channel_axis is not None:
         # do not filter across channels
         if not isinstance(sigma, Iterable):
             sigma = [sigma] * (image.ndim - 1)
@@ -119,7 +126,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     image = convert_to_float(image, preserve_range)
     if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
         raise ValueError("Provided output data type is not float")
-    return ndi.gaussian_filter(image, sigma, output=output, 
+    return ndi.gaussian_filter(image, sigma, output=output,
                                mode=mode, cval=cval, truncate=truncate)
 
 
@@ -156,9 +163,11 @@ def _guess_spatial_dimensions(image):
         raise ValueError("Expected 1D, 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg()
 def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
-                            mode='nearest', cval=0, multichannel=False,
-                            truncate=4.0):
+                            mode='nearest', cval=0, channel_axis=None,
+                            truncate=4.0, multichannel=False):
     """Find features between ``low_sigma`` and ``high_sigma`` in size.
 
     This function uses the Difference of Gaussians method for applying
@@ -192,12 +201,20 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
+    truncate : float, optional (default is 4.0)
+        Truncate the filter at this many standard deviations.
     multichannel : bool, optional (default: False)
         Whether the last axis of the image is to be interpreted as multiple
         channels. If True, each channel is filtered separately (channels are
-        not mixed together).
-    truncate : float, optional (default is 4.0)
-        Truncate the filter at this many standard deviations.
+        not mixed together). This argument is deprecated: specify
+        `channel_axis` instead.
 
     Returns
     -------
@@ -261,7 +278,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     else:
         high_sigma = np.array(high_sigma, dtype='float', ndmin=1)
 
-    if multichannel is True:
+    if channel_axis is not None:
         spatial_dims = image.ndim - 1
     else:
         spatial_dims = image.ndim
@@ -281,9 +298,9 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                          'low_sigma for all axes')
 
     im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   multichannel=multichannel, truncate=truncate)
+                   channel_axis=channel_axis, truncate=truncate)
 
     im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   multichannel=multichannel, truncate=truncate)
+                   channel_axis=channel_axis, truncate=truncate)
 
     return im1 - im2
