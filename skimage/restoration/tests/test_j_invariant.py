@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from skimage._shared.testing import assert_, expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
@@ -29,7 +30,7 @@ def test_invariant_denoise():
     assert_(denoised_mse < original_mse)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_invariant_denoise_color(dtype):
     denoised_img_color = _invariant_denoise(
         noisy_img_color.astype(dtype), _denoise_wavelet,
@@ -37,7 +38,7 @@ def test_invariant_denoise_color(dtype):
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)
     assert denoised_mse < original_mse
-    assert denoised_img_color.dtype == dtype
+    assert denoised_img_color.dtype == _supported_float_type(dtype)
 
 
 def test_invariant_denoise_color_deprecated():
