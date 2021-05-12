@@ -1,9 +1,13 @@
 import numpy as np
 
 from ._felzenszwalb_cy import _felzenszwalb_cython
+from .._shared import utils
 
 
-def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=4)
+def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, *,
+                 channel_axis=-1):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
@@ -32,6 +36,14 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     multichannel : bool, optional (default: True)
         Whether the last axis of the image is to be interpreted as multiple
         channels. A value of False, for a 3D image, is not currently supported.
+        This argument is deprecated: specify `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -54,8 +66,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     >>> img = coffee()
     >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """
-
-    if not multichannel and image.ndim > 2:
+    if channel_axis is None and image.ndim > 2:
         raise ValueError("This algorithm works only on single or "
                          "multi-channel 2d images. ")
 

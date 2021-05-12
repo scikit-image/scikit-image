@@ -66,7 +66,7 @@ from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, rescale
 
 image = shepp_logan_phantom()
-image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
+image = rescale(image, scale=0.4, mode='reflect', channel_axis=None)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 
