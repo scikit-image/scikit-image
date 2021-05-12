@@ -115,7 +115,7 @@ def _get_display_range(image):
 def imshow(image, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
-    By default, the image is displayed in greyscale, rather than
+    By default, the image is displayed in grayscale, rather than
     the matplotlib default colormap.
 
     Images are assumed to have standard range for their type. For
@@ -133,9 +133,9 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
     ----------
     image : array, shape (M, N[, 3])
         The image to display.
-    ax: `matplotlib.axes.Axes`, optional
+    ax : `matplotlib.axes.Axes`, optional
         The axis to use for the image, defaults to plt.gca().
-    show_cbar: boolean, optional.
+    show_cbar : boolean, optional.
         Whether to show the colorbar (used to override default behavior).
     **kwargs : Keyword arguments
         These are passed directly to `matplotlib.pyplot.imshow`.

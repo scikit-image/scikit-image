@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage.draw import random_shapes
 
@@ -13,8 +14,37 @@ def test_generates_color_images_with_correct_shape():
 
 def test_generates_gray_images_with_correct_shape():
     image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, multichannel=False)
+        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None)
     assert image.shape == (4567, 123)
+
+
+def test_generates_gray_images_with_correct_shape_deprecated_multichannel():
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        image, _ = random_shapes(
+            (4567, 123), min_shapes=3, max_shapes=20, multichannel=False)
+    assert image.shape == (4567, 123)
+
+    # repeat prior test, but check for positional multichannel warning
+    with expected_warnings(["Providing the `multichannel` argument"]):
+        image, _ = random_shapes((4567, 123), 20, 3, 2, None, False)
+    assert image.shape == (4567, 123)
+
+
+@pytest.mark.parametrize('channel_axis', [None, 0, 1, 2])
+def test_generated_shape_for_channel_axis(channel_axis):
+    shape = (128, 64)
+    num_channels = 5
+
+    image, _ = random_shapes(
+        shape, num_channels=num_channels, min_shapes=3, max_shapes=10,
+        channel_axis=channel_axis)
+
+    if channel_axis is None:
+        expected_shape = shape
+    else:
+        expected_shape = tuple(np.insert(shape, channel_axis, num_channels))
+
+    assert image.shape == expected_shape
 
 
 def test_generates_correct_bounding_boxes_for_rectangles():
@@ -137,8 +167,9 @@ def test_can_generate_one_by_one_rectangle():
 
 def test_throws_when_intensity_range_out_of_range():
     with testing.raises(ValueError):
-        random_shapes((1000, 1234), max_shapes=1, multichannel=False,
-                      intensity_range=(0, 256))
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            random_shapes((1000, 1234), max_shapes=1, multichannel=False,
+                          intensity_range=(0, 256))
     with testing.raises(ValueError):
         random_shapes((2, 2), max_shapes=1,
                       intensity_range=((-1, 255),))

@@ -49,7 +49,7 @@ def h_maxima(image, h, selem=None):
     """Determine all maxima of the image with height >= h.
 
     The local maxima are defined as connected sets of pixels with equal
-    grey level strictly greater than the grey level of all pixels in direct
+    gray level strictly greater than the gray level of all pixels in direct
     neighborhood of the set.
 
     A local maximum M of height h is a local maximum for which
@@ -75,11 +75,11 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The local maxima of height >= h and the global maxima.
-       The resulting image is a binary image, where pixels belonging to
-       the determined maxima take value 1, the others take value 0.
+        The local maxima of height >= h and the global maxima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined maxima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.local_maxima
@@ -177,7 +177,7 @@ def h_minima(image, h, selem=None):
     """Determine all minima of the image with depth >= h.
 
     The local minima are defined as connected sets of pixels with equal
-    grey level strictly smaller than the grey levels of all pixels in direct
+    gray level strictly smaller than the gray levels of all pixels in direct
     neighborhood of the set.
 
     A local minimum M of depth h is a local minimum for which
@@ -203,11 +203,11 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The local minima of depth >= h and the global minima.
-       The resulting image is a binary image, where pixels belonging to
-       the determined minima take value 1, the others take value 0.
+        The local minima of depth >= h and the global minima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined minima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_maxima
     skimage.morphology.extrema.local_maxima

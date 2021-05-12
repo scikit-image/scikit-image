@@ -29,7 +29,7 @@ and reconstructing the original image are compared: The Filtered Back
 Projection (FBP) and the Simultaneous Algebraic Reconstruction
 Technique (SART).
 
-For further information on tomographic reconstruction, see
+For further information on tomographic reconstruction, see:
 
 .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
        IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
@@ -66,7 +66,7 @@ from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, rescale
 
 image = shepp_logan_phantom()
-image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
+image = rescale(image, scale=0.4, mode='reflect', channel_axis=None)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 
@@ -74,7 +74,7 @@ ax1.set_title("Original")
 ax1.imshow(image, cmap=plt.cm.Greys_r)
 
 theta = np.linspace(0., 180., max(image.shape), endpoint=False)
-sinogram = radon(image, theta=theta, circle=True)
+sinogram = radon(image, theta=theta)
 dx, dy = 0.5 * 180.0 / max(image.shape), 0.5 / sinogram.shape[0]
 ax2.set_title("Radon transform\n(Sinogram)")
 ax2.set_xlabel("Projection angle (deg)")
@@ -98,12 +98,29 @@ plt.show()
 # back projection is among the fastest methods of performing the inverse
 # Radon transform. The only tunable parameter for the FBP is the filter,
 # which is applied to the Fourier transformed projections. It may be used to
-# suppress high frequency noise in the reconstruction. ``skimage`` provides a
-# few different options for the filter.
+# suppress high frequency noise in the reconstruction. ``skimage`` provides
+# the filters 'ramp', 'shepp-logan', 'cosine', 'hamming', and 'hann':
+
+import matplotlib.pyplot as plt
+from skimage.transform.radon_transform import _get_fourier_filter
+
+filters = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann']
+
+for ix, f in enumerate(filters):
+    response = _get_fourier_filter(2000, f)
+    plt.plot(response, label=f)
+
+plt.xlim([0, 1000])
+plt.xlabel('frequency')
+plt.legend()
+plt.show()
+
+######################################################################
+# Applying the inverse radon transformation with the 'ramp' filter, we get:
 
 from skimage.transform import iradon
 
-reconstruction_fbp = iradon(sinogram, theta=theta, circle=True)
+reconstruction_fbp = iradon(sinogram, theta=theta, filter_name='ramp')
 error = reconstruction_fbp - image
 print(f"FBP rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}")
 
@@ -140,7 +157,7 @@ plt.show()
 #
 # ``skimage`` provides one of the more popular variations of the algebraic
 # reconstruction techniques: the Simultaneous Algebraic Reconstruction
-# Technique (SART) [1]_ [4]_. It uses Kaczmarz' method [3]_ as the iterative
+# Technique (SART) [4]_. It uses Kaczmarz' method as the iterative
 # solver. A good reconstruction is normally obtained in a single iteration,
 # making the method computationally effective. Running one or more extra
 # iterations will normally improve the reconstruction of sharp, high

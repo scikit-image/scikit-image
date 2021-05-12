@@ -255,7 +255,14 @@ class RegionProperties:
             # determine whether func requires intensity image
             if n_args == 2:
                 if self._intensity_image is not None:
-                    return func(self.image, self.intensity_image)
+                    if self._multichannel:
+                        multichannel_list = [func(self.image,
+                                                  self.intensity_image[..., i])
+                                             for i in range(
+                            self.intensity_image.shape[-1])]
+                        return np.stack(multichannel_list, axis=-1)
+                    else:
+                        return func(self.image, self.intensity_image)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"
@@ -721,7 +728,8 @@ def regionprops_table(label_image, intensity_image=None,
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -883,7 +891,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
