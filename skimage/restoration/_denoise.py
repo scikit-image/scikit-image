@@ -1,13 +1,17 @@
+import functools
+from math import ceil
+import numbers
+
 import scipy.stats
 import numpy as np
-from math import ceil
-from .. import img_as_float
-from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import _supported_float_type, warn
 import pywt
-import skimage.color as color
+
+from .. import img_as_float
+from .._shared import utils
+from .._shared.utils import _supported_float_type, warn
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from skimage import color
 from skimage.color.colorconv import ycbcr_from_rgb
-import numbers
 
 
 def _gaussian_weight(array, sigma_squared, *, dtype=float):
@@ -88,8 +92,11 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=False):
+                      bins=10000, mode='constant', cval=0, multichannel=False,
+                      *, channel_axis=None):
     """Denoise image using bilateral filter.
 
     Parameters
@@ -121,7 +128,15 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         the image boundaries.
     multichannel : bool
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+        channels or another spatial dimension. This argument is deprecated:
+        specify `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -157,7 +172,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
     ...                              multichannel=True)
     """
-    if multichannel:
+    if channel_axis is not None:
         if image.ndim != 3:
             if image.ndim == 2:
                 raise ValueError("Use ``multichannel=False`` for 2D grayscale "
@@ -232,8 +247,10 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               range_lut, empty_dims, out)
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg()
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
-                       *, multichannel=False):
+                       *, channel_axis=None, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -259,10 +276,18 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
     multichannel : bool, optional
         Apply total-variation denoising separately for each channel. This
         option should be true for color images, otherwise the denoising is
-        also applied in the channels dimension.
+        also applied in the channels dimension. This argument is deprecated:
+        specify `channel_axis` instead.
 
     Returns
     -------
@@ -291,7 +316,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
 
     out = np.zeros(shape_ext, image.dtype)
 
-    if multichannel:
+    if channel_axis is not None:
         channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
         for c in range(image.shape[-1]):
             # the algorithm below expects 3 dimensions to always be present.
@@ -393,8 +418,9 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     return out
 
 
+@utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
-                         multichannel=False):
+                         multichannel=False, *, channel_axis=None):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
@@ -417,7 +443,15 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     multichannel : bool, optional
         Apply total-variation denoising separately for each channel. This
         option should be true for color images, otherwise the denoising is
-        also applied in the channels dimension.
+        also applied in the channels dimension. This argument is deprecated:
+        specify `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -473,10 +507,12 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
-    if multichannel:
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         out = np.zeros_like(image)
-        for c in range(image.shape[-1]):
-            out[..., c] = _denoise_tv_chambolle_nd(image[..., c], weight, eps,
+        for c in range(image.shape[channel_axis]):
+            out[_at(c)] = _denoise_tv_chambolle_nd(image[_at(c)], weight, eps,
                                                    n_iter_max)
     else:
         out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max)
@@ -698,10 +734,12 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
     return sigmas
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink',
-                    rescale_sigma=True):
+                    rescale_sigma=True, *, channel_axis=None):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -727,7 +765,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         three less than the maximum number of possible decomposition levels.
     multichannel : bool, optional
         Apply wavelet denoising separately for each channel (where channels
-        correspond to the final axis of the array).
+        correspond to the final axis of the array). This argument is
+        deprecated: specify `channel_axis` instead.
     convert2ycbcr : bool, optional
         If True and multichannel True, do the wavelet denoising in the YCbCr
         colorspace instead of the RGB color space. This typically results in
@@ -742,6 +781,13 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
 
         .. versionadded:: 0.16
            ``rescale_sigma`` was introduced in 0.16
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -808,6 +854,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     >>> denoised_img = denoise_wavelet(img, sigma=0.1, rescale_sigma=True)
 
     """
+    multichannel = channel_axis is not None
     if method not in ["BayesShrink", "VisuShrink"]:
         raise ValueError(
             ('Invalid method: {}. The currently supported methods are '
@@ -870,7 +917,9 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     return out
 
 
-def estimate_sigma(image, average_sigmas=False, multichannel=False):
+@utils.deprecate_multichannel_kwarg(multichannel_position=2)
+def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
+                   channel_axis=None):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
 
@@ -882,7 +931,15 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
         If true, average the channel estimates of `sigma`.  Otherwise return
         a list of sigmas corresponding to each channel.
     multichannel : bool
-        Estimate sigma separately for each channel.
+        Estimate sigma separately for each channel. This argument is
+        deprecated: specify `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -913,17 +970,19 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     >>> img = img + sigma * np.random.standard_normal(img.shape)
     >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
-    if multichannel:
-        nchannels = image.shape[-1]
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
+        nchannels = image.shape[channel_axis]
         sigmas = [estimate_sigma(
-            image[..., c], multichannel=False) for c in range(nchannels)]
+            image[_at(c)], channel_axis=None) for c in range(nchannels)]
         if average_sigmas:
             sigmas = np.mean(sigmas)
         return sigmas
     elif image.shape[-1] <= 4:
-        msg = ("image is size {0} on the last axis, but multichannel is "
-               "False.  If this is a color image, please set multichannel "
-               "to True for proper noise estimation.")
+        msg = ("image is size {0} on the last axis, but channel_axis is "
+               "None.  If this is a color image, please set channel_axis=-1 "
+               "for proper noise estimation.")
         warn(msg.format(image.shape[-1]))
     coeffs = pywt.dwtn(image, wavelet='db2')
     detail_coeffs = coeffs['d' * image.ndim]

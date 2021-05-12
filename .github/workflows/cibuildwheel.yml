@@ -9,6 +9,11 @@ on:
     tags:
       - v*
 
+env:
+  CIBW_BUILD_VERBOSITY: 2
+  CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+  CIBW_TEST_COMMAND: pytest --pyargs skimage
+
 jobs:
   build_linux_37_and_above_wheels:
     name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
@@ -46,8 +51,6 @@ jobs:
           CIBW_ARCHS_LINUX: auto aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
-          CIBW_TEST_COMMAND: pytest --pyargs skimage
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -90,8 +93,6 @@ jobs:
           CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
           CXXFLAGS: "-I/usr/local/opt/libomp/include"
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
-          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
-          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython (MacOS)
         if: matrix.os == 'macos-latest'
@@ -110,8 +111,6 @@ jobs:
           CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
           CXXFLAGS: "-I/usr/local/opt/libomp/include"
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
-          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
-          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython 3.6
         run: |
@@ -120,6 +119,7 @@ jobs:
           CIBW_BUILD: "cp36-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_BUILD_VERBOSITY: 2
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||
@@ -160,8 +160,6 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
-          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build Windows wheels for CPython
         run: |
@@ -172,8 +170,6 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
-          CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
-          CIBW_TEST_COMMAND: pytest --pyargs skimage
 
       - name: Build wheels for CPython 3.6
         run: |
@@ -182,6 +178,7 @@ jobs:
           CIBW_BUILD: "cp36-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_BUILD_VERBOSITY: 2
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||

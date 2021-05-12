@@ -1,8 +1,8 @@
 import functools
 import numpy as np
+import pytest
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_
+from skimage._shared.testing import assert_, expected_warnings
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
@@ -20,6 +20,7 @@ noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)
 
 _denoise_wavelet = functools.partial(denoise_wavelet, rescale_sigma=True)
 
+
 def test_invariant_denoise():
     denoised_img = _invariant_denoise(noisy_img, _denoise_wavelet)
 
@@ -28,12 +29,23 @@ def test_invariant_denoise():
     assert_(denoised_mse < original_mse)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_invariant_denoise_color(dtype):
     denoised_img_color = _invariant_denoise(
         noisy_img_color.astype(dtype), _denoise_wavelet,
-        denoiser_kwargs=dict(multichannel=True))
+        denoiser_kwargs=dict(channel_axis=-1))
+    denoised_mse = mse(denoised_img_color, test_img_color)
+    original_mse = mse(noisy_img_color, test_img_color)
+    assert denoised_mse < original_mse
     assert denoised_img_color.dtype == dtype
+
+
+def test_invariant_denoise_color_deprecated():
+
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        denoised_img_color = _invariant_denoise(
+            noisy_img_color, _denoise_wavelet,
+            denoiser_kwargs=dict(multichannel=True))
 
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)

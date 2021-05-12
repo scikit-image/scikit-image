@@ -6,14 +6,16 @@
 import numpy as np
 cimport numpy as cnp
 
+from .._shared.fused_numerics cimport np_floats
+
 from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
 
 cnp.import_array()
 
 
-def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
-                       double max_dist, bint return_tree, int random_seed):
+def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
+                       np_floats max_dist, bint return_tree, int random_seed):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -42,6 +44,11 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
 
     random_state = np.random.RandomState(random_seed)
 
+    if np_floats is cnp.float64_t:
+        dtype = np.float64
+    else:
+        dtype = np.float32
+
     # TODO join orphaned roots?
     # Some nodes might not have a point of higher density within the
     # search window. We could do a global search over these in the end.
@@ -49,25 +56,28 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
-    cdef double inv_kernel_size_sqr = -0.5 / (kernel_size * kernel_size)
+    cdef np_floats inv_kernel_size_sqr = -0.5 / (kernel_size * kernel_size)
     cdef int kernel_width = <int>ceil(3 * kernel_size)
 
     cdef Py_ssize_t height = image.shape[0]
     cdef Py_ssize_t width = image.shape[1]
     cdef Py_ssize_t channels = image.shape[2]
 
-    cdef double[:, ::1] densities = np.zeros((height, width), dtype=np.double)
+    cdef np_floats[:, ::1] densities = np.zeros((height, width), dtype=dtype)
 
-    cdef double current_density, closest, dist, t
+    cdef np_floats current_density, closest, dist, t
     cdef Py_ssize_t r, c, r_, c_, channel, r_min, r_max, c_min, c_max
-    cdef double* current_pixel_ptr
+    cdef np_floats* current_pixel_ptr
 
     # this will break ties that otherwise would give us headache
-    densities += random_state.normal(scale=0.00001, size=(height, width))
+    densities += random_state.normal(
+        scale=0.00001, size=(height, width)
+    ).astype(dtype, copy=False)
+
     # default parent to self
     cdef Py_ssize_t[:, ::1] parent = \
         np.arange(width * height, dtype=np.intp).reshape(height, width)
-    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
+    cdef np_floats[:, ::1] dist_parent = np.zeros((height, width), dtype=dtype)
 
     # compute densities
     with nogil:
