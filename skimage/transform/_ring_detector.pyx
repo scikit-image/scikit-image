@@ -995,36 +995,6 @@ def rings_detection(self):
                    }
 
 
-def debugging_rings_detection(self):
-    assert self.params['Rmin']>=3
-    assert self.params['Rmin'] <= self.params['Rmax']
-    ht_out = ridge_circle_hough_transform(self.deriv['Lrr'],
-            self.deriv['Lcc'], self.deriv['Lrc'],
-            self.deriv['principal_curv'], self.params['curv_thresh'],
-            self.params['Rmin'], self.params['Rmax'])
-    array_out = votes2array(ht_out['votes'],
-                            self.params['Rmin'], self.params['Rmax'],
-                            self.img.shape[0], self.img.shape[1],
-                            self.params['vote_thresh'])
-    smooth_out = smooth_voted4(array_out[0], array_out[1],
-                               self.params['Rmin'])
-    rings = get_circles(smooth_out, array_out[1], self.params['Rmin'],
-                        self.params['circle_thresh'])
-    rings_subpxl = _aux_subpxl_circles(rings, ht_out['directed_ridges'],
-                                  self.img.shape[0], self.img.shape[1],
-                                  self.params['Rmin'], self.params['Rmax'],
-                                  self.params['dr']
-                                 )
-
-    self.output = {'directed_ridges': ht_out['directed_ridges'],
-                   'votes': ht_out['votes'],
-                   'sparse_hough_array' : array_out[0],
-                   'voted4' : array_out[1],
-                   'sparse_hough_smooth' : smooth_out,
-                   'rings' : rings,
-                   'rings_subpxl' : rings_subpxl}
-
-
 def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
     """
     """
