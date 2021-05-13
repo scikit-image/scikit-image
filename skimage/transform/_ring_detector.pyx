@@ -48,8 +48,6 @@ from libc.math cimport M_PI as pi
 
 from cpython cimport bool
 
-#from collections import defaultdict
-
 import numpy as np
 cimport numpy as np
 
@@ -111,57 +109,7 @@ cpdef inline coord_t rij2coord(RIJ_t rij):
 cdef inline INDX_t fround(DTYPE_t x):
     return <INDX_t>(x+.5) if x>=0. else <INDX_t>(x-.5)
 
-@cython.profile(False)
-cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lrr,
-                                                DTYPE_t Lcc,
-                                                DTYPE_t Lrc):
-    """
-    compute the smallest eigen-value of the Hessian matrix
 
-    Inputs:
-    Lrr,Lcc,Lrc are the Hessian matrix components
-    """
-    #cdef:
-    #    DTYPE_t trH
-    #    DTYPE_t discriminant
-    #    DTYPE_t curvature
-    #trH = Lrr+Lcc
-    # numerically stabilising for the cases of extrimly small Lrc:
-    #discriminant = (Lrr-Lcc)**2 + 4*Lrc*Lrc
-    #curvature = 0.5*(trH - sqrt( discriminant ))
-    #return curvature
-    return 0.5*(Lrr + Lcc - sqrt((Lrr-Lcc)**2 + 4*Lrc*Lrc ))
-
-
-cpdef least_principal_curvature(DTYPE_t [:,:] Lrr, DTYPE_t [:,:] Lcc,
-                                DTYPE_t [:,:] Lrc):
-    """
-    compute the smallest eigen-value of the Hessian matrix
-
-    Inputs:
-        Lrr,Lcc,Lrc are the Hessian matrix components
-    """
-    assert Lrr is not None and Lcc is not None and Lrc is not None
-
-    cdef:
-        INDX_t Nrows
-        INDX_t Ncols
-        DTYPE_t [:,:] curv
-        INDX_t i,j
-
-    Nrows = Lrr.shape[0]
-    Ncols = Lrr.shape[1]
-    curv = np.empty((Nrows,Ncols),dtype=DTYPE)
-
-    for i in xrange(Nrows):
-        for j in xrange(Ncols):
-            curv[i,j] = f_least_principal_curvature(Lrr[i,j],
-                                                    Lcc[i,j],
-                                                    Lrc[i,j])
-    return curv
-
-
-#@cython.profile(False)
 @cython.cdivision(True)
 cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
     """
@@ -895,7 +843,7 @@ def fitCircle(coords, i, j):
 
 
 #@cython.profile(True)
-cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
+cpdef _aux_subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
                    RIJ_t Nrows, RIJ_t Ncols, RIJ_t Rmin, RIJ_t Rmax,
                    RIJ_t thickness=3,
                    # DTYPE_t eccentricity=0., ## EA20200723 excluding opencv dependency
@@ -979,14 +927,11 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
     return rings_subpxl
 
 
-cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
-                              DTYPE_t [:,:] Lcc,
-                              DTYPE_t [:,:] Lrc,
-                              DTYPE_t [:,:] curv,
-                              DTYPE_t curv_thresh=-20):
-
-    assert Lrr is not None and Lcc is not None and Lrc is not None and\
-            curv is not None
+cpdef _aux_directed_ridge_detector(DTYPE_t [:,:] Lrr,
+                                   DTYPE_t [:,:] Lcc,
+                                   DTYPE_t [:,:] Lrc,
+                                   DTYPE_t [:,:] curv,
+                                   DTYPE_t curv_thresh=-20):
 
     cdef:
         INDX_t i, j,
@@ -1007,7 +952,7 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
             #
             ###   Find Ridges:    ###
             #
-            # treshold the curvature (note that it should be smaller than...)
+            # threshold the curvature (note that it should be smaller than...)
             if curv[i,j] > curv_thresh: continue
             # perform non-minimum suppression in the least principal direction
             cosQ,sinQ = least_principal_direction(Lrr[i,j], Lcc[i,j], Lrc[i,j])
@@ -1031,7 +976,7 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
 
 
 
-def preprocessing(image, sigma):
+def ring_detector_preproc(image, sigma):
     """Blurs the image, calculates its second derivatives and its least
     principal curvature.
 
@@ -1072,7 +1017,7 @@ def rings_detection(self):
                              self.img.shape[0], self.img.shape[1],
                              self.params['vote_thresh'],
                              self.params['circle_thresh'])
-    rings_subpxl = subpxl_circles(rings,
+    rings_subpxl = _aux_subpxl_circles(rings,
                              ht_out['directed_ridges'],
                              self.img.shape[0], self.img.shape[1],
                              self.params['Rmin'], self.params['Rmax'],
@@ -1099,7 +1044,7 @@ def debugging_rings_detection(self):
                                self.params['Rmin'])
     rings = get_circles(smooth_out, array_out[1], self.params['Rmin'],
                         self.params['circle_thresh'])
-    rings_subpxl = subpxl_circles(rings, ht_out['directed_ridges'],
+    rings_subpxl = _aux_subpxl_circles(rings, ht_out['directed_ridges'],
                                   self.img.shape[0], self.img.shape[1],
                                   self.params['Rmin'], self.params['Rmax'],
                                   self.params['dr']
@@ -1114,12 +1059,14 @@ def debugging_rings_detection(self):
                    'rings_subpxl' : rings_subpxl}
 
 
-def directed_ridge_detector(self):
-    directed_ridges = directed_ridge_detector(self.deriv['Lrr'],
-            self.deriv['Lcc'], self.deriv['Lrc'],
-            self.deriv['principal_curv'], self.params['curv_thresh'])
-    self.output = {'directed_ridges' : directed_ridges,
-                   }
+def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
+    """
+    """
+    derivatives, least_princ_curv = ring_detector_preproc(image, sigma)
+    _aux_directed_ridge_detector(derivatives['Lrr'],
+            derivatives['Lcc'], derivatives['Lrc'],
+            derivatives['principal_curv'], curv_thresh)
+    return
 
 
 def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
@@ -1142,4 +1089,4 @@ def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
         Half-thickness of the ring to fit to an ellipse.
     """
 
-    return sigma, radii, thresholds, half
+    return sigma, radii, thresholds, dr
