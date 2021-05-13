@@ -5,30 +5,30 @@
 ################################################################################
 # filename: ridge_directed_ring_detector.pyx
 # first online: https://github.com/eldad-a/ridge-directed-ring-detector
-# 
+#
 # For academic citation please use:
-#     Afik, E. 
+#     Afik, E.
 #     Robust and highly performant ring detection algorithm for 3d particle tracking using 2d microscope imaging.
 #     Sci. Rep. 5, 13584; doi: 10.1038/srep13584 (2015).
-# 
+#
 #
 #  Copyright (c) 2012, Eldad Afik
 #  All rights reserved.
-#  
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are met:
-#  
+#
 #  * Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
-#  
+#
 #  * Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-#  
+#
 #  * Neither the name of ridge_directed_ring_detector nor the names of its
 #    contributors may be used to endorse or promote products derived from
 #    this software without specific prior written permission.
-#  
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,45 +39,10 @@
 #  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 #  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#  
+#
 ################################################################################
 
-## EA NOTES
-# * EA20200724 : the opencv version shows better performace:
-#                * pre-processing takes x3 longer using hessian_matrix 
-#                  (skimage), and 
-#                * ring_detection takes about x1.2, showing higher 
-#                  sensitivity to choice of parameter (sigma and curv_thresh)
-# * EA20200724 : results seem more precise and less sensitive to choice of
-#                parameters when taking derivatives usind the
-#                filters.farid_v/h (or filters.scharr_v/h); however, these
-#                operators take x6  (x3) times longer to compute, w.r.t to 
-#                hessian_matrix, which uses np.gradient; this could probably
-#                be improved by programming them to allow the 2nd order
-#                derivatives directly.
-#
-
-## EA To consider 
-# * EA20200723 : store both principal curvatures and testing for  
-#                |Lpp|>|Lqq| for Lpp being the least principal curvature
-# * EA20200724 : allow the user to choose between np.gradient (skimage
-#                hessian_matrix), scharr, and farid operators; the latter 
-#                seem to offer more precise results, with less sensitivity to
-#                the choice of parameters. The former is faster.
-# * EA20200723 : add automated choice of curv_thresh (see notebook for HY)
-# * EA20200723 : verify results and efficiency are not significantly affected
-#                the transition from opencv to skimage (Hessian calculation)
-# * EA20200723 : explore the effect of separating the ridge detection function
-#                entirely; it may not affect the %%timeit results.
-
-## ancient TODOs
-
-# TODO: cast indices to unsigned int
-# TODO: add a test to verify rij <-> coords conversion works as expected
-# (assersion)
-# TODO: add edge detection version
-
-from __future__ import division 
+from __future__ import division
 from libc.math cimport sqrt, copysign, cos, abs, fabs, ceil, exp, log2
 from libc.math cimport M_PI as pi
 
@@ -125,13 +90,11 @@ cdef RIJ_t shiftRads = shiftRows + <RIJ_t>(fround(ceil(log2(MaxRows))))
 cdef RIJ_t modCols = (1<<shiftRows)-1
 cdef RIJ_t modRows = (1<<shiftRads)-1
 
-
 # for the votes2rings function
 DEF One = 1
 DEF Two = 2
 DEF Three = 3
 DEF MaxRingsNo = 1000
-
 
 @cython.profile(False)
 cpdef inline RIJ_t coord2rij(RIJ_t r, RIJ_t i, RIJ_t j):
@@ -150,15 +113,15 @@ cdef inline INDX_t fround(DTYPE_t x):
     return <INDX_t>(x+.5) if x>=0. else <INDX_t>(x-.5)
 
 @cython.profile(False)
-cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lrr, 
-                                                DTYPE_t Lcc, 
+cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lrr,
+                                                DTYPE_t Lcc,
                                                 DTYPE_t Lrc):
-    '''
+    """
     compute the smallest eigen-value of the Hessian matrix
-    
+
     Inputs:
-    Lrr,Lcc,Lrc are the Hessian matrix components 
-    '''
+    Lrr,Lcc,Lrc are the Hessian matrix components
+    """
     #cdef:
     #    DTYPE_t trH
     #    DTYPE_t discriminant
@@ -173,27 +136,27 @@ cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lrr,
 
 cpdef least_principal_curvature(DTYPE_t [:,:] Lrr, DTYPE_t [:,:] Lcc,
                                 DTYPE_t [:,:] Lrc):
-    '''
+    """
     compute the smallest eigen-value of the Hessian matrix
-    
+
     Inputs:
-        Lrr,Lcc,Lrc are the Hessian matrix components 
-    '''
+        Lrr,Lcc,Lrc are the Hessian matrix components
+    """
     assert Lrr is not None and Lcc is not None and Lrc is not None
 
     cdef:
-        INDX_t Nrows 
-        INDX_t Ncols 
-        DTYPE_t [:,:] curv 
+        INDX_t Nrows
+        INDX_t Ncols
+        DTYPE_t [:,:] curv
         INDX_t i,j
-    
+
     Nrows = Lrr.shape[0]
     Ncols = Lrr.shape[1]
     curv = np.empty((Nrows,Ncols),dtype=DTYPE)
-    
+
     for i in xrange(Nrows):
         for j in xrange(Ncols):
-            curv[i,j] = f_least_principal_curvature(Lrr[i,j], 
+            curv[i,j] = f_least_principal_curvature(Lrr[i,j],
                                                     Lcc[i,j],
                                                     Lrc[i,j])
     return curv
@@ -202,18 +165,18 @@ cpdef least_principal_curvature(DTYPE_t [:,:] Lrr, DTYPE_t [:,:] Lcc,
 #@cython.profile(False)
 @cython.cdivision(True)
 cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
-    '''
-    compute the [cos , sin, tan] of the angle formed 
-    by the eigen-vector of the Hessian Matrix, 
+    """
+    compute the [cos , sin, tan] of the angle formed
+    by the eigen-vector of the Hessian Matrix,
     corresponding to the smaller eigen-value
-        
+
     Inputs:
-        Lrr,Lcc,Lrc are the Hessian matrix components 
-    
+        Lrr,Lcc,Lrc are the Hessian matrix components
+
     Note: input are expected to be single numbers (not arrays)
-    '''
+    """
     cdef DTYPE_t D, tangent, denominator
-    if Lrc==0: 
+    if Lrc==0:
         return (1.,0.) if Lrr<Lcc else (0.,1.)
     elif Lrc>0:
         D = .5*(Lrr-Lcc)/Lrc
@@ -228,27 +191,27 @@ cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
 #@cython.profile(False)
 cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
         y1):
-    '''
+    """
     convert the bresenham line 2d to one with no if's, provided that the
     radius axis is always the longest
-    '''
+    """
     cdef:
-        int dx 
+        int dx
         int dr
         int sx, sr, d, i, dx2, dr2
-        INDX_t [:,:] coords 
+        INDX_t [:,:] coords
 
     dr = Rmax - Rmin
     sr=1
     coords = np.empty((dr+1,2), dtype=INDX)
     dr2 = 2 * dr
 
-    # TODO: do x and y at the same run 
+    # TODO: do x and y at the same run
 
     ## fill x
     dx = abs(x1 - x0)
     sx = 1 if x0<x1 else -1
-    
+
     dx2 = 2 * dx
     d = dx2 - dr
 
@@ -262,7 +225,7 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
     ## fill y
     dx = abs(y1 - y0)
     sx = 1 if y0<y1 else -1
-    
+
     dx2 = 2 * dx
     d = dx2 - dr
 
@@ -280,13 +243,13 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
 @cython.cdivision(True)
 cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
     cdef:
-        DTYPE_t sigma 
+        DTYPE_t sigma
         RIJ_t ksize
         RIJ_t cntr
-        DTYPE_t [:] kernel 
-        DTYPE_t scale2x 
+        DTYPE_t [:] kernel
+        DTYPE_t scale2x
         INDX_t i
-    
+
     sigma = .05*r + .25
     ## based on opencv: createGaussianFilter (smooth.cpp)
     ## NOTE: normalised such that the cntr is unity
@@ -310,19 +273,19 @@ cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
 
 ###   Sparse ridge directed circle Hough transfrom:   ###
 ##  using loops, analyse only the pixels that passed the threshold, visiting
-##  each once: 
+##  each once:
 ##          (a) Non-minimum supression based on quantised principal direction
 ##          (b) Construct sparse 3D Hough space with two extra Radius slabs for
 ##              complete local max search (Rmin-1 & Rmax+1)
 ##          (c) Gaussian smoothed and radius-scaled
 ##          (c) For each point in the 3D Hough space passing a threshold
-##              (based on 40% of 2*pi*r) perform non-maximum suppresion 
+##              (based on 40% of 2*pi*r) perform non-maximum suppresion
 ##              (in a 3x3x3 cube)
 
-cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr, 
-                             DTYPE_t [:,:] Lcc, 
-                             DTYPE_t [:,:] Lrc, 
-                             DTYPE_t [:,:] curv, 
+cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
+                             DTYPE_t [:,:] Lcc,
+                             DTYPE_t [:,:] Lrc,
+                             DTYPE_t [:,:] curv,
                              DTYPE_t curv_thresh=-20,
                              RIJ_t Rmin=5,
                              RIJ_t Rmax=55):
@@ -331,7 +294,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
             curv is not None
 
     cdef:
-        INDX_t rij, i, j, r, r_, x, y, 
+        INDX_t rij, i, j, r, r_, x, y,
         RIJ_t counter, Nrads, Nrows, Ncols
         int x0, y0, x1, y1
         char sign
@@ -353,7 +316,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
     # on the exterior.
-    for i in xrange(1,Nrows-1):         
+    for i in xrange(1,Nrows-1):
         for j in xrange(1,Ncols-1):
             #
             ###   Find Ridges:    ###
@@ -374,7 +337,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
             elif copysign(1,sinQ) != copysign(1,cosQ):
                 if (curv[i,j] >= curv[i-1,j+1]) | (curv[i,j] >= curv[i+1,j-1]):
                     continue
-           
+
             # add the least principal direction to the ridge sparse array
             directed_ridges[i,j] = cosQ, sinQ
 
@@ -402,7 +365,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
 
                     votes[counter] = coord2rij(r,x,y)
                     counter+=1
-                    
+
     votes = votes[:counter]
     votes.sort()
     Rmin+=1
@@ -415,15 +378,15 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
 #@cython.wraparound(True)
 @cython.cdivision(True)
 cpdef votes2rings(RIJ_t [:] votes,
-                  RIJ_t Rmin, RIJ_t Rmax, 
-                  RIJ_t Nrows, RIJ_t Ncols, 
+                  RIJ_t Rmin, RIJ_t Rmax,
+                  RIJ_t Nrows, RIJ_t Ncols,
                   RIJ_t vote_thresh=1, DTYPE_t circle_thresh=pi):
     """
-    # A function which merges the Hough Space construction, smoothing, and 
-    # local maxima finding; 
+    # A function which merges the Hough Space construction, smoothing, and
+    # local maxima finding;
     # doing this in triples, that is - 3 equi-radius planes at a time
     # Note there's some change of notation / variables naming between this
-    # function and those which it merges (votes2array, smooth_voted4 & 
+    # function and those which it merges (votes2array, smooth_voted4 &
     # get_circles).
     #
     # SCHEME:
@@ -441,7 +404,7 @@ cpdef votes2rings(RIJ_t [:] votes,
                     hotspots_counter[Rmod] += 1
         else:
             # smooth the R plane of the Hough space.
-            # In the (R+2)%3 find local maxima (rings) using the radius 
+            # In the (R+2)%3 find local maxima (rings) using the radius
             # dependent gaussian kernel.
             # then clean the (R+1)%3:
             smoothed_slice[(R+1)%3, hough_hotspots[:hotspots_counter]] = 0
@@ -463,7 +426,7 @@ cpdef votes2rings(RIJ_t [:] votes,
         DTYPE_t ksigma, rate, kscale2x, value
         RIJ_t ksize, kcentre
         DTYPE_t [:] kernel
-        RIJ_t [:,:] rings 
+        RIJ_t [:,:] rings
         RIJ_t ring_counter
         INDX_t di, dj, k, ki, kj
         DTYPE_t vote
@@ -472,10 +435,10 @@ cpdef votes2rings(RIJ_t [:] votes,
     Rmin-=1
     Rmax+=1
     ## prepare a general kernel array to work on
-    rate = .05 # 0.05 in the Afik (2015), SciRep; doi: 10.1038/srep13584 
+    rate = .05 # 0.05 in the Afik (2015), SciRep; doi: 10.1038/srep13584
     ksigma = rate*Rmax + .25
     ## note that I take half the kernel size (for less computations):
-    ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to 
+    ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
     # even int
     kernel = np.empty((ksize),DTYPE)
 
@@ -495,7 +458,7 @@ cpdef votes2rings(RIJ_t [:] votes,
 
     rij = votes[0]
 
-    ## FIRST: populate the first two radius slabs, (and smooth each one in its 
+    ## FIRST: populate the first two radius slabs, (and smooth each one in its
     ## turn). Then exit this loop, and c ontinue for the rest at "SECOND" (no
     ## need for local max search as the Rmin_ is there just for correct local
     ## max search)
@@ -522,13 +485,13 @@ cpdef votes2rings(RIJ_t [:] votes,
             ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
-            #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
+            #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1
             ## note that I take half the kernel size (for less computations):
-            ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to 
+            ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
             # even int
             kcentre = ksize//2
             kscale2x = -0.5/ksigma**2
-            
+
             for ki in xrange(ksize):
                 kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
@@ -585,14 +548,14 @@ cpdef votes2rings(RIJ_t [:] votes,
             ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
-            #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
+            #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1
             ## note that I take half the kernel size (for less computations):
-            ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to 
+            ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
             # even int
             kcentre = ksize//2
             #kernel = np.empty((ksize),DTYPE)
             kscale2x = -0.5/ksigma**2
-            
+
             for ki in xrange(ksize):
                 kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
@@ -632,12 +595,12 @@ cpdef votes2rings(RIJ_t [:] votes,
                         for dj in xrange(-1,2):#(-1,0,1):
                             local_max &= vote >= smoothed_slice[k,i+di,j+dj]
                             # there should not be any IndexErrors here
-                if local_max: 
+                if local_max:
                     rings[ring_counter,0] = i
                     rings[ring_counter,1] = j
                     rings[ring_counter,2] = Ro
                     ring_counter += 1
-    
+
             # then clean the (R+One)%Three:
             for hot in xrange(hough_counter[R_]):
                 i = hough_modified[R_,hot,0]
@@ -662,14 +625,14 @@ cpdef votes2rings(RIJ_t [:] votes,
     ksigma = rate*R + .25
     ## based on opencv: createGaussianFilter (smooth.cpp)
     ## NOTE: normalised such that the cntr is unity
-    #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
+    #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1
     ## note that I take half the kernel size (for less computations):
-    ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to 
+    ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
     # even int
     kcentre = ksize//2
     #kernel = np.empty((ksize),DTYPE)
     kscale2x = -0.5/ksigma**2
-    
+
     for ki in xrange(ksize):
         kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
@@ -709,7 +672,7 @@ cpdef votes2rings(RIJ_t [:] votes,
                 for dj in xrange(-1,2):#(-1,0,1):
                     local_max &= vote >= smoothed_slice[k,i+di,j+dj]
                     # there should not be any IndexErrors here
-        if local_max: 
+        if local_max:
             rings[ring_counter,0] = i
             rings[ring_counter,1] = j
             rings[ring_counter,2] = Ro
@@ -725,8 +688,8 @@ cpdef votes2rings(RIJ_t [:] votes,
 #@cython.wraparound(True)
 @cython.cdivision(True)
 cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
-                  RIJ_t Rmin, RIJ_t Rmax, 
-                  RIJ_t Nrows, RIJ_t Ncols, 
+                  RIJ_t Rmin, RIJ_t Rmax,
+                  RIJ_t Nrows, RIJ_t Ncols,
                   RIJ_t vote_thresh=1):
 
     assert vote_thresh>0, 'vote_thresh must be a positive integer, got %s' % \
@@ -743,7 +706,7 @@ cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
     Nrads = Rmax-Rmin+1
     sparse_3d_Hough = np.zeros((Nrads,Nrows,Ncols), RIJ)
     voted4 = np.empty((Nrads,3), RIJ)
-    
+
     n=0
     voted4counter=0
 #    rij = votes[votes_sorter[0]]
@@ -759,14 +722,14 @@ cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
         if rij_nxt!=rij:
             # need to keep track of those that were updated, such that
             # these could be also set to zero (not all)
-            if sparse_3d_Hough[r_,i,j] >= vote_thresh: 
-            #if sparse_3d_Hough[r%Nrads,i,j] >= vote_thresh: 
+            if sparse_3d_Hough[r_,i,j] >= vote_thresh:
+            #if sparse_3d_Hough[r%Nrads,i,j] >= vote_thresh:
                 #voted4[voted4counter] = rij # change rij storage struct?
                 votes[voted4counter] = rij # change rij storage struct?
                 voted4counter += 1
             #coords = rij2coord(rij_nxt)
             #r_ = coords.r
-            #if r_!=r: 
+            #if r_!=r:
             #    sparse_3d_Hough[r_%Nrads,...] = 0
             rij = rij_nxt
             coords = rij2coord(rij)
@@ -786,7 +749,7 @@ cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
 #@cython.boundscheck(True)
 #@cython.wraparound(True)
 @cython.cdivision(True)
-cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4, 
+cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
                     RIJ_t Rmin):
 
     assert voted4 is not None and sparse_3d_Hough is not None
@@ -794,9 +757,9 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
     cdef:
         RIJ_t x, y, r, r_, i, j, ki, kj, rij, voted4_size
         DTYPE_t value
-        RIJ_t Nrows, Ncols, Nrads 
+        RIJ_t Nrows, Ncols, Nrads
         DTYPE_t [:,:,:] smoothed_hough_array
-        DTYPE_t [:] kernel 
+        DTYPE_t [:] kernel
         RIJ_t width, ksize
         coord_t coords
 
@@ -840,7 +803,7 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
 
 
 @cython.cdivision(True)
-cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4, 
+cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
                   RIJ_t Rmin, DTYPE_t circle_thresh=pi):
 
     assert sparse_3d_Hough is not None
@@ -848,7 +811,7 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
         RIJ_t rij, i, j, r, r_, n, voted4_size, ring_counter
         int di, dj, dk, dx
         DTYPE_t vote
-        RIJ_t [:,:] rings 
+        RIJ_t [:,:] rings
         bool local_max
         coord_t coords
 
@@ -859,7 +822,7 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
     #
     ###   find local max in the 3D sparse Hough space   ###
     #
-    # (ii) For every entry in the sparse array which exceeds the Threshold 
+    # (ii) For every entry in the sparse array which exceeds the Threshold
     #   verify maximum compared to (rescaled) nearest neighbours
     # (iii) if local max => append to list
 
@@ -878,7 +841,7 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
                     local_max &= vote >= sparse_3d_Hough[r_+dk, i+di, j+dj]
                     #except IndexError:
                     #    continue
-        if local_max: 
+        if local_max:
             rings[ring_counter,0] = i
             rings[ring_counter,1] = j
             rings[ring_counter,2] = r
@@ -888,56 +851,56 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
 
 
 cpdef get_ring_mask(r, dr):
-    ''' 
+    """
     returns the pixel coordinates of a circle of radius are, centres at the
     origin, assuming:
-                     (r - dr)**2 <= i**2 + j**2 <= (r + dr)**2 
-    '''
+                     (r - dr)**2 <= i**2 + j**2 <= (r + dr)**2
+    """
     # generate_mask not considering the borders yet
     y,x = np.ogrid[-r-dr: r+dr+1, -r-dr: r+dr+1]
-    ring_mask = abs(x**2+y**2-r**2-dr**2)<=2*r*dr 
+    ring_mask = abs(x**2+y**2-r**2-dr**2)<=2*r*dr
     return ring_mask
 
 
 #@cython.profile(True)
 def fitCircle(coords, i, j):
-    '''
+    """
     find the least squares circle fitting a set of 2D
     points (x,y) based on:
     http://www.scipy.org/Cookbook/Least_Squares_Circle
-    '''
-        
+    """
+
     def calc_R(centre):
-        '''
-        calculate the distance of each 2D points from the center c=(xc, yc) 
-        '''
+        """
+        calculate the distance of each 2D points from the center c=(xc, yc)
+        """
         return np.sqrt((coords[:,0]-centre[0])**2 + (coords[:,1]-centre[1])**2)
-    
+
     def cost_fn(centre):
-        '''
+        """
         calculate the algebraic distance between the 2D points and the mean
         circle centered at c=(xc, yc)
-        '''
+        """
         Ri = calc_R(centre)
         return Ri - Ri.mean()
-    
+
     # Basic usage of optimize.leastsq
     centre, ier = optimize.leastsq(cost_fn, (i,j))
-    
+
     Ri         = calc_R(centre)
     R          = Ri.mean()
     #residu   = sum((Ri - R)**2)
     #residu2  = sum((Ri**2-R**2)**2)
-        
+
     return centre, R#, residu, residu2
 
 
 #@cython.profile(True)
-cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges, 
+cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
                    RIJ_t Nrows, RIJ_t Ncols, RIJ_t Rmin, RIJ_t Rmax,
                    RIJ_t thickness=3,
-                   # DTYPE_t eccentricity=0., ## EA20200723 excluding opencv dependency 
-                    ):   
+                   # DTYPE_t eccentricity=0., ## EA20200723 excluding opencv dependency
+                    ):
     ###   sub-pxl correction (if requested)   ###
     #
     # (i)  for each local max of the 3D Hough space get the ridges pxls within
@@ -946,7 +909,7 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
     #   by the radius)
     # (iii) append to sub-pxl circles (possibly conditioned on eccentricity
     #   and/or mean squared error.
-    
+
     cdef:
         np.ndarray[np.uint8_t, ndim=2, cast=True] img_mask, ring_mask
         np.ndarray[INDX_t, ndim=2] coords # keep numpy array for the newaxis
@@ -980,28 +943,28 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
             ring_mask[row_min-i+r+thickness:r+thickness+row_max-i,\
                       col_min-j+r+thickness:r+thickness+col_max-j]
             ))
-        if False: # eccentricity: ## excluding 
+        if False: # eccentricity: ## excluding
             ## eccentricity larger than zero, that is, requested an ellipse fit
             ## make sure that cv2.fitEllipse does not crash.
             ## but better remove circles which do not have enough points on the
             ## circumference
-            if len(coords)>5: 
+            if len(coords)>5:
                 cntr, MajAx, Tilt = \
                         fitEllipse(coords[:,np.newaxis,:].astype(np.int32))
                 ## skip if the fit results in an eccentric ellipse:
-                if np.sqrt(1-MajAx[0]**2/MajAx[1]**2) < eccentricity: 
-                    R = sqrt(MajAx[0]*MajAx[1])/2 
+                if np.sqrt(1-MajAx[0]**2/MajAx[1]**2) < eccentricity:
+                    R = sqrt(MajAx[0]*MajAx[1])/2
                 else:
                     subpxled = False
             else:
                 subpxled = False
         else:
             # eccentricity==0 that is, need to fit to a circle:
-            if len(coords)>3: 
+            if len(coords)>3:
                 cntr, R = fitCircle(coords, i-row_min,j-col_min)
             else:
                 subpxled = False
-        if (R+.5 < Rmin) | (R-.5 > Rmax): 
+        if (R+.5 < Rmin) | (R-.5 > Rmax):
             subpxled = False
 
         if not subpxled:
@@ -1009,7 +972,7 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
             R = 0
         ## skip in case the circle fit is based on less than half its
         ## circumference:
-        #if (r<Rmin) or (r>Rmax) or (coords.shape[0]<pi*r) : continue 
+        #if (r<Rmin) or (r>Rmax) or (coords.shape[0]<pi*r) : continue
         rings_subpxl[n,0] = cntr[0]+row_min
         rings_subpxl[n,1] = cntr[1]+col_min
         rings_subpxl[n,2] = R
@@ -1018,16 +981,16 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
 
 
 cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
-                              DTYPE_t [:,:] Lcc, 
-                              DTYPE_t [:,:] Lrc, 
-                              DTYPE_t [:,:] curv, 
+                              DTYPE_t [:,:] Lcc,
+                              DTYPE_t [:,:] Lrc,
+                              DTYPE_t [:,:] curv,
                               DTYPE_t curv_thresh=-20):
 
     assert Lrr is not None and Lcc is not None and Lrc is not None and\
             curv is not None
 
     cdef:
-        INDX_t i, j,  
+        INDX_t i, j,
         RIJ_t Nrows, Ncols
         char sign
         DTYPE_t cosQ, sinQ
@@ -1040,7 +1003,7 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
     # on the exterior.
-    for i in xrange(1,Nrows-1):         
+    for i in xrange(1,Nrows-1):
         for j in xrange(1,Ncols-1):
             #
             ###   Find Ridges:    ###
@@ -1061,19 +1024,105 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
             elif copysign(1,sinQ) != copysign(1,cosQ):
                 if (curv[i,j] >= curv[i-1,j+1]) | (curv[i,j] >= curv[i+1,j-1]):
                     continue
-           
+
             # add the least principal direction to the ridge sparse array
             directed_ridges[i,j] = cosQ, sinQ
-                    
+
     return directed_ridges
 
 
+
+def img_preprocess(self):
+    """
+    Blurs the image, calculates its second derivatives (Hessian matrix
+    components), and its least principal curvature
+    """
+    assert self.img.dtype==DTYPE
+
+    hessian = hessian_matrix(self.img, sigma=self.params['sigma'])
+    ## EA20200723 : in the earlier versions of the code
+    ## Lrr, Lrc, Lcc were referred to as Lxx, Lxy, Lyy
+    self.deriv['Lrr'], self.deriv['Lrc'], self.deriv['Lcc'] = hessian
+    self.hessian = hessian
+
+    hessian_eigvals = hessian_matrix_eigvals((hessian))
+    principal_curvatures = hessian_eigvals
+    ## the least principal curvature being hessian_eigvals[1]
+    self.deriv['principal_curv'] = principal_curvatures[1]
+    # self.deriv['principal_curv'] = least_principal_curvature(\
+    #        self.deriv['Lrr'], self.deriv['Lcc'], self.deriv['Lrc'])
+    ## EA20200723 TODO: consider storing both principal curvatures and testing for
+    ## |Lpp|>|Lqq| for Lpp being the least principal curvature
+
+
+def rings_detection(self):
+    assert self.params['Rmin']>=3
+    assert self.params['Rmin'] <= self.params['Rmax']
+    ht_out = ridge_circle_hough_transform(self.deriv['Lrr'],
+            self.deriv['Lcc'], self.deriv['Lrc'],
+            self.deriv['principal_curv'], self.params['curv_thresh'],
+            self.params['Rmin'], self.params['Rmax'])
+    rings = votes2rings(ht_out['votes'],
+                             self.params['Rmin'], self.params['Rmax'],
+                             self.img.shape[0], self.img.shape[1],
+                             self.params['vote_thresh'],
+                             self.params['circle_thresh'])
+    rings_subpxl = subpxl_circles(rings,
+                             ht_out['directed_ridges'],
+                             self.img.shape[0], self.img.shape[1],
+                             self.params['Rmin'], self.params['Rmax'],
+                             self.params['dr'],
+                             #self.params['eccentricity'] ## opencv dependency
+                                 )
+    self.output = {'rings' : np.asarray(rings),
+                   'rings_subpxl' : np.asarray(rings_subpxl),
+                   }
+
+
+def debugging_rings_detection(self):
+    assert self.params['Rmin']>=3
+    assert self.params['Rmin'] <= self.params['Rmax']
+    ht_out = ridge_circle_hough_transform(self.deriv['Lrr'],
+            self.deriv['Lcc'], self.deriv['Lrc'],
+            self.deriv['principal_curv'], self.params['curv_thresh'],
+            self.params['Rmin'], self.params['Rmax'])
+    array_out = votes2array(ht_out['votes'],
+                            self.params['Rmin'], self.params['Rmax'],
+                            self.img.shape[0], self.img.shape[1],
+                            self.params['vote_thresh'])
+    smooth_out = smooth_voted4(array_out[0], array_out[1],
+                               self.params['Rmin'])
+    rings = get_circles(smooth_out, array_out[1], self.params['Rmin'],
+                        self.params['circle_thresh'])
+    rings_subpxl = subpxl_circles(rings, ht_out['directed_ridges'],
+                                  self.img.shape[0], self.img.shape[1],
+                                  self.params['Rmin'], self.params['Rmax'],
+                                  self.params['dr'],
+                                  #self.params['eccentricity'] ## opencv dependency
+                                 )
+
+    self.output = {'directed_ridges': ht_out['directed_ridges'],
+                   'votes': ht_out['votes'],
+                   'sparse_hough_array' : array_out[0],
+                   'voted4' : array_out[1],
+                   'sparse_hough_smooth' : smooth_out,
+                   'rings' : rings,
+                   'rings_subpxl' : rings_subpxl}
+
+def directed_ridge_detector(self):
+    directed_ridges = directed_ridge_detector(self.deriv['Lrr'],
+            self.deriv['Lcc'], self.deriv['Lrc'],
+            self.deriv['principal_curv'], self.params['curv_thresh'])
+    self.output = {'directed_ridges' : directed_ridges,
+                   }
+
+
 class RidgeHoughTransform():
-    '''
+    """
     Perform circle Hough transform based on ridge binary image (direction
     aided)
     Expects an (float-type) image input at instantiation
-    '''
+    """
 
     params = {
             ## Binarising image parameters:
@@ -1096,89 +1145,14 @@ class RidgeHoughTransform():
         #self.Nrows, self.Ncols = img.shape
 
 
-    def img_preprocess(self):
-        '''
-        Blurs the image, calculates its second derivatives (Hessian matrix
-        components), and its least principal curvature
-        '''
-        assert self.img.dtype==DTYPE
-      
-        hessian = hessian_matrix(self.img, sigma=self.params['sigma'])
-        ## EA20200723 : in the earlier versions of the code
-        ## Lrr, Lrc, Lcc were referred to as Lxx, Lxy, Lyy 
-        self.deriv['Lrr'], self.deriv['Lrc'], self.deriv['Lcc'] = hessian 
-        self.hessian = hessian
-        
-        hessian_eigvals = hessian_matrix_eigvals((hessian))
-        principal_curvatures = hessian_eigvals 
-        ## the least principal curvature being hessian_eigvals[1]
-        self.deriv['principal_curv'] = principal_curvatures[1]
-        # self.deriv['principal_curv'] = least_principal_curvature(\
-        #        self.deriv['Lrr'], self.deriv['Lcc'], self.deriv['Lrc'])
-        ## EA20200723 TODO: consider storing both principal curvatures and testing for 
-        ## |Lpp|>|Lqq| for Lpp being the least principal curvature
- 
-       
-    def rings_detection(self):
-        assert self.params['Rmin']>=3
-        assert self.params['Rmin'] <= self.params['Rmax']
-        ht_out = ridge_circle_hough_transform(self.deriv['Lrr'], 
-                self.deriv['Lcc'], self.deriv['Lrc'],
-                self.deriv['principal_curv'], self.params['curv_thresh'],
-                self.params['Rmin'], self.params['Rmax'])
-        rings = votes2rings(ht_out['votes'], 
-                                 self.params['Rmin'], self.params['Rmax'],
-                                 self.img.shape[0], self.img.shape[1], 
-                                 self.params['vote_thresh'], 
-                                 self.params['circle_thresh'])
-        rings_subpxl = subpxl_circles(rings, 
-                                 ht_out['directed_ridges'], 
-                                 self.img.shape[0], self.img.shape[1], 
-                                 self.params['Rmin'], self.params['Rmax'],
-                                 self.params['dr'],
-                                 #self.params['eccentricity'] ## opencv dependency
-                                     )
-        self.output = {'rings' : np.asarray(rings),
-                       'rings_subpxl' : np.asarray(rings_subpxl),
-                       }
 
 
-    def directed_ridge_detector(self):
-        directed_ridges = directed_ridge_detector(self.deriv['Lrr'], 
-                self.deriv['Lcc'], self.deriv['Lrc'],
-                self.deriv['principal_curv'], self.params['curv_thresh'])
-        self.output = {'directed_ridges' : directed_ridges,
-                       }
 
 
-    def debugging_rings_detection(self):
-        assert self.params['Rmin']>=3
-        assert self.params['Rmin'] <= self.params['Rmax']
-        ht_out = ridge_circle_hough_transform(self.deriv['Lrr'], 
-                self.deriv['Lcc'], self.deriv['Lrc'],
-                self.deriv['principal_curv'], self.params['curv_thresh'],
-                self.params['Rmin'], self.params['Rmax'])
-        array_out = votes2array(ht_out['votes'], 
-                                self.params['Rmin'], self.params['Rmax'], 
-                                self.img.shape[0], self.img.shape[1],
-                                self.params['vote_thresh'])
-        smooth_out = smooth_voted4(array_out[0], array_out[1], 
-                                   self.params['Rmin'])
-        rings = get_circles(smooth_out, array_out[1], self.params['Rmin'],
-                            self.params['circle_thresh'])
-        rings_subpxl = subpxl_circles(rings, ht_out['directed_ridges'],
-                                      self.img.shape[0], self.img.shape[1],
-                                      self.params['Rmin'], self.params['Rmax'],
-                                      self.params['dr'],
-                                      #self.params['eccentricity'] ## opencv dependency
-                                     )
 
-        self.output = {'directed_ridges': ht_out['directed_ridges'],
-                       'votes': ht_out['votes'],
-                       'sparse_hough_array' : array_out[0],
-                       'voted4' : array_out[1],
-                       'sparse_hough_smooth' : smooth_out,
-                       'rings' : rings,
-                       'rings_subpxl' : rings_subpxl}
+
+
+
+
 
 
