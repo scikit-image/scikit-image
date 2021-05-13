@@ -37,7 +37,7 @@ def integral_image(image, *, dtype=None):
     """
     if dtype is None and image.real.dtype.kind == 'f':
         # default to at least double precision cumsum for accuracy
-        dtype = np.promote_types(image.dtype, float)
+        dtype = np.promote_types(image.dtype, np.float64)
         image = image.astype(dtype, copy=False)
 
     S = image
