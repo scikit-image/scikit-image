@@ -40,8 +40,7 @@ def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
     q2 = functools.reduce(
             np.add, np.meshgrid(*ranges, indexing="ij", sparse=True)
             )
-    # division of order by 2 to avoid additional square root on q2
-    wfilt = 1 / np.sqrt(1 + np.power(q2, order / 2))
+    wfilt = 1 / (1 + np.power(q2, order))
     if high_pass:
         wfilt = 1 - wfilt
     return wfilt
@@ -90,9 +89,14 @@ def butterworth(
     A band-pass filter can be achieved by combining a high pass and low
     pass filter.
 
-    ``cutoff_frequency_ratio`` and ``order`` both affect slope at the cut-off
-    region. If a specific slope is desired in this region, its absolute value
-    is approximately equal to ``2^(-2.5) * order / cutoff_frequency_ratio``.
+    The literature contains multiple conventions for the  functional form of
+    the Butterworth filter. Here it is implemented as the n-dimensional form of
+
+    .. math::
+        \frac{1}{1-\left(\frac{f}{c*f_{max}}\right)^{2*n})
+
+    with :math:`f` the absolute value of the spatial frequency, :math:`c` the
+    `cutoff_frequency_ratio` and :math:`n` the `order` modeled after [2]
 
     Examples
     --------
@@ -108,6 +112,8 @@ def butterworth(
     ---------
     .. [1] Butterworth, Stephen. "On the theory of filter amplifiers."
            Wireless Engineer 7.6 (1930): 536-541.
+    .. [2] Russ, John C., et al. "The image processing handbook."
+           Computers in Physics 8.2 (1994): 177-178.
     """
     fft_shape = (image.shape if channel_axis is None
                  else np.delete(image.shape, channel_axis))

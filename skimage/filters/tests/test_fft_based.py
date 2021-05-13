@@ -1,6 +1,8 @@
 import pytest
+import os
 import numpy as np
 from .. import butterworth
+from skimage.data import astronaut, coins
 
 
 def test_butterworth_2D():
@@ -32,3 +34,25 @@ def test_butterworth_4D_channel(chan, dtype):
     im = np.zeros((3, 4, 5, 6), dtype=dtype)
     filtered = butterworth(im, channel_axis=chan)
     assert filtered.shape == im.shape
+
+
+def test_butterworth_correctness_bw():
+    small = coins()[180:210, 260:291]
+    filtered = butterworth(small,
+                           cutoff_frequency_ratio=0.2,
+                           preserve_range=True).astype(np.uint8)
+    folder = os.path.dirname(__file__)
+    path = os.path.join(folder, "coins_butter.npy")
+    np.testing.assert_allclose(filtered, np.load(path))
+
+
+def test_butterworth_correctness_rgb():
+    small = astronaut()[135:155, 205:225]
+    filtered = butterworth(small,
+                           cutoff_frequency_ratio=0.3,
+                           high_pass=True,
+                           preserve_range=True,
+                           channel_axis=-1).astype(np.uint8)
+    folder = os.path.dirname(__file__)
+    path = os.path.join(folder, "astronaut_butter.npy")
+    np.testing.assert_allclose(filtered, np.load(path))
