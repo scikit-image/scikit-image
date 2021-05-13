@@ -110,7 +110,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     sigma_color : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
-        radiometric differences. If ``None`` the standard deviation of 
+        radiometric differences. If ``None`` the standard deviation of
         ``image`` will be used. Note that, if the image is
         any `int` dtype, ``image`` will be converted using the `img_as_float`
         function and thus the standard deviation is in respect to the
