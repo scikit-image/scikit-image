@@ -264,25 +264,25 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
             #
             ###   Find Ridges:    ###
             #
-            # treshold the curvature (note that it should be smaller than...)
-            if curv[i,j] > curv_thresh: continue
+            # threshold the curvature (note that it should be smaller than...)
+            if curv[i, j] > curv_thresh: continue
             # perform non-minimum suppression in the least principal direction
-            cosQ,sinQ = least_principal_direction(Lrr[i,j], Lcc[i,j], Lrc[i,j])
+            cosQ, sinQ = least_principal_direction(Lrr[i, j], Lcc[i, j], Lrc[i, j])
             if fabs(cosQ) > cos_q_pi:
-                if (curv[i,j] >= curv[i,j+1]) | (curv[i,j] >= curv[i,j-1]):
+                if (curv[i, j] >= curv[i, j+1]) | (curv[i, j] >= curv[i, j-1]):
                     continue
             elif fabs(sinQ) > cos_q_pi:
-                if (curv[i,j] >= curv[i+1,j]) | (curv[i,j] >= curv[i-1,j]):
+                if (curv[i, j] >= curv[i+1, j]) | (curv[i, j] >= curv[i-1, j]):
                     continue
-            elif copysign(1,sinQ) == copysign(1,cosQ):
-                if (curv[i,j] >= curv[i+1,j+1]) | (curv[i,j] >= curv[i-1,j-1]):
+            elif copysign(1, sinQ) == copysign(1,cosQ):
+                if (curv[i, j] >= curv[i+1, j+1]) | (curv[i, j] >= curv[i-1, j-1]):
                     continue
-            elif copysign(1,sinQ) != copysign(1,cosQ):
-                if (curv[i,j] >= curv[i-1,j+1]) | (curv[i,j] >= curv[i+1,j-1]):
+            elif copysign(1, sinQ) != copysign(1,cosQ):
+                if (curv[i, j] >= curv[i-1, j+1]) | (curv[i, j] >= curv[i+1, j-1]):
                     continue
 
             # add the least principal direction to the ridge sparse array
-            directed_ridges[i,j] = cosQ, sinQ
+            directed_ridges[i, j] = cosQ, sinQ
 
             ###   Circle Hough Transform   ###
 
@@ -317,8 +317,6 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
     return {'directed_ridges':directed_ridges, 'votes':votes}
 
 
-#@cython.boundscheck(True)
-#@cython.wraparound(True)
 @cython.cdivision(True)
 cpdef votes2rings(RIJ_t [:] votes,
                   RIJ_t Rmin, RIJ_t Rmax,
@@ -361,15 +359,15 @@ cpdef votes2rings(RIJ_t [:] votes,
         RIJ_t votes_size, R, r, i, j, x, y, Ro
         unsigned char Rmod, Romod, R_
         RIJ_t hot, n, rij, rij_nxt
-        RIJ_t [:,:,:] hough_slice # a.k.a. sparse_3d_Hough
-        DTYPE_t [:,:,:] smoothed_slice # a.k.a. smoothed_hough_array
-        RIJ_t [:,:,:] hough_hotspots, hough_modified
+        RIJ_t [:, :, :] hough_slice # a.k.a. sparse_3d_Hough
+        DTYPE_t [:, :, :] smoothed_slice # a.k.a. smoothed_hough_array
+        RIJ_t [:, :, :] hough_hotspots, hough_modified
         RIJ_t [:] hough_counter, hotspots_counter
         coord_t coords
         DTYPE_t ksigma, rate, kscale2x, value
         RIJ_t ksize, kcentre
         DTYPE_t [:] kernel
-        RIJ_t [:,:] rings
+        RIJ_t [:, :] rings
         RIJ_t ring_counter
         INDX_t di, dj, k, ki, kj
         DTYPE_t vote
@@ -503,19 +501,19 @@ cpdef votes2rings(RIJ_t [:] votes,
                 kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
             for hot in range(hotspots_counter[Rmod]):
-                i = hough_hotspots[Rmod,hot,0]
-                j = hough_hotspots[Rmod,hot,1]
-                from_row = i-kcentre if i-kcentre>0 else 0
-                to_row = i+kcentre+1 if i+kcentre+1<Nrows else Nrows
-                from_col = j-kcentre if j-kcentre>0 else 0
-                to_col = j+kcentre+1 if j+kcentre+1<Ncols else Ncols
+                i = hough_hotspots[Rmod, hot, 0]
+                j = hough_hotspots[Rmod, hot, 1]
+                from_row = i - kcentre if i - kcentre > 0 else 0
+                to_row = i + kcentre+1 if i + kcentre+1 < Nrows else Nrows
+                from_col = j - kcentre if j - kcentre > 0 else 0
+                to_col = j + kcentre+1 if j + kcentre+1 < Ncols else Ncols
                 value = 0.
-                for x in range(from_row,to_row):
+                for x in range(from_row, to_row):
                     ki = x + kcentre - i
-                    for y in range(from_col,to_col):
+                    for y in range(from_col, to_col):
                         kj = y + kcentre - j
-                        value += hough_slice[Rmod,x,y]*kernel[ki]*kernel[kj]
-                smoothed_slice[Rmod,i,j] = value/R
+                        value += hough_slice[Rmod, x, y] * kernel[ki] * kernel[kj]
+                smoothed_slice[Rmod, i, j] = value/R
 
             ###   find local max in the 3D sparse Hough space   ###
             #
@@ -523,21 +521,20 @@ cpdef votes2rings(RIJ_t [:] votes,
             # threshold verify maximum compared to (rescaled) nearest neighbours
             # (iii) if local max => append to list
 
-            R_ = (R+One)%Three
-            Ro = R-One
-            Romod = Ro%Three
+            R_ = (R+One) % Three
+            Ro = R - One
+            Romod = Ro % Three
 
             for hot in range(hotspots_counter[Romod]):
-                i = hough_hotspots[Romod,hot,0]
-                j = hough_hotspots[Romod,hot,1]
-                vote = smoothed_slice[Romod,i,j]
+                i = hough_hotspots[Romod, hot, 0]
+                j = hough_hotspots[Romod, hot, 1]
+                vote = smoothed_slice[Romod, i, j]
                 if vote < circle_thresh: continue
-                local_max=True
-                for k in range(3):#(R_,Romod,Rmod):
-                    for di in range(-1,2):#(-1,0,1):
-                        for dj in range(-1,2):#(-1,0,1):
-                            local_max &= vote >= smoothed_slice[k,i+di,j+dj]
-                            # there should not be any IndexErrors here
+                local_max = True
+                for k in range(3):
+                    for di in range(-1,2):
+                        for dj in range(-1,2):
+                            local_max &= vote >= smoothed_slice[k, i+di, j+dj]
                 if local_max:
                     rings[ring_counter,0] = i
                     rings[ring_counter,1] = j
@@ -546,35 +543,30 @@ cpdef votes2rings(RIJ_t [:] votes,
 
             # then clean the (R+One)%Three:
             for hot in range(hough_counter[R_]):
-                i = hough_modified[R_,hot,0]
-                j = hough_modified[R_,hot,1]
-                hough_slice[R_,i,j] = 0
-            #hough_slice[R_,...] = 0
-            ## TODO: check whether it is better to simply put this loop in the
-            ## previous one, such that extra entries in the smoothed would be
-            ## set to zero (redundant), but only one loop.
+                i = hough_modified[R_, hot, 0]
+                j = hough_modified[R_, hot, 1]
+                hough_slice[R_, i, j] = 0
+
             for hot in range(hotspots_counter[R_]):
-                i = hough_hotspots[R_,hot,0]
-                j = hough_hotspots[R_,hot,1]
-                smoothed_slice[R_,i,j] = 0
-            #smoothed_slice[R_,...] = 0
+                i = hough_hotspots[R_, hot, 0]
+                j = hough_hotspots[R_, hot, 1]
+                smoothed_slice[R_, i, j] = 0
             hough_counter[R_] = 0
             hotspots_counter[R_] = 0
             R = r
-            Rmod = R%Three
+            Rmod = R % Three
             rij = votes[n]
 
-    ## smooth the Rmax+1 and find local maximum in Rmax, skip clean up:
+    # smooth the Rmax+1 and find local maximum in Rmax, skip clean up:
     ksigma = rate*R + .25
-    ## based on opencv: createGaussianFilter (smooth.cpp)
-    ## NOTE: normalised such that the cntr is unity
-    #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1
-    ## note that I take half the kernel size (for less computations):
+
+    # based on opencv: createGaussianFilter (smooth.cpp)
+    # NOTE: normalised such that the cntr is unity
+    # note that I take half the kernel size (for less computations):
     ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
-    # even int
-    kcentre = ksize//2
-    #kernel = np.empty((ksize),DTYPE)
-    kscale2x = -0.5/ksigma**2
+                                      # even int
+    kcentre = ksize // 2
+    kscale2x = -0.5 / ksigma**2
 
     for ki in range(ksize):
         kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
@@ -624,78 +616,62 @@ cpdef votes2rings(RIJ_t [:] votes,
     Rmin+=1
     Rmax-=1
 
-    return rings[:ring_counter,...]
+    return rings[:ring_counter, ...]
 
 
-#@cython.boundscheck(True)
-#@cython.wraparound(True)
 @cython.cdivision(True)
-cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
+cpdef votes2array(RIJ_t [:] votes,
                   RIJ_t Rmin, RIJ_t Rmax,
                   RIJ_t Nrows, RIJ_t Ncols,
                   RIJ_t vote_thresh=1):
 
-    assert vote_thresh>0, 'vote_thresh must be a positive integer, got %s' % \
-                                                                   vote_thresh
     cdef:
         INDX_t r, r_, i, j, rij, rij_, Nrads, n, voted4counter, votes_size
-        RIJ_t [:,:,:] sparse_3d_Hough
-        RIJ_t [:,:] voted4
+        RIJ_t [:, :, :] sparse_3d_Hough
+        RIJ_t [:, :] voted4
         coord_t coords
 
-    Rmin-=1
-    Rmax+=1
+    Rmin -= 1
+    Rmax += 1
     votes_size = votes.size
-    Nrads = Rmax-Rmin+1
-    sparse_3d_Hough = np.zeros((Nrads,Nrows,Ncols), RIJ)
-    voted4 = np.empty((Nrads,3), RIJ)
+    Nrads = Rmax - Rmin+1
+    sparse_3d_Hough = np.zeros((Nrads, Nrows, Ncols), RIJ)
+    voted4 = np.empty((Nrads, 3), RIJ)
 
-    n=0
-    voted4counter=0
-#    rij = votes[votes_sorter[0]]
+    n = 0
+    voted4counter = 0
     rij = votes[0]
     coords = rij2coord(rij)
-    r,i,j = coords.r, coords.i, coords.j
-    r_ = r-Rmin
+    r, i, j = coords.r, coords.i, coords.j
+    r_ = r - Rmin
 
-    for n in range(1,votes_size):
-        sparse_3d_Hough[r_,i,j] += 1
+    for n in range(1, votes_size):
+        sparse_3d_Hough[r_, i, j] += 1
         rij_nxt = votes[n]
 
-        if rij_nxt!=rij:
+        if rij_nxt != rij:
             # need to keep track of those that were updated, such that
             # these could be also set to zero (not all)
-            if sparse_3d_Hough[r_,i,j] >= vote_thresh:
-            #if sparse_3d_Hough[r%Nrads,i,j] >= vote_thresh:
-                #voted4[voted4counter] = rij # change rij storage struct?
+            if sparse_3d_Hough[r_, i, j] >= vote_thresh:
                 votes[voted4counter] = rij # change rij storage struct?
                 voted4counter += 1
-            #coords = rij2coord(rij_nxt)
-            #r_ = coords.r
-            #if r_!=r:
-            #    sparse_3d_Hough[r_%Nrads,...] = 0
             rij = rij_nxt
             coords = rij2coord(rij)
-            r,i,j = coords.r, coords.i, coords.j
-            r_ = r-Rmin
+            r, i, j = coords.r, coords.i, coords.j
+            r_ = r - Rmin
 
 
     sparse_3d_Hough[r_,i,j] += 1
-    #sparse_3d_Hough[r_%Nrads,i,j] += 1
 
-    Rmin+=1
-    Rmax-=1
+    Rmin += 1
+    Rmax -= 1
 
     return sparse_3d_Hough, votes[:voted4counter]
 
 
-#@cython.boundscheck(True)
-#@cython.wraparound(True)
 @cython.cdivision(True)
-cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
+cpdef smooth_voted4(RIJ_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
                     RIJ_t Rmin):
-
-    assert voted4 is not None and sparse_3d_Hough is not None
 
     cdef:
         RIJ_t x, y, r, r_, i, j, ki, kj, rij, voted4_size
@@ -706,7 +682,7 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
         RIJ_t width, ksize
         coord_t coords
 
-    Rmin-=1
+    Rmin -= 1
     Nrows = sparse_3d_Hough.shape[1]
     Ncols = sparse_3d_Hough.shape[2]
     Nrads = sparse_3d_Hough.shape[0]
@@ -727,26 +703,27 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
             r_ = r - Rmin
             kernel = kernels_list[r_]
             ksize = kernel.size
-            width = ksize//2
-        from_row = i-width if i-width>0 else 0
-        to_row = i+width+1 if i+width+1<Nrows else Nrows
-        from_col = j-width if j-width>0 else 0
-        to_col = j+width+1 if j+width+1<Ncols else Ncols
-        value=0.
-        for x in range(from_row,to_row):
-            ki = x + width - i
-            for y in range(from_col,to_col):
-                kj = y + width - j
-                value += sparse_3d_Hough[r_,x,y]*kernel[ki]*kernel[kj]
-        smoothed_hough_array[r_,i,j] = value/r
+            width = ksize // 2
+        from_row = i - width if i - width > 0 else 0
+        to_row = i + width+1 if i + width+1 < Nrows else Nrows
+        from_col = j - width if j - width > 0 else 0
+        to_col = j + width+1 if j + width+1 < Ncols else Ncols
 
-    Rmin+=1
+        value = 0.
+        for x in range(from_row, to_row):
+            ki = x + width - i
+            for y in range(from_col, to_col):
+                kj = y + width - j
+                value += sparse_3d_Hough[r_, x, y] * kernel[ki] * kernel[kj]
+        smoothed_hough_array[r_,i,j] = value / r
+
+    Rmin += 1
 
     return smoothed_hough_array
 
 
 @cython.cdivision(True)
-cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
+cpdef get_circles(DTYPE_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
                   RIJ_t Rmin, DTYPE_t circle_thresh=pi):
 
     assert sparse_3d_Hough is not None
@@ -754,7 +731,7 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
         RIJ_t rij, i, j, r, r_, n, voted4_size, ring_counter
         int di, dj, dk, dx
         DTYPE_t vote
-        RIJ_t [:,:] rings
+        RIJ_t [:, :] rings
         bool local_max
         coord_t coords
 
@@ -832,18 +809,13 @@ def fitCircle(coords, i, j):
 
     Ri         = calc_R(centre)
     R          = Ri.mean()
-    #residu   = sum((Ri - R)**2)
-    #residu2  = sum((Ri**2-R**2)**2)
 
-    return centre, R#, residu, residu2
+    return centre, R
 
 
-#@cython.profile(True)
-cpdef _aux_subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
+cpdef _aux_subpxl_circles(RIJ_t [:, :] rings, directed_ridges,
                    RIJ_t Nrows, RIJ_t Ncols, RIJ_t Rmin, RIJ_t Rmax,
-                   RIJ_t thickness=3,
-                   # DTYPE_t eccentricity=0., ## EA20200723 excluding opencv dependency
-                    ):
+                   RIJ_t thickness=3):
     ###   sub-pxl correction (if requested)   ###
     #
     # (i)  for each local max of the 3D Hough space get the ridges pxls within
@@ -864,45 +836,45 @@ cpdef _aux_subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
         bool subpxled
 
     rings_size = rings.shape[0]
-    img_mask = np.zeros((Nrows,Ncols), np.uint8)
+    img_mask = np.zeros((Nrows, Ncols), np.uint8)
     rings_subpxl = np.empty_like(rings,DTYPE)
 
     for (i,j) in directed_ridges.iterkeys():
         img_mask[i,j] += 1
 
     for n in range(rings_size):
-        i = rings[n,0]
-        j = rings[n,1]
-        r = rings[n,2]
+        i = rings[n, 0]
+        j = rings[n, 1]
+        r = rings[n, 2]
         subpxled = True
         ring_mask = get_ring_mask(r, thickness)
-        #need to acount for the image borders:
-        row_min = i-r-thickness if i-r-thickness>0 else 0
-        row_max = i+r+thickness+1 if i+r+thickness+1<Nrows else Nrows
-        col_min = j-r-thickness if j-r-thickness>0 else 0
-        col_max = j+r+thickness+1 if j+r+thickness+1<Ncols else Ncols
+
+        # need to acount for the image borders:
+        row_min = i - r - thickness if i - r - thickness > 0 else 0
+        row_max = i + r + thickness+1 if i + r + thickness+1 < Nrows else Nrows
+        col_min = j - r - thickness if j - r - thickness > 0 else 0
+        col_max = j + r + thickness+1 if j + r + thickness+1 < Ncols else Ncols
         coords = np.transpose(np.nonzero(
-            img_mask[row_min:row_max,col_min:col_max] &
-            ring_mask[row_min-i+r+thickness:r+thickness+row_max-i,\
-                      col_min-j+r+thickness:r+thickness+col_max-j]
+            img_mask[row_min:row_max, col_min:col_max] &
+            ring_mask[row_min-i+r + thickness:  thickness+r + row_max-i,\
+                      col_min-j+r + thickness:  thickness+r + col_max-j]
             ))
-        if False: # eccentricity: ## excluding
+        if False:
             ## eccentricity larger than zero, that is, requested an ellipse fit
             ## make sure that cv2.fitEllipse does not crash.
             ## but better remove circles which do not have enough points on the
             ## circumference
-            if len(coords)>5:
+            if len(coords) > 5:
                 cntr, MajAx, Tilt = \
                         fitEllipse(coords[:,np.newaxis,:].astype(np.int32))
                 ## skip if the fit results in an eccentric ellipse:
-                if np.sqrt(1-MajAx[0]**2/MajAx[1]**2) < eccentricity:
-                    R = sqrt(MajAx[0]*MajAx[1])/2
+                if np.sqrt(1 - MajAx[0]**2 / MajAx[1]**2) < eccentricity:
+                    R = sqrt(MajAx[0] * MajAx[1]) / 2
                 else:
                     subpxled = False
             else:
                 subpxled = False
         else:
-            # eccentricity==0 that is, need to fit to a circle:
             if len(coords)>3:
                 cntr, R = fitCircle(coords, i-row_min,j-col_min)
             else:
@@ -913,12 +885,10 @@ cpdef _aux_subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
         if not subpxled:
             cntr = (0,0)
             R = 0
-        ## skip in case the circle fit is based on less than half its
-        ## circumference:
-        #if (r<Rmin) or (r>Rmax) or (coords.shape[0]<pi*r) : continue
-        rings_subpxl[n,0] = cntr[0]+row_min
-        rings_subpxl[n,1] = cntr[1]+col_min
-        rings_subpxl[n,2] = R
+
+        rings_subpxl[n, 0] = cntr[0] + row_min
+        rings_subpxl[n, 1] = cntr[1] + col_min
+        rings_subpxl[n, 2] = R
 
     return rings_subpxl
 
@@ -943,26 +913,26 @@ cpdef _aux_directed_ridge_detector(DTYPE_t [:,:] Lrr,
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
     # on the exterior.
-    for i in range(1,Nrows-1):
-        for j in range(1,Ncols-1):
+    for i in range(1, Nrows-1):
+        for j in range(1, Ncols-1):
             #
             ###   Find Ridges:    ###
             #
             # threshold the curvature (note that it should be smaller than...)
             if curv[i,j] > curv_thresh: continue
             # perform non-minimum suppression in the least principal direction
-            cosQ,sinQ = least_principal_direction(Lrr[i,j], Lcc[i,j], Lrc[i,j])
+            cosQ, sinQ = least_principal_direction(Lrr[i, j], Lcc[i, j], Lrc[i, j])
             if fabs(cosQ) > cos_q_pi:
-                if (curv[i,j] >= curv[i,j+1]) | (curv[i,j] >= curv[i,j-1]):
+                if (curv[i, j] >= curv[i, j+1]) | (curv[i,j] >= curv[i,j-1]):
                     continue
             elif fabs(sinQ) > cos_q_pi:
-                if (curv[i,j] >= curv[i+1,j]) | (curv[i,j] >= curv[i-1,j]):
+                if (curv[i, j] >= curv[i+1, j]) | (curv[i,j] >= curv[i-1,j]):
                     continue
-            elif copysign(1,sinQ) == copysign(1,cosQ):
-                if (curv[i,j] >= curv[i+1,j+1]) | (curv[i,j] >= curv[i-1,j-1]):
+            elif copysign(1, sinQ) == copysign(1, cosQ):
+                if (curv[i, j] >= curv[i+1, j+1]) | (curv[i,j] >= curv[i-1,j-1]):
                     continue
-            elif copysign(1,sinQ) != copysign(1,cosQ):
-                if (curv[i,j] >= curv[i-1,j+1]) | (curv[i,j] >= curv[i+1,j-1]):
+            elif copysign(1, sinQ) != copysign(1, cosQ):
+                if (curv[i, j] >= curv[i-1, j+1]) | (curv[i,j] >= curv[i+1,j-1]):
                     continue
 
             # add the least principal direction to the ridge sparse array
