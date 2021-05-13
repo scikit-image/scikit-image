@@ -53,7 +53,6 @@ from cpython cimport bool
 import numpy as np
 cimport numpy as np
 
-#from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from ..feature import hessian_matrix, hessian_matrix_eigvals
 
 from scipy import optimize
@@ -1032,27 +1031,33 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
 
 
 
-def img_preprocess(self):
-    """
-    Blurs the image, calculates its second derivatives (Hessian matrix
-    components), and its least principal curvature
-    """
-    assert self.img.dtype==DTYPE
+def preprocessing(image, sigma):
+    """Blurs the image, calculates its second derivatives and its least
+    principal curvature.
 
-    hessian = hessian_matrix(self.img, sigma=self.params['sigma'])
-    ## EA20200723 : in the earlier versions of the code
-    ## Lrr, Lrc, Lcc were referred to as Lxx, Lxy, Lyy
-    self.deriv['Lrr'], self.deriv['Lrc'], self.deriv['Lcc'] = hessian
-    self.hessian = hessian
+    Parameters
+    ----------
+    image : array
+        Input image.
+    sigma : float
+        Value of sigma to calculate the Hessian matrix.
+
+    Returns
+    -------
+    derivatives : dict
+        Second derivatives of the input image.
+    least_principal_curvature :
+        The least principal curvature of the Hessian matrix obtained from
+        the input image and sigma.
+    """
+    derivatives = {}
+    hessian = hessian_matrix(image, sigma)
+    derivatives['Lrr'], derivatives['Lrc'], derivatives['Lcc'] = hessian
 
     hessian_eigvals = hessian_matrix_eigvals((hessian))
-    principal_curvatures = hessian_eigvals
-    ## the least principal curvature being hessian_eigvals[1]
-    self.deriv['principal_curv'] = principal_curvatures[1]
-    # self.deriv['principal_curv'] = least_principal_curvature(\
-    #        self.deriv['Lrr'], self.deriv['Lcc'], self.deriv['Lrc'])
-    ## EA20200723 TODO: consider storing both principal curvatures and testing for
-    ## |Lpp|>|Lqq| for Lpp being the least principal curvature
+
+    # the least principal curvature being hessian_eigvals[1]
+    return derivatives, hessian_eigvals[1]
 
 
 def rings_detection(self):
@@ -1109,6 +1114,7 @@ def debugging_rings_detection(self):
                    'rings' : rings,
                    'rings_subpxl' : rings_subpxl}
 
+
 def directed_ridge_detector(self):
     directed_ridges = directed_ridge_detector(self.deriv['Lrr'],
             self.deriv['Lcc'], self.deriv['Lrc'],
@@ -1117,7 +1123,13 @@ def directed_ridge_detector(self):
                    }
 
 
-class RidgeHoughTransform():
+def hough_transform_ridge(sigma=1.8, thresholds=):
+
+
+    return sigma, radii, thresholds, half
+
+
+class RidgeHoughTransform(image):
     """
     Perform circle Hough transform based on ridge binary image (direction
     aided)
