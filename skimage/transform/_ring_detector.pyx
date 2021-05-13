@@ -135,9 +135,8 @@ cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
     return  1./denominator, tangent / denominator
 
 
-#@cython.profile(False)
-cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
-        y1):
+cpdef inline INDX_t [:, :] vote4(int Rmin, int x0, int y0, int Rmax, int x1,
+                                 int y1):
     """
     convert the bresenham line 2d to one with no if's, provided that the
     radius axis is always the longest
@@ -146,14 +145,12 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
         int dx
         int dr
         int sx, sr, d, i, dx2, dr2
-        INDX_t [:,:] coords
+        INDX_t [:, :] coords
 
     dr = Rmax - Rmin
-    sr=1
-    coords = np.empty((dr+1,2), dtype=INDX)
+    sr = 1
+    coords = np.empty((dr+1, 2), dtype=INDX)
     dr2 = 2 * dr
-
-    # TODO: do x and y at the same run
 
     ## fill x
     dx = abs(x1 - x0)
@@ -162,7 +159,7 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
     dx2 = 2 * dx
     d = dx2 - dr
 
-    for i in xrange(dr+1):
+    for i in range(dr+1):
         coords[i,0] = x0
         while d >= 0:
             x0 = x0 + sx
@@ -171,13 +168,13 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
 
     ## fill y
     dx = abs(y1 - y0)
-    sx = 1 if y0<y1 else -1
+    sx = 1 if y0 < y1 else -1
 
     dx2 = 2 * dx
     d = dx2 - dr
 
-    for i in xrange(dr+1):
-        coords[i,1] = y0
+    for i in range(dr+1):
+        coords[i, 1] = y0
         while d >= 0:
             y0 = y0 + sx
             d = d - dr2
@@ -186,7 +183,6 @@ cpdef inline INDX_t [:,:] vote4(int Rmin, int x0, int y0, int Rmax, int x1, int
     return coords
 
 
-#@cython.profile(False)
 @cython.cdivision(True)
 cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
     cdef:
@@ -208,7 +204,7 @@ cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
     kernel = np.empty((ksize),DTYPE)
     scale2x = -0.5/sigma**2
 
-    for i in xrange(ksize):
+    for i in range(ksize):
         kernel[i] = exp(scale2x*(i-cntr)**2)
     return kernel
 
@@ -263,8 +259,8 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
     # on the exterior.
-    for i in xrange(1,Nrows-1):
-        for j in xrange(1,Ncols-1):
+    for i in range(1, Nrows-1):
+        for j in range(1, Ncols-1):
             #
             ###   Find Ridges:    ###
             #
@@ -299,10 +295,10 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
             y1 = fround(cosQ*Rmax)
             vote4xy = vote4(Rmin, x0, y0, Rmax, x1, y1)
 
-            for sign in xrange(-1,2,2):
-            # 20130405: corrected erraneous xrange(-1,2)
+            for sign in range(-1,2,2):
+            # 20130405: corrected erraneous range(-1,2)
             # for the inwards and outwards without the zero (inplace)
-                for r_ in xrange(Nrads):
+                for r_ in range(Nrads):
                     x = <RIJ_t>(i + sign*vote4xy[r_,0])
                     y = <RIJ_t>(j + sign*vote4xy[r_,1])
                     r = r_+Rmin
@@ -409,7 +405,7 @@ cpdef votes2rings(RIJ_t [:] votes,
     ## turn). Then exit this loop, and c ontinue for the rest at "SECOND" (no
     ## need for local max search as the Rmin_ is there just for correct local
     ## max search)
-    for n in xrange(1, votes_size):
+    for n in range(1, votes_size):
         coords = rij2coord(rij)
         r,i,j = coords.r, coords.i, coords.j
         if r==R:
@@ -439,10 +435,10 @@ cpdef votes2rings(RIJ_t [:] votes,
             kcentre = ksize//2
             kscale2x = -0.5/ksigma**2
 
-            for ki in xrange(ksize):
+            for ki in range(ksize):
                 kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
-            for hot in xrange(hotspots_counter[Rmod]):
+            for hot in range(hotspots_counter[Rmod]):
                 i = hough_hotspots[Rmod,hot,0]
                 j = hough_hotspots[Rmod,hot,1]
                 from_row = i-kcentre if i-kcentre>0 else 0
@@ -450,9 +446,9 @@ cpdef votes2rings(RIJ_t [:] votes,
                 from_col = j-kcentre if j-kcentre>0 else 0
                 to_col = j+kcentre+1 if j+kcentre+1<Ncols else Ncols
                 value = 0.
-                for x in xrange(from_row,to_row):
+                for x in range(from_row,to_row):
                     ki = x + kcentre - i
-                    for y in xrange(from_col,to_col):
+                    for y in range(from_col,to_col):
                         kj = y + kcentre - j
                         value += hough_slice[Rmod,x,y]*kernel[ki]*kernel[kj]
                 smoothed_slice[Rmod,i,j] = value/R
@@ -472,7 +468,7 @@ cpdef votes2rings(RIJ_t [:] votes,
     ## SECOND: account for Rmin+2 till Rmax-2 including local max finding, and
     ## smoothing the Rmax-1 (local max not searched for in the Rmax-1 & Rmax
     ## slabs at this stage)
-    for n in xrange(n, votes_size):
+    for n in range(n, votes_size):
         coords = rij2coord(rij)
         r,i,j = coords.r, coords.i, coords.j
         if r==R:
@@ -503,10 +499,10 @@ cpdef votes2rings(RIJ_t [:] votes,
             #kernel = np.empty((ksize),DTYPE)
             kscale2x = -0.5/ksigma**2
 
-            for ki in xrange(ksize):
+            for ki in range(ksize):
                 kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
-            for hot in xrange(hotspots_counter[Rmod]):
+            for hot in range(hotspots_counter[Rmod]):
                 i = hough_hotspots[Rmod,hot,0]
                 j = hough_hotspots[Rmod,hot,1]
                 from_row = i-kcentre if i-kcentre>0 else 0
@@ -514,9 +510,9 @@ cpdef votes2rings(RIJ_t [:] votes,
                 from_col = j-kcentre if j-kcentre>0 else 0
                 to_col = j+kcentre+1 if j+kcentre+1<Ncols else Ncols
                 value = 0.
-                for x in xrange(from_row,to_row):
+                for x in range(from_row,to_row):
                     ki = x + kcentre - i
-                    for y in xrange(from_col,to_col):
+                    for y in range(from_col,to_col):
                         kj = y + kcentre - j
                         value += hough_slice[Rmod,x,y]*kernel[ki]*kernel[kj]
                 smoothed_slice[Rmod,i,j] = value/R
@@ -531,15 +527,15 @@ cpdef votes2rings(RIJ_t [:] votes,
             Ro = R-One
             Romod = Ro%Three
 
-            for hot in xrange(hotspots_counter[Romod]):
+            for hot in range(hotspots_counter[Romod]):
                 i = hough_hotspots[Romod,hot,0]
                 j = hough_hotspots[Romod,hot,1]
                 vote = smoothed_slice[Romod,i,j]
                 if vote < circle_thresh: continue
                 local_max=True
-                for k in xrange(3):#(R_,Romod,Rmod):
-                    for di in xrange(-1,2):#(-1,0,1):
-                        for dj in xrange(-1,2):#(-1,0,1):
+                for k in range(3):#(R_,Romod,Rmod):
+                    for di in range(-1,2):#(-1,0,1):
+                        for dj in range(-1,2):#(-1,0,1):
                             local_max &= vote >= smoothed_slice[k,i+di,j+dj]
                             # there should not be any IndexErrors here
                 if local_max:
@@ -549,7 +545,7 @@ cpdef votes2rings(RIJ_t [:] votes,
                     ring_counter += 1
 
             # then clean the (R+One)%Three:
-            for hot in xrange(hough_counter[R_]):
+            for hot in range(hough_counter[R_]):
                 i = hough_modified[R_,hot,0]
                 j = hough_modified[R_,hot,1]
                 hough_slice[R_,i,j] = 0
@@ -557,7 +553,7 @@ cpdef votes2rings(RIJ_t [:] votes,
             ## TODO: check whether it is better to simply put this loop in the
             ## previous one, such that extra entries in the smoothed would be
             ## set to zero (redundant), but only one loop.
-            for hot in xrange(hotspots_counter[R_]):
+            for hot in range(hotspots_counter[R_]):
                 i = hough_hotspots[R_,hot,0]
                 j = hough_hotspots[R_,hot,1]
                 smoothed_slice[R_,i,j] = 0
@@ -580,10 +576,10 @@ cpdef votes2rings(RIJ_t [:] votes,
     #kernel = np.empty((ksize),DTYPE)
     kscale2x = -0.5/ksigma**2
 
-    for ki in xrange(ksize):
+    for ki in range(ksize):
         kernel[ki] = exp(kscale2x*(ki-kcentre)**2)
 
-    for hot in xrange(hotspots_counter[Rmod]):
+    for hot in range(hotspots_counter[Rmod]):
         i = hough_hotspots[Rmod,hot,0]
         j = hough_hotspots[Rmod,hot,1]
         from_row = i-kcentre if i-kcentre>0 else 0
@@ -591,9 +587,9 @@ cpdef votes2rings(RIJ_t [:] votes,
         from_col = j-kcentre if j-kcentre>0 else 0
         to_col = j+kcentre+1 if j+kcentre+1<Ncols else Ncols
         value = 0.
-        for x in xrange(from_row,to_row):
+        for x in range(from_row,to_row):
             ki = x + kcentre - i
-            for y in xrange(from_col,to_col):
+            for y in range(from_col,to_col):
                 kj = y + kcentre - j
                 value += hough_slice[Rmod,x,y]*kernel[ki]*kernel[kj]
         smoothed_slice[Rmod,i,j] = value/R
@@ -608,15 +604,15 @@ cpdef votes2rings(RIJ_t [:] votes,
     Ro = R-One
     Romod = Ro%Three
 
-    for hot in xrange(hotspots_counter[Romod]):
+    for hot in range(hotspots_counter[Romod]):
         i = hough_hotspots[Romod,hot,0]
         j = hough_hotspots[Romod,hot,1]
         vote = smoothed_slice[Romod,i,j]
         if vote < circle_thresh: continue
         local_max=True
-        for k in xrange(3):#(R_,Romod,Rmod):
-            for di in xrange(-1,2):#(-1,0,1):
-                for dj in xrange(-1,2):#(-1,0,1):
+        for k in range(3):#(R_,Romod,Rmod):
+            for di in range(-1,2):#(-1,0,1):
+                for dj in range(-1,2):#(-1,0,1):
                     local_max &= vote >= smoothed_slice[k,i+di,j+dj]
                     # there should not be any IndexErrors here
         if local_max:
@@ -662,7 +658,7 @@ cpdef votes2array(RIJ_t [:] votes, #INDX_t [:] votes_sorter,
     r,i,j = coords.r, coords.i, coords.j
     r_ = r-Rmin
 
-    for n in xrange(1,votes_size):
+    for n in range(1,votes_size):
         sparse_3d_Hough[r_,i,j] += 1
         rij_nxt = votes[n]
 
@@ -717,13 +713,13 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
 
     voted4_size = voted4.size
     smoothed_hough_array = np.empty_like(sparse_3d_Hough, DTYPE)
-    kernels_list = [get_1d_gaussian_kernel_r(r+Rmin) for r in xrange(Nrads)]
+    kernels_list = [get_1d_gaussian_kernel_r(r+Rmin) for r in range(Nrads)]
     r_ = 0
     kernel = kernels_list[r_]
     ksize = kernel.size
     width = ksize//2
 
-    for n in xrange(voted4_size):
+    for n in range(voted4_size):
         rij = voted4[n]
         coords = rij2coord(rij)
         r,i,j = coords.r, coords.i, coords.j
@@ -737,9 +733,9 @@ cpdef smooth_voted4(RIJ_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
         from_col = j-width if j-width>0 else 0
         to_col = j+width+1 if j+width+1<Ncols else Ncols
         value=0.
-        for x in xrange(from_row,to_row):
+        for x in range(from_row,to_row):
             ki = x + width - i
-            for y in xrange(from_col,to_col):
+            for y in range(from_col,to_col):
                 kj = y + width - j
                 value += sparse_3d_Hough[r_,x,y]*kernel[ki]*kernel[kj]
         smoothed_hough_array[r_,i,j] = value/r
@@ -773,7 +769,7 @@ cpdef get_circles(DTYPE_t [:,:,:] sparse_3d_Hough, RIJ_t [:] voted4,
     #   verify maximum compared to (rescaled) nearest neighbours
     # (iii) if local max => append to list
 
-    for n in xrange(voted4_size):
+    for n in range(voted4_size):
         rij = voted4[n]
         coords = rij2coord(rij)
         r,i,j = coords.r, coords.i, coords.j
@@ -874,7 +870,7 @@ cpdef _aux_subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
     for (i,j) in directed_ridges.iterkeys():
         img_mask[i,j] += 1
 
-    for n in xrange(rings_size):
+    for n in range(rings_size):
         i = rings[n,0]
         j = rings[n,1]
         r = rings[n,2]
@@ -947,8 +943,8 @@ cpdef _aux_directed_ridge_detector(DTYPE_t [:,:] Lrr,
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
     # on the exterior.
-    for i in xrange(1,Nrows-1):
-        for j in xrange(1,Ncols-1):
+    for i in range(1,Nrows-1):
+        for j in range(1,Ncols-1):
             #
             ###   Find Ridges:    ###
             #
