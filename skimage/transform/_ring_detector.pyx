@@ -1102,8 +1102,7 @@ def debugging_rings_detection(self):
     rings_subpxl = subpxl_circles(rings, ht_out['directed_ridges'],
                                   self.img.shape[0], self.img.shape[1],
                                   self.params['Rmin'], self.params['Rmax'],
-                                  self.params['dr'],
-                                  #self.params['eccentricity'] ## opencv dependency
+                                  self.params['dr']
                                  )
 
     self.output = {'directed_ridges': ht_out['directed_ridges'],
@@ -1123,48 +1122,24 @@ def directed_ridge_detector(self):
                    }
 
 
-def hough_transform_ridge(sigma=1.8, thresholds=):
+def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
+                          hough_thresh=[3, 0.33 * 2 * pi], dr=3):
+    """
+    Perform a circle Hough transform, direction aided, based on the ridge
+    binary image.
 
+    Parameters
+    ----------
+    sigma : float
+        Binarizing parameter, related to GX1920 full resolution; 10ms exp,
+        gain13.
+    curv_thresh : float
+    radii : list
+        Minimum and maximum radii for the Hough transform.
+    hough_thresh : list
+        Thresholds for the Hough transform: vote_thresh and circle_thresh.
+    dr : float
+        Half-thickness of the ring to fit to an ellipse.
+    """
 
     return sigma, radii, thresholds, half
-
-
-class RidgeHoughTransform(image):
-    """
-    Perform circle Hough transform based on ridge binary image (direction
-    aided)
-    Expects an (float-type) image input at instantiation
-    """
-
-    params = {
-            ## Binarising image parameters:
-            'sigma':1.8, # GX1920 full resolution; 10ms exp, gain13
-            'curv_thresh':-25,
-            ## Hough transform parameters:
-            'Rmin':7,
-            'Rmax':85,
-            'vote_thresh':3,
-            'circle_thresh': 0.33 * 2 * pi,  #2.4 #3.2
-            ## sub-pxling parameters:
-            'dr':3,  # half-thickness of the ring to fit to an ellipse
-	        # 'eccentricity':0  ## EA20200723 excluding opencv dependency
-            }
-    deriv = {}
-
-
-    def __init__(self, img=None):
-        self.img = img
-        #self.Nrows, self.Ncols = img.shape
-
-
-
-
-
-
-
-
-
-
-
-
-
