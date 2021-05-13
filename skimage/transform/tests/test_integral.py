@@ -2,7 +2,8 @@ import numpy as np
 from skimage.transform import integral_image, integrate
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_almost_equal, assert_equal
+from skimage._shared.testing import (assert_allclose, assert_almost_equal,
+                                     assert_equal)
 
 
 np.random.seed(0)
@@ -14,11 +15,13 @@ s = integral_image(x)
     'dtype', [np.float16, np.float32, np.float64, np.uint8, np.int32]
 )
 def test_integral_image_validity(dtype):
-    y = (np.random.rand(50, 50) * 255).astype(dtype)
+    rstate = np.random.RandomState(1234)
+    y = (rstate.rand(20, 20) * 255).astype(dtype)
     out = integral_image(y)
     if y.dtype.kind == 'f':
-        assert out.dtype == np.float64
-        assert_almost_equal(out[-1, -1], y.sum(dtype=np.float64))
+        assert out.dtype == y.dtype
+        rtol = 1e-3 if dtype == np.float16 else 1e-7
+        assert_allclose(out[-1, -1], y.sum(dtype=np.float64), rtol=rtol)
     else:
         assert out.dtype.kind == y.dtype.kind
         assert_equal(out[-1, -1], y.sum())

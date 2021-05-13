@@ -27,13 +27,7 @@ def integral_image(image):
            ACM SIGGRAPH Computer Graphics, vol. 18, 1984, pp. 207-212.
 
     """
-    if image.real.dtype.kind == 'f':
-        # use at least double precision cumsum for accuracy
-        dtype = np.promote_types(image.dtype, float)
-    else:
-        dtype = image.dtype
-
-    S = image.astype(dtype, copy=False)
+    S = image
     for i in range(image.ndim):
         S = S.cumsum(axis=i)
     return S
