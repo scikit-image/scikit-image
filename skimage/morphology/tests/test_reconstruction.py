@@ -142,7 +142,6 @@ def test_offset_not_none():
 
 
 def test_deprecated_import():
-    with testing.expected_warnings(
-        ["Importing from skimage.morphology.greyreconstruct is deprecated."]
-    ):
+    msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
+    with testing.expected_warnings([msg]):
         from skimage.morphology.greyreconstruct import reconstruction

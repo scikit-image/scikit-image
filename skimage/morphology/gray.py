@@ -206,7 +206,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        shift structuring element about center point. This only affects
+        Shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
     Returns
@@ -240,8 +240,8 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     """
     selem = np.array(selem)
     selem = _shift_selem(selem, shift_x, shift_y)
-    # Inside ndimage.grey_dilation, the structuring element is inverted,
-    # eg. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
+    # Inside ndi.grey_dilation, the structuring element is inverted,
+    # e.g. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
     # this author (@jni). To "patch" this behaviour, we invert our own
     # selem before passing it to `ndi.grey_dilation`.
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
@@ -257,7 +257,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
 def opening(image, selem=None, out=None):
     """Return grayscale morphological opening of an image.
 
-    The morphological opening on an image is defined as an erosion followed by
+    The morphological opening of an image is defined as an erosion followed by
     a dilation. Opening can remove small bright spots (i.e. "salt") and connect
     small dark cracks. This tends to "open" up (dark) gaps between (bright)
     features.
@@ -307,7 +307,7 @@ def opening(image, selem=None, out=None):
 def closing(image, selem=None, out=None):
     """Return grayscale morphological closing of an image.
 
-    The morphological closing on an image is defined as a dilation followed by
+    The morphological closing of an image is defined as a dilation followed by
     an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
     small bright cracks. This tends to "close" up (dark) gaps between (bright)
     features.
@@ -321,7 +321,7 @@ def closing(image, selem=None, out=None):
         If None, use cross-shaped structuring element (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None,
-        is passed, a new array will be allocated.
+        a new array will be allocated.
 
     Returns
     -------
@@ -412,8 +412,7 @@ def white_tophat(image, selem=None, out=None):
         return out
     elif out is None:
         out = np.empty_like(image)
-    # work-around for NumPy deprecation warning for arithmetic
-    # operations on bool arrays
+    # promote bool to a type that allows arithmetic operations
     if isinstance(image, np.ndarray) and image.dtype == bool:
         image_ = image.view(dtype=np.uint8)
     else:
