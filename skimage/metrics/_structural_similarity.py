@@ -166,13 +166,15 @@ def structural_similarity(im1, im2,
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         if win_size == 7:
             raise ValueError(
-                "Image is too small to perform structural similarity analysis on," 
-                "please ensure that your images are at least 7x7.")
+                "Image is too small to perform similarity analysis on,"
+                "please ensure that your images ",
+                "are at least 7x7.")
         else:
             raise ValueError(
-                "win_size exceeds image extent.  If the input is a multichannel "
-                "(color) image, set channel_axis to the axis number corresponding "
-                "to the channels.")
+                "win_size exceeds image extent. ",
+                "If the input is a multichannel (color) image, "
+                "set channel_axis to the axis number "
+                "corresponding to the channels.")
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
