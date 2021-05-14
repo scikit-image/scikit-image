@@ -11,7 +11,7 @@ env:
 
 jobs:
   build_linux_37_and_above_wheels:
-    if: github.repository_owner == 'scikit-image'
+    if: github.repository_owner == 'viniciusdc'
     name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -54,7 +54,7 @@ jobs:
 
   build_macos_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: github.repository_owner == 'scikit-image'
+    if: github.repository_owner == 'viniciusdc'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -127,7 +127,7 @@ jobs:
 
   build_windows_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: github.repository_owner == 'scikit-image'
+    if: github.repository_owner == 'viniciusdc'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -215,9 +215,10 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           python setup.py sdist
-          twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
+          ls -la ${{ github.workspace }}/dist 
+          twine upload --repository testpypi ${{ github.workspace }}/dist/scikit-image-testviniver-${SK_VERSION:1}.tar.gz
           cd ${{ github.workspace }}/dist
-          twine upload *.whl
+          twine upload --repository testpypi *.whl
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
