@@ -227,6 +227,7 @@ def test_invalid_input():
     # size mismatch
     X = np.zeros((9, 9), dtype=np.double)
     Y = np.zeros((8, 8), dtype=np.double)
+    Z = np.zeros((6, 6), dtype=np.double)
     with testing.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent
@@ -239,3 +240,6 @@ def test_invalid_input():
         structural_similarity(X, X, K2=-0.1)
     with testing.raises(ValueError):
         structural_similarity(X, X, sigma=-1.0)
+    # image is too small
+    with testing.raises(ValueError):
+        structural_similarity(Z, Z)
