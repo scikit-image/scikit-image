@@ -113,7 +113,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         radiometric differences. If ``None``, the standard deviation of
         ``image`` will be used. Note that, if the image is of
         any `int` dtype, ``image`` will be converted using the `img_as_float`
-        function and thus the standard deviation is in respect to the
+        function and thus the standard deviation will be in
         range ``[0, 1]``. For more information on scikit-image's data
         type conversions and how images are rescaled in these conversions,
         see: https://scikit-image.org/docs/stable/user_guide/data_types.html.
