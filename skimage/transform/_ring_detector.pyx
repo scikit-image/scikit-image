@@ -48,6 +48,7 @@ from libc.math cimport sqrt, copysign, cos, abs, fabs, ceil, exp, log2, M_PI
 
 from cpython cimport bool
 
+import numpy as np
 cimport numpy as cnp
 
 from ..feature import hessian_matrix, hessian_matrix_eigvals
@@ -56,32 +57,28 @@ from scipy.optimize import leastsq
 
 cimport cython
 
-cnp_int = cnp.int32_t
-cnp_float = cnp.float32_t
-cnp_uint = cnp.uint32_t
-
 ctypedef Py_ssize_t INDX_t
 
 ctypedef unsigned short KINT_t
 
 ctypedef struct coord_t:
-    cnp_uint r
-    cnp_uint i
-    cnp_uint j
+    cnp.uint32_t r
+    cnp.uint32_t i
+    cnp.uint32_t j
 
 
-cdef cnp_float cos_q_pi = cos(M_PI/8)
+cdef double cos_q_pi = cos(M_PI/8)
 
 ###   (r,i,j)  <->  rij   ###
 ## set maximal possible image size and circle radii
-#cdef cnp_uint max_rads=256, max_rows=1456, max_cols=1936
+#cdef cnp.uint32_t max_rads=256, max_rows=1456, max_cols=1936
 # DEF MaxRads = 256 ## commented out as not used in the code
 DEF MaxRows = 1456
 DEF MaxCols = 1936
-cdef cnp_uint shiftRows = <cnp_uint>(fround(ceil(log2(MaxCols))))
-cdef cnp_uint shiftRads = shiftRows + <cnp_uint>(fround(ceil(log2(MaxRows))))
-cdef cnp_uint modCols = (1 << shiftRows) - 1
-cdef cnp_uint modRows = (1 << shiftRads) - 1
+cdef cnp.uint32_t shiftRows = <cnp.uint32_t>(fround(ceil(log2(MaxCols))))
+cdef cnp.uint32_t shiftRads = shiftRows + <cnp.uint32_t>(fround(ceil(log2(MaxRows))))
+cdef cnp.uint32_t modCols = (1 << shiftRows) - 1
+cdef double modRows = (1 << shiftRads) - 1
 
 # for the votes2rings function
 DEF One = 1
@@ -93,12 +90,12 @@ cnp.import_array()
 
 
 @cython.profile(False)
-cpdef inline cnp_uint coord2rij(cnp_uint r, cnp_uint i, cnp_uint j):
+cpdef inline cnp.uint32_t coord2rij(cnp.uint32_t r, cnp.uint32_t i, cnp.uint32_t j):
     return j + (i<<shiftRows) + (r<<shiftRads)
 
 
 @cython.profile(False)
-cpdef inline coord_t rij2coord(cnp_uint rij):
+cpdef inline coord_t rij2coord(cnp.uint32_t rij):
     cdef coord_t coords
     coords.i = (rij&modRows)>>shiftRows
     coords.j = rij&modCols
@@ -107,11 +104,11 @@ cpdef inline coord_t rij2coord(cnp_uint rij):
 
 
 @cython.profile(False)
-cdef inline INDX_t fround(cnp_float x):
+cdef inline INDX_t fround(double x):
     return <INDX_t>(x+.5) if x>=0. else <INDX_t>(x-.5)
 
 
-cpdef inline least_principal_direction(cnp_float Lrr, cnp_float Lcc, cnp_float Lrc):
+cpdef inline least_principal_direction(double Lrr, double Lcc, double Lrc):
     """
     Compute the [cos , sin, tan] of the angle formed
     by the eigen-vector of the Hessian Matrix,
@@ -124,7 +121,7 @@ cpdef inline least_principal_direction(cnp_float Lrr, cnp_float Lcc, cnp_float L
 
     Note: input are expected to be single numbers (not arrays)
     """
-    cdef cnp_float D, tangent, denominator
+    cdef double D, tangent, denominator
     if Lrc==0:
         return (1.,0.) if Lrr<Lcc else (0.,1.)
     elif Lrc>0:
@@ -185,24 +182,24 @@ cpdef inline INDX_t [:, :] vote4(int Rmin, int x0, int y0, int Rmax, int x1,
     return coords
 
 
-cpdef cnp_float [:] get_1d_gaussian_kernel_r(cnp_uint r):
+cpdef double [:] get_1d_gaussian_kernel_r(cnp.uint32_t r):
     cdef:
-        cnp_float sigma
-        cnp_uint ksize
-        cnp_uint cntr
-        cnp_float [:] kernel
-        cnp_float scale2x
+        double sigma
+        cnp.uint32_t ksize
+        cnp.uint32_t cntr
+        double [:] kernel
+        double scale2x
         INDX_t i
 
     sigma = .05*r + .25
     ## based on opencv: createGaussianFilter (smooth.cpp)
     ## NOTE: normalised such that the cntr is unity
-    #cdef cnp_uint ksize = <cnp_uint>(8*sigma + 1) | 1 # bitwise OR with 1 adds one to even int
+    #cdef cnp.uint32_t ksize = <cnp.uint32_t>(8*sigma + 1) | 1 # bitwise OR with 1 adds one to even int
     ## note that I take half the kernel size (for less computations):
-    ksize = <cnp_uint>(4*sigma + 1) | 1 # bitwise OR with 1 adds one to even int
+    ksize = <cnp.uint32_t>(4*sigma + 1) | 1 # bitwise OR with 1 adds one to even int
     cntr = ksize//2
     #k = cv2.getGaussianKernel(ksize, sigma, cv2.CV_32F)
-    kernel = np.empty((ksize), cnp_float)
+    kernel = np.empty((ksize), dtype=double)
     scale2x = -0.5/sigma**2
 
     for i in range(ksize):
@@ -226,26 +223,25 @@ cpdef cnp_float [:] get_1d_gaussian_kernel_r(cnp_uint r):
 ##              (based on 40% of 2*pi*r) perform non-maximum suppresion
 ##              (in a 3x3x3 cube)
 
-cpdef ridge_circle_hough_transform(cnp_float [:,:] Lrr,
-                             cnp_float [:,:] Lcc,
-                             cnp_float [:,:] Lrc,
-                             cnp_float [:,:] curv,
-                             cnp_float curv_thresh=-20,
-                             cnp_uint Rmin=5,
-                             cnp_uint Rmax=55):
+cpdef ridge_circle_hough_transform(double [:,:] Lrr,
+                             double [:,:] Lcc,
+                             double [:,:] Lrc,
+                             double [:,:] curv,
+                             double curv_thresh=-20,
+                             cnp.uint32_t Rmin=5,
+                             cnp.uint32_t Rmax=55):
 
     assert Lrr is not None and Lcc is not None and Lrc is not None and\
             curv is not None
 
     cdef:
         INDX_t rij, i, j, r, r_, x, y,
-        cnp_uint counter, Nrads, Nrows, Ncols
+        cnp.uint32_t counter, Nrads, Nrows, Ncols
         int x0, y0, x1, y1
         char sign
-        cnp_float cosQ, sinQ
+        double cosQ, sinQ
         dict directed_ridges
-        #cnp_float [:,:] directed_ridges = np.empty((Nrows*Ncols,4), cnp_float)
-        np.ndarray[cnp_uint ,ndim=1] votes
+        cnp.ndarray[ndim=1, dtype=cnp.uint32_t] votes
         INDX_t [:,:] vote4xy
 
     Rmin-=1
@@ -255,7 +251,7 @@ cpdef ridge_circle_hough_transform(cnp_float [:,:] Lrr,
     Nrads = Rmax-Rmin+1
     directed_ridges = {}
     counter = 0
-    votes = np.empty(Nrows*Ncols*Nrads*2, dtype=cnp_uint)
+    votes = np.empty(Nrows*Ncols*Nrads*2, dtype=cnp.uint32_t)
 
     # iterate over all image entries (principal curv in this case).
     # avoid dealing with the boundaries by iterating over all but the entries
@@ -300,8 +296,8 @@ cpdef ridge_circle_hough_transform(cnp_float [:,:] Lrr,
             # 20130405: corrected erraneous range(-1,2)
             # for the inwards and outwards without the zero (inplace)
                 for r_ in range(Nrads):
-                    x = <cnp_uint>(i + sign*vote4xy[r_,0])
-                    y = <cnp_uint>(j + sign*vote4xy[r_,1])
+                    x = <cnp.uint32_t>(i + sign*vote4xy[r_,0])
+                    y = <cnp.uint32_t>(j + sign*vote4xy[r_,1])
                     r = r_+Rmin
                     ## do not need to check for above origin due to the unsign:
                     #if (x<0) | (x>=Nrows) | (y<0) | (y>=Ncols): break
@@ -318,10 +314,10 @@ cpdef ridge_circle_hough_transform(cnp_float [:,:] Lrr,
     return {'directed_ridges':directed_ridges, 'votes':votes}
 
 
-cpdef votes2rings(cnp_uint [:] votes,
-                  cnp_uint Rmin, cnp_uint Rmax,
-                  cnp_uint Nrows, cnp_uint Ncols,
-                  cnp_uint vote_thresh=1, cnp_float circle_thresh=M_PI):
+cpdef votes2rings(cnp.uint32_t [:] votes,
+                  cnp.uint32_t Rmin, cnp.uint32_t Rmax,
+                  cnp.uint32_t Nrows, cnp.uint32_t Ncols,
+                  cnp.uint32_t vote_thresh=1, double circle_thresh=M_PI):
     """
     # A function which merges the Hough Space construction, smoothing, and
     # local maxima finding;
@@ -356,21 +352,21 @@ cpdef votes2rings(cnp_uint [:] votes,
     assert vote_thresh>0, 'vote_thresh must be a positive integer, got %s' % \
                                                                    vote_thresh
     cdef:
-        cnp_uint votes_size, R, r, i, j, x, y, Ro
+        cnp.uint32_t votes_size, R, r, i, j, x, y, Ro
         unsigned char Rmod, Romod, R_
-        cnp_uint hot, n, rij, rij_nxt
-        cnp_uint [:, :, :] hough_slice # a.k.a. sparse_3d_Hough
-        cnp_float [:, :, :] smoothed_slice # a.k.a. smoothed_hough_array
-        cnp_uint [:, :, :] hough_hotspots, hough_modified
-        cnp_uint [:] hough_counter, hotspots_counter
+        cnp.uint32_t hot, n, rij, rij_nxt
+        cnp.uint32_t [:, :, :] hough_slice # a.k.a. sparse_3d_Hough
+        double [:, :, :] smoothed_slice # a.k.a. smoothed_hough_array
+        cnp.uint32_t [:, :, :] hough_hotspots, hough_modified
+        cnp.uint32_t [:] hough_counter, hotspots_counter
         coord_t coords
-        cnp_float ksigma, rate, kscale2x, value
-        cnp_uint ksize, kcentre
-        cnp_float [:] kernel
-        cnp_uint [:, :] rings
-        cnp_uint ring_counter
+        double ksigma, rate, kscale2x, value
+        cnp.uint32_t ksize, kcentre
+        double [:] kernel
+        cnp.uint32_t [:, :] rings
+        cnp.uint32_t ring_counter
         INDX_t di, dj, k, ki, kj
-        cnp_float vote
+        double vote
         bool local_max
 
     Rmin-=1
@@ -379,22 +375,22 @@ cpdef votes2rings(cnp_uint [:] votes,
     rate = .05 # 0.05 in the Afik (2015), SciRep; doi: 10.1038/srep13584
     ksigma = rate*Rmax + .25
     ## note that I take half the kernel size (for less computations):
-    ksize = <cnp_uint>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
+    ksize = <cnp.uint32_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
     # even int
-    kernel = np.empty((ksize),cnp_float)
+    kernel = np.empty((ksize), dtype=double)
 
     votes_size = votes.size
     #One,Two,Three = 1,2,3
     R = Rmin
     Rmod = R%Three
     Nrads = Rmax-Rmin+1
-    hough_slice = np.zeros((Three,Nrows,Ncols), cnp_uint)
-    smoothed_slice = np.zeros_like(hough_slice, cnp_float)
-    hough_modified = np.empty((Three,Nrows*Ncols,2),cnp_uint)
-    hough_counter = np.zeros((3),cnp_uint)
-    hough_hotspots = np.empty((Three,Nrows*Ncols,2),cnp_uint)
-    hotspots_counter =  np.zeros((3),cnp_uint)
-    rings = np.empty((MaxRingsNo,3),cnp_uint)
+    hough_slice = np.zeros((Three, Nrows, Ncols), dtype=cnp.uint32_t)
+    smoothed_slice = np.zeros_like(hough_slice, dtype=double)
+    hough_modified = np.empty((Three, Nrows*Ncols,2), dtype=cnp.uint32_t)
+    hough_counter = np.zeros((3), dtype=cnp.uint32_t)
+    hough_hotspots = np.empty((Three, Nrows*Ncols,2), dtype=cnp.uint32_t)
+    hotspots_counter = np.zeros((3), dtype=cnp.uint32_t)
+    rings = np.empty((MaxRingsNo, 3), dtype=cnp.uint32_t)
     ring_counter = 0
 
     rij = votes[0]
@@ -426,9 +422,9 @@ cpdef votes2rings(cnp_uint [:] votes,
             ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
-            #cdef cnp_uint ksize = <cnp_uint>(8*sigma + 1) | 1
+            #cdef cnp.uint32_t ksize = <cnp.uint32_t>(8*sigma + 1) | 1
             ## note that I take half the kernel size (for less computations):
-            ksize = <cnp_uint>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
+            ksize = <cnp.uint32_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
             # even int
             kcentre = ksize//2
             kscale2x = -0.5/ksigma**2
@@ -489,12 +485,12 @@ cpdef votes2rings(cnp_uint [:] votes,
             ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
-            #cdef cnp_uint ksize = <cnp_uint>(8*sigma + 1) | 1
+            #cdef cnp.uint32_t ksize = <cnp.uint32_t>(8*sigma + 1) | 1
             ## note that I take half the kernel size (for less computations):
-            ksize = <cnp_uint>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
+            ksize = <cnp.uint32_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
             # even int
             kcentre = ksize//2
-            #kernel = np.empty((ksize),cnp_float)
+            #kernel = np.empty((ksize),double)
             kscale2x = -0.5/ksigma**2
 
             for ki in range(ksize):
@@ -563,7 +559,7 @@ cpdef votes2rings(cnp_uint [:] votes,
     # based on opencv: createGaussianFilter (smooth.cpp)
     # NOTE: normalised such that the cntr is unity
     # note that I take half the kernel size (for less computations):
-    ksize = <cnp_uint>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
+    ksize = <cnp.uint32_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to
                                       # even int
     kcentre = ksize // 2
     kscale2x = -0.5 / ksigma**2
@@ -619,23 +615,23 @@ cpdef votes2rings(cnp_uint [:] votes,
     return rings[:ring_counter, ...]
 
 
-cpdef votes2array(cnp_uint [:] votes,
-                  cnp_uint Rmin, cnp_uint Rmax,
-                  cnp_uint Nrows, cnp_uint Ncols,
-                  cnp_uint vote_thresh=1):
+cpdef votes2array(cnp.uint32_t [:] votes,
+                  cnp.uint32_t Rmin, cnp.uint32_t Rmax,
+                  cnp.uint32_t Nrows, cnp.uint32_t Ncols,
+                  cnp.uint32_t vote_thresh=1):
 
     cdef:
         INDX_t r, r_, i, j, rij, rij_, Nrads, n, voted4counter, votes_size
-        cnp_uint [:, :, :] sparse_3d_Hough
-        cnp_uint [:, :] voted4
+        cnp.uint32_t [:, :, :] sparse_3d_Hough
+        cnp.uint32_t [:, :] voted4
         coord_t coords
 
     Rmin -= 1
     Rmax += 1
     votes_size = votes.size
     Nrads = Rmax - Rmin+1
-    sparse_3d_Hough = np.zeros((Nrads, Nrows, Ncols), cnp_uint)
-    voted4 = np.empty((Nrads, 3), cnp_uint)
+    sparse_3d_Hough = np.zeros((Nrads, Nrows, Ncols), dtype=cnp.uint32_t)
+    voted4 = np.empty((Nrads, 3), dtype=cnp.uint32_t)
 
     n = 0
     voted4counter = 0
@@ -668,16 +664,16 @@ cpdef votes2array(cnp_uint [:] votes,
     return sparse_3d_Hough, votes[:voted4counter]
 
 
-cpdef smooth_voted4(cnp_uint [:, :, :] sparse_3d_Hough, cnp_uint [:] voted4,
-                    cnp_uint Rmin):
+cpdef smooth_voted4(cnp.uint32_t [:, :, :] sparse_3d_Hough, cnp.uint32_t [:] voted4,
+                    cnp.uint32_t Rmin):
 
     cdef:
-        cnp_uint x, y, r, r_, i, j, ki, kj, rij, voted4_size
-        cnp_float value
-        cnp_uint Nrows, Ncols, Nrads
-        cnp_float [:, :, :] smoothed_hough_array
-        cnp_float [:] kernel
-        cnp_uint width, ksize
+        cnp.uint32_t x, y, r, r_, i, j, ki, kj, rij, voted4_size
+        double value
+        cnp.uint32_t Nrows, Ncols, Nrads
+        double [:, :, :] smoothed_hough_array
+        double [:] kernel
+        cnp.uint32_t width, ksize
         coord_t coords
 
     Rmin -= 1
@@ -686,7 +682,7 @@ cpdef smooth_voted4(cnp_uint [:, :, :] sparse_3d_Hough, cnp_uint [:] voted4,
     Nrads = sparse_3d_Hough.shape[0]
 
     voted4_size = voted4.size
-    smoothed_hough_array = np.empty_like(sparse_3d_Hough, cnp_float)
+    smoothed_hough_array = np.empty_like(sparse_3d_Hough, dtype=double)
     kernels_list = [get_1d_gaussian_kernel_r(r+Rmin) for r in range(Nrads)]
     r_ = 0
     kernel = kernels_list[r_]
@@ -720,21 +716,21 @@ cpdef smooth_voted4(cnp_uint [:, :, :] sparse_3d_Hough, cnp_uint [:] voted4,
     return smoothed_hough_array
 
 
-cpdef get_circles(cnp_float [:, :, :] sparse_3d_Hough, cnp_uint [:] voted4,
-                  cnp_uint Rmin, cnp_float circle_thresh=M_PI):
+cpdef get_circles(double [:, :, :] sparse_3d_Hough, cnp.uint32_t [:] voted4,
+                  cnp.uint32_t Rmin, double circle_thresh=M_PI):
 
     assert sparse_3d_Hough is not None
     cdef:
-        cnp_uint rij, i, j, r, r_, n, voted4_size, ring_counter
+        cnp.uint32_t rij, i, j, r, r_, n, voted4_size, ring_counter
         int di, dj, dk, dx
-        cnp_float vote
-        cnp_uint [:, :] rings
+        double vote
+        cnp.uint32_t [:, :] rings
         bool local_max
         coord_t coords
 
     dx=1
     voted4_size = voted4.size
-    rings = np.empty((voted4_size,3),cnp_uint)
+    rings = np.empty((voted4_size,3), dtype=cnp.uint32_t)
     ring_counter = 0
     #
     ###   find local max in the 3D sparse Hough space   ###
@@ -810,9 +806,9 @@ def fitCircle(coords, i, j):
     return centre, R
 
 
-cpdef _aux_subpxl_circles(cnp_uint [:, :] rings, directed_ridges,
-                   cnp_uint Nrows, cnp_uint Ncols, cnp_uint Rmin, cnp_uint Rmax,
-                   cnp_uint thickness=3):
+cpdef _aux_subpxl_circles(cnp.uint32_t [:, :] rings, directed_ridges,
+                   cnp.uint32_t Nrows, cnp.uint32_t Ncols, cnp.uint32_t Rmin, cnp.uint32_t Rmax,
+                   cnp.uint32_t thickness=3):
     ###   sub-pxl correction (if requested)   ###
     #
     # (i)  for each local max of the 3D Hough space get the ridges pxls within
@@ -823,18 +819,18 @@ cpdef _aux_subpxl_circles(cnp_uint [:, :] rings, directed_ridges,
     #   and/or mean squared error.
 
     cdef:
-        np.ndarray[np.uint8_t, ndim=2, cast=True] img_mask, ring_mask
-        np.ndarray[INDX_t, ndim=2] coords  # keep numpy array for the newaxis
+        cnp.ndarray[ndim=2, dtype=cnp.uint8_t, cast=True] img_mask, ring_mask
+        cnp.ndarray[ndim=2, dtype=INDX_t] coords  # keep numpy array for the newaxis
         INDX_t i,j,r,n, rings_size
         INDX_t row_min,row_max, col_min, col_max
-        cnp_float Tilt, R
+        double Tilt, R
         #tuple cntr, MajAx
-        cnp_float [:,:] rings_subpxl
+        double [:,:] rings_subpxl
         bool subpxled
 
     rings_size = rings.shape[0]
     img_mask = np.zeros((Nrows, Ncols), np.uint8)
-    rings_subpxl = np.empty_like(rings,cnp_float)
+    rings_subpxl = np.empty_like(rings, dtype=double)
 
     for (i,j) in directed_ridges.iterkeys():
         img_mask[i,j] += 1
@@ -890,17 +886,17 @@ cpdef _aux_subpxl_circles(cnp_uint [:, :] rings, directed_ridges,
     return rings_subpxl
 
 
-cpdef _aux_directed_ridge_detector(cnp_float [:,:] Lrr,
-                                   cnp_float [:,:] Lcc,
-                                   cnp_float [:,:] Lrc,
-                                   cnp_float [:,:] curv,
-                                   cnp_float curv_thresh=-20):
+cpdef _aux_directed_ridge_detector(double [:,:] Lrr,
+                                   double [:,:] Lcc,
+                                   double [:,:] Lrc,
+                                   double [:,:] curv,
+                                   double curv_thresh=-20):
 
     cdef:
         INDX_t i, j,
-        cnp_uint Nrows, Ncols
+        cnp.uint32_t Nrows, Ncols
         char sign
-        cnp_float cosQ, sinQ
+        double cosQ, sinQ
         dict directed_ridges
 
     Nrows = curv.shape[0]
