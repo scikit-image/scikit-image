@@ -164,7 +164,7 @@ def structural_similarity(im1, im2,
             win_size = 7   # backwards compatibility
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
-        if win_size == 7:
+        if win_size == 7 and not gaussian_weights:
             raise ValueError(
                 "Image is too small to perform similarity analysis on,"
                 "please ensure that your images ",
