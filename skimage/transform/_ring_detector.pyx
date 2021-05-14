@@ -44,8 +44,7 @@
 ################################################################################
 
 from __future__ import division
-from libc.math cimport sqrt, copysign, cos, abs, fabs, ceil, exp, log2
-from libc.math cimport M_PI as pi
+from libc.math cimport sqrt, copysign, cos, abs, fabs, ceil, exp, log2, M_PI
 from .._shared.fused_numerics cimport np_floats
 
 from cpython cimport bool
@@ -76,7 +75,7 @@ ctypedef struct coord_t:
     RIJ_t i
     RIJ_t j
 
-cdef np_floats cos_q_pi = cos(pi/8)
+cdef np_floats cos_q_pi = cos(M_PI/8)
 
 ###   (r,i,j)  <->  rij   ###
 ## set maximal possible image size and circle radii
@@ -322,7 +321,7 @@ cpdef ridge_circle_hough_transform(np_floats [:,:] Lrr,
 cpdef votes2rings(RIJ_t [:] votes,
                   RIJ_t Rmin, RIJ_t Rmax,
                   RIJ_t Nrows, RIJ_t Ncols,
-                  RIJ_t vote_thresh=1, np_floats circle_thresh=pi):
+                  RIJ_t vote_thresh=1, np_floats circle_thresh=M_PI):
     """
     # A function which merges the Hough Space construction, smoothing, and
     # local maxima finding;
@@ -722,7 +721,7 @@ cpdef smooth_voted4(RIJ_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
 
 
 cpdef get_circles(np_floats [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
-                  RIJ_t Rmin, np_floats circle_thresh=pi):
+                  RIJ_t Rmin, np_floats circle_thresh=M_PI):
 
     assert sparse_3d_Hough is not None
     cdef:
@@ -1004,7 +1003,7 @@ def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
 
 
 def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
-                          hough_thresh=[3, 0.33 * 2 * pi], dr=3):
+                          hough_thresh=[3, 0.33 * 2 * M_PI], dr=3):
     """
     Perform a circle Hough transform, direction aided, based on the ridge
     binary image.
