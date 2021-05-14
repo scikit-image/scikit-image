@@ -1,6 +1,7 @@
-# cython: boundscheck=False
-# cython: wraparound=False
-# cython: profile=False
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: profile=False
 
 ################################################################################
 # filename: ridge_directed_ring_detector.pyx
@@ -45,6 +46,7 @@
 from __future__ import division
 from libc.math cimport sqrt, copysign, cos, abs, fabs, ceil, exp, log2
 from libc.math cimport M_PI as pi
+from .._shared.fused_numerics cimport np_floats
 
 from cpython cimport bool
 
@@ -59,7 +61,7 @@ import cython
 cimport cython
 
 DTYPE = np.float32
-ctypedef np.float32_t DTYPE_t
+ctypedef np.float32_t np_floats
 
 RIJ = np.uint32
 ctypedef np.uint32_t RIJ_t
@@ -74,7 +76,7 @@ ctypedef struct coord_t:
     RIJ_t i
     RIJ_t j
 
-cdef DTYPE_t cos_q_pi = cos(pi/8)
+cdef np_floats cos_q_pi = cos(pi/8)
 
 ###   (r,i,j)  <->  rij   ###
 ## set maximal possible image size and circle radii
@@ -84,8 +86,8 @@ DEF MaxRows = 1456
 DEF MaxCols = 1936
 cdef RIJ_t shiftRows = <RIJ_t>(fround(ceil(log2(MaxCols))))
 cdef RIJ_t shiftRads = shiftRows + <RIJ_t>(fround(ceil(log2(MaxRows))))
-cdef RIJ_t modCols = (1<<shiftRows)-1
-cdef RIJ_t modRows = (1<<shiftRads)-1
+cdef RIJ_t modCols = (1 << shiftRows) - 1
+cdef RIJ_t modRows = (1 << shiftRads) - 1
 
 # for the votes2rings function
 DEF One = 1
@@ -106,23 +108,24 @@ cpdef inline coord_t rij2coord(RIJ_t rij):
     return coords
 
 @cython.profile(False)
-cdef inline INDX_t fround(DTYPE_t x):
+cdef inline INDX_t fround(np_floats x):
     return <INDX_t>(x+.5) if x>=0. else <INDX_t>(x-.5)
 
 
-@cython.cdivision(True)
-cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
+cpdef inline least_principal_direction(np_floats Lrr, np_floats Lcc, np_floats Lrc):
     """
-    compute the [cos , sin, tan] of the angle formed
+    Compute the [cos , sin, tan] of the angle formed
     by the eigen-vector of the Hessian Matrix,
     corresponding to the smaller eigen-value
 
-    Inputs:
-        Lrr,Lcc,Lrc are the Hessian matrix components
+    Parameters
+    ----------
+    Lrr, Lcc, Lrc :
+        Hessian matrix components
 
     Note: input are expected to be single numbers (not arrays)
     """
-    cdef DTYPE_t D, tangent, denominator
+    cdef np_floats D, tangent, denominator
     if Lrc==0:
         return (1.,0.) if Lrr<Lcc else (0.,1.)
     elif Lrc>0:
@@ -183,14 +186,13 @@ cpdef inline INDX_t [:, :] vote4(int Rmin, int x0, int y0, int Rmax, int x1,
     return coords
 
 
-@cython.cdivision(True)
-cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
+cpdef np_floats [:] get_1d_gaussian_kernel_r(RIJ_t r):
     cdef:
-        DTYPE_t sigma
+        np_floats sigma
         RIJ_t ksize
         RIJ_t cntr
-        DTYPE_t [:] kernel
-        DTYPE_t scale2x
+        np_floats [:] kernel
+        np_floats scale2x
         INDX_t i
 
     sigma = .05*r + .25
@@ -225,11 +227,11 @@ cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
 ##              (based on 40% of 2*pi*r) perform non-maximum suppresion
 ##              (in a 3x3x3 cube)
 
-cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
-                             DTYPE_t [:,:] Lcc,
-                             DTYPE_t [:,:] Lrc,
-                             DTYPE_t [:,:] curv,
-                             DTYPE_t curv_thresh=-20,
+cpdef ridge_circle_hough_transform(np_floats [:,:] Lrr,
+                             np_floats [:,:] Lcc,
+                             np_floats [:,:] Lrc,
+                             np_floats [:,:] curv,
+                             np_floats curv_thresh=-20,
                              RIJ_t Rmin=5,
                              RIJ_t Rmax=55):
 
@@ -241,9 +243,9 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
         RIJ_t counter, Nrads, Nrows, Ncols
         int x0, y0, x1, y1
         char sign
-        DTYPE_t cosQ, sinQ
+        np_floats cosQ, sinQ
         dict directed_ridges
-        #DTYPE_t [:,:] directed_ridges = np.empty((Nrows*Ncols,4), DTYPE)
+        #np_floats [:,:] directed_ridges = np.empty((Nrows*Ncols,4), DTYPE)
         np.ndarray[RIJ_t ,ndim=1] votes
         INDX_t [:,:] vote4xy
 
@@ -317,11 +319,10 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr,
     return {'directed_ridges':directed_ridges, 'votes':votes}
 
 
-@cython.cdivision(True)
 cpdef votes2rings(RIJ_t [:] votes,
                   RIJ_t Rmin, RIJ_t Rmax,
                   RIJ_t Nrows, RIJ_t Ncols,
-                  RIJ_t vote_thresh=1, DTYPE_t circle_thresh=pi):
+                  RIJ_t vote_thresh=1, np_floats circle_thresh=pi):
     """
     # A function which merges the Hough Space construction, smoothing, and
     # local maxima finding;
@@ -360,17 +361,17 @@ cpdef votes2rings(RIJ_t [:] votes,
         unsigned char Rmod, Romod, R_
         RIJ_t hot, n, rij, rij_nxt
         RIJ_t [:, :, :] hough_slice # a.k.a. sparse_3d_Hough
-        DTYPE_t [:, :, :] smoothed_slice # a.k.a. smoothed_hough_array
+        np_floats [:, :, :] smoothed_slice # a.k.a. smoothed_hough_array
         RIJ_t [:, :, :] hough_hotspots, hough_modified
         RIJ_t [:] hough_counter, hotspots_counter
         coord_t coords
-        DTYPE_t ksigma, rate, kscale2x, value
+        np_floats ksigma, rate, kscale2x, value
         RIJ_t ksize, kcentre
-        DTYPE_t [:] kernel
+        np_floats [:] kernel
         RIJ_t [:, :] rings
         RIJ_t ring_counter
         INDX_t di, dj, k, ki, kj
-        DTYPE_t vote
+        np_floats vote
         bool local_max
 
     Rmin-=1
@@ -619,7 +620,6 @@ cpdef votes2rings(RIJ_t [:] votes,
     return rings[:ring_counter, ...]
 
 
-@cython.cdivision(True)
 cpdef votes2array(RIJ_t [:] votes,
                   RIJ_t Rmin, RIJ_t Rmax,
                   RIJ_t Nrows, RIJ_t Ncols,
@@ -669,16 +669,15 @@ cpdef votes2array(RIJ_t [:] votes,
     return sparse_3d_Hough, votes[:voted4counter]
 
 
-@cython.cdivision(True)
 cpdef smooth_voted4(RIJ_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
                     RIJ_t Rmin):
 
     cdef:
         RIJ_t x, y, r, r_, i, j, ki, kj, rij, voted4_size
-        DTYPE_t value
+        np_floats value
         RIJ_t Nrows, Ncols, Nrads
-        DTYPE_t [:,:,:] smoothed_hough_array
-        DTYPE_t [:] kernel
+        np_floats [:, :, :] smoothed_hough_array
+        np_floats [:] kernel
         RIJ_t width, ksize
         coord_t coords
 
@@ -722,15 +721,14 @@ cpdef smooth_voted4(RIJ_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
     return smoothed_hough_array
 
 
-@cython.cdivision(True)
-cpdef get_circles(DTYPE_t [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
-                  RIJ_t Rmin, DTYPE_t circle_thresh=pi):
+cpdef get_circles(np_floats [:, :, :] sparse_3d_Hough, RIJ_t [:] voted4,
+                  RIJ_t Rmin, np_floats circle_thresh=pi):
 
     assert sparse_3d_Hough is not None
     cdef:
         RIJ_t rij, i, j, r, r_, n, voted4_size, ring_counter
         int di, dj, dk, dx
-        DTYPE_t vote
+        np_floats vote
         RIJ_t [:, :] rings
         bool local_max
         coord_t coords
@@ -830,9 +828,9 @@ cpdef _aux_subpxl_circles(RIJ_t [:, :] rings, directed_ridges,
         np.ndarray[INDX_t, ndim=2] coords # keep numpy array for the newaxis
         INDX_t i,j,r,n, rings_size
         INDX_t row_min,row_max, col_min, col_max
-        DTYPE_t Tilt, R
+        np_floats Tilt, R
         #tuple cntr, MajAx
-        DTYPE_t [:,:] rings_subpxl
+        np_floats [:,:] rings_subpxl
         bool subpxled
 
     rings_size = rings.shape[0]
@@ -893,17 +891,17 @@ cpdef _aux_subpxl_circles(RIJ_t [:, :] rings, directed_ridges,
     return rings_subpxl
 
 
-cpdef _aux_directed_ridge_detector(DTYPE_t [:,:] Lrr,
-                                   DTYPE_t [:,:] Lcc,
-                                   DTYPE_t [:,:] Lrc,
-                                   DTYPE_t [:,:] curv,
-                                   DTYPE_t curv_thresh=-20):
+cpdef _aux_directed_ridge_detector(np_floats [:,:] Lrr,
+                                   np_floats [:,:] Lcc,
+                                   np_floats [:,:] Lrc,
+                                   np_floats [:,:] curv,
+                                   np_floats curv_thresh=-20):
 
     cdef:
         INDX_t i, j,
         RIJ_t Nrows, Ncols
         char sign
-        DTYPE_t cosQ, sinQ
+        np_floats cosQ, sinQ
         dict directed_ridges
 
     Nrows = curv.shape[0]
