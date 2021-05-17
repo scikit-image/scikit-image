@@ -1016,6 +1016,24 @@ def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
         Thresholds for the Hough transform: vote_thresh and circle_thresh.
     dr : float
         Half-thickness of the ring to fit to an ellipse.
+
+    References
+    ----------
+    [1] Afik, E. Robust and highly performant ring detection algorithm for 3d
+        particle tracking using 2d microscope imaging. Sci. Rep. 5,
+        13584; doi: 10.1038/srep13584 (2015).
     """
 
-    return sigma, radii, thresholds, dr
+    #ridge_hough = RidgeHoughTransform(image)
+    #ridge_hough.params['sigma'] = sigma
+    #ridge_hough.params['Rmin'] = r_min
+    #ridge_hough.params['Rmax'] = r_max
+    #ridge_hough.params['curv_thresh'] = curv_thresh
+    #ridge_hough.params['circle_thresh'] = circle_thresh
+    #ridge_hough.params['vote_thresh'] = vote_thresh
+    #ridge_hough.params['dr'] = dr
+    #ridge_hough.img_preprocess()
+    #ridge_hough.rings_detection()
+    #detected_rings = ridge_hough.output['rings']
+
+    return detected_rings
