@@ -623,7 +623,8 @@ class ProjectiveTransform(GeometricTransform):
         ...           [7, 8, 9]]
         
         >>> A = ProjectiveTransform(matrix)  # instance created.
-        B=A(coords)    #calling instance A as a function
+        >>> B = A(coords) # calling instance A as a function
+        >>> print(B)
                         with "coords" as argument.
 
         """
