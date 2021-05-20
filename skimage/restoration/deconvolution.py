@@ -6,6 +6,8 @@ import numpy.random as npr
 from scipy.signal import convolve
 
 from . import uft
+from .._shared.fft import fftmodule as fft
+from ..util import crop
 
 __keywords__ = "restoration, image, deconvolution"
 
@@ -381,5 +383,107 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
+
+    return im_deconv
+
+
+def gaussian_natural_prior(image, psf, smoothness_weight=0.01, clip=True,
+                           pad_width=0):
+    """ Deconvolution using Gaussian natural image priors.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input degraded image.
+    psf : ndarray
+        The point spread function.
+    smoothness_weight : float, optional
+        The smoothness weight defines how much weight the Gaussian prior is
+        given in the process. No prior is used when smoothness_weight=0.
+    clip : boolean, optional
+        True by default. If true, pixel value of the result above 1 or
+        under 0 are thresholded for skimage pipeline compatibility.
+    pad_width : int or tuple of int, optional
+        If pad_width > 0, the image will be extended by `pad_width` along each
+        boundary by use of `numpy.pad` with `mode='reflect'`. This is done to
+        reduce artifacts that can arise near the edges of the deconvolved image
+        due to the periodic nature of the discrete Fourier transform.
+
+    Returns
+    -------
+    im_deconv : ndarray
+        The deconvolved image.
+
+    Examples
+    --------
+    >>> from skimage import img_as_float, data, restoration
+    >>> from scipy.ndimage import convolve
+    >>> camera = img_as_float(data.camera())
+    >>> psf = np.ones((5, 5)) / 25
+    >>> camera = convolve(camera, psf)
+    >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+    >>> deconvolved = restoration.gaussian_natural_prior(camera, psf)
+
+    Notes
+    -----
+    This algorithm solves the deconvolution in the frequency domain. Artefacts
+    like 'ringing' on sharp transitions are strongly reduced in comparison to
+    other deconvolution strategies.
+    The smoothness weight needs to be estimated by trial and error. See [1-3]
+    for guidance.
+
+    References
+    ----------
+    .. [1] http://groups.csail.mit.edu/graphics/CodedAperture/
+    .. [2] Levin, A., Fergus, R., Durand, F., & Freeman, W. T. (2007).
+           Deconvolution using natural image priors.
+           Massachusetts Institute of Technology,
+           Computer Science and Artificial Intelligence Laboratory, 3.
+    .. [3] Levin, A., Fergus, R., Durand, F., & Freeman, W. T. (2007).
+           Image and depth from a conventional camera with a coded aperture.
+           ACM transactions on graphics (TOG), 26(3), 70-es.
+    """
+    float_type = np.promote_types(image.dtype, np.float32)
+    image = image.astype(float_type, copy=False)
+    psf = psf.astype(float_type, copy=False)
+    if image.ndim != psf.ndim:
+        raise ValueError(
+            "psf and image must have an equal number of dimensions"
+        )
+
+    # pad to reduce boundary artifacts
+    image = np.pad(image, pad_width, mode='reflect')
+    shape = image.shape
+
+    # sum of squared first order differences along each axis
+    ndim = psf.ndim
+    G = 0
+    d_shape = [1, ] * ndim
+    for n in range(ndim):
+        if n == ndim - 1:
+            D = fft.rfft([-1, 1], n=shape[n])
+        else:
+            D = fft.fft([-1, 1], n=shape[n])
+        d_shape[n] = D.size
+        D = D.reshape(d_shape)  # reshape 1D array for broadcasting
+        G = G + np.conj(D) * D
+        d_shape[n] = 1
+
+    F = fft.rfftn(psf, s=shape)
+    F_conj = np.conj(F)
+    A = F_conj * F + smoothness_weight * G
+    b = F_conj * fft.rfft2(image)
+
+    X = np.divide(b, A)
+    x = np.real(fft.irfft2(X))
+
+    # recenter the deconvolved image
+    shift = tuple([(s - 1) // 2 for s in psf.shape])
+    im_deconv = np.roll(x, shift=shift, axis=range(psf.ndim))
+    # remove any padding that was previously added
+    im_deconv = crop(im_deconv, pad_width)
+    if clip:
+        im_deconv[im_deconv > 1] = 1
+        im_deconv[im_deconv < 0] = 0
 
     return im_deconv

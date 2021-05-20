@@ -143,6 +143,8 @@ registry = {
     "restoration/tests/astronaut_rl.npy":
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
+    "restoration/tests/astronaut_dnp.npy":
+        "5a9d319ab7749c369f5a670d684b9d56d619b8c8e6a326b14879baa4bba072f7",
     "restoration/tests/camera_unsup.npy": "401e512f7becec46c3379f34dbd7956a02a4f2e68f802a8d5bd605d355588880",
     "restoration/tests/camera_unsup2.npy": "cc4b31ea2a6ebe07bc7529174677b3e94eae4b7679fd822d3e721a9c8d4854d1",
     "restoration/tests/camera_wiener.npy": "4505ea8b0d63d03250c6d756560d615751b76dd6ffc4a95972fa260c0c84633e",
@@ -174,6 +176,8 @@ registry_urls = {
     "data/pivchallenge-B-B001_1.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_1.tif",
     "data/pivchallenge-B-B001_2.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_2.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
+    "restoration/tests/astronaut_dnp.npy":
+        "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_dnp.npy",
 }
 
 legacy_registry = {

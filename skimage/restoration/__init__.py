@@ -2,7 +2,8 @@
 
 """
 
-from .deconvolution import wiener, unsupervised_wiener, richardson_lucy
+from .deconvolution import (wiener, unsupervised_wiener, richardson_lucy,
+                            gaussian_natural_prior)
 from .unwrap import unwrap_phase
 from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
                        denoise_bilateral, denoise_wavelet, estimate_sigma)
@@ -16,6 +17,7 @@ from .rolling_ball import rolling_ball, ball_kernel, ellipsoid_kernel
 __all__ = ['wiener',
            'unsupervised_wiener',
            'richardson_lucy',
+           'gaussian_natural_prior',
            'unwrap_phase',
            'denoise_tv_bregman',
            'denoise_tv_chambolle',
