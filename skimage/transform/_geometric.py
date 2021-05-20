@@ -618,9 +618,9 @@ class ProjectiveTransform(GeometricTransform):
         to behave like functions. The user can call
         these instances like functions.
 
-        matrix=[[1 2 3]
-                [4 5 6]
-                [7 8 9]].
+        >>> matrix = [[1, 2, 3],
+        ...           [4, 5, 6],
+        ...           [7, 8, 9]]
         
         A=ProjectiveTransform(matrix)  #instance created.
         B=A(coords)    #calling instance A as a function
