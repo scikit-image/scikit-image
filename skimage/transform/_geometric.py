@@ -622,7 +622,7 @@ class ProjectiveTransform(GeometricTransform):
         ...           [4, 5, 6],
         ...           [7, 8, 9]]
         
-        A=ProjectiveTransform(matrix)  #instance created.
+        >>> A = ProjectiveTransform(matrix)  # instance created.
         B=A(coords)    #calling instance A as a function
                         with "coords" as argument.
 
