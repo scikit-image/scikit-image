@@ -1448,7 +1448,7 @@ class PolynomialTransform(GeometricTransform):
         A[:rows, -1] = xd
         A[rows:, -1] = yd
 
-        #scipy sparse svd uses less memory
+        # scipy sparse svd uses less memory
         _, _, V = svds(A)
 
         # solution is right singular vector that corresponds to smallest
