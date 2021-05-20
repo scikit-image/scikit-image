@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy import spatial
+from scipy.sparse.linalg import svds
 import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
@@ -1447,7 +1448,8 @@ class PolynomialTransform(GeometricTransform):
         A[:rows, -1] = xd
         A[rows:, -1] = yd
 
-        _, _, V = np.linalg.svd(A)
+        #scipy sparse svd uses less memory
+        _, _, V = svds(A)
 
         # solution is right singular vector that corresponds to smallest
         # singular value
