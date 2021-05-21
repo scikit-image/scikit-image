@@ -1,12 +1,13 @@
 import numpy as np
 import pytest
-from scipy.signal import convolve2d
 from scipy import ndimage as ndi
+from scipy.signal import convolve2d
+
+from skimage import restoration, util
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
-from skimage import restoration, util
 from skimage.restoration import uft
 
 test_img = util.img_as_float(camera())
