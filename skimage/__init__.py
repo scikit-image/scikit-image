@@ -96,8 +96,6 @@ __all__ = [
 from .util.lazy import install_lazy
 __getattr__, __dir__, _ = install_lazy(__name__, __all__)
 
-import sys
-
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
 
@@ -138,6 +136,7 @@ except NameError:
     __SKIMAGE_SETUP__ = False
 
 if __SKIMAGE_SETUP__:
+    import sys
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet

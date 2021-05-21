@@ -1,4 +1,3 @@
-import sys
 import importlib
 import importlib.util
 
@@ -49,4 +48,4 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
     def __dir__():
         return __all__
 
-    return __getattr__, __dir__, __all__
+    return __getattr__, __dir__, list(__all__)

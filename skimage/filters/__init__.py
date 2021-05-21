@@ -22,9 +22,8 @@ from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
 
-
 from ..util import lazy
-print('module:', __name__)
+
 __getattr__, __dir__, __all__ = lazy.install_lazy(
     __name__,
     submodules={'rank'},
