@@ -8,7 +8,6 @@ from scipy.signal import convolve
 from . import uft
 from .._shared.utils import _supported_float_type
 
-__keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
