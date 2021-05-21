@@ -25,7 +25,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     Performs interpolation to up-size or down-size N-dimensional images. Note
     that anti-aliasing should be enabled when down-sizing images to avoid
-    aliasing artifacts. For down-sizing with an integer factor also see
+    aliasing artifacts. For downsampling with an integer factor also see
     `skimage.transform.downscale_local_mean`.
 
     Parameters
