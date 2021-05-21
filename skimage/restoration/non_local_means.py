@@ -161,10 +161,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         preserve_range = True
 
     image = convert_to_float(image, preserve_range)
-
-    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if not image.flags.c_contiguous:
         image = np.ascontiguousarray(image)
+
+    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if channel_axis is not None:  # 2-D images
         if fast_mode:
             return _fast_nl_means_denoising_2d(image, **kwargs)
