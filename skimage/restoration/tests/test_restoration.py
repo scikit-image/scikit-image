@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from scipy.signal import convolve2d
 from scipy import ndimage as ndi
-from skimage._shared import testing
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -24,8 +23,7 @@ def _get_rtol_atol(dtype):
     return rtol, atol
 
 
-@testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
@@ -52,8 +50,7 @@ def test_wiener(dtype):
                                rtol=rtol, atol=atol)
 
 
-@testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_unsupervised_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
