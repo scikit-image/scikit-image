@@ -65,7 +65,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
-        to down-sizing. It is crucial to filter when down-sizing
+        to downsampling. It is crucial to filter when downsampling
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when down-sizing an image of which data type is not bool.
     anti_aliasing_sigma : {float, tuple of floats}, optional
