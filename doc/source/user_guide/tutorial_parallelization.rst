@@ -90,6 +90,11 @@ Tiled processing of large images with ``dask``
 When a large image is processed, we can often improve performance by
 a) parallelizing computation and b) reducing the amount of memory
 utilized at any point in time.
+<<<<<<< HEAD
+=======
+
+``dask`` has tbe
+>>>>>>> 2a1333e0ea0097b4da3529d7c4431910cadfd5cd
 
 .. code-block:: python
 
