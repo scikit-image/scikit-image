@@ -24,7 +24,6 @@ import numpy as np
 from .._shared.fft import fftmodule as fft
 from .._shared.utils import _supported_float_type
 
-__keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
 
 def ufftn(inarray, dim=None):
