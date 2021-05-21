@@ -4,11 +4,7 @@ Parallel image processing
 
 Sometimes, the need arises to process batches of images, or images
 that do not fit into memory.  We recommend `joblib
-<<<<<<< HEAD
 <https://joblib.readthedocs.io>`__ or `dask
-=======
-<https://pythonhosted.org/joblib/>`__ or `dask
->>>>>>> 2a1333e0ea0097b4da3529d7c4431910cadfd5cd
 <https://dask.pydata.org>`__ for such tasks.
 
 Batch processing with ``joblib``
