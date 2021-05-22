@@ -1,21 +1,21 @@
-name: Create Release
+name: Build Wheels and Release
 on:
   push:
     tags:
       - 'v*'
+      - 'buildwheels'
 env:
   CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+  CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
 
 
 jobs:
   build_linux_37_and_above_wheels:
-    if: github.repository_owner == 'viniciusdc'
     name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-18.04]
         cibw_python: [ "cp37-*", "cp38-*" ]
@@ -54,10 +54,9 @@ jobs:
 
   build_macos_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: github.repository_owner == 'viniciusdc'
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [macos-latest]
 
@@ -91,9 +90,7 @@ jobs:
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
       - name: Build wheels for CPython (MacOS)
-        if: matrix.os == 'macos-latest'
         run: |
-          brew install libomp
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp3?-*"
@@ -127,10 +124,9 @@ jobs:
 
   build_windows_wheels:
     name: Build wheels on ${{ matrix.os }}
-    if: github.repository_owner == 'viniciusdc'
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [windows-latest]
 
@@ -187,6 +183,7 @@ jobs:
   deploy:
     name: Release
     needs: [build_linux_37_and_above_wheels, build_macos_wheels, build_windows_wheels]
+    if: github.repository_owner == 'viniciusdc' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -211,7 +208,6 @@ jobs:
           path: ./dist
     
       - name: Publish the source distribution on PyPI
-        if: success()
         run: |
           SK_VERSION=$(git describe --tags)
           python setup.py sdist
@@ -225,7 +221,6 @@ jobs:
               
       - name: Github release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/') && success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
