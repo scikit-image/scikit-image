@@ -11,8 +11,8 @@ that do not fit into memory. Here we discuss how you could use `joblib
 Batch processing with ``joblib``
 --------------------------------
 
-Consider the case where you have a directory with, say, 2000 images.
-On each of these, you want to calculate the Otsu threshold:
+Consider the case where you have several images to be processed, and you want
+to calculate the Otsu threshold in all of them:
 
 .. code-block:: python
 
@@ -50,20 +50,24 @@ Instead, we can use ``joblib`` to parallelize the batch processing as follows:
     p = Parallel(n_jobs=-1, backend='threading')
     thresholds = p(threshold_tasks)
 
-The ``delayed`` call is to prevent ``load_and_threshold`` from
-executing immediately while setting up the parallel processing.
-Instead, it becomes a task that can be scheduled. Setting ``n_jobs``
-to ``-1`` tells ``joblib`` to use however many cores are available.
+The ``delayed`` call prevents ``load_and_threshold`` from executing immediately
+while setting up the parallel processing. Instead, it becomes a task that can
+be scheduled. Setting ``n_jobs`` to ``-1`` tells ``joblib`` to use all cores
+available.
 
 Note that thresholding is not the best example of ``joblib`` usage: speedups
 can only be expected in the case where the individual operations are somewhat
 long running. Otherwise, the overhead of scheduling and executing tasks can be
 more than what is gained by executing in parallel.
 
-You can also use ``joblib`` when creating your image processing pipelines in
-functions. In the following example, we set up the function ``task``: first,
-it applies the total variation Chambolle filter; then, it returns the histogram
-of oriented gradients (HOG) descriptor of the input image:
+
+Using ``joblib`` in user-defined pipelines
+------------------------------------------
+
+You can also use ``joblib`` when creating image processing pipelines in your
+own functions. In the following example, we set up the function ``task``:
+first, it applies the total variation Chambolle filter; then, it returns the
+histogram of oriented gradients (HOG) descriptor of the input image.
 
 .. code-block:: python
 
@@ -98,7 +102,7 @@ use ``ipython`` and measure the execution time with ``%timeit``.
 
     %timeit classic_loop()
 
-Another equivalent way to code this loop is to use a comprehension list which has the same efficiency.
+Another equivalent way to code this loop is to use a comprehension list, which has the same efficiency.
 
 .. code-block:: python
 
@@ -119,13 +123,10 @@ The number of jobs can be specified.
     %timeit joblib_loop()
 
 
-
-
-
 Batch processing with ``dask``
 ------------------------------
 
-In ``dask``, the above processing looks as follows:
+In ``dask``, the Otsu threshold processing looks as follows:
 
 .. code-block:: python
 
@@ -153,7 +154,6 @@ a) parallelizing computation and b) reducing the amount of memory
 used at any point in time.
 
 ``dask`` has tbe
-
 
 
 
