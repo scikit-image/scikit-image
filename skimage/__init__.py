@@ -158,5 +158,3 @@ else:
                              dtype_limits)
     from .data import data_dir
     from .util.lookfor import lookfor
-
-del sys
