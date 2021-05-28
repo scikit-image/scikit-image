@@ -194,12 +194,11 @@ jobs:
         with:
           python-version: '3.7'
       
-      - name: Install Dependencies
+      - name: Install Twine
         run: |
           python -m pip install --upgrade pip
-          pip install twine
-          pip install beautifulsoup4
           pip install 'numpy>=1.16.5,!=1.18.0'
+          pip install twine
       
       - uses: actions/download-artifact@v2
         id: download
