@@ -298,13 +298,13 @@ plt.show()
 
 ######################################################################
 # 1D Signal Filtering
-# -----------------
+# -------------------
 #
 # As another example of the n-dimensional feature of
 # ``rolling_ball``, we show an implementation for 1D data. Here,
 # we are interested in removing the background signal of an ECG waveform
-# in order to detect significant peaks. Smoother peaks van be removed
-# with smaller values of the radius.
+# to detect prominent peaks (higher values than the local baseline).
+# Smoother peaks can be removed with smaller values of the radius.
 
 x = pywt.data.ecg()
 background = restoration.rolling_ball(x, radius=80)
