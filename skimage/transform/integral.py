@@ -23,8 +23,8 @@ def integral_image(image, *, dtype=None):
 
     Notes
     -----
-    For better accuracy and to avoid potential overflow, the datatype of the
-    output may differ from the input when the default dtype of None is used.
+    For better accuracy and to avoid potential overflow, the data type of the
+    output may differ from the input's when the default dtype of None is used.
     For inputs with integer dtype, the behavior matches that for
     :func:`numpy.cumsum`. Floating point inputs will be promoted to at least
     double precision. The user can set `dtype` to override this behavior.
