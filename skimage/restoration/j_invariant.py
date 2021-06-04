@@ -4,8 +4,10 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.utils import _supported_float_type
 from ..metrics import mean_squared_error
 from ..util import img_as_float
+
 
 
 def _interpolate_image(image, *, multichannel=False):
@@ -112,13 +114,20 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
         Denoised image, of same shape as `image`.
     """
     image = img_as_float(image)
+
+    # promote float16->float32 if needed
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     if denoiser_kwargs is None:
         denoiser_kwargs = {}
+
 
     if 'multichannel' in denoiser_kwargs:
         multichannel = denoiser_kwargs['multichannel']
     else:
-        multichannel = False
+        multichannel = denoiser_kwargs.get('channel_axis', None) is not None
+
     interp = _interpolate_image(image, multichannel=multichannel)
     output = np.zeros_like(image)
 
@@ -291,7 +300,8 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
         if 'multichannel' in denoiser_kwargs:
             multichannel = denoiser_kwargs['multichannel']
         else:
-            multichannel = False
+            multichannel = \
+                denoiser_kwargs.get('channel_axis', None) is not None
         if not approximate_loss:
             denoised = _invariant_denoise(
                 image, denoise_function,

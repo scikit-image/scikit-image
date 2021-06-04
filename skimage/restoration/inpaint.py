@@ -5,6 +5,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 
 import skimage
+from .._shared import utils
 from ..measure import label
 from ._inpaint import _build_matrix_inner
 
@@ -188,8 +189,10 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     return out
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=2)
 def inpaint_biharmonic(image, mask, multichannel=False, *,
-                       split_into_regions=False):
+                       split_into_regions=False, channel_axis=None):
     """Inpaint masked points in image with biharmonic equations.
 
     Parameters
@@ -202,10 +205,18 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         known pixels - with 0.
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial.
+        otherwise as spatial. This argument is deprecated: specify
+        `channel_axis` instead.
     split_into_regions : boolean, optional
         If True, inpainting is performed on a region-by-region basis. This is
         likely to be slower, but will have reduced memory requirements.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -237,6 +248,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     if image.ndim < 1:
         raise ValueError('Input array has to be at least 1D')
 
+    multichannel = channel_axis is not None
     img_baseshape = image.shape[:-1] if multichannel else image.shape
     if img_baseshape != mask.shape:
         raise ValueError('Input arrays have to be the same shape')
@@ -245,8 +257,12 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         raise TypeError('Masked arrays are not supported')
 
     image = skimage.img_as_float(image)
-    mask = mask.astype(bool, copy=False)
 
+    # float16->float32 and float128->float64
+    float_dtype = utils._supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
+    mask = mask.astype(bool, copy=False)
     if not multichannel:
         image = image[..., np.newaxis]
     out = np.copy(image)

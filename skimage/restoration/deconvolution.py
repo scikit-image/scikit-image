@@ -5,8 +5,8 @@ import numpy as np
 from scipy.signal import convolve
 
 from . import uft
+from .._shared.utils import _supported_float_type
 
-__keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
@@ -116,6 +116,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
+    float_type = _supported_float_type(image.dtype)
+    image = image.astype(float_type, copy=False)
+    psf = psf.real.astype(float_type, copy=False)
+    reg = reg.real.astype(float_type, copy=False)
 
     if psf.shape != reg.shape:
         trans_func = uft.ir2tf(psf, image.shape, is_real=is_real)
@@ -129,6 +133,13 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
                              shape=image.shape)
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+
+    # TODO: can remove astype call below once minimum SciPy >= 1.4
+    if deconv.dtype.kind == 'c':
+        deconv_type = np.promote_types(float_type, np.complex64)
+    else:
+        deconv_type = float_type
+    deconv = deconv.astype(deconv_type, copy=False)
 
     if clip:
         deconv[deconv > 1] = 1
@@ -248,16 +259,20 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
+    float_type = _supported_float_type(image.dtype)
+    image = image.astype(float_type, copy=False)
+    psf = psf.real.astype(float_type, copy=False)
+    reg = reg.real.astype(float_type, copy=False)
 
     if psf.shape != reg.shape:
-        trans_fct = uft.ir2tf(psf, image.shape,  is_real=is_real)
+        trans_fct = uft.ir2tf(psf, image.shape, is_real=is_real)
     else:
         trans_fct = psf
 
     # The mean of the object
-    x_postmean = np.zeros(trans_fct.shape)
+    x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
     # The previous computed mean in the iterative loop
-    prev_x_postmean = np.zeros(trans_fct.shape)
+    prev_x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
 
     # Difference between two successive mean
     delta = np.NAN
@@ -273,9 +288,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     # The Fourier transform may change the image.size attribute, so we
     # store it.
     if is_real:
-        data_spectrum = uft.urfft2(image.astype(float))
+        data_spectrum = uft.urfft2(image)
     else:
-        data_spectrum = uft.ufft2(image.astype(float))
+        data_spectrum = uft.ufft2(image)
 
     rng = np.random.default_rng(random_state)
 
@@ -285,9 +300,14 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
         # weighting (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
-        excursion = (np.sqrt(0.5) / np.sqrt(precision)
-                     * (rng.standard_normal(data_spectrum.shape)
-                        + 1j * rng.standard_normal(data_spectrum.shape)))
+        # Note: Use astype instead of dtype argument to standard_normal to get
+        #       similar random values across precisions, as needed for
+        #       reference data used by test_unsupervised_wiener.
+        _rand1 = rng.standard_normal(data_spectrum.shape)
+        _rand1 = _rand1.astype(float_type, copy=False)
+        _rand2 = rng.standard_normal(data_spectrum.shape)
+        _rand2 = _rand2.astype(float_type, copy=False)
+        excursion = np.sqrt(0.5 / precision) * (_rand1 + 1j * _rand2)
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
@@ -331,6 +351,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         x_postmean = uft.uirfft2(x_postmean, shape=image.shape)
     else:
         x_postmean = uft.uifft2(x_postmean)
+
+    # TODO: remove astype call below once minimum SciPy >= 1.4
+    if x_postmean.dtype.kind == 'c':
+        deconv_type = np.promote_types(float_type, np.complex64)
+    else:
+        deconv_type = float_type
+    x_postmean = x_postmean.astype(deconv_type, copy=False)
 
     if clip:
         x_postmean[x_postmean > 1] = 1
@@ -378,7 +405,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    float_type = np.promote_types(image.dtype, np.float32)
+    float_type = _supported_float_type(image.dtype)
     image = image.astype(float_type, copy=False)
     psf = psf.astype(float_type, copy=False)
     im_deconv = np.full(image.shape, 0.5, dtype=float_type)
@@ -387,7 +414,9 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     for _ in range(iterations):
         conv = convolve(im_deconv, psf, mode='same')
         if filter_epsilon:
-            relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
+            with np.errstate(invalid='ignore'):
+                relative_blur = np.where(conv < filter_epsilon, 0,
+                                         image / conv)
         else:
             relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')

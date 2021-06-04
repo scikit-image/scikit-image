@@ -17,7 +17,7 @@ class TestPrepareForDisplay(TestCase):
         x = prepare_for_display(np.random.rand(10, 15))
         assert x.dtype == np.dtype(np.uint8)
 
-    def test_grey(self):
+    def test_gray(self):
         tmp = np.arange(12, dtype=float).reshape((4, 3)) / 11
         x = prepare_for_display(tmp)
         assert_array_equal(x[..., 0], x[..., 2])

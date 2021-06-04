@@ -11,6 +11,7 @@ significantly the performance.
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
+from .._shared import utils
 from .._shared.utils import warn
 
 # executive summary for next code block: try to import umfpack from
@@ -258,9 +259,11 @@ def _preprocess(labels):
     return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, spacing=None,
-                  *, prob_tol=1e-3):
+                  *, prob_tol=1e-3, channel_axis=None):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -313,7 +316,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         save on memory.
     multichannel : bool, optional
         If True, input data is parsed as multichannel data (see 'data' above
-        for proper input format in this case).
+        for proper input format in this case). This argument is deprecated:
+        specify `channel_axis` instead.
     return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the
         labels will be returned, instead of only the most likely
@@ -324,6 +328,13 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     prob_tol : float, optional
         Tolerance on the resulting probability to be in the interval [0, 1].
         If the tolerance is not satisfied, a warning is displayed.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -438,6 +449,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # and single channel images likewise have a singleton added for channels.
     # The following block ensures valid input and coerces it to the correct
     # form.
+    multichannel = channel_axis is not None
     if not multichannel:
         if data.ndim not in (2, 3):
             raise ValueError('For non-multichannel input, data must be of '
