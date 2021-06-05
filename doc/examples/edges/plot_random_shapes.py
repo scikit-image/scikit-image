@@ -38,12 +38,17 @@ image2, _ = random_shapes((128, 128), max_shapes=10,
                           intensity_range=((200, 255),))
 image3, _ = random_shapes((128, 128), max_shapes=10,
                           intensity_range=((50, 255),))
-image4, _ = random_shapes((128, 128), max_shapes=10,
-                          intensity_range=((0, 255),))
 
-for i, image in enumerate([image1, image2, image3, image4], 1):
+for i, image in enumerate([image1, image2, image3], 1):
     ax[i].imshow(image)
     ax[i].set_title(f"Colored shapes, #{i-1}")
+
+# We can also adjust the background color (default is 255).
+image, _ = random_shapes((128, 128), max_shapes=10,
+                         intensity_range=((0, 255),),
+                         background=(0, 191, 255))
+ax[4].imshow(image)
+ax[4].set_title('Blue background')
 
 # These shapes are well suited to test segmentation algorithms. Often, we
 # want shapes to overlap to test the algorithm. This is also possible:

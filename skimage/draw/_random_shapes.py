@@ -252,7 +252,8 @@ SHAPE_GENERATORS = dict(
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
-def _generate_random_colors(num_colors, num_channels, intensity_range, random):
+def _generate_random_colors(num_colors, num_channels, intensity_range, random,
+                            exclude=None):
     """Generate an array of random colors.
 
     Parameters
@@ -261,13 +262,17 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
         Number of colors to generate.
     num_channels : int
         Number of elements representing color.
-    intensity_range : {tuple of tuples of ints, tuple of ints}, optional
+    intensity_range : {tuple of tuples of ints, tuple of ints}
         The range of values to sample pixel values from. For grayscale images
         the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and
         ((min_0, max_0), ... (min_N, max_N)) if they differ.
     random : np.random.RandomState
         The random state to use for random sampling.
+    exclude : {tuple of ints, int}, optional
+        A color within the intensity_range that is excluded from
+        random sampling. For multichannel, a tuple of length num_channels is
+        required. If `None`, no color is excluded.
 
     Raises
     ------
@@ -281,13 +286,30 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
         each channel are drawn from the corresponding `intensity_range`.
 
     """
-    if num_channels == 1:
-        intensity_range = (intensity_range, )
-    elif len(intensity_range) == 1:
-        intensity_range = intensity_range * num_channels
-    colors = [random.randint(r[0], r[1]+1, size=num_colors)
-              for r in intensity_range]
-    return np.transpose(colors)
+
+    intensity_range = np.squeeze(np.asarray(intensity_range))
+    exclude = np.ascontiguousarray(exclude)
+
+    if intensity_range.ndim == 1:
+        intensity_range = np.tile(intensity_range, (num_channels, 1))
+
+    if (np.diff(intensity_range) == 0).all():
+        # if intensity range only spans a single color
+        colors = np.broadcast_to(intensity_range[:, 0],
+                                 (num_colors, num_channels))
+        if exclude is not None and (colors[0, :] == exclude).all():
+            msg = ('Shape colors can not be selected. '
+                   'Intensity range spans only background value.')
+            raise ValueError(msg)
+        else:
+            return colors
+    color_candidates = [np.arange(r[0], r[1] + 1) for r in intensity_range]
+    color_candidates = [np.setdiff1d(c, e) for c, e
+                        in zip(color_candidates, exclude)]
+    colors = np.transpose([random.choice(c, size=num_colors)
+                           for c in color_candidates])
+
+    return colors
 
 
 @deprecate_multichannel_kwarg(multichannel_position=5)
@@ -300,6 +322,7 @@ def random_shapes(image_shape,
                   num_channels=3,
                   shape=None,
                   intensity_range=None,
+                  background=255,
                   allow_overlap=False,
                   num_trials=100,
                   random_seed=None,
@@ -340,13 +363,16 @@ def random_shapes(image_shape,
     shape : {rectangle, circle, triangle, ellipse, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
-        The range of values to sample pixel values from. For grayscale
-        images the format is (min, max). For multichannel - ((min, max),)
-        if the ranges are equal across the channels, and
-        ((min_0, max_0), ... (min_N, max_N)) if they differ. As the
-        function supports generation of uint8 arrays only, the maximum
-        range is (0, 255). If None, set to (0, 254) for each channel
-        reserving color of intensity = 255 for background.
+        The range of values to sample pixel values from. For grayscale images
+        the format is (min, max). For multichannel - ((min, max),) if the
+        ranges are equal across the channels, and
+        ((min_0, max_0), ... (min_N, max_N)) if they differ. As the function
+        supports generation of uint8 arrays only, the maximum range is
+        (0, 255). If None, set to (0, 255) for each channel. Color of
+        background is always excluded.
+    background : {tuple of ints, int}, optional
+        Pixel intensities for background. Values between 0 and 255 are allowed.
+        For multichannel, a tuple of length ``num_channels`` is required.
     allow_overlap : bool, optional
         If `True`, allow shapes to overlap.
     num_trials : int, optional
@@ -389,33 +415,46 @@ def random_shapes(image_shape,
      ('triangle', ((5, 6), (13, 13)))]
     """
     if min_size > image_shape[0] or min_size > image_shape[1]:
-        raise ValueError('Minimum dimension must be less than ncols and nrows')
+        msg = 'Minimum dimension must be less than ncols and nrows.'
+        raise ValueError(msg)
     max_size = max_size or max(image_shape[0], image_shape[1])
 
     if channel_axis is None:
         num_channels = 1
 
     if intensity_range is None:
-        intensity_range = (0, 254) if num_channels == 1 else ((0, 254), )
+        intensity_range = (0, 255) if num_channels == 1 else ((0, 255), )
     else:
         tmp = (intensity_range, ) if num_channels == 1 else intensity_range
         for intensity_pair in tmp:
             for intensity in intensity_pair:
                 if not (0 <= intensity <= 255):
-                    msg = 'Intensity range must lie within (0, 255) interval'
+                    msg = 'Intensity range must lie within (0, 255) interval.'
                     raise ValueError(msg)
+
+    background = np.ascontiguousarray(background, dtype=np.uint16)
+    if len(background) == 1:
+        background = np.repeat(background, num_channels)
+    elif len(background) != num_channels:
+        msg = 'Number of background values must match number of channels.'
+        raise ValueError(msg)
+    if (background < 0).any() or (background > 255).any():
+        msg = 'Background intensity must lie within (0, 255) interval.'
+        raise ValueError(msg)
 
     random = np.random.RandomState(random_seed)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
-    image = np.full(image_shape, 255, dtype=np.uint8)
+    image = np.full(image_shape, background, dtype=np.uint8)
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
 
     num_shapes = random.randint(min_shapes, max_shapes + 1)
-    colors = _generate_random_colors(num_shapes, num_channels,
-                                     intensity_range, random)
-    shape = (min_size, max_size)
+    colors = _generate_random_colors(num_shapes,
+                                     num_channels,
+                                     intensity_range,
+                                     random,
+                                     exclude=background)
     for shape_idx in range(num_shapes):
         if user_shape is None:
             shape_generator = random.choice(SHAPE_CHOICES)
