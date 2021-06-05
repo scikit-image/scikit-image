@@ -75,9 +75,9 @@ def butterworth(
         If there is a channel dimension, provide the index here. If None
         (default) then all axes are assumed to be spatial dimensions.
     preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise the output
+        Whether to keep the original range of values. Defaults to False. If False,
         image is returned with dtype float with values scaled between 0 and 1.
-        If a complex valued image was passed, no rescaling is performed.
+        If a complex-valued image is passed, no rescaling is performed.
 
     Returns
     -------
@@ -89,14 +89,14 @@ def butterworth(
     A band-pass filter can be achieved by combining a high pass and low
     pass filter.
 
-    The literature contains multiple conventions for the  functional form of
+    The literature contains multiple conventions for the functional form of
     the Butterworth filter. Here it is implemented as the n-dimensional form of
 
     .. math::
         \frac{1}{1-\left(\frac{f}{c*f_{max}}\right)^{2*n})
 
     with :math:`f` the absolute value of the spatial frequency, :math:`c` the
-    `cutoff_frequency_ratio` and :math:`n` the `order` modeled after [2]
+    `cutoff_frequency_ratio` and :math:`n` the `order` modeled after [2]_
 
     Examples
     --------
@@ -108,8 +108,8 @@ def butterworth(
     >>> high_pass = butterworth(camera(), 0.07, True, 8)
     >>> low_pass = butterworth(astronaut(), 0.01, False, 4, channel_axis=-1)
 
-    Reference
-    ---------
+    References
+    ----------
     .. [1] Butterworth, Stephen. "On the theory of filter amplifiers."
            Wireless Engineer 7.6 (1930): 536-541.
     .. [2] Russ, John C., et al. "The image processing handbook."

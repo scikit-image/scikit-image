@@ -1,8 +1,8 @@
 import pytest
-import os
 import numpy as np
-from .. import butterworth
 from skimage.data import astronaut, coins
+from skimage.filters import butterworth
+from skimage._shared.testing import fetch
 
 
 def test_butterworth_2D():
@@ -41,8 +41,7 @@ def test_butterworth_correctness_bw():
     filtered = butterworth(small,
                            cutoff_frequency_ratio=0.2,
                            preserve_range=True).astype(np.uint8)
-    folder = os.path.dirname(__file__)
-    path = os.path.join(folder, "coins_butter.npy")
+    path = fetch('filters/tests/coins_butter.npy')
     np.testing.assert_allclose(filtered, np.load(path))
 
 
@@ -53,6 +52,5 @@ def test_butterworth_correctness_rgb():
                            high_pass=True,
                            preserve_range=True,
                            channel_axis=-1).astype(np.uint8)
-    folder = os.path.dirname(__file__)
-    path = os.path.join(folder, "astronaut_butter.npy")
+    path = fetch('filters/tests/astronaut_butter.npy')
     np.testing.assert_allclose(filtered, np.load(path))
