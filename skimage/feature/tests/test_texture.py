@@ -1,7 +1,7 @@
 import numpy as np
+import pytest
 
-from skimage._shared import testing
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import expected_warnings, test_parallel
 from skimage.feature import (graycomatrix,
                              graycoprops,
                              greycomatrix,
@@ -60,22 +60,22 @@ class TestGLCM():
         for dtype in [
                 float, np.double, np.float16, np.float32, np.float64
                 ]:
-            with testing.raises(ValueError):
+            with pytest.raises(ValueError):
                 graycomatrix(self.image.astype(dtype), [1], [np.pi], 4)
 
     def test_error_raise_int_types(self):
         for dtype in [
                 np.int16, np.int32, np.int64, np.uint16, np.uint32, np.uint64
                 ]:
-            with testing.raises(ValueError):
+            with pytest.raises(ValueError):
                 graycomatrix(self.image.astype(dtype), [1], [np.pi])
 
     def test_error_raise_negative(self):
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             graycomatrix(self.image.astype(np.int16) - 1, [1], [np.pi], 4)
 
     def test_error_raise_levels_smaller_max(self):
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             graycomatrix(self.image - 1, [1], [np.pi], 3)
 
     def test_image_data_types(self):
@@ -165,14 +165,14 @@ class TestGLCM():
     def test_greycomatrix_and_greycoprops_deprecations(self):
         expected = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
                                 normed=True, symmetric=True)
-        with testing.expected_warnings(["Function ``greycomatrix``"]):
+        with expected_warnings(["Function ``greycomatrix``"]):
             result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                                   normed=True, symmetric=True)
         np.testing.assert_array_equal(expected, result)
 
         result = np.round(result, 3)
         dissimilarity_expected = graycoprops(result, 'dissimilarity')
-        with testing.expected_warnings(["Function ``greycoprops``"]):
+        with expected_warnings(["Function ``greycoprops``"]):
             dissimilarity_result = greycoprops(result, 'dissimilarity')
         np.testing.assert_array_equal(
             dissimilarity_expected, dissimilarity_result
@@ -192,7 +192,7 @@ class TestGLCM():
 
     def test_invalid_property(self):
         result = graycomatrix(self.image, [1], [0], 4)
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             graycoprops(result, 'ABC')
 
     def test_homogeneity(self):

@@ -1,15 +1,13 @@
 import numpy as np
 import pytest
+from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data
 from skimage import img_as_float
 from skimage import draw
-from skimage._shared import testing
-from skimage._shared.testing import (assert_almost_equal, assert_array_equal,
-                                     assert_equal)
-from skimage._shared.utils import _supported_float_type
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
+from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -31,7 +29,7 @@ def im3d():
     return im3
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structure_tensor(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 1
@@ -55,7 +53,7 @@ def test_structure_tensor(dtype):
                                       [0, 0, 0, 0, 0]]))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structure_tensor_3d(dtype):
     cube = np.zeros((5, 5, 5), dtype=dtype)
     cube[2, 2, 2] = 1
@@ -81,7 +79,7 @@ def test_structure_tensor_3d(dtype):
 
 def test_structure_tensor_3d_rc_only():
     cube = np.zeros((5, 5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structure_tensor(cube, sigma=0.1, order='xy')
     A_elems_rc = structure_tensor(cube, sigma=0.1, order='rc')
     A_elems_none = structure_tensor(cube, sigma=0.1)
@@ -108,13 +106,13 @@ def test_structure_tensor_sigma(ndim):
     A_list = structure_tensor(img, sigma=[0.1] * ndim)
     assert_array_equal(A_tuple, A_default)
     assert_array_equal(A_list, A_default)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structure_tensor(img, sigma=(0.1,) * (ndim - 1))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structure_tensor(img, sigma=[0.1] * (ndim + 1))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_hessian_matrix(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 4
@@ -153,7 +151,7 @@ def test_hessian_matrix_3d():
                                                   [0,  0,  0,  0,  0]]))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structure_tensor_eigenvalues(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 1
@@ -193,7 +191,7 @@ def test_structure_tensor_eigvals():
     assert_array_equal(eigvals, eigenvalues)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_hessian_matrix_eigvals(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 4
@@ -213,7 +211,7 @@ def test_hessian_matrix_eigvals(dtype):
                                       [0,  0,  0,  0, 0]]))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_hessian_matrix_eigvals_3d(im3d, dtype):
     im3d = im3d.astype(dtype, copy=False)
     H = hessian_matrix(im3d)
@@ -246,7 +244,7 @@ def test_hessian_matrix_det():
     assert_almost_equal(det, 0, decimal=3)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_hessian_matrix_det_3d(im3d, dtype):
     im3d = im3d.astype(dtype, copy=False)
     D = hessian_matrix_det(im3d)
@@ -310,8 +308,8 @@ def test_square_image():
     assert len(results) == 1
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
-@testing.parametrize(
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize(
     'func',
     [
         corner_moravec,
@@ -328,7 +326,7 @@ def test_corner_dtype(dtype, func):
     assert corners.dtype == out_dtype
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_corner_foerstner_dtype(dtype):
     im = np.zeros((50, 50), dtype=dtype)
     im[:25, :25] = 1.
@@ -407,7 +405,7 @@ def test_rotated_img():
     assert (np.sort(results[1]) == np.sort(results_rotated[0])).all()
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_subpix_edge(dtype):
     img = np.zeros((50, 50), dtype=dtype)
     img[:25, :25] = 255
@@ -460,7 +458,9 @@ def test_subpix_border():
 def test_num_peaks():
     """For a bunch of different values of num_peaks, check that
     peak_local_max returns exactly the right amount of peaks. Test
-    is run on the astronaut image in order to produce a sufficient number of corners"""
+    is run on the astronaut image in order to produce a sufficient number of
+    corners.
+    """
 
     img_corners = corner_harris(rgb2gray(data.astronaut()))
 
@@ -509,7 +509,7 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         corner_fast(img)
 
 
@@ -560,7 +560,7 @@ def test_corner_fast_astronaut():
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         corner_orientations(
             img,
             np.asarray([[7, 7]]), np.ones((3, 3)))
@@ -568,7 +568,7 @@ def test_corner_orientations_image_unsupported_error():
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         corner_orientations(
             img,
             np.asarray([[7, 7]]), np.ones((4, 4)))
@@ -602,7 +602,7 @@ def test_corner_orientations_astronaut():
     assert_almost_equal(actual, expected)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_corner_orientations_square(dtype):
     square = np.zeros((12, 12), dtype=dtype)
     square[3:9, 3:9] = 1

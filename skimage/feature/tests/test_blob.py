@@ -4,14 +4,15 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage._shared import testing
 from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
 from skimage.feature.blob import _blob_overlap
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
 def test_blob_dog(dtype):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
@@ -128,7 +129,9 @@ def test_blob_dog_excl_border():
     assert blobs.shape[0] == 0, msg
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
 def test_blob_log(dtype):
     r2 = math.sqrt(2)
     img = np.ones((256, 256), dtype=dtype)
@@ -288,7 +291,7 @@ def test_blob_log_exclude_border():
     assert blobs.shape[0] == 0, msg
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32])
+@pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
 def test_blob_doh(dtype):
     img = np.ones((512, 512), dtype=dtype)
 
@@ -429,7 +432,7 @@ def test_blob_log_overlap_3d():
                    mode='constant')
     im3 = np.logical_or(blob1, blob2)
 
-    blobs = blob_log(im3,  min_sigma=2, max_sigma=10, overlap=0.1)
+    blobs = blob_log(im3, min_sigma=2, max_sigma=10, overlap=0.1)
     assert len(blobs) == 1
 
 
