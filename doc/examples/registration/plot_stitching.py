@@ -126,7 +126,7 @@ fig.tight_layout()
 # images in this domain:
 #
 # A global transformation is defined to move the reference image in the
-# global domain image via a simple translation
+# global domain image via a simple translation:
 margin = 50
 height, width = img_list[0].shape
 out_shape = height + 2 * margin, width + 2 * margin
