@@ -557,7 +557,7 @@ MAX_SCHARR_ND = np.array([
 def test_3d_edge_filters(func, max_edge):
     blobs = data.binary_blobs(length=128, n_dim=3)
     edges = func(blobs)
-    testing.assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
+    assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
 
 
 @pytest.mark.parametrize(
@@ -566,7 +566,7 @@ def test_3d_edge_filters(func, max_edge):
 def test_3d_edge_filters_single_axis(func):
     blobs = data.binary_blobs(length=128, n_dim=3)
     edges0 = func(blobs, axis=0)
-    testing.assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
+    assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
 
 
 @pytest.mark.parametrize(
