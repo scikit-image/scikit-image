@@ -3,7 +3,6 @@ import itertools
 import numpy as np
 import pytest
 
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
 from skimage._shared.utils import _supported_float_type, convert_to_float
@@ -79,20 +78,20 @@ def check_radon_center(shape, circle, dtype, preserve_range):
     assert np.std(sinogram_max) < 1e-6
 
 
-@testing.parametrize("shape", [(16, 16), (17, 17)])
-@testing.parametrize("circle", [False, True])
-@testing.parametrize(
+@pytest.mark.parametrize("shape", [(16, 16), (17, 17)])
+@pytest.mark.parametrize("circle", [False, True])
+@pytest.mark.parametrize(
     "dtype", [np.float64, np.float32, np.float16, np.uint8, bool]
 )
-@testing.parametrize("preserve_range", [False, True])
+@pytest.mark.parametrize("preserve_range", [False, True])
 def test_radon_center(shape, circle, dtype, preserve_range):
     check_radon_center(shape, circle, dtype, preserve_range)
 
 
-@testing.parametrize("shape", [(32, 16), (33, 17)])
-@testing.parametrize("circle", [False])
-@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
-@testing.parametrize("preserve_range", [False, True])
+@pytest.mark.parametrize("shape", [(32, 16), (33, 17)])
+@pytest.mark.parametrize("circle", [False])
+@pytest.mark.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@pytest.mark.parametrize("preserve_range", [False, True])
 def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
     check_radon_center(shape, circle, dtype, preserve_range)
 
@@ -140,10 +139,12 @@ thetas_for_test_iradon_center = [0, 90]
 circles_for_test_iradon_center = [False, True]
 
 
-@testing.parametrize("size, theta, circle",
-                     itertools.product(sizes_for_test_iradon_center,
-                                       thetas_for_test_iradon_center,
-                                       circles_for_test_iradon_center))
+@pytest.mark.parametrize(
+    "size, theta, circle",
+    itertools.product(sizes_for_test_iradon_center,
+                      thetas_for_test_iradon_center,
+                      circles_for_test_iradon_center)
+)
 def test_iradon_center(size, theta, circle):
     check_iradon_center(size, theta, circle)
 
@@ -175,8 +176,9 @@ radon_iradon_inputs = list(itertools.product(interpolation_types,
 radon_iradon_inputs.append(('cubic', 'shepp-logan'))
 
 
-@testing.parametrize("interpolation_type, filter_type",
-                     radon_iradon_inputs)
+@pytest.mark.parametrize(
+    "interpolation_type, filter_type", radon_iradon_inputs
+)
 def test_radon_iradon(interpolation_type, filter_type):
     check_radon_iradon(interpolation_type, filter_type)
 
@@ -250,8 +252,10 @@ def generate_test_data_for_radon_iradon_minimal(shapes):
                                           for shape in shapes])
 
 
-@testing.parametrize("shape, coordinate",
-                     generate_test_data_for_radon_iradon_minimal(shapes))
+@pytest.mark.parametrize(
+    "shape, coordinate",
+    generate_test_data_for_radon_iradon_minimal(shapes)
+)
 def test_radon_iradon_minimal(shape, coordinate):
     check_radon_iradon_minimal(shape, coordinate)
 
@@ -260,7 +264,7 @@ def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
     p = radon(a, theta=[0, 1, 2], circle=False)
     iradon(p, theta=[0, 1, 2], circle=False)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         iradon(p, theta=[0, 1, 2, 3])
 
 
@@ -322,7 +326,7 @@ def check_sinogram_circle_to_square(size):
             argmax_shape(sinogram_circle_to_square))
 
 
-@testing.parametrize("size", (50, 51))
+@pytest.mark.parametrize("size", (50, 51))
 def test_sinogram_circle_to_square(size):
     check_sinogram_circle_to_square(size)
 
@@ -364,9 +368,10 @@ output_sizes = (None,
                 97)
 
 
-@testing.parametrize("shape, interpolation, output_size",
-                     itertools.product(shapes_radon_iradon_circle,
-                                       interpolations, output_sizes))
+@pytest.mark.parametrize(
+    "shape, interpolation, output_size",
+    itertools.product(shapes_radon_iradon_circle, interpolations, output_sizes)
+)
 def test_radon_iradon_circle(shape, interpolation, output_size):
     check_radon_iradon_circle(interpolation, shape, output_size)
 
@@ -492,5 +497,5 @@ def test_iradon_sart_dtype(dtype):
 def test_iradon_sart_wrong_dtype():
     sinogram = np.zeros((16, 1))
 
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         iradon_sart(sinogram, dtype=int)

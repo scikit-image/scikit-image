@@ -1,9 +1,8 @@
 import numpy as np
-from skimage.transform import integral_image, integrate
+import pytest
+from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
-from skimage._shared import testing
-from skimage._shared.testing import (assert_allclose, assert_almost_equal,
-                                     assert_equal)
+from skimage.transform import integral_image, integrate
 
 
 np.random.seed(0)
@@ -11,7 +10,7 @@ x = (np.random.rand(50, 50) * 255).astype(np.uint8)
 s = integral_image(x)
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'dtype', [np.float16, np.float32, np.float64, np.uint8, np.int32]
 )
 def test_integral_image_validity(dtype):

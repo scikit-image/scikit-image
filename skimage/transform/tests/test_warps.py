@@ -1,13 +1,10 @@
 import numpy as np
 import pytest
+from numpy.testing import (assert_allclose, assert_array_almost_equal,
+                           assert_array_equal)
 from scipy.ndimage import map_coordinates
 
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_allclose,
-                                     assert_array_almost_equal,
-                                     assert_array_equal,
-                                     test_parallel)
+from skimage._shared.testing import expected_warnings, test_parallel
 from skimage._shared.utils import _supported_float_type
 from skimage.color.colorconv import rgb2gray
 from skimage.data import checkerboard, astronaut
@@ -126,7 +123,7 @@ def test_homography():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rotate(dtype):
     x = np.zeros((5, 5), dtype=dtype)
     x[1, 1] = 1
@@ -200,10 +197,10 @@ def test_rescale():
 
 def test_rescale_invalid_scale():
     x = np.zeros((10, 10, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         rescale(x, (2, 2),
                 channel_axis=None, anti_aliasing=False, mode='constant')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         rescale(x, (2, 2, 2),
                 channel_axis=-1, anti_aliasing=False, mode='constant')
 
@@ -254,7 +251,7 @@ def test_rescale_multichannel_deprecated_multiscale():
     assert scaled.shape == (10, 5, 3)
 
 
-@testing.parametrize('channel_axis', [0, 1, 2, -1])
+@pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_rescale_channel_axis_multiscale(channel_axis):
     x = np.zeros((5, 5, 3), dtype=np.double)
     x = np.moveaxis(x, -1, channel_axis)
@@ -290,7 +287,7 @@ def test_resize3d_keep():
     x[1, 1, :] = 1
     resized = resize(x, (10, 10), order=0, anti_aliasing=False,
                      mode='constant')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         # output_shape too short
         resize(x, (10, ), order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10, 3))
@@ -378,7 +375,7 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_swirl(dtype):
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
@@ -431,7 +428,7 @@ def test_warp_coords_example():
     map_coordinates(image[:, :, 0], coords[:2])
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
 def test_downsize(dtype):
@@ -468,14 +465,14 @@ def test_downsize_anti_aliasing():
     resize(x, out_size, order=1, mode='wrap',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
 
-    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
+    with pytest.raises(ValueError):  # Unknown mode, or cannot translate mode
         resize(x, out_size, order=1, mode='non-existent',
                anti_aliasing=True, anti_aliasing_sigma=sigma)
 
 
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1,
                mode='constant')
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
@@ -485,7 +482,7 @@ def test_downsize_anti_aliasing_invalid_stddev():
                anti_aliasing_sigma=(0, 1), mode="reflect")
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
 def test_downscale(dtype):
@@ -519,7 +516,7 @@ def test_downscale_to_the_limit():
     assert out.size == 1
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
 def test_downscale_local_mean(dtype):
@@ -542,7 +539,7 @@ def test_downscale_local_mean(dtype):
 
 
 def test_invalid():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(np.ones((4, 3, 3, 3)),
              SimilarityTransform())
 
@@ -557,7 +554,7 @@ def test_inverse():
 def test_slow_warp_nonint_oshape():
     image = np.random.rand(5, 5)
 
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(image, lambda xy: xy,
              output_shape=(13.1, 19.5))
 
@@ -584,16 +581,16 @@ def test_keep_range():
 
 
 def test_zero_image_size():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(np.zeros(0),
              SimilarityTransform())
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(np.zeros((0, 10)),
              SimilarityTransform())
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(np.zeros((10, 0)),
              SimilarityTransform())
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp(np.zeros((10, 10, 0)),
              SimilarityTransform())
 
@@ -646,7 +643,7 @@ def test_log_polar_mapping():
     assert np.allclose(coords, ground_truth)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_linear_warp_polar(dtype):
     radii = [5, 10, 15, 20]
     image = np.zeros([51, 51])
@@ -661,7 +658,7 @@ def test_linear_warp_polar(dtype):
     assert np.alltrue([peak in radii for peak in peaks])
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_log_warp_polar(dtype):
     radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
              np.exp(5)-1, np.exp(5)+1]
@@ -681,18 +678,18 @@ def test_log_warp_polar(dtype):
 
 
 def test_invalid_scaling_polar():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp_polar(np.zeros((10, 10)), (5, 5), scaling='invalid')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp_polar(np.zeros((10, 10)), (5, 5), scaling=None)
 
 
 def test_invalid_dimensions_polar():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp_polar(np.zeros((10, 10, 3)), (5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp_polar(np.zeros((10, 10)), (5, 5), channel_axis=-1)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), channel_axis=-1)
 
 
