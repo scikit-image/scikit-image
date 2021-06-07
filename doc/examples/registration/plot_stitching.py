@@ -81,7 +81,7 @@ img_list = [random_noise(gaussian(im, 1.1), var=5e-4, seed=seed)
 psnr_ref = peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
-# Reference points are detected over all the set images
+# Reference points are detected over all images in the set.
 min_dist = 5
 corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
                             min_distance=min_dist)
