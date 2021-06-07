@@ -20,7 +20,7 @@ from .. import dtype_limits
 from .._shared.utils import check_nD
 
 
-def _preprocess(image, mask, sigma, mode):
+def _preprocess(image, mask, sigma, mode, cval):
     """Generate a smoothed image and an eroded mask.
 
     The image is smoothed using a gaussian filter ignoring masked
@@ -41,6 +41,8 @@ def _preprocess(image, mask, sigma, mode):
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
         'constant'.
+    cval : float, optional
+        Value to fill past edges of input if `mode` is 'constant'.
 
     Returns
     -------
@@ -60,9 +62,10 @@ def _preprocess(image, mask, sigma, mode):
     pixels.
     """
 
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval)
     if mask is None:
         # Smooth the masked image
-        smoothed_image = gaussian(image, sigma=sigma, mode=mode)
+        smoothed_image = gaussian(image, **gaussian_kwargs)
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
         eroded_mask[-1:, :] = 0
@@ -76,11 +79,12 @@ def _preprocess(image, mask, sigma, mode):
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
-    bleed_over = (gaussian(mask.astype(float), sigma=sigma, mode=mode)
-                  + np.finfo(float).eps)
+    bleed_over = (
+        gaussian(mask.astype(float), **gaussian_kwargs) + np.finfo(float).eps
+    )
 
     # Smooth the masked image
-    smoothed_image = gaussian(masked_image, sigma=sigma, mode=mode)
+    smoothed_image = gaussian(masked_image, **gaussian_kwargs)
 
     # Lower the result by the bleed-over fraction, so you can
     # recalibrate by dividing by the function on the mask to recover
@@ -100,7 +104,6 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
     """Get the magnitudes shifted left to make a matrix of the points to
     the right of pts. Similarly, shift left and down to get the points
     to the top right of pts.
-
     """
     r_0, r_1, r_2, r_3 = row_slices
     c_0, c_1, c_2, c_3 = col_slices
@@ -118,21 +121,19 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
 
 
 def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
-    """Edge thinning by non-maximum suppression
+    """Edge thinning by non-maximum suppression.
 
+    Finds the normal to the edge at each point using the arctangent of the
+    ratio of the Y sobel over the X sobel - pragmatically, we can
+    look at the signs of X and Y and the relative magnitude of X vs Y
+    to sort the points into 4 categories: horizontal, vertical,
+    diagonal and antidiagonal.
+
+    Look in the normal and reverse directions to see if the values
+    in either of those directions are greater than the point in question.
+    Use interpolation (via _set_local_maxima) to get a mix of points
+    instead of picking the one that's the closest to the normal.
     """
-    #
-    # Find the normal to the edge at each point using the arctangent of the
-    # ratio of the Y sobel over the X sobel - pragmatically, we can
-    # look at the signs of X and Y and the relative magnitude of X vs Y
-    # to sort the points into 4 categories: horizontal, vertical,
-    # diagonal and antidiagonal.
-    #
-    # Look in the normal and reverse directions to see if the values
-    # in either of those directions are greater than the point in question.
-    # Use interpolation to get a mix of points instead of picking the one
-    # that's the closest to the normal.
-
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
 
@@ -199,7 +200,7 @@ def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
 
 
 def canny(image, sigma=1., low_threshold=None, high_threshold=None,
-          mask=None, use_quantiles=False, *, mode='constant'):
+          mask=None, use_quantiles=False, *, mode='constant', cval=0.0):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -225,6 +226,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         The ``mode`` parameter determines how the array borders are
         handled during Gaussian filtering, where ``cval`` is the value when
         mode is equal to 'constant'.
+    cval : float, optional
+        Value to fill past edges of input if `mode` is 'constant'.
 
     Returns
     -------
@@ -279,36 +282,11 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
 
     """
 
-    #
-    # The steps involved:
-    #
-    # * Smooth using the Gaussian with sigma above.
-    #
-    # * Apply the horizontal and vertical Sobel operators to get the gradients
-    #   within the image. The edge strength is the sum of the magnitudes
-    #   of the gradients in each direction.
-    #
-    # * Find the normal to the edge at each point using the arctangent of the
-    #   ratio of the Y sobel over the X sobel - pragmatically, we can
-    #   look at the signs of X and Y and the relative magnitude of X vs Y
-    #   to sort the points into 4 categories: horizontal, vertical,
-    #   diagonal and antidiagonal.
-    #
-    # * Look in the normal and reverse directions to see if the values
-    #   in either of those directions are greater than the point in question.
-    #   Use interpolation to get a mix of points instead of picking the one
-    #   that's the closest to the normal.
-    #
-    # * Label all points above the high threshold as edges.
-    #
-    # * Recursively label any point above the low threshold that is 8-connected
-    #   to a labeled point as an edge.
-    #
     # Regarding masks, any point touching a masked point will have a gradient
     # that is "infected" by the masked point, so it's enough to erode the
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
-    #
+
     check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
@@ -332,7 +310,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         raise ValueError("low_threshold should be lower then high_threshold")
 
     # Image filtering
-    smoothed, eroded_mask = _preprocess(image, mask, sigma, mode)
+    smoothed, eroded_mask = _preprocess(image, mask, sigma, mode, cval)
 
     # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)
