@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pytest
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings

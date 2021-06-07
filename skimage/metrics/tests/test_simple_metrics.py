@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
