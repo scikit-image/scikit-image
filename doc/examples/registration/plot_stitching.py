@@ -136,7 +136,7 @@ glob_trfm[:2, 2] = -margin, -margin
 ############################################################################
 # Now, the relative position of the other images in the global domain
 # are obtained by composing the global transformation with the
-# relative transformations
+# relative transformations:
 global_img_list = [warp(img, trfm.dot(glob_trfm), output_shape=out_shape,
                         mode="constant", cval=np.nan)
                    for img, trfm in zip(img_list, trfm_list)]
