@@ -7,11 +7,11 @@ import numpy as np
 import pywt
 
 from .. import img_as_float
-from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared import utils
-from .._shared.utils import warn
-import skimage.color as color
-from skimage.color.colorconv import ycbcr_from_rgb
+from .._shared.utils import _supported_float_type, warn
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from .. import color
+from ..color.colorconv import ycbcr_from_rgb
 
 
 def _gaussian_weight(array, sigma_squared, *, dtype=float):
@@ -110,10 +110,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     sigma_color : float
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
-        radiometric differences. Note, that the image will be converted using
-        the `img_as_float` function and thus the standard deviation is in
-        respect to the range ``[0, 1]``. If the value is ``None`` the standard
-        deviation of the ``image`` will be used.
+        radiometric differences. If ``None``, the standard deviation of
+        ``image`` will be used.
     sigma_spatial : float
         Standard deviation for range distance. A larger value results in
         averaging of pixels with larger spatial differences.
@@ -155,6 +153,14 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     Radiometric similarity is measured by the Gaussian function of the
     Euclidean distance between two color values and a certain standard
     deviation (`sigma_color`).
+
+    Note that, if the image is of any `int` dtype, ``image`` will be
+    converted using the `img_as_float` function and thus the standard
+    deviation (`sigma_color`) will be in range ``[0, 1]``.
+
+    For more information on scikit-image's data type conversions and how
+    images are rescaled in these conversions,
+    see: https://scikit-image.org/docs/stable/user_guide/data_types.html.
 
     References
     ----------
@@ -503,10 +509,13 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     if not im_type.kind == 'f':
         image = img_as_float(image)
 
+    # enforce float16->float32 and float128->float64
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
-
         out = np.zeros_like(image)
         for c in range(image.shape[channel_axis]):
             out[_at(c)] = _denoise_tv_chambolle_nd(image[_at(c)], weight, eps,
@@ -682,6 +691,7 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
     """If the ``image`` is rescaled, also rescale ``sigma`` consistently.
 
     Images that are not floating point will be rescaled via ``img_as_float``.
+    Half-precision images will be promoted to single precision.
     """
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
@@ -703,6 +713,8 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
                          for s in sigma]
             elif sigma is not None:
                 sigma *= scale_factor
+    elif image.dtype == np.float16:
+        image = image.astype(np.float32)
     return image, sigma
 
 
