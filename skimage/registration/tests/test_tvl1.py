@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage._shared.utils import _supported_float_type
 from skimage.registration import optical_flow_tvl1
