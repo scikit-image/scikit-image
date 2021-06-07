@@ -3,7 +3,8 @@ import textwrap
 
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
+                           assert_equal)
 
 from skimage.transform._geometric import (_affine_matrix_from_vector,
                                           _center_and_normalize_points,
