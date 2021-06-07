@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_almost_equal
+from numpy.testing import assert_, assert_allclose, assert_array_almost_equal
 
 from skimage import data
 from skimage import filters
@@ -578,9 +578,10 @@ def test_range(detector):
     """Output of edge detection should be in [0, 1]"""
     image = np.random.random((100, 100))
     out = detector(image)
-    assert (
+    assert_(
         out.min() >= 0, f'Minimum of `{detector.__name__}` is smaller than 0.'
     )
-    assert (
+
+    assert_(
         out.max() <= 1, f'Maximum of `{detector.__name__}` is larger than 1.'
     )
