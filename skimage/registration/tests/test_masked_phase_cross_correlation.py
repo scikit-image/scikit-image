@@ -169,7 +169,8 @@ def test_cross_correlate_masked_test_against_mismatched_dimensions():
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
 
-    with pytest.rairaises(ValueError):
+    with pytest.raises(ValueError):
+
         cross_correlate_masked(arr1, arr2, m1, m2, axes=(1, 2))
 
 
