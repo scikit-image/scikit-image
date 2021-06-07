@@ -28,6 +28,7 @@ def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
     -------
     wfilt : ndarray
         The FFT mask.
+
     """
     ranges = []
     for i, d in enumerate(shape):
@@ -77,9 +78,9 @@ def butterworth(
         If there is a channel dimension, provide the index here. If None
         (default) then all axes are assumed to be spatial dimensions.
     preserve_range : bool, optional
-        Whether to keep the original range of values. Defaults to False. If False,
-        image is returned with dtype float with values scaled between 0 and 1.
-        If a complex-valued image is passed, no rescaling is performed.
+        Whether to keep the original range of values. Defaults to False. If
+        False, image is returned with dtype float with values scaled between 0
+        and 1. If a complex-valued image is passed, no rescaling is performed.
 
     Returns
     -------
@@ -95,10 +96,11 @@ def butterworth(
     the Butterworth filter. Here it is implemented as the n-dimensional form of
 
     .. math::
+
         \frac{1}{1-\left(\frac{f}{c*f_{max}}\right)^{2*n})
 
     with :math:`f` the absolute value of the spatial frequency, :math:`c` the
-    `cutoff_frequency_ratio` and :math:`n` the `order` modeled after [2]_
+    ``cutoff_frequency_ratio`` and :math:`n` the ``order`` modeled after [2]_
 
     Examples
     --------
@@ -116,6 +118,7 @@ def butterworth(
            Wireless Engineer 7.6 (1930): 536-541.
     .. [2] Russ, John C., et al. "The image processing handbook."
            Computers in Physics 8.2 (1994): 177-178.
+
     """
     fft_shape = (image.shape if channel_axis is None
                  else np.delete(image.shape, channel_axis))
