@@ -1,7 +1,8 @@
 import numpy as np
-from skimage.transform import integral_image, integrate
+import pytest
 
-from skimage._shared.testing import assert_equal
+from skimage._shared.testing import assert_allclose, assert_equal
+from skimage.transform import integral_image, integrate
 
 
 np.random.seed(0)
@@ -9,12 +10,28 @@ x = (np.random.rand(50, 50) * 255).astype(np.uint8)
 s = integral_image(x)
 
 
-def test_validity():
-    y = np.arange(12).reshape((4, 3))
-
-    y = (np.random.rand(50, 50) * 255).astype(np.uint8)
-    assert_equal(integral_image(y)[-1, -1],
-                 y.sum())
+@pytest.mark.parametrize(
+    'dtype', [np.float16, np.float32, np.float64, np.uint8, np.int32]
+)
+@pytest.mark.parametrize('dtype_as_kwarg', [False, True])
+def test_integral_image_validity(dtype, dtype_as_kwarg):
+    rstate = np.random.RandomState(1234)
+    dtype_kwarg = dtype if dtype_as_kwarg else None
+    y = (rstate.rand(20, 20) * 255).astype(dtype)
+    out = integral_image(y, dtype=dtype_kwarg)
+    if y.dtype.kind == 'f':
+        if dtype_as_kwarg:
+            assert out.dtype == dtype
+            rtol = 1e-3 if dtype == np.float16 else 1e-7
+            assert_allclose(out[-1, -1], y.sum(dtype=np.float64), rtol=rtol)
+        else:
+            assert out.dtype == np.float64
+            assert_allclose(out[-1, -1], y.sum(dtype=np.float64))
+    else:
+        assert out.dtype.kind == y.dtype.kind
+        if not (dtype_as_kwarg and dtype == np.uint8):
+            # omit check for dtype=uint8 case as it will overflow
+            assert_equal(out[-1, -1], y.sum())
 
 
 def test_basic():

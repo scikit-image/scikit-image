@@ -8,9 +8,9 @@ example extracts a single coin from the ``skimage.data.coins`` image and uses
 histogram matching to attempt to locate it within the original image.
 
 First, a box-shaped region of the image containing the target coin is
-extracted and a histogram of its greyscale values is computed.
+extracted and a histogram of its grayscale values is computed.
 
-Next, for each pixel in the test image, a histogram of the greyscale values in
+Next, for each pixel in the test image, a histogram of the grayscale values in
 a region of the image surrounding the pixel is computed.
 ``skimage.filters.rank.windowed_histogram`` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
@@ -79,7 +79,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
 # Load the `skimage.data.coins` image
 img = img_as_ubyte(data.coins())
 
-# Quantize to 16 levels of greyscale; this way the output image will have a
+# Quantize to 16 levels of grayscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
 quantized_img = img // 16
 

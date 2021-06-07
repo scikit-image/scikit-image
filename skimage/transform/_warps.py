@@ -8,6 +8,7 @@ from ._geometric import (SimilarityTransform, AffineTransform,
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
+from .._shared import utils
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
                              _validate_interpolation_order,
@@ -187,7 +188,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     # 2-dimensional interpolation
     elif len(output_shape) == 2 or (len(output_shape) == 3 and
-                                  output_shape[2] == input_shape[2]):
+                                    output_shape[2] == input_shape[2]):
         rows = output_shape[0]
         cols = output_shape[1]
         input_rows = input_shape[0]
@@ -235,9 +236,12 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     return out
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=False,
-            anti_aliasing=None, anti_aliasing_sigma=None):
+            anti_aliasing=None, anti_aliasing_sigma=None, *,
+            channel_axis=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale N-dimensional images.
@@ -281,7 +285,8 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+        channels or another spatial dimension. This argument is deprecated:
+        specify `channel_axis` instead.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
@@ -291,6 +296,13 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
         By default, this value is chosen as (s - 1) / 2 where s is the
         down-scaling factor.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Notes
     -----
@@ -312,6 +324,7 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
 
     """
     scale = np.atleast_1d(scale)
+    multichannel = channel_axis is not None
     if len(scale) > 1:
         if ((not multichannel and len(scale) != image.ndim) or
                 (multichannel and len(scale) != image.ndim - 1)):
@@ -1032,8 +1045,11 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
     return coords
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg()
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
-               scaling='linear', multichannel=False, **kwargs):
+               scaling='linear', multichannel=False, channel_axis=None,
+               **kwargs):
     """Remap image to polar or log-polar coordinates space.
 
     Parameters
@@ -1056,7 +1072,15 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     multichannel : bool, optional
         Whether the image is a 3-D array in which the third axis is to be
         interpreted as multiple channels. If set to `False` (default), only 2-D
-        arrays are accepted.
+        arrays are accepted. This argument is deprecated: specify
+        `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
     **kwargs : keyword arguments
         Passed to `transform.warp`.
 
@@ -1087,8 +1111,9 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     Perform a log-polar warp on a color image:
 
     >>> image = data.astronaut()
-    >>> warped = warp_polar(image, scaling='log', multichannel=True)
+    >>> warped = warp_polar(image, scaling='log', channel_axis=-1)
     """
+    multichannel = channel_axis is not None
     if image.ndim != 2 and not multichannel:
         raise ValueError("Input array must be 2 dimensions "
                          "when `multichannel=False`,"

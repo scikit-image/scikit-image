@@ -196,11 +196,6 @@ sphinx_gallery_conf = {
     'remove_config_comments':True,
 }
 
-# set plotly renderer to capture _repr_html_ for sphinx-gallery
-import plotly.io as pio
-pio.renderers.default = 'sphinx_gallery'
-
-
 from sphinx_gallery.utils import _has_optipng
 if _has_optipng():
     # This option requires optipng to compress images

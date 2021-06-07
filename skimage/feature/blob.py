@@ -7,7 +7,7 @@ from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 
 
 # This basic blob detection algorithm is based on:
@@ -312,6 +312,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     # if both min and max sigma are scalar, function returns only one sigma
     scalar_sigma = np.isscalar(max_sigma) and np.isscalar(min_sigma)
@@ -319,13 +321,13 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
     if np.isscalar(max_sigma):
-        max_sigma = np.full(image.ndim, max_sigma, dtype=float)
+        max_sigma = np.full(image.ndim, max_sigma, dtype=float_dtype)
     if np.isscalar(min_sigma):
-        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float_dtype)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=float)
-    max_sigma = np.asarray(max_sigma, dtype=float)
+    min_sigma = np.asarray(min_sigma, dtype=float_dtype)
+    max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
@@ -357,7 +359,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         return np.empty((0, 3))
 
     # Convert local_maxima to float64
-    lm = local_maxima.astype(np.float64)
+    lm = local_maxima.astype(float_dtype)
 
     # translate final column of lm, which contains the index of the
     # sigma that produced the maximum intensity value, into the sigma
@@ -468,6 +470,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     # if both min and max sigma are scalar, function returns only one sigma
     scalar_sigma = (
@@ -477,13 +481,13 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
     if np.isscalar(max_sigma):
-        max_sigma = np.full(image.ndim, max_sigma, dtype=float)
+        max_sigma = np.full(image.ndim, max_sigma, dtype=float_dtype)
     if np.isscalar(min_sigma):
-        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float_dtype)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=float)
-    max_sigma = np.asarray(max_sigma, dtype=float)
+    min_sigma = np.asarray(min_sigma, dtype=float_dtype)
+    max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     if log_scale:
         # for anisotropic data, we use the "highest resolution/variance" axis
@@ -517,7 +521,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         return np.empty((0, 3))
 
     # Convert local_maxima to float64
-    lm = local_maxima.astype(np.float64)
+    lm = local_maxima.astype(float_dtype)
 
     # translate final column of lm, which contains the index of the
     # sigma that produced the maximum intensity value, into the sigma
@@ -620,6 +624,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     check_nD(image, 2)
 
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     image = integral_image(image)
 
     if log_scale:

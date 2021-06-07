@@ -82,19 +82,10 @@ Other (2021)
 * Monitor when multibuild devel gets merged into master for python 3.8
   compatibility https://github.com/matthew-brett/multibuild/issues/284
   and update osx_install to point to the correct branch
-* When ``numpy`` is set to >= 1.16, remove the warning assertion in
-  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
-  regarding ``invalid value encountered in reduce``.
-  regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
-  vectorized version of ``np.linspace``.
 * Once NumPy is set to >= 1.17, consider removing
   ``skimage.morphology._util._fast_pad``.
-* Remove pillow version related warning for MPO file format in
-  `io._plugins.pil_plugin.imread` when upgrading pillow min version to
-  6.0.0
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 
@@ -102,7 +93,10 @@ Other (2022)
 ------------
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
   the minimum supported version of ``scipy`` reaches 1.4.
-* Remove pillow version related warning for CVE when pillow > 7.1.0 in
+* Remove unneeded `deconv_type` and astype call in `weiner` and
+  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
+  supported version of ``scipy`` reaches 1.4.
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
 Other (2023)

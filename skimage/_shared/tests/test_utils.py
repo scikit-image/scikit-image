@@ -4,9 +4,15 @@ import numpy as np
 import numpy.testing as npt
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
-                                   change_default_value, remove_arg)
+                                   change_default_value, remove_arg,
+                                   _supported_float_type,
+                                   channel_as_last_axis)
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+
+complex_dtypes = [np.complex64, np.complex128]
+if hasattr(np, 'complex256'):
+    complex_dtypes += [np.complex256]
 
 
 def test_remove_argument():
@@ -184,6 +190,75 @@ def test_validate_interpolation_order(dtype, order):
     else:
         # Valid use case
         assert _validate_interpolation_order(dtype, order) == order
+
+
+@pytest.mark.parametrize(
+    'dtype',
+    [bool, np.float16, np.float32, np.float64, np.uint8, np.uint16, np.uint32,
+     np.uint64, np.int8, np.int16, np.int32, np.int64]
+)
+def test_supported_float_dtype_real(dtype):
+    float_dtype = _supported_float_type(dtype)
+    if dtype in [np.float16, np.float32]:
+        assert float_dtype == np.float32
+    else:
+        assert float_dtype == np.float64
+
+
+@pytest.mark.parametrize('dtype', complex_dtypes)
+@pytest.mark.parametrize('allow_complex', [False, True])
+def test_supported_float_dtype_complex(dtype, allow_complex):
+    if allow_complex:
+        float_dtype = _supported_float_type(dtype, allow_complex=allow_complex)
+        if dtype == np.complex64:
+            assert float_dtype == np.complex64
+        else:
+            assert float_dtype == np.complex128
+    else:
+        with testing.raises(ValueError):
+            _supported_float_type(dtype, allow_complex=allow_complex)
+
+
+@pytest.mark.parametrize(
+    'dtype', ['f', 'float32', np.float32, np.dtype(np.float32)]
+)
+def test_supported_float_dtype_input_kinds(dtype):
+    assert _supported_float_type(dtype) == np.float32
+
+
+@pytest.mark.parametrize(
+    'dtypes, expected',
+    [
+        ((np.float16, np.float64), np.float64),
+        ([np.float32, np.uint16, np.int8], np.float64),
+        ({np.float32, np.float16}, np.float32),
+    ]
+)
+def test_supported_float_dtype_sequence(dtypes, expected):
+    float_dtype = _supported_float_type(dtypes)
+    assert float_dtype == expected
+
+
+@channel_as_last_axis(multichannel_output=False)
+def _decorated_channel_axis_size(x, *, channel_axis=None):
+    if channel_axis is None:
+        return None
+    assert channel_axis == -1
+    return x.shape[-1]
+
+
+@testing.parametrize('channel_axis', [None, 0, 1, 2, -1, -2, -3])
+def test_decorated_channel_axis_shape(channel_axis):
+    # Verify that channel_as_last_axis modifies the channel_axis as expected
+
+    # need unique size per axis here
+    x = np.zeros((2, 3, 4))
+
+    size = _decorated_channel_axis_size(x, channel_axis=channel_axis)
+    if channel_axis is None:
+        assert size is None
+    else:
+        assert size == x.shape[channel_axis]
 
 
 if __name__ == "__main__":
