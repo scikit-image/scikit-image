@@ -20,7 +20,7 @@ from skimage.metrics import peak_signal_noise_ratio
 
 
 def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
-    """Image locations matching using SSD minimization.
+    """Match image locations using SSD minimization.
 
     Areas from `img0` are matched with areas from `img1`. These areas
     are defined as patches located around pixels with Gaussian
