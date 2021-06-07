@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
@@ -32,15 +33,15 @@ def test_gabor_kernel_bandwidth():
     assert_equal(kernel.shape, (9, 9))
 
 
-@testing.parametrize('dtype', [np.complex64, np.complex128])
+@pytest.mark.parametrize('dtype', [np.complex64, np.complex128])
 def test_gabor_kernel_dtype(dtype):
     kernel = gabor_kernel(1, bandwidth=1, dtype=dtype)
     assert kernel.dtype == dtype
 
 
-@testing.parametrize('dtype', [np.uint8, np.float32])
+@pytest.mark.parametrize('dtype', [np.uint8, np.float32])
 def test_gabor_kernel_invalid_dtype(dtype):
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         kernel = gabor_kernel(1, bandwidth=1, dtype=dtype)
         assert kernel.dtype == dtype
 
@@ -92,7 +93,7 @@ def test_gabor():
     assert responses[1, 1] > responses[1, 0]
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_gabor_dtype(dtype):
     image = np.ones((16, 16), dtype=dtype)
     y = gabor(image, 0.3)

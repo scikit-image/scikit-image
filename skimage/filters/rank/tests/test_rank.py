@@ -275,7 +275,7 @@ class TestRank():
         selem = disk(20)
         image = (np.random.rand(500, 500) * 256).astype(np.uint8)
         out = image
-        with testing.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             rank.mean(image, selem, out=out)
 
     def test_compare_autolevels(self):
@@ -805,5 +805,5 @@ class TestRank():
     def test_input_boolean_dtype(self):
         image = (np.random.rand(100, 100) * 256).astype(bool)
         elem = np.ones((3, 3), dtype=bool)
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             rank.maximum(image=image, selem=elem)

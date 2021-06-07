@@ -3,7 +3,6 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_less, assert_equal
 
 from skimage import img_as_float
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -191,8 +190,8 @@ def test_2d_cropped_camera_image():
                     ones, atol=1 - 1e-7)
 
 
-@testing.parametrize('func', [meijering, sato, frangi, hessian])
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('func', [meijering, sato, frangi, hessian])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_ridge_output_dtype(func, dtype):
     img = img_as_float(camera()).astype(dtype, copy=False)
     assert func(img).dtype == _supported_float_type(img.dtype)
@@ -257,4 +256,4 @@ def test_border_warning(func):
 
 if __name__ == "__main__":
     from numpy import testing
-    testing.run_module_suite()
+    np.testing.run_module_suite()

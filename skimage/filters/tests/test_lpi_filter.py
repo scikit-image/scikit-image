@@ -1,12 +1,11 @@
-
 import numpy as np
+import pytest
 import scipy
 from numpy.testing import assert_, assert_equal
 
-from ..._shared import testing
-from ..._shared.utils import _supported_float_type
-from ...data import camera
-from ..lpi_filter import LPIFilter2D, inverse, wiener
+from skimage._shared.utils import _supported_float_type
+from skimage.data import camera
+from skimage.lpi_filter import LPIFilter2D, inverse, wiener
 
 have_scipy_fft = np.lib.NumpyVersion(scipy.__version__) >= '1.4.0'
 
@@ -21,15 +20,16 @@ class TestLPIFilter2D:
     def setup_method(self):
         self.f = LPIFilter2D(self.filt_func)
 
-    @testing.parametrize(
+    @pytest.mark.parametrize(
         'c_slice', [slice(None), slice(0, -5), slice(0, -20)]
     )
     def test_ip_shape(self, c_slice):
         x = self.img[:, c_slice]
         assert_equal(self.f(x).shape, x.shape)
 
-    @testing.parametrize('dtype', [np.uint8, np.float16, np.float32,
-                                   np.float64])
+    @pytest.mark.parametrize(
+        'dtype', [np.uint8, np.float16, np.float32, np.float64]
+    )
     def test_inverse(self, dtype):
         img = self.img.astype(dtype, copy=False)
 
@@ -57,8 +57,9 @@ class TestLPIFilter2D:
         g1 = inverse(F[::-1, ::-1], self.filt_func)
         assert_((g - g1[::-1, ::-1]).sum() < 55)
 
-    @testing.parametrize('dtype', [np.uint8, np.float16, np.float32,
-                                   np.float64])
+    @pytest.mark.parametrize(
+        'dtype', [np.uint8, np.float16, np.float32, np.float64]
+    )
     def test_wiener(self, dtype):
 
         img = self.img.astype(dtype, copy=False)
@@ -83,5 +84,5 @@ class TestLPIFilter2D:
         assert_((g - g1[::-1, ::-1]).sum() < 1)
 
     def test_non_callable(self):
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             LPIFilter2D(None)

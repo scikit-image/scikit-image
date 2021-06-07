@@ -1,26 +1,26 @@
 import numpy as np
+import pytest
 
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import parametrize
 from skimage._shared.utils import _supported_float_type
 from skimage.filters import unsharp_mask
 
 
-@parametrize("shape,multichannel",
-             [((29,), False),
-              ((40, 4), True),
-              ((32, 32), False),
-              ((29, 31, 3), True),
-              ((13, 17, 4, 8), False)])
-@parametrize("dtype", [np.uint8, np.int8,
-                       np.uint16, np.int16,
-                       np.uint32, np.int32,
-                       np.uint64, np.int64,
-                       np.float32, np.float64])
-@parametrize("radius", [0, 0.1, 2.0])
-@parametrize("amount", [0.0, 0.5, 2.0, -1.0])
-@parametrize("offset", [-1.0, 0.0, 1.0])
-@parametrize("preserve", [False, True])
+@pytest.mark.parametrize("shape,multichannel",
+                         [((29,), False),
+                          ((40, 4), True),
+                          ((32, 32), False),
+                          ((29, 31, 3), True),
+                          ((13, 17, 4, 8), False)])
+@pytest.mark.parametrize("dtype", [np.uint8, np.int8,
+                                   np.uint16, np.int16,
+                                   np.uint32, np.int32,
+                                   np.uint64, np.int64,
+                                   np.float32, np.float64])
+@pytest.mark.parametrize("radius", [0, 0.1, 2.0])
+@pytest.mark.parametrize("amount", [0.0, 0.5, 2.0, -1.0])
+@pytest.mark.parametrize("offset", [-1.0, 0.0, 1.0])
+@pytest.mark.parametrize("preserve", [False, True])
 def test_unsharp_masking_output_type_and_shape(
         radius, amount, shape, multichannel, dtype, offset, preserve):
     array = np.random.random(shape)
@@ -34,12 +34,12 @@ def test_unsharp_masking_output_type_and_shape(
     assert output.shape == shape
 
 
-@parametrize("shape,multichannel",
-             [((32, 32), False),
-              ((15, 15, 2), True),
-              ((17, 19, 3), True)])
-@parametrize("radius", [(0.0, 0.0), (1.0, 1.0), (2.0, 1.5)])
-@parametrize("preserve", [False, True])
+@pytest.mark.parametrize("shape,multichannel",
+                         [((32, 32), False),
+                          ((15, 15, 2), True),
+                          ((17, 19, 3), True)])
+@pytest.mark.parametrize("radius", [(0.0, 0.0), (1.0, 1.0), (2.0, 1.5)])
+@pytest.mark.parametrize("preserve", [False, True])
 def test_unsharp_masking_with_different_radii(radius, shape,
                                               multichannel, preserve):
     amount = 1.0
@@ -54,14 +54,14 @@ def test_unsharp_masking_with_different_radii(radius, shape,
     assert output.shape == shape
 
 
-@parametrize("shape,channel_axis",
-             [((16, 16), None),
-              ((15, 15, 2), -1),
-              ((13, 17, 3), -1),
-              ((2, 15, 15), 0),
-              ((3, 13, 17), 0)])
-@parametrize("offset", [-5, 0, 5])
-@parametrize("preserve", [False, True])
+@pytest.mark.parametrize("shape,channel_axis",
+                         [((16, 16), None),
+                          ((15, 15, 2), -1),
+                          ((13, 17, 3), -1),
+                          ((2, 15, 15), 0),
+                          ((3, 13, 17), 0)])
+@pytest.mark.parametrize("offset", [-5, 0, 5])
+@pytest.mark.parametrize("preserve", [False, True])
 def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
                                                           channel_axis,
                                                           preserve):
@@ -81,12 +81,12 @@ def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
     assert output.shape == shape
 
 
-@parametrize("shape,multichannel",
-             [((16, 16), False),
-              ((15, 15, 2), True),
-              ((13, 17, 3), True)])
-@parametrize("offset", [-5, 0, 5])
-@parametrize("preserve", [False, True])
+@pytest.mark.parametrize("shape,multichannel",
+                         [((16, 16), False),
+                          ((15, 15, 2), True),
+                          ((13, 17, 3), True)])
+@pytest.mark.parametrize("offset", [-5, 0, 5])
+@pytest.mark.parametrize("preserve", [False, True])
 def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
                                                           multichannel,
                                                           preserve):
@@ -111,12 +111,12 @@ def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
         output = unsharp_mask(array, radius, amount, multichannel, preserve)
 
 
-@parametrize("shape,channel_axis",
-             [((16, 16), None),
-              ((15, 15, 2), -1),
-              ((13, 17, 3), -1)])
-@parametrize("preserve", [False, True])
-@parametrize("dtype", [np.uint8, np.float16, np.float32, np.float64])
+@pytest.mark.parametrize("shape,channel_axis",
+                         [((16, 16), None),
+                          ((15, 15, 2), -1),
+                          ((13, 17, 3), -1)])
+@pytest.mark.parametrize("preserve", [False, True])
+@pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32, np.float64])
 def test_unsharp_masking_dtypes(shape, channel_axis, preserve, dtype):
     radius = 2.0
     amount = 1.0

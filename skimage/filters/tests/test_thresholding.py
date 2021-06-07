@@ -1,13 +1,17 @@
-import pytest
 import numpy as np
+import pytest
+from numpy.testing import (assert_equal, assert_allclose, assert_almost_equal,
+                           assert_array_equal)
 from scipy import ndimage as ndi
 
-from skimage import util
 from skimage import data
+from skimage import util
+from skimage._shared._warnings import expected_warnings
 from skimage.color import rgb2gray
 from skimage.draw import disk
-from skimage._shared._warnings import expected_warnings
 from skimage.exposure import histogram
+from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
+                                        _get_multiotsu_thresh_indices)
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -22,11 +26,6 @@ from skimage.filters.thresholding import (threshold_local,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
-from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                        _get_multiotsu_thresh_indices)
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal
-from skimage._shared.testing import assert_array_equal
 
 
 class TestSimpleImage():
@@ -366,7 +365,7 @@ def test_li_arbitrary_start_point():
 
 def test_li_negative_inital_guess():
     coins = data.coins()
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         result = threshold_li(coins, initial_guess=-5)
 
 
@@ -412,7 +411,7 @@ def test_yen_coins_image_as_float():
 
 def test_local_even_block_size_error():
     img = data.camera()
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_local(img, block_size=4)
 
 
@@ -526,7 +525,7 @@ def test_threshold_minimum_synthetic():
 
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
-    with testing.raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         threshold_minimum(img)
 
 
@@ -590,10 +589,10 @@ def test_mean_std_2d(window_size, mean_kernel):
     image = np.random.rand(256, 256)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
-    np.testing.assert_allclose(m, expected_m)
+    assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
-    np.testing.assert_allclose(s, expected_s)
+    assert_allclose(s, expected_s)
 
 
 @pytest.mark.parametrize(
@@ -607,10 +606,10 @@ def test_mean_std_3d(window_size, mean_kernel):
     image = np.random.rand(40, 40, 40)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
-    np.testing.assert_allclose(m, expected_m)
+    assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
-    np.testing.assert_allclose(s, expected_s)
+    assert_allclose(s, expected_s)
 
 
 def test_niblack_sauvola_pathological_image():
@@ -664,13 +663,13 @@ def test_multiotsu_astro_image():
 
 def test_multiotsu_more_classes_then_values():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=2)
     img[:, 3:] = 2
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=3)
     img[:, 6:] = 3
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=4)
 
 

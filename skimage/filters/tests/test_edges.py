@@ -1,15 +1,14 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_allclose, assert_array_almost_equal
+
 from skimage import data
 from skimage import filters
+from skimage._shared.utils import _supported_float_type
 from skimage.filters.edges import _mask_filter_result
 
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_almost_equal,
-                                     assert_, assert_allclose)
-from skimage._shared.utils import _supported_float_type
 
-
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_roberts_zeros(dtype):
     """Roberts' filter on an array of all zeros."""
     result = filters.roberts(np.zeros((10, 10), dtype=dtype),
@@ -18,7 +17,7 @@ def test_roberts_zeros(dtype):
     assert (np.all(result == 0))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_roberts_diagonal1(dtype):
     """Roberts' filter on a diagonal edge should be a diagonal line."""
     image = np.tri(10, 10, 0, dtype=dtype)
@@ -46,7 +45,7 @@ def test_sobel_zeros():
     assert (np.all(result == 0))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_sobel_mask(dtype):
     """Sobel on a masked array should be zero."""
     result = filters.sobel(np.random.uniform(size=(10, 10)).astype(dtype),
@@ -142,7 +141,7 @@ def test_scharr_zeros():
     assert (np.all(result < 1e-16))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_scharr_mask(dtype):
     """Scharr on a masked array should be zero."""
     result = filters.scharr(np.random.uniform(size=(10, 10)).astype(dtype),
@@ -241,7 +240,7 @@ def test_prewitt_zeros():
     assert_allclose(result, 0)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_prewitt_mask(dtype):
     """Prewitt on a masked array should be zero."""
     result = filters.prewitt(np.random.uniform(size=(10, 10)).astype(dtype),
@@ -351,7 +350,7 @@ def test_laplace_zeros():
     assert_allclose(result, check_result)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_laplace_mask(dtype):
     """Laplace on a masked array should be zero."""
     # Create a synthetic 2D image
@@ -370,7 +369,7 @@ def test_farid_zeros():
     assert (np.all(result == 0))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_farid_mask(dtype):
     """Farid on a masked array should be zero."""
     result = filters.farid(np.random.uniform(size=(10, 10)).astype(dtype),
@@ -462,8 +461,9 @@ def test_farid_v_horizontal():
     assert_allclose(result, 0, atol=1e-10)
 
 
-@testing.parametrize("grad_func", (filters.prewitt_h, filters.sobel_h,
-                                   filters.scharr_h))
+@pytest.mark.parametrize(
+    "grad_func", (filters.prewitt_h, filters.sobel_h, filters.scharr_h)
+)
 def test_horizontal_mask_line(grad_func):
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
@@ -480,8 +480,10 @@ def test_horizontal_mask_line(grad_func):
     assert_allclose(result, expected)
 
 
-@testing.parametrize("grad_func", (
-    filters.prewitt_v, filters.sobel_v, filters.scharr_v))
+@pytest.mark.parametrize(
+    "grad_func",
+    (filters.prewitt_v, filters.sobel_v, filters.scharr_v)
+)
 def test_vertical_mask_line(grad_func):
     """Vertical edge filters mask pixels surrounding input mask."""
     _, hgrad = np.mgrid[:1:11j, :1:11j]  # horizontal gradient with spacing 0.1
@@ -546,7 +548,7 @@ MAX_SCHARR_ND = np.array([
 ]).astype(float)
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     ('func', 'max_edge'),
     [(filters.prewitt, MAX_SOBEL_ND),
      (filters.sobel, MAX_SOBEL_ND),
@@ -558,7 +560,7 @@ def test_3d_edge_filters(func, max_edge):
     testing.assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'func', (filters.prewitt, filters.sobel, filters.scharr)
 )
 def test_3d_edge_filters_single_axis(func):
@@ -567,7 +569,7 @@ def test_3d_edge_filters_single_axis(func):
     testing.assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'detector',
     [filters.sobel, filters.scharr, filters.prewitt,
      filters.roberts, filters.farid]
@@ -576,9 +578,9 @@ def test_range(detector):
     """Output of edge detection should be in [0, 1]"""
     image = np.random.random((100, 100))
     out = detector(image)
-    assert_(
+    assert (
         out.min() >= 0, f'Minimum of `{detector.__name__}` is smaller than 0.'
     )
-    assert_(
+    assert (
         out.max() <= 1, f'Maximum of `{detector.__name__}` is larger than 1.'
     )
