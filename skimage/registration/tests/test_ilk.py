@@ -1,15 +1,14 @@
 import numpy as np
 import pytest
 
-from skimage._shared import testing
 from skimage._shared.utils import _supported_float_type
 from skimage.registration import optical_flow_ilk
 from test_tvl1 import _sin_flow_gen
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
-@testing.parametrize('gaussian', [True, False])
-@testing.parametrize('prefilter', [True, False])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('gaussian', [True, False])
+@pytest.mark.parametrize('prefilter', [True, False])
 def test_2d_motion(dtype, gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
@@ -25,13 +24,13 @@ def test_2d_motion(dtype, gaussian, prefilter):
     assert abs(flow - gt_flow).mean() < 0.5
 
     if dtype != float_dtype:
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             optical_flow_ilk(image0, image1, gaussian=gaussian,
                              prefilter=prefilter, dtype=dtype)
 
 
-@testing.parametrize('gaussian', [True, False])
-@testing.parametrize('prefilter', [True, False])
+@pytest.mark.parametrize('gaussian', [True, False])
+@pytest.mark.parametrize('prefilter', [True, False])
 def test_3d_motion(gaussian, prefilter):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
@@ -88,12 +87,12 @@ def test_incompatible_shapes():
     rnd = np.random.RandomState(0)
     I0 = rnd.normal(size=(256, 256))
     I1 = rnd.normal(size=(255, 256))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         u, v = optical_flow_ilk(I0, I1)
 
 
 def test_wrong_dtype():
     rnd = np.random.RandomState(0)
     img = rnd.normal(size=(256, 256))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         u, v = optical_flow_ilk(img, img, dtype='int')

@@ -1,9 +1,11 @@
 import numpy as np
+import pytest
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
+                           assert_array_equal, assert_array_less, assert_equal)
 from scipy.ndimage import fourier_shift
 
-from skimage._shared import testing
 from skimage._shared.fft import fftmodule as fft
-from skimage._shared.testing import assert_equal, fetch, expected_warnings
+from skimage._shared.testing import fetch, expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, stereo_motorcycle
 from skimage.feature import masked_register_translation as _deprecated
@@ -125,7 +127,7 @@ def test_masked_registration_padfield_data():
         assert_equal((shift_x, shift_y), (-xi, yi))
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_cross_correlate_masked_output_shape(dtype):
     """Masked normalized cross-correlation should return a shape
     of N + M + 1 for each transform axis."""
@@ -167,7 +169,7 @@ def test_cross_correlate_masked_test_against_mismatched_dimensions():
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
 
-    with testing.raises(ValueError):
+    with pytest.rairaises(ValueError):
         cross_correlate_masked(arr1, arr2, m1, m2, axes=(1, 2))
 
 
@@ -195,8 +197,8 @@ def test_cross_correlate_masked_output_range():
     # No assert array less or equal, so we add an eps
     # Also could not find an `assert_array_greater`, Use (-xcorr) instead
     eps = np.finfo(float).eps
-    testing.assert_array_less(xcorr, 1 + eps)
-    testing.assert_array_less(-xcorr, 1 + eps)
+    assert_array_less(xcorr, 1 + eps)
+    assert_array_less(-xcorr, 1 + eps)
 
 
 def test_cross_correlate_masked_side_effects():
@@ -242,7 +244,7 @@ def test_cross_correlate_masked_over_axes():
     over_axes = cross_correlate_masked(
         arr1, arr2, m1, m2, axes=(0, 1), mode='same')
 
-    testing.assert_array_almost_equal(with_loop, over_axes)
+    assert_array_almost_equal(with_loop, over_axes)
 
 
 def test_cross_correlate_masked_autocorrelation_trivial_masks():
@@ -263,5 +265,5 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
 
     # Autocorrelation should have maximum in center of array
     # uint8 inputs will be processed in float32, so reduce decimal to 5
-    testing.assert_almost_equal(xcorr.max(), 1, decimal=5)
-    testing.assert_array_equal(max_index, np.array(arr1.shape) / 2)
+    assert_almost_equal(xcorr.max(), 1, decimal=5)
+    assert_array_equal(max_index, np.array(arr1.shape) / 2)

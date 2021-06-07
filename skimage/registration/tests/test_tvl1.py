@@ -1,6 +1,5 @@
 import numpy as np
 
-from skimage._shared import testing
 from skimage._shared.utils import _supported_float_type
 from skimage.registration import optical_flow_tvl1
 from skimage.transform import warp
@@ -34,7 +33,7 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     return gt_flow, image1
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_motion(dtype):
     # Generate synthetic data
     rnd = np.random.RandomState(0)
@@ -49,7 +48,7 @@ def test_2d_motion(dtype):
     assert abs(flow - gt_flow) .mean() < 0.5
 
     if dtype != float_dtype:
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             optical_flow_tvl1(image0, image1, attachment=5, dtype=dtype)
 
 def test_3d_motion():
@@ -106,12 +105,12 @@ def test_incompatible_shapes():
     rnd = np.random.RandomState(0)
     I0 = rnd.normal(size=(256, 256))
     I1 = rnd.normal(size=(128, 256))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         u, v = optical_flow_tvl1(I0, I1)
 
 
 def test_wrong_dtype():
     rnd = np.random.RandomState(0)
     img = rnd.normal(size=(256, 256))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         u, v = optical_flow_tvl1(img, img, dtype=np.int64)

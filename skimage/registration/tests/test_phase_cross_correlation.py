@@ -2,7 +2,6 @@ import numpy as np
 from scipy.ndimage import fourier_shift
 
 from skimage import img_as_float
-from skimage._shared import testing
 from skimage._shared.fft import fftmodule as fft
 from skimage._shared.testing import assert_allclose
 from skimage._shared.utils import _supported_float_type
@@ -37,7 +36,7 @@ def test_subpixel_precision():
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_real_input(dtype):
     reference_image = camera().astype(dtype, copy=False)
     subpixel_shift = (-2.4, 1.32)
@@ -90,7 +89,7 @@ def test_3d_input():
 
 def test_unknown_space_input():
     image = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(
             image, image,
             space="frank")
@@ -100,20 +99,20 @@ def test_wrong_input():
     # Dimensionality mismatch
     image = np.ones((5, 5, 1))
     template = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image)
 
     # Size mismatch
     image = np.ones((5, 5))
     template = np.ones((4, 4))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image)
 
     # NaN values in data
     image = np.ones((5, 5))
     image[0][0] = np.nan
     template = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image, return_error=True)
 
 
@@ -141,13 +140,13 @@ def test_4d_input_subpixel():
 
 
 def test_mismatch_upsampled_region_size():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _upsampled_dft(
             np.ones((4, 4)),
             upsampled_region_size=[3, 2, 1, 4])
 
 
 def test_mismatch_offsets_size():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _upsampled_dft(np.ones((4, 4)), 3,
                        axis_offsets=[3, 2, 1, 4])
