@@ -623,10 +623,6 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     """
     check_nD(image, 2)
 
-    # if image.dtype.kind == 'f':
-    #     # need max magnitude around 1 for default threshold setting
-    #     image /= image.max()
-
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
