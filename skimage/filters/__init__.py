@@ -21,7 +21,7 @@ from ._median import median
 from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
-from ._fft_based import (butterworth)
+from ._fft_based import butterworth
 
 
 __all__ = ['inverse',
