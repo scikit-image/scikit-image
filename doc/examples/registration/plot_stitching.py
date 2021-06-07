@@ -99,7 +99,7 @@ matching_corners = [match_locations(img0, img1, coords0, coords1, min_dist)
 
 ############################################################################
 # Once all the points are registred to the reference points, robust
-# relative affine transformations can be estimated using RANSAC method
+# relative affine transformations can be estimated using the RANSAC method.
 src = np.array(coords0)
 trfm_list = [ransac((dst, src), EuclideanTransform, min_samples=3,
                     residual_threshold=2, max_trials=100)[0].params
