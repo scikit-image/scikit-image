@@ -1,9 +1,8 @@
 import numpy as np
+from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.utils import _supported_float_type
 from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
                              mean_squared_error, normalized_mutual_information)
@@ -39,7 +38,7 @@ def test_PSNR_vs_IPOL():
     assert_almost_equal(p, p_IPOL, decimal=4)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_PSNR_float(dtype):
     p_uint8 = peak_signal_noise_ratio(cam, cam_noisy)
     camf = (cam / 255.).astype(dtype, copy=False)
@@ -62,11 +61,11 @@ def test_PSNR_float(dtype):
 
 def test_PSNR_errors():
     # shape mismatch
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         peak_signal_noise_ratio(cam, cam[:-1, :])
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_NRMSE(dtype):
     x = np.ones(4, dtype=dtype)
     y = np.asarray([0., 2., 2., 2.], dtype=dtype)
@@ -96,10 +95,10 @@ def test_NRMSE_no_int_overflow():
 def test_NRMSE_errors():
     x = np.ones(4)
     # shape mismatch
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         normalized_root_mse(x[:-1], x)
     # invalid normalization name
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         normalized_root_mse(x, x, normalization='foo')
 
 
@@ -113,7 +112,7 @@ def test_nmi_different_sizes():
     assert normalized_mutual_information(cam[:, :400], cam[:400, :]) > 1
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_nmi_random(dtype):
     random1 = np.random.random((100, 100))
     random2 = np.random.random((100, 100))
