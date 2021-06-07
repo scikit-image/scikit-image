@@ -59,21 +59,21 @@ def butterworth(
 ):
     """Apply a Butterworth filter to enhance high or low frequency features.
 
-    This filter is defined in the Fourier domain
+    This filter is defined in the Fourier domain.
 
     Parameters
     ----------
     image : (M[, N[, ..., P]][, C]) ndarray
         Input image.
     cutoff_frequency_ratio : float, optional
-        Determines the position of the cut-off relative to the
-        shape of the FFT.
+        Determines the position of the cut-off relative to the shape of the
+        FFT.
     high_pass : bool, optional
         Whether to perform a high pass filter. If False, a low pass filter is
         performed.
     order : float, optional
-        Order of the filter which affects the slope near the cut-off.
-        Higher order means steeper slope in frequency space.
+        Order of the filter which affects the slope near the cut-off. Higher
+        order means steeper slope in frequency space.
     channel_axis : int, optional
         If there is a channel dimension, provide the index here. If None
         (default) then all axes are assumed to be spatial dimensions.
@@ -96,8 +96,7 @@ def butterworth(
     the Butterworth filter. Here it is implemented as the n-dimensional form of
 
     .. math::
-
-        \frac{1}{1-\left(\frac{f}{c*f_{max}}\right)^{2*n})
+        \\frac{1}{1 - \\left(\\frac{f}{c*f_{max}}\\right)^{2*n}}
 
     with :math:`f` the absolute value of the spatial frequency, :math:`c` the
     ``cutoff_frequency_ratio`` and :math:`n` the ``order`` modeled after [2]_
