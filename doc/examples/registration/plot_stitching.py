@@ -123,7 +123,7 @@ fig.tight_layout()
 # A composite image can be obtained using the relative positions of
 # the registered images to the reference one. To do so, we can define a
 # global domain around the reference image and position the other
-# images in this domain:
+# images in this domain.
 #
 # A global transformation is defined to move the reference image in the
 # global domain image via a simple translation:
