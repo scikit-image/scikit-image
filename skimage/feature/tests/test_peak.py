@@ -1,7 +1,6 @@
 import itertools
 import numpy as np
 import pytest
-import unittest
 from numpy.testing import assert_array_almost_equal, assert_equal
 from scipy import ndimage as ndi
 
@@ -509,7 +508,7 @@ def test_input_values_with_labels():
     assert_equal(img, img_before)
 
 
-class TestProminentPeaks(unittest.TestCase):
+class TestProminentPeaks():
     def test_isolated_peaks(self):
         image = np.zeros((15, 15))
         x0, y0, i0 = (12, 8, 1)
@@ -521,9 +520,9 @@ class TestProminentPeaks(unittest.TestCase):
         out = peak._prominent_peaks(image)
         assert len(out[0]) == 3
         for i, x, y in zip(out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i1, i2))
-            self.assertTrue(x in (x0, x1, x2))
-            self.assertTrue(y in (y0, y1, y2))
+            assert i in (i0, i1, i2)
+            assert x in (x0, x1, x2)
+            assert y in (y0, y1, y2)
 
     def test_threshold(self):
         image = np.zeros((15, 15))
@@ -536,14 +535,14 @@ class TestProminentPeaks(unittest.TestCase):
         out = peak._prominent_peaks(image, threshold=None)
         assert len(out[0]) == 3
         for i, x, y in zip(out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i1, i2))
-            self.assertTrue(x in (x0, x1, x2))
+            assert i in (i0, i1, i2)
+            assert x in (x0, x1, x2)
         out = peak._prominent_peaks(image, threshold=9)
         assert len(out[0]) == 2
         for i, x, y in zip(out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i2))
-            self.assertTrue(x in (x0, x2))
-            self.assertTrue(y in (y0, y2))
+            assert i in (i0, i2)
+            assert x in (x0, x2)
+            assert y in (y0, y2)
 
     def test_peaks_in_contact(self):
         image = np.zeros((15, 15))
