@@ -1,13 +1,13 @@
 from .binary import (binary_erosion, binary_dilation, binary_opening,
                      binary_closing)
-from .grey import (erosion, dilation, opening, closing, white_tophat,
+from .gray import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from ..measure._label import label
 from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
-from .greyreconstruct import reconstruction
+from .grayreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import h_minima, h_maxima, local_maxima, local_minima
 from ._flood_fill import flood, flood_fill

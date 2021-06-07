@@ -24,7 +24,7 @@ def imread(fname):
     -------
     img_array : ndarray
         Unlike plugins such as PIL, where different color bands/channels are
-        stored in the third dimension, FITS images are greyscale-only and can
+        stored in the third dimension, FITS images are grayscale-only and can
         be N-dimensional, so an array of the native FITS dimensionality is
         returned, without color channels.
 
