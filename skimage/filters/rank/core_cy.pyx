@@ -126,115 +126,116 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
 
     num_se_n = num_se_s = num_se_e = num_se_w = 0
 
-    for i in range(n_bins):
-        histo[i] = 0
+    with nogil:
+        for i in range(n_bins):
+            histo[i] = 0
 
-    for r in range(srows):
-        for c in range(scols):
-            if t_e[r, c]:
-                se_e_r[num_se_e] = r - centre_r
-                se_e_c[num_se_e] = c - centre_c
-                num_se_e += 1
-            if t_w[r, c]:
-                se_w_r[num_se_w] = r - centre_r
-                se_w_c[num_se_w] = c - centre_c
-                num_se_w += 1
-            if t_n[r, c]:
-                se_n_r[num_se_n] = r - centre_r
-                se_n_c[num_se_n] = c - centre_c
-                num_se_n += 1
-            if t_s[r, c]:
-                se_s_r[num_se_s] = r - centre_r
-                se_s_c[num_se_s] = c - centre_c
-                num_se_s += 1
+        for r in range(srows):
+            for c in range(scols):
+                if t_e[r, c]:
+                    se_e_r[num_se_e] = r - centre_r
+                    se_e_c[num_se_e] = c - centre_c
+                    num_se_e += 1
+                if t_w[r, c]:
+                    se_w_r[num_se_w] = r - centre_r
+                    se_w_c[num_se_w] = c - centre_c
+                    num_se_w += 1
+                if t_n[r, c]:
+                    se_n_r[num_se_n] = r - centre_r
+                    se_n_c[num_se_n] = c - centre_c
+                    num_se_n += 1
+                if t_s[r, c]:
+                    se_s_r[num_se_s] = r - centre_r
+                    se_s_c[num_se_s] = c - centre_c
+                    num_se_s += 1
 
-    for r in range(srows):
-        for c in range(scols):
-            rr = r - centre_r
-            cc = c - centre_c
-            if selem[r, c]:
+        for r in range(srows):
+            for c in range(scols):
+                rr = r - centre_r
+                cc = c - centre_c
+                if selem[r, c]:
+                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                        histogram_increment(histo, &pop, image[rr, cc])
+
+        r = 0
+        c = 0
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins, mid_bin,
+               p0, p1, s0, s1)
+
+        # main loop
+        r = 0
+        for even_row in range(0, rows, 2):
+
+            # ---> west to east
+            for c in range(1, cols):
+                for s in range(num_se_e):
+                    rr = r + se_e_r[s]
+                    cc = c + se_e_c[s]
+                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                        histogram_increment(histo, &pop, image[rr, cc])
+
+                for s in range(num_se_w):
+                    rr = r + se_w_r[s]
+                    cc = c + se_w_c[s] - 1
+                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                        histogram_decrement(histo, &pop, image[rr, cc])
+
+                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
+                       mid_bin, p0, p1, s0, s1)
+
+            r += 1  # pass to the next row
+            if r >= rows:
+                break
+
+            # ---> north to south
+            for s in range(num_se_s):
+                rr = r + se_s_r[s]
+                cc = c + se_s_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_increment(histo, &pop, image[rr, cc])
 
-    r = 0
-    c = 0
-    kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins, mid_bin,
-           p0, p1, s0, s1)
-
-    # main loop
-    r = 0
-    for even_row in range(0, rows, 2):
-
-        # ---> west to east
-        for c in range(1, cols):
-            for s in range(num_se_e):
-                rr = r + se_e_r[s]
-                cc = c + se_e_c[s]
-                if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, &pop, image[rr, cc])
-
-            for s in range(num_se_w):
-                rr = r + se_w_r[s]
-                cc = c + se_w_c[s] - 1
+            for s in range(num_se_n):
+                rr = r + se_n_r[s] - 1
+                cc = c + se_n_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
                    mid_bin, p0, p1, s0, s1)
 
-        r += 1  # pass to the next row
-        if r >= rows:
-            break
+            # ---> east to west
+            for c in range(cols - 2, -1, -1):
+                for s in range(num_se_w):
+                    rr = r + se_w_r[s]
+                    cc = c + se_w_c[s]
+                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                        histogram_increment(histo, &pop, image[rr, cc])
 
-        # ---> north to south
-        for s in range(num_se_s):
-            rr = r + se_s_r[s]
-            cc = c + se_s_c[s]
-            if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, &pop, image[rr, cc])
+                for s in range(num_se_e):
+                    rr = r + se_e_r[s]
+                    cc = c + se_e_c[s] + 1
+                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                        histogram_decrement(histo, &pop, image[rr, cc])
 
-        for s in range(num_se_n):
-            rr = r + se_n_r[s] - 1
-            cc = c + se_n_c[s]
-            if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, &pop, image[rr, cc])
+                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
+                       mid_bin, p0, p1, s0, s1)
 
-        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
-               mid_bin, p0, p1, s0, s1)
+            r += 1  # pass to the next row
+            if r >= rows:
+                break
 
-        # ---> east to west
-        for c in range(cols - 2, -1, -1):
-            for s in range(num_se_w):
-                rr = r + se_w_r[s]
-                cc = c + se_w_c[s]
+            # ---> north to south
+            for s in range(num_se_s):
+                rr = r + se_s_r[s]
+                cc = c + se_s_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_increment(histo, &pop, image[rr, cc])
 
-            for s in range(num_se_e):
-                rr = r + se_e_r[s]
-                cc = c + se_e_c[s] + 1
+            for s in range(num_se_n):
+                rr = r + se_n_r[s] - 1
+                cc = c + se_n_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
-                   mid_bin, p0, p1, s0, s1)
-
-        r += 1  # pass to the next row
-        if r >= rows:
-            break
-
-        # ---> north to south
-        for s in range(num_se_s):
-            rr = r + se_s_r[s]
-            cc = c + se_s_c[s]
-            if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, &pop, image[rr, cc])
-
-        for s in range(num_se_n):
-            rr = r + se_n_r[s] - 1
-            cc = c + se_n_c[s]
-            if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, &pop, image[rr, cc])
-
-        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
-               n_bins, mid_bin, p0, p1, s0, s1)
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
+                   n_bins, mid_bin, p0, p1, s0, s1)

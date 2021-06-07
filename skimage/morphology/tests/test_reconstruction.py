@@ -9,7 +9,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
-from skimage.morphology.greyreconstruct import reconstruction
+from skimage.morphology.grayreconstruct import reconstruction
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_almost_equal
 
@@ -139,3 +139,9 @@ def test_offset_not_none():
     assert_array_almost_equal(
         reconstruction(seed, mask, method='dilation',
                        selem=np.ones(3), offset=np.array([0])), expected)
+
+
+def test_deprecated_import():
+    msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
+    with testing.expected_warnings([msg]):
+        from skimage.morphology.greyreconstruct import reconstruction
