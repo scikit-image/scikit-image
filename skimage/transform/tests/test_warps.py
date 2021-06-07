@@ -375,7 +375,7 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
@@ -643,7 +643,7 @@ def test_log_polar_mapping():
     assert np.allclose(coords, ground_truth)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_linear_warp_polar(dtype):
     radii = [5, 10, 15, 20]
     image = np.zeros([51, 51])
@@ -658,7 +658,7 @@ def test_linear_warp_polar(dtype):
     assert np.alltrue([peak in radii for peak in peaks])
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_log_warp_polar(dtype):
     radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
              np.exp(5)-1, np.exp(5)+1]
