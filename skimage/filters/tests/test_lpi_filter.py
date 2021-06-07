@@ -5,7 +5,7 @@ from numpy.testing import assert_, assert_equal
 
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera
-from skimage.lpi_filter import LPIFilter2D, inverse, wiener
+from skimage.filters.lpi_filter import LPIFilter2D, inverse, wiener
 
 have_scipy_fft = np.lib.NumpyVersion(scipy.__version__) >= '1.4.0'
 
