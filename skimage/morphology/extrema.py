@@ -13,7 +13,7 @@ import numpy as np
 
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
-from . import greyreconstruct, _util
+from . import grayreconstruct, _util
 from ._extrema_cy import _local_maxima
 
 
@@ -167,7 +167,7 @@ def h_maxima(image, h, selem=None):
     else:
         shifted_img = _subtract_constant_clip(image, h)
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
+    rec_img = grayreconstruct.reconstruction(shifted_img, image,
                                              method='dilation', selem=selem)
     residue_img = image - rec_img
     return (residue_img >= h).astype(np.uint8)
@@ -263,7 +263,7 @@ def h_minima(image, h, selem=None):
     else:
         shifted_img = _add_constant_clip(image, h)
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
+    rec_img = grayreconstruct.reconstruction(shifted_img, image,
                                              method='erosion', selem=selem)
     residue_img = rec_img - image
     return (residue_img >= h).astype(np.uint8)
