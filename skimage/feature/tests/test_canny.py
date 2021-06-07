@@ -16,7 +16,7 @@ class TestCanny(unittest.TestCase):
     def test_00_01_zeros_mask(self):
         '''Test that the Canny filter finds no points in a masked image'''
         result = (feature.canny(np.random.uniform(size=(20, 20)), 4, 0, 0,
-                          np.zeros((20, 20), bool)))
+                                np.zeros((20, 20), bool)))
         self.assertFalse(np.any(result))
 
     def test_01_01_circle(self):

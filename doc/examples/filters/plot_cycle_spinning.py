@@ -51,14 +51,14 @@ ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
 # max_shift = 3 -> shifts of (0, 1, 2, 3) along each axis
 # etc...
 
-denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1',
+denoise_kwargs = dict(channel_axis=-1, convert2ycbcr=True, wavelet='db1',
                       rescale_sigma=True)
 
 all_psnr = []
 max_shifts = [0, 1, 3, 5]
 for n, s in enumerate(max_shifts):
     im_bayescs = cycle_spin(noisy, func=denoise_wavelet, max_shifts=s,
-                            func_kw=denoise_kwargs, multichannel=True)
+                            func_kw=denoise_kwargs, channel_axis=-1)
     ax[n+1].imshow(im_bayescs)
     ax[n+1].axis('off')
     psnr = peak_signal_noise_ratio(original, im_bayescs)
