@@ -1,11 +1,12 @@
 import numpy as np
+import pytest
+
 from skimage.feature import (greycomatrix,
                              greycoprops,
                              local_binary_pattern,
                              multiblock_lbp)
 from skimage._shared.testing import test_parallel
 from skimage.transform import integral_image
-from skimage._shared import testing
 
 
 class TestGLCM():
@@ -18,7 +19,9 @@ class TestGLCM():
 
     @test_parallel()
     def test_output_angles(self):
-        result = greycomatrix(self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4)
+        result = greycomatrix(
+            self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4
+        )
         assert result.shape == (4, 4, 1, 4)
         expected1 = np.array([[2, 2, 1, 0],
                              [0, 2, 0, 0],
@@ -55,26 +58,27 @@ class TestGLCM():
         for dtype in [
                 float, np.double, np.float16, np.float32, np.float64
                 ]:
-            with testing.raises(ValueError):
+            with pytest.raises(ValueError):
                 greycomatrix(self.image.astype(dtype), [1], [np.pi], 4)
 
     def test_error_raise_int_types(self):
         for dtype in [
                 np.int16, np.int32, np.int64, np.uint16, np.uint32, np.uint64
                 ]:
-            with testing.raises(ValueError):
+            with pytest.raises(ValueError):
                 greycomatrix(self.image.astype(dtype), [1], [np.pi])
 
     def test_error_raise_negative(self):
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             greycomatrix(self.image.astype(np.int16) - 1, [1], [np.pi], 4)
 
     def test_error_raise_levels_smaller_max(self):
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             greycomatrix(self.image - 1, [1], [np.pi], 3)
 
     def test_image_data_types(self):
-        for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]:
+        for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32,
+                      np.int64]:
             img = self.image.astype(dtype)
             result = greycomatrix(img, [1], [np.pi / 2], 4,
                                   symmetric=True)
@@ -169,7 +173,7 @@ class TestGLCM():
 
     def test_invalid_property(self):
         result = greycomatrix(self.image, [1], [0], 4)
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             greycoprops(result, 'ABC')
 
     def test_homogeneity(self):

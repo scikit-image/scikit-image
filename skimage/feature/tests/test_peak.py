@@ -2,10 +2,10 @@ import itertools
 import numpy as np
 import pytest
 import unittest
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import assert_array_almost_equal
-from skimage._shared.testing import assert_equal
+from numpy.testing import assert_array_almost_equal, assert_equal
 from scipy import ndimage as ndi
+
+from skimage._shared._warnings import expected_warnings
 from skimage.feature import peak
 
 

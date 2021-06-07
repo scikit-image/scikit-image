@@ -1,16 +1,16 @@
 import numpy as np
-from skimage._shared.testing import assert_almost_equal
+import pytest
 from numpy import sqrt, ceil
+from numpy.testing import assert_almost_equal
 
 from skimage import data
 from skimage import img_as_float
 from skimage.feature import daisy
-from skimage._shared import testing
 
 
 def test_daisy_color_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         daisy(img)
 
 
@@ -47,7 +47,7 @@ def test_descs_shape():
     assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_daisy_sigmas_and_radii(dtype):
     img = data.astronaut()[:64, :64].mean(axis=2).astype(dtype, copy=False)
     sigmas = [1, 2, 3]
@@ -60,7 +60,7 @@ def test_daisy_incompatible_sigmas_and_radii():
     img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
     sigmas = [1, 2]
     radii = [1, 2]
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         daisy(img, sigmas=sigmas, ring_radii=radii)
 
 
@@ -94,7 +94,7 @@ def test_daisy_normalization():
         for j in range(descs.shape[1]):
             assert_almost_equal(np.sum(descs[i, j, :]), 0)
 
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         daisy(img, normalization='does_not_exist')
 
 
