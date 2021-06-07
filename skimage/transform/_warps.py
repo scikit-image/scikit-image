@@ -1195,11 +1195,11 @@ def resize_local_mean(image, output_shape, grid_mode=True,
         image.ndim, additional singleton dimensions will be appended to the
         input ``image`` as needed.
     grid_mode : bool, optional
-        If False, the distance from the pixel centers is zoomed. Otherwise, the
-        distance including the full pixel extent is used. For example, a 1d
-        signal of length 5 is considered to have length 4 when `grid_mode` is
-        False, but length 5 when `grid_mode` is True. See the following
-        visual illustration:
+        Defines ``image`` pixels position: if True, pixels are assumed to be at
+        grid intersections, otherwise at cell centers. As a consequence,
+        for example, a 1d signal of length 5 is considered to have length 4
+        when `grid_mode` is False, but length 5 when `grid_mode` is True. See
+        the following visual illustration:
 
         .. code-block:: text
 
