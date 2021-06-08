@@ -21,6 +21,7 @@ from ._median import median
 from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
+from ._blur_effect import blur_effect
 
 
 __all__ = ['inverse',
@@ -68,4 +69,5 @@ __all__ = ['inverse',
            'apply_hysteresis_threshold',
            'rank',
            'unsharp_mask',
-           'window']
+           'window',
+           'blur_effect']
