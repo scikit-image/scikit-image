@@ -119,13 +119,16 @@ def test_normalize():
 # Test multichannel histograms
 # ============================
 
-def test_multichannel_hist_common_bins_uint8():
+@pytest.mark.parametrize('source_range', ['dtype', 'image'])
+def test_multichannel_hist_common_bins_uint8(source_range):
     """Check that all channels use the same binning."""
     # First channel contains zeros
     # Second channel contains 255
-    im = np.array((np.zeros((5, 5)), np.ones((5, 5))*255), dtype=np.uint8)
+    im = np.stack((np.zeros((5, 5), dtype=np.uint8),
+                   np.full((5, 5), 255, dtype=np.uint8)),
+                  axis=0)
     im = np.moveaxis(im, source=0, destination=2)
-    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+    frequencies, bin_centers = exposure.histogram(im, source_range='image',
                                                   channel_axis=-1)
     assert_array_equal(bin_centers, np.arange(0, 256))
     assert frequencies[0][0] == 25

@@ -35,7 +35,22 @@ def _offset_array(arr, low_boundary, high_boundary):
     return arr, offset
 
 
-def _bincount_histogram(image, source_range):
+def _bincount_histogram_centers(image, source_range):
+    """Compute bin centers for bincount-based histogram."""
+    if source_range not in ['image', 'dtype']:
+        raise ValueError(
+            f'Incorrect value for `source_range` argument: {source_range}'
+        )
+    if source_range == 'image':
+        image_min = int(image.min().astype(np.int64))
+        image_max = int(image.max().astype(np.int64))
+    elif source_range == 'dtype':
+        image_min, image_max = dtype_limits(image, clip_negative=False)
+    bin_centers = np.arange(image_min, image_max + 1)
+    return bin_centers
+
+
+def _bincount_histogram(image, source_range, bin_centers=None):
     """
     Efficient histogram calculation for an image of integers.
 
@@ -58,16 +73,11 @@ def _bincount_histogram(image, source_range):
     bin_centers : array
         The values at the center of the bins.
     """
-    if source_range not in ['image', 'dtype']:
-        raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
-    if source_range == 'image':
-        image_min = int(image.min().astype(np.int64))
-        image_max = int(image.max().astype(np.int64))
-    elif source_range == 'dtype':
-        image_min, image_max = dtype_limits(image, clip_negative=False)
+    if bin_centers is None:
+        bin_centers = _bincount_histogram_centers(image, source_range)
+    image_min, image_max = bin_centers[0], bin_centers[-1]
     image, offset = _offset_array(image, image_min, image_max)
     hist = np.bincount(image.ravel(), minlength=image_max - image_min + 1)
-    bin_centers = np.arange(image_min, image_max + 1)
     if source_range == 'image':
         idx = max(image_min, 0)
         hist = hist[idx:]
@@ -129,33 +139,122 @@ def histogram(image, nbins=256, source_range='image', normalize=False, *,
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4 and channel_axis is None:
-        utils.warn("This might be a color image. The histogram will be "
-                   "computed on the flattened image. You can instead "
-                   "apply this function to each color channel, or set "
-                   "channel_axis.")
+        utils.warn('This might be a color image. The histogram will be '
+                   'computed on the flattened image. You can instead '
+                   'apply this function to each color channel, or set '
+                   'channel_axis.')
 
     if channel_axis is not None:
         channels = sh[-1]
         hist = []
-        bin_centers = []
+
+        # compute bins based on the raveled array
+        if np.issubdtype(image.dtype, np.integer):
+            # here bins corresponds to the bin centers
+            bins = _bincount_histogram_centers(image, source_range)
+        else:
+            # determine the bin edges for np.histogram
+            bins = _get_bin_edges(image, nbins, hist_range)
+
         for chan in range(channels):
-            h, bc = _histogram(image[..., chan], nbins, source_range, normalize)
+            h, bc = _histogram(image[..., chan], bins, source_range, normalize)
             hist.append(h)
         # Convert to numpy arrays
-        bin_centers = np.array(bc)
-        hist = np.array(hist)
+        bin_centers = np.asarray(bc)
+        hist = np.stack(hist, axis=0)
     else:
         hist, bin_centers = _histogram(image, nbins, source_range, normalize)
 
     return hist, bin_centers
 
 
-def _histogram(image, nbins, source_range, normalize):
+def _get_outer_edges(image, hist_range):
+    """Determine the outer bin edges to use.
+
+    These are obtained from either the image or hist_range.
+
+    Notes
+    -----
+    This function is a copy of ``np.lib.histograms._get_outer_edges``.
+    """
+    if hist_range is not None:
+        first_edge, last_edge = hist_range
+        if first_edge > last_edge:
+            raise ValueError(
+                "max must be larger than min in hist_range parameter."
+            )
+        if not (np.isfinite(first_edge) and np.isfinite(last_edge)):
+            raise ValueError(
+                f"supplied hist_range of [{first_edge}, {last_edge}] is "
+                "not finite"
+            )
+    elif image.size == 0:
+        # handle empty arrays. Can't determine hist_range, so use 0-1.
+        first_edge, last_edge = 0, 1
+    else:
+        first_edge, last_edge = image.min(), image.max()
+        if not (np.isfinite(first_edge) and np.isfinite(last_edge)):
+            raise ValueError(
+                f"autodetected hist_range of [{first_edge}, {last_edge}] is "
+                "not finite"
+            )
+
+    # expand empty hist_range to avoid divide by zero
+    if first_edge == last_edge:
+        first_edge = first_edge - 0.5
+        last_edge = last_edge + 0.5
+
+    return first_edge, last_edge
+
+
+def _get_bin_edges(image, bins, hist_range):
+    """Computes the bins used internally by `np.histogram`.
+
+    Notes
+    -----
+    This helper is a simplified version of ``np.lib.histograms._get_bin_edges``
+    that only supports uniformly spaced bins.
+    """
+    first_edge, last_edge = _get_outer_edges(image, hist_range)
+    # numpy/gh-10322 means that type resolution rules are dependent on array
+    # shapes. To avoid this causing problems, we pick a type now and stick
+    # with it throughout.
+    bin_type = np.result_type(first_edge, last_edge, image)
+    if np.issubdtype(bin_type, np.integer):
+        bin_type = np.result_type(bin_type, float)
+
+    # compute bin edges
+    bin_edges = np.linspace(
+        first_edge, last_edge, bins + 1, endpoint=True, dtype=bin_type
+    )
+    return bin_edges
+
+
+def _histogram(image, bins, source_range, normalize):
+    """
+
+    Parameters
+    ----------
+    image : ndarray
+        Image for which the histogram is to be computed.
+    bins : int or ndarray
+        The number of histogram bins. For images with integer dtype, an array
+        containing the bin centers can also be provided. For images with
+        floating point dtype, this can be an array of bin_edges for use by
+        ``np.histogram``.
+    source_range : string, optional
+        'image' (default) determines the range from the input image.
+        'dtype' determines the range from the expected range of the images
+        of that data type.
+    normalize : bool, optional
+        If True, normalize the histogram by the sum of its values.
+    """
 
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
-        hist, bin_centers = _bincount_histogram(image, source_range)
+        bin_centers = bins if isinstance(bins, np.ndarray) else None
+        hist, bin_centers = _bincount_histogram(image, source_range, bin_centers)
     else:
         if source_range == 'image':
             hist_range = None
@@ -163,7 +262,7 @@ def _histogram(image, nbins, source_range, normalize):
             hist_range = dtype_limits(image, clip_negative=False)
         else:
             ValueError('Wrong value for the `source_range` argument')
-        hist, bin_edges = np.histogram(image, bins=nbins, range=hist_range)
+        hist, bin_edges = np.histogram(image, bins=bins, range=hist_range)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
 
     if normalize:
