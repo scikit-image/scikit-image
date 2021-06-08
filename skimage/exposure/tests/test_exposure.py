@@ -120,21 +120,30 @@ def test_normalize():
 # ============================
 
 @pytest.mark.parametrize('source_range', ['dtype', 'image'])
-def test_multichannel_hist_common_bins_uint8(source_range):
+@pytest.mark.parametrize('dtype', [np.uint8, np.int16, np.float64])
+def test_multichannel_hist_common_bins_uint8(dtype, source_range):
     """Check that all channels use the same binning."""
-    # First channel contains zeros
-    # Second channel contains 255
-    im = np.stack((np.zeros((5, 5), dtype=np.uint8),
-                   np.full((5, 5), 255, dtype=np.uint8)),
-                  axis=0)
-    im = np.moveaxis(im, source=0, destination=2)
-    frequencies, bin_centers = exposure.histogram(im, source_range='image',
-                                                  channel_axis=-1)
-    assert_array_equal(bin_centers, np.arange(0, 256))
-    assert frequencies[0][0] == 25
+    # Construct multichannel image with uniform values within each channel,
+    # but the full range of values across channels.
+    shape = (5, 5)
+    channel_size = shape[0] * shape[1]
+    imin, imax = dtype_range[dtype]
+    im = np.stack(
+        (
+            np.full(shape, imin, dtype=dtype),
+            np.full(shape, imax, dtype=dtype),
+        ),
+        axis=-1
+    )
+    frequencies, bin_centers = exposure.histogram(
+        im, source_range=source_range, channel_axis=-1
+    )
+    if np.issubdtype(dtype, np.integer):
+        assert_array_equal(bin_centers, np.arange(imin, imax + 1))
+    assert frequencies[0][0] == channel_size
     assert frequencies[0][-1] == 0
     assert frequencies[1][0] == 0
-    assert frequencies[1][-1] == 25
+    assert frequencies[1][-1] == channel_size
 
 
 # Test histogram equalization
