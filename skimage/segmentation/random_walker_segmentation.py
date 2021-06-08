@@ -406,13 +406,13 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> np.random.seed(0)
-    >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
+    >>> rng = np.random.default_rng()
+    >>> a = np.zeros((10, 10)) + 0.2 * rng.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a, dtype=np.int32)
     >>> b[3, 3] = 1  # Marker for first phase
     >>> b[6, 6] = 2  # Marker for second phase
-    >>> random_walker(a, b)
+    >>> random_walker(a, b)  # doctest: +SKIP
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

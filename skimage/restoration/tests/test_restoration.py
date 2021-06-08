@@ -55,11 +55,14 @@ def test_wiener(dtype):
 def test_unsupervised_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
-    np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    seed = 16829302
+    rng = np.random.RandomState(seed)
+    data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
-    deconvolved, _ = restoration.unsupervised_wiener(data, psf)
-    assert deconvolved.dtype == _supported_float_type(dtype)
+    deconvolved, _ = restoration.unsupervised_wiener(data, psf,
+                                                     random_state=seed)
+    float_type = _supported_float_type(dtype)
+    assert deconvolved.dtype == float_type
 
     rtol, atol = _get_rtol_atol(dtype)
     path = fetch('restoration/tests/camera_unsup.npy')
@@ -69,13 +72,13 @@ def test_unsupervised_wiener(dtype):
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
     assert otf.real.dtype == _supported_float_type(dtype)
-    np.random.seed(0)
-    deconvolved = restoration.unsupervised_wiener(
+    deconvolved2 = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"callback": lambda x: None})[0]
-    assert deconvolved.real.dtype == _supported_float_type(dtype)
+        user_params={"callback": lambda x: None},
+        random_state=seed)[0]
+    assert deconvolved2.real.dtype == float_type
     path = fetch('restoration/tests/camera_unsup2.npy')
-    np.testing.assert_allclose(np.real(deconvolved),
+    np.testing.assert_allclose(np.real(deconvolved2),
                                np.load(path),
                                rtol=rtol, atol=atol)
 
