@@ -87,10 +87,10 @@ __all__ = [
     'registration',
     'restoration',
     'segmentation',
-    '_shared',
     'transform',
     'util',
-    'viewer'
+    'viewer',
+    '__version__'
 ]
 
 from .util.lazy import install_lazy
