@@ -233,7 +233,8 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     >>> from skimage.restoration import denoise_wavelet
     >>> import numpy as np
     >>> img = color.rgb2gray(data.astronaut()[:50, :50])
-    >>> noisy = img + 0.5 * img.std() * np.random.randn(*img.shape)
+    >>> rng = np.random.default_rng()
+    >>> noisy = img + 0.5 * img.std() * rng.standard_normal(img.shape)
     >>> parameters = {'sigma': np.arange(0.1, 0.4, 0.02)}
     >>> denoising_function = calibrate_denoiser(noisy, denoise_wavelet,
     ...                                         denoise_parameters=parameters)

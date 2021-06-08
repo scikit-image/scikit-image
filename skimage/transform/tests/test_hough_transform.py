@@ -77,8 +77,8 @@ def test_probabilistic_hough_seed():
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
-                                               seed=1234)
-    assert len(lines) == 64
+                                               seed=41537233)
+    assert len(lines) == 56
 
 
 def test_probabilistic_hough_bad_input():

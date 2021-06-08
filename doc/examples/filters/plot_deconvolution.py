@@ -23,13 +23,15 @@ from scipy.signal import convolve2d as conv2
 
 from skimage import color, data, restoration
 
+rng = np.random.default_rng()
+
 astro = color.rgb2gray(data.astronaut())
 
 psf = np.ones((5, 5)) / 25
 astro = conv2(astro, psf, 'same')
 # Add Noise to Image
 astro_noisy = astro.copy()
-astro_noisy += (np.random.poisson(lam=25, size=astro.shape) - 10) / 255.
+astro_noisy += (rng.poisson(lam=25, size=astro.shape) - 10) / 255.
 
 # Restore Image using Richardson-Lucy algorithm
 deconvolved_RL = restoration.richardson_lucy(astro_noisy, psf, iterations=30)
