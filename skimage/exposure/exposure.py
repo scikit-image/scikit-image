@@ -2,7 +2,7 @@ import numpy as np
 
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
-from .._shared.utils import warn
+from .._shared import utils
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
@@ -74,19 +74,20 @@ def _bincount_histogram(image, source_range):
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range='image', normalize=False,
-              multichannel=False):
+@utils.channel_as_last_axis()
+def histogram(image, nbins=256, source_range='image', normalize=False, *,
+              channel_axis=None):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
 
-    If multichannel is not set, the histogram is computed on the flattened
-    image. For color or multichannel images, the function should either be
-    the function should be either be used separately on each
-    channel to obtain a histogram for each color channel with separate binning,
-    or by setting multichannel=True to use a common binning for all channels.
+    If `channel_axis` is not set, the histogram is computed on the flattened
+    image. For color or multichannel images, set ``channel_axis``to use a
+    common binning for all channels. Alternatively, one may apply the function
+    separately on each channel to obtain a histogram for each color channel
+    with separate binning.
 
     Parameters
     ----------
@@ -101,9 +102,10 @@ def histogram(image, nbins=256, source_range='image', normalize=False,
         of that data type.
     normalize : bool, optional
         If True, normalize the histogram by the sum of its values.
-    multichannel : bool, optional
-        If True, calculates an individiual histogram for each channel, using a common
-        binning.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
 
     Returns
     -------
@@ -121,18 +123,18 @@ def histogram(image, nbins=256, source_range='image', normalize=False,
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
+    (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([ 93585, 168559]), array([0.25, 0.75]))
+    (array([107432, 154712]), array([ 0.25,  0.75]))
     """
     sh = image.shape
-    if len(sh) == 3 and sh[-1] < 4 and not multichannel:
-        warn("This might be a color image. The histogram will be "
-             "computed on the flattened image. You can instead "
-             "apply this function to each color channel, or set "
-             "multichannel=True")
+    if len(sh) == 3 and sh[-1] < 4 and channel_axis is None:
+        utils.warn("This might be a color image. The histogram will be "
+                   "computed on the flattened image. You can instead "
+                   "apply this function to each color channel, or set "
+                   "channel_axis.")
 
-    if multichannel:
+    if channel_axis is not None:
         channels = sh[-1]
         hist = []
         bin_centers = []
@@ -437,7 +439,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
                                             clip_negative=(imin >= 0)))
 
     if np.any(np.isnan([imin, imax, omin, omax])):
-        warn(
+        utils.warn(
             "One or more intensity levels are NaN. Rescaling will broadcast "
             "NaN to the full image. Provide intensity levels yourself to "
             "avoid this. E.g. with np.nanmin(image), np.nanmax(image).",
