@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.transform import SimilarityTransform, warp
+from skimage.transform import SimilarityTransform, warp, resize_local_mean
 import warnings
 import functools
 import inspect
@@ -52,3 +52,24 @@ class WarpSuite:
         transformations."""
         result = warp(self.image, self.tform, order=self.order,
                       preserve_range=True)
+
+
+class ResizeLocalMeanSuite:
+    params = ([np.uint8, np.uint16, np.float32, np.float64],
+              [128, 512, 1024, 2048],
+              [128, 512, 1024],
+              [2, 3],
+              [2, 3],
+              [True, False]
+              )
+    param_names = ['dtype', 'shape_in', 'shape_out', 'ndim_in',
+                   'ndim_out', 'grid_mode']
+
+    def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
+        self.shape_in = ndim_in * (shape_in, )
+        self.image = np.zeros(self.shape_in, dtype=dtype)
+        self.shape_out = ndim_out * (shape_out, )
+        self.grid_mode = grid_mode
+
+    def time_resize_local_mean(self):
+        resize_local_mean(self.image, self.shape_out, self.grid_mode)

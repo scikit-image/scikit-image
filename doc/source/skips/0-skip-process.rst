@@ -272,7 +272,7 @@ References and Footnotes
 
 .. [1] This historical record is available by the normal git commands
    for retrieving older revisions, and can also be browsed on
-   `GitHub <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips>`_.
+   `GitHub <https://github.com/scikit-image/scikit-image/tree/main/doc/source/skips>`_.
 
 .. [2] The URL for viewing SKIPs on the web is
    https://scikit-image.org/docs/stable/skips/

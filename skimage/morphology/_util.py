@@ -218,7 +218,7 @@ def _fast_pad(image, value, *, order="C"):
     image : ndarray
         Image to pad.
     value : scalar
-         The value to use. Should be compatible with `image`'s dtype.
+        The value to use. Should be compatible with `image`'s dtype.
     order : "C" or "F"
         Specify the memory layout of the padded image (C or Fortran style).
 

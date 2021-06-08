@@ -57,8 +57,8 @@ Here's the long and short of it:
 
    * Pull the latest changes from upstream::
 
-      git checkout master
-      git pull upstream master
+      git checkout main
+      git pull upstream main
 
    * Create a branch for the feature you want to work on. Since the
      branch name will appear in the merge message, use a sensible name
@@ -128,14 +128,14 @@ For a more detailed discussion, read these :doc:`detailed documents
    bug, also add "Closes #123" where 123 is the issue number.
 
 
-Divergence between ``upstream master`` and your feature branch
---------------------------------------------------------------
+Divergence between ``upstream main`` and your feature branch
+------------------------------------------------------------
 
 If GitHub indicates that the branch of your Pull Request can no longer
-be merged automatically, merge the master branch into yours::
+be merged automatically, merge the main branch into yours::
 
-   git fetch upstream master
-   git merge upstream/master
+   git fetch upstream main
+   git merge upstream/main
 
 If any conflicts occur, they need to be fixed before continuing.  See
 which files are in conflict using::
@@ -154,8 +154,8 @@ Inside the conflicted file, you'll find sections like these::
    <<<<<<< HEAD
    The way the text looks in your branch
    =======
-   The way the text looks in the master branch
-   >>>>>>> master
+   The way the text looks in the main branch
+   >>>>>>> main
 
 Choose one version of the text that should be kept, and delete the
 rest::
@@ -190,8 +190,13 @@ Guidelines
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
   :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
-* No changes are ever committed without review and approval by two core
-  team members.  Ask on the
+* No changes are ever merged without review and approval by two core team members.
+  There are two exceptions to this rule. First, pull requests which affect
+  only the documentation require review and approval by only one core team
+  member in most cases. If the maintainer feels the changes are large or
+  likely to be controversial, two reviews should still be encouraged. The
+  second case is that of minor fixes which restore CI to a working state,
+  because these should be merged fairly quickly. Reach out on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
@@ -606,22 +611,22 @@ of time since building scikit-image can be a time consuming task::
 
   asv run -E existing -b TransformSuite
 
-Comparing results to master
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Comparing results to main
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Often, the goal of a PR is to compare the results of the modifications in terms
-speed to a snapshot of the code that is in the master branch of the
+speed to a snapshot of the code that is in the main branch of the
 ``scikit-image`` repository. The command ``asv continuous`` is of help here::
 
-  asv continuous master -b TransformSuite
+  asv continuous main -b TransformSuite
 
 This call will build out the environments specified in the ``asv.conf.json``
 file and compare the performance of the benchmark between your current commit
-and the code in the master branch.
+and the code in the main branch.
 
 The output may look something like::
 
-  $ asv continuous master -b TransformSuite
+  $ asv continuous main -b TransformSuite
   · Creating environments
   · Discovering benchmarks
   ·· Uninstalling from conda-py3.7-cython-numpy1.15-scipy
@@ -633,7 +638,7 @@ The output may look something like::
 
   BENCHMARKS NOT SIGNIFICANTLY CHANGED.
 
-In this case, the differences between HEAD and master are not significant
+In this case, the differences between HEAD and main are not significant
 enough for airspeed velocity to report.
 
 It is also possible to get a comparison of results for two specific revisions

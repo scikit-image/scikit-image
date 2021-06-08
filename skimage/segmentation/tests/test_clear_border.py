@@ -35,7 +35,7 @@ def test_clear_border():
                      [1, 1, 1, 1, 1, 1, 1, 1, 1],
                      [1, 1, 1, 1, 1, 1, 1, 1, 1],
                      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-                     [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(bool)
     result = clear_border(image.copy(), mask=mask)
     ref = image.copy()
     ref[1:3, 0:2] = 0

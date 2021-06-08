@@ -45,7 +45,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
     method: str, optional
-        One of 'lewiner', 'lorensen' or '_lorensen'. Specify witch of
+        One of 'lewiner', 'lorensen' or '_lorensen'. Specify which of
         Lewiner et al. or Lorensen et al. method will be used. The
         '_lorensen' flag correspond to an old implementation that will
         be deprecated in version 0.19.

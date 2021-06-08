@@ -5,6 +5,37 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
+def _bernoulli(p, shape, *, random_state):
+    """
+    Bernoulli trials at a given probability of a given size.
+
+    This function is meant as a lower-memory alternative to calls such as
+    `np.random.choice([True, False], size=image.shape, p=[p, 1-p])`.
+    While `np.random.choice` can handle many classes, for the 2-class case
+    (Bernoulli trials), this function is much more efficient.
+
+    Parameters
+    ----------
+    p : float
+        The probability that any given trial returns `True`.
+    shape : int or tuple of ints
+        The shape of the ndarray to return.
+    seed : `numpy.random.Generator`
+        ``Generator`` instance.
+
+    Returns
+    -------
+    out : ndarray[bool]
+        The results of Bernoulli trials in the given `size` where success
+        occurs with probability `p`.
+    """
+    if p == 0:
+        return np.zeros(shape, dtype=bool)
+    if p == 1:
+        return np.ones(shape, dtype=bool)
+    return random_state.random(shape) <= p
+
+
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
@@ -28,8 +59,15 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                       images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
                       n is Gaussian noise with specified mean & variance.
-    seed : int, optional
-        If provided, this will set the random seed before generating noise,
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is
+        used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that
+        instance is used.
+
+        This will set the random seed before generating noise,
         for valid pseudo-random comparisons.
     clip : bool, optional
         If True (default), the output will be clipped after noise applied
@@ -93,8 +131,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         low_clip = 0.
 
     image = img_as_float(image)
-    if seed is not None:
-        np.random.seed(seed=seed)
+
+    rng = np.random.default_rng(seed)
 
     allowedtypes = {
         'gaussian': 'gaussian_values',
@@ -129,8 +167,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         kwargs.setdefault(kw, kwdefaults[kw])
 
     if mode == 'gaussian':
-        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
-                                 image.shape)
+        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5, image.shape)
         out = image + noise
 
     elif mode == 'localvar':
@@ -139,7 +176,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             raise ValueError('All values of `local_vars` must be > 0.')
 
         # Safe shortcut usage broadcasts kwargs['local_vars'] as a ufunc
-        out = image + np.random.normal(0, kwargs['local_vars'] ** 0.5)
+        out = image + rng.normal(0, kwargs['local_vars'] ** 0.5)
 
     elif mode == 'poisson':
         # Determine unique values in image & calculate the next power of two
@@ -152,7 +189,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             image = (image + 1.) / (old_max + 1.)
 
         # Generating noise for each unique value in image.
-        out = np.random.poisson(image * vals) / float(vals)
+        out = rng.poisson(image * vals) / float(vals)
 
         # Return image to original range if input was signed
         if low_clip == -1.:
@@ -160,29 +197,26 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = np.random.choice([True, False], size=image.shape,
-                                   p=[p, 1 - p])
-        salted = np.random.choice([True, False], size=image.shape,
-                                  p=[q, 1 - q])
+        flipped = _bernoulli(p, image.shape, random_state=rng)
+        salted = _bernoulli(q, image.shape, random_state=rng)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip
 
     elif mode == 'speckle':
-        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
-                                 image.shape)
+        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5, image.shape)
         out = image + image * noise
 
     # Clip back to original range, if necessary

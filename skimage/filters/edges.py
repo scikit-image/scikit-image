@@ -112,7 +112,8 @@ def _reshape_nd(arr, ndim, dim):
 
     Examples
     --------
-    >>> arr = np.random.random(7)
+    >>> rng = np.random.default_rng()
+    >>> arr = rng.random(7)
     >>> _reshape_nd(arr, 2, 0).shape
     (7, 1)
     >>> _reshape_nd(arr, 3, 1).shape
@@ -218,7 +219,8 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    scharr, prewitt, canny
+    sobel_h, sobel_v : horizontal and vertical edge detection.
+    scharr, prewitt, farid, skimage.feature.canny
 
     References
     ----------
@@ -334,7 +336,8 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, prewitt, canny
+    scharr_h, scharr_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
@@ -464,7 +467,8 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, scharr
+    prewitt_h, prewitt_v : horizontal and vertical edge detection.
+    sobel, scharr, farid, skimage.feature.canny
 
     Notes
     -----
@@ -568,7 +572,8 @@ def roberts(image, mask=None):
 
     See also
     --------
-    sobel, scharr, prewitt, feature.canny
+    roberts_pos_diag, roberts_neg_diag : diagonal edge detection.
+    sobel, scharr, prewitt, skimage.feature.canny
 
     Examples
     --------
@@ -706,7 +711,8 @@ def farid(image, *, mask=None):
 
     See also
     --------
-    sobel, prewitt, canny
+    farid_h, farid_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
