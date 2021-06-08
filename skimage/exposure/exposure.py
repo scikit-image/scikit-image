@@ -193,7 +193,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False, *,
     its own bin, which improves speed and intensity-resolution.
 
     If `channel_axis` is not set, the histogram is computed on the flattened
-    image. For color or multichannel images, set ``channel_axis``to use a
+    image. For color or multichannel images, set ``channel_axis`` to use a
     common binning for all channels. Alternatively, one may apply the function
     separately on each channel to obtain a histogram for each color channel
     with separate binning.
@@ -674,8 +674,9 @@ def adjust_log(image, gain=1, inv=False):
     """Performs Logarithmic correction on the input image.
 
     This function transforms the input image pixelwise according to the
-    equation ``O = gain*log(1 + I)`` after scaling each pixel to the range 0 to 1.
-    For inverse logarithmic correction, the equation is ``O = gain*(2**I - 1)``.
+    equation ``O = gain*log(1 + I)`` after scaling each pixel to the range
+    0 to 1. For inverse logarithmic correction, the equation is
+    ``O = gain*(2**I - 1)``.
 
     Parameters
     ----------
