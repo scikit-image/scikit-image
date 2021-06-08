@@ -183,7 +183,7 @@ def _get_numpy_hist_range(image, source_range):
     return hist_range
 
 
-@utils.channel_as_last_axis()
+@utils.channel_as_last_axis(multichannel_output=False)
 def histogram(image, nbins=256, source_range='image', normalize=False, *,
               channel_axis=None):
     """Return histogram of image.
@@ -219,7 +219,8 @@ def histogram(image, nbins=256, source_range='image', normalize=False, *,
     Returns
     -------
     hist : array
-        The values of the histogram.
+        The values of the histogram. When ``channel_axis`` is not None, hist
+        will be a 2D array where the first axis corresponds to channels.
     bin_centers : array
         The values at the center of the bins.
 
