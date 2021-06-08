@@ -531,6 +531,8 @@ def convert_to_float(image, preserve_range):
         Transformed version of the input.
 
     """
+    if image.dtype == np.float16:
+        return image.astype(np.float32)
     if preserve_range:
         # Convert image to double only if it is not single or double
         # precision float

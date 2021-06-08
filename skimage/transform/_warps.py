@@ -144,6 +144,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
 
+    if image.dtype == np.float16:
+        image = image.astype(np.float32)
+
     if anti_aliasing is None:
         anti_aliasing = not image.dtype == bool
 
@@ -413,6 +416,9 @@ def rotate(image, angle, resize=False, center=None, order=None,
     """
 
     rows, cols = image.shape[0], image.shape[1]
+
+    if image.dtype == np.float16:
+        image = image.astype(np.float32)
 
     # rotation around center
     if center is None:
@@ -881,6 +887,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
 
     if order > 0:
         image = convert_to_float(image, preserve_range)
+        if image.dtype == np.float16:
+            image = image.astype(np.float32)
 
     input_shape = np.array(image.shape)
 
