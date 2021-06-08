@@ -10,7 +10,8 @@ from ..measure import block_reduce
 
 from .._shared import utils
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float, _to_ndimage_mode,
+                             convert_to_float, _supported_float_type,
+                             _to_ndimage_mode,
                              _validate_interpolation_order)
 
 HOMOGRAPHY_TRANSFORMS = (
@@ -105,6 +106,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     elif output_ndim < image.ndim - 1:
         raise ValueError("len(output_shape) cannot be smaller than the image "
                          "dimensions")
+
+    if image.dtype == np.float16:
+        image = image.astype(np.float32)
 
     if anti_aliasing is None:
         anti_aliasing = not image.dtype == bool
@@ -375,6 +379,9 @@ def rotate(image, angle, resize=False, center=None, order=None,
     """
 
     rows, cols = image.shape[0], image.shape[1]
+
+    if image.dtype == np.float16:
+        image = image.astype(np.float32)
 
     # rotation around center
     if center is None:
@@ -843,6 +850,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
 
     if order > 0:
         image = convert_to_float(image, preserve_range)
+        if image.dtype == np.float16:
+            image = image.astype(np.float32)
 
     input_shape = np.array(image.shape)
 
