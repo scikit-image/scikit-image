@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
 from .._shared.utils import warn
 
@@ -14,7 +14,7 @@ DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
 DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
                     'uint12': (0, 2 ** 12 - 1),
                     'uint14': (0, 2 ** 14 - 1),
-                    'bool': dtype_range[np.bool_],
+                    'bool': dtype_range[bool],
                     'float': dtype_range[np.float64]})
 
 
@@ -61,8 +61,8 @@ def _bincount_histogram(image, source_range):
     if source_range not in ['image', 'dtype']:
         raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
-        image_min = np.min(image).astype(np.int64)
-        image_max = np.max(image).astype(np.int64)
+        image_min = int(image.min().astype(np.int64))
+        image_max = int(image.max().astype(np.int64))
     elif source_range == 'dtype':
         image_min, image_max = dtype_limits(image, clip_negative=False)
     image, offset = _offset_array(image, image_min, image_max)
@@ -121,9 +121,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False,
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
+    (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([107432, 154712]), array([ 0.25,  0.75]))
+    (array([ 93585, 168559]), array([0.25, 0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4 and not multichannel:
@@ -220,7 +220,7 @@ def equalize_hist(image, nbins=256, mask=None):
         Number of bins for image histogram. Note: this argument is
         ignored for integer images, for which each integer is its own
         bin.
-    mask: ndarray of bools or 0s and 1s, optional
+    mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
 
@@ -291,6 +291,50 @@ def intensity_range(image, range_values='image', clip_negative=False):
     return i_min, i_max
 
 
+def _output_dtype(dtype_or_range):
+    """Determine the output dtype for rescale_intensity.
+
+    The dtype is determined according to the following rules:
+    - if ``dtype_or_range`` is a dtype, that is the output dtype.
+    - if ``dtype_or_range`` is a dtype string, that is the dtype used, unless
+      it is not a NumPy data type (e.g. 'uint12' for 12-bit unsigned integers),
+      in which case the data type that can contain it will be used
+      (e.g. uint16 in this case).
+    - if ``dtype_or_range`` is a pair of values, the output data type will be
+      float.
+
+    Parameters
+    ----------
+    dtype_or_range : type, string, or 2-tuple of int/float
+        The desired range for the output, expressed as either a NumPy dtype or
+        as a (min, max) pair of numbers.
+
+    Returns
+    -------
+    out_dtype : type
+        The data type appropriate for the desired output.
+    """
+    if type(dtype_or_range) in [list, tuple, np.ndarray]:
+        # pair of values: always return float.
+        return float
+    if type(dtype_or_range) == type:
+        # already a type: return it
+        return dtype_or_range
+    if dtype_or_range in DTYPE_RANGE:
+        # string key in DTYPE_RANGE dictionary
+        try:
+            # if it's a canonical numpy dtype, convert
+            return np.dtype(dtype_or_range).type
+        except TypeError:  # uint10, uint12, uint14
+            # otherwise, return uint16
+            return np.uint16
+    else:
+        raise ValueError(
+            'Incorrect value for out_range, should be a valid image data '
+            f'type or a pair of values, got {dtype_or_range}.'
+        )
+
+
 def rescale_intensity(image, in_range='image', out_range='dtype'):
     """Return image after stretching or shrinking its intensity levels.
 
@@ -322,6 +366,12 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         Image array after rescaling its intensity. This image is the same dtype
         as the input image.
 
+    Notes
+    -----
+    .. versionchanged:: 0.17
+        The dtype of the output array has changed to match the output dtype, or
+        float if the output range is specified by a pair of floats.
+
     See Also
     --------
     equalize_hist
@@ -339,42 +389,68 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     It's easy to accidentally convert an image dtype from uint8 to float:
 
     >>> 1.0 * image
-    array([  51.,  102.,  153.])
+    array([ 51., 102., 153.])
 
     Use `rescale_intensity` to rescale to the proper range for float dtypes:
 
     >>> image_float = 1.0 * image
     >>> rescale_intensity(image_float)
-    array([ 0. ,  0.5,  1. ])
+    array([0. , 0.5, 1. ])
 
     To maintain the low contrast of the original, use the `in_range` parameter:
 
     >>> rescale_intensity(image_float, in_range=(0, 255))
-    array([ 0.2,  0.4,  0.6])
+    array([0.2, 0.4, 0.6])
 
     If the min/max value of `in_range` is more/less than the min/max image
     intensity, then the intensity levels are clipped:
 
     >>> rescale_intensity(image_float, in_range=(0, 102))
-    array([ 0.5,  1. ,  1. ])
+    array([0.5, 1. , 1. ])
 
     If you have an image with signed integers but want to rescale the image to
-    just the positive range, use the `out_range` parameter:
+    just the positive range, use the `out_range` parameter. In that case, the
+    output dtype will be float:
 
     >>> image = np.array([-10, 0, 10], dtype=np.int8)
     >>> rescale_intensity(image, out_range=(0, 127))
+    array([  0. ,  63.5, 127. ])
+
+    To get the desired range with a specific dtype, use ``.astype()``:
+
+    >>> rescale_intensity(image, out_range=(0, 127)).astype(np.int8)
     array([  0,  63, 127], dtype=int8)
 
+    If the input image is constant, the output will be clipped directly to the
+    output range:
+    >>> image = np.array([130, 130, 130], dtype=np.int32)
+    >>> rescale_intensity(image, out_range=(0, 127)).astype(np.int32)
+    array([127, 127, 127], dtype=int32)
     """
-    dtype = image.dtype.type
+    if out_range in ['dtype', 'image']:
+        out_dtype = _output_dtype(image.dtype.type)
+    else:
+        out_dtype = _output_dtype(out_range)
 
-    imin, imax = intensity_range(image, in_range)
-    omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
+    imin, imax = map(float, intensity_range(image, in_range))
+    omin, omax = map(float, intensity_range(image, out_range,
+                                            clip_negative=(imin >= 0)))
+
+    if np.any(np.isnan([imin, imax, omin, omax])):
+        warn(
+            "One or more intensity levels are NaN. Rescaling will broadcast "
+            "NaN to the full image. Provide intensity levels yourself to "
+            "avoid this. E.g. with np.nanmin(image), np.nanmax(image).",
+            stacklevel=2
+        )
 
     image = np.clip(image, imin, imax)
 
-    image = (image - imin) / float(imax - imin)
-    return np.array(image * (omax - omin) + omin, dtype=dtype)
+    if imin != imax:
+        image = (image - imin) / (imax - imin)
+        return np.asarray(image * (omax - omin) + omin, dtype=out_dtype)
+    else:
+        return np.clip(image, omin, omax).astype(out_dtype)
 
 
 def _assert_non_negative(image):
@@ -383,6 +459,14 @@ def _assert_non_negative(image):
         raise ValueError('Image Correction methods work correctly only on '
                          'images with non-negative values. Use '
                          'skimage.exposure.rescale_intensity.')
+
+
+def _adjust_gamma_u8(image, gamma, gain):
+    """LUT based implmentation of gamma adjustement.
+
+    """
+    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma)).astype('uint8')
+    return lut[image]
 
 
 def adjust_gamma(image, gamma=1, gain=1):
@@ -431,16 +515,22 @@ def adjust_gamma(image, gamma=1, gain=1):
     >>> image.mean() > gamma_corrected.mean()
     True
     """
-    _assert_non_negative(image)
-    dtype = image.dtype.type
-
     if gamma < 0:
         raise ValueError("Gamma should be a non-negative real number.")
 
-    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+    dtype = image.dtype.type
 
-    out = ((image / scale) ** gamma) * scale * gain
-    return dtype(out)
+    if dtype is np.uint8:
+        out = _adjust_gamma_u8(image, gamma, gain)
+    else:
+        _assert_non_negative(image)
+
+        scale = float(dtype_limits(image, True)[1]
+                      - dtype_limits(image, True)[0])
+
+        out = (((image / scale) ** gamma) * scale * gain).astype(dtype)
+
+    return out
 
 
 def adjust_log(image, gain=1, inv=False):
@@ -483,7 +573,7 @@ def adjust_log(image, gain=1, inv=False):
         return dtype(out)
 
     out = np.log2(1 + image / scale) * scale * gain
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
@@ -532,7 +622,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
         return dtype(out)
 
     out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
@@ -576,8 +666,11 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     False
     """
     image = np.asanyarray(image)
-    if image.ndim == 3 and image.shape[2] in [3, 4]:
-        image = rgb2gray(image)
+    if image.ndim == 3:
+        if image.shape[2] == 4:
+            image = rgba2rgb(image)
+        if image.shape[2] == 3:
+            image = rgb2gray(image)
 
     dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])

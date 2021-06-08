@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import draw
@@ -9,7 +10,7 @@ from skimage.measure import (moments, moments_central, moments_coords,
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_allclose)
-from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 
 
 def test_moments():
@@ -47,19 +48,6 @@ def test_moments_central():
     assert_equal(mu, mu2)
 
 
-def test_moments_central_deprecated():
-    image = np.zeros((20, 20), dtype=np.double)
-    image[5:-5, 5:-5] = np.random.random((10, 10))
-    center = moments(image, 1)[[1, 0], [0, 1]]
-    cr, cc = center
-    with expected_warnings(['deprecated 2D-only']):
-        mu0 = moments_central(image, cr, cc)
-        mu1 = moments_central(image, cr=cr, cc=cc)
-    mu_ref = moments_central(image, center)
-    assert_almost_equal(mu0.T, mu_ref)
-    assert_almost_equal(mu1.T, mu_ref)
-
-
 def test_moments_coords():
     image = np.zeros((20, 20), dtype=np.double)
     image[13:17, 13:17] = 1
@@ -68,6 +56,23 @@ def test_moments_coords():
     coords = np.array([[r, c] for r in range(13, 17)
                        for c in range(13, 17)], dtype=np.double)
     mu_coords = moments_coords(coords)
+    assert_almost_equal(mu_coords, mu_image)
+
+
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_moments_coords_dtype(dtype):
+    image = np.zeros((20, 20), dtype=dtype)
+    image[13:17, 13:17] = 1
+
+    expected_dtype = _supported_float_type(dtype)
+    mu_image = moments(image)
+    assert mu_image.dtype == expected_dtype
+
+    coords = np.array([[r, c] for r in range(13, 17)
+                       for c in range(13, 17)], dtype=dtype)
+    mu_coords = moments_coords(coords)
+    assert mu_coords.dtype == expected_dtype
+
     assert_almost_equal(mu_coords, mu_image)
 
 
@@ -146,21 +151,51 @@ def test_moments_hu():
     assert_almost_equal(hu, hu2, decimal=1)
 
 
-def test_centroid():
-    image = np.zeros((20, 20), dtype=np.double)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_moments_dtype(dtype):
+    image = np.zeros((20, 20), dtype=dtype)
+    image[13:15, 13:17] = 1
+
+    expected_dtype = _supported_float_type(image)
+    mu = moments_central(image, (13.5, 14.5))
+    assert mu.dtype == expected_dtype
+
+    nu = moments_normalized(mu)
+    assert nu.dtype == expected_dtype
+
+    hu = moments_hu(nu)
+    assert hu.dtype == expected_dtype
+
+
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_centroid(dtype):
+    image = np.zeros((20, 20), dtype=dtype)
     image[14, 14:16] = 1
     image[15, 14:16] = 1/3
     image_centroid = centroid(image)
-    assert_allclose(image_centroid, (14.25, 14.5))
+    if dtype == np.float16:
+        rtol = 1e-3
+    elif dtype == np.float32:
+        rtol = 1e-5
+    else:
+        rtol = 1e-7
+    assert_allclose(image_centroid, (14.25, 14.5), rtol=rtol)
 
 
-def test_inertia_tensor_2d():
-    image = np.zeros((40, 40))
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_inertia_tensor_2d(dtype):
+    image = np.zeros((40, 40), dtype=dtype)
     image[15:25, 5:35] = 1  # big horizontal rectangle (aligned with axis 1)
+    expected_dtype = _supported_float_type(image.dtype)
+
     T = inertia_tensor(image)
+    assert T.dtype == expected_dtype
     assert T[0, 0] > T[1, 1]
     np.testing.assert_allclose(T[0, 1], 0)
+
     v0, v1 = inertia_tensor_eigvals(image, T=T)
+    assert v0.dtype == expected_dtype
+    assert v1.dtype == expected_dtype
     np.testing.assert_allclose(np.sqrt(v0/v1), 3, rtol=0.01, atol=0.05)
 
 
@@ -186,3 +221,15 @@ def test_inertia_tensor_3d():
     expected_vr = R @ v0
     assert (np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or
             np.allclose(-vr, expected_vr, atol=1e-3, rtol=0.01))
+
+
+def test_inertia_tensor_eigvals():
+    # Floating point precision problems could make a positive
+    # semidefinite matrix have an eigenvalue that is very slightly
+    # negative.  Check that we have caught and fixed this problem.
+    image = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+    # mu = np.array([[3, 0, 98], [0, 14, 0], [2, 0, 98]])
+    eigvals = inertia_tensor_eigvals(image=image)
+    assert (min(eigvals) >= 0)

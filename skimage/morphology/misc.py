@@ -2,7 +2,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn
+from .._shared.utils import warn, remove_arg
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -48,7 +48,10 @@ def _check_dtype_supported(ar):
                         "Got %s." % ar.dtype)
 
 
-def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
+@remove_arg("in_place", changed_version="1.0",
+            help_msg="Please use out argument instead.")
+def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
+                         *, out=None):
     """Remove objects smaller than the specified size.
 
     Expects ar to be an array with labeled objects, and removes objects
@@ -68,7 +71,11 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         labelling if `ar` is bool.
     in_place : bool, optional (default: False)
         If ``True``, remove the objects in the input array itself.
-        Otherwise, make a copy.
+        Otherwise, make a copy. Deprecated since version 0.19. Please
+        use `out` instead.
+    out : ndarray
+        Array of the same shape as `ar`, into which the output is
+        placed. By default, a new array is created.
 
     Raises
     ------
@@ -92,13 +99,13 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> b
     array([[False, False, False, False, False],
            [ True,  True,  True, False, False],
-           [ True,  True,  True, False, False]], dtype=bool)
+           [ True,  True,  True, False, False]])
     >>> c = morphology.remove_small_objects(a, 7, connectivity=2)
     >>> c
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
-           [ True,  True,  True, False, False]], dtype=bool)
-    >>> d = morphology.remove_small_objects(a, 6, in_place=True)
+           [ True,  True,  True, False, False]])
+    >>> d = morphology.remove_small_objects(a, 6, out=a)
     >>> d is a
     True
 
@@ -106,9 +113,12 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     # Raising type error if not int or bool
     _check_dtype_supported(ar)
 
+    if out is not None:
+        in_place = False
+
     if in_place:
         out = ar
-    else:
+    elif out is None:
         out = ar.copy()
 
     if min_size == 0:  # shortcut for efficiency
@@ -139,8 +149,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
+@remove_arg("in_place", changed_version="1.0",
+            help_msg="Please use out argument instead.")
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
-                       min_size=None):
+                       *, out=None):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
@@ -153,9 +165,12 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
-        If `True`, remove the connected components in the input array itself.
-        Otherwise, make a copy.
-
+        If `True`, remove the connected components in the input array
+        itself. Otherwise, make a copy. Deprecated since version 0.19.
+        Please use `out` instead.
+    out : ndarray
+        Array of the same shape as `ar` and bool dtype, into which the
+        output is placed. By default, a new array is created.
 
     Raises
     ------
@@ -181,14 +196,14 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True,  True,  True, False],
            [ True, False, False,  True,  True, False],
-           [ True,  True,  True,  True,  True, False]], dtype=bool)
+           [ True,  True,  True,  True,  True, False]])
     >>> c = morphology.remove_small_holes(a, 2, connectivity=2)
     >>> c
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
-           [ True,  True,  True,  True,  True, False]], dtype=bool)
-    >>> d = morphology.remove_small_holes(a, 2, in_place=True)
+           [ True,  True,  True,  True,  True, False]])
+    >>> d = morphology.remove_small_holes(a, 2, out=a)
     >>> d is a
     True
 
@@ -207,28 +222,22 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
         warn("Any labeled images will be returned as a boolean array. "
              "Did you mean to use a boolean array?", UserWarning)
 
-    if min_size is not None:
-        warn("the min_size argument is deprecated and will be removed in " +
-             "0.16. Use area_threshold instead.")
-        area_threshold = min_size
+    if out is not None:
+        if out.dtype != bool:
+            raise TypeError("out dtype must be bool")
+        in_place = False
 
     if in_place:
         out = ar
-    else:
-        out = ar.copy()
+    elif out is None:
+        out = ar.astype(bool, copy=True)
 
     # Creating the inverse of ar
-    if in_place:
-        out = np.logical_not(out, out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, in_place)
+    out = remove_small_objects(out, area_threshold, connectivity, out=out)
 
-    if in_place:
-        out = np.logical_not(out, out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(out, out=out)
 
     return out

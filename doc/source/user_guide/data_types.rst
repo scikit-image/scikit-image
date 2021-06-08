@@ -33,9 +33,9 @@ functions that convert dtypes and properly rescale image intensities (see
 `Input types`_). You should **never use** ``astype`` on an image, because it
 violates these assumptions about the dtype range::
 
-   >>> from skimage import img_as_float
+   >>> from skimage.util import img_as_float
    >>> image = np.arange(0, 50, 10, dtype=np.uint8)
-   >>> print(image.astype(np.float)) # These float values are out of range.
+   >>> print(image.astype(float)) # These float values are out of range.
    [  0.  10.  20.  30.  40.]
    >>> print(img_as_float(image))
    [ 0.          0.03921569  0.07843137  0.11764706  0.15686275]
@@ -63,24 +63,19 @@ img_as_int     Convert to 16-bit int.
 =============  =================================
 
 These functions convert images to the desired dtype and *properly rescale their
-values*. If conversion reduces the precision of the image, then a warning is
-issued::
+values*::
 
-   >>> from skimage import img_as_ubyte
+   >>> from skimage.util import img_as_ubyte
    >>> image = np.array([0, 0.5, 1], dtype=float)
    >>> img_as_ubyte(image)
-   WARNING:dtype_converter:Possible precision loss when converting from
-   float64 to uint8
    array([  0, 128, 255], dtype=uint8)
 
-Warnings can be locally ignored with a context manager::
+Be careful! These conversions can result in a loss of precision, since 8 bits
+cannot hold the same amount of information as 64 bits::
 
-   >>> import warnings
-   >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> with warnings.catch_warnings():
-   ...     warnings.simplefilter("ignore")
-   ...     img_as_ubyte(image)
-   array([  0, 128, 255], dtype=uint8)
+   >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
+   >>> image_as_ubyte(image)
+   array([  0, 128, 128, 255], dtype=uint8)
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
@@ -119,7 +114,7 @@ unnecessary data copies take place.
 A user that requires a specific type of output (e.g., for display purposes),
 may write::
 
-   >>> from skimage import img_as_uint
+   >>> from skimage.util import img_as_uint
    >>> out = img_as_uint(sobel(image))
    >>> plt.imshow(out)
 
@@ -155,7 +150,7 @@ If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
 default. If you prefer working with floating point images, :func:`img_as_float`
 can be used to convert the image::
 
-    >>> from skimage import img_as_float
+    >>> from skimage.util import img_as_float
     >>> image = img_as_float(any_opencv_image)
 
 Using an image from ``skimage`` with OpenCV
@@ -163,7 +158,7 @@ Using an image from ``skimage`` with OpenCV
 
 The reverse can be achieved with :func:`img_as_ubyte`::
 
-    >>> from skimage import img_as_ubyte
+    >>> from skimage.util import img_as_ubyte
     >>> cv_image = img_as_ubyte(any_skimage_image)
 
 
@@ -176,7 +171,7 @@ a custom function that requires a particular dtype, you should call one of the
 dtype conversion functions (here, ``func1`` and ``func2`` are ``skimage``
 functions)::
 
-   >>> from skimage import img_as_float
+   >>> from skimage.util import img_as_float
    >>> image = img_as_float(func1(func2(image)))
    >>> processed_image = custom_func(image)
 
@@ -243,4 +238,4 @@ References
 
 .. _numpy: https://docs.scipy.org/doc/numpy/user/
 .. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
-.. _OpenCV: http://opencv.org/
+.. _OpenCV: https://opencv.org/

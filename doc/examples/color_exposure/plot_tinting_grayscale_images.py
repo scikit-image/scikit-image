@@ -60,7 +60,8 @@ all_hues = color.hsv2rgb(hsv)
 
 fig, ax = plt.subplots(figsize=(5, 2))
 # Set image extent so hues go from 0 to 1 and the image is a nice aspect ratio.
-ax.imshow(all_hues, extent=(0, 1, 0, 0.2))
+ax.imshow(all_hues, extent=(0 - 0.5 / len(hue_gradient),
+                            1 + 0.5 / len(hue_gradient), 0, 0.2))
 ax.set_axis_off()
 
 ######################################################################
@@ -116,8 +117,8 @@ fig.tight_layout()
 from skimage.filters import rank
 
 # Square regions defined as slices over the first two dimensions.
-top_left = (slice(100),) * 2
-bottom_right = (slice(-100, None),) * 2
+top_left = (slice(25),) * 2
+bottom_right = (slice(-25, None),) * 2
 
 sliced_image = image.copy()
 sliced_image[top_left] = colorize(image[top_left], 0.82, saturation=0.5)
@@ -125,7 +126,7 @@ sliced_image[bottom_right] = colorize(image[bottom_right], 0.5, saturation=0.5)
 
 # Create a mask selecting regions with interesting texture.
 noisy = rank.entropy(grayscale_image, np.ones((9, 9)))
-textured_regions = noisy > 4
+textured_regions = noisy > 4.25
 # Note that using `colorize` here is a bit more difficult, since `rgb2hsv`
 # expects an RGB image (height x width x channel), but fancy-indexing returns
 # a set of RGB pixels (# pixels x channel).

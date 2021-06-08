@@ -28,10 +28,12 @@ from skimage.data import binary_blobs
 from skimage.exposure import rescale_intensity
 import skimage
 
+rng = np.random.default_rng()
+
 # Generate noisy synthetic data
 data = skimage.img_as_float(binary_blobs(length=128, seed=1))
 sigma = 0.35
-data += np.random.normal(loc=0, scale=sigma, size=data.shape)
+data += rng.normal(loc=0, scale=sigma, size=data.shape)
 data = rescale_intensity(data, in_range=(-sigma, 1 + sigma),
                          out_range=(-1, 1))
 
@@ -47,13 +49,13 @@ labels = random_walker(data, markers, beta=10, mode='bf')
 # Plot results
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2),
                                     sharex=True, sharey=True)
-ax1.imshow(data, cmap='gray', interpolation='nearest')
+ax1.imshow(data, cmap='gray')
 ax1.axis('off')
 ax1.set_title('Noisy data')
-ax2.imshow(markers, cmap='magma', interpolation='nearest')
+ax2.imshow(markers, cmap='magma')
 ax2.axis('off')
 ax2.set_title('Markers')
-ax3.imshow(labels, cmap='gray', interpolation='nearest')
+ax3.imshow(labels, cmap='gray')
 ax3.axis('off')
 ax3.set_title('Segmentation')
 

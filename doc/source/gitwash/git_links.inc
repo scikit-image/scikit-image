@@ -12,46 +12,45 @@
 .. _git: https://git-scm.com/
 .. _github: https://github.com
 .. _github help: https://help.github.com
-.. _msysgit: https://git-for-windows.github.io/
-.. _git-osx-installer: https://code.google.com/p/git-osx-installer/downloads/list
+.. _msysgit: https://gitforwindows.org/
+.. _git-osx-installer: https://code.google.com/archive/p/git-osx-installer/downloads
 .. _subversion: http://subversion.tigris.org/
-.. _git cheat sheet: https://github.com/guides/git-cheat-sheet
+.. _git cheat sheet: http://cheat.errtheblog.com/s/git
 .. _pro git book: https://git-scm.com/book/en/v2
-.. _git svn crash course: https://git-scm.com/course/svn.html
-.. _learn.github: https://learn.github.com/
-.. _network graph visualizer: https://github.com/blog/39-say-hello-to-the-network-graph-visualizer
-.. _git user manual: https://schacon.github.com/git/user-manual.html
-.. _git tutorial: https://schacon.github.com/git/gittutorial.html
+.. _git svn crash course: https://git.wiki.kernel.org/index.php/GitSvnCrashCourse
+.. _learn.github: https://lab.github.com/
+.. _network graph visualizer: https://github.blog/2008-04-10-say-hello-to-the-network-graph-visualizer/
+.. _git user manual: http://schacon.github.io/git/user-manual.html
+.. _git tutorial: http://schacon.github.io/git/gittutorial.html
 .. _git community book: https://book.git-scm.com/
-.. _git ready: http://www.gitready.com/
-.. _git casts: http://www.gitcasts.com/
+.. _git ready: http://gitready.com/
+.. _git casts: https://gitcasts.com/
 .. _Fernando's git page: http://www.fperez.org/py4science/git.html
 .. _git magic: http://www-cs-students.stanford.edu/~blynn/gitmagic/index.html
-.. _git concepts: https://www.eecs.harvard.edu/~cduan/technical/git/
-.. _git clone: https://schacon.github.com/git/git-clone.html
-.. _git checkout: https://schacon.github.com/git/git-checkout.html
-.. _git commit: https://schacon.github.com/git/git-commit.html
-.. _git push: https://schacon.github.com/git/git-push.html
-.. _git pull: https://schacon.github.com/git/git-pull.html
-.. _git add: https://schacon.github.com/git/git-add.html
-.. _git status: https://schacon.github.com/git/git-status.html
-.. _git diff: https://schacon.github.com/git/git-diff.html
-.. _git log: https://schacon.github.com/git/git-log.html
-.. _git branch: https://schacon.github.com/git/git-branch.html
-.. _git remote: https://schacon.github.com/git/git-remote.html
-.. _git rebase: https://schacon.github.com/git/git-rebase.html
-.. _git config: https://schacon.github.com/git/git-config.html
-.. _why the -a flag?: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
-.. _git staging area: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
-.. _tangled working copy problem: http://tomayko.com/writings/the-thing-about-git
-.. _git management: http://kerneltrap.org/Linux/Git_Management
+.. _git concepts: https://www.sbf5.com/~cduan/technical/git/
+.. _git clone: http://schacon.github.io/git/git-clone.html
+.. _git checkout: http://schacon.github.io/git/git-checkout.html
+.. _git commit: http://schacon.github.io/git/git-commit.html
+.. _git push: http://schacon.github.io/git/git-push.html
+.. _git pull: http://schacon.github.io/git/git-pull.html
+.. _git add: http://schacon.github.io/git/git-add.html
+.. _git status: http://schacon.github.io/git/git-status.html
+.. _git diff: http://schacon.github.io/git/git-diff.html
+.. _git log: http://schacon.github.io/git/git-log.html
+.. _git branch: http://schacon.github.io/git/git-branch.html
+.. _git remote: http://schacon.github.io/git/git-remote.html
+.. _git rebase: http://schacon.github.io/git/git-rebase.html
+.. _git config: http://schacon.github.io/git/git-config.html
+.. _why the -a flag?: http://gitready.com/beginner/2009/01/18/the-staging-area.html
+.. _git staging area: http://gitready.com/beginner/2009/01/18/the-staging-area.html
+.. _tangled working copy problem: https://tomayko.com/writings/the-thing-about-git
 .. _linux git workflow: https://www.mail-archive.com/dri-devel@lists.sourceforge.net/msg39091.html
-.. _git parable: http://tom.preston-werner.com/2009/05/19/the-git-parable.html
-.. _git foundation: http://matthew-brett.github.com/pydagogue/foundation.html
-.. _deleting master on github: http://matthew-brett.github.com/pydagogue/gh_delete_master.html
-.. _rebase without tears: http://matthew-brett.github.com/pydagogue/rebase_without_tears.html
-.. _resolving a merge: https://schacon.github.com/git/user-manual.html#resolving-a-merge
-.. _ipython git workflow: http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
+.. _git parable: https://tom.preston-werner.com/2009/05/19/the-git-parable.html
+.. _git foundation: http://matthew-brett.github.io/pydagogue/foundation.html
+.. _deleting master on github: http://matthew-brett.github.io/pydagogue/gh_delete_master.html
+.. _rebase without tears: http://matthew-brett.github.io/pydagogue/rebase_without_tears.html
+.. _resolving a merge: http://schacon.github.io/git/user-manual.html#resolving-a-merge
+.. _ipython git workflow: https://mail.python.org/pipermail/ipython-dev/2010-October/005632.html
 
 .. other stuff
 .. _python: https://www.python.org

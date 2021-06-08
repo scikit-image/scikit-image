@@ -7,7 +7,7 @@ from ..morphology import octagon, star
 from ..feature.censure_cy import _censure_dob_loop
 from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
                             _mask_border_keypoints)
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales
@@ -103,9 +103,9 @@ def _star_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
-    feature_mask[(Axx + Ayy) ** 2
-                 > line_threshold * (Axx * Ayy - Axy ** 2)] = False
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
+    feature_mask[(Arr + Acc) ** 2
+                 > line_threshold * (Arr * Acc - Arc ** 2)] = False
 
 
 class CENSURE(FeatureDetector):
@@ -190,7 +190,8 @@ class CENSURE(FeatureDetector):
            [155, 151],
            [184,  63]])
     >>> censure.scales
-    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2,
+           2])
 
     """
 
@@ -238,7 +239,7 @@ class CENSURE(FeatureDetector):
         # (4) Finally, we remove the border keypoints and return the keypoints
         # along with its corresponding scale.
 
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         num_scales = self.max_scale - self.min_scale
 
@@ -274,7 +275,7 @@ class CENSURE(FeatureDetector):
             self.scales = scales
             return
 
-        cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
+        cumulative_mask = np.zeros(keypoints.shape[0], dtype=bool)
 
         if self.mode == 'octagon':
             for i in range(self.min_scale + 1, self.max_scale):

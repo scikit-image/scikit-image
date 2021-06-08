@@ -35,6 +35,7 @@ def sobel_each(image):
 def sobel_hsv(image):
     return filters.sobel(image)
 
+
 ######################################################################
 # We can use these functions as we would normally use them, but now they work
 # with both gray-scale and color images. Let's plot the results with a color

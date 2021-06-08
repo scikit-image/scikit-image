@@ -6,7 +6,7 @@ described in [1]_.
 The pixel neighborhood is defined by:
 
 * the given structuring element
-* an interval [g-s0, g+s1] in greylevel around g the processed pixel greylevel
+* an interval [g-s0, g+s1] in graylevel around g the processed pixel graylevel
 
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
@@ -25,19 +25,17 @@ References
 
 import numpy as np
 
-from ..._shared.utils import assert_nD
+from ..._shared.utils import check_nD
 from . import bilateral_cy
-from .generic import _handle_input
-
+from .generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
-
-    assert_nD(image, 2)
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+    check_nD(image, 2)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
@@ -56,10 +54,10 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
     Spatial closeness is measured by considering only the local pixel
     neighborhood given by a structuring element.
 
-    Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
-    where g is the current pixel greylevel.
+    Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
+    where g is the current pixel graylevel.
 
-    Only pixels belonging to the structuring element and having a greylevel
+    Only pixels belonging to the structuring element and having a graylevel
     inside this interval are averaged.
 
     Parameters
@@ -78,7 +76,7 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        Define the [s0, s1] interval around the greyvalue of the center pixel
+        Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
 
     Returns
@@ -88,7 +86,7 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------
@@ -111,7 +109,7 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     The number of pixels is defined as the number of pixels which are included
     in the structuring element and the mask. Additionally pixels must have a
-    greylevel inside the interval [g-s0, g+s1] where g is the greyvalue of the
+    graylevel inside the interval [g-s0, g+s1] where g is the grayvalue of the
     center pixel.
 
     Parameters
@@ -130,7 +128,7 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        Define the [s0, s1] interval around the greyvalue of the center pixel
+        Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
 
     Returns
@@ -170,10 +168,10 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
     Spatial closeness is measured by considering only the local pixel
     neighborhood given by a structuring element (selem).
 
-    Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
-    where g is the current pixel greylevel.
+    Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
+    where g is the current pixel graylevel.
 
-    Only pixels belonging to the structuring element AND having a greylevel
+    Only pixels belonging to the structuring element AND having a graylevel
     inside this interval are summed.
 
     Note that the sum may overflow depending on the data type of the input
@@ -195,7 +193,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        Define the [s0, s1] interval around the greyvalue of the center pixel
+        Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
 
     Returns
@@ -205,7 +203,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------

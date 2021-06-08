@@ -9,7 +9,6 @@ from skimage.viewer.plugins import OverlayPlugin
 from skimage._shared.version_requirements import is_installed
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal
-from skimage._shared._warnings import expected_warnings
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
@@ -70,8 +69,7 @@ def test_viewer_with_overlay():
     ov.color = 3
     assert_equal(ov.color, 'yellow')
 
-    with expected_warnings(['precision loss']):
-        viewer.save_to_file(filename)
+    viewer.save_to_file(filename)
     ov.display_filtered_image(img)
     assert_equal(ov.overlay, img)
     ov.overlay = None

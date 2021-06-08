@@ -17,11 +17,11 @@ import scipy.ndimage as ndi
 from scipy.ndimage import generate_binary_structure, binary_erosion, label
 from ..filters import gaussian
 from .. import dtype_limits, img_as_float
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels
+    """Smooth an image with a linear function, ignoring masked pixels.
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ def smooth_with_function_and_mask(image, function, mask):
         Mask with 1's for significant pixels, 0's for masked pixels.
 
     Notes
-    ------
+    -----
     This function calculates the fractional contribution of masked pixels
     by applying the function to the mask (which gets you the fraction of
     the pixel data that's due to significant points). We then mask the image
@@ -55,15 +55,15 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     """Edge filter an image using the Canny algorithm.
 
     Parameters
-    -----------
+    ----------
     image : 2D array
         Grayscale input image to detect edges on; can be of any dtype.
-    sigma : float
+    sigma : float, optional
         Standard deviation of the Gaussian filter.
-    low_threshold : float
+    low_threshold : float, optional
         Lower bound for hysteresis thresholding (linking edges).
         If None, low_threshold is set to 10% of dtype's max.
-    high_threshold : float
+    high_threshold : float, optional
         Upper bound for hysteresis thresholding (linking edges).
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
@@ -105,19 +105,21 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
       low threshold that is 8-connected to a labeled point as an edge.
 
     References
-    -----------
+    ----------
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
+           :DOI:`10.1109/TPAMI.1986.4767851`
     .. [2] William Green's Canny tutorial
-           http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+           https://en.wikipedia.org/wiki/Canny_edge_detector
 
     Examples
     --------
     >>> from skimage import feature
+    >>> rng = np.random.default_rng()
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
-    >>> im += 0.2 * np.random.rand(*im.shape)
+    >>> im += 0.2 * rng.random(im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
     >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results
@@ -153,16 +155,22 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
-    assert_nD(image, 2)
+    check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        low_threshold = 0.1 * dtype_max
+        low_threshold = 0.1
+    elif use_quantiles:
+        if not(0.0 <= low_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         low_threshold = low_threshold / dtype_max
 
     if high_threshold is None:
-        high_threshold = 0.2 * dtype_max
+        high_threshold = 0.2
+    elif use_quantiles:
+        if not(0.0 <= high_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         high_threshold = high_threshold / dtype_max
 
@@ -263,11 +271,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #---- If use_quantiles is set then calculate the thresholds to use
     #
     if use_quantiles:
-        if high_threshold > 1.0 or low_threshold > 1.0:
-            raise ValueError("Quantile thresholds must not be > 1.0")
-        if high_threshold < 0.0 or low_threshold < 0.0:
-            raise ValueError("Quantile thresholds must not be < 0.0")
-
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 

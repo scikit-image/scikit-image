@@ -3,8 +3,8 @@ from textwrap import dedent
 from ..qt import QtGui, QtCore, QtWidgets
 import numpy as np
 
-import skimage
-from ... import io, img_as_ubyte
+from ... import io
+from ...util import img_as_ubyte
 from .core import BaseWidget
 from ..utils import dialogs
 
@@ -86,7 +86,7 @@ class SaveButtons(BaseWidget):
         if not filename:
             return
         image = self.plugin.filtered_image
-        if image.dtype == np.bool:
+        if image.dtype == bool:
             # TODO: This check/conversion should probably be in `imsave`.
             image = img_as_ubyte(image)
         io.imsave(filename, image)

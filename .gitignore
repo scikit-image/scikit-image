@@ -13,7 +13,10 @@ __pycache__
 *.new
 *.md5
 *.old
+*.lprof
+.DS_Store
 .pytest_cache
+.mypy_cache/
 temp.tif
 .ropeproject
 doc/source/api
@@ -33,5 +36,4 @@ doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
-
-save-demo.jpg
+.vscode/

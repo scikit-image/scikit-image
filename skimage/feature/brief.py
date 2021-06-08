@@ -5,11 +5,10 @@ from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
 from .brief_cy import _brief_loop
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 class BRIEF(DescriptorExtractor):
-
     """BRIEF binary descriptor extractor.
 
     BRIEF (Binary Robust Independent Elementary Features) is an efficient
@@ -34,7 +33,14 @@ class BRIEF(DescriptorExtractor):
     mode : {'normal', 'uniform'}, optional
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
-    sample_seed : int, optional
+    sample_seed : {None, int, `numpy.random.Generator`}, optional
+        If `sample_seed` is None the `numpy.random.Generator` singleton is
+        used.
+        If `sample_seed` is an int, a new ``Generator`` instance is used,
+        seeded with `sample_seed`.
+        If `sample_seed` is already a ``Generator`` instance then that instance
+        is used.
+
         Seed for the random sampling of the decision pixel-pairs. From a square
         window with length `patch_size`, pixel pairs are sampled using the
         `mode` parameter to build the descriptors using intensity comparison.
@@ -122,7 +128,11 @@ class BRIEF(DescriptorExtractor):
         self.patch_size = patch_size
         self.mode = mode
         self.sigma = sigma
-        self.sample_seed = sample_seed
+
+        if sample_seed is None:
+            self.sample_seed = np.random.SeedSequence().entropy
+        else:
+            self.sample_seed = sample_seed
 
         self.descriptors = None
         self.mask = None
@@ -138,10 +148,9 @@ class BRIEF(DescriptorExtractor):
             Keypoint coordinates as ``(row, col)``.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
-        random = np.random.RandomState()
-        random.seed(self.sample_seed)
+        random = np.random.default_rng(self.sample_seed)
 
         image = _prepare_grayscale_input_2D(image)
 
@@ -152,7 +161,8 @@ class BRIEF(DescriptorExtractor):
         desc_size = self.descriptor_size
         patch_size = self.patch_size
         if self.mode == 'normal':
-            samples = (patch_size / 5.0) * random.randn(desc_size * 8)
+            samples = (patch_size / 5.0) * random.standard_normal(desc_size
+                                                                  * 8)
             samples = np.array(samples, dtype=np.int32)
             samples = samples[(samples < (patch_size // 2))
                               & (samples > - (patch_size - 2) // 2)]
@@ -160,9 +170,9 @@ class BRIEF(DescriptorExtractor):
             pos1 = samples[:desc_size * 2].reshape(desc_size, 2)
             pos2 = samples[desc_size * 2:desc_size * 4].reshape(desc_size, 2)
         elif self.mode == 'uniform':
-            samples = random.randint(-(patch_size - 2) // 2,
-                                     (patch_size // 2) + 1,
-                                     (desc_size * 2, 2))
+            samples = random.integers(-(patch_size - 2) // 2,
+                                      (patch_size // 2) + 1,
+                                      (desc_size * 2, 2))
             samples = np.array(samples, dtype=np.int32)
             pos1, pos2 = np.split(samples, 2)
 

@@ -46,8 +46,6 @@ from skimage import color
 from skimage.util.shape import view_as_windows
 from skimage.util import montage
 
-np.random.seed(42)
-
 patch_shape = 8, 8
 n_filters = 49
 
@@ -75,13 +73,13 @@ ax = axes.ravel()
 ax[0].imshow(astro, cmap=plt.cm.gray)
 ax[0].set_title("Image (original)")
 
-ax[1].imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(fb1_montage, cmap=plt.cm.gray)
 ax[1].set_title("K-means filterbank (codebook)\non original image")
 
 ax[2].imshow(astro_dog, cmap=plt.cm.gray)
 ax[2].set_title("Image (LGN-like DoG)")
 
-ax[3].imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(fb2_montage, cmap=plt.cm.gray)
 ax[3].set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 
 for a in ax.ravel():

@@ -53,7 +53,7 @@ edges = canny(image, sigma=3, low_threshold=10, high_threshold=50)
 hough_radii = np.arange(20, 35, 2)
 hough_res = hough_circle(edges, hough_radii)
 
-# Select the most prominent 5 circles
+# Select the most prominent 3 circles
 accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
                                            total_num_peaks=3)
 
@@ -61,7 +61,8 @@ accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
 image = color.gray2rgb(image)
 for center_y, center_x, radius in zip(cy, cx, radii):
-    circy, circx = circle_perimeter(center_y, center_x, radius)
+    circy, circx = circle_perimeter(center_y, center_x, radius,
+                                    shape=image.shape)
     image[circy, circx] = (220, 20, 20)
 
 ax.imshow(image, cmap=plt.cm.gray)

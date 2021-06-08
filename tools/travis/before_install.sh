@@ -63,8 +63,7 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-python -m pip install --upgrade pip
-pip install --retries 3 -q wheel
+python -m pip install --upgrade pip wheel
 
 # install specific wheels from wheelhouse
 for requirement in matplotlib scipy pillow; do
@@ -72,16 +71,16 @@ for requirement in matplotlib scipy pillow; do
 done
 # cython is not in the default.txt requirements
 WHEELS="$WHEELS $(grep -i cython requirements/build.txt)"
-pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
+python -m pip install $PIP_FLAGS $WHEELHOUSE $WHEELS
 
 # Install build time requirements
-pip install --retries 3 -q $PIP_FLAGS -r requirements/build.txt
+python -m pip install $PIP_FLAGS -r requirements/build.txt
 # Default requirements are necessary to build because of lazy importing
 # They can be moved after the build step if #3158 is accepted
-pip install --retries 3 -q $PIP_FLAGS -r requirements/default.txt
+python -m pip install $PIP_FLAGS -r requirements/default.txt
 
 # Show what's installed
-pip list
+python -m pip list
 
 section () {
     echo -en "travis_fold:start:$1\r"

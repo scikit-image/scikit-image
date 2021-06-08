@@ -4,7 +4,7 @@ How to parallelize loops
 
 In image processing, we frequently apply the same algorithm
 on a large batch of images. In this paragraph, we propose to
-use `joblib <https://pythonhosted.org/joblib/>`_ to parallelize
+use `joblib <https://joblib.readthedocs.io>`_ to parallelize
 loops. Here is an example of such repetitive tasks:
 
 .. code-block:: python

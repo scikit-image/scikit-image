@@ -3,7 +3,7 @@ from numpy import testing
 
 from skimage import data, color
 from skimage.util import img_as_bool
-from skimage.morphology import binary, grey, selem
+from skimage.morphology import binary, gray, selem
 from scipy import ndimage as ndi
 
 import pytest
@@ -15,36 +15,36 @@ bw_img = img > 100 / 255.
 def test_non_square_image():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], strel)
-    grey_res = img_as_bool(grey.erosion(bw_img[:100, :200], strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_img, strel)
-    grey_res = img_as_bool(grey.erosion(bw_img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.erosion(bw_img, strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
     strel = selem.square(3)
     binary_res = binary.binary_dilation(bw_img, strel)
-    grey_res = img_as_bool(grey.dilation(bw_img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.dilation(bw_img, strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
-    grey_res = img_as_bool(grey.closing(bw_img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.closing(bw_img, strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
     strel = selem.square(3)
     binary_res = binary.binary_opening(bw_img, strel)
-    grey_res = img_as_bool(grey.opening(bw_img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.opening(bw_img, strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_selem_overflow():
@@ -52,8 +52,8 @@ def test_selem_overflow():
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
     binary_res = binary.binary_erosion(img, strel)
-    grey_res = img_as_bool(grey.erosion(img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
+    gray_res = img_as_bool(gray.erosion(img, strel))
+    testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_out_argument():
@@ -93,7 +93,7 @@ def test_default_selem(function):
 
 def test_3d_fallback_default_selem():
     # 3x3x3 cube inside a 7x7x7 image:
-    image = np.zeros((7, 7, 7), np.bool)
+    image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
     opened = binary.binary_opening(image)
@@ -110,7 +110,7 @@ binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
 @pytest.mark.parametrize("function", binary_3d_fallback_functions)
 def test_3d_fallback_cube_selem(function):
     # 3x3x3 cube inside a 7x7x7 image:
-    image = np.zeros((7, 7, 7), np.bool)
+    image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
     cube = np.ones((3, 3, 3), dtype=np.uint8)
@@ -148,8 +148,8 @@ def test_binary_output_2d():
     binary.binary_opening(image, out=int_opened)
     binary.binary_closing(image, out=int_closed)
 
-    testing.assert_equal(bin_opened.dtype, np.bool)
-    testing.assert_equal(bin_closed.dtype, np.bool)
+    testing.assert_equal(bin_opened.dtype, bool)
+    testing.assert_equal(bin_closed.dtype, bool)
 
     testing.assert_equal(int_opened.dtype, np.uint8)
     testing.assert_equal(int_closed.dtype, np.uint8)
@@ -168,8 +168,8 @@ def test_binary_output_3d():
     binary.binary_opening(image, out=int_opened)
     binary.binary_closing(image, out=int_closed)
 
-    testing.assert_equal(bin_opened.dtype, np.bool)
-    testing.assert_equal(bin_closed.dtype, np.bool)
+    testing.assert_equal(bin_opened.dtype, bool)
+    testing.assert_equal(bin_closed.dtype, bool)
 
     testing.assert_equal(int_opened.dtype, np.uint8)
     testing.assert_equal(int_closed.dtype, np.uint8)

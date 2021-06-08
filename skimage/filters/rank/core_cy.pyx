@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
 
+cnp.import_array()
 
 cdef inline dtype_t _max(dtype_t a, dtype_t b) nogil:
     return a if a >= b else b
@@ -17,13 +18,13 @@ cdef inline dtype_t _min(dtype_t a, dtype_t b) nogil:
     return a if a <= b else b
 
 
-cdef inline void histogram_increment(Py_ssize_t* histo, double* pop,
+cdef inline void histogram_increment(Py_ssize_t[::1] histo, double* pop,
                                      dtype_t value) nogil:
     histo[value] += 1
     pop[0] += 1
 
 
-cdef inline void histogram_decrement(Py_ssize_t* histo, double* pop,
+cdef inline void histogram_decrement(Py_ssize_t[::1] histo, double* pop,
                                      dtype_t value) nogil:
     histo[value] -= 1
     pop[0] -= 1
@@ -36,13 +37,15 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
     else:
-        if mask[r * cols + c]:
+        if not mask:
+            return 1
+        elif mask[r * cols + c]:
             return 1
         else:
             return 0
 
 
-cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
+cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
@@ -67,15 +70,17 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
-    assert centre_r >= 0
-    assert centre_c >= 0
-    assert centre_r < srows
-    assert centre_c < scols
+    assert centre_r >= 0, f'centre_r {centre_r} < 0'
+    assert centre_c >= 0, f'centre_c {centre_c} < 0'
+    assert centre_r < srows, f'centre_r {centre_r} >= srows {srows}'
+    assert centre_c < scols, f'centre_c {centre_c} >= scols {scols}'
 
     cdef Py_ssize_t mid_bin = n_bins / 2
 
     # define pointers to the data
-    cdef char* mask_data = &mask[0, 0]
+    cdef char * mask_data = NULL
+    if mask is not None:
+        mask_data = &mask[0, 0]
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
@@ -97,55 +102,33 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef unsigned char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
     # the current local histogram distribution
-    cdef Py_ssize_t* histo
+    # cdef Py_ssize_t* histo
+    cdef Py_ssize_t [::1] histo = np.zeros(n_bins, dtype=np.intp)
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
     # the east structuring element border
-    cdef Py_ssize_t se_size = srows * scols * sizeof(Py_ssize_t)
-    cdef Py_ssize_t* se_e_r
-    cdef Py_ssize_t* se_e_c
-    cdef Py_ssize_t* se_w_r
-    cdef Py_ssize_t* se_w_c
-    cdef Py_ssize_t* se_n_r
-    cdef Py_ssize_t* se_n_c
-    cdef Py_ssize_t* se_s_r
-    cdef Py_ssize_t* se_s_c
+    cdef Py_ssize_t se_size = srows * scols
+    cdef Py_ssize_t [::1] se_e_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_e_c = np.empty(se_size, dtype=np.intp)
+
+    cdef Py_ssize_t [::1] se_w_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_w_c = np.empty(se_size, dtype=np.intp)
+
+    cdef Py_ssize_t [::1] se_n_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_n_c = np.empty(se_size, dtype=np.intp)
+
+    cdef Py_ssize_t [::1] se_s_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_s_c = np.empty(se_size, dtype=np.intp)
 
     # number of element in each attack border
     cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
 
+    num_se_n = num_se_s = num_se_e = num_se_w = 0
+
     with nogil:
-
-        se_e_r = <Py_ssize_t*>malloc(se_size)
-        se_e_c = <Py_ssize_t*>malloc(se_size)
-        se_w_r = <Py_ssize_t*>malloc(se_size)
-        se_w_c = <Py_ssize_t*>malloc(se_size)
-        se_n_r = <Py_ssize_t*>malloc(se_size)
-        se_n_c = <Py_ssize_t*>malloc(se_size)
-        se_s_r = <Py_ssize_t*>malloc(se_size)
-        se_s_c = <Py_ssize_t*>malloc(se_size)
-        histo = <Py_ssize_t*>malloc(n_bins * sizeof(Py_ssize_t))
-
-        if (se_e_r is NULL or se_e_c is NULL or se_w_r is NULL or
-            se_w_c is NULL or se_n_r is NULL or se_n_c is NULL or
-            se_s_r is NULL or se_s_c is NULL or histo is NULL):
-            free(se_e_r)
-            free(se_e_c)
-            free(se_w_r)
-            free(se_w_c)
-            free(se_n_r)
-            free(se_n_c)
-            free(se_s_r)
-            free(se_s_c)
-            free(histo)
-            with gil:
-                raise MemoryError()
-
         for i in range(n_bins):
             histo[i] = 0
-
-        num_se_n = num_se_s = num_se_e = num_se_w = 0
 
         for r in range(srows):
             for c in range(scols):
@@ -256,14 +239,3 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
             kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
                    n_bins, mid_bin, p0, p1, s0, s1)
-
-        # release memory allocated by malloc
-        free(se_e_r)
-        free(se_e_c)
-        free(se_w_r)
-        free(se_w_c)
-        free(se_n_r)
-        free(se_n_c)
-        free(se_s_r)
-        free(se_s_c)
-        free(histo)

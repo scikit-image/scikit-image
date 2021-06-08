@@ -1,8 +1,6 @@
 .. toctree:: 
    :hidden: 
  
-   gitwash/index 
-   gsoc2011 
-   cell_profiler 
+   gitwash/index
 
 .. include:: ../../CONTRIBUTING.txt

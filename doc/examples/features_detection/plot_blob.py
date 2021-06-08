@@ -68,7 +68,7 @@ ax = axes.ravel()
 
 for idx, (blobs, color, title) in enumerate(sequence):
     ax[idx].set_title(title)
-    ax[idx].imshow(image, interpolation='nearest')
+    ax[idx].imshow(image)
     for blob in blobs:
         y, x, r = blob
         c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)

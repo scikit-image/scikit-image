@@ -3,7 +3,7 @@ import functools
 import numpy as np
 
 from .. import color
-from ..util.dtype import convert
+from ..util.dtype import _convert
 
 
 __all__ = ['adapt_rgb', 'hsv_value', 'each_channel']
@@ -58,7 +58,7 @@ def hsv_value(image_filter, image, *args, **kwargs):
     hsv = color.rgb2hsv(image[:, :, :3])
     value = hsv[:, :, 2].copy()
     value = image_filter(value, *args, **kwargs)
-    hsv[:, :, 2] = convert(value, hsv.dtype)
+    hsv[:, :, 2] = _convert(value, hsv.dtype)
     return color.hsv2rgb(hsv)
 
 
@@ -76,4 +76,4 @@ def each_channel(image_filter, image, *args, **kwargs):
     """
     c_new = [image_filter(c, *args, **kwargs)
              for c in np.moveaxis(image, -1, 0)]
-    return np.moveaxis(np.array(c_new), 0, -1)
+    return np.stack(c_new, axis=-1)

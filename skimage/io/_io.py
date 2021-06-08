@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..io.manage_plugins import call_plugin
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
 from .._shared.utils import warn
@@ -11,8 +11,7 @@ __all__ = ['imread', 'imsave', 'imshow', 'show',
            'imread_collection', 'imshow_collection']
 
 
-def imread(fname, as_gray=False, plugin=None, flatten=None,
-           **plugin_args):
+def imread(fname, as_gray=False, plugin=None, **plugin_args):
     """Load an image from file.
 
     Parameters
@@ -32,8 +31,6 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
-    flatten : bool
-        Backward compatible keyword, superseded by `as_gray`.
 
     Returns
     -------
@@ -43,16 +40,6 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
-    if 'as_grey' in plugin_args.keys():
-        as_gray = plugin_args.pop('as_grey', as_gray)
-        warn('`as_grey` has been deprecated in favor of `as_gray`')
-
-    # Backward compatibility
-    if flatten is not None:
-        as_gray = flatten
-        warn('`flatten` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
-
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
@@ -69,6 +56,8 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
             img = np.swapaxes(img, -2, -3)
 
         if as_gray:
+            if img.shape[2] == 4:
+                img = rgba2rgb(img)
             img = rgb2gray(img)
 
     return img
@@ -94,7 +83,7 @@ def imread_collection(load_pattern, conserve_memory=True,
     ic : ImageCollection
         Collection of images.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -121,7 +110,7 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -137,10 +126,13 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
+    if arr.dtype == bool:
+        warn('%s is a boolean image: setting True to 255 and False to 0. '
+             'To silence this warning, please convert the image using '
+             'img_as_ubyte.' % fname, stacklevel=2)
+        arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
-    if arr.dtype == bool:
-        warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 
@@ -156,7 +148,7 @@ def imshow(arr, plugin=None, **plugin_args):
         tried (starting with imageio) until a suitable
         candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -178,7 +170,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
         Name of plugin to use.  By default, the different plugins are
         tried until a suitable candidate is found.
 
-    Other parameters
+    Other Parameters
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
@@ -201,8 +193,9 @@ def show():
     --------
     >>> import skimage.io as io
 
+    >>> rng = np.random.default_rng()
     >>> for i in range(4):
-    ...     ax_im = io.imshow(np.random.rand(50, 50))
+    ...     ax_im = io.imshow(rng.random((50, 50)))
     >>> io.show() # doctest: +SKIP
 
     '''

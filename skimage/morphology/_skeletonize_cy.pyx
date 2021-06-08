@@ -5,6 +5,8 @@
 
 import numpy as np
 cimport numpy as cnp
+cnp.import_array()
+
 
 def _fast_skeletonize(image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
@@ -112,7 +114,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:nrows-1, 1:ncols-1].astype(np.bool)
+    return _skeleton[1:nrows-1, 1:ncols-1].astype(bool)
 
 
 """
@@ -185,19 +187,19 @@ def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
                     accumulator += 2
                 if jj < cols - 1 and result[ii - 1, jj + 1]:
                         accumulator += 4
-                if jj > 0 and result[ii, jj - 1]:
-                    accumulator += 8
-                if jj < cols - 1 and result[ii, jj + 1]:
-                    accumulator += 32
-                if ii < rows - 1:
-                    if jj > 0 and result[ii + 1, jj - 1]:
-                        accumulator += 64
-                    if result[ii + 1, jj]:
-                        accumulator += 128
-                    if jj < cols - 1 and result[ii + 1, jj + 1]:
-                        accumulator += 256
-                # Assign the value of table corresponding to the configuration
-                result[ii, jj] = table[accumulator]
+            if jj > 0 and result[ii, jj - 1]:
+                accumulator += 8
+            if jj < cols - 1 and result[ii, jj + 1]:
+                accumulator += 32
+            if ii < rows - 1:
+                if jj > 0 and result[ii + 1, jj - 1]:
+                    accumulator += 64
+                if result[ii + 1, jj]:
+                    accumulator += 128
+                if jj < cols - 1 and result[ii + 1, jj + 1]:
+                    accumulator += 256
+            # Assign the value of table corresponding to the configuration
+            result[ii, jj] = table[accumulator]
 
 
 

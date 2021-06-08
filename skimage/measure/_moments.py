@@ -1,8 +1,7 @@
 import numpy as np
-from .._shared.utils import assert_nD
+from .._shared.utils import _supported_float_type, check_nD
 from . import _moments_cy
 import itertools
-from warnings import warn
 
 
 def moments_coords(coords, order=3):
@@ -39,9 +38,8 @@ def moments_coords(coords, order=3):
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)], dtype=np.double)
     >>> M = moments_coords(coords)
-    >>> centroid_row = M[1, 0] / M[0, 0]
-    >>> centroid_col = M[0, 1] / M[0, 0]
-    >>> centroid_row, centroid_col
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 15.5)
     """
     return moments_coords_central(coords, 0, order=order)
@@ -85,10 +83,10 @@ def moments_coords_central(coords, center=None, order=3):
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)])
     >>> moments_coords_central(coords)
-    array([[ 16.,   0.,  20.,   0.],
-           [  0.,   0.,   0.,   0.],
-           [ 20.,   0.,  25.,   0.],
-           [  0.,   0.,   0.,   0.]])
+    array([[16.,  0., 20.,  0.],
+           [ 0.,  0.,  0.,  0.],
+           [20.,  0., 25.,  0.],
+           [ 0.,  0.,  0.,  0.]])
 
     As seen above, for symmetric objects, odd-order moments (columns 1 and 3,
     rows 1 and 3) are zero when centered on the centroid, or center of mass,
@@ -96,11 +94,12 @@ def moments_coords_central(coords, center=None, order=3):
     point, this no longer holds:
 
     >>> coords2 = np.concatenate((coords, [[17, 17]]), axis=0)
-    >>> np.round(moments_coords_central(coords2), 2)
-    array([[ 17.  ,   0.  ,  22.12,  -2.49],
-           [  0.  ,   3.53,   1.73,   7.4 ],
-           [ 25.88,   6.02,  36.63,   8.83],
-           [  4.15,  19.17,  14.8 ,  39.6 ]])
+    >>> np.round(moments_coords_central(coords2),
+    ...          decimals=2)  # doctest: +NORMALIZE_WHITESPACE
+    array([[17.  ,  0.  , 22.12, -2.49],
+           [ 0.  ,  3.53,  1.73,  7.4 ],
+           [25.88,  6.02, 36.63,  8.83],
+           [ 4.15, 19.17, 14.8 , 39.6 ]])
 
     Image moments and central image moments are equivalent (by definition)
     when the center is (0, 0):
@@ -113,18 +112,20 @@ def moments_coords_central(coords, center=None, order=3):
         # This format corresponds to coordinate tuples as returned by
         # e.g. np.nonzero: (row_coords, column_coords).
         # We represent them as an npoints x ndim array.
-        coords = np.transpose(coords)
-    assert_nD(coords, 2)
+        coords = np.stack(coords, axis=-1)
+    check_nD(coords, 2)
     ndim = coords.shape[1]
+
+    float_type = _supported_float_type(coords.dtype)
     if center is None:
-        center = np.mean(coords, axis=0)
+        center = np.mean(coords, axis=0, dtype=float)
 
     # center the coordinates
-    coords = coords.astype(float) - center
+    coords = coords.astype(float_type, copy=False) - center
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
-    coords = coords[..., np.newaxis] ** np.arange(order + 1)
+    coords = np.stack([coords ** c for c in range(order + 1)], axis=-1)
 
     # add extra dimensions for proper broadcasting
     coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
@@ -185,15 +186,14 @@ def moments(image, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> cr, cc
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 14.5)
     """
     return moments_central(image, (0,) * image.ndim, order=order)
 
 
-def moments_central(image, center=None, cc=None, order=3, **kwargs):
+def moments_central(image, center=None, order=3, **kwargs):
     """Calculate all central image moments up to a certain order.
 
     The center coordinates (cr, cc) can be calculated from the raw moments as:
@@ -211,13 +211,6 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
         is not provided.
     order : int, optional
         The maximum order of moments computed.
-
-    Other Parameters
-    ----------------
-    cr : double
-        DEPRECATED: Center row coordinate for 2D image.
-    cc : double
-        DEPRECATED: Center column coordinate for 2D image.
 
     Returns
     -------
@@ -240,31 +233,22 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> moments_central(image, (cr, cc))
-    array([[ 16.,   0.,  20.,   0.],
-           [  0.,   0.,   0.,   0.],
-           [ 20.,   0.,  25.,   0.],
-           [  0.,   0.,   0.,   0.]])
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> moments_central(image, centroid)
+    array([[16.,  0., 20.,  0.],
+           [ 0.,  0.,  0.,  0.],
+           [20.,  0., 25.,  0.],
+           [ 0.,  0.,  0.,  0.]])
     """
-    if cc is not None:  # using deprecated interface
-        message = ('Using deprecated 2D-only, xy-coordinate interface to '
-                   'moments_central. This interface will be removed in '
-                   'scikit-image 0.16. Use '
-                   'moments_central(image, center=(cr, cc), order=3).')
-        warn(message)
-        if 'cr' in kwargs and center is None:
-            center = (kwargs['cr'], cc)
-        else:
-            center = (center, cc)
-        return moments_central(image, center=center, order=order).T
     if center is None:
         center = centroid(image)
-    calc = image.astype(float)
+    float_dtype = _supported_float_type(image.dtype)
+    calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
-        delta = np.arange(dim_length, dtype=float) - center[dim]
-        powers_of_delta = delta[:, np.newaxis] ** np.arange(order + 1)
+        delta = np.arange(dim_length, dtype=float_dtype) - center[dim]
+        powers_of_delta = (
+            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+        )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
         calc = np.rollaxis(calc, -1, dim)
@@ -306,15 +290,13 @@ def moments_normalized(mu, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> m = moments(image)
-    >>> cr = m[0, 1] / m[0, 0]
-    >>> cc = m[1, 0] / m[0, 0]
-    >>> mu = moments_central(image, cr, cc)
+    >>> centroid = (m[0, 1] / m[0, 0], m[1, 0] / m[0, 0])
+    >>> mu = moments_central(image, centroid)
     >>> moments_normalized(mu)
-    array([[        nan,         nan,  0.078125  ,  0.        ],
-           [        nan,  0.        ,  0.        ,  0.        ],
-           [ 0.078125  ,  0.        ,  0.00610352,  0.        ],
-           [ 0.        ,  0.        ,  0.        ,  0.        ]])
-
+    array([[       nan,        nan, 0.078125  , 0.        ],
+           [       nan, 0.        , 0.        , 0.        ],
+           [0.078125  , 0.        , 0.00610352, 0.        ],
+           [0.        , 0.        , 0.        , 0.        ]])
     """
     if np.any(np.array(mu.shape) <= order):
         raise ValueError("Shape of image moments must be >= `order`")
@@ -337,7 +319,7 @@ def moments_hu(nu):
     Parameters
     ----------
     nu : (M, M) array
-        Normalized central image moments, where M must be > 4.
+        Normalized central image moments, where M must be >= 4.
 
     Returns
     -------
@@ -357,9 +339,19 @@ def moments_hu(nu):
            Berlin, 1993.
     .. [5] https://en.wikipedia.org/wiki/Image_moment
 
-
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 0.5
+    >>> image[10:12, 10:12] = 1
+    >>> mu = moments_central(image)
+    >>> nu = moments_normalized(mu)
+    >>> moments_hu(nu)
+    array([7.45370370e-01, 3.51165981e-01, 1.04049179e-01, 4.06442107e-02,
+           2.64312299e-03, 2.40854582e-02, 4.33680869e-19])
     """
-    return _moments_cy.moments_hu(nu.astype(np.double))
+    dtype = np.float32 if nu.dtype == 'float32' else np.float64
+    return _moments_cy.moments_hu(nu.astype(dtype, copy=False))
 
 
 def centroid(image):
@@ -374,6 +366,14 @@ def centroid(image):
     -------
     center : tuple of float, length ``image.ndim``
         The centroid of the (nonzero) pixels in ``image``.
+
+    Examples
+    --------
+    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image[13:17, 13:17] = 0.5
+    >>> image[10:12, 10:12] = 1
+    >>> centroid(image)
+    array([13.16666667, 13.16666667])
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1)
     center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
@@ -412,7 +412,7 @@ def inertia_tensor(image, mu=None):
     if mu is None:
         mu = moments_central(image, order=2)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
-    result = np.zeros((image.ndim, image.ndim))
+    result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
 
     # nD expression to get coordinates ([2, 0], [0, 2]) (2D),
     # ([2, 0, 0], [0, 2, 0], [0, 0, 2]) (3D), etc.
@@ -467,4 +467,9 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     if T is None:
         T = inertia_tensor(image, mu)
     eigvals = np.linalg.eigvalsh(T)
+    # Floating point precision problems could make a positive
+    # semidefinite matrix have an eigenvalue that is very slightly
+    # negative. This can cause problems down the line, so set values
+    # very near zero to zero.
+    eigvals = np.clip(eigvals, 0, None, out=eigvals)
     return sorted(eigvals, reverse=True)

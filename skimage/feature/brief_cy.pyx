@@ -4,9 +4,12 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
+cnp.import_array()
+
+from .._shared.fused_numerics cimport np_floats
 
 
-def _brief_loop(double[:, ::1] image, unsigned char[:, ::1] descriptors,
+def _brief_loop(np_floats[:, ::1] image, unsigned char[:, ::1] descriptors,
                 Py_ssize_t[:, ::1] keypoints,
                 int[:, ::1] pos0, int[:, ::1] pos1):
 

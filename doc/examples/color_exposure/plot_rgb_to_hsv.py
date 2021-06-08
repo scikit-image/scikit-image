@@ -18,13 +18,14 @@ channels.
 
 """
 
-##############################################################################
-# We first load the RGB image and extract the Hue and Value channels:
 
 import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.color import rgb2hsv
+
+##############################################################################
+# We first load the RGB image and extract the Hue and Value channels:
 
 rgb_img = data.coffee()
 hsv_img = rgb2hsv(rgb_img)

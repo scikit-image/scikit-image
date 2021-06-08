@@ -12,98 +12,74 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 
-
 New Features
 ------------
 
-- unsharp mask filtering (#2772)
-- New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
-- Image translation registration for masked data
-  (``skimage.feature.masked_register_translation``)
+- Added a new keyword only parameter ``random_state`` to
+  ``morphology.medial_axis`` and ``restoration.unsupervised_wiener``.
+- Seeding random number generators will not give the same results as the
+  underlying generator was updated to use ``numpy.random.Generator``.
+
+Documentation
+-------------
+
+- A new doc tutorial presenting a 3D biomedical imaging example has been added
+  to the gallery (#4946). The technical content benefited from conversations
+  with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
+- Documentation has been added to the contributing notes about how to submit a
+  gallery example 
 
 
 Improvements
 ------------
 
-- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
-  improved with a new Cython-based implementation. #3022
-- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
-  new optional dependency).
-- Performance is now monitored by
-  `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
-  results will appear at https://pandas.pydata.org/speed/
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
+- ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to a
+  LUT (#4966).  
+- ``measure.label`` has been accelerated for boolean input images, by using
+  ``scipy.ndimage``'s implementation for this case (#4945).
+- ``util.apply_parallel`` now works with multichannel data (#4927).
+- ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
 
 
 API Changes
 -----------
 
-- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
-  removed. Use parameter ``data_range`` instead.
-- imageio is now the preferred plugin for reading and writing images.
-- imageio is now a dependency of scikit-image.
-- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
-  with numpy 1.15
-- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
-  base10 instead of the natural logarithm as discussed in issue #2995.
-- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to ``False``.
-- Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to ``True``.
-- Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to ``True``.
-- Default value of ``mode`` parameter in ``skimage.transform.swirl``
-  has been set to ``reflect``.
-- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters.threshold_local`` instead.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
-- Default value of ``mode`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``reflect``.
-- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``True``.
-- Removed the ``skimage.test`` function. This functionality can be achieved
-  by calling ``pytest`` directly.
-- ``skimage.transform.seam_carve`` has been removed because the algorithm is
-  patented.
+- A default value has been added to ``measure.find_contours``, corresponding to
+  the half distance between the min and max values of the image 
+  #4862
+- ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
+  descriptive name.
+- The ``level`` parameter of ``measure.find_contours`` is now a keyword
+  argument, with a default value set to (max(image) - min(image)) / 2.
+- ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
+  to add support for Minkowski distances.
 
 
 Bugfixes
 --------
 
-- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
-  no longer raise an error if any dimension of the image is smaller 3 and
-  the keyword ``allow_borders`` was false.
-- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
-  will return a boolean array instead of an array of 0s and 1s if the
-  parameter ``indices`` was false.
-
+- Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
+  dimensions or more (#4823)
+- ``min_distance`` is now enforced for ``skimage.feature.peak_local_max``
+  (#2592).
+- Peak detection in labels is fixed in ``skimage.feature.peak_local_max``
+  (#4756).
+- Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
+  is avoided (#5047).
 
 Deprecations
 ------------
 
-- Python 2 support has been dropped. Users should have Python >= 3.5.
-- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
-- ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
-  ``anti_aliasing`` has been enabled by default.
-- ``regionprops`` will use row-column coordinates in 0.16. You can start
-  using them now with ``regionprops(..., coordinates='rc')``. You can silence
-  warning messages, and retain the old behavior, with
-  ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error. This change has a number of consequences.
-  Specifically, the "orientation" region property will measure the
-  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
-  row-column coordinates.
-- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
-  and will be removed in 0.16. Use ``area_threshold`` instead.
-- ``skimage.filters.median`` will change behavior in the future to have an
-  identical behavior as ``scipy.ndimage.median_filter``. This behavior can be
-  set already using ``behavior='ndimage'``. In 0.16, it will be the default
-  behavior and removed in 0.17 as well as the parameter of the previous
-  behavior (i.e., ``mask``, ``shift_x``, ``shift_y``) will be removed.
+- In ``measure.label``, the deprecated ``neighbors`` parameter has been
+  removed.
+
+
+Development process
+-------------------
 
 
 Contributors to this release

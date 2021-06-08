@@ -1,4 +1,3 @@
-from .histogram_matching import match_histograms
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
                               hough_circle_peaks, hough_ellipse)
@@ -13,14 +12,13 @@ from ._geometric import (estimate_transform,
                          EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import (swirl, resize, rotate, rescale,
-                     downscale_local_mean, warp, warp_coords)
+                     downscale_local_mean, warp, warp_coords, warp_polar,
+                     resize_local_mean)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
-from .seam_carving import seam_carve
 
 
-__all__ = ['match_histograms',
-           'hough_circle',
+__all__ = ['hough_circle',
            'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',
@@ -36,6 +34,7 @@ __all__ = ['match_histograms',
            'integrate',
            'warp',
            'warp_coords',
+           'warp_polar',
            'estimate_transform',
            'matrix_transform',
            'EuclideanTransform',
@@ -48,11 +47,11 @@ __all__ = ['match_histograms',
            'PiecewiseAffineTransform',
            'swirl',
            'resize',
+           'resize_local_mean',
            'rotate',
            'rescale',
            'downscale_local_mean',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian',
-           'seam_carve']
+           'pyramid_laplacian']

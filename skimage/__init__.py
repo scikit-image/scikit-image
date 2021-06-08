@@ -1,4 +1,4 @@
-"""Image Processing SciKit (Toolbox for SciPy)
+"""Image Processing for Python
 
 ``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
@@ -26,11 +26,11 @@ graph
 io
     Reading, saving, and displaying images and video.
 measure
-    Measurement of image properties, e.g., similarity and contours.
+    Measurement of image properties, e.g., region properties and contours.
+metrics
+    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
 morphology
     Morphological operations, e.g., opening or skeletonization.
-novice
-    Simplified interface for teaching purposes.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
@@ -71,7 +71,7 @@ dtype_limits
 import sys
 
 
-__version__ = '0.15.dev0'
+__version__ = '0.19.0.dev0'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))

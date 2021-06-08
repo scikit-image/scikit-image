@@ -18,8 +18,10 @@ class PaintTool(CanvasToolBase):
         Skimage viewer or plot plugin object.
     overlay_shape : shape tuple
         2D shape tuple used to initialize overlay image.
+    radius : int
+        The size of the paint cursor.
     alpha : float (between [0, 1])
-        Opacity of overlay
+        Opacity of overlay.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.

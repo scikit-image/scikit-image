@@ -4,8 +4,8 @@
 """
 
 import numpy as np
-from scipy.fftpack import ifftshift
-from .._shared.utils import assert_nD
+from .._shared.fft import fftmodule as fft
+from .._shared.utils import check_nD
 
 eps = np.finfo(float).eps
 
@@ -49,12 +49,12 @@ class LPIFilter2D(object):
         Parameters
         ----------
         impulse_response : callable `f(r, c, **filter_params)`
-            Function that yields the impulse response.  `r` and `c` are
+            Function that yields the impulse response.  ``r`` and ``c`` are
             1-dimensional vectors that represent row and column positions, in
             other words coordinates are (r[0],c[0]),(r[0],c[1]) etc.
             `**filter_params` are passed through.
 
-            In other words, `impulse_response` would be called like this:
+            In other words, ``impulse_response`` would be called like this:
 
             >>> def impulse_response(r, c, **filter_params):
             ...     pass
@@ -102,13 +102,13 @@ class LPIFilter2D(object):
                                       **self.filter_params).reshape(dshape)
 
             f = _pad(f, oshape)
-            F = np.dual.fftn(f)
+            F = fft.fftn(f)
             self._cache = F
         else:
             F = self._cache
 
         data = _pad(data, oshape)
-        G = np.dual.fftn(data)
+        G = fft.fftn(data)
 
         return F, G
 
@@ -120,9 +120,9 @@ class LPIFilter2D(object):
         data : (M,N) ndarray
 
         """
-        assert_nD(data, 2, 'data')
+        check_nD(data, 2, 'data')
         F, G = self._prepare(data)
-        out = np.dual.ifftn(F * G)
+        out = fft.ifftn(F * G)
         out = np.abs(_centre(out, data.shape))
         return out
 
@@ -158,7 +158,7 @@ def forward(data, impulse_response=None, filter_params={},
     >>> filtered = forward(data.coins(), filt_func)
 
     """
-    assert_nD(data, 2, 'data')
+    check_nD(data, 2, 'data')
     if predefined_filter is None:
         predefined_filter = LPIFilter2D(impulse_response, **filter_params)
     return predefined_filter(data)
@@ -188,7 +188,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
         images, construct the LPIFilter2D and specify it here.
 
     """
-    assert_nD(data, 2, 'data')
+    check_nD(data, 2, 'data')
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
     else:
@@ -201,7 +201,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     mask = np.abs(F) > max_gain
     F[mask] = np.sign(F[mask]) * max_gain
 
-    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def wiener(data, impulse_response=None, filter_params={}, K=0.25,
@@ -227,10 +227,10 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
         images, construct the LPIFilter2D and specify it here.
 
     """
-    assert_nD(data, 2, 'data')
+    check_nD(data, 2, 'data')
 
     if not isinstance(K, float):
-        assert_nD(K, 2, 'K')
+        check_nD(K, 2, 'K')
 
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
@@ -243,7 +243,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
-    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def constrained_least_squares(data, lam, impulse_response=None,
