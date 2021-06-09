@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import scipy.ndimage as ndi
 
+import plotly
 import plotly.express as px
 from skimage import (
     data, color, filters
@@ -45,12 +46,13 @@ N = 32
 blurred_images = [ndi.uniform_filter(image, size=k) for k in range(2, N, 2)]
 img_stack = np.stack(blurred_images)
 
-px.imshow(
+fig = px.imshow(
     img_stack,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'strength of blur'}
+    labels={'animation_frame': 'blur strength ~'}
 )
+plotly.io.show(fig)
 
 #####################################################################
 # Plot blur metric
