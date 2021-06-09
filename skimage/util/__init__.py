@@ -17,15 +17,6 @@ from ._montage import montage
 from ._label import label_points
 
 
-# `skimage.util` contain compiled modules, yet since `lazy` lives here
-# we'd like to be able to import it without compiling.  This is a workaround
-# to postpone `map_array` loading until when it is needed.
-def __getattr__(name):
-    if name == 'map_array':
-        from ._map_array import map_array
-        return map_array
-
-
 @functools.wraps(np.pad)
 def pad(*args, **kwargs):
     warnings.warn("skimage.util.pad is deprecated and will be removed in "

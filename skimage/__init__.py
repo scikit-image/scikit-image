@@ -93,7 +93,7 @@ __all__ = [
     '__version__'
 ]
 
-from .util.lazy import install_lazy
+from ._shared.lazy import install_lazy
 __getattr__, __dir__, _ = install_lazy(__name__, __all__)
 
 from ._shared.version_requirements import ensure_python_version
