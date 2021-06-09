@@ -109,7 +109,7 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
                                    Py_ssize_t p, Py_ssize_t r, Py_ssize_t c,
                                    Py_ssize_t planes, Py_ssize_t rows,
                                    Py_ssize_t cols,
-                                   Py_ssize_t axis_inc):
+                                   Py_ssize_t axis_inc) nogil:
 
     cdef Py_ssize_t pp, rr, cc, j
 
@@ -226,44 +226,45 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
         kernel(&out[p, r, c, 0], odepth, histo, pop, image[p, r, c],
                n_bins, mid_bin, p0, p1, s0, s1)
 
-    # main loop
+        with nogil:
+            # main loop
 
-        for even_row in range(0, rows, 2):
+            for even_row in range(0, rows, 2):
 
-            # ---> west to east
-            for c in range(1, cols):
+                # ---> west to east
+                for c in range(1, cols):
+                    _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
+                                      r, c, planes, rows, cols, axis_inc=0)
+
+                    kernel(&out[p, r, c, 0], odepth, histo, pop,
+                           image[p, r, c], n_bins, mid_bin, p0, p1, s0, s1)
+
+                r += 1  # pass to the next row
+                if r >= rows:
+                    break
+
+                # ---> north to south
                 _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
-                                  r, c, planes, rows, cols, axis_inc=0)
+                                  r, c, planes, rows, cols, axis_inc=3)
 
                 kernel(&out[p, r, c, 0], odepth, histo, pop,
                        image[p, r, c], n_bins, mid_bin, p0, p1, s0, s1)
 
-            r += 1  # pass to the next row
-            if r >= rows:
-                break
+                # ---> east to west
+                for c in range(cols - 2, -1, -1):
+                    _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
+                                      r, c, planes, rows, cols, axis_inc=2)
 
-            # ---> north to south
-            _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
-                              r, c, planes, rows, cols, axis_inc=3)
+                    kernel(&out[p, r, c, 0], odepth, histo, pop,
+                           image[p, r, c], n_bins, mid_bin, p0, p1, s0, s1)
 
-            kernel(&out[p, r, c, 0], odepth, histo, pop,
-                   image[p, r, c], n_bins, mid_bin, p0, p1, s0, s1)
+                r += 1  # pass to the next row
+                if r >= rows:
+                    break
 
-            # ---> east to west
-            for c in range(cols - 2, -1, -1):
+                # ---> north to south
                 _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
-                                  r, c, planes, rows, cols, axis_inc=2)
+                                  r, c, planes, rows, cols, axis_inc=3)
 
-                kernel(&out[p, r, c, 0], odepth, histo, pop,
-                       image[p, r, c], n_bins, mid_bin, p0, p1, s0, s1)
-
-            r += 1  # pass to the next row
-            if r >= rows:
-                break
-
-            # ---> north to south
-            _update_histogram(image, se, num_se, histo, &pop, mask_data, p,
-                              r, c, planes, rows, cols, axis_inc=3)
-
-            kernel(&out[p, r, c, 0], odepth, histo, pop, image[p, r, c],
-                   n_bins, mid_bin, p0, p1, s0, s1)
+                kernel(&out[p, r, c, 0], odepth, histo, pop, image[p, r, c],
+                       n_bins, mid_bin, p0, p1, s0, s1)

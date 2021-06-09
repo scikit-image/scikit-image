@@ -62,8 +62,7 @@ for radius in [0, 2, 4]:
 # Apply defect mask to the image over the same region in each color channel
 image_defect = image_orig * ~mask[..., np.newaxis]
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask,
-                                          multichannel=True)
+image_result = inpaint.inpaint_biharmonic(image_defect, mask, channel_axis=-1)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
 ax = axes.ravel()
