@@ -9,7 +9,7 @@ from ..util import img_as_float
 __all__ = ['blur_effect']
 
 
-def blur_effect(image, h_size=11):
+def blur_effect(image, h_size=11, channel_axis=None):
     """
     Compute a metric that indicates the strength of blur in an image (0 for no
     blur, 1 for maximal blur).
@@ -21,6 +21,10 @@ def blur_effect(image, h_size=11):
         before computing the blur metric.
     h_size : int, optional
         Size of the re-blurring filter. Default is 11.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be grayscale (single-channel).
+        Otherwise, this parameter indicates which axis of the array
+        corresponds to color channels.
 
     Returns
     -------
@@ -52,8 +56,13 @@ def blur_effect(image, h_size=11):
     if image.ndim not in (2, 3):
         raise ValueError('image must be 2-dimensional')
 
-    if image.ndim == 3:
-        image = rgb2gray(image)
+    if channel_axis is not None:
+        if not isinstance(channel_axis, int) or channel_axis >= image.ndim:
+            raise ValueError('channel_axis value is invalid')
+        else:
+            # ensure color channels are at the final dimension to use rgb2gray
+            image = np.moveaxis(image, channel_axis, -1)
+            image = rgb2gray(image)
     image = img_as_float(image)
     shape = image.shape
 
