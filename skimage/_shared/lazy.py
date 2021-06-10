@@ -49,7 +49,7 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
     def __dir__():
         return __all__
 
-    if os.environ.get('EAGER_IMPORT', None):
+    if os.environ.get('EAGER_IMPORT', ''):
         for attr in set(attr_to_modules.keys()) | submodules:
             __getattr__(attr)
 
