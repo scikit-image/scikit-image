@@ -156,6 +156,12 @@ jobs:
 
   - bash: |
       set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
+      $PYTHON -m asv check -E existing
+    displayName: Check benchmarks
+
+  - bash: |
+      set -ex
       export PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Install the doc dependencies
