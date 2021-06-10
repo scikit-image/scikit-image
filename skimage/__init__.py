@@ -75,7 +75,6 @@ __all__ = [
     'data',
     'draw',
     'exposure',
-    'external',
     'feature',
     'filters',
     'future',
