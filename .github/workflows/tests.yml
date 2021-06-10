@@ -121,6 +121,7 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+          asv machine --yes
           asv dev -v -E existing
 
   test_skimage_macos:
@@ -196,4 +197,5 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+          asv machine --yes
           asv dev -v -E existing

@@ -158,6 +158,7 @@ jobs:
       set -ex
       PYTHON="$(python.pythonLocation)\\python.exe"
       $PYTHON -m asv check -v -E existing
+      $PYTHON -m asv machine --yes
       $PYTHON -m asv dev -v -E existing
     displayName: Check benchmarks
 
