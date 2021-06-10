@@ -28,7 +28,7 @@ __getattr__, __dir__, __all__ = lazy.install_lazy(
     __name__,
     submodules={'rank'},
     submod_attrs={
-        'lpi_filter': ['inverse', 'wiener', 'LPFilter2D'],
+        'lpi_filter': ['inverse', 'wiener', 'LPIFilter2D'],
         '_gaussian': ['gaussian', '_guess_spatial_dimensions',
                       'difference_of_gaussians'],
         'edges': ['sobel', 'sobel_h', 'sobel_v',
