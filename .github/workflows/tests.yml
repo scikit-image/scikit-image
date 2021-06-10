@@ -27,6 +27,7 @@ jobs:
         OPTIONAL_DEPS: [0]
         OPTIONS_NAME: ["default"]
         INSTALL_FROM_SDIST: [0]
+        RUN_BENCHMARKS: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -61,8 +62,6 @@ jobs:
             python-version: 3.7
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
-
-
 
 
     steps:
@@ -121,8 +120,15 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+
+      - name: Run benchmarks (dev pass)
+        if: matrix.RUN_BENCHMARKS == 1
+        run: |
           asv machine --yes
-          asv dev -v -E existing
+          asv dev -v -E existing | sed "/failed$/ s/^/::error::/" | tee benchmarks.log
+          if grep "failed" benchmarks.log > /dev/null ; then
+              exit 1
+          fi
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -197,5 +203,3 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
-          asv machine --yes
-          asv dev -v -E existing
