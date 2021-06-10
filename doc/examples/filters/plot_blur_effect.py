@@ -79,3 +79,6 @@ plt.show()
 # We can see that as soon as the blur is stronger than (reaches the scale of)
 # the size of the uniform filter, the metric gets close to 1 and, hence, tends
 # asymptotically to 1 with increasing blur strength.
+# The value of 11 pixels gives a blur metric which correlates best with human
+# perception. That's why it's the default value in the implementation of the
+# perceptual blur metric ``filters.blur_effect``.
