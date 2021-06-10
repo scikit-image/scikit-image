@@ -120,7 +120,7 @@ jobs:
 
       - name: Check benchmarks
         run: |
-          asv check -E existing
+          asv check -v -E existing
 
 
   test_skimage_macos:
@@ -195,4 +195,4 @@ jobs:
 
       - name: Check benchmarks
         run: |
-          asv check -E existing
+          asv check -v -E existing
