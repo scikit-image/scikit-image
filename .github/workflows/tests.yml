@@ -118,6 +118,9 @@ jobs:
             fi
             source tools/github/script.sh
 
+      - name: Check benchmarks
+        run: |
+          asv check -E existing
 
 
   test_skimage_macos:
@@ -190,4 +193,6 @@ jobs:
             fi
             source tools/github/script.sh
 
-
+      - name: Check benchmarks
+        run: |
+          asv check -E existing
