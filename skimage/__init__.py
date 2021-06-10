@@ -93,11 +93,12 @@ __all__ = [
     '__version__'
 ]
 
+from ._shared.version_requirements import ensure_python_version
+ensure_python_version((3, 7))
+
 from ._shared.lazy import install_lazy
 __getattr__, __dir__, _ = install_lazy(__name__, __all__)
 
-from ._shared.version_requirements import ensure_python_version
-ensure_python_version((3, 5))
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
