@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import os
 
 
 def install_lazy(module_name, submodules=None, submod_attrs=None):
@@ -32,7 +33,7 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
         attr: mod for mod, attrs in submod_attrs.items() for attr in attrs
     }
 
-    __all__ = submodules | attr_to_modules.keys()
+    __all__ = list(submodules | attr_to_modules.keys())
 
     def __getattr__(name):
         if name in submodules:
@@ -47,5 +48,9 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
 
     def __dir__():
         return __all__
+
+    if os.environ.get('EAGER_IMPORT', None):
+        for attr in set(attr_to_modules.keys()) | submodules:
+            __getattr__(attr)
 
     return __getattr__, __dir__, list(__all__)
