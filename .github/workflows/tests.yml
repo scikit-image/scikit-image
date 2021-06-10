@@ -121,7 +121,7 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
-
+          asv dev -v -E existing
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -196,3 +196,4 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+          asv dev -v -E existing
