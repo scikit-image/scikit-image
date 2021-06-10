@@ -17,7 +17,7 @@ def blur_effect(image, h_size=11, channel_axis=None):
     Parameters
     ----------
     image : ndarray
-        RGB or grayscale 2D image. The input image is converted to grayscale
+        RGB or grayscale nD image. The input image is converted to grayscale
         before computing the blur metric.
     h_size : int, optional
         Size of the re-blurring filter. Default is 11.
@@ -30,10 +30,9 @@ def blur_effect(image, h_size=11, channel_axis=None):
     -------
 
     blur : float (0 to 1)
-        Blur metric: the maximum of horizontal (Bx) and vertical (By) metrics.
-    blur_table : ndarray [Bx, By]
-        Bx (resp. By) is the blur metric in the horizontal (resp. vertical)
-        direction.
+        Blur metric: the maximum of blur metrics along all axes.
+    blur_table : list of floats
+        The i-th element is the blur metric along the i-th axis.
 
     Notes
     -----
@@ -53,40 +52,29 @@ def blur_effect(image, h_size=11, channel_axis=None):
        https://hal.archives-ouvertes.fr/hal-00232709
        :DOI:`10.1117/12.702790`
     """
-    if image.ndim not in (2, 3):
-        raise ValueError('image must be 2-dimensional')
+    # number of non-channel axes
+    n_axes = image.ndim
 
     if channel_axis is not None:
         if not isinstance(channel_axis, int) or channel_axis >= image.ndim:
             raise ValueError('channel_axis value is invalid')
         else:
-            # ensure color channels are at the final dimension to use rgb2gray
+            n_axes = n_axes - 1
+            # ensure color channels are in the final dimension
             image = np.moveaxis(image, channel_axis, -1)
             image = rgb2gray(image)
     image = img_as_float(image)
     shape = image.shape
+    B = []
 
-    # vertical blur
-    ver = ndi.uniform_filter1d(image, h_size, axis=0)
-    im_sharp = np.abs(sobel(image, axis=0))
-    im_blur = np.abs(sobel(ver, axis=0))
+    for a in range(n_axes):
+        filt_im = ndi.uniform_filter1d(image, h_size, axis=a)
+        im_sharp = np.abs(sobel(image, axis=a))
+        im_blur = np.abs(sobel(filt_im, axis=a))
+        T = np.fmax(np.zeros_like(image), im_sharp - im_blur)
+        slices = [slice(2, shape[a] - 1) for a in range(n_axes)]
+        M1 = np.sum(im_sharp[tuple(slices)])
+        M2 = np.sum(T[tuple(slices)])
+        B.append(np.abs((M1 - M2)) / M1)
 
-    T = np.fmax(np.zeros_like(image), im_sharp - im_blur)
-    M1 = np.sum(im_sharp[2:shape[0] - 1, 2:shape[1] - 1])
-    M2 = np.sum(T[2:shape[0] - 1, 2:shape[1] - 1])
-
-    By = np.abs((M1 - M2)) / M1
-
-    # horizontal blur
-    hor = ndi.uniform_filter1d(image, h_size, axis=1)
-    im_sharp = np.abs(sobel(image, axis=1))
-    im_blur = np.abs(sobel(hor, axis=1))
-
-    T = np.fmax(np.zeros_like(image), im_sharp - im_blur)
-    M1 = np.sum(im_sharp[2:shape[0] - 1, 2:shape[1] - 1])
-    M2 = np.sum(T[2:shape[0] - 1, 2:shape[1] - 1])
-
-    Bx = np.abs((M1 - M2)) / M1
-
-    B = np.array([Bx, By])
-    return B.max(), B
+    return np.max(B), B
