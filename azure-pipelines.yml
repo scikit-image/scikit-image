@@ -207,8 +207,8 @@ jobs:
       PYTHON="$(python.pythonLocation)\\python.exe"
 
       $PYTHON -m asv machine --yes
-      $PYTHON -m asv dev -v -E existing | sed "/failed$/ s/^/##[error]/" | tee benchmarks.log
-      if grep "failed" benchmarks.log > /dev/null ; then
+      $PYTHON -m asv dev -v -E existing | sed "/Traceback \|failed$/ s/^/::error::/" | tee benchmarks.log
+      if grep "Traceback \|failed" benchmarks.log > /dev/null ; then
           exit 1
       fi
     displayName: 'Run benchmarks (dev pass)'

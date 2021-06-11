@@ -125,8 +125,8 @@ jobs:
         if: matrix.RUN_BENCHMARKS == 1
         run: |
           asv machine --yes
-          asv dev -v -E existing | sed "/failed$/ s/^/::error::/" | tee benchmarks.log
-          if grep "failed" benchmarks.log > /dev/null ; then
+          asv dev -v -E existing | sed "/Traceback \|failed$/ s/^/::error::/" | tee benchmarks.log
+          if grep "Traceback \|failed" benchmarks.log > /dev/null ; then
               exit 1
           fi
 
