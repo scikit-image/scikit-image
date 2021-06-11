@@ -1,0 +1,41 @@
+name: Benchmark
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+
+  benchmark_linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout (baseline)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Checkout (contender)
+        uses: actions/checkout@v2
+        with:
+          clean: false
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+
+      - name: Setup some dependencies
+        shell: bash -l {0}
+        run:
+          pip install asv
+
+      - name: Run benchmarks
+        shell: bash -l {0}
+        run: |
+          set -x
+
+          # ID this runner
+          asv machine --yes
+
+          # Run benchmarks for current commit against base
+          asv continuous ${GITHUB_BASE_REF##*/} ${GITHUB_SHA}
