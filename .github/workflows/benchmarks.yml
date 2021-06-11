@@ -37,6 +37,9 @@ jobs:
           # ID this runner
           asv machine --yes
 
+          echo "Baseline:  ${{ github.event.pull_request.base.sha }} (${{ github.event.pull_request.base.label }})"
+          echo "Contender: ${GITHUB_SHA} (${{ github.event.pull_request.head.label }})"
+
           # Run benchmarks for current commit against base
           asv continuous ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA}
 
