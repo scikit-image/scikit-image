@@ -41,10 +41,10 @@ class RegistrationSuite(object):
 
 class PhaseCrossCorrelationRegistration:
     """Benchmarks for registration.phase_cross_correlation in scikit-image"""
-    param_names = ["ndims", "image_size", "upscale_factor"]
+    param_names = ["ndims", "image_size", "upsample_factor"]
     params = [(2, 3), (32, 100), (1, 5, 10)]
 
-    def setup(self, ndims, image_size, upscale_factor, *args):
+    def setup(self, ndims, image_size, upsample_factor, *args):
         if phase_cross_correlation is None:
             raise NotImplementedError("phase_cross_correlation unavailable")
         shifts = (-2.3, 1.7, 5.4, -3.2)[:ndims]
@@ -53,10 +53,10 @@ class PhaseCrossCorrelationRegistration:
         self.reference_image = np.fft.fftn(phantom)
         self.shifted_image = ndi.fourier_shift(self.reference_image, shifts)
 
-    def time_phase_cross_correlation(self, ndims, image_size, upscale_factor):
+    def time_phase_cross_correlation(self, ndims, image_size, upsample_factor):
         result = phase_cross_correlation(self.reference_image,
                                          self.shifted_image,
-                                         upscale_factor,
+                                         upsample_factor=upsample_factor,
                                          space="fourier")
 
     def peakmem_reference(self, *args):
@@ -74,8 +74,8 @@ class PhaseCrossCorrelationRegistration:
         pass
 
     def peakmem_phase_cross_correlation(self, ndims, image_size,
-                                        upscale_factor):
+                                        upsample_factor):
         result = phase_cross_correlation(self.reference_image,
                                          self.shifted_image,
-                                         upscale_factor,
+                                         upsample_factor=upsample_factor,
                                          space="fourier")
