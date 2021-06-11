@@ -18,7 +18,7 @@
     "pythons": ["3.7"],
     "matrix": {
          "cython": [],
-         "numpy": ["1.15", "1.16"],
+         "numpy": ["1.17"],
          "scipy": []
     },
 
