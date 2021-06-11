@@ -38,7 +38,8 @@ jobs:
           echo "Contender: ${GITHUB_SHA} (${{ github.event.pull_request.head.label }})"
 
           # Run benchmarks for current commit against base
-          asv continuous --split --show-stderr --verbose ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" | tee benchmarks.log
+          # See https://github.com/airspeed-velocity/asv/issues/595 for discussion on interleaved processes
+          asv continuous --split --show-stderr --verbose --interleave-processes ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" | tee benchmarks.log
           if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
               exit 1
           fi
