@@ -14,7 +14,7 @@ jobs:
       - name: Checkout (baseline)
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.base.ref }}
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Checkout (contender)
         uses: actions/checkout@v2
@@ -38,4 +38,5 @@ jobs:
           asv machine --yes
 
           # Run benchmarks for current commit against base
-          asv continuous ${GITHUB_BASE_REF##*/} ${GITHUB_SHA}
+          asv continuous ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA}
+
