@@ -11,15 +11,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout (baseline)
+      # We need the full repo to avoid this issue
+      # https://github.com/actions/checkout/issues/23
+      - name: Checkout full repo
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
-
-      - name: Checkout (contender)
-        uses: actions/checkout@v2
-        with:
-          clean: false
+          fetch-depth: 0
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
