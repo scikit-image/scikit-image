@@ -19,7 +19,8 @@
     "matrix": {
          "cython": [],
          "numpy": ["1.17"],
-         "scipy": []
+         "scipy": [],
+         "pooch": []
     },
 
     "env_dir": ".asv/env",
