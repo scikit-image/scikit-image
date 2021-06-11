@@ -106,7 +106,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> # For RGB images, each is filtered separately
     >>> from skimage.data import astronaut
     >>> image = astronaut()
-    >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
+    >>> filtered_img = gaussian(image, sigma=1, channel_axis=-1)
 
     """
     if image.ndim == 3 and image.shape[-1] == 3 and channel_axis is None:
@@ -250,13 +250,13 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     >>> from skimage.data import astronaut
     >>> from skimage.filters import difference_of_gaussians
     >>> filtered_image = difference_of_gaussians(astronaut(), 2, 10,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Laplacian of Gaussian filter as approximated by the Difference
     of Gaussians filter:
 
     >>> filtered_image = difference_of_gaussians(astronaut(), 2,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Difference of Gaussians filter to a grayscale image using different
     sigma values for each axis:

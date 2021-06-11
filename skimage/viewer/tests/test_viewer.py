@@ -42,7 +42,7 @@ def make_key_event(key):
 def test_collection_viewer():
 
     img = data.astronaut()
-    img_collection = tuple(pyramid_gaussian(img, multichannel=True))
+    img_collection = tuple(pyramid_gaussian(img, channel_axis=-1))
 
     view = CollectionViewer(img_collection)
     make_key_event(48)

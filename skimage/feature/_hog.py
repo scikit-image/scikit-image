@@ -158,9 +158,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     multichannel = channel_axis is not None
     ndim_spatial = image.ndim - 1 if multichannel else image.ndim
     if ndim_spatial != 2:
-        raise ValueError('Only images with 2 spatial dimensions are '
+        raise ValueError('Only images with two spatial dimensions are '
                          'supported. If using with color/multichannel '
-                         'images, specify `multichannel=True`.')
+                         'images, specify `channel_axis`.')
 
     """
     The first stage applies an optional global image normalization
