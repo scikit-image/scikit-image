@@ -6,6 +6,27 @@ import os
 def install_lazy(module_name, submodules=None, submod_attrs=None):
     """Install lazily loaded submodules, and functions or other attributes.
 
+    Typically, modules import submodules and attributes as follows::
+
+      import mysubmodule
+      import anothersubmodule
+
+      from .foo import someattr
+
+    The idea is to replace a module's `__getattr__`, `__dir__`, and
+    `__all__`, such that all imports work exactly the way the would
+    before, except that they are only imported when used.
+
+    The typical way to call this function, replacing the above imports, is::
+
+      __getattr__, __lazy_dir__, __all__ = install_lazy(
+        __name__,
+        ['mysubmodule', 'anothersubmodule'],
+        {'foo': 'someattr'}
+      )
+
+    This functionality requires Python 3.7 or higher.
+
     Parameters
     ----------
     module_name : str
