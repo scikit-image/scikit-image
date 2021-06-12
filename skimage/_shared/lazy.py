@@ -1,6 +1,7 @@
 import importlib
 import importlib.util
 import os
+import sys
 
 
 def install_lazy(module_name, submodules=None, submod_attrs=None):
@@ -75,3 +76,50 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
             __getattr__(attr)
 
     return __getattr__, __dir__, list(__all__)
+
+
+def load(fullname):
+    """Return a lazily imported proxy for a module or library.
+
+    We often see the following pattern::
+
+      def myfunc():
+          import scipy
+          ....
+
+    This is to prevent a library, in this case `scipy`, from being
+    imported at function definition time, since that can be slow.
+
+    This function provides a proxy module that, upon access, imports
+    the actual module.
+
+    Parameters
+    ----------
+    fullname : str
+        The full name of the package or subpackage to import.  For example::
+
+          sp = lazy_import('scipy')  # import scipy as sp
+          spla = lazy_import('scipy.linalg')  # import scipy.linalg as spla
+
+    Returns
+    -------
+    pm : importlib.util._LazyModule
+        Proxy module.  Can be used like any regularly imported module.
+
+    """
+    if fullname in sys.modules:
+        return sys.modules[fullname]
+
+    spec = importlib.util.find_spec(fullname)
+    try:
+        module = importlib.util.module_from_spec(spec)
+    except:  # noqa: E722
+        raise ImportError(f'Could not lazy import module {fullname}') from None
+    loader = importlib.util.LazyLoader(spec.loader)
+
+    sys.modules[fullname] = module
+
+    # Make module with proper locking and get it inserted into sys.modules.
+    loader.exec_module(module)
+
+    return module
