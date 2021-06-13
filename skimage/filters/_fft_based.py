@@ -3,8 +3,6 @@ import functools
 import numpy as np
 
 from .._shared.fft import fftmodule as fft
-from ..exposure import rescale_intensity
-from ..util import dtype_limits
 
 
 def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
