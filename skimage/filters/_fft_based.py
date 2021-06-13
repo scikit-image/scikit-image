@@ -55,7 +55,6 @@ def butterworth(
     high_pass=True,
     order=2.0,
     channel_axis=None,
-    preserve_range=False,
 ):
     """Apply a Butterworth filter to enhance high or low frequency features.
 
@@ -77,10 +76,6 @@ def butterworth(
     channel_axis : int, optional
         If there is a channel dimension, provide the index here. If None
         (default) then all axes are assumed to be spatial dimensions.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Defaults to False. If
-        False, image is returned with dtype float with values scaled between 0
-        and 1. If a complex-valued image is passed, no rescaling is performed.
 
     Returns
     -------
@@ -136,8 +131,6 @@ def butterworth(
     if is_real:
         butterfilt = fft.irfftn(wfilt * fft.rfftn(image, axes=axes),
                                 s=fft_shape, axes=axes)
-        out_range = dtype_limits(image) if preserve_range else (0.0, 1.0)
-        butterfilt = rescale_intensity(butterfilt, out_range=out_range)
     else:
         butterfilt = fft.ifftn(wfilt * fft.fftn(image, axes=axes),
                                s=fft_shape, axes=axes)

@@ -160,8 +160,6 @@ registry = {
     "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
     "data/pivchallenge-B-B001_1.tif": "e95e09abbcecba723df283ac7d361766328abd943701a2ec2f345d4a2014da2a",
     "data/pivchallenge-B-B001_2.tif": "4ceb5407e4e333476a0f264c14b7a3f6c0e753fcdc99ee1c4b8196e5f823805e",
-    "filters/tests/astronaut_butter.npy": "16533589be887b67b51d1340be552c928db0cdc77dd51edf3e79f98860a39b4c",
-    "filters/tests/coins_butter.npy": "ca4708df2f3e9548c69251a05464892dd634025093dd4a30450e328439b6f5e5",
 }
 
 registry_urls = {
