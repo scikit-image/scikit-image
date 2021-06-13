@@ -105,7 +105,7 @@ def test_gaussian():
 
 
 def test_localvar():
-    seed = 42
+    seed = 23703
     data = np.zeros((128, 128)) + 0.5
     local_vars = np.zeros((128, 128)) + 0.001
     local_vars[:64, 64:] = 0.1
@@ -134,8 +134,8 @@ def test_localvar():
 def test_speckle():
     seed = 42
     data = np.zeros((128, 128)) + 0.1
-    np.random.seed(seed=seed)
-    noise = np.random.normal(0.1, 0.02 ** 0.5, (128, 128))
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0.1, 0.02 ** 0.5, (128, 128))
     expected = np.clip(data + data * noise, 0, 1)
 
     data_speckle = random_noise(data, mode='speckle', seed=seed, mean=0.1,
@@ -149,8 +149,8 @@ def test_poisson():
     cam_noisy = random_noise(data, mode='poisson', seed=seed)
     cam_noisy2 = random_noise(data, mode='poisson', seed=seed, clip=False)
 
-    np.random.seed(seed=seed)
-    expected = np.random.poisson(img_as_float(data) * 256) / 256.
+    rng = np.random.default_rng(seed)
+    expected = rng.poisson(img_as_float(data) * 256) / 256.
     assert_allclose(cam_noisy, np.clip(expected, 0., 1.))
     assert_allclose(cam_noisy2, expected)
 

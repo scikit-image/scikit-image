@@ -353,7 +353,6 @@ plot_basedir = os.path.join(curpath, "plots")
 plot_pre_code = """
 import numpy as np
 import matplotlib.pyplot as plt
-np.random.seed(0)
 
 import matplotlib
 matplotlib.rcParams.update({
@@ -392,7 +391,7 @@ intersphinx_mapping = {
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
-    'matplotlib': ('https://matplotlib.org/stable',
+    'matplotlib': ('https://matplotlib.org/',
                    (None, './_intersphinx/matplotlib-objects.inv'))
 }
 
