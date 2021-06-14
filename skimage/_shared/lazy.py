@@ -15,7 +15,7 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
       from .foo import someattr
 
     The idea is to replace a module's `__getattr__`, `__dir__`, and
-    `__all__`, such that all imports work exactly the way the would
+    `__all__`, such that all imports work exactly the way they did
     before, except that they are only imported when used.
 
     The typical way to call this function, replacing the above imports, is::
