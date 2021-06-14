@@ -34,7 +34,7 @@ def skeletonize(image, *, method=None):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -47,7 +47,6 @@ def skeletonize(image, *, method=None):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -108,7 +107,7 @@ def skeletonize_2d(image):
     skeleton : ndarray
         A matrix containing the thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -132,7 +131,6 @@ def skeletonize_2d(image):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -264,7 +262,6 @@ def thin(image, max_iter=None):
     ----------
     image : binary (M, N) ndarray
         The image to be thinned.
-
     max_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -276,7 +273,7 @@ def thin(image, max_iter=None):
     out : ndarray of bool
         Thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 
@@ -361,9 +358,8 @@ def thin(image, max_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-def medial_axis(image, mask=None, return_distance=False):
-    """
-    Compute the medial axis transform of a binary image
+def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
+    """Compute the medial axis transform of a binary image.
 
     Parameters
     ----------
@@ -374,6 +370,15 @@ def medial_axis(image, mask=None, return_distance=False):
         value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        .. versionadded:: 0.19
 
     Returns
     -------
@@ -383,7 +388,7 @@ def medial_axis(image, mask=None, return_distance=False):
         Distance transform of the image (only returned if `return_distance`
         is True)
 
-    See also
+    See Also
     --------
     skeletonize
 
@@ -490,7 +495,7 @@ def medial_axis(image, mask=None, return_distance=False):
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    generator = np.random.RandomState(0)
+    generator = np.random.default_rng(random_state)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
@@ -532,8 +537,6 @@ def _table_lookup(image, table):
     table : ndarray
         A 512-element table giving the transform of each pixel given
         the values of that pixel and its 8-connected neighbors.
-    border_value : bool
-        The value of pixels beyond the border of the image.
 
     Returns
     -------
@@ -543,7 +546,6 @@ def _table_lookup(image, table):
     Notes
     -----
     The pixels are numbered like this::
-
 
       0 1 2
       3 4 5
@@ -593,7 +595,7 @@ def skeletonize_3d(image):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 

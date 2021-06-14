@@ -98,7 +98,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Parameters
     ----------
-    image : ndarray (2-D, 3-D, ...) of integers
+    image : ndarray (2-D, 3-D, ...)
         Data array where the lowest value points are labeled first.
     markers : int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the

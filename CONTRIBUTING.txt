@@ -190,8 +190,13 @@ Guidelines
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
   :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
-* No changes are ever committed without review and approval by two core
-  team members.  Ask on the
+* No changes are ever merged without review and approval by two core team members.
+  There are two exceptions to this rule. First, pull requests which affect
+  only the documentation require review and approval by only one core team
+  member in most cases. If the maintainer feels the changes are large or
+  likely to be controversial, two reviews should still be encouraged. The
+  second case is that of minor fixes which restore CI to a working state,
+  because these should be merged fairly quickly. Reach out on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**

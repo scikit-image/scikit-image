@@ -195,7 +195,7 @@ def equalize_hist(image, nbins=256, mask=None):
         Number of bins for image histogram. Note: this argument is
         ignored for integer images, for which each integer is its own
         bin.
-    mask: ndarray of bools or 0s and 1s, optional
+    mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
 

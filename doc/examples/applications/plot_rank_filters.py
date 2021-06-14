@@ -66,7 +66,8 @@ plt.tight_layout()
 from skimage.filters.rank import median
 from skimage.morphology import disk, ball
 
-noise = np.random.random(noisy_image.shape)
+rng = np.random.default_rng()
+noise = rng.random(noisy_image.shape)
 noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
@@ -635,7 +636,7 @@ elem = disk(r + 1)
 rec = []
 s_range = range(100, 1000, 100)
 for s in s_range:
-    a = (np.random.random((s, s)) * 256).astype(np.uint8)
+    a = (rng.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_max(a, elem)
     (rcm, ms_rcm) = cm_dil(a, elem)
     rec.append((ms_rc, ms_rcm))
@@ -703,7 +704,7 @@ elem = disk(r + 1)
 rec = []
 s_range = [100, 200, 500, 1000]
 for s in s_range:
-    a = (np.random.random((s, s)) * 256).astype(np.uint8)
+    a = (rng.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_med(a, elem)
     rndi, ms_ndi = ndi_med(a, r)
     rec.append((ms_rc, ms_ndi))

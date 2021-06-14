@@ -35,7 +35,7 @@ class TestMatchHistogram:
         """Assert that pdf of matched image is close to the reference's pdf for
         all channels and all values of matched"""
 
-        with expected_warnings(["'multichannel' is a deprecated argument"]):
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
             matched = exposure.match_histograms(image, reference,
                                                 multichannel=multichannel)
 

@@ -10,7 +10,8 @@ img[:, 65] = 1
 img[35:45, 35:50] = 1
 rr, cc = line(60, 130, 80, 10)
 img[rr, cc] = 1
-img += np.random.random(img.shape) > 0.95
+rng = np.random.default_rng()
+img += rng.random(img.shape) > 0.95
 
 out, angles, d = hough_line(img)
 
