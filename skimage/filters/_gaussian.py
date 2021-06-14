@@ -47,8 +47,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
         If True (by default) - keep the original range of values.
-        Otherwise, the input 'image' is converted according to the conventions of ``img_as_float``
-        (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on dtype of input)
+        Otherwise, the input 'image' is converted according to the conventions
+        of ``img_as_float``
+        (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
+        dtype of input)
 
         For more information, see:
         https://scikit-image.org/docs/dev/user_guide/data_types.html
@@ -301,9 +303,11 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                          'low_sigma for all axes')
 
     im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate, preserve_range=False)
+                   channel_axis=channel_axis, truncate=truncate,
+                   preserve_range=False)
 
     im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate, preserve_range=False)
+                   channel_axis=channel_axis, truncate=truncate,
+                   preserve_range=False)
 
     return im1 - im2

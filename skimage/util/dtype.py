@@ -324,7 +324,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         elif kind_in == 'i':
             # From DirectX conversions:
             # The most negative value maps to -1.0f
-            # Every other value is converted to a float (call it c), and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+            # Every other value is converted to a float (call it c)
+            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
 
             image = np.multiply(image, 1. / imax_in,
                                 dtype=computation_type)

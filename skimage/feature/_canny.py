@@ -178,7 +178,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         mask = np.ones(image.shape, dtype=bool)
 
     def fsmooth(x):
-        return img_as_float(gaussian(x, sigma, mode='constant', preserve_range=False))
+        return img_as_float(gaussian(x, sigma, mode='constant',
+                                     preserve_range=False))
 
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
