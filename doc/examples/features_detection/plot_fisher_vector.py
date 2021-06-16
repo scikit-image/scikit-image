@@ -3,7 +3,7 @@
 Fisher vector feature encoding
 ===============================
 
-A Fisher vector is an image feature encoding and quantisation technique that
+A Fisher vector is an image feature encoding and quantization technique that
 can be seen as a soft or probabilistic version of the popular
 bag-of-visual-words or VLAD algorithms. Images are modelled using a visual
 vocabulary which is estimated using a K-mode Gaussian mixture model trained on
