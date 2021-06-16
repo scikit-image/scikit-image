@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def install_lazy(module_name, submodules=None, submod_attrs=None):
+def install(module_name, submodules=None, submod_attrs=None):
     """Install lazily loaded submodules, and functions or other attributes.
 
     Typically, modules import submodules and attributes as follows::
@@ -20,7 +20,7 @@ def install_lazy(module_name, submodules=None, submod_attrs=None):
 
     The typical way to call this function, replacing the above imports, is::
 
-      __getattr__, __lazy_dir__, __all__ = install_lazy(
+      __getattr__, __lazy_dir__, __all__ = lazy.install(
         __name__,
         ['mysubmodule', 'anothersubmodule'],
         {'foo': 'someattr'}

@@ -94,8 +94,8 @@ __all__ = [
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 7))
 
-from ._shared.lazy import install_lazy
-__getattr__, __lazy_dir__, _ = install_lazy(__name__, __all__)
+from ._shared import lazy
+__getattr__, __lazy_dir__, _ = lazy.install(__name__, __all__)
 
 
 def __dir__():
