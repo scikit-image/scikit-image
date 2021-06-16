@@ -24,7 +24,7 @@ from ._window import window
 
 from .._shared import lazy
 
-__getattr__, __dir__, __all__ = lazy.install(
+__getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submodules={'rank'},
     submod_attrs={

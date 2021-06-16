@@ -4,8 +4,8 @@ import os
 import sys
 
 
-def install(module_name, submodules=None, submod_attrs=None):
-    """Install lazily loaded submodules, and functions or other attributes.
+def attach(module_name, submodules=None, submod_attrs=None):
+    """Attach lazily loaded submodules, functions, or other attributes.
 
     Typically, modules import submodules and attributes as follows::
 
@@ -20,7 +20,7 @@ def install(module_name, submodules=None, submod_attrs=None):
 
     The typical way to call this function, replacing the above imports, is::
 
-      __getattr__, __lazy_dir__, __all__ = lazy.install(
+      __getattr__, __lazy_dir__, __all__ = lazy.attach(
         __name__,
         ['mysubmodule', 'anothersubmodule'],
         {'foo': 'someattr'}
@@ -33,7 +33,7 @@ def install(module_name, submodules=None, submod_attrs=None):
     module_name : str
         Typically use __name__.
     submodules : set
-        List of submodules to install.
+        List of submodules to attach.
     submod_attrs : dict
         Dictionary of submodule -> list of attributes / functions.
         These attributes are imported as they are used.
