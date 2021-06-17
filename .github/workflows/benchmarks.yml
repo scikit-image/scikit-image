@@ -28,6 +28,10 @@ jobs:
 
       - name: Run benchmarks
         shell: bash -l {0}
+        env:
+          OPENBLAS_NUM_THREADS: 1
+          MKL_NUM_THREADS: 1
+          OMP_NUM_THREADS: 1
         run: |
           set -x
 
@@ -39,7 +43,10 @@ jobs:
 
           # Run benchmarks for current commit against base
           # See https://github.com/airspeed-velocity/asv/issues/595 for discussion on interleaved processes
-          asv continuous --split --show-stderr --verbose --interleave-processes ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" | tee benchmarks.log
+          ASV_OPTIONS="--split --show-stderr --verbose --interleave-processes --quick"
+          asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
+              | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
+              | tee benchmarks.log
           if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
               exit 1
           fi
