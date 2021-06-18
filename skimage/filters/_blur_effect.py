@@ -28,7 +28,6 @@ def blur_effect(image, h_size=11, channel_axis=None):
 
     Returns
     -------
-
     blur : float (0 to 1)
         Blur metric: the maximum of blur metrics along all axes.
     blur_table : list of floats
@@ -36,7 +35,6 @@ def blur_effect(image, h_size=11, channel_axis=None):
 
     Notes
     -----
-
     `h_size` must keep the same value in order to compare results between
     images. Most of the time, the default size (11) is enough. This means that
     the metric can clearly discriminate blur up to an average 11x11 filter; if

@@ -39,8 +39,7 @@ image = data.astronaut()
 image = color.rgb2gray(image)
 
 #####################################################################
-# Let us blur this image increasingly, by applying it a uniform filter with
-# increasing size.
+# Let us blur this image with a series of uniform filters of increasing size.
 
 N = 32
 blurred_images = [ndi.uniform_filter(image, size=k) for k in range(2, N, 2)]
