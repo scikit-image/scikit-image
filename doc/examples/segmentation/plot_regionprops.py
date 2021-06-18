@@ -59,7 +59,7 @@ ax.axis((0, 600, 600, 0))
 plt.show()
 
 #####################################################################
-# We use the :py:func:`skimage.measure.regionprops_table` to compute
+# We use the :py:func:`skimage.measure.regionprops_table` function to compute
 # (selected) properties for each region. Note that
 # ``skimage.measure.regionprops_table`` actually computes the properties,
 # whereas ``skimage.measure.regionprops`` computes them when they come in use
@@ -83,6 +83,7 @@ pd.DataFrame(props)
 # This example uses plotly in order to display properties when
 # hovering over the objects.
 
+import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 from skimage import data, filters, measure, morphology
@@ -115,4 +116,4 @@ for index in range(1, labels.max()):
         mode='lines', fill='toself', showlegend=False,
         hovertemplate=hoverinfo, hoveron='points+fills'))
 
-fig
+plotly.io.show(fig)
