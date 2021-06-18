@@ -50,7 +50,7 @@ jobs:
 
           # Run benchmarks for current commit against base
           # See https://github.com/airspeed-velocity/asv/issues/595 for discussion on interleaved processes
-          ASV_OPTIONS="--split --show-stderr --verbose --interleave-processes --factor $ASV_FACTOR"
+          ASV_OPTIONS="--split --show-stderr --interleave-processes --factor $ASV_FACTOR"
           asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
