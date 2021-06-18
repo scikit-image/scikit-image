@@ -69,8 +69,8 @@ def blur_effect(image, h_size=11, channel_axis=None):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=a)
         im_sharp = np.abs(sobel(image, axis=a))
         im_blur = np.abs(sobel(filt_im, axis=a))
-        T = np.fmax(np.zeros_like(image), im_sharp - im_blur)
-        slices = [slice(2, shape[a] - 1) for a in range(n_axes)]
+        T = np.maximum(0, im_sharp - im_blur)
+        slices = [slice(2, shape[ax] - 1) for ax in range(n_axes)]
         M1 = np.sum(im_sharp[tuple(slices)])
         M2 = np.sum(T[tuple(slices)])
         B.append(np.abs((M1 - M2)) / M1)
