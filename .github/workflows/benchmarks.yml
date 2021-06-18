@@ -3,19 +3,23 @@ name: Benchmark
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+  pull_request_target:
+    types: [labeled]
+  workflow_dispatch:
 
 jobs:
-
   benchmark_linux:
+    # if: ${{ github.event.label.name == 'run-benchmark' || github.event_name == 'workflow_dispatch' }}
     name: Linux
     runs-on: ubuntu-20.04
 
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
-      - name: Checkout full repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
       - name: Setup Miniconda
@@ -28,10 +32,12 @@ jobs:
 
       - name: Run benchmarks
         shell: bash -l {0}
+        id: benchmark
         env:
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
+          ASV_FACTOR: 1.4
         run: |
           set -x
 
@@ -43,12 +49,17 @@ jobs:
 
           # Run benchmarks for current commit against base
           # See https://github.com/airspeed-velocity/asv/issues/595 for discussion on interleaved processes
-          ASV_OPTIONS="--split --show-stderr --verbose --interleave-processes --quick"
+          ASV_OPTIONS="--split --show-stderr --verbose --interleave-processes --factor $ASV_FACTOR"
           asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
+
+          # Report and export results for subsequent steps
           if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
+              echo "::set-output name=result::Benchmark finished with errors! :rotating_light: Check [logs here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
               exit 1
+          else
+              echo "::set-output name=result::Benchmark finished successfully! :white_check_mark: Check [logs here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
           fi
 
       - uses: actions/upload-artifact@v2
@@ -56,3 +67,16 @@ jobs:
         with:
           name: asv-benchmark-results
           path: .asv/results
+
+      - name: Post results
+        if: always()
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: ${{ github.event.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${{ steps.bench.outputs.result }}`
+            })
