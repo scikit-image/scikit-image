@@ -62,9 +62,8 @@ def test_unsharp_masking_with_different_radii(radius, shape,
                           ((3, 13, 17), 0)])
 @pytest.mark.parametrize("offset", [-5, 0, 5])
 @pytest.mark.parametrize("preserve", [False, True])
-def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
-                                                          channel_axis,
-                                                          preserve):
+def test_unsharp_masking_with_different_ranges(shape, offset, channel_axis,
+                                               preserve):
     radius = 2.0
     amount = 1.0
     dtype = np.int16
