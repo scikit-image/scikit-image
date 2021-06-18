@@ -79,8 +79,8 @@ def test_structural_similarity_grad(seed, dtype):
 
     mssim, grad, s = structural_similarity(
         X, Y, data_range=255, gradient=True, full=True)
-    s.dtype == dtype
-    grad.dtype == dtype
+    assert s.dtype == dtype
+    assert grad.dtype == dtype
     assert np.all(grad < 0.05)
 
 
