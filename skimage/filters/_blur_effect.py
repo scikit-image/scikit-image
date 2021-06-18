@@ -54,13 +54,17 @@ def blur_effect(image, h_size=11, channel_axis=None):
     n_axes = image.ndim
 
     if channel_axis is not None:
-        if not isinstance(channel_axis, int) or channel_axis >= image.ndim:
-            raise ValueError('channel_axis value is invalid')
-        else:
-            n_axes = n_axes - 1
+        try:
             # ensure color channels are in the final dimension
             image = np.moveaxis(image, channel_axis, -1)
-            image = rgb2gray(image)
+        except np.AxisError:
+            print('channel_axis must be one of the image array dimensions')
+            raise
+        except TypeError:
+            print('channel_axis must be an integer')
+            raise
+        image = rgb2gray(image)
+        n_axes = n_axes - 1
     image = img_as_float(image)
     shape = image.shape
     B = []
