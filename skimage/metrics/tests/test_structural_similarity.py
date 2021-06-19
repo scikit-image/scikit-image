@@ -79,13 +79,14 @@ def test_structural_similarity_grad(seed, dtype):
 
     mssim, grad, s = structural_similarity(
         X, Y, data_range=255, gradient=True, full=True)
-    s.dtype == dtype
-    grad.dtype == dtype
+    assert s.dtype == _supported_float_type(dtype)
+    assert grad.dtype == _supported_float_type(dtype)
     assert np.all(grad < 0.05)
 
 
-@pytest.mark.parametrize('dtype', [np.uint8, np.int32, np.float16, np.float32,
-                               np.float64])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
 def test_structural_similarity_dtype(dtype):
     N = 30
     X = np.random.rand(N, N)
