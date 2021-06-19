@@ -1,42 +1,47 @@
 import warnings
 
-import pytest
-
 import numpy as np
-from skimage.filters._gaussian import (gaussian, _guess_spatial_dimensions,
-                                       difference_of_gaussians)
+import pytest
+from numpy.testing import assert_array_equal
+
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+from skimage.filters._gaussian import (gaussian, _guess_spatial_dimensions,
+                                       difference_of_gaussians)
+
+_preserve_range_msg = "The new recommended value for preserve_range"
 
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
     with testing.raises(ValueError):
-        gaussian(a, sigma=-1.0)
+        gaussian(a, sigma=-1.0, preserve_range=True)
     with testing.raises(ValueError):
-        gaussian(a, sigma=[-1.0, 1.0])
+        gaussian(a, sigma=[-1.0, 1.0], preserve_range=True)
     with testing.raises(ValueError):
-        gaussian(a,
-                 sigma=np.asarray([-1.0, 1.0]))
+        gaussian(a, sigma=np.asarray([-1.0, 1.0]), preserve_range=True)
 
 
 def test_null_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    assert np.all(gaussian(a, 0) == a)
+    assert np.all(gaussian(a, 0, preserve_range=True) == a)
 
 
 def test_default_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    assert np.all(gaussian(a) == gaussian(a, sigma=1))
+    assert_array_equal(
+        gaussian(a, preserve_range=True),
+        gaussian(a, preserve_range=True, sigma=1)
+    )
 
 
 def test_energy_decrease():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    gaussian_a = gaussian(a, sigma=1, mode='reflect')
+    gaussian_a = gaussian(a, preserve_range=True, sigma=1, mode='reflect')
     assert gaussian_a.std() < a.std()
 
 
@@ -45,7 +50,7 @@ def test_multichannel(channel_axis):
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
     a = np.moveaxis(a, -1, channel_axis)
-    gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect', 
+    gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect', preserve_range=True,
                               channel_axis=channel_axis)
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
@@ -57,7 +62,7 @@ def test_multichannel(channel_axis):
 
     if channel_axis % a.ndim == 2:
         # Test legacy behavior equivalent to old (multichannel = None)
-        with expected_warnings(['multichannel']):
+        with expected_warnings(['multichannel', _preserve_range_msg]):
             gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect')
 
         # Check that the mean value is conserved in each channel
@@ -66,7 +71,8 @@ def test_multichannel(channel_axis):
                            gaussian_rgb_a.mean(axis=spatial_axes))
     # Iterable sigma
     gaussian_rgb_a = gaussian(a, sigma=[1, 2], mode='reflect',
-                              channel_axis=channel_axis)
+                              channel_axis=channel_axis,
+                              preserve_range=True)
     assert np.allclose(a.mean(axis=spatial_axes),
                        gaussian_rgb_a.mean(axis=spatial_axes))
 
@@ -74,7 +80,8 @@ def test_multichannel(channel_axis):
 def test_deprecated_multichannel():
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument",
+                            _preserve_range_msg]):
         gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
                                   multichannel=True)
     # Check that the mean value is conserved in each channel
@@ -82,7 +89,8 @@ def test_deprecated_multichannel():
     assert np.allclose(a.mean(axis=(0, 1)), gaussian_rgb_a.mean(axis=(0, 1)))
 
     # check positional multichannel argument warning
-    with expected_warnings(["Providing the `multichannel` argument"]):
+    with expected_warnings(["Providing the `multichannel` argument",
+                            _preserve_range_msg]):
         gaussian_rgb_a = gaussian(a, 1, None, 'reflect', 0, True)
 
 
@@ -97,7 +105,8 @@ def test_preserve_range():
     assert np.all(filtered_preserved == 1.)
 
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
-    gaussian(img, 1)
+    with expected_warnings([_preserve_range_msg]):
+        gaussian(img, 1)
 
 
 def test_1d_ok():
@@ -113,7 +122,7 @@ def test_1d_ok():
 def test_4d_ok():
     img = np.zeros((5,) * 4)
     img[2, 2, 2, 2] = 1
-    res = gaussian(img, 1, mode='reflect')
+    res = gaussian(img, 1, mode='reflect', preserve_range=True)
     assert np.allclose(res.sum(), 1)
 
 
@@ -153,8 +162,8 @@ def test_output_error():
 @testing.parametrize("s2", [4, (5, 6)])
 def test_difference_of_gaussians(s, s2):
     image = np.random.rand(10, 10)
-    im1 = gaussian(image, s)
-    im2 = gaussian(image, s2)
+    im1 = gaussian(image, s, preserve_range=True)
+    im2 = gaussian(image, s2, preserve_range=True)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2)
     assert np.allclose(dog, dog2)
@@ -163,9 +172,9 @@ def test_difference_of_gaussians(s, s2):
 @testing.parametrize("s", [1, (1, 2)])
 def test_auto_sigma2(s):
     image = np.random.rand(10, 10)
-    im1 = gaussian(image, s)
+    im1 = gaussian(image, s, preserve_range=True)
     s2 = 1.6 * np.array(s)
-    im2 = gaussian(image, s2)
+    im2 = gaussian(image, s2, preserve_range=True)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2)
     assert np.allclose(dog, dog2)
