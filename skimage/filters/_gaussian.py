@@ -165,7 +165,9 @@ def _guess_spatial_dimensions(image):
     if image.ndim == 4 and image.shape[-1] == 3:
         return 3
     else:
-        raise ValueError("Expected 1D, 2D, 3D, or 4D array, got %iD." % image.ndim)
+        raise ValueError(
+            f"Expected 1D, 2D, 3D, or 4D array, got {image.ndim}D."
+        )
 
 
 @utils.channel_as_last_axis()
