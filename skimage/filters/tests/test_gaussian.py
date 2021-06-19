@@ -2,9 +2,8 @@ import warnings
 
 import numpy as np
 import pytest
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_equal
 
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage.filters._gaussian import (gaussian, _guess_spatial_dimensions,
                                        difference_of_gaussians)
@@ -15,11 +14,11 @@ _preserve_range_msg = "The new recommended value for preserve_range"
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         gaussian(a, sigma=-1.0, preserve_range=True)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         gaussian(a, sigma=[-1.0, 1.0], preserve_range=True)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         gaussian(a, sigma=np.asarray([-1.0, 1.0]), preserve_range=True)
 
 
@@ -45,7 +44,7 @@ def test_energy_decrease():
     assert gaussian_a.std() < a.std()
 
 
-@testing.parametrize('channel_axis', [0, 1, -1])
+@pytest.mark.parametrize('channel_axis', [0, 1, -1])
 def test_multichannel(channel_axis):
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
@@ -132,11 +131,11 @@ def test_guess_spatial_dimensions():
     im3 = np.zeros((5, 5, 3))
     im4 = np.zeros((5, 5, 5, 3))
     im5 = np.zeros((5,))
-    testing.assert_equal(_guess_spatial_dimensions(im1), 2)
-    testing.assert_equal(_guess_spatial_dimensions(im2), 3)
-    testing.assert_equal(_guess_spatial_dimensions(im3), None)
-    testing.assert_equal(_guess_spatial_dimensions(im4), 3)
-    testing.assert_equal(_guess_spatial_dimensions(im5), 1)
+    assert_equal(_guess_spatial_dimensions(im1), 2)
+    assert_equal(_guess_spatial_dimensions(im2), 3)
+    assert_equal(_guess_spatial_dimensions(im3), None)
+    assert_equal(_guess_spatial_dimensions(im4), 3)
+    assert_equal(_guess_spatial_dimensions(im5), 1)
 
 
 @pytest.mark.parametrize(
@@ -158,8 +157,8 @@ def test_output_error():
                  preserve_range=True)
 
 
-@testing.parametrize("s", [1, (2, 3)])
-@testing.parametrize("s2", [4, (5, 6)])
+@pytest.mark.parametrize("s", [1, (2, 3)])
+@pytest.mark.parametrize("s2", [4, (5, 6)])
 def test_difference_of_gaussians(s, s2):
     image = np.random.rand(10, 10)
     im1 = gaussian(image, s, preserve_range=True)
@@ -169,7 +168,7 @@ def test_difference_of_gaussians(s, s2):
     assert np.allclose(dog, dog2)
 
 
-@testing.parametrize("s", [1, (1, 2)])
+@pytest.mark.parametrize("s", [1, (1, 2)])
 def test_auto_sigma2(s):
     image = np.random.rand(10, 10)
     im1 = gaussian(image, s, preserve_range=True)
@@ -182,20 +181,20 @@ def test_auto_sigma2(s):
 
 def test_dog_invalid_sigma_dims():
     image = np.ones((5, 5, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 2))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         difference_of_gaussians(image, 1, (3, 4))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         with expected_warnings(["`multichannel` is a deprecated argument"]):
             difference_of_gaussians(image, (1, 2, 3), multichannel=True)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 2, 3), channel_axis=-1)
 
 
 def test_dog_invalid_sigma2():
     image = np.ones((3, 3))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         difference_of_gaussians(image, 3, 2)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 5), (2, 4))
