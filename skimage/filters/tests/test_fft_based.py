@@ -94,8 +94,7 @@ def test_butterworth_4D_channel(chan, dtype):
 def test_butterworth_correctness_bw():
     small = coins()[180:190, 260:270]
     filtered = butterworth(small,
-                           cutoff_frequency_ratio=0.2,
-                           )
+                           cutoff_frequency_ratio=0.2)
     correct = np.array(
         [
             [ 28.63019362, -17.69023786,  26.95346957,  20.57423019, -15.1933463 , -28.05828136, -35.25135674, -25.70376951, -43.37121955, -16.87688457],
