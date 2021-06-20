@@ -33,7 +33,14 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         Higher means fewer clusters.
     return_tree : bool
         Whether to return the full segmentation hierarchy tree and distances.
-    random_seed : int
+    random_seed : {None, int, `numpy.random.Generator`}, optional
+        If `random_seed` is None the `numpy.random.Generator` singleton
+        is used.
+        If `random_seed` is an int, a new ``Generator`` instance is used,
+        seeded with `random_seed`.
+        If `random_seed` is already a ``Generator`` instance then that instance
+        is used.
+
         Random seed used for breaking ties.
 
     Returns
@@ -42,7 +49,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         Integer mask indicating segment labels.
     """
 
-    random_state = np.random.RandomState(random_seed)
+    random_state = np.random.default_rng(random_seed)
 
     if np_floats is cnp.float64_t:
         dtype = np.float64

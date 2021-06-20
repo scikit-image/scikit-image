@@ -173,7 +173,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> from skimage import data, img_as_float
     >>> astro = img_as_float(data.astronaut())
     >>> astro = astro[220:300, 220:320]
-    >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
+    >>> rng = np.random.default_rng()
+    >>> noisy = astro + 0.6 * astro.std() * rng.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
     ...                              multichannel=True)
@@ -492,7 +493,8 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
 
     >>> from skimage import color, data
     >>> img = color.rgb2gray(data.astronaut())[:50, :50]
-    >>> img += 0.5 * img.std() * np.random.randn(*img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.5 * img.std() * rng.standard_normal(img.shape)
     >>> denoised_img = denoise_tv_chambolle(img, weight=60)
 
     3D example on synthetic data:
@@ -500,7 +502,8 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     >>> x, y, z = np.ogrid[0:20, 0:20, 0:20]
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(float)
-    >>> mask += 0.2*np.random.randn(*mask.shape)
+    >>> rng = np.random.default_rng()
+    >>> mask += 0.2 * rng.standard_normal(mask.shape)
     >>> res = denoise_tv_chambolle(mask, weight=100)
 
     """
@@ -855,7 +858,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
-    >>> img += 0.1 * np.random.randn(*img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.1 * rng.standard_normal(img.shape)
     >>> img = np.clip(img, 0, 1)
     >>> denoised_img = denoise_wavelet(img, sigma=0.1, rescale_sigma=True)
 
@@ -973,7 +977,8 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
     >>> from skimage import img_as_float
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
-    >>> img = img + sigma * np.random.standard_normal(img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img = img + sigma * rng.standard_normal(img.shape)
     >>> sigma_hat = estimate_sigma(img, multichannel=False)
     """
     if channel_axis is not None:
