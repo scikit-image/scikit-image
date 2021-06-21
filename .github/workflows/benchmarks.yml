@@ -88,6 +88,7 @@ jobs:
       - name: "Check ccache performance"
         shell: bash -l {0}
         run: ccache -s
+        if: always()
 
       - uses: actions/upload-artifact@v2
         if: always()
