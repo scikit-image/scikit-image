@@ -38,6 +38,7 @@ PROPS = {
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
+    'FeretDiameter': 'feret_diameter_max',
     'FeretDiameterMax': 'feret_diameter_max',
     'FilledArea': 'area_filled',
     'filled_area': 'area_filled',
