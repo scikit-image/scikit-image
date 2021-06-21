@@ -133,7 +133,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
     def _build_pyramid(self, image):
         image = _prepare_grayscale_input_2D(image)
         return list(pyramid_gaussian(image, self.n_scales - 1,
-                                     self.downscale, multichannel=False))
+                                     self.downscale, channel_axis=None))
 
     def _detect_octave(self, octave_image):
         dtype = octave_image.dtype
