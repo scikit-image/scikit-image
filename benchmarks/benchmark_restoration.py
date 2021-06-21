@@ -151,7 +151,7 @@ class RollingBall(object):
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)
-    time_rollingball_ndim.timeout = 180
+    time_rollingball_ndim.timeout = 300
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
