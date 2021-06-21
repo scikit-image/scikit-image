@@ -10,7 +10,6 @@ from .._shared import utils
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
-@change_default_value('preserve_range', new_value=True, changed_version='1.0')
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
@@ -46,9 +45,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         ambiguous, when the array has shape (M, N, 3).
         This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
-        If True (by default) - keep the original range of values.
-        Otherwise, the input 'image' is converted according to the conventions
-        of ``img_as_float``
+        If True, keep the original range of values. Otherwise, the input
+        ``image`` is converted according to the conventions of ``img_as_float``
         (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
         dtype of input)
 
