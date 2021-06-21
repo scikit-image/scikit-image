@@ -20,7 +20,7 @@ def _singlescale_basic_features_singlechannel(
     img, sigma, intensity=True, edges=True, texture=True
 ):
     results = ()
-    gaussian_filtered = filters.gaussian(img, sigma)
+    gaussian_filtered = filters.gaussian(img, sigma, preserve_range=False)
     if intensity:
         results += (gaussian_filtered,)
     if edges:

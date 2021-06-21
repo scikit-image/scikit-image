@@ -177,7 +177,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> noisy = astro + 0.6 * astro.std() * rng.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
-    ...                              multichannel=True)
+    ...                              channel_axis=-1)
     """
     if channel_axis is not None:
         if image.ndim != 3:
@@ -208,7 +208,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
             raise ValueError("Bilateral filter is not implemented for "
                              "grayscale images of 3 or more dimensions, "
                              "but input image has {0} dimension. Use "
-                             "``multichannel=True`` for 2-D RGB "
+                             "``channel_axis=-1`` for 2-D RGB "
                              "images.".format(image.shape))
 
     if win_size is None:
@@ -979,7 +979,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
     >>> sigma = 0.1
     >>> rng = np.random.default_rng()
     >>> img = img + sigma * rng.standard_normal(img.shape)
-    >>> sigma_hat = estimate_sigma(img, multichannel=False)
+    >>> sigma_hat = estimate_sigma(img, channel_axis=None)
     """
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim

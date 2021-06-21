@@ -71,5 +71,5 @@ class ResizeLocalMeanSuite:
         self.shape_out = ndim_out * (shape_out, )
         self.grid_mode = grid_mode
 
-    def time_resize_local_mean(self):
+    def time_resize_local_mean(self, *args):
         resize_local_mean(self.image, self.shape_out, self.grid_mode)

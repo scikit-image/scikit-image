@@ -1,18 +1,14 @@
-name: Build CI wheels
-
+name: Build Wheels and Release
 on:
   push:
-    branches:
-      - main
-      - v[0-9]+.[0-9]+.x
-      - cibuildwheel
     tags:
-      - v*
-
+      - 'v*'
+      - 'buildwheels'
 env:
   CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: pytest pooch pytest-localserver pytest-faulthandler
+  CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
+
 
 jobs:
   build_linux_37_and_above_wheels:
@@ -77,7 +73,6 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
-
       - name: Build wheels for CPython 3.9 and Mac OS
         run: |
           brew install libomp
@@ -95,9 +90,7 @@ jobs:
           LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
       - name: Build wheels for CPython (MacOS)
-        if: matrix.os == 'macos-latest'
         run: |
-          brew install libomp
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp3?-*"
@@ -124,7 +117,6 @@ jobs:
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||
           startsWith(github.ref, 'refs/tags/v0.17')
-
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -151,7 +143,6 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
-
       - name: Build wheels for CPython 3.9 (Linux and Windows)
         run: |
           python -m cibuildwheel --output-dir dist
@@ -183,8 +174,52 @@ jobs:
         if: >
           startsWith(github.ref, 'refs/heads/v0.17') ||
           startsWith(github.ref, 'refs/tags/v0.17')
-
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: ./dist/*.whl
+
+
+  deploy:
+    name: Release
+    needs: [build_linux_37_and_above_wheels, build_macos_wheels, build_windows_wheels]
+    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.7'
+      
+      - name: Install Twine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/build.txt
+          pip install twine
+      
+      - uses: actions/download-artifact@v2
+        id: download
+        with:
+          name: wheels
+          path: ./dist
+    
+      - name: Publish the source distribution on PyPI
+        run: |
+          SK_VERSION=$(git describe --tags)
+          python setup.py sdist
+          ls -la ${{ github.workspace }}/dist 
+          twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
+          cd ${{ github.workspace }}/dist
+          twine upload *.whl
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+              
+      - name: Github release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
