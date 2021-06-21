@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from skimage.transform import SimilarityTransform, warp, resize_local_mean
 import warnings
@@ -65,9 +66,11 @@ class ResizeLocalMeanSuite:
     param_names = ['dtype', 'shape_in', 'shape_out', 'ndim_in',
                    'ndim_out', 'grid_mode']
 
-    timeout = 300
-
     def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
+        is_slow = any((dtype == np.float64, shape_in == 2048, shape_out == 1024, ndim_in == 3, ndim_out == 3))
+        if os.environ.get("SKIP_SLOW") == "1" and is_slow:
+            raise NotImplementedError("Skipping in CI because of memory usage and time constraints")
+
         self.shape_in = ndim_in * (shape_in, )
         self.image = np.zeros(self.shape_in, dtype=dtype)
         self.shape_out = ndim_out * (shape_out, )
