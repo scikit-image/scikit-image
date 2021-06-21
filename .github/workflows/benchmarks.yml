@@ -34,7 +34,7 @@ jobs:
 
       - name: Setup some dependencies
         shell: bash -l {0}
-        run:
+        run: |
           pip install asv
           apt install -y ccache
           # Export ccache'd compilers as env vars
