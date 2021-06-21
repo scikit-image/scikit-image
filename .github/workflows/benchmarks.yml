@@ -3,13 +3,10 @@ name: Benchmark
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled]
-  pull_request_target:
-    types: [opened, reopened, synchronize, labeled]
   workflow_dispatch:
 
 jobs:
   benchmark_linux:
-    if: github.event_name == 'pull_request'
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Linux
     runs-on: ubuntu-20.04
@@ -96,27 +93,3 @@ jobs:
         with:
           name: asv-benchmark-results
           path: .asv/results
-
-  benchmark_report:
-    if: github.event_name == 'pull_request_target'
-    # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
-    name: Report benchmark
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Write message
-        id: message
-        run: |
-          echo "::set-output name=content::Benchmarks are running! Check [logs here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
-
-      - name: Post link to logs
-        if: always()
-        uses: actions/github-script@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.issues.createComment({
-              issue_number: ${{ github.event.number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `${{ steps.message.outputs.content }}`
-            })
