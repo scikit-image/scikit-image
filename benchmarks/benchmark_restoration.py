@@ -11,6 +11,9 @@ import scipy.ndimage as ndi
 
 class RestorationSuite:
     """Benchmark for restoration routines in scikit image."""
+
+    timeout = 120
+
     def setup(self):
         nz = 32
         self.volume_f64 = np.stack([camera()[::2, ::2], ] * nz,
@@ -148,6 +151,7 @@ class RollingBall(object):
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)
+    time_rollingball_ndim.timeout = 180
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
