@@ -59,7 +59,7 @@ ax.axis((0, 600, 600, 0))
 plt.show()
 
 #####################################################################
-# We use the :py:func:`skimage.measure.regionprops_table` to compute
+# We use the :py:func:`skimage.measure.regionprops_table` function to compute
 # (selected) properties for each region. Note that
 # ``skimage.measure.regionprops_table`` actually computes the properties,
 # whereas ``skimage.measure.regionprops`` computes them when they come in use
@@ -83,6 +83,7 @@ pd.DataFrame(props)
 # This example uses plotly in order to display properties when
 # hovering over the objects.
 
+import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 from skimage import data, filters, measure, morphology
@@ -104,15 +105,15 @@ properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
 # For each label, add a filled scatter trace for its contour,
 # and display the properties of the label in the hover of this trace.
 for index in range(1, labels.max()):
-    label = props[index].label
-    contour = measure.find_contours(labels == label, 0.5)[0]
+    label_i = props[index].label
+    contour = measure.find_contours(labels == label_i, 0.5)[0]
     y, x = contour.T
     hoverinfo = ''
     for prop_name in properties:
         hoverinfo += f'<b>{prop_name}: {getattr(props[index], prop_name):.2f}</b><br>'
     fig.add_trace(go.Scatter(
-        x=x, y=y, name=label,
+        x=x, y=y, name=label_i,
         mode='lines', fill='toself', showlegend=False,
         hovertemplate=hoverinfo, hoveron='points+fills'))
 
-fig
+plotly.io.show(fig)
