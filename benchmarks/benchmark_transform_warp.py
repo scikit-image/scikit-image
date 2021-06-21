@@ -65,6 +65,8 @@ class ResizeLocalMeanSuite:
     param_names = ['dtype', 'shape_in', 'shape_out', 'ndim_in',
                    'ndim_out', 'grid_mode']
 
+    timeout = 300
+
     def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
         self.shape_in = ndim_in * (shape_in, )
         self.image = np.zeros(self.shape_in, dtype=dtype)
