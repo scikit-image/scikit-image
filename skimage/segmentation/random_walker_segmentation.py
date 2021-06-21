@@ -188,7 +188,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         else:
             # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
-            ml = ruge_stuben_solver(lap_sparse)
+            ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
