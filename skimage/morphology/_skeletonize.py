@@ -358,9 +358,8 @@ def thin(image, max_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-def medial_axis(image, mask=None, return_distance=False):
-    """
-    Compute the medial axis transform of a binary image
+def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
+    """Compute the medial axis transform of a binary image.
 
     Parameters
     ----------
@@ -371,6 +370,15 @@ def medial_axis(image, mask=None, return_distance=False):
         value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        .. versionadded:: 0.19
 
     Returns
     -------
@@ -487,7 +495,7 @@ def medial_axis(image, mask=None, return_distance=False):
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    generator = np.random.RandomState(0)
+    generator = np.random.default_rng(random_state)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],

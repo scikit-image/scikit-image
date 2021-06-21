@@ -17,7 +17,13 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
 
-    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm)
+    if np.isfinite(num_peaks):
+        max_out = int(num_peaks)
+    else:
+        max_out = None
+
+    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm,
+                           max_out=max_out)
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]

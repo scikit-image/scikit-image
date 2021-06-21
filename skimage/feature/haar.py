@@ -8,7 +8,6 @@ from ._haar import haar_like_feature_coord_wrapper
 from ._haar import haar_like_feature_wrapper
 from ..color import gray2rgb
 from ..draw import rectangle
-from .._shared.utils import check_random_state
 from ..util import img_as_float
 
 FEATURE_TYPE = ('type-2-x', 'type-2-y',
@@ -257,11 +256,15 @@ def draw_haar_like_feature(image, r, c, width, height,
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-    random_state : int, RandomState instance or None, optional
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`. The random state is used when generating a set of
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        The random state is used when generating a set of
         features smaller than the total number of available features.
 
     Returns
@@ -287,7 +290,7 @@ def draw_haar_like_feature(image, r, c, width, height,
             [0. , 0.5, 0. ]]])
 
     """
-    random_state = check_random_state(random_state)
+    random_state = np.random.default_rng(random_state)
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
 

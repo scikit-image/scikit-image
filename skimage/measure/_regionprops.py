@@ -162,9 +162,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
     propmasks = [(sample == n) for n in labels]
+
+    rng = np.random.default_rng()
+
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, np.random.random(sample.shape))
+            return func(mask, rng.random(sample.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
@@ -728,7 +731,8 @@ def regionprops_table(label_image, intensity_image=None,
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -890,7 +894,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0

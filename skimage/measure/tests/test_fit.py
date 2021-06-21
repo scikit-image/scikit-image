@@ -269,10 +269,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    random_state = np.random.RandomState(1)
+    random_state = np.random.RandomState(12373240)
 
     # generate original data without noise
-    src = 100 * random_state.random_sample((50, 2))
+    src = 100 * random_state.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -284,8 +284,7 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                random_state=random_state)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
