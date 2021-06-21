@@ -37,9 +37,9 @@ jobs:
         run: |
           pip install asv
           sudo apt-get update -y && sudo apt-get install -y ccache
-          # Export ccache'd compilers as env vars
-          echo "CC=ccache $(which gcc)"  >> ${GITHUB_ENV}
-          echo "CXX=ccache $(which gxx)" >> ${GITHUB_ENV}
+          # Make gcc/gxx symlinks first in path
+          sudo /usr/sbin/update-ccache-symlinks
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
 
       - name: "Prepare ccache"
         id: prepare-ccache
