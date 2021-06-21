@@ -75,7 +75,7 @@ the appropriate point in main and the following instructions are still apt.
 
   1. Add a tag in git that starts with the string "buildwheel"::
 
-    git tag -m <github_release_message> buildwheel_0.19.0test
+    git tag -m <github_release_message> buildwheel_<major>.<minor>.0test
 
   2. Push the new tag to GitHub (you can delete these after if you wish)::
 
