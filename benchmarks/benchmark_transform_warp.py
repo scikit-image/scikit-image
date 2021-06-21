@@ -67,8 +67,8 @@ class ResizeLocalMeanSuite:
                    'ndim_out', 'grid_mode']
 
     def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
-        is_slow = any((dtype == np.float64, shape_in == 2048, shape_out == 1024,
-                       ndim_in == 3, ndim_out == 3))
+        is_slow = any((dtype == np.float64, shape_in == 2048,
+                       shape_out == 1024, ndim_in == 3, ndim_out == 3))
         if os.environ.get("SKIP_SLOW") == "1" and is_slow:
             m = "Skipping in CI because of memory usage and time constraints"
             raise NotImplementedError(m)
