@@ -36,7 +36,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install asv
-          apt install -y ccache
+          sudo apt-get update -y && sudo apt-get install -y ccache
           # Export ccache'd compilers as env vars
           echo "CC=ccache $(which gcc)"  >> ${GITHUB_ENV}
           echo "CXX=ccache $(which gxx)" >> ${GITHUB_ENV}
