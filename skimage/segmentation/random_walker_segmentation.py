@@ -274,7 +274,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     data : array_like
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
-        dimensional (multichannel=True) with the highest dimension denoting
+        dimensional with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
