@@ -13,6 +13,12 @@ jobs:
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Linux
     runs-on: ubuntu-20.04
+    env:
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_MAXSIZE: 400M
 
     steps:
       # We need the full repo to avoid this issue
@@ -30,6 +36,27 @@ jobs:
         shell: bash -l {0}
         run:
           pip install asv
+          apt install -y ccache
+          # Export ccache'd compilers as env vars
+          echo "CC=ccache $(which gcc)"  >> ${GITHUB_ENV}
+          echo "CXX=ccache $(which gxx)" >> ${GITHUB_ENV}
+
+      - name: "Prepare ccache"
+        id: prepare-ccache
+        shell: bash -l {0}
+        run: |
+          echo "::set-output name=key::$(echo "${{ matrix.name }}" | tr -d ' .')"
+          echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
+          ccache -p
+          ccache -z
+
+      - name: "Restore ccache"
+        uses: actions/cache@v1.1.0
+        with:
+          path: .ccache
+          key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
+          restore-keys: |
+            ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-
 
       - name: Run benchmarks
         shell: bash -l {0}
@@ -50,7 +77,7 @@ jobs:
 
           # Run benchmarks for current commit against base
           # See https://github.com/airspeed-velocity/asv/issues/595 for discussion on interleaved processes
-          ASV_OPTIONS="--split --show-stderr --interleave-processes --factor $ASV_FACTOR"
+          ASV_OPTIONS="--split --show-stderr --interleave-processes --factor $ASV_FACTOR --bench exposure"
           asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
@@ -59,6 +86,10 @@ jobs:
           if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
               exit 1
           fi
+
+      - name: "Check ccache performance"
+        shell: bash -l {0}
+        run: ccache -s
 
       - uses: actions/upload-artifact@v2
         if: always()
