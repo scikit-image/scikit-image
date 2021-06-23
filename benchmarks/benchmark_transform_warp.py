@@ -56,27 +56,14 @@ class WarpSuite:
 
 
 class ResizeLocalMeanSuite:
-    params = ([np.uint8, np.uint16, np.float32, np.float64],
-              [128, 512, 1024, 2048],
-              [128, 512, 1024],
-              [2, 3],
-              [2, 3],
-              [True, False]
+    params = ([np.float32, np.float64],
+              [(512, 512), (2048, 2048), (192, 192, 192)],
+              [(512, 512), (2048, 2048), (192, 192, 192)],
               )
-    param_names = ['dtype', 'shape_in', 'shape_out', 'ndim_in',
-                   'ndim_out', 'grid_mode']
+    param_names = ['dtype', 'shape_in', 'shape_out']
 
-    def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
-        is_slow = any((dtype == np.float64, shape_in == 2048,
-                       shape_out == 1024, ndim_in == 3, ndim_out == 3))
-        if os.environ.get("SKIP_SLOW") == "1" and is_slow:
-            m = "Skipping in CI because of memory usage and time constraints"
-            raise NotImplementedError(m)
+    def setup(self, dtype, shape_in, shape_out):
+        self.image = np.zeros(shape_in, dtype=dtype)
 
-        self.shape_in = ndim_in * (shape_in, )
-        self.image = np.zeros(self.shape_in, dtype=dtype)
-        self.shape_out = ndim_out * (shape_out, )
-        self.grid_mode = grid_mode
-
-    def time_resize_local_mean(self, *args):
-        resize_local_mean(self.image, self.shape_out, self.grid_mode)
+    def time_resize_local_mean(self, dtype, shape_in, shape_out):
+        resize_local_mean(self.image, shape_out)
