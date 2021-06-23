@@ -116,7 +116,7 @@ class RollingBall(object):
 
     def time_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
-    time_rollingball.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball.params = [25, 50, 100, 200]
     time_rollingball.param_names = ["radius"]
 
     def peakmem_reference(self, *args):
@@ -137,7 +137,7 @@ class RollingBall(object):
 
     def peakmem_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
-    peakmem_rollingball.params = [25, 50, 75, 100, 150, 200]
+    peakmem_rollingball.params = [25, 50, 100, 200]
     peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
@@ -145,7 +145,7 @@ class RollingBall(object):
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.NaN
         restoration.rolling_ball(image, radius=radius, nansafe=True)
-    time_rollingball_nan.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball_nan.params = [25, 50, 100, 200]
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
@@ -154,11 +154,10 @@ class RollingBall(object):
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)
-    time_rollingball_ndim.timeout = 300
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
-    time_rollingball_threads.params = range(0, 9)
+    time_rollingball_threads.params = (0, 2, 4, 8)
     time_rollingball_threads.param_names = ["threads"]
 
 
