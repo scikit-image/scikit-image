@@ -78,12 +78,6 @@ def attach(module_name, submodules=None, submod_attrs=None):
     return __getattr__, __dir__, list(__all__)
 
 
-class LazyImportError(ImportError):
-    def __init__(self, module, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.module = module
-
-
 def load(fullname):
     """Return a lazily imported proxy for a module or library.
 
@@ -130,17 +124,13 @@ def load(fullname):
         return sys.modules[fullname]
 
     spec = importlib.util.find_spec(fullname)
-    try:
-        module = importlib.util.module_from_spec(spec)
-    except:  # noqa: E722
-        raise LazyImportError(
-            fullname, f'Could not lazy import module {fullname}'
-        ) from None
-    loader = importlib.util.LazyLoader(spec.loader)
+    if spec is None:
+        raise ModuleNotFoundError(f"No module name '{fullname}'")
 
+    module = importlib.util.module_from_spec(spec)
     sys.modules[fullname] = module
 
-    # Make module with proper locking and get it inserted into sys.modules.
+    loader = importlib.util.LazyLoader(spec.loader)
     loader.exec_module(module)
 
     return module
