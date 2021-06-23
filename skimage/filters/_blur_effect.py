@@ -20,7 +20,7 @@ def blur_effect(image, h_size=11, channel_axis=None):
         RGB or grayscale nD image. The input image is converted to grayscale
         before computing the blur metric.
     h_size : int, optional
-        Size of the re-blurring filter. Default is 11.
+        Size of the re-blurring filter.
     channel_axis : int or None, optional
         If None, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array
@@ -67,14 +67,14 @@ def blur_effect(image, h_size=11, channel_axis=None):
     shape = image.shape
     B = []
 
-    for a in range(n_axes):
-        filt_im = ndi.uniform_filter1d(image, h_size, axis=a)
-        im_sharp = np.abs(sobel(image, axis=a))
-        im_blur = np.abs(sobel(filt_im, axis=a))
+    slices = tuple([slice(2, s - 1) for s in shape])
+    for ax in range(n_axes):
+        filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)
+        im_sharp = np.abs(sobel(image, axis=ax))
+        im_blur = np.abs(sobel(filt_im, axis=ax))
         T = np.maximum(0, im_sharp - im_blur)
-        slices = [slice(2, shape[ax] - 1) for ax in range(n_axes)]
-        M1 = np.sum(im_sharp[tuple(slices)])
-        M2 = np.sum(T[tuple(slices)])
+        M1 = np.sum(im_sharp[slices])
+        M2 = np.sum(T[slices])
         B.append(np.abs((M1 - M2)) / M1)
 
     return np.max(B), B
