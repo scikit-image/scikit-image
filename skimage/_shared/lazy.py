@@ -120,8 +120,10 @@ def load(fullname):
         Actual loading of the module occurs upon first attribute request.
 
     """
-    if fullname in sys.modules:
+    try:
         return sys.modules[fullname]
+    except KeyError:
+        pass
 
     spec = importlib.util.find_spec(fullname)
     if spec is None:
