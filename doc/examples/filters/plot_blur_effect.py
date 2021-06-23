@@ -64,9 +64,9 @@ B = pd.DataFrame(
     columns=['h_size = 3', 'h_size = 11', 'h_size = 30']
 )
 for ind, im in enumerate(blurred_images):
-    B.loc[ind, 'h_size = 3'], _ = filters.blur_effect(im, h_size=3)
-    B.loc[ind, 'h_size = 11'], _ = filters.blur_effect(im, h_size=11)
-    B.loc[ind, 'h_size = 30'], _ = filters.blur_effect(im, h_size=30)
+    B.loc[ind, 'h_size = 3'] = filters.blur_effect(im, h_size=3)
+    B.loc[ind, 'h_size = 11'] = filters.blur_effect(im, h_size=11)
+    B.loc[ind, 'h_size = 30'] = filters.blur_effect(im, h_size=30)
 
 B.plot().set(xlabel='blur strength (half the size of uniform filter)',
              ylabel='blur metric');

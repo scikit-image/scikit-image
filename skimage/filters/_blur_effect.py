@@ -9,7 +9,7 @@ from ..util import img_as_float
 __all__ = ['blur_effect']
 
 
-def blur_effect(image, h_size=11, channel_axis=None):
+def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     """Compute a metric that indicates the strength of blur in an image
     (0 for no blur, 1 for maximal blur).
 
@@ -24,13 +24,15 @@ def blur_effect(image, h_size=11, channel_axis=None):
         If None, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array
         corresponds to color channels.
+    reduce_func : callable, optional
+        Function used to calculate the aggregation of blur metrics along all
+        axes. If set to None, the entire list is returned, where the i-th
+        element is the blur metric along the i-th axis.
 
     Returns
     -------
-    blur : float (0 to 1)
-        Blur metric: the maximum of blur metrics along all axes.
-    blur_table : list of floats
-        The i-th element is the blur metric along the i-th axis.
+    blur : float (0 to 1) or list of floats
+        Blur metric: by default, the maximum of blur metrics along all axes.
 
     Notes
     -----
@@ -76,4 +78,4 @@ def blur_effect(image, h_size=11, channel_axis=None):
         M2 = np.sum(T[slices])
         B.append(np.abs((M1 - M2)) / M1)
 
-    return np.max(B), B
+    return B if reduce_func is None else reduce_func(B)
