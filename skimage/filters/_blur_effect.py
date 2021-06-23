@@ -50,8 +50,6 @@ def blur_effect(image, h_size=11, channel_axis=None):
        https://hal.archives-ouvertes.fr/hal-00232709
        :DOI:`10.1117/12.702790`
     """
-    # number of non-channel axes
-    n_axes = image.ndim
 
     if channel_axis is not None:
         try:
@@ -64,7 +62,7 @@ def blur_effect(image, h_size=11, channel_axis=None):
             print('channel_axis must be an integer')
             raise
         image = rgb2gray(image)
-        n_axes = n_axes - 1
+    n_axes = image.ndim
     image = img_as_float(image)
     shape = image.shape
     B = []
