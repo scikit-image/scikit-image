@@ -21,6 +21,7 @@ from ._median import median
 from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
+from ._fft_based import butterworth
 
 
 __all__ = ['inverse',
@@ -28,6 +29,7 @@ __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
            'gaussian',
+           'butterworth',
            'difference_of_gaussians',
            'median',
            'sobel',

@@ -3,8 +3,8 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
+from .._shared.utils import warn, convert_to_float, change_default_value
 from .._shared import utils
-from .._shared.utils import warn, convert_to_float
 
 
 __all__ = ['gaussian', 'difference_of_gaussians']
@@ -45,9 +45,12 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         ambiguous, when the array has shape (M, N, 3).
         This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of ``img_as_float``.
-        Also see
+        If True, keep the original range of values. Otherwise, the input
+        ``image`` is converted according to the conventions of ``img_as_float``
+        (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
+        dtype of input)
+
+        For more information, see:
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     truncate : float, optional
         Truncate the filter at this many standard deviations.
@@ -106,7 +109,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> # For RGB images, each is filtered separately
     >>> from skimage.data import astronaut
     >>> image = astronaut()
-    >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
+    >>> filtered_img = gaussian(image, sigma=1, channel_axis=-1)
 
     """
     if image.ndim == 3 and image.shape[-1] == 3 and channel_axis is None:
@@ -160,7 +163,9 @@ def _guess_spatial_dimensions(image):
     if image.ndim == 4 and image.shape[-1] == 3:
         return 3
     else:
-        raise ValueError("Expected 1D, 2D, 3D, or 4D array, got %iD." % image.ndim)
+        raise ValueError(
+            f"Expected 1D, 2D, 3D, or 4D array, got {image.ndim}D."
+        )
 
 
 @utils.channel_as_last_axis()
@@ -250,13 +255,13 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     >>> from skimage.data import astronaut
     >>> from skimage.filters import difference_of_gaussians
     >>> filtered_image = difference_of_gaussians(astronaut(), 2, 10,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Laplacian of Gaussian filter as approximated by the Difference
     of Gaussians filter:
 
     >>> filtered_image = difference_of_gaussians(astronaut(), 2,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Difference of Gaussians filter to a grayscale image using different
     sigma values for each axis:
@@ -298,9 +303,11 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                          'low_sigma for all axes')
 
     im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate)
+                   channel_axis=channel_axis, truncate=truncate,
+                   preserve_range=False)
 
     im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate)
+                   channel_axis=channel_axis, truncate=truncate,
+                   preserve_range=False)
 
     return im1 - im2
