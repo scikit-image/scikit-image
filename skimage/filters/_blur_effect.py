@@ -10,9 +10,8 @@ __all__ = ['blur_effect']
 
 
 def blur_effect(image, h_size=11, channel_axis=None):
-    """
-    Compute a metric that indicates the strength of blur in an image (0 for no
-    blur, 1 for maximal blur).
+    """Compute a metric that indicates the strength of blur in an image
+    (0 for no blur, 1 for maximal blur).
 
     Parameters
     ----------
