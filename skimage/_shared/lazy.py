@@ -90,14 +90,26 @@ def load(fullname):
     We often see the following pattern::
 
       def myfunc():
-          import scipy
+          import scipy as sp
+          sp.argmin(...)
           ....
 
     This is to prevent a library, in this case `scipy`, from being
     imported at function definition time, since that can be slow.
 
     This function provides a proxy module that, upon access, imports
-    the actual module.
+    the actual module.  So the idiom equivalent to the above example is::
+
+      sp = lazy.load("scipy")
+
+      def myfunc():
+          sp.argmin(...)
+          ....
+
+    The initial import time is fast because the actual import is delayed
+    until the first attribute is requested. The overall import time may
+    decrease as well for users that don't make use of large portions
+    of the library.
 
     Parameters
     ----------
@@ -111,6 +123,7 @@ def load(fullname):
     -------
     pm : importlib.util._LazyModule
         Proxy module.  Can be used like any regularly imported module.
+        Actual loading of the module occurs upon first attribute request.
 
     """
     if fullname in sys.modules:
