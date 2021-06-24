@@ -10,14 +10,13 @@ import numpy as np
 
 class BoundingBox:
     """
-    Construct an axis-aligned Bounding-Box
-    consisting of top left and bottom right corners.
+    Axis-aligned bounding box.
 
-    The contructor uses the (r,c,..) coordinates for the top left corner and
+    The contructor uses the ``(r, c, ...)`` coordinates for the top left corner and
     either the coordinates of the botton right corner or the BoundingBox
-    dimensions (height, width,...).
+    dimensions ``(height, width, ...)``.
 
-    BoundingBoxes can have 2 (rectangle), 3 (3D BoundingBox) or more dimensions.
+    BoundingBoxes can have two (rectangle), three (rectangular prism), or more dimensions.
 
     Parameters
     ----------
@@ -26,14 +25,16 @@ class BoundingBox:
 
     bottom_right : array-like of ints or floats, optional
         (r,c)-coordinates for the bottom right corner of the BoundingBox.
+        Either `bottom_right` or `dimensions` must be specified.
 
     dimensions : array-like of ints or floats, optional
-        dimensions of the BoundingBox (height, width). The default is None.
+        Dimensions of the BoundingBox ``(height, width, ...)``. The default is None.
+        Either `bottom_right` or `dimensions` must be specified.
 
     Raises
     ------
     ValueError
-        If neither or both of bottom_right and dimensions are provided.
+        If neither or both `bottom_right` and `dimensions` are provided.
 
     Attributes
     ----------
@@ -167,7 +168,7 @@ def disjoint(bbox1, bbox2):
 
 def intersect(bbox1, bbox2):
     """
-    Return the BoundingBox corresponding to the intersection of 2 BoundingBoxes.
+    Return the BoundingBox corresponding to the intersection of two BoundingBoxes.
 
     Return None if the two BoundingBoxes do not overlap.
     The intersection of 2 BoundingBoxes can yield a 0-area BoundingBox
@@ -216,7 +217,9 @@ def intersection_over_union(bbox1, bbox2):
     """
     Ratio intersection over union for a pair of BoundingBoxes.
 
-    The intersection over union (IoU) ranges between 0 (no overlap) and 1 (full
+    Intersection over union (IoU) is a metric for the overlap between two bounding boxes.
+    
+    The IoU ranges between 0 (no overlap) and 1 (full
     overlap) and has no unit.
     For 2D BoundingBoxes, the IoU corresponds to a ratio of areas.
     For 3D BoundingBoxes, the IoU corresponds to a ratio of volumes.
