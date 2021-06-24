@@ -65,7 +65,7 @@ jobs:
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
           ASV_FACTOR: 1.4
-          SKIP_SLOW: 1
+          ASV_SKIP_SLOW: 1
         run: |
           set -x
 

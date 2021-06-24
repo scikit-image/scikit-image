@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -149,6 +151,9 @@ class RollingBall(object):
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
+        if os.environ.get("ASV_SKIP_SLOW"):
+            raise NotImplementedError("Skipping...")
+
         from skimage.restoration.rolling_ball import ellipsoid_kernel
         image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
