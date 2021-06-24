@@ -3,7 +3,7 @@
 Estimate strength of blur
 =========================
 
-This example shows how the metric implemented in ``filters.blur_effect``
+This example shows how the metric implemented in ``measure.blur_effect``
 behaves, both as a function of the strength of blur and of the size of the
 re-blurring filter. This no-reference perceptual blur metric is described in
 [1]_.
@@ -25,7 +25,7 @@ import scipy.ndimage as ndi
 import plotly
 import plotly.express as px
 from skimage import (
-    data, color, filters
+    color, data, measure
 )
 
 
@@ -64,9 +64,9 @@ B = pd.DataFrame(
     columns=['h_size = 3', 'h_size = 11', 'h_size = 30']
 )
 for ind, im in enumerate(blurred_images):
-    B.loc[ind, 'h_size = 3'] = filters.blur_effect(im, h_size=3)
-    B.loc[ind, 'h_size = 11'] = filters.blur_effect(im, h_size=11)
-    B.loc[ind, 'h_size = 30'] = filters.blur_effect(im, h_size=30)
+    B.loc[ind, 'h_size = 3'] = measure.blur_effect(im, h_size=3)
+    B.loc[ind, 'h_size = 11'] = measure.blur_effect(im, h_size=11)
+    B.loc[ind, 'h_size = 30'] = measure.blur_effect(im, h_size=30)
 
 B.plot().set(xlabel='blur strength (half the size of uniform filter)',
              ylabel='blur metric');
@@ -79,4 +79,4 @@ plt.show()
 # asymptotically to 1 with increasing blur strength.
 # The value of 11 pixels gives a blur metric which correlates best with human
 # perception. That's why it's the default value in the implementation of the
-# perceptual blur metric ``filters.blur_effect``.
+# perceptual blur metric ``measure.blur_effect``.

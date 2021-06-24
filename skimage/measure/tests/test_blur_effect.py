@@ -2,7 +2,8 @@ from numpy.testing import assert_array_equal
 
 from skimage.color import rgb2gray
 from skimage.data import astronaut, cells3d
-from skimage.filters import blur_effect, gaussian
+from skimage.filters import gaussian
+from skimage.measure import blur_effect
 
 image = astronaut()
 image_3d = cells3d()[:, 1, :, :]  # grab just the nuclei

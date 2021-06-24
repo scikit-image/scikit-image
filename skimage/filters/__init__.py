@@ -21,7 +21,6 @@ from ._median import median
 from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
-from ._blur_effect import blur_effect
 from ._fft_based import butterworth
 
 
@@ -72,4 +71,4 @@ __all__ = ['inverse',
            'rank',
            'unsharp_mask',
            'window',
-           'blur_effect']
+           ]
