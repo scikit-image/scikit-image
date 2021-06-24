@@ -217,7 +217,10 @@ def intersection_over_union(bbox1, bbox2):
     """
     Ratio intersection over union for a pair of BoundingBoxes.
 
-    Intersection over union (IoU) is a metric for the overlap between two bounding boxes.
+    Intersection over union (IoU, also known as Jaccard Index) is a metric for the overlap between two bounding boxes (A and B in the exampel below).
+    
+    .. math:: IoU(A, B) = |A \cap B | / |A \cup B|
+    
     
     The IoU ranges between 0 (no overlap) and 1 (full
     overlap) and has no unit.
