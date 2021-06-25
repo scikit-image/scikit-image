@@ -11,7 +11,7 @@ try:
     from skimage.morphology import disk
 except ImportError:
     from skimage.morphology import circle as disk
-from . import _channel_kwarg
+from . import _channel_kwarg, _skip_slow
 
 
 class RestorationSuite:
@@ -151,14 +151,12 @@ class RollingBall(object):
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
-        if os.environ.get("ASV_SKIP_SLOW"):
-            raise NotImplementedError("Skipping...")
-
         from skimage.restoration.rolling_ball import ellipsoid_kernel
         image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)
+    time_rollingball_ndim.setup = _skip_slow
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
