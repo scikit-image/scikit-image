@@ -49,13 +49,14 @@ References
 .. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-
 import functools
-import numpy as np
 from warnings import warn
+
+import numpy as np
 from scipy import linalg
-from ..util import dtype, dtype_limits
+
 from .._shared.utils import _supported_float_type
+from ..util import dtype, dtype_limits
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -492,6 +493,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
     except KeyError:
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
+
 
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,

@@ -8,14 +8,16 @@ Authors
 :license: modified BSD
 """
 
+import colorsys
 import numpy as np
 import pytest
-from skimage._shared.testing import (assert_allclose, assert_equal,
-                                     assert_almost_equal,
-                                     assert_array_almost_equal, fetch,
-                                     TestCase)
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_almost_equal, assert_equal)
 
-from skimage.util import img_as_float, img_as_ubyte, img_as_float32
+from skimage import data
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
+from skimage._shared.utils import _supported_float_type
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
                            rgb2hed, hed2rgb,
@@ -35,15 +37,10 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb, gray2rgba)
-
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
-from skimage import data
-import colorsys
+from skimage.util import img_as_float, img_as_ubyte, img_as_float32
 
 
-class TestColorconv(TestCase):
+class TestColorconv():
 
     img_rgb = data.colorwheel()
     img_grayscale = data.camera()
@@ -86,14 +83,16 @@ class TestColorconv(TestCase):
         expected = np.array([[[1, 1, 1],
                               [0, 0.5, 1],
                               [0.5, 0.75, 1]]]).astype(float)
-        self.assertEqual(rgb.shape, expected.shape)
+        assert_equal(rgb.shape, expected.shape)
         assert_almost_equal(rgb, expected)
 
     def test_rgba2rgb_error_grayscale(self):
-        self.assertRaises(ValueError, rgba2rgb, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgba2rgb(self.img_grayscale)
 
     def test_rgba2rgb_error_rgb(self):
-        self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
+        with pytest.raises(ValueError):
+            rgba2rgb(self.img_rgb)
 
     def test_rgba2rgb_dtype(self):
         rgba = self.img_rgba.astype('float64')
@@ -113,7 +112,8 @@ class TestColorconv(TestCase):
         assert_almost_equal(hsv, gt)
 
     def test_rgb2hsv_error_grayscale(self):
-        self.assertRaises(ValueError, rgb2hsv, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgb2hsv(self.img_grayscale)
 
     def test_rgb2hsv_dtype(self):
         rgb = img_as_float(self.img_rgb)
@@ -133,7 +133,8 @@ class TestColorconv(TestCase):
         assert_almost_equal(rgb, hsv2rgb(hsv), decimal=4)
 
     def test_hsv2rgb_error_grayscale(self):
-        self.assertRaises(ValueError, hsv2rgb, self.img_grayscale)
+        with pytest.raises(ValueError):
+            hsv2rgb(self.img_grayscale)
 
     def test_hsv2rgb_dtype(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
@@ -161,7 +162,8 @@ class TestColorconv(TestCase):
     # stop repeating the "raises" checks for all other functions that are
     # implemented with color._convert()
     def test_rgb2xyz_error_grayscale(self):
-        self.assertRaises(ValueError, rgb2xyz, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgb2xyz(self.img_grayscale)
 
     def test_rgb2xyz_dtype(self):
         img = self.colbars_array
@@ -270,10 +272,10 @@ class TestColorconv(TestCase):
             assert_almost_equal(
                 convert_colorspace(self.colbars_array, 'RGB', space), gt)
 
-        self.assertRaises(ValueError, convert_colorspace,
-                          self.colbars_array, 'nokey', 'XYZ')
-        self.assertRaises(ValueError, convert_colorspace,
-                          self.colbars_array, 'RGB', 'nokey')
+        with pytest.raises(ValueError):
+            convert_colorspace(self.colbars_array, 'nokey', 'XYZ')
+        with pytest.raises(ValueError):
+            convert_colorspace(self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2gray(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(float)
@@ -790,7 +792,7 @@ def test_rgba2rgb_nD(shape):
     assert out.shape == expected_shape
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rgba2rgb_dtypes(dtype):
     rgba = np.array([[[0, 0.5, 1, 0],
                       [0, 0.5, 1, 1],
@@ -805,7 +807,7 @@ def test_rgba2rgb_dtypes(dtype):
     assert_almost_equal(rgb, expected)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_lab_lch_roundtrip_dtypes(dtype):
     rgb = img_as_float(data.colorwheel()).astype(dtype=dtype, copy=False)
     lab = rgb2lab(rgb)
@@ -816,7 +818,7 @@ def test_lab_lch_roundtrip_dtypes(dtype):
     assert_array_almost_equal(lab2, lab, decimal=decimal)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rgb2hsv_dtypes(dtype):
     rgb = img_as_float(data.colorwheel())[::16, ::16]
     rgb = rgb.astype(dtype=dtype, copy=False)
