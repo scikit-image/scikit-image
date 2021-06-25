@@ -40,8 +40,31 @@ class BoundingBox:
     ----------
     top_left : array of int or float
         The top left corner of the BoundingBox.
+    
     bottom_right : array of int or float
         The bottom right corner of the BoundingBox.
+    
+    height : int or float
+        height of the bounding box/dimension along the y-axis.
+    
+    width : int or float
+       width of the bounding box/dimension along the x-axis.
+    
+    ndim : int or float
+        number of dimensions of the bounding box.
+    
+    area : int or float
+        area of the bounding box in the xy plane, currently only defined for 2D BoundingBox.
+    
+    volume : int or float
+        volume of the bounding box in the xyz space, currently only defined for 3D BoundingBox.
+    
+    integral : int or float
+        integral of the bounding box along all dimensions. Equivalent to area and volume for respectively 2D and 3D BoundingBox.
+    
+    shape : array of int of float
+        shape of the BoundingBox.
+
     """
 
     def __init__(self, top_left, *, bottom_right=None, shape=None):
@@ -197,7 +220,6 @@ def intersect(bbox1, bbox2):
     ...     print('r1 and r2 are not intersecting')
     r1 and r2 are not intersecting
     """
-
     if bbox1 == bbox2:  # return a copy
         return BoundingBox(bbox1.top_left,
                            bottom_right=bbox1.bottom_right)
