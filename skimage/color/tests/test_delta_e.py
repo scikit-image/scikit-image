@@ -1,19 +1,16 @@
 """Test for correctness of color distance functions"""
-from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
+import pytest
+from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
-from skimage._shared import testing
-from skimage._shared.testing import (
-    assert_allclose, assert_equal, assert_almost_equal, fetch
-)
+from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
-from skimage.color.delta_e import (
-    deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, deltaE_cmc
-)
+from skimage.color.delta_e import (deltaE_cie76, deltaE_ciede94,
+                                   deltaE_ciede2000, deltaE_cmc)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_ciede2000_dE(dtype):
     data = load_ciede2000_data()
     N = len(data)
@@ -28,7 +25,7 @@ def test_ciede2000_dE(dtype):
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_ciede2000(lab1, lab2)
-    assert dE2.dtype == np.float64
+    assert dE2.dtype == _supported_float_type(dtype)
 
     rtol = 1e-2 if dtype == np.float32 else 1e-4
     assert_allclose(dE2, data['dE'], rtol=rtol)
@@ -65,7 +62,7 @@ def load_ciede2000_data():
     return np.loadtxt(path, dtype=dtype)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_cie76(dtype):
     data = load_ciede2000_data()
     N = len(data)
@@ -80,7 +77,7 @@ def test_cie76(dtype):
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_cie76(lab1, lab2)
-    assert dE2.dtype == np.float64
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         4.00106328, 6.31415011, 9.1776999, 2.06270077, 2.36957073,
         2.91529271, 2.23606798, 2.23606798, 4.98000036, 4.9800004,
@@ -94,7 +91,7 @@ def test_cie76(dtype):
     assert_allclose(dE2, oracle, rtol=rtol)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_ciede94(dtype):
     data = load_ciede2000_data()
     N = len(data)
@@ -109,7 +106,7 @@ def test_ciede94(dtype):
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_ciede94(lab1, lab2)
-    assert dE2.dtype == np.float64
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.39503887, 1.93410055, 2.45433566, 0.68449187, 0.6695627,
         0.69194527, 2.23606798, 2.03163832, 4.80069441, 4.80069445,
@@ -123,7 +120,7 @@ def test_ciede94(dtype):
     assert_allclose(dE2, oracle, rtol=rtol)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_cmc(dtype):
     data = load_ciede2000_data()
     N = len(data)
@@ -138,7 +135,7 @@ def test_cmc(dtype):
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_cmc(lab1, lab2)
-    assert dE2.dtype == np.float64
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.73873611, 2.49660844, 3.30494501, 0.85735576, 0.88332927,
         0.97822692, 3.50480874, 2.87930032, 6.5783807, 6.57838075,
@@ -148,8 +145,7 @@ def test_cmc(dtype):
         1.2548143, 1.76838061, 2.02583367, 3.08695508, 1.74893533,
         1.90095165, 1.70258148, 1.80317207, 2.44934417
     ])
-
-    rtol = 1e-4 if dtype == np.float32 else 1e-8
+    rtol = 1e-5 if dtype == np.float32 else 1e-8
     assert_allclose(dE2, oracle, rtol=rtol)
 
     # Equal or close colors make `delta_e.get_dH2` function to return
