@@ -62,7 +62,7 @@ class ResizeLocalMeanSuite:
               )
     param_names = ['dtype', 'shape_in', 'shape_out']
 
-    timeout = 120
+    timeout = 180
 
     def setup(self, dtype, shape_in, shape_out):
         self.image = np.zeros(shape_in, dtype=dtype)
