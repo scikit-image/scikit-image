@@ -14,7 +14,7 @@ class BoundingBox:
 
     The contructor uses the ``(r, c, ...)`` coordinates for the top left corner and
     either the coordinates of the botton right corner or the BoundingBox
-    dimensions ``(height, width, ...)``.
+    shape ``(height, width, ...)``.
 
     BoundingBoxes can have two (rectangle), three (rectangular prism), or more dimensions.
 
@@ -25,16 +25,16 @@ class BoundingBox:
 
     bottom_right : array-like of ints or floats, optional
         (r,c)-coordinates for the bottom right corner of the BoundingBox.
-        Either `bottom_right` or `dimensions` must be specified.
+        Either `bottom_right` or `shape` must be specified.
 
-    dimensions : array-like of ints or floats, optional
+    shape : array-like of ints or floats, optional
         Dimensions of the BoundingBox ``(height, width, ...)``. The default is None.
-        Either `bottom_right` or `dimensions` must be specified.
+        Either `bottom_right` or `shape` must be specified.
 
     Raises
     ------
     ValueError
-        If neither or both `bottom_right` and `dimensions` are provided.
+        If neither or both `bottom_right` and `shape` are provided.
 
     Attributes
     ----------
@@ -44,14 +44,14 @@ class BoundingBox:
         The bottom right corner of the BoundingBox.
     """
 
-    def __init__(self, top_left, *, bottom_right=None, dimensions=None):
+    def __init__(self, top_left, *, bottom_right=None, shape=None):
         self.top_left = np.asarray(top_left)
 
-        if (bottom_right is None) and (dimensions is None):
-            raise ValueError("Specify one of bottom_right or dimensions.")
+        if (bottom_right is None) and (shape is None):
+            raise ValueError("Specify one of bottom_right or shape.")
 
-        if (bottom_right is not None) and (dimensions is not None):
-            raise ValueError("Specify bottom_right or dimensions, not both.")
+        if (bottom_right is not None) and (shape is not None):
+            raise ValueError("Specify bottom_right or shape, not both.")
 
         if bottom_right is not None:
             if not np.all(top_left <= bottom_right):
@@ -59,11 +59,11 @@ class BoundingBox:
                                  "larger or equal to the top left corner.")
             self.bottom_right = np.asarray(bottom_right)
 
-        elif dimensions is not None:
-            dimensions = np.asarray(dimensions)
-            if not (dimensions >= 0).all():
+        elif shape is not None:
+            shape = np.asarray(shape)
+            if not (shape >= 0).all():
                 raise ValueError("Dimensions should be positive.")
-            self.bottom_right = self.top_left + dimensions
+            self.bottom_right = self.top_left + shape
 
     @property
     def height(self):
@@ -125,16 +125,16 @@ class BoundingBox:
 
         For 2D/3D shapes, the integral corresponds respectively to the area/volume.
         """
-        return np.prod(self.dimensions)
+        return np.prod(self.shape)
 
     @property
-    def dimensions(self):
+    def shape(self):
         """Return the dimensions of the BoundingBox as an array.
 
         Examples
         --------
         >>> r = BoundingBox((1, 1), bottom_right=(2, 3))
-        >>> r.dimensions
+        >>> r.shape
         array([1, 2])
         """
         return self.bottom_right - self.top_left
@@ -192,7 +192,7 @@ def intersect(bbox1, bbox2):
     >>> intersect(r0, r1)
     BoundingBox((1, 2), bottom_right=(2, 3))
 
-    >>> r2 = BoundingBox((10, 10), dimensions=(3, 3))
+    >>> r2 = BoundingBox((10, 10), shape=(3, 3))
     >>> if intersect(r1, r2) is None:
     ...     print('r1 and r2 are not intersecting')
     r1 and r2 are not intersecting
@@ -214,7 +214,7 @@ def intersect(bbox1, bbox2):
 
 
 def intersection_over_union(bbox1, bbox2):
-    """
+    r"""
     Ratio intersection over union for a pair of BoundingBoxes.
 
     Intersection over union (IoU, also known as Jaccard Index) is a metric for the overlap between two bounding boxes (A and B in the exampel below).
@@ -242,7 +242,6 @@ def intersection_over_union(bbox1, bbox2):
     iou : float
         The intersection over union value.
     """
-
     if (bbox1 == bbox2):
         # Prevent issue with IoU of 0-integral BoundingBox with themselves
         return 1
