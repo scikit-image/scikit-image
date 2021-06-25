@@ -191,3 +191,17 @@ def test_subclass_conversion():
         x = x.astype(dtype)
         y = _convert(x, np.floating)
         assert y.dtype == x.dtype
+
+
+def test_int_to_float():
+    """Check Normalization when casting img_as_float from int types to float"""
+    int_list = np.arange(9, dtype=np.int64)
+    converted = img_as_float(int_list)
+    assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
+
+    ii32 = np.iinfo(np.int32)
+    ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
+    floats = img_as_float(ii_list)
+
+    assert_equal(floats.max(), 1)
+    assert_equal(floats.min(), -1)

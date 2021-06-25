@@ -1047,7 +1047,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     pixel (x,y) neighborhood defined by a rectangular window with size w
     times w centered around the pixel. k is a configurable parameter
     that weights the effect of standard deviation.
-    R is the maximum standard deviation of a greyscale image.
+    R is the maximum standard deviation of a grayscale image.
 
     Parameters
     ----------
