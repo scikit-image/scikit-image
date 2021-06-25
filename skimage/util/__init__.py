@@ -16,7 +16,6 @@ from ._invert import invert
 from ._montage import montage
 from ._map_array import map_array
 from ._label import label_points
-from .crop_bounding_box import bounding_box_crop, download_path
 
 
 @functools.wraps(np.pad)
@@ -49,6 +48,4 @@ __all__ = ['img_as_float32',
            'invert',
            'unique_rows',
            'label_points',
-           'bounding_box_crop',
-           'download_path',
            ]
