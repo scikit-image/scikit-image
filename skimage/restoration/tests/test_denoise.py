@@ -41,7 +41,7 @@ except AttributeError:
     pass
 
 
-@pytest.mark.parametrize('dtype',float_dtypes)
+@pytest.mark.parametrize('dtype', float_dtypes)
 def test_denoise_tv_chambolle_2d(dtype):
     # astronaut image
     img = astro_gray.astype(dtype, copy=True)
@@ -284,8 +284,8 @@ def test_denoise_bilateral_types(dtype):
     img = np.clip(img, 0, 1).astype(dtype)
 
     # check that we can process multiple float types
-    out = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                        sigma_spatial=10, channel_axis=None)
+    restoration.denoise_bilateral(img, sigma_color=0.1,
+                                  sigma_spatial=10, channel_axis=None)
 
 
 @pytest.mark.parametrize('dtype', [np.float32, np.double])
@@ -296,7 +296,7 @@ def test_denoise_bregman_types(dtype):
     img = np.clip(img, 0, 1).astype(dtype)
 
     # check that we can process multiple float types
-    out = restoration.denoise_tv_bregman(img, weight=5)
+    restoration.denoise_tv_bregman(img, weight=5)
 
 
 def test_denoise_bilateral_zeros():
@@ -772,7 +772,7 @@ def test_wavelet_threshold():
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
-    with expected_warnings(["Thresholding method ",]):
+    with expected_warnings(["Thresholding method "]):
         _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
                            threshold=sigma)
 
@@ -1060,7 +1060,7 @@ def test_cycle_spinning_num_workers():
     dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                     func_kw=func_kw, channel_axis=None,
                                     num_workers=1)
-    with expected_warnings([DASK_NOT_INSTALLED_WARNING,]):
+    with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, channel_axis=None,
                                         num_workers=4)
@@ -1111,4 +1111,4 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
 
 
 if __name__ == "__main__":
-    testing.run_module_suite()
+    np.testing.run_module_suite()

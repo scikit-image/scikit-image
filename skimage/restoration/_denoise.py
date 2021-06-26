@@ -32,7 +32,7 @@ def _gaussian_weight(array, sigma_squared, *, dtype=float):
     gaussian : ndarray
         The input array filtered by the Gaussian.
     """
-    return np.exp(-0.5 * (array ** 2  / sigma_squared), dtype=dtype)
+    return np.exp(-0.5 * (array ** 2 / sigma_squared), dtype=dtype)
 
 
 def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
@@ -237,7 +237,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     color_lut = _compute_color_lut(bins, sigma_color, max_value,
                                    dtype=image.dtype)
 
-    range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
+    range_lut = _compute_spatial_lut(win_size, sigma_spatial,
+                                     dtype=image.dtype)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
@@ -257,8 +258,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
 @utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
-def denoise_tv_bregman(image, weight, max_num_iter=100, eps=1e-3, isotropic=True,
-                       *, channel_axis=None, multichannel=False):
+def denoise_tv_bregman(image, weight, max_num_iter=100, eps=1e-3,
+                       isotropic=True, *, channel_axis=None,
+                       multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -328,7 +330,8 @@ def denoise_tv_bregman(image, weight, max_num_iter=100, eps=1e-3, isotropic=True
         channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
         for c in range(image.shape[-1]):
             # the algorithm below expects 3 dimensions to always be present.
-            # slicing the array in this fashion preserves the channel dimension for us
+            # slicing the array in this fashion preserves the channel dimension
+            # for us
             channel_in = np.ascontiguousarray(image[..., c:c+1])
 
             _denoise_tv_bregman(channel_in, image.dtype.type(weight),
@@ -640,7 +643,6 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for image
-        dlen = wavelet.dec_len
         wavelet_levels = pywt.dwtn_max_level(image.shape, wavelet)
 
         # Skip coarsest wavelet scales (see Notes in docstring).

@@ -353,7 +353,10 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         prev_x_postmean = x_postmean
 
         # stop of the algorithm
-        if (iteration > params['min_num_iter']) and (delta < params['threshold']):
+        if (
+            (iteration > params['min_num_iter']) and
+            (delta < params['threshold'])
+        ):
             break
 
     # Empirical average \approx POSTMEAN Eq. 44
