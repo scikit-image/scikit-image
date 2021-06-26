@@ -47,7 +47,7 @@ def test_binary_opening():
     assert_array_equal(binary_res, gray_res)
 
 
-def test_selem_overflow():
+def test_footprint_overflow():
     strel = np.ones((17, 17), dtype=np.uint8)
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
@@ -72,7 +72,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
 
 
 @pytest.mark.parametrize("function", binary_functions)
-def test_default_selem(function):
+def test_default_footprint(function):
     strel = footprint.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -91,7 +91,7 @@ def test_default_selem(function):
     im_test = function(image)
     assert_array_equal(im_expected, im_test)
 
-def test_3d_fallback_default_selem():
+def test_3d_fallback_default_footprint():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
@@ -108,7 +108,7 @@ binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
 
 
 @pytest.mark.parametrize("function", binary_3d_fallback_functions)
-def test_3d_fallback_cube_selem(function):
+def test_3d_fallback_cube_footprint(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
@@ -127,9 +127,9 @@ def test_2d_ndimage_equivalence():
     bin_opened = binary.binary_opening(image)
     bin_closed = binary.binary_closing(image)
 
-    selem = ndi.generate_binary_structure(2, 1)
-    ndimage_opened = ndi.binary_opening(image, structure=selem)
-    ndimage_closed = ndi.binary_closing(image, structure=selem)
+    footprint = ndi.generate_binary_structure(2, 1)
+    ndimage_opened = ndi.binary_opening(image, structure=footprint)
+    ndimage_closed = ndi.binary_closing(image, structure=footprint)
 
     assert_array_equal(bin_opened, ndimage_opened)
     assert_array_equal(bin_closed, ndimage_closed)
