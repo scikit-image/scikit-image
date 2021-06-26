@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from . import uft
 
 
@@ -377,7 +377,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -386,7 +387,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
        Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
-    iterations : int, optional
+    num_iter : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
     clip : boolean, optional
@@ -422,7 +423,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     im_deconv = np.full(image.shape, 0.5, dtype=float_type)
     psf_mirror = np.flip(psf)
 
-    for _ in range(iterations):
+    for _ in range(num_iter):
         conv = convolve(im_deconv, psf, mode='same')
         if filter_epsilon:
             with np.errstate(invalid='ignore'):
