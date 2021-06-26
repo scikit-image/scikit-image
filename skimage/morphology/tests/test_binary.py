@@ -4,6 +4,7 @@ from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
 from skimage import data, color
+from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprint, gray
 
@@ -13,58 +14,67 @@ bw_img = img > 100 / 255.
 
 
 def test_non_square_image():
-    strel = footprint.square(3)
-    binary_res = binary.binary_erosion(bw_img[:100, :200], strel)
-    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], strel))
+    footprint = footprint.square(3)
+    binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
+    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
 
 
+@pytest.mark.parametrize(
+    'function',
+    ['binary_erosion', 'binary_dilation', 'binary_closing', 'binary_opening']
+)
+def test_selem_kwarg_deprecation(function):
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        getattr(binary, function)(bw_img, selem=footprint.square(3))
+
+
 def test_binary_erosion():
-    strel = footprint.square(3)
-    binary_res = binary.binary_erosion(bw_img, strel)
-    gray_res = img_as_bool(gray.erosion(bw_img, strel))
+    footprint = footprint.square(3)
+    binary_res = binary.binary_erosion(bw_img, footprint)
+    gray_res = img_as_bool(gray.erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
-    strel = footprint.square(3)
-    binary_res = binary.binary_dilation(bw_img, strel)
-    gray_res = img_as_bool(gray.dilation(bw_img, strel))
+    footprint = footprint.square(3)
+    binary_res = binary.binary_dilation(bw_img, footprint)
+    gray_res = img_as_bool(gray.dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
-    strel = footprint.square(3)
-    binary_res = binary.binary_closing(bw_img, strel)
-    gray_res = img_as_bool(gray.closing(bw_img, strel))
+    footprint = footprint.square(3)
+    binary_res = binary.binary_closing(bw_img, footprint)
+    gray_res = img_as_bool(gray.closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
-    strel = footprint.square(3)
-    binary_res = binary.binary_opening(bw_img, strel)
-    gray_res = img_as_bool(gray.opening(bw_img, strel))
+    footprint = footprint.square(3)
+    binary_res = binary.binary_opening(bw_img, footprint)
+    gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_footprint_overflow():
-    strel = np.ones((17, 17), dtype=np.uint8)
+    footprint = np.ones((17, 17), dtype=np.uint8)
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
-    binary_res = binary.binary_erosion(img, strel)
-    gray_res = img_as_bool(gray.erosion(img, strel))
+    binary_res = binary.binary_erosion(img, footprint)
+    gray_res = img_as_bool(gray.erosion(img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_out_argument():
     for func in (binary.binary_erosion, binary.binary_dilation):
-        strel = np.ones((3, 3), dtype=np.uint8)
+        footprint = np.ones((3, 3), dtype=np.uint8)
         img = np.ones((10, 10))
         out = np.zeros_like(img)
         out_saved = out.copy()
-        func(img, strel, out=out)
+        func(img, footprint, out=out)
         assert np.any(out != out_saved)
-        assert_array_equal(out, func(img, strel))
+        assert_array_equal(out, func(img, footprint))
 
 
 binary_functions = [binary.binary_erosion, binary.binary_dilation,
@@ -73,7 +83,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
 
 @pytest.mark.parametrize("function", binary_functions)
 def test_default_footprint(function):
-    strel = footprint.diamond(radius=1)
+    footprint = footprint.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -87,7 +97,7 @@ def test_default_footprint(function):
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], np.uint8)
-    im_expected = function(image, strel)
+    im_expected = function(image, footprint)
     im_test = function(image)
     assert_array_equal(im_expected, im_test)
 

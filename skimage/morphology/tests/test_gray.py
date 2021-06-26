@@ -281,3 +281,12 @@ def test_deprecated_import():
     msg = "Importing from skimage.morphology.grey is deprecated."
     with expected_warnings([msg]):
         from skimage.morphology.grey import erosion
+
+
+@pytest.mark.parametrize(
+    'function', ['erosion', 'dilation', 'closing', 'opening', 'white_tophat',
+                 'black_tophat'],
+)
+def test_selem_kwarg_deprecation(function):
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        getattr(gray, function)(np.zeros((4, 4)), selem=np.ones((3, 3)))

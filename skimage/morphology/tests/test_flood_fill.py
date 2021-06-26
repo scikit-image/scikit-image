@@ -19,6 +19,12 @@ def test_empty_input():
     assert flood(np.empty((20, 0, 4)), ()).shape == (20, 0, 4)
 
 
+def test_selem_kwarg_deprecation():
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        output = flood_fill(np.empty(0), (), 2, selem=None)
+    assert output.size == 0
+
+
 def test_float16():
     image = np.array([9., 0.1, 42], dtype=np.float16)
     with pytest.raises(TypeError, match="dtype of `image` is float16"):

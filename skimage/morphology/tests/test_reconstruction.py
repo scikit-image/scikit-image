@@ -146,3 +146,10 @@ def test_deprecated_import():
     msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
     with expected_warnings([msg]):
         from skimage.morphology.greyreconstruct import reconstruction
+
+
+def test_selem_kwarg_deprecation():
+    seed = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    mask = np.array([0, 8, 6, 8, 8, 8, 8, 4, 4, 0])
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        reconstruction(seed, mask, method='dilation', selem=np.ones(3))
