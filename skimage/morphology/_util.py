@@ -54,18 +54,18 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
-def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
+def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     """Compute offsets to a samples neighbors if the image would be raveled.
 
     Parameters
     ----------
     image_shape : tuple
         The shape of the image for which the offsets are computed.
-    selem : ndarray
+    footprint : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
     center : tuple
-        Tuple of indices to the center of `selem`.
+        Tuple of indices to the center of `footprint`.
     order : {"C", "F"}, optional
         Whether the image described by `image_shape` is in row-major (C-style)
         or column-major (Fortran-style) order.
@@ -79,7 +79,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     Notes
     -----
     This function will return values even if `image_shape` contains a dimension
-    length that is smaller than `selem`.
+    length that is smaller than `footprint`.
 
     Examples
     --------
@@ -89,14 +89,14 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     array([ 2, -6,  1, -1,  6, -2,  3,  8, -3, -4,  7, -5, -7, -8,  5,  4, -9,
             9])
     """
-    if not selem.ndim == len(image_shape) == len(center):
+    if not footprint.ndim == len(image_shape) == len(center):
         raise ValueError(
             "number of dimensions in image shape, structuring element and its"
             "center index does not match"
         )
 
-    selem_indices = np.stack(np.nonzero(selem), axis=-1)
-    offsets = selem_indices - center
+    footprint_indices = np.stack(np.nonzero(footprint), axis=-1)
+    offsets = footprint_indices - center
 
     if order == 'F':
         offsets = offsets[:, ::-1]
@@ -113,9 +113,9 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     distances = np.abs(offsets).sum(axis=1)
     raveled_offsets = raveled_offsets[np.argsort(distances)]
 
-    # If any dimension in image_shape is smaller than selem.shape
+    # If any dimension in image_shape is smaller than footprint.shape
     # duplicates might occur, remove them
-    if any(x < y for x, y in zip(image_shape, selem.shape)):
+    if any(x < y for x, y in zip(image_shape, footprint.shape)):
         # np.unique reorders, which we don't want
         _, indices = np.unique(raveled_offsets, return_index=True)
         raveled_offsets = raveled_offsets[np.sort(indices)]
@@ -126,33 +126,33 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     return raveled_offsets
 
 
-def _resolve_neighborhood(selem, connectivity, ndim):
+def _resolve_neighborhood(footprint, connectivity, ndim):
     """Validate or create structuring element.
 
-    Depending on the values of `connectivity` and `selem` this function
-    either creates a new structuring element (`selem` is None) using
-    `connectivity` or validates the given structuring element (`selem` is not
-    None).
+    Depending on the values of `connectivity` and `footprint` this function
+    either creates a new structuring element (`footprint` is None) using
+    `connectivity` or validates the given structuring element (`footprint` is
+    not None).
 
     Parameters
     ----------
-    selem : ndarray
+    footprint : ndarray
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
         boolean array and have the same number of dimensions as `image`. If
-        neither `selem` nor `connectivity` are given, all adjacent pixels are
-        considered as part of the neighborhood.
+        neither `footprint` nor `connectivity` are given, all adjacent pixels
+        are considered as part of the neighborhood.
     connectivity : int
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        `footprint` is not None.
     ndim : int
-        Number of dimensions `selem` ought to have.
+        Number of dimensions `footprint` ought to have.
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         Validated or new structuring element specifying the neighborhood.
 
     Examples
@@ -164,24 +164,24 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     >>> _resolve_neighborhood(None, None, 3).shape
     (3, 3, 3)
     """
-    if selem is None:
+    if footprint is None:
         if connectivity is None:
             connectivity = ndim
-        selem = ndi.generate_binary_structure(ndim, connectivity)
+        footprint = ndi.generate_binary_structure(ndim, connectivity)
     else:
         # Validate custom structured element
-        selem = np.asarray(selem, dtype=bool)
+        footprint = np.asarray(footprint, dtype=bool)
         # Must specify neighbors for all dimensions
-        if selem.ndim != ndim:
+        if footprint.ndim != ndim:
             raise ValueError(
                 "number of dimensions in image and structuring element do not"
                 "match"
             )
         # Must only specify direct neighbors
-        if any(s != 3 for s in selem.shape):
+        if any(s != 3 for s in footprint.shape):
             raise ValueError("dimension size in structuring element is not 3")
 
-    return selem
+    return footprint
 
 
 def _set_border_values(image, value):

@@ -5,12 +5,11 @@ Tests for Morphological structuring elements
 Author: Damian Eads
 """
 import numpy as np
+from numpy.testing import assert_equal
 
 from skimage import data
+from skimage._shared.testing import fetch
 from skimage.morphology import footprint
-
-from skimage._shared.testing import assert_equal, fetch
-from skimage._shared import testing
 
 
 class TestSElem():

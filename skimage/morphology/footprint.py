@@ -23,7 +23,7 @@ def square(width, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
@@ -53,7 +53,7 @@ def rectangle(nrows, ncols, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
@@ -85,7 +85,7 @@ def diamond(radius, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
@@ -113,7 +113,7 @@ def disk(radius, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
@@ -142,14 +142,14 @@ def ellipse(width, height, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
 
     Examples
     --------
-    >>> from skimage.morphology import selem
-    >>> selem.ellipse(5, 3)
+    >>> from skimage.morphology import footprint
+    >>> footprint.ellipse(5, 3)
     array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -159,10 +159,10 @@ def ellipse(width, height, dtype=np.uint8):
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
 
     """
-    selem = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
+    footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
     rows, cols = draw.ellipse(height, width, height + 1, width + 1)
-    selem[rows, cols] = 1
-    return selem
+    footprint[rows, cols] = 1
+    return footprint
 
 
 def cube(width, dtype=np.uint8):
@@ -184,7 +184,7 @@ def cube(width, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
@@ -212,7 +212,7 @@ def octahedron(radius, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
@@ -244,7 +244,7 @@ def ball(radius, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
     """
@@ -278,23 +278,23 @@ def octagon(m, n, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
 
     """
     from . import convex_hull_image
-    selem = np.zeros((m + 2 * n, m + 2 * n))
-    selem[0, n] = 1
-    selem[n, 0] = 1
-    selem[0, m + n - 1] = 1
-    selem[m + n - 1, 0] = 1
-    selem[-1, n] = 1
-    selem[n, -1] = 1
-    selem[-1, m + n - 1] = 1
-    selem[m + n - 1, -1] = 1
-    selem = convex_hull_image(selem).astype(dtype)
-    return selem
+    footprint = np.zeros((m + 2 * n, m + 2 * n))
+    footprint[0, n] = 1
+    footprint[n, 0] = 1
+    footprint[0, m + n - 1] = 1
+    footprint[m + n - 1, 0] = 1
+    footprint[-1, n] = 1
+    footprint[n, -1] = 1
+    footprint[-1, m + n - 1] = 1
+    footprint[m + n - 1, -1] = 1
+    footprint = convex_hull_image(footprint).astype(dtype)
+    return footprint
 
 
 def star(a, dtype=np.uint8):
@@ -317,7 +317,7 @@ def star(a, dtype=np.uint8):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
 
@@ -331,25 +331,26 @@ def star(a, dtype=np.uint8):
 
     m = 2 * a + 1
     n = a // 2
-    selem_square = np.zeros((m + 2 * n, m + 2 * n))
-    selem_square[n: m + n, n: m + n] = 1
+    footprint_square = np.zeros((m + 2 * n, m + 2 * n))
+    footprint_square[n: m + n, n: m + n] = 1
 
     c = (m + 2 * n - 1) // 2
-    selem_rotated = np.zeros((m + 2 * n, m + 2 * n))
-    selem_rotated[0, c] = selem_rotated[-1, c] = 1
-    selem_rotated[c, 0] = selem_rotated[c, -1] = 1
-    selem_rotated = convex_hull_image(selem_rotated).astype(int)
+    footprint_rotated = np.zeros((m + 2 * n, m + 2 * n))
+    footprint_rotated[0, c] = footprint_rotated[-1, c] = 1
+    footprint_rotated[c, 0] = footprint_rotated[c, -1] = 1
+    footprint_rotated = convex_hull_image(footprint_rotated).astype(int)
 
-    selem = selem_square + selem_rotated
-    selem[selem > 0] = 1
+    footprint = footprint_square + footprint_rotated
+    footprint[footprint > 0] = 1
 
-    return selem.astype(dtype)
+    return footprint.astype(dtype)
 
 
-def _default_selem(ndim):
+def _default_footprint(ndim):
     """Generates a cross-shaped structuring element (connectivity=1).
 
-    This is the default structuring element (selem) if no selem was specified.
+    This is the default structuring element (footprint) if no footprint was
+    specified.
 
     Parameters
     ----------
@@ -358,7 +359,7 @@ def _default_selem(ndim):
 
     Returns
     -------
-    selem : ndarray
+    footprint : ndarray
         The structuring element where elements of the neighborhood
         are 1 and 0 otherwise.
 

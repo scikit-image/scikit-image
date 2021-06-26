@@ -3,7 +3,7 @@ import numpy as np
 import functools
 from scipy import ndimage as ndi
 from .._shared.utils import warn, remove_arg
-from .footprint import _default_selem
+from .footprint import _default_footprint
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
@@ -16,7 +16,7 @@ funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
 skimage2ndimage.update({x: x for x in funcs})
 
 
-def default_selem(func):
+def default_footprint(func):
     """Decorator to add a default structuring element to morphology functions.
 
     Parameters
@@ -33,10 +33,10 @@ def default_selem(func):
 
     """
     @functools.wraps(func)
-    def func_out(image, selem=None, *args, **kwargs):
-        if selem is None:
-            selem = _default_selem(image.ndim)
-        return func(image, selem=selem, *args, **kwargs)
+    def func_out(image, footprint=None, *args, **kwargs):
+        if footprint is None:
+            footprint = _default_footprint(image.ndim)
+        return func(image, footprint=footprint, *args, **kwargs)
 
     return func_out
 
@@ -125,9 +125,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
         return out
 
     if out.dtype == bool:
-        selem = ndi.generate_binary_structure(ar.ndim, connectivity)
+        footprint = ndi.generate_binary_structure(ar.ndim, connectivity)
         ccs = np.zeros_like(ar, dtype=np.int32)
-        ndi.label(ar, selem, output=ccs)
+        ndi.label(ar, footprint, output=ccs)
     else:
         ccs = out
 

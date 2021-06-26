@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-from pytest import raises
 
-from skimage.morphology import flood, flood_fill
 from skimage._shared.testing import expected_warnings
+from skimage.morphology import flood, flood_fill
 
 eps = 1e-12
 
@@ -22,7 +21,7 @@ def test_empty_input():
 
 def test_float16():
     image = np.array([9., 0.1, 42], dtype=np.float16)
-    with raises(TypeError, match="dtype of `image` is float16"):
+    with pytest.raises(TypeError, match="dtype of `image` is float16"):
         flood_fill(image, 0, 1)
 
 
@@ -206,14 +205,14 @@ def test_neighbors():
     np.testing.assert_equal(output2, expected)
 
 
-def test_selem():
+def test_footprint():
     # Basic tests for nonstandard structuring elements
-    selem = np.array([[0, 1, 1],
-                      [0, 1, 1],
-                      [0, 0, 0]])  # Cannot grow left or down
+    footprint = np.array([[0, 1, 1],
+                          [0, 1, 1],
+                          [0, 0, 0]])  # Cannot grow left or down
 
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (3, 1), 255,
-                        selem=selem)
+                        footprint=footprint)
 
     expected = np.array([[0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
@@ -223,12 +222,12 @@ def test_selem():
 
     np.testing.assert_equal(output, expected)
 
-    selem = np.array([[0, 0, 0],
-                      [1, 1, 0],
-                      [1, 1, 0]])  # Cannot grow right or up
+    footprint = np.array([[0, 0, 0],
+                          [1, 1, 0],
+                          [1, 1, 0]])  # Cannot grow right or up
 
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
-                        selem=selem)
+                        footprint=footprint)
 
     expected = np.array([[  0,   0,   0,   0,   0,   0],
                          [255, 255, 255, 255, 255,   0],
