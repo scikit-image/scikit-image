@@ -3,10 +3,10 @@ import pytest
 from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
-from skimage import data, color
+from skimage import data, color, morphology
 from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
-from skimage.morphology import binary, footprint, gray
+from skimage.morphology import binary, gray
 
 
 img = color.rgb2gray(data.astronaut())
@@ -14,7 +14,7 @@ bw_img = img > 100 / 255.
 
 
 def test_non_square_image():
-    footprint = footprint.square(3)
+    footprint = morphology.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
     gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
@@ -26,32 +26,32 @@ def test_non_square_image():
 )
 def test_selem_kwarg_deprecation(function):
     with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(binary, function)(bw_img, selem=footprint.square(3))
+        getattr(binary, function)(bw_img, selem=morphology.square(3))
 
 
 def test_binary_erosion():
-    footprint = footprint.square(3)
+    footprint = morphology.square(3)
     binary_res = binary.binary_erosion(bw_img, footprint)
     gray_res = img_as_bool(gray.erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
-    footprint = footprint.square(3)
+    footprint = morphology.square(3)
     binary_res = binary.binary_dilation(bw_img, footprint)
     gray_res = img_as_bool(gray.dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
-    footprint = footprint.square(3)
+    footprint = morphology.square(3)
     binary_res = binary.binary_closing(bw_img, footprint)
     gray_res = img_as_bool(gray.closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
-    footprint = footprint.square(3)
+    footprint = morphology.square(3)
     binary_res = binary.binary_opening(bw_img, footprint)
     gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
@@ -83,7 +83,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
 
 @pytest.mark.parametrize("function", binary_functions)
 def test_default_footprint(function):
-    footprint = footprint.diamond(radius=1)
+    footprint = morphology.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
