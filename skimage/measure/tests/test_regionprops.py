@@ -1,19 +1,18 @@
 import math
 
 import numpy as np
-from numpy import array
+import pytest
+from numpy.testing import (assert_almost_equal, assert_array_equal,
+                           assert_array_almost_equal, assert_equal)
 
 from skimage import data
-from skimage.segmentation import slic
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           perimeter_crofton, euler_number,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
                                           COL_DTYPES)
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
-                                     assert_array_almost_equal, assert_equal)
+from skimage.segmentation import slic
 
 
 SAMPLE = np.array(
@@ -63,11 +62,11 @@ def test_all_props_3d():
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    with testing.raises(TypeError):
+    with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=float))
-    with testing.raises(TypeError):
+    with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
-    with testing.raises(TypeError):
+    with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=bool))
 
 
@@ -77,7 +76,7 @@ def test_ndim():
     regionprops(np.zeros((10, 10, 10), dtype=int))
     regionprops(np.zeros((1, 1), dtype=int))
     regionprops(np.zeros((1, 1, 1), dtype=int))
-    with testing.raises(TypeError):
+    with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10, 10, 2), dtype=int))
 
 
@@ -473,13 +472,13 @@ def test_invalid():
     def get_intensity_image():
         ps[0].image_intensity
 
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         get_intensity_image()
 
 
 def test_invalid_size():
     wrong_intensity_sample = np.array([[1], [1]])
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
 
@@ -551,29 +550,29 @@ def test_docstrings_and_props():
 def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions)
-    assert out == {'label': array([1]),
-                   'bbox-0': array([0]), 'bbox-1': array([0]),
-                   'bbox-2': array([10]), 'bbox-3': array([18])}
+    assert out == {'label': np.array([1]),
+                   'bbox-0': np.array([0]), 'bbox-1': np.array([0]),
+                   'bbox-2': np.array([10]), 'bbox-3': np.array([18])}
 
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([72]),
-                   'bbox+0': array([0]), 'bbox+1': array([0]),
-                   'bbox+2': array([10]), 'bbox+3': array([18])}
+    assert out == {'label': np.array([1]), 'area': np.array([72]),
+                   'bbox+0': np.array([0]), 'bbox+1': np.array([0]),
+                   'bbox+2': np.array([10]), 'bbox+3': np.array([18])}
 
 
 def test_regionprops_table():
     out = regionprops_table(SAMPLE)
-    assert out == {'label': array([1]),
-                   'bbox-0': array([0]), 'bbox-1': array([0]),
-                   'bbox-2': array([10]), 'bbox-3': array([18])}
+    assert out == {'label': np.array([1]),
+                   'bbox-0': np.array([0]), 'bbox-1': np.array([0]),
+                   'bbox-2': np.array([10]), 'bbox-3': np.array([18])}
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([72]),
-                   'bbox+0': array([0]), 'bbox+1': array([0]),
-                   'bbox+2': array([10]), 'bbox+3': array([18])}
+    assert out == {'label': np.array([1]), 'area': np.array([72]),
+                   'bbox+0': np.array([0]), 'bbox+1': np.array([0]),
+                   'bbox+2': np.array([10]), 'bbox+3': np.array([18])}
 
 
 def test_regionprops_table_equal_to_original():
@@ -647,9 +646,9 @@ def test_column_dtypes_correct():
 
 def test_deprecated_coords_argument():
     with expected_warnings(['coordinates keyword argument']):
-        region = regionprops(SAMPLE, coordinates='rc')
-    with testing.raises(ValueError):
-        region = regionprops(SAMPLE, coordinates='xy')
+        regionprops(SAMPLE, coordinates='rc')
+    with pytest.raises(ValueError):
+        regionprops(SAMPLE, coordinates='xy')
 
 
 def pixelcount(regionmask):
@@ -682,16 +681,16 @@ def test_extra_properties_intensity():
 
 
 def test_extra_properties_no_intensity_provided():
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(intensity_median,))[0]
         _ = region.intensity_median
 
 
 def test_extra_properties_nr_args():
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(too_few_args,))[0]
         _ = region.too_few_args
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(too_many_args,))[0]
         _ = region.too_many_args
 
@@ -711,8 +710,8 @@ def test_extra_properties_table():
                             properties=('label',),
                             extra_properties=(intensity_median, pixelcount)
                             )
-    assert_array_almost_equal(out['intensity_median'], array([2., 4.]))
-    assert_array_equal(out['pixelcount'], array([10, 2]))
+    assert_array_almost_equal(out['intensity_median'], np.array([2., 4.]))
+    assert_array_equal(out['pixelcount'], np.array([10, 2]))
 
 
 def test_multichannel():
