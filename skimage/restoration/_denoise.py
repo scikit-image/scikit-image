@@ -256,7 +256,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def denoise_tv_bregman(image, weight, max_num_iter=100, eps=1e-3, isotropic=True,
                        *, channel_axis=None, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
@@ -279,7 +280,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
 
             SUM((u(n) - u(n-1))**2) < eps
 
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
@@ -331,14 +332,14 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
             channel_in = np.ascontiguousarray(image[..., c:c+1])
 
             _denoise_tv_bregman(channel_in, image.dtype.type(weight),
-                                max_iter, eps, isotropic, channel_out)
+                                max_num_iter, eps, isotropic, channel_out)
 
             out[..., c] = channel_out[..., 0]
 
     else:
         image = np.ascontiguousarray(image)
 
-        _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+        _denoise_tv_bregman(image, image.dtype.type(weight), max_num_iter, eps,
                             isotropic, out)
 
     return np.squeeze(out[1:-1, 1:-1])
