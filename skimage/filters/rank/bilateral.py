@@ -25,26 +25,28 @@ References
 
 import numpy as np
 
-from ..._shared.utils import check_nD
+from ..._shared.utils import check_nD, deprecate_kwarg
 from . import bilateral_cy
 from .generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
+def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
     check_nD(image, 2)
-    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
-                                                    out_dtype)
+    image, footprint, out, mask, n_bins = _preprocess_input(
+        image, footprint, out, mask, out_dtype
+    )
 
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins, s0=s0, s1=s1)
 
     return out.reshape(out.shape[:2])
 
 
-def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
 
@@ -64,7 +66,7 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -98,11 +100,12 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._mean, image, selem, out=out,
+    return _apply(bilateral_cy._mean, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Return the local number (population) of pixels.
 
@@ -116,7 +119,7 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -154,11 +157,12 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._pop, image, selem, out=out,
+    return _apply(bilateral_cy._pop, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
 
@@ -166,7 +170,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
     pixels based on their spatial closeness and radiometric similarity.
 
     Spatial closeness is measured by considering only the local pixel
-    neighborhood given by a structuring element (selem).
+    neighborhood given by a structuring element (footprint).
 
     Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
     where g is the current pixel graylevel.
@@ -181,7 +185,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -215,5 +219,5 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._sum, image, selem, out=out,
+    return _apply(bilateral_cy._sum, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)

@@ -49,7 +49,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
-                char[:, ::1] selem,
+                char[:, ::1] footprint,
                 char[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
                 signed char shift_x, signed char shift_y,
@@ -62,12 +62,12 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
-    cdef Py_ssize_t srows = selem.shape[0]
-    cdef Py_ssize_t scols = selem.shape[1]
+    cdef Py_ssize_t srows = footprint.shape[0]
+    cdef Py_ssize_t scols = footprint.shape[1]
     cdef Py_ssize_t odepth = out.shape[2]
 
-    cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[0] / 2) + shift_y
-    cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
+    cdef Py_ssize_t centre_r = <Py_ssize_t>(footprint.shape[0] / 2) + shift_y
+    cdef Py_ssize_t centre_c = <Py_ssize_t>(footprint.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0, f'centre_r {centre_r} < 0'
@@ -89,16 +89,16 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
     cdef double pop = 0
 
     # build attack and release borders by using difference along axis
-    t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
+    t = np.hstack((footprint, np.zeros((footprint.shape[0], 1))))
     cdef unsigned char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
 
-    t = np.hstack((np.zeros((selem.shape[0], 1)), selem))
+    t = np.hstack((np.zeros((footprint.shape[0], 1)), footprint))
     cdef unsigned char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
 
-    t = np.vstack((selem, np.zeros((1, selem.shape[1]))))
+    t = np.vstack((footprint, np.zeros((1, footprint.shape[1]))))
     cdef unsigned char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
 
-    t = np.vstack((np.zeros((1, selem.shape[1])), selem))
+    t = np.vstack((np.zeros((1, footprint.shape[1])), footprint))
     cdef unsigned char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
     # the current local histogram distribution
@@ -153,7 +153,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
             for c in range(scols):
                 rr = r - centre_r
                 cc = c - centre_c
-                if selem[r, c]:
+                if footprint[r, c]:
                     if is_in_mask(rows, cols, rr, cc, mask_data):
                         histogram_increment(histo, &pop, image[rr, cc])
 

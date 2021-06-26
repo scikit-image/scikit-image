@@ -18,7 +18,7 @@ cdef inline dtype_t _min(dtype_t a, dtype_t b) nogil:
     return a if a <= b else b
 
 
-cdef inline void _count_attack_border_elements(char[:, :, ::1] selem,
+cdef inline void _count_attack_border_elements(char[:, :, ::1] footprint,
                                                Py_ssize_t [:, :, ::1] se,
                                                Py_ssize_t [::1] num_se,
                                                Py_ssize_t splanes,
@@ -31,16 +31,24 @@ cdef inline void _count_attack_border_elements(char[:, :, ::1] selem,
     cdef Py_ssize_t r, c, p
 
     # build attack and release borders by using difference along axis
-    t = np.dstack((selem, np.zeros((selem.shape[0], selem.shape[1], 1))))
+    t = np.dstack(
+        (footprint, np.zeros((footprint.shape[0], footprint.shape[1], 1)))
+    )
     cdef unsigned char[:, :, :] t_e = (np.diff(t, axis=2) < 0).view(np.uint8)
 
-    t = np.dstack((np.zeros((selem.shape[0], selem.shape[1], 1)), selem))
+    t = np.dstack(
+        (np.zeros((footprint.shape[0], footprint.shape[1], 1)), footprint)
+    )
     cdef unsigned char[:, :, :] t_w = (np.diff(t, axis=2) > 0).view(np.uint8)
 
-    t = np.hstack((selem, np.zeros((selem.shape[0], 1, selem.shape[2]))))
+    t = np.hstack(
+        (footprint, np.zeros((footprint.shape[0], 1, footprint.shape[2])))
+    )
     cdef unsigned char[:, :, :] t_s = (np.diff(t, axis=1) < 0).view(np.uint8)
 
-    t = np.hstack((np.zeros((selem.shape[0], 1, selem.shape[2])), selem))
+    t = np.hstack(
+        (np.zeros((footprint.shape[0], 1, footprint.shape[2])), footprint)
+    )
     cdef unsigned char[:, :, :] t_n = (np.diff(t, axis=1) > 0).view(np.uint8)
 
     for r in range(srows):
@@ -69,7 +77,7 @@ cdef inline void _count_attack_border_elements(char[:, :, ::1] selem,
 
 
 cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] image,
-                                                            char[:, :, ::1] selem,
+                                                            char[:, :, ::1] footprint,
                                                             Py_ssize_t [::1] histo,
                                                             double* pop,
                                                             char* mask_data,
@@ -93,7 +101,7 @@ cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] i
                 rr = r - centre_r
                 cc = c - centre_c
 
-                if selem[j, r, c]:
+                if footprint[j, r, c]:
                     if is_in_mask_3D(planes, rows, cols, pp, rr, cc,
                                      mask_data):
                         # histogram_increment(histo, pop, image[pp, rr, cc])
@@ -156,7 +164,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
                                dtype_t, Py_ssize_t, Py_ssize_t, double,
                                double, Py_ssize_t, Py_ssize_t) nogil,
                    dtype_t[:, :, ::1] image,
-                   char[:, :, ::1] selem,
+                   char[:, :, ::1] footprint,
                    char[:, :, ::1] mask,
                    dtype_t_out[:, :, :, ::1] out,
                    signed char shift_x, signed char shift_y,
@@ -170,22 +178,28 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
     cdef Py_ssize_t planes = image.shape[0]
     cdef Py_ssize_t rows = image.shape[1]
     cdef Py_ssize_t cols = image.shape[2]
-    cdef Py_ssize_t splanes = selem.shape[0]
-    cdef Py_ssize_t srows = selem.shape[1]
-    cdef Py_ssize_t scols = selem.shape[2]
+    cdef Py_ssize_t splanes = footprint.shape[0]
+    cdef Py_ssize_t srows = footprint.shape[1]
+    cdef Py_ssize_t scols = footprint.shape[2]
     cdef Py_ssize_t odepth = out.shape[3]
 
-    cdef Py_ssize_t centre_p = (selem.shape[0] // 2) + shift_x
-    cdef Py_ssize_t centre_r = (selem.shape[1] // 2) + shift_y
-    cdef Py_ssize_t centre_c = (selem.shape[2] // 2) + shift_z
+    cdef Py_ssize_t centre_p = (footprint.shape[0] // 2) + shift_x
+    cdef Py_ssize_t centre_r = (footprint.shape[1] // 2) + shift_y
+    cdef Py_ssize_t centre_c = (footprint.shape[2] // 2) + shift_z
 
     # check that structuring element center is inside the element bounding box
     if not 0 <= centre_p < splanes:
-        raise ValueError("half selem + shift_x must be between 0 and selem")
+        raise ValueError(
+            "half footprint + shift_x must be between 0 and footprint"
+        )
     if not 0 <= centre_r < srows:
-        raise ValueError("half selem + shift_y must be between 0 and selem")
+        raise ValueError(
+            "half footprint + shift_y must be between 0 and footprint"
+        )
     if not 0 <= centre_c < scols:
-        raise ValueError("half selem + shift_z must be between 0 and selem")
+        raise ValueError(
+            "half footprint + shift_z must be between 0 and footprint"
+        )
 
     cdef Py_ssize_t mid_bin = n_bins // 2
 
@@ -210,14 +224,15 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
     # number of element in each attack border in 4 directions
     cdef Py_ssize_t [::1] num_se = np.zeros(4, dtype=np.intp)
 
-    _count_attack_border_elements(selem, se, num_se, splanes, srows, scols,
+    _count_attack_border_elements(footprint, se, num_se, splanes, srows, scols,
                                   centre_p, centre_r, centre_c)
 
     for p in range(planes):
         histo[:] = 0
         pop = 0
-        _build_initial_histogram_from_neighborhood(image, selem, histo, &pop,
-                                                   mask_data, p, planes, rows, cols,
+        _build_initial_histogram_from_neighborhood(image, footprint, histo,
+                                                   &pop, mask_data, p,
+                                                   planes, rows, cols,
                                                    splanes, srows, scols,
                                                    centre_p, centre_r,
                                                    centre_c)
