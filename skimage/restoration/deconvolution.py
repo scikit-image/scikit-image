@@ -1,12 +1,11 @@
 """Implementations restoration functions"""
-
+import warnings
 
 import numpy as np
 from scipy.signal import convolve
 
-from . import uft
 from .._shared.utils import _supported_float_type
-
+from . import uft
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
@@ -203,9 +202,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     burnin : int
        The number of sample to ignore to start computation of the
        mean. 15 by default.
-    min_iter : int
+    min_num_iter : int
        The minimum number of iterations. 30 by default.
-    max_iter : int
+    max_num_iter : int
        The maximum number of iterations if ``threshold`` is not
        satisfied. 200 by default.
     callback : callable (None by default)
@@ -251,8 +250,20 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
     """
-    params = {'threshold': 1e-4, 'max_iter': 200,
-              'min_iter': 30, 'burnin': 15, 'callback': None}
+
+    if user_params is not None:
+        for s in ('max', 'min'):
+            if (s + '_iter') in user_params:
+                warning_msg = (
+                    f"`{s}_iter` is a deprecated key for `user_params`."
+                    "It will be removed in version 1.0. "
+                    f"Use `{s}_num_iter` instead."
+                )
+                warnings.warn(warning_msg, FutureWarning)
+                user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
+
+    params = {'threshold': 1e-4, 'max_num_iter': 200,
+              'min_num_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
 
     if reg is None:
@@ -295,7 +306,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     rng = np.random.default_rng(random_state)
 
     # Gibbs sampling
-    for iteration in range(params['max_iter']):
+    for iteration in range(params['max_num_iter']):
         # Sample of Eq. 27 p(circX^k | gn^k-1, gx^k-1, y).
 
         # weighting (correlation in direct space)
@@ -342,7 +353,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         prev_x_postmean = x_postmean
 
         # stop of the algorithm
-        if (iteration > params['min_iter']) and (delta < params['threshold']):
+        if (iteration > params['min_num_iter']) and (delta < params['threshold']):
             break
 
     # Empirical average \approx POSTMEAN Eq. 44

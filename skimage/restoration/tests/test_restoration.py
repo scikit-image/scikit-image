@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 from scipy.signal import convolve2d
 
 from skimage import restoration, util
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -74,13 +75,30 @@ def test_unsupervised_wiener(dtype):
     assert otf.real.dtype == _supported_float_type(dtype)
     deconvolved2 = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"callback": lambda x: None},
+        user_params={
+            "callback": lambda x: None,
+            "max_num_iter": 200,
+            "min_num_iter": 30,
+        },
         random_state=seed)[0]
     assert deconvolved2.real.dtype == float_type
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved2),
                                np.load(path),
                                rtol=rtol, atol=atol)
+
+
+def test_unsupervised_wiener_deprecated_user_param():
+    psf = np.ones((5, 5), dtype=float) / 25
+    data = convolve2d(test_img, psf, 'same')
+    otf = uft.ir2tf(psf, data.shape, is_real=False)
+    _, laplacian = uft.laplacian(2, data.shape)
+    with expected_warnings(["`max_iter` is a deprecated key",
+                            "`min_iter` is a deprecated key"]):
+        restoration.unsupervised_wiener(
+            data, otf, reg=laplacian, is_real=False,
+            user_params={"max_iter": 200, "min_iter": 30}, random_state=5
+        )
 
 
 def test_image_shape():
