@@ -354,8 +354,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
         # stop of the algorithm
         if (
-            (iteration > params['min_num_iter']) and
-            (delta < params['threshold'])
+            (iteration > params['min_num_iter'])
+            and (delta < params['threshold'])
         ):
             break
 
