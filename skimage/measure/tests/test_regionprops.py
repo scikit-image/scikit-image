@@ -206,8 +206,8 @@ def test_eccentricity():
     assert_almost_equal(eps, 0)
 
 
-def test_equiv_diameter():
-    diameter = regionprops(SAMPLE)[0].equivalent_diameter
+def test_equivalent_diameter_area():
+    diameter = regionprops(SAMPLE)[0].equivalent_diameter_area
     # determined with MATLAB
     assert_almost_equal(diameter, 9.57461472963)
 

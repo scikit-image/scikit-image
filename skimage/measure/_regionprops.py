@@ -34,7 +34,8 @@ PROPS = {
     'convex_image': 'image_convex',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
-    'EquivDiameter': 'equivalent_diameter',
+    'EquivDiameter': 'equivalent_diameter_area',
+    'equivalent_diameter': 'equivalent_diameter_area',
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
@@ -106,7 +107,7 @@ COL_DTYPES = {
     'centroid_weighted_local': float,
     'coords': object,
     'eccentricity': float,
-    'equivalent_diameter': float,
+    'equivalent_diameter_area': float,
     'euler_number': int,
     'extent': float,
     'feret_diameter_max': float,
@@ -355,7 +356,7 @@ class RegionProperties:
         return sqrt(1 - l2 / l1)
 
     @property
-    def equivalent_diameter(self):
+    def equivalent_diameter_area(self):
         return (2 * self._ndim * self.area / PI) ** (1 / self._ndim)
 
     @property
@@ -999,7 +1000,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         (distance between focal points) over the major axis length.
         The value is in the interval [0, 1).
         When it is 0, the ellipse becomes a circle.
-    **equivalent_diameter** : float
+    **equivalent_diameter_area** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
         Euler characteristic of the set of non-zero pixels.
