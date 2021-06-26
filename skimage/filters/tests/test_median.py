@@ -1,11 +1,10 @@
-import pytest
-
 import numpy as np
+import pytest
+from numpy.testing import assert_allclose
 from scipy import ndimage
 
-from skimage.filters import median
-from skimage.filters import rank
-from skimage._shared.testing import assert_allclose
+from skimage.filters import median, rank
+from skimage._shared.testing import expected_warnings
 
 
 @pytest.fixture
@@ -34,6 +33,11 @@ def test_median_warning(image, mode, cval, behavior,
     assert len(records) == n_warning
     for rec in records:
         assert isinstance(rec.message, warning_type)
+
+
+def test_selem_kwarg_deprecation(image):
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        median(image, selem=None)
 
 
 @pytest.mark.parametrize(
