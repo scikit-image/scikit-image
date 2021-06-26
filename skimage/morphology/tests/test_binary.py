@@ -3,7 +3,7 @@ from numpy import testing
 
 from skimage import data, color
 from skimage.util import img_as_bool
-from skimage.morphology import binary, gray, selem
+from skimage.morphology import binary, footprint, gray
 from scipy import ndimage as ndi
 
 import pytest
@@ -13,35 +13,35 @@ bw_img = img > 100 / 255.
 
 
 def test_non_square_image():
-    strel = selem.square(3)
+    strel = footprint.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], strel)
     gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], strel))
     testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_erosion():
-    strel = selem.square(3)
+    strel = footprint.square(3)
     binary_res = binary.binary_erosion(bw_img, strel)
     gray_res = img_as_bool(gray.erosion(bw_img, strel))
     testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
-    strel = selem.square(3)
+    strel = footprint.square(3)
     binary_res = binary.binary_dilation(bw_img, strel)
     gray_res = img_as_bool(gray.dilation(bw_img, strel))
     testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
-    strel = selem.square(3)
+    strel = footprint.square(3)
     binary_res = binary.binary_closing(bw_img, strel)
     gray_res = img_as_bool(gray.closing(bw_img, strel))
     testing.assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
-    strel = selem.square(3)
+    strel = footprint.square(3)
     binary_res = binary.binary_opening(bw_img, strel)
     gray_res = img_as_bool(gray.opening(bw_img, strel))
     testing.assert_array_equal(binary_res, gray_res)
@@ -73,7 +73,7 @@ binary_functions = [binary.binary_erosion, binary.binary_dilation,
 
 @pytest.mark.parametrize("function", binary_functions)
 def test_default_selem(function):
-    strel = selem.diamond(radius=1)
+    strel = footprint.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],

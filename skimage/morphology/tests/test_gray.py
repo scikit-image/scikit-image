@@ -3,7 +3,7 @@ from scipy import ndimage as ndi
 
 from skimage import color, data, transform
 from skimage.util import img_as_uint, img_as_ubyte
-from skimage.morphology import gray, selem
+from skimage.morphology import gray, footprint
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_equal,
@@ -23,8 +23,8 @@ class TestMorphology(TestCase):
     def _build_expected_output(self):
         funcs = (gray.erosion, gray.dilation, gray.opening, gray.closing,
                  gray.white_tophat, gray.black_tophat)
-        selems_2D = (selem.square, selem.diamond,
-                     selem.disk, selem.star)
+        selems_2D = (footprint.square, footprint.diamond,
+                     footprint.disk, footprint.star)
 
         image = img_as_ubyte(transform.downscale_local_mean(
             color.rgb2gray(data.coffee()), (20, 20)))
@@ -50,8 +50,8 @@ class TestEccentricStructuringElements(TestCase):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
         self.white_pixel = 255 - self.black_pixel
-        self.selems = [selem.square(2), selem.rectangle(2, 2),
-                       selem.rectangle(2, 1), selem.rectangle(1, 2)]
+        self.selems = [footprint.square(2), footprint.rectangle(2, 2),
+                       footprint.rectangle(2, 1), footprint.rectangle(1, 2)]
 
     def test_dilate_erode_symmetry(self):
         for s in self.selems:
@@ -105,7 +105,7 @@ gray_functions = [gray.erosion, gray.dilation,
 
 @parametrize("function", gray_functions)
 def test_default_selem(function):
-    strel = selem.diamond(radius=1)
+    strel = footprint.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
