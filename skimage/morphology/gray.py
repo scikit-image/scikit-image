@@ -259,9 +259,9 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     return out
 
 
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 @default_footprint
 @pad_for_eccentric_footprints
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def opening(image, footprint=None, out=None):
     """Return grayscale morphological opening of an image.
 
@@ -310,9 +310,9 @@ def opening(image, footprint=None, out=None):
     return out
 
 
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 @default_footprint
 @pad_for_eccentric_footprints
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def closing(image, footprint=None, out=None):
     """Return grayscale morphological closing of an image.
 
