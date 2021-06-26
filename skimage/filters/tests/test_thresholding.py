@@ -1,13 +1,15 @@
 import pytest
 import numpy as np
+from numpy.testing import assert_equal, assert_almost_equal, assert_array_equal
 from scipy import ndimage as ndi
 
-from skimage import util
-from skimage import data
+from skimage import data, util
+from skimage._shared._warnings import expected_warnings
 from skimage.color import rgb2gray
 from skimage.draw import disk
-from skimage._shared._warnings import expected_warnings
 from skimage.exposure import histogram
+from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices,
+                                        _get_multiotsu_thresh_indices_lut)
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -22,11 +24,6 @@ from skimage.filters.thresholding import (threshold_local,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
-from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                        _get_multiotsu_thresh_indices)
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal
-from skimage._shared.testing import assert_array_equal
 
 
 class TestSimpleImage():
@@ -366,7 +363,7 @@ def test_li_arbitrary_start_point():
 
 def test_li_negative_inital_guess():
     coins = data.coins()
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         result = threshold_li(coins, initial_guess=-5)
 
 
@@ -412,7 +409,7 @@ def test_yen_coins_image_as_float():
 
 def test_local_even_block_size_error():
     img = data.camera()
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_local(img, block_size=4)
 
 
@@ -509,6 +506,12 @@ def test_threshold_minimum_histogram():
     threshold = threshold_minimum(hist=hist)
     assert_equal(threshold, 85)
 
+def test_threshold_minimum_deprecated_max_iter_kwarg():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    with expected_warnings(["`max_iter` is a deprecated argument"]):
+        threshold_minimum(hist=hist, max_iter=5000)
+
 def test_threshold_minimum_counts():
     camera = util.img_as_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
@@ -526,7 +529,7 @@ def test_threshold_minimum_synthetic():
 
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
-    with testing.raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         threshold_minimum(img)
 
 
@@ -664,13 +667,13 @@ def test_multiotsu_astro_image():
 
 def test_multiotsu_more_classes_then_values():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=2)
     img[:, 3:] = 2
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=3)
     img[:, 6:] = 3
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         threshold_multiotsu(img, classes=4)
 
 
