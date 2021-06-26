@@ -39,7 +39,7 @@ def test_median_warning(image, mode, cval, behavior,
 @pytest.mark.parametrize(
     "behavior, func, params",
     [('ndimage', ndimage.median_filter, {'size': (3, 3)}),
-     ('rank', rank.median, {'selem': np.ones((3, 3), dtype=np.uint8)})]
+     ('rank', rank.median, {'footprint': np.ones((3, 3), dtype=np.uint8)})]
 )
 def test_median_behavior(image, behavior, func, params):
     assert_allclose(median(image, behavior=behavior), func(image, **params))
