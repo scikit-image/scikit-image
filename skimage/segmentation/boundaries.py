@@ -175,9 +175,13 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
             footprint = ndi.generate_binary_structure(ndim, ndim)
             inverted_background = np.array(label_img, copy=True)
             inverted_background[background_image] = max_label
-            adjacent_objects = ((dilation(label_img, footprint) !=
-                                 erosion(inverted_background, footprint)) &
-                                ~background_image)
+            adjacent_objects = (
+                (
+                    dilation(label_img, footprint)
+                    != erosion(inverted_background, footprint)
+                )
+                & ~background_image
+            )
             boundaries &= (background_image | adjacent_objects)
         return boundaries
     else:

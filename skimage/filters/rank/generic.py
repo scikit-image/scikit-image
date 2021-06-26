@@ -1201,9 +1201,9 @@ def noise_filter(image, footprint, out=None, mask=None,
         footprint_cpy[centre_r, centre_c, centre_z] = 0
 
         return _apply_scalar_per_pixel_3D(generic_cy._noise_filter_3D,
-                                          image, footprint_cpy, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
+                                          image, footprint_cpy, out=out,
+                                          mask=mask, shift_x=shift_x,
+                                          shift_y=shift_y, shift_z=shift_z)
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")

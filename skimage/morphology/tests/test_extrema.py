@@ -437,8 +437,8 @@ class TestLocalMaxima(unittest.TestCase):
             np.ones((3, 3), dtype=np.uint8),
             np.ones((3, 3), dtype=bool),
         ]:
-            # Test different dtypes for footprint which expects a boolean array but
-            # will accept and convert other types if possible
+            # Test different dtypes for footprint which expects a boolean array
+            # but will accept and convert other types if possible
             result_footprint_square = extrema.local_maxima(
                 self.image, footprint=footprint
             )

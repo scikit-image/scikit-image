@@ -627,8 +627,8 @@ class TestRank():
             rank.mean(image=image, footprint=elem, out=out, mask=mask,
                       shift_x=0, shift_y=0)
             assert_equal(image, out)
-            rank.geometric_mean(image=image, footprint=elem, out=out, mask=mask,
-                                shift_x=0, shift_y=0)
+            rank.geometric_mean(image=image, footprint=elem, out=out,
+                                mask=mask, shift_x=0, shift_y=0)
             assert_equal(image, out)
             rank.mean_percentile(image=image, footprint=elem, out=out,
                                  mask=mask, shift_x=0, shift_y=0)
@@ -648,7 +648,7 @@ class TestRank():
             with expected_warnings(expected):
                 assert rank.minimum(image, footprint)[10, 10] == 0
                 assert rank.maximum(image, footprint)[10, 10] == value
-                mean_val =  rank.mean(image, footprint)[10, 10]
+                mean_val = rank.mean(image, footprint)[10, 10]
                 assert mean_val == int(value / footprint.size)
 
     def test_bilateral(self):

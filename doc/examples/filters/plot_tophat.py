@@ -21,7 +21,7 @@ from skimage import color, morphology
 
 image = color.rgb2gray(data.hubble_deep_field())[:500, :500]
 
-footprint =  morphology.disk(1)
+footprint = morphology.disk(1)
 res = morphology.white_tophat(image, footprint)
 
 fig, ax = plt.subplots(ncols=3, figsize=(20, 8))

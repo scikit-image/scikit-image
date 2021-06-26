@@ -43,7 +43,8 @@ def binary_erosion(image, footprint=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_erosion(image, structure=footprint, output=out, border_value=True)
+    ndi.binary_erosion(image, structure=footprint, output=out,
+                       border_value=True)
     return out
 
 

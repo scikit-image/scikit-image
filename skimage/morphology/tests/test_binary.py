@@ -101,6 +101,7 @@ def test_default_footprint(function):
     im_test = function(image)
     assert_array_equal(im_expected, im_test)
 
+
 def test_3d_fallback_default_footprint():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)

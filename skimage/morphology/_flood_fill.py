@@ -15,8 +15,8 @@ from ._util import (_resolve_neighborhood, _set_border_values,
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def flood_fill(image, seed_point, new_value, *, footprint=None, connectivity=None,
-               tolerance=None, in_place=False, inplace=None):
+def flood_fill(image, seed_point, new_value, *, footprint=None,
+               connectivity=None, tolerance=None, in_place=False, inplace=None):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -114,8 +114,8 @@ def flood_fill(image, seed_point, new_value, *, footprint=None, connectivity=Non
              category=FutureWarning)
         in_place = inplace
 
-    mask = flood(image, seed_point, footprint=footprint, connectivity=connectivity,
-                 tolerance=tolerance)
+    mask = flood(image, seed_point, footprint=footprint,
+                 connectivity=connectivity, tolerance=tolerance)
 
     if not in_place:
         image = image.copy()
@@ -251,7 +251,8 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
     ravelled_seed_idx = np.ravel_multi_index([i + 1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, footprint, center=((1,) * image.ndim), order=order)
+        working_image.shape, footprint, center=((1,) * image.ndim),
+        order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
     flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)

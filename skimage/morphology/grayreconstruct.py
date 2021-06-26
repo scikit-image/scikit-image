@@ -178,7 +178,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     value_stride = np.array(images.strides[1:]) // images.dtype.itemsize
     image_stride = images.strides[0] // images.dtype.itemsize
     footprint_mgrid = np.mgrid[[slice(-o, d - o)
-                            for d, o in zip(footprint.shape, offset)]]
+                                for d, o in zip(footprint.shape, offset)]]
     footprint_offsets = footprint_mgrid[:, footprint].transpose()
     nb_strides = np.array([np.sum(value_stride * footprint_offset)
                            for footprint_offset in footprint_offsets],

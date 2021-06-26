@@ -243,8 +243,8 @@ def enhance_contrast_percentile(image, footprint, out=None, mask=None,
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def percentile(image, footprint, out=None, mask=None, shift_x=False, shift_y=False,
-               p0=0):
+def percentile(image, footprint, out=None, mask=None, shift_x=False,
+               shift_y=False, p0=0):
     """Return local percentile of an image.
 
     Returns the value of the p0 lower percentile of the local grayvalue

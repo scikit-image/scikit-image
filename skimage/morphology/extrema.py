@@ -290,8 +290,8 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
         boolean array and have the same number of dimensions as `image`. If
-        neither `footprint` nor `connectivity` are given, all adjacent pixels are
-        considered as part of the neighborhood.
+        neither `footprint` nor `connectivity` are given, all adjacent pixels
+        are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
