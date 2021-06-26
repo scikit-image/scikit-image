@@ -16,7 +16,8 @@ from ._util import (_resolve_neighborhood, _set_border_values,
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def flood_fill(image, seed_point, new_value, *, footprint=None,
-               connectivity=None, tolerance=None, in_place=False, inplace=None):
+               connectivity=None, tolerance=None, in_place=False,
+               inplace=None):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
