@@ -70,8 +70,8 @@ img = img_as_ubyte(data.moon())
 img_rescale = exposure.equalize_hist(img)
 
 # Equalization
-selem = disk(30)
-img_eq = rank.equalize(img, selem=selem)
+footprint = disk(30)
+img_eq = rank.equalize(img, footprint=footprint)
 
 
 # Display results
@@ -147,7 +147,7 @@ img_rescale = exposure.equalize_hist(img)
 
 # Local equalization
 neighborhood = ball(3)
-img_eq = rank.equalize(img, selem=neighborhood)
+img_eq = rank.equalize(img, footprint=neighborhood)
 
 # Display results
 fig, axes = plt.subplots(2, 3, figsize=(8, 5))
