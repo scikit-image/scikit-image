@@ -14,13 +14,14 @@ confocal fluorescence microscopy (more details at [1]_ under
 
 """
 
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-
+import plotly
 import plotly.express as px
-from skimage import (
-    data, feature
-)
+
+from skimage import data, feature
 
 
 #####################################################################
@@ -143,7 +144,7 @@ coords
 # Let us view the spatial distribution of the eigenvalues in the X-Y plane
 # where the maximum eigenvalue is found (i.e., ``Z = coords[1]``).
 
-px.imshow(
+fig1 = px.imshow(
     eigen[:, coords[1], :, :],
     facet_col=0,
     labels={'x': 'col', 'y': 'row', 'facet_col': 'rank'},
@@ -172,7 +173,7 @@ eigen[2, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 # Let us visualize the slice of sample data in the X-Y plane where the
 # maximum eigenvalue is found.
 
-px.imshow(
+fig2 = px.imshow(
     sample[coords[1], :, :],
     zmin=v_min,
     zmax=v_max,
@@ -188,13 +189,18 @@ px.imshow(
 # tissue), especially in the Y-Z plane (``longitudinal=1``).
 
 subplots = np.dstack((sample[:, coords[2], :], sample[:, :, coords[3]]))
-px.imshow(
+fig3 = px.imshow(
     subplots,
     zmin=v_min,
     zmax=v_max,
     facet_col=2,
     labels={'facet_col': 'longitudinal'}
 )
+
+if 'SKIMAGE_DISABLE_PLOTLY_SHOW' not in os.environ:
+    plotly.io.show(fig1)
+    plotly.io.show(fig2)
+    plotly.io.show(fig3)
 
 #####################################################################
 # As a conclusion, the region about voxel
