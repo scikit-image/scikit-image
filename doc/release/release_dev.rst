@@ -80,6 +80,9 @@ Bugfixes
   (#4756).
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
+- Nonzero values at the image edge are no longer incorrectly marked as a
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
+
 
 Deprecations
 ------------
