@@ -34,8 +34,7 @@ def _find_boundaries_subpixel(label_img):
     edges = np.ones(label_img_expanded.shape, dtype=bool)
     edges[pixels] = False
     label_img_expanded[edges] = max_label
-    windows = view_as_windows(np.pad(label_img_expanded, 1,
-                                     mode='constant', constant_values=0),
+    windows = view_as_windows(np.pad(label_img_expanded, 1, mode='edge'),
                               (3,) * ndim)
 
     boundaries = np.zeros_like(edges)
