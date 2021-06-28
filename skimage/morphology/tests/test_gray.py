@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import TestCase, fetch
-from skimage.morphology import gray, footprint
+from skimage.morphology import gray, footprints
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -23,8 +23,8 @@ class TestMorphology():
     def _build_expected_output(self):
         funcs = (gray.erosion, gray.dilation, gray.opening, gray.closing,
                  gray.white_tophat, gray.black_tophat)
-        footprints_2D = (footprint.square, footprint.diamond,
-                         footprint.disk, footprint.star)
+        footprints_2D = (footprints.square, footprints.diamond,
+                         footprints.disk, footprints.star)
 
         image = img_as_ubyte(transform.downscale_local_mean(
             color.rgb2gray(data.coffee()), (20, 20)))
@@ -50,9 +50,9 @@ class TestEccentricStructuringElements(TestCase):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
         self.white_pixel = 255 - self.black_pixel
-        self.footprints = [footprint.square(2), footprint.rectangle(2, 2),
-                           footprint.rectangle(2, 1),
-                           footprint.rectangle(1, 2)]
+        self.footprints = [footprints.square(2), footprints.rectangle(2, 2),
+                           footprints.rectangle(2, 1),
+                           footprints.rectangle(1, 2)]
 
     def test_dilate_erode_symmetry(self):
         for s in self.footprints:
@@ -106,7 +106,7 @@ gray_functions = [gray.erosion, gray.dilation,
 
 @pytest.mark.parametrize("function", gray_functions)
 def test_default_footprint(function):
-    strel = footprint.diamond(radius=1)
+    strel = footprints.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],

@@ -3,7 +3,7 @@ import numpy as np
 import functools
 from scipy import ndimage as ndi
 from .._shared.utils import warn, remove_arg
-from .footprint import _default_footprint
+from .footprints import _default_footprint
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.

@@ -2,7 +2,7 @@ from .binary import (binary_erosion, binary_dilation, binary_opening,
                      binary_closing)
 from .gray import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
-from .footprint import (
+from .footprints import (
     square, rectangle, diamond, disk, cube, octahedron, ball, octagon, star
 )
 from ..measure._label import label

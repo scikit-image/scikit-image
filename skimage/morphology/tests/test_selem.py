@@ -9,7 +9,7 @@ from numpy.testing import assert_equal
 
 from skimage import data
 from skimage._shared.testing import fetch
-from skimage.morphology import footprint
+from skimage.morphology import footprints
 
 
 class TestSElem():
@@ -17,7 +17,7 @@ class TestSElem():
     def test_square_footprint(self):
         """Test square structuring elements"""
         for k in range(0, 5):
-            actual_mask = footprint.square(k)
+            actual_mask = footprints.square(k)
             expected_mask = np.ones((k, k), dtype='uint8')
             assert_equal(expected_mask, actual_mask)
 
@@ -25,14 +25,14 @@ class TestSElem():
         """Test rectangle structuring elements"""
         for i in range(0, 5):
             for j in range(0, 5):
-                actual_mask = footprint.rectangle(i, j)
+                actual_mask = footprints.rectangle(i, j)
                 expected_mask = np.ones((i, j), dtype='uint8')
                 assert_equal(expected_mask, actual_mask)
 
     def test_cube_footprint(self):
         """Test cube structuring elements"""
         for k in range(0, 5):
-            actual_mask = footprint.cube(k)
+            actual_mask = footprints.cube(k)
             expected_mask = np.ones((k, k, k), dtype='uint8')
             assert_equal(expected_mask, actual_mask)
 
@@ -66,20 +66,20 @@ class TestSElem():
 
     def test_footprint_disk(self):
         """Test disk structuring elements"""
-        self.strel_worker("data/disk-matlab-output.npz", footprint.disk)
+        self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
 
     def test_footprint_diamond(self):
         """Test diamond structuring elements"""
-        self.strel_worker("data/diamond-matlab-output.npz", footprint.diamond)
+        self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
 
     def test_footprint_ball(self):
         """Test ball structuring elements"""
-        self.strel_worker_3d("data/disk-matlab-output.npz", footprint.ball)
+        self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
 
     def test_footprint_octahedron(self):
         """Test octahedron structuring elements"""
         self.strel_worker_3d("data/diamond-matlab-output.npz",
-                             footprint.octahedron)
+                             footprints.octahedron)
 
     def test_footprint_octagon(self):
         """Test octagon structuring elements"""
@@ -95,11 +95,11 @@ class TestSElem():
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]],
                                   dtype=np.uint8)
-        actual_mask1 = footprint.octagon(5, 3)
+        actual_mask1 = footprints.octagon(5, 3)
         expected_mask2 = np.array([[0, 1, 0],
                                    [1, 1, 1],
                                    [0, 1, 0]], dtype=np.uint8)
-        actual_mask2 = footprint.octagon(1, 1)
+        actual_mask2 = footprints.octagon(1, 1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
@@ -112,15 +112,15 @@ class TestSElem():
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=np.uint8)
-        actual_mask1 = footprint.ellipse(5, 3)
+        actual_mask1 = footprints.ellipse(5, 3)
         expected_mask2 = np.array([[1, 1, 1],
                                    [1, 1, 1],
                                    [1, 1, 1]], dtype=np.uint8)
-        actual_mask2 = footprint.ellipse(1, 1)
+        actual_mask2 = footprints.ellipse(1, 1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
-        assert_equal(expected_mask1, footprint.ellipse(3, 5).T)
-        assert_equal(expected_mask2, footprint.ellipse(1, 1).T)
+        assert_equal(expected_mask1, footprints.ellipse(3, 5).T)
+        assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
 
     def test_footprint_star(self):
         """Test star structuring elements"""
@@ -138,10 +138,10 @@ class TestSElem():
                                    [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
                                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
                                   dtype=np.uint8)
-        actual_mask1 = footprint.star(4)
+        actual_mask1 = footprints.star(4)
         expected_mask2 = np.array([[1, 1, 1],
                                    [1, 1, 1],
                                    [1, 1, 1]], dtype=np.uint8)
-        actual_mask2 = footprint.star(1)
+        actual_mask2 = footprints.star(1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
