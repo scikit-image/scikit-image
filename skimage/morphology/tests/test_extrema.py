@@ -407,17 +407,17 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_connectivity(self):
         """Test results if footprint is a scalar."""
-        # Connectivity 1: generates cross shaped structuring element
+        # Connectivity 1: generates cross shaped footprint
         result_conn1 = extrema.local_maxima(self.image, connectivity=1)
         assert result_conn1.dtype == bool
         assert_equal(result_conn1, self.expected_cross)
 
-        # Connectivity 2: generates square shaped structuring element
+        # Connectivity 2: generates square shaped footprint
         result_conn2 = extrema.local_maxima(self.image, connectivity=2)
         assert result_conn2.dtype == bool
         assert_equal(result_conn2, self.expected_default)
 
-        # Connectivity 3: generates square shaped structuring element
+        # Connectivity 3: generates square shaped footprint
         result_conn3 = extrema.local_maxima(self.image, connectivity=3)
         assert result_conn3.dtype == bool
         assert_equal(result_conn3, self.expected_default)
@@ -614,7 +614,7 @@ class TestLocalMaxima(unittest.TestCase):
         """Test output for arrays with dimension smaller 3.
 
         If any dimension of an array is smaller than 3 and `allow_borders` is
-        false a structuring element, which has at least 3 elements in each
+        false a footprint, which has at least 3 elements in each
         dimension, can't be applied. This is an implementation detail so
         `local_maxima` should still return valid output (see gh-3261).
 

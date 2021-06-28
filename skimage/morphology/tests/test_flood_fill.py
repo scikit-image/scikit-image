@@ -212,7 +212,7 @@ def test_neighbors():
 
 
 def test_footprint():
-    # Basic tests for nonstandard structuring elements
+    # Basic tests for nonstandard footprints
     footprint = np.array([[0, 1, 1],
                           [0, 1, 1],
                           [0, 0, 0]])  # Cannot grow left or down

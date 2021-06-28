@@ -1,5 +1,5 @@
 """
-Tests for Morphological structuring elements
+Tests for Morphological footprints
 (skimage.morphology.footprint)
 
 Author: Damian Eads
@@ -15,14 +15,14 @@ from skimage.morphology import footprints
 class TestSElem():
 
     def test_square_footprint(self):
-        """Test square structuring elements"""
+        """Test square footprints"""
         for k in range(0, 5):
             actual_mask = footprints.square(k)
             expected_mask = np.ones((k, k), dtype='uint8')
             assert_equal(expected_mask, actual_mask)
 
     def test_rectangle_footprint(self):
-        """Test rectangle structuring elements"""
+        """Test rectangle footprints"""
         for i in range(0, 5):
             for j in range(0, 5):
                 actual_mask = footprints.rectangle(i, j)
@@ -30,7 +30,7 @@ class TestSElem():
                 assert_equal(expected_mask, actual_mask)
 
     def test_cube_footprint(self):
-        """Test cube structuring elements"""
+        """Test cube footprints"""
         for k in range(0, 5):
             actual_mask = footprints.cube(k)
             expected_mask = np.ones((k, k, k), dtype='uint8')
@@ -65,24 +65,24 @@ class TestSElem():
             k = k + 1
 
     def test_footprint_disk(self):
-        """Test disk structuring elements"""
+        """Test disk footprints"""
         self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
 
     def test_footprint_diamond(self):
-        """Test diamond structuring elements"""
+        """Test diamond footprints"""
         self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
 
     def test_footprint_ball(self):
-        """Test ball structuring elements"""
+        """Test ball footprints"""
         self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
 
     def test_footprint_octahedron(self):
-        """Test octahedron structuring elements"""
+        """Test octahedron footprints"""
         self.strel_worker_3d("data/diamond-matlab-output.npz",
                              footprints.octahedron)
 
     def test_footprint_octagon(self):
-        """Test octagon structuring elements"""
+        """Test octagon footprints"""
         expected_mask1 = np.array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -104,7 +104,7 @@ class TestSElem():
         assert_equal(expected_mask2, actual_mask2)
 
     def test_footprint_ellipse(self):
-        """Test ellipse structuring elements"""
+        """Test ellipse footprints"""
         expected_mask1 = np.array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -123,7 +123,7 @@ class TestSElem():
         assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
 
     def test_footprint_star(self):
-        """Test star structuring elements"""
+        """Test star footprints"""
         expected_mask1 = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                                    [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],

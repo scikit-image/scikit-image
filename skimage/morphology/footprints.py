@@ -6,7 +6,7 @@ from .._shared.utils import deprecate_kwarg
 
 
 def square(width, dtype=np.uint8):
-    """Generates a flat, square-shaped structuring element.
+    """Generates a flat, square-shaped footprint.
 
     Every pixel along the perimeter has a chessboard distance
     no greater than radius (radius=floor(width/2)) pixels.
@@ -19,13 +19,13 @@ def square(width, dtype=np.uint8):
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        A structuring element consisting only of ones, i.e. every
-        pixel belongs to the neighborhood.
+        A footprint consisting only of ones, i.e. every pixel belongs to the
+        neighborhood.
 
     """
     return np.ones((width, width), dtype=dtype)
@@ -34,7 +34,7 @@ def square(width, dtype=np.uint8):
 @deprecate_kwarg({"height": "ncols", "width": "nrows"},
                  removed_version="0.20.0")
 def rectangle(nrows, ncols, dtype=np.uint8):
-    """Generates a flat, rectangular-shaped structuring element.
+    """Generates a flat, rectangular-shaped footprint.
 
     Every pixel in the rectangle generated for a given width and given height
     belongs to the neighborhood.
@@ -49,13 +49,13 @@ def rectangle(nrows, ncols, dtype=np.uint8):
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        A structuring element consisting only of ones, i.e. every
-        pixel belongs to the neighborhood.
+        A footprint consisting only of ones, i.e. every pixel belongs to the
+        neighborhood.
 
     Notes
     -----
@@ -67,7 +67,7 @@ def rectangle(nrows, ncols, dtype=np.uint8):
 
 
 def diamond(radius, dtype=np.uint8):
-    """Generates a flat, diamond-shaped structuring element.
+    """Generates a flat, diamond-shaped footprint.
 
     A pixel is part of the neighborhood (i.e. labeled 1) if
     the city block/Manhattan distance between it and the center of
@@ -76,18 +76,17 @@ def diamond(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-        The radius of the diamond-shaped structuring element.
+        The radius of the diamond-shaped footprint.
 
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
     """
     L = np.arange(0, radius * 2 + 1)
     I, J = np.meshgrid(L, L)
@@ -96,7 +95,7 @@ def diamond(radius, dtype=np.uint8):
 
 
 def disk(radius, dtype=np.uint8):
-    """Generates a flat, disk-shaped structuring element.
+    """Generates a flat, disk-shaped footprint.
 
     A pixel is within the neighborhood if the Euclidean distance between
     it and the origin is no greater than radius.
@@ -104,18 +103,17 @@ def disk(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-        The radius of the disk-shaped structuring element.
+        The radius of the disk-shaped footprint.
 
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
     """
     L = np.arange(-radius, radius + 1)
     X, Y = np.meshgrid(L, L)
@@ -123,7 +121,7 @@ def disk(radius, dtype=np.uint8):
 
 
 def ellipse(width, height, dtype=np.uint8):
-    """Generates a flat, ellipse-shaped structuring element.
+    """Generates a flat, ellipse-shaped footprint.
 
     Every pixel along the perimeter of ellipse satisfies
     the equation ``(x/width+1)**2 + (y/height+1)**2 = 1``.
@@ -131,20 +129,19 @@ def ellipse(width, height, dtype=np.uint8):
     Parameters
     ----------
     width : int
-        The width of the ellipse-shaped structuring element.
+        The width of the ellipse-shaped footprint.
     height : int
-        The height of the ellipse-shaped structuring element.
+        The height of the ellipse-shaped footprint.
 
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     Examples
     --------
@@ -166,7 +163,7 @@ def ellipse(width, height, dtype=np.uint8):
 
 
 def cube(width, dtype=np.uint8):
-    """ Generates a cube-shaped structuring element.
+    """ Generates a cube-shaped footprint.
 
     This is the 3D equivalent of a square.
     Every pixel along the perimeter has a chessboard distance
@@ -180,20 +177,20 @@ def cube(width, dtype=np.uint8):
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        A structuring element consisting only of ones, i.e. every
-        pixel belongs to the neighborhood.
+        A footprint consisting only of ones, i.e. every pixel belongs to the
+        neighborhood.
 
     """
     return np.ones((width, width, width), dtype=dtype)
 
 
 def octahedron(radius, dtype=np.uint8):
-    """Generates a octahedron-shaped structuring element.
+    """Generates a octahedron-shaped footprint.
 
     This is the 3D equivalent of a diamond.
     A pixel is part of the neighborhood (i.e. labeled 1) if
@@ -203,18 +200,17 @@ def octahedron(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-        The radius of the octahedron-shaped structuring element.
+        The radius of the octahedron-shaped footprint.
 
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
@@ -226,7 +222,7 @@ def octahedron(radius, dtype=np.uint8):
 
 
 def ball(radius, dtype=np.uint8):
-    """Generates a ball-shaped structuring element.
+    """Generates a ball-shaped footprint.
 
     This is the 3D equivalent of a disk.
     A pixel is within the neighborhood if the Euclidean distance between
@@ -235,18 +231,17 @@ def ball(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-        The radius of the ball-shaped structuring element.
+        The radius of the ball-shaped footprint.
 
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
     Z, Y, X = np.mgrid[-radius:radius:n * 1j,
@@ -257,7 +252,7 @@ def ball(radius, dtype=np.uint8):
 
 
 def octagon(m, n, dtype=np.uint8):
-    """Generates an octagon shaped structuring element.
+    """Generates an octagon shaped footprint.
 
     For a given size of (m) horizontal and vertical sides
     and a given (n) height or width of slanted sides octagon is generated.
@@ -274,13 +269,12 @@ def octagon(m, n, dtype=np.uint8):
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     """
     from . import convex_hull_image
@@ -298,7 +292,7 @@ def octagon(m, n, dtype=np.uint8):
 
 
 def star(a, dtype=np.uint8):
-    """Generates a star shaped structuring element.
+    """Generates a star shaped footprint.
 
     Start has 8 vertices and is an overlap of square of size `2*a + 1`
     with its 45 degree rotated version.
@@ -313,13 +307,12 @@ def star(a, dtype=np.uint8):
     Other Parameters
     ----------------
     dtype : data-type
-        The data type of the structuring element.
+        The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     """
     from . import convex_hull_image
@@ -347,9 +340,9 @@ def star(a, dtype=np.uint8):
 
 
 def _default_footprint(ndim):
-    """Generates a cross-shaped structuring element (connectivity=1).
+    """Generates a cross-shaped footprint (connectivity=1).
 
-    This is the default structuring element (footprint) if no footprint was
+    This is the default footprint (footprint) if no footprint was
     specified.
 
     Parameters
@@ -360,8 +353,7 @@ def _default_footprint(ndim):
     Returns
     -------
     footprint : ndarray
-        The structuring element where elements of the neighborhood
-        are 1 and 0 otherwise.
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     """
     return ndi.generate_binary_structure(ndim, 1)

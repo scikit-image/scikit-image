@@ -67,9 +67,8 @@ def autolevel_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -105,9 +104,8 @@ def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -143,9 +141,8 @@ def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -181,9 +178,8 @@ def subtract_mean_percentile(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -223,9 +219,8 @@ def enhance_contrast_percentile(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -264,9 +259,8 @@ def percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
@@ -288,7 +282,7 @@ def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
-    in the structuring element and the mask.
+    in the footprint and the mask.
 
     Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
@@ -304,9 +298,8 @@ def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -345,9 +338,8 @@ def sum_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -386,9 +378,8 @@ def threshold_percentile(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0 : float in [0, ..., 1]
         Set the percentile value.
 

@@ -17,7 +17,7 @@ skimage2ndimage.update({x: x for x in funcs})
 
 
 def default_footprint(func):
-    """Decorator to add a default structuring element to morphology functions.
+    """Decorator to add a default footprint to morphology functions.
 
     Parameters
     ----------
@@ -28,7 +28,7 @@ def default_footprint(func):
     Returns
     -------
     func_out : function
-        The function, using a default structuring element of same dimension
+        The function, using a default footprint of same dimension
         as the input image with connectivity 1.
 
     """

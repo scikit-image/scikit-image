@@ -239,7 +239,7 @@ class TestRank():
         assert_equal(r, out)
 
     def test_structuring_element8(self):
-        # check the output for a custom structuring element
+        # check the output for a custom footprint
 
         r = np.array([[0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0],
@@ -432,7 +432,7 @@ class TestRank():
             assert_equal(f8, f16)
 
     def test_trivial_footprint8(self):
-        # check that min, max and mean returns identity if structuring element
+        # check that min, max and mean returns identity if footprint
         # contains only central pixel
 
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -457,7 +457,7 @@ class TestRank():
         assert_equal(image, out)
 
     def test_trivial_footprint16(self):
-        # check that min, max and mean returns identity if structuring element
+        # check that min, max and mean returns identity if footprint
         # contains only central pixel
 
         image = np.zeros((5, 5), dtype=np.uint16)
@@ -482,7 +482,7 @@ class TestRank():
         assert_equal(image, out)
 
     def test_smallest_footprint8(self):
-        # check that min, max and mean returns identity if structuring element
+        # check that min, max and mean returns identity if footprint
         # contains only central pixel
 
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -504,7 +504,7 @@ class TestRank():
         assert_equal(image, out)
 
     def test_smallest_footprint16(self):
-        # check that min, max and mean returns identity if structuring element
+        # check that min, max and mean returns identity if footprint
         # contains only central pixel
 
         image = np.zeros((5, 5), dtype=np.uint16)
@@ -529,8 +529,7 @@ class TestRank():
         assert_equal(image, out)
 
     def test_empty_footprint(self):
-        # check that min, max and mean returns zeros if structuring element is
-        # empty
+        # check that min, max and mean returns zeros if footprint is empty
 
         image = np.zeros((5, 5), dtype=np.uint16)
         out = np.zeros_like(image)

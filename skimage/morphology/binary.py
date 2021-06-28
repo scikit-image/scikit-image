@@ -8,7 +8,7 @@ from .._shared.utils import deprecate_kwarg
 from .misc import default_footprint
 
 
-# The default_footprint decorator provides a diamond structuring element as
+# The default_footprint decorator provides a diamond footprint as
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
@@ -29,7 +29,7 @@ def binary_erosion(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -66,7 +66,7 @@ def binary_dilation(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -102,7 +102,7 @@ def binary_opening(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -137,7 +137,7 @@ def binary_closing(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.

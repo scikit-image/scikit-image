@@ -287,11 +287,11 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
     image : ndarray
         An n-dimensional array.
     footprint : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `footprint` nor `connectivity` are given, all adjacent pixels
-        are considered as part of the neighborhood.
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
@@ -402,7 +402,7 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
 
     if any(s < 3 for s in image.shape):
         # Warn and skip if any dimension is smaller than 3
-        # -> no maxima can exist & structuring element can't be applied
+        # -> no maxima can exist & footprint can't be applied
         warn(
             "maxima can't exist for an image with any dimension smaller 3 "
             "if borders aren't allowed",
@@ -452,11 +452,11 @@ def local_minima(image, footprint=None, connectivity=None, indices=False,
     image : ndarray
         An n-dimensional array.
     footprint : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `footprint` nor `connectivity` are given, all adjacent pixels
-        are considered as part of the neighborhood.
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or

@@ -187,7 +187,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
     cdef Py_ssize_t centre_r = (footprint.shape[1] // 2) + shift_y
     cdef Py_ssize_t centre_c = (footprint.shape[2] // 2) + shift_z
 
-    # check that structuring element center is inside the element bounding box
+    # check that footprint center is inside the element bounding box
     if not 0 <= centre_p < splanes:
         raise ValueError(
             "half footprint + shift_x must be between 0 and footprint"
@@ -217,7 +217,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
 
     # these lists contain the relative pixel plane, row and column for each of
     # the 4 attack borders east, north, west and south
-    # e.g. se[0, 0, :] lists the planes of the east structuring element border
+    # e.g. se[0, 0, :] lists the planes of the east footprint border
     cdef Py_ssize_t se_size = splanes * srows * scols
     cdef Py_ssize_t [:, :, ::1] se = np.zeros([4, 3, se_size], dtype=np.intp)
 

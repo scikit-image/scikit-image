@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 
 
 def _validate_connectivity(image_dim, connectivity, offset):
-    """Convert any valid connectivity to a structuring element and offset.
+    """Convert any valid connectivity to a footprint and offset.
 
     Parameters
     ----------
@@ -16,17 +16,18 @@ def _validate_connectivity(image_dim, connectivity, offset):
         The neighborhood connectivity. An integer is interpreted as in
         ``scipy.ndimage.generate_binary_structure``, as the maximum number
         of orthogonal steps to reach a neighbor. An array is directly
-        interpreted as a structuring element and its shape is validated against
+        interpreted as a footprint and its shape is validated against
         the input image shape. ``None`` is interpreted as a connectivity of 1.
     offset : tuple of int, or None
-        The coordinates of the center of the structuring element.
+        The coordinates of the center of the footprint.
 
     Returns
     -------
     c_connectivity : array of bool
-        The structuring element corresponding to the input `connectivity`.
+        The footprint (structuring element) corresponding to the input
+        `connectivity`.
     offset : array of int
-        The offset corresponding to the center of the structuring element.
+        The offset corresponding to the center of the footprint.
 
     Raises
     ------
@@ -62,8 +63,8 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     image_shape : tuple
         The shape of the image for which the offsets are computed.
     footprint : ndarray
-        A structuring element determining the neighborhood expressed as an
-        n-D array of 1's and 0's.
+        The footprint (structuring element) determining the neighborhood
+        expressed as an n-D array of 1's and 0's.
     center : tuple
         Tuple of indices to the center of `footprint`.
     order : {"C", "F"}, optional
@@ -91,7 +92,7 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     """
     if not footprint.ndim == len(image_shape) == len(center):
         raise ValueError(
-            "number of dimensions in image shape, structuring element and its"
+            "number of dimensions in image shape, footprint and its"
             "center index does not match"
         )
 
@@ -127,21 +128,20 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
 
 
 def _resolve_neighborhood(footprint, connectivity, ndim):
-    """Validate or create structuring element.
+    """Validate or create a footprint (structuring element).
 
     Depending on the values of `connectivity` and `footprint` this function
-    either creates a new structuring element (`footprint` is None) using
-    `connectivity` or validates the given structuring element (`footprint` is
-    not None).
+    either creates a new footprint (`footprint` is None) using `connectivity`
+    or validates the given footprint (`footprint` is not None).
 
     Parameters
     ----------
     footprint : ndarray
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `footprint` nor `connectivity` are given, all adjacent pixels
-        are considered as part of the neighborhood.
+        The footprint (structuring) element used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
@@ -153,7 +153,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim):
     Returns
     -------
     footprint : ndarray
-        Validated or new structuring element specifying the neighborhood.
+        Validated or new footprint specifying the neighborhood.
 
     Examples
     --------
@@ -174,12 +174,12 @@ def _resolve_neighborhood(footprint, connectivity, ndim):
         # Must specify neighbors for all dimensions
         if footprint.ndim != ndim:
             raise ValueError(
-                "number of dimensions in image and structuring element do not"
+                "number of dimensions in image and footprint do not"
                 "match"
             )
         # Must only specify direct neighbors
         if any(s != 3 for s in footprint.shape):
-            raise ValueError("dimension size in structuring element is not 3")
+            raise ValueError("dimension size in footprint is not 3")
 
     return footprint
 

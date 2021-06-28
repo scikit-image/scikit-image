@@ -69,7 +69,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
     cdef Py_ssize_t centre_r = <Py_ssize_t>(footprint.shape[0] / 2) + shift_y
     cdef Py_ssize_t centre_c = <Py_ssize_t>(footprint.shape[1] / 2) + shift_x
 
-    # check that structuring element center is inside the element bounding box
+    # check that footprint center is inside the element bounding box
     assert centre_r >= 0, f'centre_r {centre_r} < 0'
     assert centre_c >= 0, f'centre_c {centre_c} < 0'
     assert centre_r < srows, f'centre_r {centre_r} >= srows {srows}'
@@ -107,7 +107,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
-    # the east structuring element border
+    # the east footprint border
     cdef Py_ssize_t se_size = srows * scols
     cdef Py_ssize_t [::1] se_e_r = np.empty(se_size, dtype=np.intp)
     cdef Py_ssize_t [::1] se_e_c = np.empty(se_size, dtype=np.intp)

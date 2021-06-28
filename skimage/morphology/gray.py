@@ -17,23 +17,23 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
 def _shift_footprint(footprint, shift_x, shift_y):
     """Shift the binary image `footprint` in the left and/or up.
 
-    This only affects 2D structuring elements with even number of rows
+    This only affects 2D footprints with even number of rows
     or columns.
 
     Parameters
     ----------
     footprint : 2D array, shape (M, N)
-        The input structuring element.
+        The input footprint.
     shift_x, shift_y : bool
         Whether to move `footprint` along each axis.
 
     Returns
     -------
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
-        The shifted structuring element.
+        The shifted footprint.
     """
     if footprint.ndim != 2:
-        # do nothing for 1D or 3D or higher structuring elements
+        # do nothing for 1D or 3D or higher footprints
         return footprint
     m, n = footprint.shape
     if m % 2 == 0:
@@ -61,12 +61,12 @@ def _invert_footprint(footprint):
     Parameters
     ----------
     footprint : array
-        The input structuring element.
+        The input footprint.
 
     Returns
     -------
     inverted : array, same shape and type as `footprint`
-        The structuring element, in opposite order.
+        The footprint, in opposite order.
 
     Examples
     --------
@@ -91,7 +91,7 @@ def pad_for_eccentric_footprints(func):
     ----------
     func : callable
         A morphological function, either opening or closing, that
-        supports eccentric structuring elements. Its parameters must
+        supports eccentric footprints. Its parameters must
         include at least `image`, `footprint`, and `out`.
 
     Returns
@@ -146,13 +146,13 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. footprint with even numbered
+        shift footprint about center point. This only affects
+        eccentric footprints (i.e. footprint with even numbered
         sides).
 
     Returns
@@ -164,7 +164,7 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
     lower algorithm complexity makes the `skimage.filters.rank.minimum`
-    function more efficient for larger images and structuring elements.
+    function more efficient for larger images and footprints.
 
     Examples
     --------
@@ -207,13 +207,13 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        Shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. footprint with even numbered
+        Shift footprint about center point. This only affects
+        eccentric footprints (i.e. footprint with even numbered
         sides).
 
     Returns
@@ -225,7 +225,7 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     -----
     For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
     algorithm complexity makes the `skimage.filters.rank.maximum` function more
-    efficient for larger images and structuring elements.
+    efficient for larger images and footprints.
 
     Examples
     --------
@@ -247,7 +247,7 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """
     footprint = np.array(footprint)
     footprint = _shift_footprint(footprint, shift_x, shift_y)
-    # Inside ndi.grey_dilation, the structuring element is inverted,
+    # Inside ndi.grey_dilation, the footprint is inverted,
     # e.g. `footprint = footprint[::-1, ::-1]` for 2D [1]_, for reasons unknown
     # to this author (@jni). To "patch" this behaviour, we invert our own
     # footprint before passing it to `ndi.grey_dilation`.
@@ -276,7 +276,7 @@ def opening(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -327,7 +327,7 @@ def closing(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -368,7 +368,7 @@ def white_tophat(image, footprint=None, out=None):
 
     The white top hat of an image is defined as the image minus its
     morphological opening. This operation returns the bright spots of the image
-    that are smaller than the structuring element.
+    that are smaller than the footprint.
 
     Parameters
     ----------
@@ -376,7 +376,7 @@ def white_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -442,7 +442,7 @@ def black_tophat(image, footprint=None, out=None):
 
     The black top hat of an image is defined as its morphological closing minus
     the original image. This operation returns the dark spots of the image that
-    are smaller than the structuring element. Note that dark spots in the
+    are smaller than the footprint. Note that dark spots in the
     original image are bright spots after the black top hat.
 
     Parameters
@@ -451,7 +451,7 @@ def black_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.

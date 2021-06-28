@@ -21,11 +21,11 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
 
     Morphological reconstruction by dilation is similar to basic morphological
     dilation: high-intensity values will replace nearby low-intensity values.
-    The basic dilation operator, however, uses a structuring element to
+    The basic dilation operator, however, uses a footprint to
     determine how far a value in the input image can spread. In contrast,
     reconstruction uses two images: a "seed" image, which specifies the values
     that spread, and a "mask" image, which gives the maximum allowed value at
-    each pixel. The mask image, like the structuring element, limits the spread
+    each pixel. The mask image, like the footprint, limits the spread
     of high-intensity values. Reconstruction by erosion is simply the inverse:
     low-intensity values spread from the seed image and are limited by the mask
     image, which represents the minimum allowed value.
@@ -55,7 +55,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         Default is the n-D square of radius equal to 1 (i.e. a 3x3 square
         for 2D images, a 3x3x3 cube for 3D images, etc.)
     offset : ndarray, optional
-        The coordinates of the center of the structuring element.
+        The coordinates of the center of the footprint.
         Default is located on the geometrical center of the footprint, in that
         case footprint dimensions must be odd.
 

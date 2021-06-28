@@ -34,10 +34,10 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
     footprint : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
@@ -141,10 +141,10 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
         The point in `image` used as the starting point for the flood fill.  If
         the image is 1D, this point may be given as an integer.
     footprint : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or

@@ -12,8 +12,8 @@ snake-like path:
 /--------------------------/
 \--------------------------...
 
-The local histogram is updated at each pixel as the structuring element window
-moves by, i.e. only those pixels entering and leaving the structuring element
+The local histogram is updated at each pixel as the footprint window
+moves by, i.e. only those pixels entering and leaving the footprint
 update the local histogram. The histogram size is 8-bit (256 bins) for 8-bit
 images and 2- to 16-bit for 16-bit images depending on the maximum value of the
 image.
@@ -24,7 +24,7 @@ image) where non zero values are the part of the image participating in the
 histogram computation. By default the entire image is filtered.
 
 This implementation outperforms :func:`skimage.morphology.dilation`
-for large structuring elements.
+for large footprints.
 
 Input images will be cast in unsigned 8-bit integer or unsigned 16-bit integer
 if necessary. The number of histogram bins is then determined from the maximum
@@ -253,9 +253,8 @@ def _apply_scalar_per_pixel(func, image, footprint, out, mask, shift_x,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
@@ -304,9 +303,8 @@ def _apply_vector_per_pixel(func, image, footprint, out, mask, shift_x,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
@@ -357,9 +355,8 @@ def autolevel(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -409,9 +406,8 @@ def equalize(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -461,9 +457,8 @@ def gradient(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -513,9 +508,8 @@ def maximum(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -529,7 +523,7 @@ def maximum(image, footprint, out=None, mask=None,
     Notes
     -----
     The lower algorithm complexity makes `skimage.filters.rank.maximum`
-    more efficient for larger images and structuring elements.
+    more efficient for larger images and footprints.
 
     Examples
     --------
@@ -574,9 +568,8 @@ def mean(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -626,9 +619,8 @@ def geometric_mean(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -683,9 +675,8 @@ def subtract_mean(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -744,9 +735,8 @@ def median(image, footprint=None, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -803,9 +793,8 @@ def minimum(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -819,7 +808,7 @@ def minimum(image, footprint, out=None, mask=None,
     Notes
     -----
     The lower algorithm complexity makes `skimage.filters.rank.minimum` more
-    efficient for larger images and structuring elements.
+    efficient for larger images and footprints.
 
     Examples
     --------
@@ -866,9 +855,8 @@ def modal(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -922,9 +910,8 @@ def enhance_contrast(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -963,7 +950,7 @@ def pop(image, footprint, out=None, mask=None,
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
-    in the structuring element and the mask.
+    in the footprint and the mask.
 
     Parameters
     ----------
@@ -977,9 +964,8 @@ def pop(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1036,9 +1022,8 @@ def sum(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1095,9 +1080,8 @@ def threshold(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1151,9 +1135,8 @@ def noise_filter(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     References
     ----------
@@ -1181,7 +1164,7 @@ def noise_filter(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        # ensure that the central pixel in the structuring element is empty
+        # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
         centre_c = int(footprint.shape[1] / 2) + shift_x
         # make a local copy
@@ -1192,7 +1175,7 @@ def noise_filter(image, footprint, out=None, mask=None,
                                        footprint_cpy, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
-        # ensure that the central pixel in the structuring element is empty
+        # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
         centre_c = int(footprint.shape[1] / 2) + shift_x
         centre_z = int(footprint.shape[2] / 2) + shift_z
@@ -1227,9 +1210,8 @@ def entropy(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1284,9 +1266,8 @@ def otsu(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1342,9 +1323,8 @@ def windowed_histogram(image, footprint, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     n_bins : int or None
         The number of histogram bins. Will default to ``image.max() + 1``
         if None is passed.
@@ -1400,9 +1380,8 @@ def majority(image, footprint, *, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------

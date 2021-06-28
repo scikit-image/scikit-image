@@ -5,7 +5,7 @@ described in [1]_.
 
 The pixel neighborhood is defined by:
 
-* the given structuring element
+* the given footprint (structuring element)
 * an interval [g-s0, g+s1] in graylevel around g the processed pixel graylevel
 
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
@@ -54,13 +54,13 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
     pixels based on their spatial closeness and radiometric similarity.
 
     Spatial closeness is measured by considering only the local pixel
-    neighborhood given by a structuring element.
+    neighborhood given by a footprint (structuring element).
 
     Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
     where g is the current pixel graylevel.
 
-    Only pixels belonging to the structuring element and having a graylevel
-    inside this interval are averaged.
+    Only pixels belonging to the footprint and having a graylevel inside this
+    interval are averaged.
 
     Parameters
     ----------
@@ -74,9 +74,8 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     s0, s1 : int
         Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
@@ -111,9 +110,9 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
 
     The number of pixels is defined as the number of pixels which are included
-    in the structuring element and the mask. Additionally pixels must have a
-    graylevel inside the interval [g-s0, g+s1] where g is the grayvalue of the
-    center pixel.
+    in the footprint and the mask. Additionally pixels must have a graylevel
+    inside the interval [g-s0, g+s1] where g is the grayvalue of the center
+    pixel.
 
     Parameters
     ----------
@@ -127,9 +126,8 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     s0, s1 : int
         Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
@@ -170,13 +168,13 @@ def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
     pixels based on their spatial closeness and radiometric similarity.
 
     Spatial closeness is measured by considering only the local pixel
-    neighborhood given by a structuring element (footprint).
+    neighborhood given by a footprint (structuring element).
 
     Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
     where g is the current pixel graylevel.
 
-    Only pixels belonging to the structuring element AND having a graylevel
-    inside this interval are summed.
+    Only pixels belonging to the footprint AND having a graylevel inside this
+    interval are summed.
 
     Note that the sum may overflow depending on the data type of the input
     array.
@@ -193,9 +191,8 @@ def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     s0, s1 : int
         Define the [s0, s1] interval around the grayvalue of the center pixel
         to be considered for computing the value.
