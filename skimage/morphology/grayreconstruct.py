@@ -11,19 +11,21 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
+from .._shared.utils import deprecate_kwarg
 from ..filters._rank_order import rank_order
 
 
-def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """Perform a morphological reconstruction of an image.
 
     Morphological reconstruction by dilation is similar to basic morphological
     dilation: high-intensity values will replace nearby low-intensity values.
-    The basic dilation operator, however, uses a structuring element to
+    The basic dilation operator, however, uses a footprint to
     determine how far a value in the input image can spread. In contrast,
     reconstruction uses two images: a "seed" image, which specifies the values
     that spread, and a "mask" image, which gives the maximum allowed value at
-    each pixel. The mask image, like the structuring element, limits the spread
+    each pixel. The mask image, like the footprint, limits the spread
     of high-intensity values. Reconstruction by erosion is simply the inverse:
     low-intensity values spread from the seed image and are limited by the mask
     image, which represents the minimum allowed value.
@@ -48,14 +50,14 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         mask image. For dilation, each seed value must be less than or equal
         to the corresponding mask value; for erosion, the reverse is true.
         Default is 'dilation'.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
         Default is the n-D square of radius equal to 1 (i.e. a 3x3 square
         for 2D images, a 3x3x3 cube for 3D images, etc.)
     offset : ndarray, optional
-        The coordinates of the center of the structuring element.
-        Default is located on the geometrical center of the selem, in that case
-        selem dimensions must be odd.
+        The coordinates of the center of the footprint.
+        Default is located on the geometrical center of the footprint, in that
+        case footprint dimensions must be odd.
 
     Returns
     -------
@@ -135,27 +137,27 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     except ImportError:
         raise ImportError("_grayreconstruct extension not available.")
 
-    if selem is None:
-        selem = np.ones([3] * seed.ndim, dtype=bool)
+    if footprint is None:
+        footprint = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        selem = selem.astype(bool)
+        footprint = footprint.astype(bool)
 
     if offset is None:
-        if not all([d % 2 == 1 for d in selem.shape]):
+        if not all([d % 2 == 1 for d in footprint.shape]):
             raise ValueError("Footprint dimensions must all be odd")
-        offset = np.array([d // 2 for d in selem.shape])
+        offset = np.array([d // 2 for d in footprint.shape])
     else:
-        if offset.ndim != selem.ndim:
-            raise ValueError("Offset and selem ndims must be equal.")
-        if not all([(0 <= o < d) for o, d in zip(offset, selem.shape)]):
-            raise ValueError("Offset must be included inside selem")
+        if offset.ndim != footprint.ndim:
+            raise ValueError("Offset and footprint ndims must be equal.")
+        if not all([(0 <= o < d) for o, d in zip(offset, footprint.shape)]):
+            raise ValueError("Offset must be included inside footprint")
 
-    # Cross out the center of the selem
-    selem[tuple(slice(d, d + 1) for d in offset)] = False
+    # Cross out the center of the footprint
+    footprint[tuple(slice(d, d + 1) for d in offset)] = False
 
     # Make padding for edges of reconstructed image so we can ignore boundaries
     dims = np.zeros(seed.ndim + 1, dtype=int)
-    dims[1:] = np.array(seed.shape) + (np.array(selem.shape) - 1)
+    dims[1:] = np.array(seed.shape) + (np.array(footprint.shape) - 1)
     dims[0] = 2
     inside_slices = tuple(slice(o, o + s) for o, s in zip(offset, seed.shape))
     # Set padded region to minimum image intensity and mask along first axis so
@@ -175,11 +177,12 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     # a flattened array
     value_stride = np.array(images.strides[1:]) // images.dtype.itemsize
     image_stride = images.strides[0] // images.dtype.itemsize
-    selem_mgrid = np.mgrid[[slice(-o, d - o)
-                            for d, o in zip(selem.shape, offset)]]
-    selem_offsets = selem_mgrid[:, selem].transpose()
-    nb_strides = np.array([np.sum(value_stride * selem_offset)
-                           for selem_offset in selem_offsets], np.int32)
+    footprint_mgrid = np.mgrid[[slice(-o, d - o)
+                                for d, o in zip(footprint.shape, offset)]]
+    footprint_offsets = footprint_mgrid[:, footprint].transpose()
+    nb_strides = np.array([np.sum(value_stride * footprint_offset)
+                           for footprint_offset in footprint_offsets],
+                          np.int32)
 
     images = images.flatten()
 
@@ -207,5 +210,5 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1)
+    rec_img.shape = np.array(seed.shape) + (np.array(footprint.shape) - 1)
     return rec_img[inside_slices]

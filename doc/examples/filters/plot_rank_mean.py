@@ -26,11 +26,15 @@ from skimage.filters import rank
 
 
 image = data.coins()
-selem = disk(20)
+footprint = disk(20)
 
-percentile_result = rank.mean_percentile(image, selem=selem, p0=.1, p1=.9)
-bilateral_result = rank.mean_bilateral(image, selem=selem, s0=500, s1=500)
-normal_result = rank.mean(image, selem=selem)
+percentile_result = rank.mean_percentile(
+    image, footprint=footprint, p0=.1, p1=.9
+)
+bilateral_result = rank.mean_bilateral(
+    image, footprint=footprint, s0=500, s1=500
+)
+normal_result = rank.mean(image, footprint=footprint)
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
