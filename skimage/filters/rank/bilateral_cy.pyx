@@ -78,33 +78,33 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
 
 
 def _mean(dtype_t[:, ::1] image,
-          char[:, ::1] selem,
+          char[:, ::1] footprint,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
           Py_ssize_t n_bins):
 
-    _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_mean[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, s0, s1, n_bins)
 
 
 def _pop(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
+         char[:, ::1] footprint,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
          Py_ssize_t n_bins):
 
-    _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_pop[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, s0, s1, n_bins)
 
 
 def _sum(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
+         char[:, ::1] footprint,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
          Py_ssize_t n_bins):
 
-    _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_sum[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, s0, s1, n_bins)

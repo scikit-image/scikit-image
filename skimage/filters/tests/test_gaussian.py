@@ -7,18 +7,16 @@ from skimage._shared.utils import _supported_float_type
 from skimage.filters._gaussian import (gaussian, _guess_spatial_dimensions,
                                        difference_of_gaussians)
 
-_preserve_range_msg = "The new recommended value for preserve_range"
-
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
     with pytest.raises(ValueError):
-        gaussian(a, sigma=-1.0, preserve_range=True)
+        gaussian(a, sigma=-1.0)
     with pytest.raises(ValueError):
-        gaussian(a, sigma=[-1.0, 1.0], preserve_range=True)
+        gaussian(a, sigma=[-1.0, 1.0])
     with pytest.raises(ValueError):
-        gaussian(a, sigma=np.asarray([-1.0, 1.0]), preserve_range=True)
+        gaussian(a, sigma=np.asarray([-1.0, 1.0]))
 
 
 def test_null_sigma():
@@ -68,8 +66,9 @@ def test_multichannel(channel_axis):
 
     if channel_axis % a.ndim == 2:
         # Test legacy behavior equivalent to old (multichannel = None)
-        with expected_warnings(['multichannel', _preserve_range_msg]):
-            gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect')
+        with expected_warnings(['multichannel']):
+            gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
+                                      preserve_range=True)
 
         # Check that the mean value is conserved in each channel
         # (color channels are not mixed together)
@@ -86,8 +85,7 @@ def test_multichannel(channel_axis):
 def test_deprecated_multichannel():
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
-    with expected_warnings(["`multichannel` is a deprecated argument",
-                            _preserve_range_msg]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
                                   multichannel=True)
     # Check that the mean value is conserved in each channel
@@ -95,8 +93,7 @@ def test_deprecated_multichannel():
     assert np.allclose(a.mean(axis=(0, 1)), gaussian_rgb_a.mean(axis=(0, 1)))
 
     # check positional multichannel argument warning
-    with expected_warnings(["Providing the `multichannel` argument",
-                            _preserve_range_msg]):
+    with expected_warnings(["Providing the `multichannel` argument"]):
         gaussian_rgb_a = gaussian(a, 1, None, 'reflect', 0, True)
 
 
@@ -111,8 +108,7 @@ def test_preserve_range():
     assert np.all(filtered_preserved == 1.)
 
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
-    with expected_warnings([_preserve_range_msg]):
-        gaussian(img, 1)
+    gaussian(img, 1)
 
 
 def test_1d_ok():

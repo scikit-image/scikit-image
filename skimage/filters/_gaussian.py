@@ -11,7 +11,6 @@ from ..util import img_as_float
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
-@change_default_value('preserve_range', new_value=True, changed_version='1.0')
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
@@ -47,9 +46,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         ambiguous, when the array has shape (M, N, 3).
         This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
-        If True (by default) - keep the original range of values.
-        Otherwise, the input 'image' is converted according to the conventions
-        of ``img_as_float``
+        If True, keep the original range of values. Otherwise, the input
+        ``image`` is converted according to the conventions of ``img_as_float``
         (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
         dtype of input)
 
@@ -112,7 +110,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> # For RGB images, each is filtered separately
     >>> from skimage.data import astronaut
     >>> image = astronaut()
-    >>> filtered_img = gaussian(image, sigma=1, multichannel=True)
+    >>> filtered_img = gaussian(image, sigma=1, channel_axis=-1)
 
     """
     if image.ndim == 3 and image.shape[-1] == 3 and channel_axis is None:
@@ -260,13 +258,13 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     >>> from skimage.data import astronaut
     >>> from skimage.filters import difference_of_gaussians
     >>> filtered_image = difference_of_gaussians(astronaut(), 2, 10,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Laplacian of Gaussian filter as approximated by the Difference
     of Gaussians filter:
 
     >>> filtered_image = difference_of_gaussians(astronaut(), 2,
-    ...                                          multichannel=True)
+    ...                                          channel_axis=-1)
 
     Apply a Difference of Gaussians filter to a grayscale image using different
     sigma values for each axis:
