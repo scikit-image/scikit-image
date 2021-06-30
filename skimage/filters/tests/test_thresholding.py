@@ -616,11 +616,16 @@ def test_mean_std_3d(window_size, mean_kernel):
 @pytest.mark.parametrize(
     "threshold_func", [threshold_local, threshold_niblack, threshold_sauvola],
 )
-@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
-def test_floating_point_dtypes(threshold_func, dtype):
-    r = np.random.randn(40, 40).astype(dtype, copy=False)
+@pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
+def test_variable_dtypes(threshold_func, dtype):
+    r = 255 * np.random.rand(32, 16)
+    r = r.astype(dtype, copy=False)
 
-    kwargs = dict(block_size=9) if threshold_func is threshold_local else {}
+    kwargs = {}
+    if threshold_func is threshold_local:
+        kwargs = dict(block_size=9)
+    elif threshold_func is threshold_sauvola:
+        kwargs = dict(r=128)
 
     # use double precision result as a reference
     expected = threshold_func(r.astype(float), **kwargs)
