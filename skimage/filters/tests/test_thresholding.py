@@ -7,6 +7,7 @@ from scipy import ndimage as ndi
 from skimage import data
 from skimage import util
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
@@ -610,6 +611,23 @@ def test_mean_std_3d(window_size, mean_kernel):
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
     assert_allclose(s, expected_s)
+
+
+@pytest.mark.parametrize(
+    "threshold_func", [threshold_local, threshold_niblack, threshold_sauvola],
+)
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+def test_floating_point_dtypes(threshold_func, dtype):
+    r = np.random.randn(40, 40).astype(dtype, copy=False)
+
+    kwargs = dict(block_size=9) if threshold_func is threshold_local else {}
+
+    # use double precision result as a reference
+    expected = threshold_func(r.astype(float), **kwargs)
+
+    out = threshold_func(r, **kwargs)
+    assert out.dtype == _supported_float_type(dtype)
+    assert_allclose(out, expected, rtol=1e-5, atol=1e-5)
 
 
 def test_niblack_sauvola_pathological_image():
