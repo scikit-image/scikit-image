@@ -5,9 +5,9 @@ from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 from skimage import data
 from skimage import img_as_float
 from skimage import draw
+from skimage._shared.utils import _supported_float_type
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
-from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
