@@ -8,10 +8,8 @@ import numpy as np
 from .._shared.fft import fftmodule as fft
 from .._shared.utils import _supported_float_type, check_nD
 
-eps = np.finfo(float).eps
 
-
-def _min_limit(x, val=eps):
+def _min_limit(x, val=np.finfo(float).eps):
     mask = np.abs(x) < val
     x[mask] = np.sign(x[mask]) * val
 
@@ -200,7 +198,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
         filt = predefined_filter
 
     F, G = filt._prepare(data)
-    _min_limit(F, val=np.finfo(float).eps)
+    _min_limit(F, val=np.finfo(F.real.dtype).eps)
 
     F = 1 / F
     mask = np.abs(F) > max_gain
@@ -243,7 +241,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
         filt = predefined_filter
 
     F, G = filt._prepare(data)
-    _min_limit(F, val=np.finfo(float).eps)
+    _min_limit(F, val=np.finfo(F.real.dtype).eps)
 
     H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
