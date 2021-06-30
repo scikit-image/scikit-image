@@ -214,7 +214,7 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     --------
     find_boundaries
     """
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     marked = img_as_float(image, force_copy=True)
     marked = marked.astype(float_dtype, copy=False)
     if marked.ndim == 2:
