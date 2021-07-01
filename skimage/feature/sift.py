@@ -30,7 +30,7 @@ class Keypoints:
         if theta:
             self.theta = self.theta[filter]
 
-
+#todo:add range of histogram max, rn 80%
 class SIFT(FeatureDetector, DescriptorExtractor):
     """SIFT feature detection and oriented descriptor extraction.
 
@@ -372,7 +372,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             dim = gradient[0].shape[0:2]
             yx = keypoints.yx / delta
             sigma = keypoints.sigma / delta
-            theta = keypoints.theta
             mns = keypoints.mns
 
             # dimensions of the patch
@@ -383,11 +382,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             for k in range(len(Max)):
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
-
+                print(k)
                 m, n = np.mgrid[Min[k, 0]:Max[k, 0], Min[k, 1]: Max[k, 1]]  # the patch
                 y_mn = np.copy(m) - yx[k, 0]  # normalized coordinates
                 x_mn = np.copy(n) - yx[k, 1]
-                y_mn, x_mn = self.rotate(y_mn, x_mn, -theta[k], 1)
+                y_mn, x_mn = self.rotate(y_mn, x_mn, -keypoints.theta[k], 1)
 
                 inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
                 y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
@@ -396,7 +395,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradientY = gradientSpace[o][0][m, n, mns[k, 2]]
                 gradientX = gradientSpace[o][1][m, n, mns[k, 2]]
 
-                theta = np.mod(np.arctan2(gradientX, gradientY) - theta[k], 2 * np.pi)
+                theta = np.mod(np.arctan2(gradientX, gradientY) - keypoints.theta[k], 2 * np.pi)
                 kernel = np.exp(-(np.square(y_mn) + np.square(x_mn)) / (2 * (self.lambda_descr * sigma[k]) ** 2))
                 magnitude = np.sqrt(np.square(gradientY) + np.square(gradientX)) * kernel
 
