@@ -6,4 +6,4 @@ from skimage import img_as_float
 def test_sift():
     img = img_as_float(rgb2gray(astronaut()))
     s = SIFT(c_edge=13)
-    s.detect(img)
+    s.detect_and_extract(img)
