@@ -384,6 +384,14 @@ class TestColorconv():
                                       xyz2lab(self.xyz_array, I, "2"),
                                       decimal=2)
 
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_xyz2lab_channel_axis(self, channel_axis):
+        # test conversion with channels along a specified axis
+        xyz = np.moveaxis(self.xyz_array, source=-1, destination=channel_axis)
+        lab = xyz2lab(xyz, channel_axis=channel_axis)
+        lab = np.moveaxis(lab, source=channel_axis, destination=-1)
+        assert_array_almost_equal(lab, self.lab_array, decimal=3)
+
     def test_xyz2lab_dtype(self):
         img = self.xyz_array.astype('float64')
         img32 = img.astype('float32')
@@ -421,6 +429,14 @@ class TestColorconv():
         except ValueError:
             pass
 
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_lab2xyz_channel_axis(self, channel_axis):
+        # test conversion with channels along a specified axis
+        lab = np.moveaxis(self.lab_array, source=-1, destination=channel_axis)
+        xyz = lab2xyz(lab, channel_axis=channel_axis)
+        xyz = np.moveaxis(xyz, source=channel_axis, destination=-1)
+        assert_array_almost_equal(xyz, self.xyz_array, decimal=3)
+
     def test_lab2xyz_dtype(self):
         img = self.lab_array.astype('float64')
         img32 = img.astype('float32')
@@ -447,9 +463,17 @@ class TestColorconv():
         gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
         assert_array_almost_equal(rgb2lab(self.colbars_array), gt_array, decimal=2)
 
-    def test_lab_rgb_roundtrip(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_lab_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+        img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
+        assert_array_almost_equal(
+            lab2rgb(
+                rgb2lab(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis
+            ),
+            img_rgb,
+        )
 
     def test_rgb2lab_dtype(self):
         img = self.colbars_array.astype('float64')
@@ -489,6 +513,14 @@ class TestColorconv():
                                       xyz2luv(self.xyz_array, I, "2"),
                                       decimal=2)
 
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_xyz2luv_channel_axis(self, channel_axis):
+        # test conversion with channels along a specified axis
+        xyz = np.moveaxis(self.xyz_array, source=-1, destination=channel_axis)
+        luv = xyz2luv(xyz, channel_axis=channel_axis)
+        luv = np.moveaxis(luv, source=channel_axis, destination=-1)
+        assert_array_almost_equal(luv, self.luv_array, decimal=3)
+
     def test_xyz2luv_dtype(self):
         img = self.xyz_array.astype('float64')
         img32 = img.astype('float32')
@@ -514,6 +546,14 @@ class TestColorconv():
             luv_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
+
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_luv2xyz_channel_axis(self, channel_axis):
+        # test conversion with channels along a specified axis
+        luv = np.moveaxis(self.luv_array, source=-1, destination=channel_axis)
+        xyz = luv2xyz(luv, channel_axis=channel_axis)
+        xyz = np.moveaxis(xyz, source=channel_axis, destination=-1)
+        assert_array_almost_equal(xyz, self.xyz_array, decimal=3)
 
     def test_luv2xyz_dtype(self):
         img = self.luv_array.astype('float64')
@@ -556,9 +596,17 @@ class TestColorconv():
         assert luv2rgb(img).dtype == img.dtype
         assert luv2rgb(img32).dtype == img32.dtype
 
-    def test_luv_rgb_roundtrip(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_luv_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(luv2rgb(rgb2luv(img_rgb)), img_rgb)
+        img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
+        assert_array_almost_equal(
+            luv2rgb(
+                rgb2luv(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis
+            ),
+            img_rgb,
+        )
 
     def test_lab_rgb_outlier(self):
         lab_array = np.ones((3, 1, 3))

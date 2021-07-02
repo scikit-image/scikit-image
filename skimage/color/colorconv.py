@@ -894,7 +894,8 @@ def grey2rgb(image):
     return gray2rgb(image)
 
 
-def xyz2lab(xyz, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     """XYZ to CIE-LAB color space conversion.
 
     Parameters
@@ -939,7 +940,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     >>> img_xyz = rgb2xyz(img)
     >>> img_lab = xyz2lab(img_xyz)
     """
-    arr = _prepare_colorarray(xyz)
+    arr = _prepare_colorarray(xyz, channel_axis=-1)
 
     xyz_ref_white = get_xyz_coords(illuminant, observer, arr.dtype)
 
@@ -961,7 +962,8 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
-def lab2xyz(lab, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     """CIE-LAB to XYZcolor space conversion.
 
     Parameters
@@ -999,7 +1001,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
     .. [2] https://en.wikipedia.org/wiki/Lab_color_space
     """
-    arr = _prepare_colorarray(lab).copy()
+    arr = _prepare_colorarray(lab, channel_axis=-1).copy()
 
     L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
     y = (L + 16.) / 116.
@@ -1024,7 +1026,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     return out
 
 
-def rgb2lab(rgb, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def rgb2lab(rgb, illuminant="D65", observer="2", *, channel_axis=-1):
     """Conversion from the sRGB color space (IEC 61966-2-1:1999)
     to the CIE Lab colorspace under the given illuminant and observer.
 
@@ -1065,7 +1068,8 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
     return xyz2lab(rgb2xyz(rgb), illuminant, observer)
 
 
-def lab2rgb(lab, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     """Lab to RGB color space conversion.
 
     Parameters
@@ -1101,7 +1105,8 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     return xyz2rgb(lab2xyz(lab, illuminant, observer))
 
 
-def xyz2luv(xyz, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     """XYZ to CIE-Luv color space conversion.
 
     Parameters
@@ -1150,7 +1155,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     if input_is_one_pixel:
         xyz = xyz[np.newaxis, ...]
 
-    arr = _prepare_colorarray(xyz)
+    arr = _prepare_colorarray(xyz, channel_axis=-1)
 
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -1186,7 +1191,8 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     return out
 
 
-def luv2xyz(luv, illuminant="D65", observer="2"):
+@channel_as_last_axis()
+def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
     """CIE-Luv to XYZ color space conversion.
 
     Parameters
@@ -1222,7 +1228,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
     .. [2] https://en.wikipedia.org/wiki/CIELUV
     """
-    arr = _prepare_colorarray(luv).copy()
+    arr = _prepare_colorarray(luv, channel_axis=-1).copy()
 
     L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
@@ -1253,7 +1259,8 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
 
 
-def rgb2luv(rgb):
+@channel_as_last_axis()
+def rgb2luv(rgb, *, channel_axis=-1):
     """RGB to CIE-Luv color space conversion.
 
     Parameters
@@ -1284,7 +1291,8 @@ def rgb2luv(rgb):
     return xyz2luv(rgb2xyz(rgb))
 
 
-def luv2rgb(luv):
+@channel_as_last_axis()
+def luv2rgb(luv, *, channel_axis=-1):
     """Luv to RGB color space conversion.
 
     Parameters
