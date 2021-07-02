@@ -55,7 +55,7 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-from .._shared.utils import slice_at_axis, _reshape_nd
+from .._shared.utils import _reshape_nd, channel_as_last_axis, slice_at_axis
 from ..util import dtype, dtype_limits
 
 
@@ -198,6 +198,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     return out
 
 
+@channel_as_last_axis()
 def rgb2hsv(rgb, *, channel_axis=-1):
     """RGB to HSV color space conversion.
 
@@ -236,8 +237,7 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     if input_is_one_pixel:
         rgb = rgb[np.newaxis, ...]
 
-    arr = _prepare_colorarray(rgb, channel_axis=channel_axis)
-    arr = np.moveaxis(arr, source=channel_axis, destination=-1)
+    arr = _prepare_colorarray(rgb, channel_axis=-1)
     out = np.empty_like(arr)
 
     # -- V channel
@@ -278,9 +278,10 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     if input_is_one_pixel:
         out = np.squeeze(out, axis=0)
 
-    return np.moveaxis(out, source=-1, destination=channel_axis)
+    return out
 
 
+@channel_as_last_axis()
 def hsv2rgb(hsv, *, channel_axis=-1):
     """HSV to RGB color space conversion.
 
@@ -315,8 +316,7 @@ def hsv2rgb(hsv, *, channel_axis=-1):
     >>> img_hsv = rgb2hsv(img)
     >>> img_rgb = hsv2rgb(img_hsv)
     """
-    arr = _prepare_colorarray(hsv, channel_axis=channel_axis)
-    arr = np.moveaxis(arr, source=channel_axis, destination=-1)
+    arr = _prepare_colorarray(hsv, channel_axis=-1)
 
     hi = np.floor(arr[..., 0] * 6)
     f = arr[..., 0] * 6 - hi
@@ -334,7 +334,7 @@ def hsv2rgb(hsv, *, channel_axis=-1):
                       np.stack((t, p, v), axis=-1),
                       np.stack((v, p, q), axis=-1)]))
 
-    return np.moveaxis(out, source=-1, destination=channel_axis)
+    return out
 
 
 # ---------------------------------------------------------------
