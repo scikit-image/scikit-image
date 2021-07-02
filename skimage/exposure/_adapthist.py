@@ -15,6 +15,8 @@ comes with no guarantee.
 """
 import numbers
 import numpy as np
+
+from .._shared.utils import channel_as_last_axis
 from ..util import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
@@ -25,7 +27,7 @@ NR_OF_GRAY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 @adapt_rgb(hsv_value)
 def equalize_adapthist(image, kernel_size=None,
-                       clip_limit=0.01, nbins=256):
+                       clip_limit=0.01, nbins=256, channel_axis=-1):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
 
     An algorithm for local contrast enhancement, that uses histograms computed
@@ -47,6 +49,10 @@ def equalize_adapthist(image, kernel_size=None,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("data range").
+    channel_axis : int, optional
+        When the image is a 2D RGB or RGBA image, this parameter specifies
+        which axis corresponds to the color `channels`. Otherwise, this
+        parameter is ignored.
 
     Returns
     -------

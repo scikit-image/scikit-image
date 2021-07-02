@@ -27,8 +27,10 @@ def smooth_each(image, sigma):
     return filters.gaussian(image, sigma)
 
 
-@adapt_rgb(each_channel, channel_axis=0)
-def smooth_each_axis0(image, sigma):
+# if the function has a channel_axis argument, it will be picked up by
+# adapt_rgb as the axis to iterate over
+@adapt_rgb(each_channel)
+def smooth_each_axis(image, sigma, channel_axis=-1):
     return filters.gaussian(image, sigma)
 
 
@@ -49,8 +51,8 @@ def smooth_hsv(image, sigma):
     return filters.gaussian(image, sigma)
 
 
-@adapt_rgb(hsv_value, channel_axis=0)
-def smooth_hsv_axis0(image, sigma):
+@adapt_rgb(hsv_value)
+def smooth_hsv_axis(image, sigma, channel_axis=-1):
     return filters.gaussian(image, sigma)
 
 
@@ -80,9 +82,11 @@ def test_each_channel_with_filter_argument():
         assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
 
 
-def test_each_channel_with_filter_argument_axis0():
-    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=0)
-    filtered = smooth_each_axis0(color_img, SIGMA)
+@pytest.mark.parametrize("channel_axis", [0, 1, 2, -1])
+def test_each_channel_with_filter_and_axis_argument(channel_axis):
+    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=channel_axis)
+    filtered = smooth_each_axis(color_img, SIGMA, channel_axis=channel_axis)
+    filtered = np.moveaxis(filtered, source=channel_axis, destination=0)
     for i, channel in enumerate(filtered):
         assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
 
@@ -104,11 +108,13 @@ def test_hsv_value_with_filter_argument():
     assert_allclose(color.rgb2hsv(filtered)[:, :, 2], smooth(value))
 
 
-def test_hsv_value_with_filter_argument_axis0():
-    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=0)
-    filtered = smooth_hsv_axis0(color_img, SIGMA)
+@pytest.mark.parametrize("channel_axis", [0, 1, 2, -1])
+def test_hsv_value_with_filter_and_axis_argument(channel_axis):
+    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=channel_axis)
+    filtered = smooth_hsv_axis(color_img, SIGMA, channel_axis=channel_axis)
+    filtered = np.moveaxis(filtered, source=channel_axis, destination=-1)
     value = color.rgb2hsv(COLOR_IMAGE)[:, :, 2]
-    assert_allclose(color.rgb2hsv(filtered, channel_axis=0)[2], smooth(value))
+    assert_allclose(color.rgb2hsv(filtered)[..., 2], smooth(value))
 
 
 def test_hsv_value_with_non_float_output():
@@ -122,20 +128,20 @@ def test_hsv_value_with_non_float_output():
     assert_allclose(filtered_value, filters.sobel(value), rtol=1e-5, atol=1e-5)
 
 
-def test_missing_channel_axis_param():
+# def test_missing_channel_axis_param():
 
-    def _identity(image_filter, image):
-        return image
+#     def _identity(image_filter, image):
+#         return image
 
-    # when channel_axis != -1, the function passed to adapt_rgb must have a
-    # channel_axis argument
-    with pytest.raises(ValueError):
-        @adapt_rgb(_identity, channel_axis=0)
-        def identity(image):
-            return image
+#     # when channel_axis != -1, the function passed to adapt_rgb must have a
+#     # channel_axis argument
+#     with pytest.raises(ValueError):
+#         @adapt_rgb(_identity, channel_axis=0)
+#         def identity(image):
+#             return image
 
-    # default channel_axis=-1 doesn't raise an error
-    @adapt_rgb(_identity)
-    def identity(image):
-        return image
-    assert_array_equal(COLOR_IMAGE, identity(COLOR_IMAGE))
+#     # default channel_axis=-1 doesn't raise an error
+#     @adapt_rgb(_identity)
+#     def identity(image):
+#         return image
+#     assert_array_equal(COLOR_IMAGE, identity(COLOR_IMAGE))
