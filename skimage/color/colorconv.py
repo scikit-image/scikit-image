@@ -1317,7 +1317,8 @@ def luv2rgb(luv, *, channel_axis=-1):
     return xyz2rgb(luv2xyz(luv))
 
 
-def rgb2hed(rgb):
+@channel_as_last_axis()
+def rgb2hed(rgb, *, channel_axis=-1):
     """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
 
     Parameters
@@ -1352,7 +1353,8 @@ def rgb2hed(rgb):
     return separate_stains(rgb, hed_from_rgb)
 
 
-def hed2rgb(hed):
+@channel_as_last_axis()
+def hed2rgb(hed, *, channel_axis=-1):
     """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
 
     Parameters
@@ -1388,7 +1390,8 @@ def hed2rgb(hed):
     return combine_stains(hed, rgb_from_hed)
 
 
-def separate_stains(rgb, conv_matrix):
+@channel_as_last_axis()
+def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     """RGB to stain color space conversion.
 
     Parameters
@@ -1445,7 +1448,7 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = _prepare_colorarray(rgb, force_copy=True)
+    rgb = _prepare_colorarray(rgb, force_copy=True, channel_axis=-1)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
     log_adjust = np.log(1E-6)  # used to compensate the sum above
 
@@ -1456,7 +1459,8 @@ def separate_stains(rgb, conv_matrix):
     return stains
 
 
-def combine_stains(stains, conv_matrix):
+@channel_as_last_axis()
+def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     """Stain to RGB color space conversion.
 
     Parameters
@@ -1510,7 +1514,7 @@ def combine_stains(stains, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
-    stains = _prepare_colorarray(stains)
+    stains = _prepare_colorarray(stains, channel_axis=-1)
 
     # log_adjust here is used to compensate the sum within separate_stains().
     log_adjust = -np.log(1E-6)
