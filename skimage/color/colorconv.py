@@ -49,11 +49,13 @@ References
 .. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-
 import functools
-import numpy as np
 from warnings import warn
+
+import numpy as np
 from scipy import linalg
+
+from .._shared.utils import slice_at_axis, _reshape_nd
 from ..util import dtype, dtype_limits
 
 
@@ -115,20 +117,28 @@ def convert_colorspace(arr, fromspace, tospace):
     return todict[tospace](fromdict[fromspace](arr))
 
 
-def _prepare_colorarray(arr, force_copy=False):
+def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     """Check the shape of the array and convert it to
     floating point representation.
     """
     arr = np.asanyarray(arr)
 
-    if arr.shape[-1] != 3:
-        raise ValueError("Input array must have a shape == (..., 3)), "
-                         f"got {arr.shape}")
+    if arr.shape[channel_axis] != 3:
+        msg = ("the input array must have shape 3 along `channel_axis`, "
+               f"got {arr.shape}")
+        raise ValueError(msg)
 
     return dtype.img_as_float(arr, force_copy=force_copy)
 
 
-def rgba2rgb(rgba, background=(1, 1, 1)):
+def _validate_channel_axis(channel_axis, ndim):
+    if not isinstance(channel_axis, int):
+        raise TypeError("channel_axis must be an integer")
+    if channel_axis < -ndim or channel_axis >= ndim:
+        raise ValueError("channel_axis exceeds array dimensions")
+
+
+def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     """RGBA to RGB conversion using alpha blending [1]_.
 
     Parameters
@@ -161,9 +171,11 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     >>> img_rgb = color.rgba2rgb(img_rgba)
     """
     arr = np.asanyarray(rgba)
+    _validate_channel_axis(channel_axis, arr.ndim)
+    channel_axis = channel_axis % arr.ndim
 
-    if arr.shape[-1] != 4:
-        msg = ("the input array must have shape == (..., 4)), "
+    if arr.shape[channel_axis] != 4:
+        msg = ("the input array must have shape 4 along `channel_axis`, "
                f"got {arr.shape}")
         raise ValueError(msg)
 
@@ -176,14 +188,13 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     if np.any(background < 0) or np.any(background > 1):
         raise ValueError('background RGB values must be floats between '
                          '0 and 1.')
+    # reshape background for broadcasting along non-channel axes
+    background = _reshape_nd(background, arr.ndim, channel_axis)
 
-    background = background[np.newaxis, ...]
-    alpha = arr[..., -1, np.newaxis]
-    channels = arr[np.newaxis, ..., :-1]
-
-    out = np.squeeze(np.clip((1 - alpha) * background + alpha * channels,
-                             a_min=0, a_max=1),
-                     axis=0)
+    alpha = arr[slice_at_axis(slice(3, 4), axis=channel_axis)]
+    channels = arr[slice_at_axis(slice(3), axis=channel_axis)]
+    out = np.clip((1 - alpha) * background + alpha * channels,
+                  a_min=0, a_max=1)
     return out
 
 

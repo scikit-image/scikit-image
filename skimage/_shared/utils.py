@@ -457,6 +457,41 @@ def slice_at_axis(sl, axis):
     return (slice(None),) * axis + (sl,) + (...,)
 
 
+def _reshape_nd(arr, ndim, dim):
+    """Reshape a 1D array to have n dimensions, all singletons but one.
+
+    Parameters
+    ----------
+    arr : array, shape (N,)
+        Input array
+    ndim : int
+        Number of desired dimensions of reshaped array.
+    dim : int
+        Which dimension/axis will not be singleton-sized.
+
+    Returns
+    -------
+    arr_reshaped : array, shape ([1, ...], N, [1,...])
+        View of `arr` reshaped to the desired shape.
+
+    Examples
+    --------
+    >>> rng = np.random.default_rng()
+    >>> arr = rng.random(7)
+    >>> _reshape_nd(arr, 2, 0).shape
+    (7, 1)
+    >>> _reshape_nd(arr, 3, 1).shape
+    (1, 7, 1)
+    >>> _reshape_nd(arr, 4, -1).shape
+    (1, 1, 1, 7)
+    """
+    if arr.ndim != 1:
+        raise ValueError("arr must be a 1d array")
+    new_shape = [1,] * ndim
+    new_shape[dim] = -1
+    return np.reshape(arr, new_shape)
+
+
 def check_nD(array, ndim, arg_name='image'):
     """
     Verify an array meets the desired ndims and array isn't empty.

@@ -8,13 +8,15 @@ Authors
 :license: modified BSD
 """
 
+import colorsys
 import numpy as np
 import pytest
-from skimage._shared.testing import assert_equal, assert_almost_equal
-from skimage._shared.testing import assert_array_almost_equal, fetch
-from skimage._shared.testing import TestCase
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
+                           assert_equal)
 
-from skimage.util import img_as_float, img_as_ubyte, img_as_float32
+from skimage import data
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
                            rgb2hed, hed2rgb,
@@ -34,13 +36,10 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb, gray2rgba)
-
-from skimage._shared._warnings import expected_warnings
-from skimage import data
-import colorsys
+from skimage.util import img_as_float, img_as_ubyte, img_as_float32
 
 
-class TestColorconv(TestCase):
+class TestColorconv():
 
     img_rgb = data.colorwheel()
     img_grayscale = data.camera()
@@ -77,20 +76,36 @@ class TestColorconv(TestCase):
                           ])
 
     # RGBA to RGB
-    def test_rgba2rgb_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, 2, -1])
+    def test_rgba2rgb_conversion(self, channel_axis):
         rgba = self.img_rgba
-        rgb = rgba2rgb(rgba)
+
+        rgba = np.moveaxis(rgba, source=-1, destination=channel_axis)
+        rgb = rgba2rgb(rgba, channel_axis=channel_axis)
+        rgb = np.moveaxis(rgb, source=channel_axis, destination=-1)
+
         expected = np.array([[[1, 1, 1],
                               [0, 0.5, 1],
                               [0.5, 0.75, 1]]]).astype(float)
-        self.assertEqual(rgb.shape, expected.shape)
+        assert_equal(rgb.shape, expected.shape)
         assert_almost_equal(rgb, expected)
 
     def test_rgba2rgb_error_grayscale(self):
-        self.assertRaises(ValueError, rgba2rgb, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgba2rgb(self.img_grayscale)
+
+    def test_rgba2rgb_error_channel_axis_None(self):
+        with pytest.raises(TypeError):
+            rgba2rgb(self.img_rgba, channel_axis=None)
+
+    @pytest.mark.parametrize("channel_axis", [-4, 3])
+    def test_rgba2rgb_error_channel_axis_out_of_range(self, channel_axis):
+        with pytest.raises(ValueError):
+            rgba2rgb(self.img_rgba, channel_axis=channel_axis)
 
     def test_rgba2rgb_error_rgb(self):
-        self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
+        with pytest.raises(ValueError):
+            rgba2rgb(self.img_rgb)
 
     def test_rgba2rgb_dtype(self):
         rgba = self.img_rgba.astype('float64')
@@ -110,7 +125,8 @@ class TestColorconv(TestCase):
         assert_almost_equal(hsv, gt)
 
     def test_rgb2hsv_error_grayscale(self):
-        self.assertRaises(ValueError, rgb2hsv, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgb2hsv(self.img_grayscale)
 
     def test_rgb2hsv_dtype(self):
         rgb = img_as_float(self.img_rgb)
@@ -130,7 +146,8 @@ class TestColorconv(TestCase):
         assert_almost_equal(rgb, hsv2rgb(hsv), decimal=4)
 
     def test_hsv2rgb_error_grayscale(self):
-        self.assertRaises(ValueError, hsv2rgb, self.img_grayscale)
+        with pytest.raises(ValueError):
+            hsv2rgb(self.img_grayscale)
 
     def test_hsv2rgb_dtype(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
@@ -158,7 +175,8 @@ class TestColorconv(TestCase):
     # stop repeating the "raises" checks for all other functions that are
     # implemented with color._convert()
     def test_rgb2xyz_error_grayscale(self):
-        self.assertRaises(ValueError, rgb2xyz, self.img_grayscale)
+        with pytest.raises(ValueError):
+            rgb2xyz(self.img_grayscale)
 
     def test_rgb2xyz_dtype(self):
         img = self.colbars_array
@@ -267,10 +285,10 @@ class TestColorconv(TestCase):
             assert_almost_equal(
                 convert_colorspace(self.colbars_array, 'RGB', space), gt)
 
-        self.assertRaises(ValueError, convert_colorspace,
-                          self.colbars_array, 'nokey', 'XYZ')
-        self.assertRaises(ValueError, convert_colorspace,
-                          self.colbars_array, 'RGB', 'nokey')
+        with pytest.raises(ValueError):
+            convert_colorspace(self.colbars_array, 'nokey', 'XYZ')
+        with pytest.raises(ValueError):
+            convert_colorspace(self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2gray(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(float)
