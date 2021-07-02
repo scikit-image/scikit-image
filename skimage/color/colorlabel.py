@@ -108,10 +108,16 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         between fully saturated (original RGB, `saturation=1`) and fully
         unsaturated (grayscale, `saturation=0`). Only applies when
         `kind='overlay'`.
+    channel_axis : int, optional
+        This parameter indicates which axis of the output array will correspond
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
-    result : array of float, shape (M, N, 3)
+    result : array of float, shape (..., 3, ...)
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """

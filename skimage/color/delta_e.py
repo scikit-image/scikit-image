@@ -33,6 +33,12 @@ def deltaE_cie76(lab1, lab2, channel_axis=-1):
         reference color (Lab colorspace)
     lab2 : array_like
         comparison color (Lab colorspace)
+    channel_axis : int, optional
+        This parameter indicates which axis of the arrays corresponds to
+        channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -75,6 +81,12 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015, *,
         first scale parameter
     k2 : float, optional
         second scale parameter
+    channel_axis : int, optional
+        This parameter indicates which axis of the arrays corresponds to
+        channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -143,6 +155,12 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
         chroma scale factor, usually 1
     kH : float (range), optional
         hue scale factor, usually 1
+    channel_axis : int, optional
+        This parameter indicates which axis of the arrays corresponds to
+        channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -272,6 +290,12 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1, *, channel_axis=-1):
         reference color (Lab colorspace)
     lab2 : array_like
         comparison color (Lab colorspace)
+    channel_axis : int, optional
+        This parameter indicates which axis of the arrays corresponds to
+        channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------

@@ -313,7 +313,8 @@ class TestColorconv():
         assert rgbcie2rgb(img).dtype == img.dtype
         assert rgbcie2rgb(img32).dtype == img32.dtype
 
-    def test_convert_colorspace(self):
+    @pytest.mark.parametrize("channel_axis", [0, -1])
+    def test_convert_colorspace(self, channel_axis):
         colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr', 'YDbDr']
         colfuncs_from = [
             hsv2rgb, rgbcie2rgb, xyz2rgb,
@@ -324,17 +325,23 @@ class TestColorconv():
             rgb2ycbcr, rgb2ypbpr, rgb2ydbdr
         ]
 
+        colbars_array = np.moveaxis(
+            self.colbars_array, source=-1, destination=channel_axis
+        )
+
+        kw = dict(channel_axis=channel_axis)
+
         assert_almost_equal(
-            convert_colorspace(self.colbars_array, 'RGB', 'RGB'),
-            self.colbars_array)
+            convert_colorspace(colbars_array, 'RGB', 'RGB', **kw),
+            colbars_array)
 
         for i, space in enumerate(colspaces):
-            gt = colfuncs_from[i](self.colbars_array)
+            gt = colfuncs_from[i](colbars_array, **kw)
             assert_almost_equal(
-                convert_colorspace(self.colbars_array, space, 'RGB'), gt)
-            gt = colfuncs_to[i](self.colbars_array)
+                convert_colorspace(colbars_array, space, 'RGB', **kw), gt)
+            gt = colfuncs_to[i](colbars_array, **kw)
             assert_almost_equal(
-                convert_colorspace(self.colbars_array, 'RGB', space), gt)
+                convert_colorspace(colbars_array, 'RGB', space, **kw), gt)
 
         with pytest.raises(ValueError):
             convert_colorspace(self.colbars_array, 'nokey', 'XYZ')
