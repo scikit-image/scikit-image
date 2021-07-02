@@ -11,7 +11,7 @@ from skimage._shared.testing import (test_parallel, assert_equal,
 
 @test_parallel()
 def test_color_2d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -32,7 +32,7 @@ def test_color_2d():
 
 
 def test_multichannel_2d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 20, 8))
     img[:10, :10, 0:2] = 1
     img[:10, 10:, 2:4] = 1
@@ -52,7 +52,7 @@ def test_multichannel_2d():
 
 
 def test_gray_2d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
@@ -72,7 +72,7 @@ def test_gray_2d():
 
 
 def test_gray_2d_deprecated_multichannel():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
@@ -97,7 +97,7 @@ def test_gray_2d_deprecated_multichannel():
 
 
 def test_color_3d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in img.shape[:-1]:
@@ -118,7 +118,7 @@ def test_color_3d():
 
 
 def test_gray_3d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:
@@ -140,7 +140,7 @@ def test_gray_3d():
 
 
 def test_list_sigma():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.array([[1, 1, 1, 0, 0, 0],
                     [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rnd.normal(size=img.shape)
@@ -152,7 +152,7 @@ def test_list_sigma():
 
 
 def test_spacing():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1],
@@ -210,7 +210,7 @@ def test_enforce_connectivity():
 
 def test_slic_zero():
     # Same as test_color_2d but with slic_zero=True
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -230,7 +230,7 @@ def test_slic_zero():
 
 
 def test_more_segments_than_pixels():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
@@ -244,7 +244,7 @@ def test_more_segments_than_pixels():
 
 
 def test_color_2d_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
@@ -272,7 +272,7 @@ def test_color_2d_mask():
 
 
 def test_multichannel_2d_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((20, 20))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 20, 8))
@@ -301,7 +301,7 @@ def test_multichannel_2d_mask():
 
 
 def test_gray_2d_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
@@ -328,7 +328,7 @@ def test_gray_2d_mask():
 
 
 def test_list_sigma_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((2, 6))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0, 0],
@@ -342,7 +342,7 @@ def test_list_sigma_mask():
 
 
 def test_spacing_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((2, 5))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0],
@@ -396,7 +396,7 @@ def test_enforce_connectivity_mask():
 
 def test_slic_zero_mask():
 
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
@@ -424,7 +424,7 @@ def test_slic_zero_mask():
 
 
 def test_more_segments_than_pixels_mask():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
@@ -445,7 +445,7 @@ def test_color_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in msk.shape:
@@ -471,7 +471,7 @@ def test_gray_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:

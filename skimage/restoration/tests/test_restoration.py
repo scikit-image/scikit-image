@@ -56,6 +56,8 @@ def test_unsupervised_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     seed = 16829302
+    # keep old-style RandomState here for compatibility with previously stored
+    # reference data in camera_unsup.npy and camera_unsup2.npy
     rng = np.random.RandomState(seed)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)

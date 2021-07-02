@@ -35,6 +35,7 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
     # Get tight ROI around the mask to optimize
     coord = np.array(np.nonzero(mask), dtype=float).T
     # Fix random seed to ensure repeatability
+    # Keep old-style RandomState here as expected results in tests depend on it
     rnd = random.RandomState(123)
 
     # select n_centroids randomly distributed points from within the mask
