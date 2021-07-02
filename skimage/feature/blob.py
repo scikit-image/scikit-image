@@ -279,7 +279,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     .. [2] Lowe, D.G. Distinctive Image Features from Scale-Invariant
         Keypoints. International Journal of Computer Vision 60, 91–110 (2004).
         https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
-        DOI:10.1023/B:VISI.0000029664.99615.94
+        :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
     Examples
     --------
