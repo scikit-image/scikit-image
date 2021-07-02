@@ -8,27 +8,20 @@ on:
 jobs:
   benchmark:
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
-    name: ${{ matrix.os }}-repl-${{ matrix.replica }}
-    runs-on: ${{ matrix.os }}
+    name: Linux
+    runs-on: ubuntu-20.04
     env:
       CCACHE_BASEDIR: "${{ github.workspace }}"
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
       CCACHE_COMPRESS: true
       CCACHE_COMPRESSLEVEL: 6
       CCACHE_MAXSIZE: 400M
-    strategy:
-      fail-fast: false
-      matrix:
-        replica: [1, 2]  # we do two replicas of a single pass each
-        os: [ubuntu-20.04]
 
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
       - uses: actions/checkout@v2
         with:
-          # ref: ${{github.event.pull_request.head.ref}}
-          # repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
       - name: Setup Miniconda
@@ -49,7 +42,7 @@ jobs:
         id: prepare-ccache
         shell: bash -l {0}
         run: |
-          echo "::set-output name=key::${{ matrix.os }}-repl-${{ matrix.replica }}"
+          echo "::set-output name=key::benchmark-$RUNNER_OS"
           echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
           ccache -p
           ccache -z
@@ -71,7 +64,6 @@ jobs:
           OMP_NUM_THREADS: 1
           ASV_FACTOR: 1.5
           ASV_SKIP_SLOW: 1
-          ASV_PROCESSES: 1  # this is not parallelization! it's the number of passes
         run: |
           set -x
 
@@ -85,7 +77,7 @@ jobs:
           export CONDA_EXE=$(which mamba)
 
           # Run benchmarks for current commit against base
-          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
+          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
           asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
@@ -103,5 +95,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: asv-benchmark-results-${{ matrix.os }}-repl-${{ matrix.replica }}
+          name: asv-benchmark-results-${{ runner.os }}
           path: .asv/results
