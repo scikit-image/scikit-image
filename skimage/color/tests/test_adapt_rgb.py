@@ -1,6 +1,8 @@
 from functools import partial
 
 import numpy as np
+import pytest
+from numpy.testing import assert_array_equal
 
 from skimage import img_as_float, img_as_uint
 from skimage import color, data, filters
@@ -25,6 +27,11 @@ def smooth_each(image, sigma):
     return filters.gaussian(image, sigma)
 
 
+@adapt_rgb(each_channel, channel_axis=0)
+def smooth_each_axis0(image, sigma):
+    return filters.gaussian(image, sigma)
+
+
 @adapt_rgb(each_channel)
 def mask_each(image, mask):
     result = image.copy()
@@ -39,6 +46,11 @@ def edges_hsv(image):
 
 @adapt_rgb(hsv_value)
 def smooth_hsv(image, sigma):
+    return filters.gaussian(image, sigma)
+
+
+@adapt_rgb(hsv_value, channel_axis=0)
+def smooth_hsv_axis0(image, sigma):
     return filters.gaussian(image, sigma)
 
 
@@ -62,7 +74,16 @@ def test_each_channel():
 
 def test_each_channel_with_filter_argument():
     filtered = smooth_each(COLOR_IMAGE, SIGMA)
-    for i, channel in enumerate(np.rollaxis(filtered, axis=-1)):
+    for i, channel in enumerate(
+        np.moveaxis(filtered, source=-1, destination=0)
+    ):
+        assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
+
+
+def test_each_channel_with_filter_argument_axis0():
+    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=0)
+    filtered = smooth_each_axis0(color_img, SIGMA)
+    for i, channel in enumerate(filtered):
         assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
 
 
@@ -83,6 +104,13 @@ def test_hsv_value_with_filter_argument():
     assert_allclose(color.rgb2hsv(filtered)[:, :, 2], smooth(value))
 
 
+def test_hsv_value_with_filter_argument_axis0():
+    color_img = np.moveaxis(COLOR_IMAGE, source=-1, destination=0)
+    filtered = smooth_hsv_axis0(color_img, SIGMA)
+    value = color.rgb2hsv(COLOR_IMAGE)[:, :, 2]
+    assert_allclose(color.rgb2hsv(filtered, channel_axis=0)[2], smooth(value))
+
+
 def test_hsv_value_with_non_float_output():
     # Since `rgb2hsv` returns a float image and the result of the filtered
     # result is inserted into the HSV image, we want to make sure there isn't
@@ -92,3 +120,22 @@ def test_hsv_value_with_non_float_output():
     value = color.rgb2hsv(COLOR_IMAGE)[:, :, 2]
     # Reduce tolerance because dtype conversion.
     assert_allclose(filtered_value, filters.sobel(value), rtol=1e-5, atol=1e-5)
+
+
+def test_missing_channel_axis_param():
+
+    def _identity(image_filter, image):
+        return image
+
+    # when channel_axis != -1, the function passed to adapt_rgb must have a
+    # channel_axis argument
+    with pytest.raises(ValueError):
+        @adapt_rgb(_identity, channel_axis=0)
+        def identity(image):
+            return image
+
+    # default channel_axis=-1 doesn't raise an error
+    @adapt_rgb(_identity)
+    def identity(image):
+        return image
+    assert_array_equal(COLOR_IMAGE, identity(COLOR_IMAGE))
