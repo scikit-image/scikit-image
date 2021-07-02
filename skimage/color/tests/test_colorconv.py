@@ -115,9 +115,14 @@ class TestColorconv():
         assert rgba2rgb(rgba32).dtype == rgba32.dtype
 
     # RGB to HSV
-    def test_rgb2hsv_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_rgb2hsv_conversion(self, channel_axis):
         rgb = img_as_float(self.img_rgb)[::16, ::16]
-        hsv = rgb2hsv(rgb).reshape(-1, 3)
+
+        _rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
+        hsv = rgb2hsv(_rgb, channel_axis=channel_axis)
+        hsv = np.moveaxis(hsv, source=channel_axis, destination=-1).reshape(-1, 3)
+
         # ground truth from colorsys
         gt = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
                        for pt in rgb.reshape(-1, 3)]
@@ -136,14 +141,20 @@ class TestColorconv():
         assert rgb2hsv(rgb32).dtype == rgb32.dtype
 
     # HSV to RGB
-    def test_hsv2rgb_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_hsv2rgb_conversion(self, channel_axis):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
         # create HSV image with colorsys
         hsv = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
                         for pt in rgb.reshape(-1, 3)]).reshape(rgb.shape)
+
+        hsv = np.moveaxis(hsv, source=-1, destination=channel_axis)
+        _rgb = hsv2rgb(hsv, channel_axis=channel_axis)
+        _rgb = np.moveaxis(_rgb, source=channel_axis, destination=-1)
+
         # convert back to RGB and compare with original.
         # relative precision for RGB -> HSV roundtrip is about 1e-6
-        assert_almost_equal(rgb, hsv2rgb(hsv), decimal=4)
+        assert_almost_equal(rgb, _rgb, decimal=4)
 
     def test_hsv2rgb_error_grayscale(self):
         with pytest.raises(ValueError):

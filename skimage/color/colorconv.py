@@ -198,7 +198,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     return out
 
 
-def rgb2hsv(rgb):
+def rgb2hsv(rgb, *, channel_axis=-1):
     """RGB to HSV color space conversion.
 
     Parameters
@@ -236,7 +236,8 @@ def rgb2hsv(rgb):
     if input_is_one_pixel:
         rgb = rgb[np.newaxis, ...]
 
-    arr = _prepare_colorarray(rgb)
+    arr = _prepare_colorarray(rgb, channel_axis=channel_axis)
+    arr = np.moveaxis(arr, source=channel_axis, destination=-1)
     out = np.empty_like(arr)
 
     # -- V channel
@@ -277,10 +278,10 @@ def rgb2hsv(rgb):
     if input_is_one_pixel:
         out = np.squeeze(out, axis=0)
 
-    return out
+    return np.moveaxis(out, source=-1, destination=channel_axis)
 
 
-def hsv2rgb(hsv):
+def hsv2rgb(hsv, *, channel_axis=-1):
     """HSV to RGB color space conversion.
 
     Parameters
@@ -314,7 +315,8 @@ def hsv2rgb(hsv):
     >>> img_hsv = rgb2hsv(img)
     >>> img_rgb = hsv2rgb(img_hsv)
     """
-    arr = _prepare_colorarray(hsv)
+    arr = _prepare_colorarray(hsv, channel_axis=channel_axis)
+    arr = np.moveaxis(arr, source=channel_axis, destination=-1)
 
     hi = np.floor(arr[..., 0] * 6)
     f = arr[..., 0] * 6 - hi
@@ -332,7 +334,7 @@ def hsv2rgb(hsv):
                       np.stack((t, p, v), axis=-1),
                       np.stack((v, p, q), axis=-1)]))
 
-    return out
+    return np.moveaxis(out, source=-1, destination=channel_axis)
 
 
 # ---------------------------------------------------------------
