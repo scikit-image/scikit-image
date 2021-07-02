@@ -27,7 +27,6 @@ jobs:
         OPTIONAL_DEPS: [0]
         OPTIONS_NAME: ["default"]
         INSTALL_FROM_SDIST: [0]
-        RUN_BENCHMARKS: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -121,14 +120,6 @@ jobs:
         run: |
           asv check -v -E existing
 
-      - name: Run benchmarks (dev pass)
-        if: matrix.RUN_BENCHMARKS == 1
-        run: |
-          asv machine --yes
-          asv dev -v -E existing | sed "/Traceback \|failed$/ s/^/::error::/" | tee benchmarks.log
-          if grep "Traceback \|failed" benchmarks.log > /dev/null ; then
-              exit 1
-          fi
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}

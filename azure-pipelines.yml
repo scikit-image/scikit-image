@@ -21,7 +21,6 @@ jobs:
         ARCH: 'x64'
         PIP_FLAGS: ''
         TEST_EXAMPLES: 'true'
-        RUN_BENCHMARKS: 'true'
       Python38:
         PYTHON_VERSION: '3.8'
         ARCH: 'x86'
@@ -201,18 +200,6 @@ jobs:
       done
     condition:
     displayName: 'Gallery testing'
-
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
-
-      $PYTHON -m asv machine --yes
-      $PYTHON -m asv dev -v -E existing | sed "/Traceback \|failed$/ s/^/::error::/" | tee benchmarks.log
-      if grep "Traceback \|failed" benchmarks.log > /dev/null ; then
-          exit 1
-      fi
-    displayName: 'Run benchmarks (dev pass)'
-    condition: eq(variables['RUN_BENCHMARKS'], 'true')
 
 #  - bash: |
 #      # -- Publish the .whl artifacts
