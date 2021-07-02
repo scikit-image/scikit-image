@@ -1524,7 +1524,8 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     return np.clip(rgb, a_min=0, a_max=1)
 
 
-def lab2lch(lab):
+@channel_as_last_axis()
+def lab2lch(lab, *, channel_axis=-1):
     """CIE-LAB to CIE-LCH color space conversion.
 
     LCH is the cylindrical representation of the LAB (Cartesian) colorspace
@@ -1575,7 +1576,8 @@ def _cart2polar_2pi(x, y):
     return r, t
 
 
-def lch2lab(lch):
+@channel_as_last_axis()
+def lch2lab(lch, *, channel_axis=-1):
     """CIE-LCH to CIE-LAB color space conversion.
 
     LCH is the cylindrical representation of the LAB (Cartesian) colorspace
@@ -1626,7 +1628,8 @@ def _prepare_lab_array(arr, force_copy=True):
     return dtype.img_as_float(arr, force_copy=force_copy)
 
 
-def rgb2yuv(rgb):
+@channel_as_last_axis()
+def rgb2yuv(rgb, *, channel_axis=-1):
     """RGB to YUV color space conversion.
 
     Parameters
@@ -1656,7 +1659,8 @@ def rgb2yuv(rgb):
     return _convert(yuv_from_rgb, rgb)
 
 
-def rgb2yiq(rgb):
+@channel_as_last_axis()
+def rgb2yiq(rgb, *, channel_axis=-1):
     """RGB to YIQ color space conversion.
 
     Parameters
@@ -1677,7 +1681,8 @@ def rgb2yiq(rgb):
     return _convert(yiq_from_rgb, rgb)
 
 
-def rgb2ypbpr(rgb):
+@channel_as_last_axis()
+def rgb2ypbpr(rgb, *, channel_axis=-1):
     """RGB to YPbPr color space conversion.
 
     Parameters
@@ -1702,7 +1707,8 @@ def rgb2ypbpr(rgb):
     return _convert(ypbpr_from_rgb, rgb)
 
 
-def rgb2ycbcr(rgb):
+@channel_as_last_axis()
+def rgb2ycbcr(rgb, *, channel_axis=-1):
     """RGB to YCbCr color space conversion.
 
     Parameters
@@ -1736,7 +1742,8 @@ def rgb2ycbcr(rgb):
     return arr
 
 
-def rgb2ydbdr(rgb):
+@channel_as_last_axis()
+def rgb2ydbdr(rgb, *, channel_axis=-1):
     """RGB to YDbDr color space conversion.
 
     Parameters
@@ -1767,7 +1774,8 @@ def rgb2ydbdr(rgb):
     return arr
 
 
-def yuv2rgb(yuv):
+@channel_as_last_axis()
+def yuv2rgb(yuv, *, channel_axis=-1):
     """YUV to RGB color space conversion.
 
     Parameters
@@ -1792,7 +1800,8 @@ def yuv2rgb(yuv):
     return _convert(rgb_from_yuv, yuv)
 
 
-def yiq2rgb(yiq):
+@channel_as_last_axis()
+def yiq2rgb(yiq, *, channel_axis=-1):
     """YIQ to RGB color space conversion.
 
     Parameters
@@ -1813,7 +1822,8 @@ def yiq2rgb(yiq):
     return _convert(rgb_from_yiq, yiq)
 
 
-def ypbpr2rgb(ypbpr):
+@channel_as_last_axis()
+def ypbpr2rgb(ypbpr, *, channel_axis=-1):
     """YPbPr to RGB color space conversion.
 
     Parameters
@@ -1838,7 +1848,8 @@ def ypbpr2rgb(ypbpr):
     return _convert(rgb_from_ypbpr, ypbpr)
 
 
-def ycbcr2rgb(ycbcr):
+@channel_as_last_axis()
+def ycbcr2rgb(ycbcr, *, channel_axis=-1):
     """YCbCr to RGB color space conversion.
 
     Parameters
@@ -1872,7 +1883,8 @@ def ycbcr2rgb(ycbcr):
     return _convert(rgb_from_ycbcr, arr)
 
 
-def ydbdr2rgb(ydbdr):
+@channel_as_last_axis()
+def ydbdr2rgb(ydbdr, *, channel_axis=-1):
     """YDbDr to RGB color space conversion.
 
     Parameters

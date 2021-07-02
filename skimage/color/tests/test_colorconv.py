@@ -639,10 +639,15 @@ class TestColorconv():
             with expected_warnings(['Color data out of range']):
                 lab2xyz(lab)
 
-    def test_lab_lch_roundtrip(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_lab_lch_roundtrip(self, channel_axis):
         rgb = img_as_float(self.img_rgb)
-        lab = rgb2lab(rgb)
-        lab2 = lch2lab(lab2lch(lab))
+        rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
+        lab = rgb2lab(rgb, channel_axis=channel_axis)
+        lab2 = lch2lab(
+            lab2lch(lab, channel_axis=channel_axis),
+            channel_axis=channel_axis,
+        )
         assert_array_almost_equal(lab2, lab)
 
     def test_rgb_lch_roundtrip(self):
@@ -689,13 +694,30 @@ class TestColorconv():
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
         assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]]))
 
-    def test_yuv_roundtrip(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_yuv_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
-        assert_array_almost_equal(yuv2rgb(rgb2yuv(img_rgb)), img_rgb)
-        assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
-        assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
-        assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
-        assert_array_almost_equal(ydbdr2rgb(rgb2ydbdr(img_rgb)), img_rgb)
+        img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
+        assert_array_almost_equal(
+            yuv2rgb(rgb2yuv(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis),
+            img_rgb)
+        assert_array_almost_equal(
+            yiq2rgb(rgb2yiq(img_rgb, channel_axis=channel_axis),
+                    channel_axis=channel_axis),
+            img_rgb)
+        assert_array_almost_equal(
+            ypbpr2rgb(rgb2ypbpr(img_rgb, channel_axis=channel_axis),
+                      channel_axis=channel_axis),
+            img_rgb)
+        assert_array_almost_equal(
+            ycbcr2rgb(rgb2ycbcr(img_rgb, channel_axis=channel_axis),
+                      channel_axis=channel_axis),
+            img_rgb)
+        assert_array_almost_equal(
+            ydbdr2rgb(rgb2ydbdr(img_rgb, channel_axis=channel_axis),
+                      channel_axis=channel_axis),
+            img_rgb)
 
     def test_rgb2yuv_dtype(self):
         img = self.colbars_array.astype('float64')
