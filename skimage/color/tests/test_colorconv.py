@@ -17,6 +17,7 @@ from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
 from skimage import data
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
+from skimage._shared.utils import slice_at_axis
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
                            rgb2hed, hed2rgb,
@@ -172,7 +173,8 @@ class TestColorconv():
         assert hsv2rgb(hsv32).dtype == hsv32.dtype
 
     # RGB to XYZ
-    def test_rgb2xyz_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_rgb2xyz_conversion(self, channel_axis):
         gt = np.array([[[0.950456, 1.      , 1.088754],
                         [0.538003, 0.787329, 1.06942 ],
                         [0.592876, 0.28484 , 0.969561],
@@ -181,7 +183,14 @@ class TestColorconv():
                         [0.35758 , 0.71516 , 0.119193],
                         [0.412453, 0.212671, 0.019334],
                         [0.      , 0.      , 0.      ]]])
-        assert_almost_equal(rgb2xyz(self.colbars_array), gt)
+
+        img = np.moveaxis(
+            self.colbars_array, source=-1, destination=channel_axis
+        )
+        out = rgb2xyz(img, channel_axis=channel_axis)
+        out = np.moveaxis(out, source=channel_axis, destination=-1)
+
+        assert_almost_equal(out, gt)
 
     # stop repeating the "raises" checks for all other functions that are
     # implemented with color._convert()
@@ -209,9 +218,15 @@ class TestColorconv():
         assert xyz2rgb(img32).dtype == img32.dtype
 
     # RGB<->XYZ roundtrip on another image
-    def test_xyz_rgb_roundtrip(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_xyz_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
-        assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
+
+        img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
+        round_trip = xyz2rgb(rgb2xyz(img_rgb, channel_axis=channel_axis),
+                             channel_axis=channel_axis)
+
+        assert_array_almost_equal(round_trip, img_rgb)
 
     # HED<->RGB roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
@@ -242,7 +257,8 @@ class TestColorconv():
         assert_array_almost_equal(img_out, img_in)
 
     # RGB to RGB CIE
-    def test_rgb2rgbcie_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_rgb2rgbcie_conversion(self, channel_axis):
         gt = np.array([[[ 0.1488856 ,  0.18288098,  0.19277574],
                         [ 0.01163224,  0.16649536,  0.18948516],
                         [ 0.12259182,  0.03308008,  0.17298223],
@@ -251,7 +267,15 @@ class TestColorconv():
                         [ 0.02629378,  0.1498009 ,  0.01979351],
                         [ 0.13725336,  0.01638562,  0.00329059],
                         [ 0.        ,  0.        ,  0.        ]]])
-        assert_almost_equal(rgb2rgbcie(self.colbars_array), gt)
+
+        img = np.moveaxis(
+            self.colbars_array, source=-1, destination=channel_axis
+        )
+        out = rgb2rgbcie(img, channel_axis=channel_axis)
+
+        out = np.moveaxis(out, source=channel_axis, destination=-1)
+
+        assert_almost_equal(out, gt)
 
     def test_rgb2rgbcie_dtype(self):
         img = self.colbars_array.astype('float64')
@@ -261,10 +285,15 @@ class TestColorconv():
         assert rgb2rgbcie(img32).dtype == img32.dtype
 
     # RGB CIE to RGB
-    def test_rgbcie2rgb_conversion(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_rgbcie2rgb_conversion(self, channel_axis):
+        rgb = np.moveaxis(
+            self.colbars_array, source=-1, destination=channel_axis
+        )
+        round_trip = rgbcie2rgb(rgb2rgbcie(rgb, channel_axis=channel_axis),
+                                channel_axis=channel_axis)
         # only roundtrip test, we checked rgb2rgbcie above already
-        assert_almost_equal(rgbcie2rgb(rgb2rgbcie(self.colbars_array)),
-                            self.colbars_array)
+        assert_almost_equal(round_trip, rgb)
 
     def test_rgbcie2rgb_dtype(self):
         img = rgb2rgbcie(self.colbars_array).astype('float64')
@@ -301,9 +330,11 @@ class TestColorconv():
         with pytest.raises(ValueError):
             convert_colorspace(self.colbars_array, 'RGB', 'nokey')
 
-    def test_rgb2gray(self):
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    def test_rgb2gray(self, channel_axis):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(float)
-        g = rgb2gray(x)
+        x = np.moveaxis(x, source=-1, destination=channel_axis)
+        g = rgb2gray(x, channel_axis=channel_axis)
         assert_array_almost_equal(g, 1)
 
         assert_equal(g.shape, (1, 1))
@@ -655,60 +686,45 @@ def test_gray2rgb():
     assert_equal(z[0, 1, :], [128, 128, 128])
 
 
-def test_gray2rgb_rgb():
-    x = np.random.rand(5, 5, 4)
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        y = gray2rgb(x)
-    assert_equal(x, y)
-
-
-def test_gray2rgb_alpha():
-    x = np.random.random((5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    x = np.random.random((5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
-                              alpha=True)[0, 0, 3], 1)
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
-                              alpha=True)[0, 0, 3], 255)
-
-
 @pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
-def test_gray2rgba(shape):
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_gray2rgba(shape, channel_axis):
     # nD case
     img = np.random.random(shape)
-    rgba = gray2rgba(img)
+    rgba = gray2rgba(img, channel_axis=channel_axis)
+    assert rgba.ndim == img.ndim + 1
 
     # Shape check
-    assert_equal(rgba.shape, shape + (4, ))
+    new_axis_loc = channel_axis % rgba.ndim
+    assert_equal(rgba.shape,
+                 shape[:new_axis_loc] + (4, ) + shape[new_axis_loc:])
 
     # dtype check
     assert rgba.dtype == img.dtype
 
     # RGB channels check
     for channel in range(3):
-        assert_equal(rgba[..., channel], img)
+        assert_equal(rgba[slice_at_axis(channel, axis=new_axis_loc)], img)
 
     # Alpha channel check
-    assert_equal(rgba[..., 3], 1.0)
+    assert_equal(rgba[slice_at_axis(3, axis=new_axis_loc)], 1.0)
+
+
+@pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_gray2rgb_channel_axis(shape, channel_axis):
+    # nD case
+    img = np.random.random(shape)
+    rgb = gray2rgb(img, channel_axis=channel_axis)
+    assert rgb.ndim == img.ndim + 1
+
+    # Shape check
+    new_axis_loc = channel_axis % rgb.ndim
+    assert_equal(rgb.shape,
+                 shape[:new_axis_loc] + (3, ) + shape[new_axis_loc:])
+
+    # dtype check
+    assert rgb.dtype == img.dtype
 
 
 def test_gray2rgba_dtype():
@@ -754,8 +770,7 @@ def test_gray2rgba_alpha():
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))
-    expected_err_msg = ("could not broadcast input array from shape (5,5,1) "
-                        "into shape (5,5)")
+    expected_err_msg = ("alpha.shape must match image.shape")
 
     with pytest.raises(ValueError) as err:
         rgba = gray2rgba(img, alpha)
@@ -769,9 +784,7 @@ def test_nD_gray_conversion(func, shape):
     img = np.random.rand(*shape)
 
     msg_list = []
-    if img.ndim == 3 and func == gray2rgb:
-        msg_list.append('Pass-through of possibly RGB images in gray2rgb')
-    elif img.ndim == 2 and func == rgb2gray:
+    if img.ndim == 2 and func == rgb2gray:
         msg_list.append('The behavior of rgb2gray will change')
 
     with expected_warnings(msg_list):

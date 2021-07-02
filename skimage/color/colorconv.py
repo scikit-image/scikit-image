@@ -604,7 +604,8 @@ def _convert(matrix, arr):
     return arr @ matrix.T.astype(arr.dtype)
 
 
-def xyz2rgb(xyz):
+@channel_as_last_axis()
+def xyz2rgb(xyz, *, channel_axis=-1):
     """XYZ to RGB color space conversion.
 
     Parameters
@@ -649,7 +650,8 @@ def xyz2rgb(xyz):
     return arr
 
 
-def rgb2xyz(rgb):
+@channel_as_last_axis()
+def rgb2xyz(rgb, *, channel_axis=-1):
     """RGB to XYZ color space conversion.
 
     Parameters
@@ -684,14 +686,15 @@ def rgb2xyz(rgb):
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
-    arr = _prepare_colorarray(rgb).copy()
+    arr = _prepare_colorarray(rgb, channel_axis=-1).copy()
     mask = arr > 0.04045
     arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
     arr[~mask] /= 12.92
     return arr @ xyz_from_rgb.T.astype(arr.dtype)
 
 
-def rgb2rgbcie(rgb):
+@channel_as_last_axis()
+def rgb2rgbcie(rgb, *, channel_axis=-1):
     """RGB to RGB CIE color space conversion.
 
     Parameters
@@ -723,7 +726,8 @@ def rgb2rgbcie(rgb):
     return _convert(rgbcie_from_rgb, rgb)
 
 
-def rgbcie2rgb(rgbcie):
+@channel_as_last_axis()
+def rgbcie2rgb(rgbcie, *, channel_axis=-1):
     """RGB CIE to RGB color space conversion.
 
     Parameters
@@ -756,7 +760,8 @@ def rgbcie2rgb(rgbcie):
     return _convert(rgb_from_rgbcie, rgbcie)
 
 
-def rgb2gray(rgb):
+@channel_as_last_axis(multichannel_output=False)
+def rgb2gray(rgb, *, channel_axis=-1):
     """Compute luminance of an RGB image.
 
     Parameters
@@ -824,7 +829,7 @@ def rgb2grey(rgb):
     return rgb2gray(rgb)
 
 
-def gray2rgba(image, alpha=None):
+def gray2rgba(image, alpha=None, *, channel_axis=-1):
     """Create a RGBA representation of a gray-level image.
 
     Parameters
@@ -853,24 +858,21 @@ def gray2rgba(image, alpha=None):
     if not np.can_cast(alpha, arr.dtype):
         warn("alpha can't be safely cast to image dtype {}"
              .format(arr.dtype.name), stacklevel=2)
-
-    rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
-    rgba[..., :3] = arr[..., np.newaxis]
-    rgba[..., 3] = alpha
-
+    if np.isscalar(alpha):
+        alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
+    elif alpha.shape != arr.shape:
+        raise ValueError("alpha.shape must match image.shape")
+    rgba = np.stack((arr,)*3 + (alpha,), axis=channel_axis)
     return rgba
 
 
-def gray2rgb(image, alpha=None):
+def gray2rgb(image, *, channel_axis=-1):
     """Create an RGB representation of a gray-level image.
 
     Parameters
     ----------
     image : array_like
         Input image.
-    alpha : bool, optional
-        Ensure that the output image has an alpha layer. If None,
-        alpha layers are passed through but not created.
 
     Returns
     -------
@@ -882,48 +884,7 @@ def gray2rgb(image, alpha=None):
     If the input is a 1-dimensional image of shape ``(M, )``, the output
     will be shape ``(M, 3)``.
     """
-
-    if alpha is not None:
-        warn("alpha argument is deprecated and will be removed in "
-             "version 0.19. Please use the gray2rgba function instead"
-             "to obtain an RGBA image.", FutureWarning, stacklevel=2)
-    is_rgb = False
-    is_alpha = False
-    dims = np.squeeze(image).ndim
-
-    if dims == 3:
-        if image.shape[2] == 3:
-            is_rgb = True
-        elif image.shape[2] == 4:
-            is_alpha = True
-            is_rgb = True
-
-    if is_rgb:
-        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
-             'In version 0.19, input arrays will always be considered '
-             'grayscale, even if the last dimension has length 3 or 4. '
-             'To prevent this warning and ensure compatibility with future '
-             'versions, detect RGB images outside of this function.',
-             FutureWarning, stacklevel=2)
-        if alpha is False:
-            image = image[..., :3]
-
-        elif alpha is True and is_alpha is False:
-            alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
-                           dtype_limits(image, clip_negative=False)[1])
-            image = np.concatenate((image, alpha_layer), axis=2)
-
-        return image
-
-    else:
-        image = image[..., np.newaxis]
-
-        if alpha:
-            alpha_layer = (np.ones_like(image)
-                           * dtype_limits(image, clip_negative=False)[1])
-            return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
-        else:
-            return np.concatenate(3 * (image,), axis=-1)
+    return np.stack(3 * (image,), axis=channel_axis)
 
 
 @functools.wraps(gray2rgb)
