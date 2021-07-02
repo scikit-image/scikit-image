@@ -156,7 +156,8 @@ def test_leave_labels_alone():
     assert_array_equal(labels, labels_saved)
 
 
-def test_avg():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_avg(channel_axis):
     # label image
     label_field = np.array([[1, 1, 1, 2],
                             [1, 2, 2, 2],
@@ -187,18 +188,24 @@ def test_avg():
     expected_out = np.dstack((rout, gout, bout))
 
     # test standard averaging
-    out = label2rgb(label_field, image, kind='avg', bg_label=-1)
+    _image = np.moveaxis(image, source=-1, destination=channel_axis)
+    out = label2rgb(label_field, _image, kind='avg', bg_label=-1,
+                    channel_axis=channel_axis)
+    out = np.moveaxis(out, source=channel_axis, destination=-1)
     assert_array_equal(out, expected_out)
 
     # test averaging with custom background value
-    out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
-                       kind='avg')
+    out_bg = label2rgb(label_field, _image, bg_label=2, bg_color=(0, 0, 0),
+                       kind='avg', channel_axis=channel_axis)
+    out_bg = np.moveaxis(out_bg, source=channel_axis, destination=-1)
     expected_out_bg = expected_out.copy()
     expected_out_bg[label_field == 2] = 0
     assert_array_equal(out_bg, expected_out_bg)
 
     # test default background color
-    out_bg = label2rgb(label_field, image, bg_label=2, kind='avg')
+    out_bg = label2rgb(label_field, _image, bg_label=2, kind='avg',
+                       channel_axis=channel_axis)
+    out_bg = np.moveaxis(out_bg, source=channel_axis, destination=-1)
     assert_array_equal(out_bg, expected_out_bg)
 
 

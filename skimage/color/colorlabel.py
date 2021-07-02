@@ -110,7 +110,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         `kind='overlay'`.
     channel_axis : int, optional
         This parameter indicates which axis of the output array will correspond
-        to channels.
+        to channels. If `image` is provided, this must also match the axis of
+        `image` that corresponds to channels.
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
@@ -121,6 +122,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    if image is not None:
+        image = np.moveaxis(image, source=channel_axis, destination=-1)
     if kind == 'overlay':
         rgb = _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha, saturation)
