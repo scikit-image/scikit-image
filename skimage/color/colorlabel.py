@@ -74,7 +74,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 @change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
               bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay',
-              *, saturation=0):
+              *, saturation=0, channel_axis=-1):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -116,12 +116,13 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         value in `label` with the image, at a certain alpha value.
     """
     if kind == 'overlay':
-        return _label2rgb_overlay(label, image, colors, alpha, bg_label,
+        rgb = _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha, saturation)
     elif kind == 'avg':
-        return _label2rgb_avg(label, image, bg_label, bg_color)
+        rgb = _label2rgb_avg(label, image, bg_label, bg_color)
     else:
         raise ValueError("`kind` must be either 'overlay' or 'avg'.")
+    return np.moveaxis(rgb, source=-1, destination=channel_axis)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,

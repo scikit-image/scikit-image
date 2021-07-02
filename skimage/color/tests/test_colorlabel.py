@@ -40,15 +40,21 @@ def test_wrong_kind():
         label2rgb(label, kind='foo', bg_label=-1)
 
 
-def test_uint_image():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_uint_image(channel_axis):
     img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
-    output = label2rgb(labels, image=img, bg_label=0)
+    output = label2rgb(labels, image=img, bg_label=0,
+                       channel_axis=channel_axis)
     # Make sure that the output is made of floats and in the correct range
     assert np.issubdtype(output.dtype, np.floating)
     assert output.max() <= 1
+
+    # size 3 (RGB) along the specified channel_axis
+    new_axis = channel_axis % output.ndim
+    assert output.shape[new_axis] == 3
 
 
 def test_rgb():
