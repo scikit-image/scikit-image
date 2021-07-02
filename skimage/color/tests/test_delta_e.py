@@ -2,15 +2,16 @@
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from skimage._shared.testing import (
-    assert_allclose, assert_equal, assert_almost_equal, fetch
-)
-from skimage.color.delta_e import (
-    deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, deltaE_cmc
-)
+import pytest
+from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
+
+from skimage._shared.testing import fetch
+from skimage.color.delta_e import (deltaE_cie76, deltaE_ciede94,
+                                   deltaE_ciede2000, deltaE_cmc)
 
 
-def test_ciede2000_dE():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_ciede2000_dE(channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3))
@@ -23,7 +24,9 @@ def test_ciede2000_dE():
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_ciede2000(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_ciede2000(lab1, lab2, channel_axis=channel_axis)
 
     assert_allclose(dE2, data['dE'], rtol=1.e-4)
 
@@ -59,7 +62,8 @@ def load_ciede2000_data():
     return np.loadtxt(path, dtype=dtype)
 
 
-def test_cie76():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_cie76(channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3))
@@ -72,7 +76,9 @@ def test_cie76():
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_cie76(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_cie76(lab1, lab2, channel_axis=channel_axis)
     oracle = np.array([
         4.00106328, 6.31415011, 9.1776999, 2.06270077, 2.36957073,
         2.91529271, 2.23606798, 2.23606798, 4.98000036, 4.9800004,
@@ -85,7 +91,8 @@ def test_cie76():
     assert_allclose(dE2, oracle, rtol=1.e-8)
 
 
-def test_ciede94():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_ciede94(channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3))
@@ -98,7 +105,9 @@ def test_ciede94():
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_ciede94(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_ciede94(lab1, lab2, channel_axis=channel_axis)
     oracle = np.array([
         1.39503887, 1.93410055, 2.45433566, 0.68449187, 0.6695627,
         0.69194527, 2.23606798, 2.03163832, 4.80069441, 4.80069445,
@@ -111,7 +120,8 @@ def test_ciede94():
     assert_allclose(dE2, oracle, rtol=1.e-8)
 
 
-def test_cmc():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_cmc(channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3))
@@ -124,7 +134,9 @@ def test_cmc():
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_cmc(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_cmc(lab1, lab2, channel_axis=channel_axis)
     oracle = np.array([
         1.73873611, 2.49660844, 3.30494501, 0.85735576, 0.88332927,
         0.97822692, 3.50480874, 2.87930032, 6.5783807, 6.57838075,
@@ -142,11 +154,17 @@ def test_cmc():
     # issue on Github):
     lab1 = lab2
     expected = np.zeros_like(oracle)
-    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+    assert_almost_equal(
+        deltaE_cmc(lab1, lab2, channel_axis=channel_axis), expected, decimal=6
+    )
 
     lab2[0, 0] += np.finfo(float).eps
-    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+    assert_almost_equal(
+        deltaE_cmc(lab1, lab2, channel_axis=channel_axis), expected, decimal=6
+    )
 
+
+def test_cmc_single_item():
     # Single item case:
     lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
     assert_equal(deltaE_cmc(lab1, lab2), 0)

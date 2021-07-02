@@ -20,10 +20,11 @@ https://en.wikipedia.org/wiki/Color_difference
 
 import numpy as np
 
+from .._shared.utils import slice_at_axis
 from .colorconv import lab2lch, _cart2polar_2pi
 
 
-def deltaE_cie76(lab1, lab2):
+def deltaE_cie76(lab1, lab2, channel_axis=-1):
     """Euclidean distance between two points in Lab color space
 
     Parameters
@@ -46,12 +47,13 @@ def deltaE_cie76(lab1, lab2):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
-    L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
-    L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
+    L1, a1, b1 = np.moveaxis(lab1, source=channel_axis, destination=0)[:3]
+    L2, a2, b2 = np.moveaxis(lab2, source=channel_axis, destination=0)[:3]
     return np.sqrt((L2 - L1) ** 2 + (a2 - a1) ** 2 + (b2 - b1) ** 2)
 
 
-def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
+def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015, *,
+                   channel_axis=-1):
     """Color difference according to CIEDE 94 standard
 
     Accommodates perceptual non-uniformities through the use of application
@@ -102,12 +104,15 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
-    L1, C1 = np.rollaxis(lab2lch(lab1), -1)[:2]
-    L2, C2 = np.rollaxis(lab2lch(lab2), -1)[:2]
+    lab1 = np.moveaxis(lab1, source=channel_axis, destination=0)
+    lab2 = np.moveaxis(lab2, source=channel_axis, destination=0)
+
+    L1, C1 = lab2lch(lab1, channel_axis=0)[:2]
+    L2, C2 = lab2lch(lab2, channel_axis=0)[:2]
 
     dL = L1 - L2
     dC = C1 - C2
-    dH2 = get_dH2(lab1, lab2)
+    dH2 = get_dH2(lab1, lab2, channel_axis=0)
 
     SL = 1
     SC = 1 + k1 * C1
@@ -119,7 +124,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     return np.sqrt(np.maximum(dE2, 0))
 
 
-def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
+def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
     """Color difference as given by the CIEDE 2000 standard.
 
     CIEDE 2000 is a major revision of CIDE94.  The perceptual calibration is
@@ -160,6 +165,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
+
+    channel_axis = channel_axis % lab1.ndim
     unroll = False
     if lab1.ndim == 1 and lab2.ndim == 1:
         unroll = True
@@ -167,8 +174,10 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
             lab1 = lab1[None, :]
         if lab2.ndim == 1:
             lab2 = lab2[None, :]
-    L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
-    L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
+        channel_axis += 1
+    L1, a1, b1 = np.moveaxis(lab1, source=channel_axis, destination=0)[:3]
+    L2, a2, b2 = np.moveaxis(lab2, source=channel_axis, destination=0)[:3]
+
 
     # distort `a` based on average chroma
     # then convert to lch coordines from distorted `a`
@@ -244,7 +253,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     return ans
 
 
-def deltaE_cmc(lab1, lab2, kL=1, kC=1):
+def deltaE_cmc(lab1, lab2, kL=1, kC=1, *, channel_axis=-1):
     """Color difference from the  CMC l:c standard.
 
     This color difference was developed by the Colour Measurement Committee
@@ -283,12 +292,14 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
            JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132
            (1984).
     """
-    L1, C1, h1 = np.rollaxis(lab2lch(lab1), -1)[:3]
-    L2, C2, h2 = np.rollaxis(lab2lch(lab2), -1)[:3]
+    lab1 = np.moveaxis(lab1, source=channel_axis, destination=0)
+    lab2 = np.moveaxis(lab2, source=channel_axis, destination=0)
+    L1, C1, h1 = lab2lch(lab1, channel_axis=0)[:3]
+    L2, C2, h2 = lab2lch(lab2, channel_axis=0)[:3]
 
     dC = C1 - C2
     dL = L1 - L2
-    dH2 = get_dH2(lab1, lab2)
+    dH2 = get_dH2(lab1, lab2, channel_axis=0)
 
     T = np.where(np.logical_and(np.rad2deg(h1) >= 164, np.rad2deg(h1) <= 345),
                  0.56 + 0.2 * np.abs(np.cos(h1 + np.deg2rad(168))),
@@ -308,7 +319,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     return np.sqrt(np.maximum(dE2, 0))
 
 
-def get_dH2(lab1, lab2):
+def get_dH2(lab1, lab2, *, channel_axis=-1):
     """squared hue difference term occurring in deltaE_cmc and deltaE_ciede94
 
     Despite its name, "dH" is not a simple difference of hue values.  We avoid
@@ -329,8 +340,8 @@ def get_dH2(lab1, lab2):
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
 
-    a1, b1 = np.rollaxis(lab1, -1)[1:3]
-    a2, b2 = np.rollaxis(lab2, -1)[1:3]
+    a1, b1 = np.moveaxis(lab1, source=channel_axis, destination=0)[1:3]
+    a2, b2 = np.moveaxis(lab2, source=channel_axis, destination=0)[1:3]
 
     # magnitude of (a, b) is the chroma
     C1 = np.hypot(a1, b1)
