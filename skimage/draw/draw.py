@@ -3,7 +3,7 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from ._draw import (_coords_inside_image, _line, _line_aa,
-                    _polygon, _draw_poly_on_array,_ellipse_perimeter,
+                    _polygon, _draw_poly_on_array, _ellipse_perimeter,
                     _circle_perimeter, _circle_perimeter_aa,
                     _bezier_curve)
 
@@ -530,12 +530,14 @@ def draw_poly_on_array(r, c, image, fill_value=1):
     image : ndarray
         Input image that polygon will be drawn onto.
     fill_value : bool, int, tuple, optional
-        The value that will be assigned to coordinates within the polygon. Default is 1.
+        The value that will be assigned to coordinates within the polygon.
+        Default is 1.
 
     Returns
     -------
-    image: ndarray 
-        The updated image with the areas inside the polygon now assigned the fill_value.
+    image: ndarray
+        The updated image with the areas inside the polygon now assigned the
+        fill_value.
 
     Examples
     --------
