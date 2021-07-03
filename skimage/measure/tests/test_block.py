@@ -87,6 +87,13 @@ def test_invalid_block_size():
     with testing.raises(ValueError):
         block_reduce(image, [1, 0.5])
 
+def test_default_block_size():
+    image = np.arange(4 * 6).reshape(4, 6)
+    out = block_reduce(image, func=np.mean)
+    expected = np.array([[ 3.5, 5.5, 7.5],
+                          [15.5, 17.5, 19.5]])
+    assert_equal(expected, out)
+
 
 def test_func_kwargs_same_dtype():
     image = np.array([[97, 123, 173, 227],

@@ -11,7 +11,7 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
     ----------
     image : ndarray
         N-dimensional input image.
-    block_size : array_like
+    block_size : array_like or int
         Array containing down-sampling integer factor along each axis.
         Default block_size is 2.
     func : callable
@@ -60,7 +60,9 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
             [35]]])
     """
 
-    if len(block_size) != image.ndim:
+    if np.isscalar(block_size):
+        block_size = (block_size,) * image.ndim
+    elif len(block_size) != image.ndim:
         raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
 
