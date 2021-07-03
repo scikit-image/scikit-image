@@ -256,7 +256,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+def denoise_tv_bregman(image, weight=1.0, max_iter=100, eps=1e-3, isotropic=True,
                        *, channel_axis=None, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
@@ -272,7 +272,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
     weight : float
         Denoising weight. The smaller the `weight`, the more denoising (at
         the expense of less similarity to the `input`). The regularization
-        parameter `lambda` is chosen as `2 * weight`.
+        parameter `lambda` is chosen as `2 * weight`. Default weight is 1.0.
     eps : float, optional
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when::

@@ -142,7 +142,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
                     methods=methods, verbose=verbose)
 
 
-def threshold_local(image, block_size, method='gaussian', offset=0,
+def threshold_local(image, block_size=2, method='gaussian', offset=0,
                     mode='reflect', param=None, cval=0):
     """Compute a threshold mask image based on local pixel neighborhood.
 
@@ -157,7 +157,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         Grayscale input image.
     block_size : int or sequence of int
         Odd size of pixel neighborhood which is used to calculate the
-        threshold value (e.g. 3, 5, 7, ..., 21, ...).
+        threshold value (e.g. 3, 5, 7, ..., 21, ...). Default block_size is 2.
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
