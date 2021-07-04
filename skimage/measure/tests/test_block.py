@@ -87,11 +87,12 @@ def test_invalid_block_size():
     with testing.raises(ValueError):
         block_reduce(image, [1, 0.5])
 
+
 def test_default_block_size():
     image = np.arange(4 * 6).reshape(4, 6)
     out = block_reduce(image, func=np.min)
-    expected = np.array([[ 0, 2, 4],
-                          [12, 14, 16]])
+    expected = np.array([[0, 2, 4],
+                         [12, 14, 16]])
     assert_equal(expected, out)
 
 
