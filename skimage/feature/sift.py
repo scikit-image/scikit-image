@@ -73,13 +73,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             The number of bins in the histograms of the descriptor patch.
 
 
+        #todo: not correct yet, complete the documentation when the code is finished
         Attributes
         ----------
         delta_min : float
             The sampling distance of the first octave. It's final value is 1/upsampling.
         deltas : (n_octaves, n_scales + 3)
             The sampling distances of all octaves.
-        keypoints : (N, 2) array #todo: update
+        keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
 
 
@@ -341,7 +342,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         # return the gradientspace to reuse it to find the descriptor
         return gradientSpace
 
-    def rotate(self, Y, X, angle, sigma):
+    def _rotate(self, Y, X, angle, sigma):
         c = np.cos(angle)
         s = np.sin(angle)
         rY = (c * Y - s * X) / sigma
