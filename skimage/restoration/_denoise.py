@@ -256,7 +256,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-def denoise_tv_bregman(image, weight=1.0, max_iter=100, 
+def denoise_tv_bregman(image, weight=1.0, max_iter=100,
                        eps=1e-3, isotropic=True,
                        *, channel_axis=None, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
