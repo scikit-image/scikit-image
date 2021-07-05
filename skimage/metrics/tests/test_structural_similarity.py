@@ -228,9 +228,8 @@ def test_structural_similarity_small_image():
     assert_equal(structural_similarity(X, X, win_size=3), 1.0)
     assert_equal(structural_similarity(X, X, win_size=5), 1.0)
     # when user don't specify win_size with small image
-    with testing.raises(ValueError) as cm:
+    with testing.raises(ValueError):
         structural_similarity(Y, Y)
-        assert 'win_size exceeds image extent.' in cm.exception.msg
 
 def test_invalid_input():
     # size mismatch
@@ -239,9 +238,8 @@ def test_invalid_input():
     with testing.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent
-    with testing.raises(ValueError) as cm:
+    with testing.raises(ValueError):
         structural_similarity(X, X, win_size=X.shape[0] + 1)
-        assert 'win_size exceeds image extent' in cm.exception.msg
     # some kwarg inputs must be non-negative
     with testing.raises(ValueError):
         structural_similarity(X, X, K1=-0.1)
