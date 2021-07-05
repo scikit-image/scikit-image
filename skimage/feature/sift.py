@@ -288,8 +288,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
-            Min = np.array(np.maximum(0, np.add(np.subtract(yx, radius[:, np.newaxis]), 0.5)), dtype=int)
-            Max = np.array(np.minimum(yx + radius[:, np.newaxis] + 0.5, (dim[0] - 1, dim[1] - 1)), dtype=int)
+            Min = np.maximum(0, np.add(np.subtract(yx, radius[:, np.newaxis]), 0.5)).astype(np.int)
+            Max = np.minimum(yx + radius[:, np.newaxis] + 0.5, (dim[0] - 1, dim[1] - 1)).astype(np.int)
 
             for k in range(len(keypoints.yx)):
                 if np.all(Min[k] > 0) and np.all(Max[k] > Min[k]):
@@ -308,7 +308,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                                2 * (self.lambda_ori * sigma[k]) ** 2))  # more weight to center values
 
                     # fill the histogram
-                    bins = np.array(np.floor((theta / (2 * np.pi) * self.n_bins + 0.5) % self.n_bins), dtype=int)
+                    bins = np.floor((theta / (2 * np.pi) * self.n_bins + 0.5) % self.n_bins).astype(np.int)
                     np.add.at(hist, bins, kernel * magnitude)
 
                     # smooth the histogram and find the maximum
@@ -439,8 +439,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # saturate the descriptor
                 histograms = np.minimum(histograms, 0.2 * np.linalg.norm(histograms))
                 # normalize the descriptor
-                descriptor = np.array(np.minimum(np.floor((512 * histograms) / np.linalg.norm(histograms)), 255),
-                                      dtype=np.uint8)
+                descriptor = np.minimum(np.floor((512 * histograms) / np.linalg.norm(histograms)), 255).astype(np.uint8)
                 keypoint_des[key_count, :] = descriptor
                 key_count += 1
         return keypoint_des
