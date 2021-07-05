@@ -223,8 +223,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     [ax[keys[still_in, 0], keys[still_in, 1], keys[still_in, 2]] for ax in grad]), 0,
                     1)  # Jacoby of all extrema
                 self._hessian(H, octave, keys)
-                H_inv = np.linalg.inv(H)  # invert hessian
-                off = np.einsum('ijk,ik->ij', -H_inv, J)  # offset of the extremum
+                # H_inv = np.linalg.inv(H)  # invert hessian
+                # off = np.einsum('ijk,ik->ij', -H_inv, J)  # offset of the extremum
+                off = np.linalg.solve(-H, J)  # offset of the extremum
                 wrong_position_pos = np.logical_and(off > 0.6, keys + 1 < tuple(
                     [a - 1 for a in dim]))  # offset is too big and an increase wouldnt bring us out of bounds
                 wrong_position_neg = np.logical_and(off < -0.6, keys - 1 > 0)
