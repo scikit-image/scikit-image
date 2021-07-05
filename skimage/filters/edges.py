@@ -58,8 +58,8 @@ def _mask_filter_result(result, mask):
     affect values in the result.
     """
     if mask is not None:
-        erosion_selem = ndi.generate_binary_structure(mask.ndim, mask.ndim)
-        mask = binary_erosion(mask, erosion_selem, border_value=0)
+        erosion_footprint = ndi.generate_binary_structure(mask.ndim, mask.ndim)
+        mask = binary_erosion(mask, erosion_footprint, border_value=0)
         result *= mask
     return result
 

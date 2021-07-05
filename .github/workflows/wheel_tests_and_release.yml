@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - 'v*'
-      - 'buildwheels'
+      - 'buildwheels*'
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
