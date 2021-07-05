@@ -222,12 +222,20 @@ def test_mssim_mixed_dtype():
         cam, cam_noisy.astype(np.float32), data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
+def test_structural_similarity_small_image():
+    X = np.zeros((5, 5), dtype=np.double)
+    Y = np.zeros((5, 5), dtype=np.double)
+    assert_equal(structural_similarity(X, X, win_size=3), 1.0)
+    assert_equal(structural_similarity(X, X, win_size=5), 1.0)
+    # when user don't specify win_size with small image
+    with testing.raises(ValueError) as cm:
+        structural_similarity(Y, Y)
+        assert 'win_size exceeds image extent.' in cm.exception.msg
 
 def test_invalid_input():
     # size mismatch
     X = np.zeros((9, 9), dtype=np.double)
     Y = np.zeros((8, 8), dtype=np.double)
-    Z = np.zeros((6, 6), dtype=np.double)
     with testing.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent
@@ -241,7 +249,3 @@ def test_invalid_input():
         structural_similarity(X, X, K2=-0.1)
     with testing.raises(ValueError):
         structural_similarity(X, X, sigma=-1.0)
-    # image is too small
-    with testing.raises(ValueError) as cm:
-        structural_similarity(Z, Z)
-        assert 'Image is too small' in cm.exception.msg
