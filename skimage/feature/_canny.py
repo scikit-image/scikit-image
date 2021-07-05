@@ -15,7 +15,7 @@ Original author: Lee Kamentsky
 import numpy as np
 import scipy.ndimage as ndi
 from scipy.ndimage import generate_binary_structure, binary_erosion, label
-from ..filters import gaussian
+from ..filters._gaussian import gaussian
 from ..util.dtype import dtype_limits, img_as_float
 from .._shared.utils import check_nD
 
