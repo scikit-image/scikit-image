@@ -191,6 +191,7 @@ jobs:
         if [[ "${f}" == *"plot_3d_interaction"* ]]; then
           echo "skipped"
         else
+          $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
           if [ $? -ne 0 ]; then
             exit 1
           fi
