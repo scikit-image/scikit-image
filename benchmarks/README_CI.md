@@ -1,5 +1,9 @@
 # Benchmark CI
 
+<!-- Author: @jaimergp -->
+<!-- Last updated: 2021.07.06 -->
+<!-- Describes the work done as part of https://github.com/scikit-image/scikit-image/pull/5424 -->
+
 ## How it works
 
 The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yml`) by adding a `run-benchmark` label to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
@@ -100,4 +104,19 @@ benchmark_transform_warp.WarpSuite.time_to_float64 [fv-az95-499/conda-py3.7-cyth
    numpy.float64   2.48±0.04ms   513±50μs   1.23±0.04ms   134±3ms     30.7±2ms    85.4±2ms   2.55±0.01s   632±4ms    1.45±0.01s
   =============== ============= ========== ============= ========== ============ ========== ============ ========== ============
   started: 2021-07-06 06:14:36, duration: 1.99m
+```
+
+## Other details
+
+### Skipping slow or demanding tests
+
+To minimize the time required to run the full suite, we trimmed the parameter matrix in some cases and, in others, directly skipped tests that ran for too long or require too much memory. Unlike `pytest`, `asv` does not have a notion of marks. However, you can `raise NotImplementedError` in the setup step to skip a test. In that vein, a new private function is defined at `benchmarks.__init__`: `_skip_slow`. This will check if the `ASV_SKIP_SLOW` environment variable has been defined. If set to `1`, it will raise `NotImplementedError` and skip the test. To implement this behavior in other tests, you can add the following attribute:
+
+```python
+from . import _skip_slow  # this function is defined in benchmarks.__init__
+
+def time_something_slow():
+    pass
+
+time_something.setup = _skip_slow
 ```
