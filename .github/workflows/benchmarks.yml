@@ -94,7 +94,7 @@ jobs:
 
       - name: Add instructions to artifact
         if: always()
-        run: cp benchmarks/README.md benchmarks.log .asv/results/
+        run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
 
       - uses: actions/upload-artifact@v2
         if: always()
