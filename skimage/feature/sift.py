@@ -11,7 +11,7 @@ from scipy.ndimage.filters import maximum_filter
 upsamplings = [1, 2, 4]
 
 
-class Keypoints:
+class _Keypoints:
     def __init__(self, mns=None, yx=None, sigma=None, val=None, theta=None):
         self.mns = mns
         self.yx = yx
@@ -29,6 +29,7 @@ class Keypoints:
         self.val = self.val[filter]
         if theta:
             self.theta = self.theta[filter]
+
 
 #todo:add range of histogram max, rn 80%
 class SIFT(FeatureDetector, DescriptorExtractor):
@@ -263,7 +264,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                                   (yx + sigmas[:, np.newaxis]) < img_shape),
                                    axis=1)
 
-            keypoints = Keypoints(keys[border_filter],
+            keypoints = _Keypoints(keys[border_filter],
                                   yx[border_filter],
                                   sigmas[border_filter],
                                   w[contrast_filter][edge_filter][border_filter])
