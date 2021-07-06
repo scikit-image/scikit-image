@@ -110,8 +110,8 @@ def load(fullname):
     fullname : str
         The full name of the package or subpackage to import.  For example::
 
-          sp = lazy_import('scipy')  # import scipy as sp
-          spla = lazy_import('scipy.linalg')  # import scipy.linalg as spla
+          sp = lazy.load('scipy')  # import scipy as sp
+          spla = lazy.load('scipy.linalg')  # import scipy.linalg as spla
 
     Returns
     -------
