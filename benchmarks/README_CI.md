@@ -15,6 +15,13 @@ We use `asv continuous` to run the job, which runs a relative performance measur
 
 Due to the sensitivity of the test, we cannot guarantee that false positives are not produced. In practice, values between `(0.7, 1.5)` are to be considered part of the measurement noise. When in doubt, running the benchmark suite one more time will provide more information about the test being a false positive or not.
 
+## Running the benchmarks on GitHub Actions
+
+1. On a PR, add the label `run-benchmark`.
+2. The CI job will be started. Checks will appear if the usual dashboard panel above the comment box.
+3. If more commits are added, the label checks will be grouped with the last commit checks _before_ you added the label.
+4. Alternatively, you can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
+
 ## The artifacts
 
 The CI job will also generate an artifact. This is the `.asv/results` directory compressed in a zip file. Its contents include:
