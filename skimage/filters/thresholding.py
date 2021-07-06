@@ -1,7 +1,7 @@
 import itertools
 import math
 import numpy as np
-from scipy import ndimage as ndi
+from scipy import ndimage as ndi, stats
 from collections import OrderedDict
 from collections.abc import Iterable
 from ..exposure import histogram
@@ -1233,3 +1233,69 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
+
+def threshold_tpoint(image, nbins=256, tail=True):
+    """
+    T-point algorithm for thresholding unimodal images.
+    The image histogram is assumed to be unimodal with a small tail.
+    Two line segments are fitted to the sharply descending slope near the 
+    histogram peak and to the histogram tail. The optimal threshold minimises 
+    the residuals between the two fitted line segments and the histogram.
+
+    Parameters
+    ----------
+    image: (M, N) ndarray
+        Image to threshold.
+    nbins: int, default is 256
+        Number of bins in image histogram.
+    tail: bool, default is True
+        If True consider the histogram tail for thresholding.
+        Otherwise consider the histogram foot.
+
+    Returns
+    -------
+    threshold: float
+        Calculated threshold value.
+
+    References
+    ----------
+    [1] doi.org/10.1016/j.patrec.2009.12.025
+
+    """
+
+    hist, bin_centers = histogram(image.ravel(), nbins=nbins)
+    hist = hist.astype(np.float)
+
+    if not tail:
+        hist = hist[::-1]
+        bin_centers = bin_centers[::-1]
+
+    # get histogram peak index
+    M = np.argmax(hist)
+
+    # need at least two data points to fit a line
+    offset = 2
+    # start and stop indices for threshold testing
+    levels = np.arange(M + offset, hist.size - offset)
+    residuals = np.empty_like(levels, dtype=np.float)
+
+    for index, k in enumerate(levels):
+        # line 1: steeply descending slope
+        D1 = stats.linregress(bin_centers[M:k], hist[M:k])
+        # line 2: shallow tail
+        D2 = stats.linregress(
+            bin_centers[k + 1: hist.size], hist[k + 1: hist.size])
+
+        # calculate sum of residuals
+        err1 = np.square(
+            hist[M:k] - (D1.slope * bin_centers[M:k] + D1.intercept))
+        err2 = np.square(
+            hist[k + 1: hist.size]
+            - (D2.slope * bin_centers[k + 1: hist.size] + D2.intercept)
+        )
+        residuals[index] = err1.sum() + err2.sum()
+
+    # get minimum errors as threshold point
+    threshold = bin_centers[:-offset][-(residuals.size - np.argmin(residuals))]
+    return threshold

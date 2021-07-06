@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from scipy import ndimage as ndi
+from scipy import ndimage as ndi, integrate, interpolate
 
 from skimage import util
 from skimage import data
@@ -19,6 +19,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_triangle,
                                           threshold_minimum,
                                           threshold_multiotsu,
+                                          threshold_tpoint,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
@@ -130,7 +131,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         if ndim == 2:
             image = self.image
@@ -157,7 +158,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         if ndim == 2:
             image = self.image
@@ -201,10 +202,10 @@ class TestSimpleImage():
         out = threshold_local(self.image, 3, method='median',
                               mode='constant', cval=20)
         expected = np.array([[20.,  1.,  3.,  4., 20.],
-                            [ 1.,  1.,  3.,  4.,  4.],
-                            [ 2.,  2.,  4.,  4.,  4.],
-                            [ 4.,  4.,  4.,  1.,  2.],
-                            [20.,  5.,  5.,  2., 20.]])
+                             [1.,  1.,  3.,  4.,  4.],
+                             [2.,  2.,  4.,  4.,  4.],
+                             [4.,  4.,  4.,  1.,  2.],
+                             [20.,  5.,  5.,  2., 20.]])
         assert_equal(expected, out)
 
     def test_threshold_niblack(self):
@@ -703,3 +704,68 @@ def test_multiotsu_lut():
             result = _get_multiotsu_thresh_indices(prob, classes - 1)
 
             assert np.array_equal(result_lut, result)
+
+
+def test_tpoint_tail():
+    # simulate piecewise histogram
+    x = np.linspace(0, 1, 256)
+
+    piece_points = (0.2, 0.35)
+    gradients = (5, -5, -0.25)
+
+    def recursive(x, n):
+        if not n:
+            return gradients[n]*x
+        else:
+            return gradients[n]*x + recursive(piece_points[n-1], n-1) - gradients[n]*piece_points[n-1]
+
+    y = np.piecewise(x,
+                     (x <= piece_points[0], (x > piece_points[0])
+                      * (x <= piece_points[1]), x > piece_points[1]),
+                     [lambda x, n=n: recursive(x, n)
+                      for n in range(len(gradients))]
+                     )
+
+    cdf = integrate.cumtrapz(y, x, initial=0)
+    # normalise cdf to range [0..1]
+    cdf /= cdf.max()
+
+    # simulate image according to histogram
+    fn = interpolate.interp1d(cdf, x)
+    im = fn(np.random.rand(1024, 1024))
+
+    err = 0.01
+    assert piece_points[1]-err <= threshold_tpoint(im) <= piece_points[1]+err
+
+
+def test_tpoint_foot():
+    # simulate piecewise histogram
+    x = np.linspace(0, 1, 256)
+
+    piece_points = (0.6, 0.8)
+    gradients = (0.1, 3, -3)
+
+    def recursive(x, n):
+        if not n:
+            return gradients[n]*x
+        else:
+            return gradients[n]*x + recursive(piece_points[n-1], n-1) - gradients[n]*piece_points[n-1]
+
+    y = np.piecewise(x,
+                     (x <= piece_points[0], (x > piece_points[0])
+                      * (x <= piece_points[1]), x > piece_points[1]),
+                     [lambda x, n=n: recursive(x, n)
+                      for n in range(len(gradients))]
+                     )
+
+    cdf = integrate.cumtrapz(y, x, initial=0)
+    # normalise cdf to range [0..1]
+    cdf /= cdf.max()
+
+    # simulate image according to histogram
+    fn = interpolate.interp1d(cdf, x)
+    im = fn(np.random.rand(1024, 1024))
+
+    err = 0.01
+    assert piece_points[0] - \
+        err <= threshold_tpoint(im, tail=False) <= piece_points[0]+err
