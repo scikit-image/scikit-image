@@ -14,14 +14,13 @@ confocal fluorescence microscopy (more details at [1]_ under
 
 """
 
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
-import plotly
-import plotly.express as px
 
-from skimage import data, feature
+import plotly.express as px
+from skimage import (
+    data, feature
+)
 
 
 #####################################################################
@@ -197,10 +196,9 @@ fig3 = px.imshow(
     labels={'facet_col': 'longitudinal'}
 )
 
-if 'SKIMAGE_DISABLE_PLOTLY_SHOW' not in os.environ:
-    plotly.io.show(fig1)
-    plotly.io.show(fig2)
-    plotly.io.show(fig3)
+plotly.io.show(fig1)
+plotly.io.show(fig2)
+plotly.io.show(fig3)
 
 #####################################################################
 # As a conclusion, the region about voxel

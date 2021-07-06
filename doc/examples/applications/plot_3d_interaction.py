@@ -14,7 +14,6 @@ imaged with confocal fluorescence microscopy (more details at [1]_ under
 .. [1] https://gitlab.com/scikit-image/data/#data
 
 """
-import os
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -141,9 +140,7 @@ fig = px.imshow(
     binary_string=True,
     labels={'facet_col': 'channel', 'animation_frame': 'plane'}
 )
-
-if 'SKIMAGE_DISABLE_PLOTLY_SHOW' not in os.environ:
-    plotly.io.show(fig)
+plotly.io.show(fig)
 
 #####################################################################
 # The biologist's eye can spot that the two bright blobs (best seen in

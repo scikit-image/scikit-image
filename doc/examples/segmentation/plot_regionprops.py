@@ -8,8 +8,6 @@ first analyze an image with two ellipses. Below we show how to explore
 interactively the properties of labelled objects.
 """
 import math
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -118,5 +116,4 @@ for index in range(1, labels.max()):
         mode='lines', fill='toself', showlegend=False,
         hovertemplate=hoverinfo, hoveron='points+fills'))
 
-if 'SKIMAGE_DISABLE_PLOTLY_SHOW' not in os.environ:
-    plotly.io.show(fig)
+plotly.io.show(fig)

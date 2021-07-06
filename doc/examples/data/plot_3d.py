@@ -14,19 +14,13 @@ provided in ``(z, c, y, x)`` order. Channel 0 contains cell membranes, while cha
 The example below shows how to explore this dataset. This 3D image can be used
 to test the various functions of scikit-image.
 """
-import os
-
+from skimage import data
 import plotly
 import plotly.express as px
-
-from skimage import data
-
 
 img = data.cells3d()[20:]
 fig = px.imshow(img, facet_col=1, animation_frame=0,
                 binary_string=True, binary_format='jpg')
 fig.layout.annotations[0]['text'] = 'Cell membranes'
 fig.layout.annotations[1]['text'] = 'Nuclei'
-
-if 'SKIMAGE_DISABLE_PLOTLY_SHOW' not in os.environ:
-    plotly.io.show(fig)
+plotly.io.show(fig)
