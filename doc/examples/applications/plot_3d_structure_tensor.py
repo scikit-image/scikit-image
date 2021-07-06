@@ -16,8 +16,9 @@ confocal fluorescence microscopy (more details at [1]_ under
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 import plotly.express as px
+import plotly.io
+
 from skimage import (
     data, feature
 )
