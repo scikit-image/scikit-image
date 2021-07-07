@@ -12,11 +12,10 @@ upsamplings = [1, 2, 4]
 
 
 class _Keypoints:
-    def __init__(self, mns=None, yx=None, sigma=None, val=None, theta=None):
+    def __init__(self, mns=None, yx=None, sigma=None, theta=None):
         self.mns = mns
         self.yx = yx
         self.sigma = sigma
-        self.val = val
         self.theta = theta
 
     def __len__(self):
@@ -26,7 +25,6 @@ class _Keypoints:
         self.yx = self.yx[mask]
         self.mns = self.mns[mask]
         self.sigma = self.sigma[mask]
-        self.val = self.val[mask]
         if theta:
             self.theta = self.theta[mask]
 
@@ -342,7 +340,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     keypoints_valid[k] = False
             keypoints.mns = np.vstack((keypoints.mns, keypoints.mns[keypoint_indices]))
             keypoints.yx = np.vstack((keypoints.yx, keypoints.yx[keypoint_indices]))
-            keypoints.val = np.hstack((keypoints.val, keypoints.val[keypoint_indices]))
             keypoints.sigma = np.hstack((keypoints.sigma, keypoints.sigma[keypoint_indices]))
             keypoints.theta = np.hstack((keypoints.theta, keypoint_angles))
             keypoints_valid = np.hstack((keypoints_valid, np.ones((len(keypoint_indices)), dtype=bool)))
