@@ -22,7 +22,7 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 ## Running the benchmarks on GitHub Actions
 
 1. On a PR, add the label `run-benchmark`.
-2. The CI job will be started. Checks will appear if the usual dashboard panel above the comment box.
+2. The CI job will be started. Checks will appear in the usual dashboard panel above the comment box.
 3. If more commits are added, the label checks will be grouped with the last commit checks _before_ you added the label.
 4. Alternatively, you can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
 
