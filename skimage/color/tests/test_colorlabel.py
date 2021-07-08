@@ -11,19 +11,6 @@ from skimage._shared.testing import (assert_array_almost_equal,
                                      assert_no_warnings)
 
 
-def test_deprecation_warning():
-
-    image = np.ones((3, 3))
-    label = np.ones((3, 3))
-
-    with pytest.warns(FutureWarning) as record:
-        label2rgb(image, label)
-
-    expected_msg = "The new recommended value"
-
-    assert str(record[0].message).startswith(expected_msg)
-
-
 def test_shape_mismatch():
     image = np.ones((3, 3))
     label = np.ones((2, 2))
