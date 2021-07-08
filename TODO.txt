@@ -33,7 +33,6 @@ Version 0.19
   warning when order > 0 and input array is bool in _set_order.
 * In ``skimage/transform/_warps.py``, raise a ValueError instead of the
   warning when anti_aliasing is True and input array is bool in resize.
-* In ``skimage/feature/__init__.py``, remove `register_translation`.
 * In ``skimage.measure._marching_cube_lewiner.py``, remove
   ``marching_cube_lewiner``.
 * In ``skimage.measure._marching_cube_classic.py``, remove
@@ -42,7 +41,6 @@ Version 0.19
   arguments and the associated deprecation warnings from `gray2rgb`.
 * In ``skimage/color/colorlabel.py``, remove the `change_default_value`
   decorator from `label2rgb` and set `bg_label` default value to 0.
-* In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
 
 Version 0.20
 ------------
