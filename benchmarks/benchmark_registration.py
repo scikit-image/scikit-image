@@ -44,10 +44,11 @@ class RegistrationSuite(object):
 
 class PhaseCrossCorrelationRegistration:
     """Benchmarks for registration.phase_cross_correlation in scikit-image"""
-    param_names = ["ndims", "image_size", "upscale_factor", "dtype"]
+
+    param_names = ["ndims", "image_size", "upsample_factor", "dtype"]
     params = [(2, 3), (32, 100), (1, 5, 10), (np.complex64, np.complex128)]
 
-    def setup(self, ndims, image_size, upscale_factor, dtype, *args):
+    def setup(self, ndims, image_size, upsample_factor, dtype, *args):
         if phase_cross_correlation is None:
             raise NotImplementedError("phase_cross_correlation unavailable")
         shifts = (-2.3, 1.7, 5.4, -3.2)[:ndims]
@@ -57,11 +58,11 @@ class PhaseCrossCorrelationRegistration:
         self.shifted_image = ndi.fourier_shift(self.reference_image, shifts)
         self.shifted_image = self.shifted_image.astype(dtype, copy=False)
 
-    def time_phase_cross_correlation(self, ndims, image_size, upscale_factor,
+    def time_phase_cross_correlation(self, ndims, image_size, upsample_factor,
                                      *args):
         result = phase_cross_correlation(self.reference_image,
                                          self.shifted_image,
-                                         upsample_factor=upscale_factor,
+                                         upsample_factor=upsample_factor,
                                          space="fourier")
 
     def peakmem_reference(self, *args):
@@ -79,8 +80,8 @@ class PhaseCrossCorrelationRegistration:
         pass
 
     def peakmem_phase_cross_correlation(self, ndims, image_size,
-                                        upscale_factor, *args):
+                                        upsample_factor, *args):
         result = phase_cross_correlation(self.reference_image,
                                          self.shifted_image,
-                                         upsample_factor=upscale_factor,
+                                         upsample_factor=upsample_factor,
                                          space="fourier")
