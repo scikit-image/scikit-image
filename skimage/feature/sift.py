@@ -89,8 +89,25 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         >>> detector_extractor1.detect_and_extract(img1)
         >>> detector_extractor2.detect_and_extract(img2)
         >>> matches = match_descriptors(detector_extractor1.descriptors,
-        ...                             detector_extractor2.descriptors)
-        #todo: add results
+        ...                             detector_extractor2.descriptors, max_ratio=0.6)
+        >>> matches[10:15]
+        array([[ 11,  11],
+               [ 12, 380],
+               [ 13,  13],
+               [ 14, 381],
+               [ 15,  15]])
+        >>> detector_extractor1.keypoints[matches[10:15, 0]]
+        array([[170, 241],
+               [341, 287],
+               [234,  13],
+               [232, 378],
+               [206, 307]])
+        >>> detector_extractor2.keypoints[matches[10:15, 1]]
+        array([[271, 170],
+               [225, 341],
+               [499, 234],
+               [133, 232],
+               [205, 206]])
 
         """
 
@@ -266,14 +283,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return extrema_pos, extrema_scales, extrema_sigmas
 
     def _fit(self, h):
+        """Refine the position of the peak by fitting it to a parabola"""
         return (h[0] - h[2]) / (2 * (h[0] + h[2] - 2 * h[1]))
-
-    def _rotate(self, y, x, angle, sigma):
-        c = np.cos(angle)
-        s = np.sin(angle)
-        rY = (c * y - s * x) / sigma
-        rX = (s * y + c * x) / sigma
-        return rY, rX
 
     def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct, gaussian_scalespace):
         """Source: "Anatomy of the SIFT Method" Alg. 11
@@ -348,6 +359,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             orientations_oct.append(np.hstack((orientations, keypoint_angles))[keypoints_valid])
         # return the gradientspace to reuse it to find the descriptor
         return orientations_oct, gradientSpace
+
+    def _rotate(self, y, x, angle, sigma):
+        c = np.cos(angle)
+        s = np.sin(angle)
+        rY = (c * y - s * x) / sigma
+        rX = (s * y + c * x) / sigma
+        return rY, rX
 
     def _descriptor(self, positions_oct, scales_oct, sigmas_oct, orientations_oct, gradientspace):
         """Source: "Anatomy of the SIFT Method" Alg. 12
@@ -512,5 +530,5 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         descriptors = self._descriptor(positions, scales, sigmas, orientations, gradientSpace)
 
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
-        self.orientations = np.vstack(orientations)
+        self.orientations = np.hstack(orientations)
         self.descriptors = descriptors
