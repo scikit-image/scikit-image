@@ -804,13 +804,6 @@ def rgb2gray(rgb):
     return rgb @ coeffs
 
 
-@functools.wraps(rgb2gray)
-def rgb2grey(rgb):
-    warn('rgb2grey is deprecated. It will be removed in version 0.19.'
-         'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
-    return rgb2gray(rgb)
-
-
 def gray2rgba(image, alpha=None):
     """Create a RGBA representation of a gray-level image.
 
@@ -911,13 +904,6 @@ def gray2rgb(image, alpha=None):
             return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
         else:
             return np.concatenate(3 * (image,), axis=-1)
-
-
-@functools.wraps(gray2rgb)
-def grey2rgb(image):
-    warn('grey2rgb is deprecated. It will be removed in version 0.19.'
-         'Please use gray2rgb instead.', FutureWarning, stacklevel=2)
-    return gray2rgb(image)
 
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
