@@ -1,6 +1,5 @@
 import inspect
 import functools
-import numbers
 import sys
 import warnings
 from collections.abc import Iterable
@@ -210,7 +209,6 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
                 kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
-
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
@@ -487,7 +485,7 @@ def _reshape_nd(arr, ndim, dim):
     """
     if arr.ndim != 1:
         raise ValueError("arr must be a 1d array")
-    new_shape = [1,] * ndim
+    new_shape = [1] * ndim
     new_shape[dim] = -1
     return np.reshape(arr, new_shape)
 
@@ -513,8 +511,10 @@ def check_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if array.size == 0:
         raise ValueError(msg_empty_array % (arg_name))
-    if not array.ndim in ndim:
-        raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
+    if array.ndim not in ndim:
+        raise ValueError(
+            msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim]))
+        )
 
 
 def convert_to_float(image, preserve_range):

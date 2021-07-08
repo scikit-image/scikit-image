@@ -530,6 +530,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
 
+
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
 # "Quantification of histochemical staining by color deconvolution.,"
@@ -932,7 +933,7 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
     elif alpha.shape != arr.shape:
         raise ValueError("alpha.shape must match image.shape")
-    rgba = np.stack((arr,)*3 + (alpha,), axis=channel_axis)
+    rgba = np.stack((arr,) * 3 + (alpha,), axis=channel_axis)
     return rgba
 
 
@@ -1490,8 +1491,8 @@ def hed2rgb(hed, *, channel_axis=-1):
     Parameters
     ----------
     hed : (..., 3, ...) array_like
-        The image in the HED color space. By default, the final dimension denotes
-        channels.
+        The image in the HED color space. By default, the final dimension
+        denotes channels.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.

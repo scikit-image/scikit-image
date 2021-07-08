@@ -122,7 +122,8 @@ class TestColorconv():
 
         _rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
         hsv = rgb2hsv(_rgb, channel_axis=channel_axis)
-        hsv = np.moveaxis(hsv, source=channel_axis, destination=-1).reshape(-1, 3)
+        hsv = np.moveaxis(hsv, source=channel_axis, destination=-1)
+        hsv = hsv.reshape(-1, 3)
 
         # ground truth from colorsys
         gt = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
@@ -390,13 +391,13 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
+                fname = f"color/tests/data/lab_array_{I}_{obs}.npy"
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab_array_I_obs,
                                           xyz2lab(self.xyz_array, I, obs),
                                           decimal=2)
         for I in ["d75", "e"]:
-            fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
+            fname = f"color/tests/data/lab_array_{I}_2.npy"
             lab_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(lab_array_I_obs,
                                       xyz2lab(self.xyz_array, I, "2"),
@@ -426,26 +427,22 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
+                fname = f"color/tests/data/lab_array_{I}_{obs}.npy"
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["d75", "e"]:
-            fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
+            fname = f"color/tests/data/lab_array_{I}_2.npy"
             lab_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
 
         # And we include a call to test the exception handling in the code.
-        try:
-            xs = lab2xyz(lab_array_I_obs, "NaI", "2")   # Not an illuminant
-        except ValueError:
-            pass
+        with pytest.raises(ValueError):
+            lab2xyz(lab_array_I_obs, "NaI", "2")   # Not an illuminant
 
-        try:
-            xs = lab2xyz(lab_array_I_obs, "d50", "42")   # Not a degree
-        except ValueError:
-            pass
+        with pytest.raises(ValueError):
+            lab2xyz(lab_array_I_obs, "d50", "42")   # Not a degree
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
     def test_lab2xyz_channel_axis(self, channel_axis):
@@ -470,16 +467,18 @@ class TestColorconv():
         """
         # Obtained with D65 white point, sRGB model and gamma
         gt_for_colbars = np.array([
-            [100,0,0],
+            [100, 0, 0],
             [97.1393, -21.5537, 94.4780],
             [91.1132, -48.0875, -14.1312],
             [87.7347, -86.1827, 83.1793],
             [60.3242, 98.2343, -60.8249],
             [53.2408, 80.0925, 67.2032],
             [32.2970, 79.1875, -107.8602],
-            [0,0,0]]).T
+            [0, 0, 0]]).T
         gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
-        assert_array_almost_equal(rgb2lab(self.colbars_array), gt_array, decimal=2)
+        assert_array_almost_equal(
+            rgb2lab(self.colbars_array), gt_array, decimal=2
+        )
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
     def test_lab_rgb_roundtrip(self, channel_axis):
@@ -519,13 +518,13 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = "color/tests/data/luv_array_{0}_{1}.npy".format(I, obs)
+                fname = f"color/tests/data/luv_array_{I}_{obs}.npy"
                 luv_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(luv_array_I_obs,
                                           xyz2luv(self.xyz_array, I, obs),
                                           decimal=2)
         for I in ["d75", "e"]:
-            fname = "color/tests/data/luv_array_{0}_2.npy".format(I)
+            fname = f"color/tests/data/luv_array_{I}_2.npy"
             luv_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(luv_array_I_obs,
                                       xyz2luv(self.xyz_array, I, "2"),
@@ -555,12 +554,12 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = "color/tests/data/luv_array_{0}_{1}.npy".format(I, obs)
+                fname = f"color/tests/data/luv_array_{I}_{obs}.npy"
                 luv_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["d75", "e"]:
-            fname = "color/tests/data/luv_array_{0}_2.npy".format(I, obs)
+            fname = f"color/tests/data/luv_array_{I}_2.npy"
             luv_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
@@ -692,14 +691,26 @@ class TestColorconv():
         assert_array_almost_equal(rgb2yuv(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
-        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        assert_array_almost_equal(
+            rgb2ycbcr(rgb), np.array([[[235, 128, 128]]])
+        )
         assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[1, 0, 0]]]))
         rgb = np.array([[[0.0, 1.0, 0.0]]])
-        assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
-        assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
-        assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
-        assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
-        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]]))
+        assert_array_almost_equal(
+            rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]])
+        )
+        assert_array_almost_equal(
+            rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]])
+        )
+        assert_array_almost_equal(
+            rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]])
+        )
+        assert_array_almost_equal(
+            rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]])
+        )
+        assert_array_almost_equal(
+            rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]])
+        )
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
     def test_yuv_roundtrip(self, channel_axis):
@@ -707,7 +718,7 @@ class TestColorconv():
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
         assert_array_almost_equal(
             yuv2rgb(rgb2yuv(img_rgb, channel_axis=channel_axis),
-                channel_axis=channel_axis),
+                    channel_axis=channel_axis),
             img_rgb)
         assert_array_almost_equal(
             yiq2rgb(rgb2yiq(img_rgb, channel_axis=channel_axis),
