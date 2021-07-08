@@ -63,8 +63,8 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
     if np.isscalar(block_size):
         block_size = (block_size,) * image.ndim
     elif len(block_size) != image.ndim:
-        raise ValueError("`block_size` must have the same length "
-                         "as `image.shape`.")
+        raise ValueError("`block_size` must be a scalar or have "
+                         "the same length as `image.shape`")
 
     if func_kwargs is None:
         func_kwargs = {}
