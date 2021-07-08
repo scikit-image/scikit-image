@@ -114,7 +114,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.n_ori = n_ori
 
         self.delta_min = 1 / upsampling
-        self.deltas = self.delta_min * np.power(2, np.arange(self.n_octaves-1))
+        self.deltas = self.delta_min * np.power(2, np.arange(self.n_octaves - 1))
         self.keypoints = None
         self.sigmas = None
         self.orientations = None
@@ -161,22 +161,18 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return (a[:, 0] > 0) & (a[:, 0] < dim[0] - 1) & (a[:, 1] > 0) & (a[:, 1] < dim[1] - 1)
 
     def _hessian(self, h, d, positions):
-        """Source: "Anatomy of the SIFT Method"  p.380 (13)
-        """
-        h[:, 0, 0] = \
-            d[positions[:, 0] - 1, positions[:, 1], positions[:, 2]] \
-            + d[positions[:, 0] + 1, positions[:, 1], positions[:, 2]] \
-            - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]]
+        """Source: "Anatomy of the SIFT Method"  p.380 (13)"""
+        h[:, 0, 0] = (d[positions[:, 0] - 1, positions[:, 1], positions[:, 2]]
+                      + d[positions[:, 0] + 1, positions[:, 1], positions[:, 2]]
+                      - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]])
 
-        h[:, 1, 1] = \
-            d[positions[:, 0], positions[:, 1] - 1, positions[:, 2]] \
-            + d[positions[:, 0], positions[:, 1] + 1, positions[:, 2]] \
-            - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]]
+        h[:, 1, 1] = (d[positions[:, 0], positions[:, 1] - 1, positions[:, 2]]
+                      + d[positions[:, 0], positions[:, 1] + 1, positions[:, 2]]
+                      - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]])
 
-        h[:, 2, 2] = \
-            d[positions[:, 0], positions[:, 1], positions[:, 2] - 1] \
-            + d[positions[:, 0], positions[:, 1], positions[:, 2] + 1] \
-            - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]]
+        h[:, 2, 2] = (d[positions[:, 0], positions[:, 1], positions[:, 2] - 1]
+                      + d[positions[:, 0], positions[:, 1], positions[:, 2] + 1]
+                      - 2 * d[positions[:, 0], positions[:, 1], positions[:, 2]])
 
         h[:, 1, 0] = h[:, 0, 1] = 0.25 * (
                 d[positions[:, 0] + 1, positions[:, 1] + 1, positions[:, 2]]
@@ -414,14 +410,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 positions = np.where(comb)
 
                 # the weights/contributions are shared bilinearly between the histograms
-                weights = \
-                    (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_y[positions[1], positions[0]]) \
-                    * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_x[positions[2], positions[0]]) \
-                    * magnitude[positions[0]]
+                w0 = ((1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_y[positions[1], positions[0]])
+                      * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_x[positions[2], positions[0]])
+                      * magnitude[positions[0]])
 
                 # the weight is shared linearly between the 2 nearest bins
-                w1 = weights * ((self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
-                w2 = weights * (1 - (self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
+                w1 = w0 * ((self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
+                w2 = w0 * (1 - (self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
                 k_index = near_t[positions[0]]
                 np.add.at(histograms, (positions[1], positions[2], k_index), w1)
                 np.add.at(histograms, (positions[1], positions[2], np.mod((k_index + 1), self.n_ori)), w2)
@@ -460,6 +455,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
         self.orientations = np.vstack(orientations)
 
+    # not yet working due to the descrepancy between the way keypoints are processed (a list of keypoints in their
+    # respective octave) or how they are returned (all in one array)
     def extract(self, image, positions, scales, sigmas, orientations):
         """Extract the descriptors for all keypoints in the image.
 
