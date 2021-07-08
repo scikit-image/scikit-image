@@ -15,7 +15,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
   * Also make sure to look in the function ``_init_level_set``
