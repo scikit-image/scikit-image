@@ -726,17 +726,18 @@ def test_bool_and_anti_aliasing_errors():
         resize(img, (5, 5), anti_aliasing=True)
 
 
-def test_bool_array_warnings():
+@pytest.mark.parametrize("order", [1, 2, 3, 4, 5])
+def test_bool_nonzero_order_errors(order):
     img = np.zeros((10, 10), dtype=bool)
 
-    with expected_warnings(['Input image dtype is bool']):
-        rescale(img, 0.5, order=1)
+    with pytest.raises(ValueError):
+        rescale(img, 0.5, order=order)
 
-    with expected_warnings(['Input image dtype is bool']):
-        resize(img, (5, 5), order=1)
+    with pytest.raises(ValueError):
+        resize(img, (5, 5), order=order)
 
-    with expected_warnings(['Input image dtype is bool']):
-        warp(img, np.eye(3), order=1)
+    with pytest.raises(ValueError):
+        warp(img, np.eye(3), order=order)
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])

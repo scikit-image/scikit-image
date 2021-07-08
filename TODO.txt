@@ -15,8 +15,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* In ``skimage/_shared/utils.py``, raise a ValueError instead of the
-  warning when order > 0 and input array is bool in _set_order.
 * In ``skimage.measure._marching_cube_lewiner.py``, remove
   ``marching_cube_lewiner``.
 * In ``skimage.measure._marching_cube_classic.py``, remove
