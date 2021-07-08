@@ -29,7 +29,7 @@ def test_grey(dtype):
 
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_color(dtype):
-    rnd = np.random.RandomState(0)
+    rnd = np.random.RandomState(583428449)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -49,7 +49,7 @@ def test_color(dtype):
     seg2 = quickshift(img, kernel_size=1, max_dist=2, random_seed=0,
                       convert2lab=False, sigma=0)
     # very oversegmented:
-    assert_equal(len(np.unique(seg2)), 7)
+    assert_equal(len(np.unique(seg2)), 12)
     # still don't cross lines
     assert (seg2[9, :] != seg2[10, :]).all()
     assert (seg2[:, 9] != seg2[:, 10]).all()

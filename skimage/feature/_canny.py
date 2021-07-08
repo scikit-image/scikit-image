@@ -62,7 +62,8 @@ def _preprocess(image, mask, sigma, mode, cval):
     pixels.
     """
 
-    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval)
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
+                           preserve_range=False)
     if mask is None:
         # Smooth the masked image
         smoothed_image = gaussian(image, **gaussian_kwargs)
@@ -271,10 +272,11 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     Examples
     --------
     >>> from skimage import feature
+    >>> rng = np.random.default_rng()
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
-    >>> im += 0.2 * np.random.rand(*im.shape)
+    >>> im += 0.2 * rng.random(im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
     >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results

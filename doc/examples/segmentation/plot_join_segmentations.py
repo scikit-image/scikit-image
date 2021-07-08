@@ -35,7 +35,7 @@ ws = watershed(edges, markers)
 seg1 = label(ws == foreground)
 
 # Make segmentation using SLIC superpixels.
-seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,
+seg2 = slic(coins, n_segments=117, max_num_iter=160, sigma=1, compactness=0.75,
             channel_axis=None, start_label=0)
 
 # Combine the two.

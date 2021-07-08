@@ -1,4 +1,9 @@
+import os
+
 import numpy as np
+import scipy.ndimage as ndi
+
+import skimage
 from skimage.data import camera
 from skimage import restoration, data, color
 from skimage.morphology import binary_dilation
@@ -6,11 +11,14 @@ try:
     from skimage.morphology import disk
 except ImportError:
     from skimage.morphology import circle as disk
-import scipy.ndimage as ndi
+from . import _channel_kwarg, _skip_slow
 
 
 class RestorationSuite:
     """Benchmark for restoration routines in scikit image."""
+
+    timeout = 120
+
     def setup(self):
         nz = 32
         self.volume_f64 = np.stack([camera()[::2, ::2], ] * nz,
@@ -26,19 +34,19 @@ class RestorationSuite:
         restoration.denoise_nl_means(self.volume_f64, patch_size=3,
                                      patch_distance=2, sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=False,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
     def time_denoise_nl_means_f32(self):
         restoration.denoise_nl_means(self.volume_f32, patch_size=3,
                                      patch_distance=2, sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=False,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
     def time_denoise_nl_means_fast_f64(self):
         restoration.denoise_nl_means(self.volume_f64, patch_size=3,
                                      patch_distance=2, sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=True,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
     def time_denoise_nl_means_fast_f32(self):
         restoration.denoise_nl_means(self.volume_f32, patch_size=3,
@@ -49,7 +57,7 @@ class RestorationSuite:
         restoration.denoise_nl_means(self.volume_f64, patch_size=3,
                                      patch_distance=2,  sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=False,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
     def peakmem_denoise_nl_means_f32(self):
         restoration.denoise_nl_means(self.volume_f32, patch_size=3,
@@ -60,13 +68,13 @@ class RestorationSuite:
         restoration.denoise_nl_means(self.volume_f64, patch_size=3,
                                      patch_distance=2, sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=True,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
     def peakmem_denoise_nl_means_fast_f32(self):
         restoration.denoise_nl_means(self.volume_f32, patch_size=3,
                                      patch_distance=2, sigma=self.sigma,
                                      h=0.7 * self.sigma, fast_mode=True,
-                                     multichannel=False)
+                                     **_channel_kwarg(False))
 
 
 class DeconvolutionSuite:
@@ -110,7 +118,7 @@ class RollingBall(object):
 
     def time_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
-    time_rollingball.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball.params = [25, 50, 100, 200]
     time_rollingball.param_names = ["radius"]
 
     def peakmem_reference(self, *args):
@@ -131,7 +139,7 @@ class RollingBall(object):
 
     def peakmem_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
-    peakmem_rollingball.params = [25, 50, 75, 100, 150, 200]
+    peakmem_rollingball.params = [25, 50, 100, 200]
     peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
@@ -139,7 +147,7 @@ class RollingBall(object):
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.NaN
         restoration.rolling_ball(image, radius=radius, nansafe=True)
-    time_rollingball_nan.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball_nan.params = [25, 50, 100, 200]
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
@@ -148,10 +156,11 @@ class RollingBall(object):
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(
             image, kernel=kernel)
+    time_rollingball_ndim.setup = _skip_slow
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
-    time_rollingball_threads.params = range(0, 9)
+    time_rollingball_threads.params = (0, 2, 4, 8)
     time_rollingball_threads.param_names = ["threads"]
 
 
@@ -194,8 +203,8 @@ class Inpaint(object):
 
     def time_inpaint_rgb(self):
         restoration.inpaint_biharmonic(self.image_defect, self.mask,
-                                       multichannel=True)
+                                       **_channel_kwarg(True))
 
     def time_inpaint_grey(self):
         restoration.inpaint_biharmonic(self.image_defect_gray, self.mask,
-                                       multichannel=False)
+                                       **_channel_kwarg(False))
