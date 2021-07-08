@@ -15,8 +15,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
-  * Also make sure to look in the function ``_init_level_set``
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
