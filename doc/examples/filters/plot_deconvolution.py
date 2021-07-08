@@ -34,7 +34,7 @@ astro_noisy = astro.copy()
 astro_noisy += (rng.poisson(lam=25, size=astro.shape) - 10) / 255.
 
 # Restore Image using Richardson-Lucy algorithm
-deconvolved_RL = restoration.richardson_lucy(astro_noisy, psf, iterations=30)
+deconvolved_RL = restoration.richardson_lucy(astro_noisy, psf, num_iter=30)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
 plt.gray()

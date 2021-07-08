@@ -1,18 +1,18 @@
 import itertools
 import math
-import numpy as np
-from scipy import ndimage as ndi
 from collections import OrderedDict
 from collections.abc import Iterable
+
+import numpy as np
+from scipy import ndimage as ndi
+
+from .._shared.utils import check_nD, deprecate_kwarg, warn
 from ..exposure import histogram
-from .._shared.utils import check_nD, warn
+from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
+                                  _get_multiotsu_thresh_indices_lut)
 from ..transform import integral_image
 from ..util import dtype_limits
-from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                  _get_multiotsu_thresh_indices)
-
-from ._sparse import _validate_window_size, _correlate_sparse
-
+from ._sparse import _correlate_sparse, _validate_window_size
 
 __all__ = ['try_all_threshold',
            'threshold_otsu',
@@ -710,7 +710,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
     The histogram of the input ``image`` is computed if not provided and
@@ -727,7 +728,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximum number of iterations to smooth the histogram.
     hist : array, or 2-tuple of arrays, optional
         Histogram to determine the threshold from and a corresponding array
@@ -784,7 +785,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     smooth_hist = counts.astype(np.float64, copy=False)
 
-    for counter in range(max_iter):
+    for counter in range(max_num_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
         maximum_idxs = find_local_maxima_idx(smooth_hist)
         if len(maximum_idxs) < 3:
@@ -792,7 +793,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
-    elif counter == max_iter - 1:
+    elif counter == max_num_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram'
                            'smoothing')
 

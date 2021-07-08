@@ -75,8 +75,8 @@ init_ls = checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_chan_vese(image, 35, init_level_set=init_ls, smoothing=3,
-                             iter_callback=callback)
+ls = morphological_chan_vese(image, num_iter=35, init_level_set=init_ls,
+                             smoothing=3, iter_callback=callback)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.flatten()
@@ -109,7 +109,8 @@ init_ls[10:-10, 10:-10] = 1
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_geodesic_active_contour(gimage, 230, init_ls,
+ls = morphological_geodesic_active_contour(gimage, num_iter=230,
+                                           init_level_set=init_ls,
                                            smoothing=1, balloon=-1,
                                            threshold=0.69,
                                            iter_callback=callback)
