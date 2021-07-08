@@ -2,17 +2,10 @@ from distutils.version import LooseVersion
 
 import numpy as np
 import pytest
-# note: skimage.util.pad is just numpy.pad
-from skimage.util import pad
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_allclose,
                                      TestCase)
-
-
-def test_deprecation():
-    with pytest.warns(FutureWarning):
-        pad(np.ones((5, 5)), 2, mode='constant')
 
 
 class TestConditionalShortcuts(TestCase):

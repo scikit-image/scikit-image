@@ -15,8 +15,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* Remove the definition of `skimage.util.pad` and
-  skimage/util/tests/test_arraypad.py.
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/_shared/utils.py``, raise a ValueError instead of the
