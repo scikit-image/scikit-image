@@ -8,18 +8,6 @@ Version 0.17
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.18
-------------
-
-
-Version 0.19
-------------
-
-* In ``skimage.measure._marching_cube_lewiner.py``, remove
-  ``marching_cube_lewiner``.
-* In ``skimage.measure._marching_cube_classic.py``, remove
-  ``marching_cube_classic``.
-
 Version 0.20
 ------------
 
