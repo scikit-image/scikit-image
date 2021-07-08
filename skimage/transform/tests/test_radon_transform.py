@@ -183,15 +183,6 @@ def test_radon_iradon(interpolation_type, filter_type):
     check_radon_iradon(interpolation_type, filter_type)
 
 
-@pytest.mark.parametrize("filter_type", filter_types)
-def test_iradon_new_signature(filter_type):
-    image = PHANTOM
-    sinogram = radon(image, circle=False)
-    with pytest.warns(FutureWarning):
-        assert np.array_equal(iradon(sinogram, filter=filter_type),
-                              iradon(sinogram, filter_name=filter_type))
-
-
 def test_iradon_angles():
     """
     Test with different number of projections

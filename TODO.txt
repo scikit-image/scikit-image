@@ -29,8 +29,6 @@ Version 0.19
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
 * In ``skimage/color/colorconv.py``, remove the deprecation warnings
   from `rgb2gray`.
-* In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
-  decoration from ``iradon``.
 * In ``skimage/_shared/utils.py``, raise a ValueError instead of the
   warning when order > 0 and input array is bool in _set_order.
 * In ``skimage/transform/_warps.py``, raise a ValueError instead of the
