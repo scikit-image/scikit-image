@@ -824,16 +824,13 @@ def gray2rgba(image, alpha=None):
     return rgba
 
 
-def gray2rgb(image, alpha=None):
+def gray2rgb(image):
     """Create an RGB representation of a gray-level image.
 
     Parameters
     ----------
     image : array_like
         Input image.
-    alpha : bool, optional
-        Ensure that the output image has an alpha layer. If None,
-        alpha layers are passed through but not created.
 
     Returns
     -------
@@ -845,48 +842,7 @@ def gray2rgb(image, alpha=None):
     If the input is a 1-dimensional image of shape ``(M, )``, the output
     will be shape ``(M, 3)``.
     """
-
-    if alpha is not None:
-        warn("alpha argument is deprecated and will be removed in "
-             "version 0.19. Please use the gray2rgba function instead"
-             "to obtain an RGBA image.", FutureWarning, stacklevel=2)
-    is_rgb = False
-    is_alpha = False
-    dims = np.squeeze(image).ndim
-
-    if dims == 3:
-        if image.shape[2] == 3:
-            is_rgb = True
-        elif image.shape[2] == 4:
-            is_alpha = True
-            is_rgb = True
-
-    if is_rgb:
-        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
-             'In version 0.19, input arrays will always be considered '
-             'grayscale, even if the last dimension has length 3 or 4. '
-             'To prevent this warning and ensure compatibility with future '
-             'versions, detect RGB images outside of this function.',
-             FutureWarning, stacklevel=2)
-        if alpha is False:
-            image = image[..., :3]
-
-        elif alpha is True and is_alpha is False:
-            alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
-                           dtype_limits(image, clip_negative=False)[1])
-            image = np.concatenate((image, alpha_layer), axis=2)
-
-        return image
-
-    else:
-        image = image[..., np.newaxis]
-
-        if alpha:
-            alpha_layer = (np.ones_like(image)
-                           * dtype_limits(image, clip_negative=False)[1])
-            return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
-        else:
-            return np.concatenate(3 * (image,), axis=-1)
+    return np.stack(3 * (image,), axis=-1)
 
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):

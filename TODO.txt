@@ -34,8 +34,6 @@ Version 0.19
   ``marching_cube_lewiner``.
 * In ``skimage.measure._marching_cube_classic.py``, remove
   ``marching_cube_classic``.
-* In ``skimage/color/colorconv.py``, remove the `alpha`and `is_rgb`
-  arguments and the associated deprecation warnings from `gray2rgb`.
 * In ``skimage/color/colorlabel.py``, remove the `change_default_value`
   decorator from `label2rgb` and set `bg_label` default value to 0.
 

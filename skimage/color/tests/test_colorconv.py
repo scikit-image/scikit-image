@@ -628,38 +628,10 @@ def test_gray2rgb():
 
 def test_gray2rgb_rgb():
     x = np.random.rand(5, 5, 4)
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        y = gray2rgb(x)
-    assert_equal(x, y)
-
-
-def test_gray2rgb_alpha():
-    x = np.random.random((5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    x = np.random.random((5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
-                              alpha=True)[0, 0, 3], 1)
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
-                              alpha=True)[0, 0, 3], 255)
+    y = gray2rgb(x)
+    assert y.shape == (x.shape + (3,))
+    for i in range(3):
+        assert_equal(x, y[..., i])
 
 
 @pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
@@ -738,16 +710,8 @@ def test_gray2rgba_alpha():
                                     (4, 5, 4, 5, 3)]))
 def test_nD_gray_conversion(func, shape):
     img = np.random.rand(*shape)
-
-    msg_list = []
-    if img.ndim == 3 and func == gray2rgb:
-        msg_list.append('Pass-through of possibly RGB images in gray2rgb')
-
-    with expected_warnings(msg_list):
-        out = func(img)
-
+    out = func(img)
     common_ndim = min(out.ndim, len(shape))
-
     assert out.shape[:common_ndim] == shape[:common_ndim]
 
 
