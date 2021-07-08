@@ -15,8 +15,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
-  in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
 * Remove the definition of `skimage.util.pad` and
   skimage/util/tests/test_arraypad.py.

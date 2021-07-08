@@ -16,8 +16,7 @@ from ._util import (_resolve_neighborhood, _set_border_values,
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def flood_fill(image, seed_point, new_value, *, footprint=None,
-               connectivity=None, tolerance=None, in_place=False,
-               inplace=None):
+               connectivity=None, tolerance=None, in_place=False):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -52,11 +51,6 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
         If True, flood filling is applied to `image` in place.  If False, the
         flood filled result is returned without modifying the input `image`
         (default).
-    inplace : bool, optional
-        This parameter is deprecated and will be removed in version 0.19.0
-        in favor of in_place. If True, flood filling is applied to `image`
-        inplace. If False, the flood filled result is returned without
-        modifying the input `image` (default).
 
     Returns
     -------
@@ -108,13 +102,6 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    if inplace is not None:
-        warn('The `inplace` parameter is depreciated and will be removed '
-             'in version 0.19.0. Use `in_place` instead.',
-             stacklevel=2,
-             category=FutureWarning)
-        in_place = inplace
-
     mask = flood(image, seed_point, footprint=footprint,
                  connectivity=connectivity, tolerance=tolerance)
 
