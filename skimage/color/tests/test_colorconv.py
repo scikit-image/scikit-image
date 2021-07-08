@@ -706,7 +706,7 @@ class TestColorconv():
             rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]])
         )
         assert_array_almost_equal(
-            rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]])
+            rgb2ycbcr(rgb), np.array([[[144.553, 53.797, 34.214]]])
         )
         assert_array_almost_equal(
             rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]])
