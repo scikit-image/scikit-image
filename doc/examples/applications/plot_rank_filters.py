@@ -257,12 +257,20 @@ from skimage.filters.rank import autolevel_percentile
 
 image = data.camera()
 
-selem = disk(20)
-loc_autolevel = autolevel(image, selem=selem)
-loc_perc_autolevel0 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
-loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
-loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
-loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.15, p1=.85)
+footprint = disk(20)
+loc_autolevel = autolevel(image, footprint=footprint)
+loc_perc_autolevel0 = autolevel_percentile(
+    image, footprint=footprint, p0=.01, p1=.99
+)
+loc_perc_autolevel1 = autolevel_percentile(
+    image, footprint=footprint, p0=.05, p1=.95
+)
+loc_perc_autolevel2 = autolevel_percentile(
+    image, footprint=footprint, p0=.1, p1=.9
+)
+loc_perc_autolevel3 = autolevel_percentile(
+    image, footprint=footprint, p0=.15, p1=.85
+)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
@@ -372,10 +380,10 @@ from skimage import exposure
 p8 = data.page()
 
 radius = 10
-selem = disk(radius)
+footprint = disk(radius)
 
 # t_loc_otsu is an image
-t_loc_otsu = otsu(p8, selem)
+t_loc_otsu = otsu(p8, footprint)
 loc_otsu = p8 >= t_loc_otsu
 
 # t_glob_otsu is a scalar
@@ -580,18 +588,18 @@ def exec_and_timeit(func):
 
 
 @exec_and_timeit
-def cr_med(image, selem):
-    return median(image=image, selem=selem)
+def cr_med(image, footprint):
+    return median(image=image, footprint=footprint)
 
 
 @exec_and_timeit
-def cr_max(image, selem):
-    return maximum(image=image, selem=selem)
+def cr_max(image, footprint):
+    return maximum(image=image, footprint=footprint)
 
 
 @exec_and_timeit
-def cm_dil(image, selem):
-    return dilation(image=image, selem=selem)
+def cm_dil(image, footprint):
+    return dilation(image=image, footprint=footprint)
 
 
 @exec_and_timeit
