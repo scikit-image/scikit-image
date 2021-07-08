@@ -188,13 +188,9 @@ jobs:
         # hang and timeout.
         sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
 
-        if [[ "${f}" == *"plot_3d_interaction"* ]]; then
-          echo "skipped"
-        else
-          $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
-          if [ $? -ne 0 ]; then
-            exit 1
-          fi
+        $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
+        if [ $? -ne 0 ]; then
+          exit 1
         fi
       done
 
