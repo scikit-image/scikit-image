@@ -219,7 +219,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
     eps = np.finfo(image_product.real.dtype).eps
-    image_product /= (np.abs(image_product) + eps)
+    image_product /= np.maximum(np.abs(image_product), 100 * eps)
     cross_correlation = ifftn(image_product)
 
     # Locate maximum
