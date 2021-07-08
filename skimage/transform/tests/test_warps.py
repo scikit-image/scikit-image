@@ -716,14 +716,18 @@ def test_bool_img_resize():
     assert_array_equal(res, expected)
 
 
-def test_bool_array_warnings():
+def test_bool_and_anti_aliasing_errors():
     img = np.zeros((10, 10), dtype=bool)
 
-    with expected_warnings(['Input image dtype is bool']):
+    with pytest.raises(ValueError):
         rescale(img, 0.5, anti_aliasing=True)
 
-    with expected_warnings(['Input image dtype is bool']):
+    with pytest.raises(ValueError):
         resize(img, (5, 5), anti_aliasing=True)
+
+
+def test_bool_array_warnings():
+    img = np.zeros((10, 10), dtype=bool)
 
     with expected_warnings(['Input image dtype is bool']):
         rescale(img, 0.5, order=1)
