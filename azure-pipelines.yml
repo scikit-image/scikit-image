@@ -198,7 +198,7 @@ jobs:
           fi
         fi
       done
-    condition:
+    condition: eq(variables['TEST_EXAMPLES'], 'true')
     displayName: 'Gallery testing'
 
 #  - bash: |
