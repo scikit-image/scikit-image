@@ -280,29 +280,37 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_pos.append(yx[border_filter])
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
-        return extrema_pos, extrema_scales, extrema_sigmas
+
+        octave_indices = np.hstack([np.full(len(p), i) for i, p in enumerate(extrema_pos)])
+        return np.vstack(extrema_pos), np.hstack(extrema_scales), np.hstack(extrema_sigmas), octave_indices
 
     def _fit(self, h):
         """Refine the position of the peak by fitting it to a parabola"""
         return (h[0] - h[2]) / (2 * (h[0] + h[2] - 2 * h[1]))
 
-    def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct, gaussian_scalespace):
+    def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct, indices, gaussian_scalespace):
         """Source: "Anatomy of the SIFT Method" Alg. 11
         Calculates the orientation of the gradient around every keypoint
         """
         gradientSpace = []
-        orientations_oct = []
-        for o, (positions, scales, sigmas, octave) in enumerate(
-                zip(positions_oct, scales_oct, sigmas_oct, gaussian_scalespace)):
+        keypoint_indices = []  # list for keypoints that have more than one reference orientation
+        keypoint_angles = []
+        keypoint_octave = []
+        keypoints_valid = np.ones_like(sigmas_oct, dtype=bool)
+        orientations = np.zeros_like(sigmas_oct)
+        key_count = 0
+        for o in range(self.n_octaves):
+            in_oct = indices == o
+            positions = positions_oct[in_oct]
+            scales = scales_oct[in_oct]
+            sigmas = sigmas_oct[in_oct]
+            octave = gaussian_scalespace[o]
+
             gradientSpace.append(np.gradient(octave))
             delta = self.deltas[o]
             dim = octave.shape[0:2]
-            orientations = np.zeros_like(sigmas)
             yx = positions / delta  # convert to octaves dimensions
             sigma = sigmas / delta
-            keypoint_indices = []
-            keypoint_angles = []
-            keypoints_valid = np.ones_like(sigma, dtype=bool)
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
@@ -346,19 +354,21 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                         if ori > np.pi:
                             ori -= 2 * np.pi
                         if c == 0:
-                            orientations[k] = ori
+                            orientations[key_count] = ori
                         else:
-                            keypoint_indices.append(k)
+                            keypoint_indices.append(key_count)
                             keypoint_angles.append(ori)
+                            keypoint_octave.append(o)
                 else:
-                    keypoints_valid[k] = False
-            keypoints_valid = np.hstack((keypoints_valid, np.ones((len(keypoint_indices)), dtype=bool)))
-            positions_oct[o] = np.vstack((positions, positions[keypoint_indices]))[keypoints_valid]
-            scales_oct[o] = np.hstack((scales, scales[keypoint_indices]))[keypoints_valid]
-            sigmas_oct[o] = np.hstack((sigmas, sigmas[keypoint_indices]))[keypoints_valid]
-            orientations_oct.append(np.hstack((orientations, keypoint_angles))[keypoints_valid])
+                    keypoints_valid[key_count] = False
+                key_count += 1
+        positions_oct = np.vstack((positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
+        scales_oct = np.hstack((scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
+        sigmas_oct = np.hstack((sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
+        orientations = np.hstack((orientations[keypoints_valid], keypoint_angles))
+        indices = np.hstack((indices[keypoints_valid], keypoint_octave))
         # return the gradientspace to reuse it to find the descriptor
-        return orientations_oct, gradientSpace
+        return positions_oct, scales_oct, sigmas_oct, indices, orientations, gradientSpace
 
     def _rotate(self, y, x, angle, sigma):
         c = np.cos(angle)
@@ -367,16 +377,20 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         rX = (s * y + c * x) / sigma
         return rY, rX
 
-    def _descriptor(self, positions_oct, scales_oct, sigmas_oct, orientations_oct, gradientspace):
+    def _descriptor(self, positions_oct, scales_oct, sigmas_oct, indices, orientations_oct, gradientspace):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
-        nKey = sum([len(k) for k in positions_oct])
+        nKey = len(scales_oct)
         keypoint_des = np.empty((nKey, self.n_hist ** 2 * self.n_ori), dtype=int)
         key_count = 0
-        for o, (positions, scales, sigmas, orientations, gradient) in \
-                enumerate(zip(positions_oct, scales_oct, sigmas_oct, orientations_oct, gradientspace)):
-            print(o)
+        for o in range(self.n_octaves):
+            in_oct = indices == o
+            positions = positions_oct[in_oct]
+            scales = scales_oct[in_oct]
+            sigmas = sigmas_oct[in_oct]
+            gradient = gradientspace[o]
+
             delta = self.deltas[o]
             dim = gradient[0].shape[0:2]
             yx = positions / delta
@@ -393,16 +407,16 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 m, n = np.mgrid[Min[k, 0]:Max[k, 0], Min[k, 1]: Max[k, 1]]  # the patch
                 y_mn = np.copy(m) - yx[k, 0]  # normalized coordinates
                 x_mn = np.copy(n) - yx[k, 1]
-                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations[k], 1)
+                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations_oct[key_count], 1)
 
                 inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
                 y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
                 m, n = m[inRadius], n[inRadius]
 
-                gradientY = gradientspace[o][0][m, n, scales[k]]
-                gradientX = gradientspace[o][1][m, n, scales[k]]
+                gradientY = gradient[0][m, n, scales[k]]
+                gradientX = gradient[1][m, n, scales[k]]
 
-                theta = np.mod(np.arctan2(gradientX, gradientY) - orientations[k], 2 * np.pi)
+                theta = np.mod(np.arctan2(gradientX, gradientY) - orientations_oct[key_count], 2 * np.pi)
                 kernel = np.exp(-(np.square(y_mn) + np.square(x_mn)) / (2 * (self.lambda_descr * sigma[k]) ** 2))
                 magnitude = np.sqrt(np.square(gradientY) + np.square(gradientX)) * kernel
 
@@ -523,11 +537,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         dog_scalespace = [np.diff(layer, axis=2) for layer in gaussian_scalespace]
 
-        positions, scales, sigmas = self._find_localize_evaluate(dog_scalespace, image.shape)
+        positions, scales, sigmas, indices = self._find_localize_evaluate(dog_scalespace, image.shape)
 
-        orientations, gradientSpace = self._compute_orientation(positions, scales, sigmas, gaussian_scalespace)
+        positions, scales, sigmas, indices, orientations, gradientSpace = self._compute_orientation(positions, scales,
+                                                                                                    sigmas, indices,
+                                                                                                    gaussian_scalespace)
 
-        descriptors = self._descriptor(positions, scales, sigmas, orientations, gradientSpace)
+        descriptors = self._descriptor(positions, scales, sigmas, indices, orientations, gradientSpace)
 
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
         self.orientations = np.hstack(orientations)
