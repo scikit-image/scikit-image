@@ -60,14 +60,22 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             The sampling distance of the first octave. It's final value is 1/upsampling.
         deltas : (n_octaves, ) array
             The sampling distances of all octaves.
+        scalespace_sigmas : (n_octaves, n_scales + 3) array
+            The sigma value of all scales in all octaves.
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-        sigmas : (n_octaves, n_scales + 3) array
-            The sigma value of all scales in all octaves.
+        positions : (N, 2) array
+            Subpixel-precision keypoint coordinates as ``(row, col)``.
+        sigmas : (N, ) array
+            The corresponding sigma (blur) value of a keypoint.
+        sigmas : (N, ) array
+            The corresponding scale of a keypoint.
         orientations : (N, ) array
-            The orientations of the gradient around every keypoint
+            The orientations of the gradient around every keypoint.
+        octaves : (N, ) array
+            The corresponding octave of a keypoint.
         descriptors : (N, n_hist*n_hist*n_ori) array
-            The descriptors of all keypoints.
+            The descriptor octave of a keypoint.
 
 
         References
@@ -535,4 +543,3 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self._compute_descriptor(gradientSpace)
 
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
-        print("")
