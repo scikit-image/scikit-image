@@ -100,9 +100,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         ...                             detector_extractor2.descriptors, max_ratio=0.6)
         >>> matches[10:15]
         array([[ 11,  11],
-               [ 12, 380],
+               [ 12, 568],
                [ 13,  13],
-               [ 14, 381],
+               [ 14, 569],
                [ 15,  15]])
         >>> detector_extractor1.keypoints[matches[10:15, 0]]
         array([[170, 241],
@@ -112,9 +112,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                [206, 307]])
         >>> detector_extractor2.keypoints[matches[10:15, 1]]
         array([[271, 170],
-               [225, 341],
+               [383,  95],
                [499, 234],
-               [133, 232],
+               [191, 260],
                [205, 206]])
 
         """
