@@ -8,11 +8,11 @@ from ._geometric import (SimilarityTransform, AffineTransform,
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from .._shared import utils
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
                              _validate_interpolation_order,
-                             channel_as_last_axis)
+                             channel_as_last_axis,
+                             deprecate_multichannel_kwarg)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -239,8 +239,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     return out
 
 
-@utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=7)
+@channel_as_last_axis()
+@deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
@@ -1054,8 +1054,8 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
     return coords
 
 
-@utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg()
+@channel_as_last_axis()
+@deprecate_multichannel_kwarg()
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
                scaling='linear', multichannel=False, channel_axis=None,
                **kwargs):
@@ -1064,9 +1064,8 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     Parameters
     ----------
     image : ndarray
-        Input image. Only 2-D arrays are accepted by default. If
-        `multichannel=True`, 3-D arrays are accepted and the last axis is
-        interpreted as multiple channels.
+        Input image. Only 2-D arrays are accepted by default. 3-D arrays are
+        accepted if a `channel_axis` is specified.
     center : tuple (row, col), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
@@ -1124,14 +1123,12 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     """
     multichannel = channel_axis is not None
     if image.ndim != 2 and not multichannel:
-        raise ValueError("Input array must be 2 dimensions "
-                         "when `multichannel=False`,"
-                         " got {}".format(image.ndim))
+        raise ValueError("Input array must be 2-dimensional when "
+                         f"`channel_axis=None`, got {image.ndim}")
 
     if image.ndim != 3 and multichannel:
-        raise ValueError("Input array must be 3 dimensions "
-                         "when `multichannel=True`,"
-                         " got {}".format(image.ndim))
+        raise ValueError("Input array must be 3-dimensional when "
+                         f"`channel_axis` is specified, got {image.ndim}")
 
     if center is None:
         center = (np.array(image.shape)[:2] / 2) - 0.5

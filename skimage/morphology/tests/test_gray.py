@@ -1,16 +1,16 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from scipy import ndimage as ndi
+from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 from skimage import color, data, transform
-from skimage.util import img_as_uint, img_as_ubyte
-from skimage.morphology import gray, selem
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import TestCase, fetch
+from skimage._shared.testing import fetch
+from skimage.morphology import gray, footprints
+from skimage.util import img_as_uint, img_as_ubyte
 
 
-class TestMorphology(TestCase):
+class TestMorphology():
 
     # These expected outputs were generated with skimage v0.12.1
     # using:
@@ -23,15 +23,15 @@ class TestMorphology(TestCase):
     def _build_expected_output(self):
         funcs = (gray.erosion, gray.dilation, gray.opening, gray.closing,
                  gray.white_tophat, gray.black_tophat)
-        selems_2D = (selem.square, selem.diamond,
-                     selem.disk, selem.star)
+        footprints_2D = (footprints.square, footprints.diamond,
+                         footprints.disk, footprints.star)
 
         image = img_as_ubyte(transform.downscale_local_mean(
             color.rgb2gray(data.coffee()), (20, 20)))
 
         output = {}
         for n in range(1, 4):
-            for strel in selems_2D:
+            for strel in footprints_2D:
                 for func in funcs:
                     key = '{0}_{1}_{2}'.format(
                         strel.__name__, n, func.__name__)
@@ -45,55 +45,57 @@ class TestMorphology(TestCase):
         assert_equal(expected, calculated)
 
 
-class TestEccentricStructuringElements(TestCase):
-    def setUp(self):
+class TestEccentricStructuringElements():
+
+    def setup_class(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
         self.white_pixel = 255 - self.black_pixel
-        self.selems = [selem.square(2), selem.rectangle(2, 2),
-                       selem.rectangle(2, 1), selem.rectangle(1, 2)]
+        self.footprints = [footprints.square(2), footprints.rectangle(2, 2),
+                           footprints.rectangle(2, 1),
+                           footprints.rectangle(1, 2)]
 
     def test_dilate_erode_symmetry(self):
-        for s in self.selems:
+        for s in self.footprints:
             c = gray.erosion(self.black_pixel, s)
             d = gray.dilation(self.white_pixel, s)
             assert np.all(c == (255 - d))
 
     def test_open_black_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             gray_open = gray.opening(self.black_pixel, s)
             assert np.all(gray_open == self.black_pixel)
 
     def test_close_white_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             gray_close = gray.closing(self.white_pixel, s)
             assert np.all(gray_close == self.white_pixel)
 
     def test_open_white_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             assert np.all(gray.opening(self.white_pixel, s) == 0)
 
     def test_close_black_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             assert np.all(gray.closing(self.black_pixel, s) == 255)
 
     def test_white_tophat_white_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             tophat = gray.white_tophat(self.white_pixel, s)
             assert np.all(tophat == self.white_pixel)
 
     def test_black_tophat_black_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             tophat = gray.black_tophat(self.black_pixel, s)
             assert np.all(tophat == (255 - self.black_pixel))
 
     def test_white_tophat_black_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             tophat = gray.white_tophat(self.black_pixel, s)
             assert np.all(tophat == 0)
 
     def test_black_tophat_white_pixel(self):
-        for s in self.selems:
+        for s in self.footprints:
             tophat = gray.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
@@ -104,8 +106,8 @@ gray_functions = [gray.erosion, gray.dilation,
 
 
 @pytest.mark.parametrize("function", gray_functions)
-def test_default_selem(function):
-    strel = selem.diamond(radius=1)
+def test_default_footprint(function):
+    strel = footprints.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -124,7 +126,7 @@ def test_default_selem(function):
     assert_array_equal(im_expected, im_test)
 
 
-def test_3d_fallback_default_selem():
+def test_3d_fallback_default_footprint():
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
@@ -141,7 +143,7 @@ gray_3d_fallback_functions = [gray.closing, gray.opening]
 
 
 @pytest.mark.parametrize("function", gray_3d_fallback_functions)
-def test_3d_fallback_cube_selem(function):
+def test_3d_fallback_cube_footprint(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
@@ -191,9 +193,9 @@ def test_2d_ndimage_equivalence():
     opened = gray.opening(image)
     closed = gray.closing(image)
 
-    selem = ndi.generate_binary_structure(2, 1)
-    ndimage_opened = ndi.grey_opening(image, footprint=selem)
-    ndimage_closed = ndi.grey_closing(image, footprint=selem)
+    footprint = ndi.generate_binary_structure(2, 1)
+    ndimage_opened = ndi.grey_opening(image, footprint=footprint)
+    ndimage_closed = ndi.grey_closing(image, footprint=footprint)
 
     assert_array_equal(opened, ndimage_opened)
     assert_array_equal(closed, ndimage_closed)
@@ -278,5 +280,14 @@ def test_1d_erosion():
 
 def test_deprecated_import():
     msg = "Importing from skimage.morphology.grey is deprecated."
-    with testing.expected_warnings([msg]):
+    with expected_warnings([msg]):
         from skimage.morphology.grey import erosion
+
+
+@pytest.mark.parametrize(
+    'function', ['erosion', 'dilation', 'closing', 'opening', 'white_tophat',
+                 'black_tophat'],
+)
+def test_selem_kwarg_deprecation(function):
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        getattr(gray, function)(np.zeros((4, 4)), selem=np.ones((3, 3)))

@@ -62,3 +62,11 @@ def test_zero_crop():
     arr = np.arange(45).reshape(9, 5)
     out = crop(arr, 0)
     assert out.shape == (9, 5)
+
+
+def test_np_int_crop():
+    arr = np.arange(45).reshape(9, 5)
+    out1 = crop(arr, np.int64(1))
+    out2 = crop(arr, np.int32(1))
+    assert_array_equal(out1, out2)
+    assert out1.shape == (7, 3)

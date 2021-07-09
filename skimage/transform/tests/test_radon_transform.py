@@ -12,7 +12,7 @@ from skimage.transform import radon, iradon, iradon_sart, rescale
 
 PHANTOM = shepp_logan_phantom()[::2, ::2]
 PHANTOM = rescale(PHANTOM, 0.5, order=1,
-                  mode='constant', anti_aliasing=False, multichannel=False)
+                  mode='constant', anti_aliasing=False, channel_axis=None)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -394,7 +394,7 @@ def test_iradon_sart():
     debug = False
 
     image = rescale(PHANTOM, 0.8, mode='reflect',
-                    multichannel=False, anti_aliasing=False)
+                    channel_axis=None, anti_aliasing=False)
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),

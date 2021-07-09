@@ -3,13 +3,17 @@ Binary morphological operations
 """
 import numpy as np
 from scipy import ndimage as ndi
-from .misc import default_selem
+
+from .._shared.utils import deprecate_kwarg
+from .misc import default_footprint
 
 
-# The default_selem decorator provides a diamond structuring element as default
-# with the same dimension as the input image and size 3 along each axis.
-@default_selem
-def binary_erosion(image, selem=None, out=None, *, iterations=1):
+# The default_footprint decorator provides a diamond footprint as
+# default with the same dimension as the input image and size 3 along each
+# axis.
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def binary_erosion(image, footprint=None, out=None, *, iterations=1):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -23,9 +27,9 @@ def binary_erosion(image, selem=None, out=None, *, iterations=1):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -39,13 +43,14 @@ def binary_erosion(image, selem=None, out=None, *, iterations=1):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_erosion(image, structure=selem, output=out, border_value=True,
-                       iterations=iterations)
+    ndi.binary_erosion(image, structure=footprint, output=out,
+                       border_value=True, iterations=iterations)
     return out
 
 
-@default_selem
-def binary_dilation(image, selem=None, out=None, *, iterations=1):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def binary_dilation(image, footprint=None, out=None, *, iterations=1):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -59,9 +64,9 @@ def binary_dilation(image, selem=None, out=None, *, iterations=1):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -74,13 +79,14 @@ def binary_dilation(image, selem=None, out=None, *, iterations=1):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_dilation(image, structure=selem, output=out,
+    ndi.binary_dilation(image, structure=footprint, output=out,
                         iterations=iterations)
     return out
 
 
-@default_selem
-def binary_opening(image, selem=None, out=None, *, iterations=1):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def binary_opening(image, footprint=None, out=None, *, iterations=1):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as grayscale opening but performs
@@ -95,9 +101,9 @@ def binary_opening(image, selem=None, out=None, *, iterations=1):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -108,13 +114,14 @@ def binary_opening(image, selem=None, out=None, *, iterations=1):
         The result of the morphological opening.
 
     """
-    eroded = binary_erosion(image, selem, iterations=iterations)
-    out = binary_dilation(eroded, selem, out=out, iterations=iterations)
+    eroded = binary_erosion(image, footprint, iterations=iterations)
+    out = binary_dilation(eroded, footprint, out=out, iterations=iterations)
     return out
 
 
-@default_selem
-def binary_closing(image, selem=None, out=None, *, iterations=1):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def binary_closing(image, footprint=None, out=None, *, iterations=1):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as grayscale closing but performs
@@ -129,9 +136,9 @@ def binary_closing(image, selem=None, out=None, *, iterations=1):
     ----------
     image : ndarray
         Binary input image.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped structuring element (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1).
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
@@ -142,6 +149,6 @@ def binary_closing(image, selem=None, out=None, *, iterations=1):
         The result of the morphological closing.
 
     """
-    dilated = binary_dilation(image, selem, iterations=iterations)
-    out = binary_erosion(dilated, selem, out=out, iterations=iterations)
+    dilated = binary_dilation(image, footprint, iterations=iterations)
+    out = binary_erosion(dilated, footprint, out=out, iterations=iterations)
     return out

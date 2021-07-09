@@ -1,15 +1,16 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..util import img_as_float
 from ..filters import sobel
 
 
+@deprecate_kwarg({'max_iterations': 'max_num_iter'}, removed_version="1.0")
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1,
+                   max_num_iter=2500, convergence=0.1,
                    *,
                    boundary_condition='periodic',
                    coordinates='rc'):
@@ -44,7 +45,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Explicit time stepping parameter.
     max_px_move : float, optional
         Maximum pixel distance to move per iteration.
-    max_iterations : int, optional
+    max_num_iter : int, optional
         Maximum iterations to optimize snake shape.
     convergence : float, optional
         Convergence criteria.
@@ -83,7 +84,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian(img, 2)
+    >>> img = gaussian(img, 2, preserve_range=False)
 
     Initialize spline:
 
@@ -101,9 +102,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     if coordinates != 'rc':
         raise ValueError('Coordinate values must be set in a row column '
                          'format. `coordinates` must be set to "rc".')
-    max_iterations = int(max_iterations)
-    if max_iterations <= 0:
-        raise ValueError("max_iterations should be >0.")
+    max_num_iter = int(max_num_iter)
+    if max_num_iter <= 0:
+        raise ValueError("max_num_iter should be >0.")
     convergence_order = 10
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
                  'fixed-free', 'fixed-fixed', 'free-free']
@@ -192,7 +193,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     inv = inv.astype(float_dtype, copy=False)
 
     # Explicit time stepping for image energy minimization:
-    for i in range(max_iterations):
+    for i in range(max_num_iter):
         # RectBivariateSpline always returns float64, so call astype here
         fx = intp(x, y, dx=1, grid=False).astype(float_dtype, copy=False)
         fy = intp(x, y, dy=1, grid=False).astype(float_dtype, copy=False)

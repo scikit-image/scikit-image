@@ -4,6 +4,7 @@ n-dimensional array.
 """
 
 import numpy as np
+from numbers import Integral
 
 __all__ = ['crop']
 
@@ -39,9 +40,9 @@ def crop(ar, crop_width, copy=False, order='K'):
     """
     ar = np.array(ar, copy=False)
 
-    if isinstance(crop_width, int):
+    if isinstance(crop_width, Integral):
         crops = [[crop_width, crop_width]] * ar.ndim
-    elif isinstance(crop_width[0], int):
+    elif isinstance(crop_width[0], Integral):
         if len(crop_width) == 1:
             crops = [[crop_width[0], crop_width[0]]] * ar.ndim
         elif len(crop_width) == 2:

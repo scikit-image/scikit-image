@@ -124,10 +124,10 @@ def hog_histograms(np_floats[:, ::1] gradient_columns,
     c_0 = cell_columns / 2
     cc = cell_rows * number_of_cells_rows
     cr = cell_columns * number_of_cells_columns
-    range_rows_stop = cell_rows / 2
-    range_rows_start = -range_rows_stop
-    range_columns_stop = cell_columns / 2
-    range_columns_start = -range_columns_stop
+    range_rows_stop = (cell_rows + 1) / 2
+    range_rows_start = -(cell_rows / 2)
+    range_columns_stop = (cell_columns + 1) / 2
+    range_columns_start = -(cell_columns / 2)
     number_of_orientations_per_180 = 180. / number_of_orientations
 
     with nogil:
