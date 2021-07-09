@@ -29,3 +29,19 @@ requires = [
     "numpy; python_version>='3.10'",
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
+
+[tool.towncrier]
+  filename = "doc/release/release_{version}.rst"
+  directory = "doc/source/upcoming_changes"
+  issue_format = "`#{issue} <https://github.com/scikit-image/scikit-image/issues/{issue}>`_"  
+  template = "doc/source/upcoming_changes/towncrier_template.jinja"
+  type = [
+    { name = "API Changes",               directory = "api",          showcontent = true },
+    { name = "Improvements",              directory = "improvements", showcontent = true },
+    { name = "Deprecations",              directory = "deprecated",   showcontent = true },
+    { name = "Development process",       directory = "process",      showcontent = true },
+    { name = "New Features",              directory = "feature",      showcontent = true },
+    { name = "Bug Fixes",                 directory = "bugfix",       showcontent = true },
+    { name = "Documentation",             directory = "doc",          showcontent = true },
+    { name = "Other Pull Requests",       directory = "trivial",      showcontent = false },
+]
