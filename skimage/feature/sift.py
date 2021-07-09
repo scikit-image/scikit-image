@@ -132,9 +132,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         self.delta_min = 1 / upsampling
         self.deltas = self.delta_min * np.power(2, np.arange(self.n_octaves - 1))
+        self.scalespace_sigmas = None
         self.keypoints = None
+        self.positions = None
         self.sigmas = None
+        self.scales = None
         self.orientations = None
+        self.octaves = None
         self.descriptors = None
 
     def _number_of_octaves(self, n, image_shape):
@@ -171,7 +175,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             scalespace.append(octave)
             image = octave[:, :, self.n_scales][::2, ::2]  # downscale the image by taking every second pixel
             current_sigma = sigmas[o, self.n_scales]
-        self.sigmas = sigmas
+        self.scalespace_sigmas = sigmas
         return scalespace
 
     def _inrange(self, a, dim):
@@ -256,7 +260,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             off = off[finished]
             w = vals + 0.5 * np.sum(J * off, axis=1)  # values at interpolated point
             H = H[finished, :2, :2]
-            sigmaratio = self.sigmas[0, 1] / self.sigmas[0, 0]
+            sigmaratio = self.scalespace_sigmas[0, 1] / self.scalespace_sigmas[0, 0]
 
             contrast_threshold = self.c_dog / self.n_scales
             edge_threshold = np.square(self.c_edge + 1) / self.c_edge
@@ -273,7 +277,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             off = off[contrast_filter][edge_filter]
             yx = (keys[:, 0:2] + off[:, 0:2]) * delta
 
-            sigmas = self.sigmas[o, keys[:, 2]] * np.power(sigmaratio, off[:, 2])
+            sigmas = self.scalespace_sigmas[o, keys[:, 2]] * np.power(sigmaratio, off[:, 2])
             border_filter = np.all(np.logical_and((yx - sigmas[:, np.newaxis]) > 0.0,
                                                   (yx + sigmas[:, np.newaxis]) < img_shape),
                                    axis=1)
@@ -288,7 +292,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """Refine the position of the peak by fitting it to a parabola"""
         return (h[0] - h[2]) / (2 * (h[0] + h[2] - 2 * h[1]))
 
-    def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct, indices, gaussian_scalespace):
+    def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct, octaves, gaussian_scalespace):
         """Source: "Anatomy of the SIFT Method" Alg. 11
         Calculates the orientation of the gradient around every keypoint
         """
@@ -300,7 +304,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         orientations = np.zeros_like(sigmas_oct)
         key_count = 0
         for o in range(self.n_octaves):
-            in_oct = indices == o
+            in_oct = octaves == o
             positions = positions_oct[in_oct]
             scales = scales_oct[in_oct]
             sigmas = sigmas_oct[in_oct]
@@ -362,13 +366,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 else:
                     keypoints_valid[key_count] = False
                 key_count += 1
-        positions_oct = np.vstack((positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
-        scales_oct = np.hstack((scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
-        sigmas_oct = np.hstack((sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
-        orientations = np.hstack((orientations[keypoints_valid], keypoint_angles))
-        indices = np.hstack((indices[keypoints_valid], keypoint_octave))
+        self.positions = np.vstack((positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
+        self.scales = np.hstack((scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
+        self.sigmas = np.hstack((sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
+        self.orientations = np.hstack((orientations[keypoints_valid], keypoint_angles))
+        self.octaves = np.hstack((octaves[keypoints_valid], keypoint_octave))
         # return the gradientspace to reuse it to find the descriptor
-        return positions_oct, scales_oct, sigmas_oct, indices, orientations, gradientSpace
+        return gradientSpace
 
     def _rotate(self, y, x, angle, sigma):
         c = np.cos(angle)
@@ -377,20 +381,20 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         rX = (s * y + c * x) / sigma
         return rY, rX
 
-    def _descriptor(self, positions_oct, scales_oct, sigmas_oct, indices_oct, orientations_oct, gradientspace):
+    def _compute_descriptor(self, gradientspace):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
-        nKey = len(scales_oct)
-        keypoint_des = np.empty((nKey, self.n_hist ** 2 * self.n_ori), dtype=np.uint8)
+        nKey = len(self.scales)
+        self.descriptors = np.empty((nKey, self.n_hist ** 2 * self.n_ori), dtype=np.uint8)
         key_count = 0
         key_numbers = np.arange(nKey)
         for o in range(self.n_octaves):
-            in_oct = indices_oct == o
-            positions = positions_oct[in_oct]
-            scales = scales_oct[in_oct]
-            sigmas = sigmas_oct[in_oct]
-            orientations = orientations_oct[in_oct]
+            in_oct = self.octaves == o
+            positions = self.positions[in_oct]
+            scales = self.scales[in_oct]
+            sigmas = self.sigmas[in_oct]
+            orientations = self.orientations[in_oct]
             numbers = key_numbers[in_oct]
             gradient = gradientspace[o]
 
@@ -462,9 +466,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 histograms = np.minimum(histograms, 0.2 * np.linalg.norm(histograms))
                 # normalize the descriptor
                 descriptor = np.minimum(np.floor((512 * histograms) / np.linalg.norm(histograms)), 255).astype(np.uint8)
-                keypoint_des[numbers[k], :] = descriptor
+                self.descriptors[numbers[k], :] = descriptor
                 key_count += 1
-        return keypoint_des
 
     def detect(self, image):
         """Detect the keypoints.
@@ -483,30 +486,19 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         dog_scalespace = [np.diff(layer, axis=2) for layer in gaussian_scalespace]
 
-        positions, scales, sigmas = self._find_localize_evaluate(dog_scalespace, image.shape)
+        positions, scales, sigmas, octaves = self._find_localize_evaluate(dog_scalespace, image.shape)
 
-        orientations, _ = self._compute_orientation(positions, scales, sigmas, gaussian_scalespace)
+        self._compute_orientation(positions, scales, sigmas, octaves, gaussian_scalespace)
 
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
-        self.orientations = np.vstack(orientations)
 
-    # not yet working due to the descrepancy between the way keypoints are processed (a list of keypoints in their
-    # respective octave) or how they are returned (all in one array)
-    def extract(self, image, positions, scales, sigmas, orientations):
+    def extract(self, image):
         """Extract the descriptors for all keypoints in the image.
 
         Parameters
         ----------
         image : 2D array
             Input image.
-        positions : List[(N, 2) array]
-            Refined keypoint coordinates as ``(row, col)`` seperated into their octaves.
-        scales : List[(N, ) array]
-            Corresponding scales seperated into their octaves.
-        sigmas : List[(N, ) array]
-            The refined sigma value of the scale.
-        orientations : List[(N, ) array]
-            Corresponding orientations in radians.
 
         """
         check_nD(image, 2)
@@ -517,11 +509,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         gradientSpace = [np.gradient(octave) for octave in gaussian_scalespace]
 
-        descriptors = self._descriptor(positions, scales, sigmas, orientations, gradientSpace)
-
-        self.keypoints = np.vstack([p.round().astype(np.int) for p in positions])
-        self.orientations = np.vstack(orientations)
-        self.descriptors = descriptors
+        self._compute_descriptor(gradientSpace)
 
     def detect_and_extract(self, image):
         """Detect the keypoints and extract their descriptors.
@@ -540,14 +528,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         dog_scalespace = [np.diff(layer, axis=2) for layer in gaussian_scalespace]
 
-        positions, scales, sigmas, indices = self._find_localize_evaluate(dog_scalespace, image.shape)
+        positions, scales, sigmas, octaves = self._find_localize_evaluate(dog_scalespace, image.shape)
 
-        positions, scales, sigmas, indices, orientations, gradientSpace = self._compute_orientation(positions, scales,
-                                                                                                    sigmas, indices,
-                                                                                                    gaussian_scalespace)
+        gradientSpace = self._compute_orientation(positions, scales, sigmas, octaves, gaussian_scalespace)
 
-        descriptors = self._descriptor(positions, scales, sigmas, indices, orientations, gradientSpace)
+        self._compute_descriptor(gradientSpace)
 
         self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
-        self.orientations = np.hstack(orientations)
-        self.descriptors = descriptors
+        print("")
