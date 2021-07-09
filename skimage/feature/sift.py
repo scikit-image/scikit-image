@@ -377,18 +377,21 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         rX = (s * y + c * x) / sigma
         return rY, rX
 
-    def _descriptor(self, positions_oct, scales_oct, sigmas_oct, indices, orientations_oct, gradientspace):
+    def _descriptor(self, positions_oct, scales_oct, sigmas_oct, indices_oct, orientations_oct, gradientspace):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
         nKey = len(scales_oct)
-        keypoint_des = np.empty((nKey, self.n_hist ** 2 * self.n_ori), dtype=int)
+        keypoint_des = np.empty((nKey, self.n_hist ** 2 * self.n_ori), dtype=np.uint8)
         key_count = 0
+        key_numbers = np.arange(nKey)
         for o in range(self.n_octaves):
-            in_oct = indices == o
+            in_oct = indices_oct == o
             positions = positions_oct[in_oct]
             scales = scales_oct[in_oct]
             sigmas = sigmas_oct[in_oct]
+            orientations = orientations_oct[in_oct]
+            numbers = key_numbers[in_oct]
             gradient = gradientspace[o]
 
             delta = self.deltas[o]
@@ -407,7 +410,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 m, n = np.mgrid[Min[k, 0]:Max[k, 0], Min[k, 1]: Max[k, 1]]  # the patch
                 y_mn = np.copy(m) - yx[k, 0]  # normalized coordinates
                 x_mn = np.copy(n) - yx[k, 1]
-                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations_oct[key_count], 1)
+                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations[k], 1)
 
                 inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
                 y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
@@ -416,7 +419,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradientY = gradient[0][m, n, scales[k]]
                 gradientX = gradient[1][m, n, scales[k]]
 
-                theta = np.mod(np.arctan2(gradientX, gradientY) - orientations_oct[key_count], 2 * np.pi)
+                theta = np.mod(np.arctan2(gradientX, gradientY) - orientations[k], 2 * np.pi)
                 kernel = np.exp(-(np.square(y_mn) + np.square(x_mn)) / (2 * (self.lambda_descr * sigma[k]) ** 2))
                 magnitude = np.sqrt(np.square(gradientY) + np.square(gradientX)) * kernel
 
@@ -439,19 +442,19 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # every contribution in y direction is combined with every in x direction
                 # y: histogram 3 and 4, x: histogram 2 -> contribute to (3,2) and (4,2)
                 comb = np.logical_and(near_x.T[:, None, :], near_y.T[:, :, None])
-                positions = np.where(comb)
+                comb_pos = np.where(comb)
 
                 # the weights/contributions are shared bilinearly between the histograms
-                w0 = ((1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_y[positions[1], positions[0]])
-                      * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_x[positions[2], positions[0]])
-                      * magnitude[positions[0]])
+                w0 = ((1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_y[comb_pos[1], comb_pos[0]])
+                      * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k])) * dist_x[comb_pos[2], comb_pos[0]])
+                      * magnitude[comb_pos[0]])
 
                 # the weight is shared linearly between the 2 nearest bins
-                w1 = w0 * ((self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
-                w2 = w0 * (1 - (self.n_ori / (2 * np.pi)) * near_t_val[positions[0]])
-                k_index = near_t[positions[0]]
-                np.add.at(histograms, (positions[1], positions[2], k_index), w1)
-                np.add.at(histograms, (positions[1], positions[2], np.mod((k_index + 1), self.n_ori)), w2)
+                w1 = w0 * ((self.n_ori / (2 * np.pi)) * near_t_val[comb_pos[0]])
+                w2 = w0 * (1 - (self.n_ori / (2 * np.pi)) * near_t_val[comb_pos[0]])
+                k_index = near_t[comb_pos[0]]
+                np.add.at(histograms, (comb_pos[1], comb_pos[2], k_index), w1)
+                np.add.at(histograms, (comb_pos[1], comb_pos[2], np.mod((k_index + 1), self.n_ori)), w2)
 
                 # convert the histograms to a 1d descriptor
                 histograms = histograms.flatten()
@@ -459,7 +462,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 histograms = np.minimum(histograms, 0.2 * np.linalg.norm(histograms))
                 # normalize the descriptor
                 descriptor = np.minimum(np.floor((512 * histograms) / np.linalg.norm(histograms)), 255).astype(np.uint8)
-                keypoint_des[key_count, :] = descriptor
+                keypoint_des[numbers[k], :] = descriptor
                 key_count += 1
         return keypoint_des
 
