@@ -222,6 +222,7 @@ def test_mssim_mixed_dtype():
         cam, cam_noisy.astype(np.float32), data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
+
 def test_structural_similarity_small_image():
     X = np.zeros((5, 5), dtype=np.double)
     Y = np.zeros((5, 5), dtype=np.double)
@@ -230,6 +231,7 @@ def test_structural_similarity_small_image():
     # when user don't specify win_size with small image
     with testing.raises(ValueError):
         structural_similarity(Y, Y)
+
 
 def test_invalid_input():
     # size mismatch
