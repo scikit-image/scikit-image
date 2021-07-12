@@ -77,7 +77,7 @@ image = img_as_float(image)
 gradient = inverse_gaussian_gradient(image)
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
-im_test3 = morphological_geodesic_active_contour(gradient, iterations=100,
+im_test3 = morphological_geodesic_active_contour(gradient, num_iter=100,
                                                  init_level_set=init_ls,
                                                  smoothing=1, balloon=-1,
                                                  threshold=0.69)
