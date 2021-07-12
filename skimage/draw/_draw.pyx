@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
+from .._shared.fused_numerics cimport np_anyint
 
 cnp.import_array()
 
@@ -245,7 +246,7 @@ def _polygon(r, c, shape):
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def _draw_poly_on_array(r, c, image, fill_value):
+def _draw_poly_on_array(r, c, np_anyint[:, :] image, fill_value):
     """Fill the area of a polygon on an input image.
     
     Parameters
@@ -254,15 +255,17 @@ def _draw_poly_on_array(r, c, image, fill_value):
         Row coordinates of vertices of polygon.
     c : (N,) ndarray
         Column coordinates of vertices of polygon.
-    image : ndarray
+    image : ndarray:
         Input image that polygon will be drawn onto.
     fill_value : bool, int, tuple, optional
-        The value that will be assigned to coordinates within the polygon. Default is 1. 
+        The value that will be assigned to coordinates within the polygon. 
+        Default is 1. 
         
     Returns
     -------
     image: ndarray 
-        The updated image with the areas inside the polygon now assigned the fill_value.
+        The updated image with the areas inside the polygon now assigned the
+        fill_value.
     """
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
@@ -278,16 +281,15 @@ def _draw_poly_on_array(r, c, image, fill_value):
     maxr = min(shape[0] - 1, maxr)
     maxc = min(shape[1] - 1, maxc)
 
-    # make contiguous arrays for r, c coordinates and image - image dtype undefined to allow for any image type
+    # make contiguous arrays for r, c coordinates and image
     cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, np.float64)
     cdef cnp.float64_t[::1] cptr = np.ascontiguousarray(c, np.float64)
-    image_ptr = np.ascontiguousarray(image)
     cdef Py_ssize_t r_i, c_i
 
     for r_i in range(minr, maxr+1):
         for c_i in range(minc, maxc+1):
             if point_in_polygon(cptr, rptr, <double>c_i, <double>r_i):
-                image_ptr[c_i, r_i] = fill_value
+                image[c_i, r_i] = fill_value
 
     return image
 

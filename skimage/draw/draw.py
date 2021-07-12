@@ -545,7 +545,7 @@ def draw_poly_on_array(r, c, image, fill_value=1):
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> r = np.array([1, 2, 8])
     >>> c = np.array([1, 7, 4])
-    >>> img = draw_poly_on_array(r, c, image, fill_value=1)
+    >>> img = draw_poly_on_array(r, c, img, fill_value=1)
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
