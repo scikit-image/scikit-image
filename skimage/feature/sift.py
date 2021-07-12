@@ -17,13 +17,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             Prior to the feature detection the image is upscaled by a factor of 1 (no
             upscaling), 2 or 4. Method: Bi-cubic interpolation.
         n_octaves : int, optional
-            Maximum number of octaves. With every octave the image size is halfed and
+            Maximum number of octaves. With every octave the image size is halved and
             the sigma doubled.
         n_scales : int, optional
             Maximum number of scales in every octave.
         sigma_min : float, optional
             The blur level of the seed image. If upsampling is enabled sigma_min is scaled
-            by factor 1/upsamling
+            by factor 1/upsampling
         sigma_in : float, optional
             The assumed blur level of the input image.
         c_dog : float, optional
@@ -32,7 +32,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             final_c_dog = (2^(1/n_scales)-1) / (2^(1/3)-1) * c_dog
         c_edge : float, optional
             Threshold to discard extrema that lie in edges. If H is the Hessian of an extremum,
-            its "edgeness" is decribed by tr(H)²/det(H). If the edgeness is higher than
+            its "edgeness" is described by tr(H)²/det(H). If the edgeness is higher than
             (c_edge + 1)²/c_edge, the extremum is discarded.
         n_bins : int, optional
             Number of bins in the histogram that describes the gradient orientations around
@@ -254,7 +254,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # off = np.einsum('ijk,ik->ij', -H_inv, J)  # offset of the extremum
                 off = np.linalg.solve(-H, J)  # offset of the extremum
                 wrong_position_pos = np.logical_and(off > 0.5, keys + 1 < tuple(
-                    [a - 1 for a in dim]))  # offset is too big and an increase wouldnt bring us out of bounds
+                    [a - 1 for a in dim]))  # offset is too big and an increase would not bring us out of bounds
                 wrong_position_neg = np.logical_and(off < -0.5, keys - 1 > 0)
                 if (not np.any(np.logical_or(wrong_position_neg, wrong_position_pos))) or i == 4:
                     break
@@ -275,7 +275,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # filter for contrast, edgeness and borders
             contrast_filter = np.abs(w) > contrast_threshold
-            eig, _ = np.linalg.eig(H[contrast_filter])  # eigenvalues instead of trace and determinante
+            eig, _ = np.linalg.eig(H[contrast_filter])  # eigenvalues instead of trace and determinant
             trace = eig[:, 1] + eig[:, 0]
             determinant = eig[:, 1] * eig[:, 0]
             edge_respone = np.square(trace) / determinant
