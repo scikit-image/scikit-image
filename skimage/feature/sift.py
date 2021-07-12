@@ -80,7 +80,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         References
         ----------
-        .. [1] Ives Rey Otero, and Mauricio Delbracio
+        .. [1] D.G. Lowe
+              "Object recognition from local scale-invariant features"
+              https://dx.doi.org/10.1109/ICCV.1999.790410
+
+        .. [2] Ives Rey Otero and Mauricio Delbracio
               "Anatomy of the SIFT Method"
               Image Processing On Line, 4 (2014), pp. 370–396.
               https://doi.org/10.5201/ipol.2014.82
@@ -275,7 +279,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # filter for contrast, edgeness and borders
             contrast_filter = np.abs(w) > contrast_threshold
-            eig, _ = np.linalg.eig(H[contrast_filter])  # eigenvalues instead of trace and determinant
+            eig, _ = np.linalg.eig(H[contrast_filter])
             trace = eig[:, 1] + eig[:, 0]
             determinant = eig[:, 1] * eig[:, 0]
             edge_respone = np.square(trace) / determinant
