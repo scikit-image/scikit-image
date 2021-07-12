@@ -151,6 +151,8 @@ fig1 = px.imshow(
     title=f'Eigenvalues for plane Z = {coords[1]}.'
 )
 
+plotly.io.show(fig1)
+
 #####################################################################
 # We are looking at a local property. Let us consider a tiny neighbourhood
 # around the maximum eigenvalue in the above X-Y plane.
@@ -181,6 +183,8 @@ fig2 = px.imshow(
     title=f'Interactive view of plane Z = {coords[1]}.'
 )
 
+plotly.io.show(fig2)
+
 #####################################################################
 # Let us visualize the slices of sample data in the X-Z (left) and Y-Z (right)
 # planes where the maximum eigenvalue is found. The Z axis is the vertical
@@ -197,8 +201,6 @@ fig3 = px.imshow(
     labels={'facet_col': 'longitudinal'}
 )
 
-plotly.io.show(fig1)
-plotly.io.show(fig2)
 plotly.io.show(fig3)
 
 #####################################################################
