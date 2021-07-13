@@ -231,7 +231,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
 
     See also
     --------
-    skimage.feature.blog_dog
+    skimage.feature.blob_dog
 
     Notes
     -----

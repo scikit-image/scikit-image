@@ -1,15 +1,16 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_equal, assert_allclose
+
 from skimage import data
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose
-from skimage._shared.utils import _supported_float_type
 
-
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_periodic_reference(dtype):
     img = data.astronaut()
     img = rgb2gray(img)
@@ -27,7 +28,7 @@ def test_periodic_reference(dtype):
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_fixed_reference(dtype):
     img = data.text()
     r = np.linspace(136, 50, 100)
@@ -43,7 +44,7 @@ def test_fixed_reference(dtype):
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_free_reference(dtype):
     img = data.text()
     r = np.linspace(70, 40, 100)
@@ -59,7 +60,7 @@ def test_free_reference(dtype):
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
 
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_RGB(dtype):
     img = gaussian(data.text(), 1, preserve_range=False)
     imgR = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
@@ -101,15 +102,15 @@ def test_end_points():
     init = np.array([r, c]).T
     snake = active_contour(gaussian(img, 3), init,
                            boundary_condition='periodic', alpha=0.015, beta=10,
-                           w_line=0, w_edge=1, gamma=0.001, max_iterations=100)
+                           w_line=0, w_edge=1, gamma=0.001, max_num_iter=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) < 2
     snake = active_contour(gaussian(img, 3), init,
                            boundary_condition='free', alpha=0.015, beta=10,
-                           w_line=0, w_edge=1, gamma=0.001, max_iterations=100)
+                           w_line=0, w_edge=1, gamma=0.001, max_num_iter=100)
     assert np.sum(np.abs(snake[0, :]-snake[-1, :])) > 2
     snake = active_contour(gaussian(img, 3), init,
                            boundary_condition='fixed', alpha=0.015, beta=10,
-                           w_line=0, w_edge=1, gamma=0.001, max_iterations=100)
+                           w_line=0, w_edge=1, gamma=0.001, max_num_iter=100)
     assert_allclose(snake[0, :], [r[0], c[0]], atol=1e-5)
 
 
@@ -118,10 +119,12 @@ def test_bad_input():
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         active_contour(img, init, boundary_condition='wrong')
-    with testing.raises(ValueError):
-        active_contour(img, init, max_iterations=-15)
+    with pytest.raises(ValueError):
+        active_contour(img, init, max_num_iter=-15)
+    with expected_warnings(["`max_iterations` is a deprecated argument"]):
+        snake = active_contour(img, init, max_iterations=15)
 
 
 def test_coord_raises():
@@ -131,15 +134,15 @@ def test_coord_raises():
     y = 220 + 100*np.cos(s)
     init = np.array([x, y]).T
     # coordinates='xy' is not valid
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         snake = active_contour(gaussian(img, 3), init,
                                boundary_condition='periodic', alpha=0.015,
                                beta=10, w_line=0, w_edge=1, gamma=0.001,
-                               max_iterations=100, coordinates='xy')
+                               max_num_iter=100, coordinates='xy')
 
     # coordinates=None is not valid
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         snake = active_contour(gaussian(img, 3), init,
                                boundary_condition='periodic', alpha=0.015,
                                beta=10, w_line=0, w_edge=1, gamma=0.001,
-                               max_iterations=100, coordinates=None)
+                               max_num_iter=100, coordinates=None)

@@ -4,15 +4,14 @@ from numpy.testing import (assert_equal, assert_allclose, assert_almost_equal,
                            assert_array_equal)
 from scipy import ndimage as ndi
 
-from skimage import data
-from skimage import util
+from skimage import data, util
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
-from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                        _get_multiotsu_thresh_indices)
+from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices,
+                                        _get_multiotsu_thresh_indices_lut)
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -260,15 +259,18 @@ def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 101 < threshold_otsu(camera) < 103
 
+
 def test_otsu_camera_image_histogram():
     camera = util.img_as_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=hist) < 103
 
+
 def test_otsu_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=counts) < 103
+
 
 def test_otsu_coins_image():
     coins = util.img_as_ubyte(data.coins())
@@ -367,7 +369,7 @@ def test_li_arbitrary_start_point():
 def test_li_negative_inital_guess():
     coins = data.coins()
     with pytest.raises(ValueError):
-        result = threshold_li(coins, initial_guess=-5)
+        threshold_li(coins, initial_guess=-5)
 
 
 def test_li_pathological_arrays():
@@ -389,10 +391,12 @@ def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 145 < threshold_yen(camera) < 147
 
+
 def test_yen_camera_image_histogram():
     camera = util.img_as_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     assert 145 < threshold_yen(hist=hist) < 147
+
 
 def test_yen_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
@@ -426,11 +430,13 @@ def test_isodata_camera_image():
 
     assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
 
+
 def test_isodata_camera_image_histogram():
     camera = util.img_as_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_isodata(hist=hist)
     assert threshold == 102
+
 
 def test_isodata_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
@@ -503,17 +509,27 @@ def test_threshold_minimum():
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
+
 def test_threshold_minimum_histogram():
     camera = util.img_as_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=hist)
     assert_equal(threshold, 85)
 
+
+def test_threshold_minimum_deprecated_max_iter_kwarg():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    with expected_warnings(["`max_iter` is a deprecated argument"]):
+        threshold_minimum(hist=hist, max_iter=5000)
+
+
 def test_threshold_minimum_counts():
     camera = util.img_as_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=counts)
     assert_equal(threshold, 85)
+
 
 def test_threshold_minimum_synthetic():
     img = np.arange(25*25, dtype=np.uint8).reshape((25, 25))
