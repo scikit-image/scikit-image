@@ -70,4 +70,5 @@ __all__ = ['inverse',
            'apply_hysteresis_threshold',
            'rank',
            'unsharp_mask',
-           'window']
+           'window',
+           ]

@@ -5,3 +5,4 @@ pytest-faulthandler
 flake8
 codecov
 pooch>=1.3.0
+asv

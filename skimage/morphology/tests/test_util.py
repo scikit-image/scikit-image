@@ -1,8 +1,8 @@
 """Tests for `_util`."""
 
 
-import pytest
 import numpy as np
+import pytest
 from numpy.testing import assert_array_equal
 
 from skimage.morphology import _util
@@ -14,22 +14,22 @@ from skimage.morphology import _util
 @pytest.mark.parametrize("order", ["C", "F"])
 def test_offsets_to_raveled_neighbors_highest_connectivity(image_shape, order):
     """
-    Check scenarios where selem is always of the highest connectivity
+    Check scenarios where footprint is always of the highest connectivity
     and all dimensions are > 2.
     """
-    selem = np.ones((3,) * len(image_shape), dtype=bool)
+    footprint = np.ones((3,) * len(image_shape), dtype=bool)
     center = (1,) * len(image_shape)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center, order
+        image_shape, footprint, center, order
     )
 
     # Assert only neighbors are present, center was removed
-    assert len(offsets) == selem.sum() - 1
+    assert len(offsets) == footprint.sum() - 1
     assert 0 not in offsets
     # Assert uniqueness
     assert len(set(offsets)) == offsets.size
     # offsets form pairs of with same value but different signs
-    # if selem is symmetric around center
+    # if footprint is symmetric around center
     assert all(-x in offsets for x in offsets)
 
     # Construct image whose values are the Manhattan distance to its center
@@ -65,35 +65,36 @@ def test_offsets_to_raveled_neighbors_highest_connectivity(image_shape, order):
     (2,), (2, 2), (2, 1, 2), (2, 2, 1, 2), (0, 2, 1, 2)
 ])
 @pytest.mark.parametrize("order", ["C", "F"])
-def test_offsets_to_raveled_neighbors_selem_smaller_image(image_shape, order):
+def test_offsets_to_raveled_neighbors_footprint_smaller_image(image_shape,
+                                                              order):
     """
     Test if a dimension indicated by `image_shape` is smaller than in
-    `selem`.
+    `footprint`.
     """
-    selem = np.ones((3,) * len(image_shape), dtype=bool)
+    footprint = np.ones((3,) * len(image_shape), dtype=bool)
     center = (1,) * len(image_shape)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center, order
+        image_shape, footprint, center, order
     )
 
     # Assert only neighbors are present, center and duplicates (possible
     # for this scenario) where removed
-    assert len(offsets) <= selem.sum() - 1
+    assert len(offsets) <= footprint.sum() - 1
     assert 0 not in offsets
     # Assert uniqueness
     assert len(set(offsets)) == offsets.size
     # offsets form pairs of with same value but different signs
-    # if selem is symmetric around center
+    # if footprint is symmetric around center
     assert all(-x in offsets for x in offsets)
 
 
 def test_offsets_to_raveled_neighbors_explicit_0():
     """Check reviewed example."""
     image_shape = (100, 200, 3)
-    selem = np.ones((3, 3, 3), dtype=bool)
+    footprint = np.ones((3, 3, 3), dtype=bool)
     center = (1, 1, 1)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center
+        image_shape, footprint, center
     )
 
     desired = np.array([
@@ -105,12 +106,12 @@ def test_offsets_to_raveled_neighbors_explicit_0():
 
 
 def test_offsets_to_raveled_neighbors_explicit_1():
-    """Check reviewed example where selem is larger in last dimension."""
+    """Check reviewed example where footprint is larger in last dimension."""
     image_shape = (10, 9, 8, 3)
-    selem = np.ones((3, 3, 3, 4), dtype=bool)
+    footprint = np.ones((3, 3, 3, 4), dtype=bool)
     center = (1, 1, 1, 1)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center
+        image_shape, footprint, center
     )
 
     desired = np.array([
