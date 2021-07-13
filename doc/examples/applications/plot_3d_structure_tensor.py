@@ -16,8 +16,9 @@ confocal fluorescence microscopy (more details at [1]_ under
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 import plotly.express as px
+import plotly.io
+
 from skimage import (
     data, feature
 )
@@ -49,12 +50,14 @@ print(f'range: ({v_min}, {v_max})')
 #####################################################################
 # Let us visualize the middle slice of our 3D image.
 
-px.imshow(
+fig1 = px.imshow(
     data[n_plane // 2, :, :, 1],
     zmin=v_min,
     zmax=v_max,
     labels={'x': 'col', 'y': 'row', 'color': 'intensity'}
 )
+
+plotly.io.show(fig1)
 
 #####################################################################
 # Let us pick a specific region, which shows relative X-Y isotropy. In
@@ -101,13 +104,15 @@ for it, (ax, image) in enumerate(zip(axes.flatten(), sample[::step])):
 # typical size for strong variations. We shall use this size as the
 # 'width' of the window function.
 
-px.imshow(
+fig2 = px.imshow(
     sample[0, :, :],
     zmin=v_min,
     zmax=v_max,
     labels={'x': 'col', 'y': 'row', 'color': 'intensity'},
     title='Interactive view of bottom slice of sample data.'
 )
+
+plotly.io.show(fig2)
 
 #####################################################################
 # About the brightest region (i.e., at row ~ 22 and column ~ 17), we can see
@@ -143,12 +148,14 @@ coords
 # Let us view the spatial distribution of the eigenvalues in the X-Y plane
 # where the maximum eigenvalue is found (i.e., ``Z = coords[1]``).
 
-px.imshow(
+fig3 = px.imshow(
     eigen[:, coords[1], :, :],
     facet_col=0,
     labels={'x': 'col', 'y': 'row', 'facet_col': 'rank'},
     title=f'Eigenvalues for plane Z = {coords[1]}.'
 )
+
+plotly.io.show(fig3)
 
 #####################################################################
 # We are looking at a local property. Let us consider a tiny neighbourhood
@@ -172,13 +179,15 @@ eigen[2, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 # Let us visualize the slice of sample data in the X-Y plane where the
 # maximum eigenvalue is found.
 
-px.imshow(
+fig4 = px.imshow(
     sample[coords[1], :, :],
     zmin=v_min,
     zmax=v_max,
     labels={'x': 'col', 'y': 'row', 'color': 'intensity'},
     title=f'Interactive view of plane Z = {coords[1]}.'
 )
+
+plotly.io.show(fig4)
 
 #####################################################################
 # Let us visualize the slices of sample data in the X-Z (left) and Y-Z (right)
@@ -188,13 +197,15 @@ px.imshow(
 # tissue), especially in the Y-Z plane (``longitudinal=1``).
 
 subplots = np.dstack((sample[:, coords[2], :], sample[:, :, coords[3]]))
-px.imshow(
+fig5 = px.imshow(
     subplots,
     zmin=v_min,
     zmax=v_max,
     facet_col=2,
     labels={'facet_col': 'longitudinal'}
 )
+
+plotly.io.show(fig5)
 
 #####################################################################
 # As a conclusion, the region about voxel

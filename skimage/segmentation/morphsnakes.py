@@ -4,7 +4,7 @@ from itertools import cycle
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, deprecate_kwarg
 
 __all__ = ['morphological_chan_vese',
            'morphological_geodesic_active_contour',
@@ -253,7 +253,8 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
-def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+def morphological_chan_vese(image, num_iter, init_level_set='checkerboard',
                             smoothing=1, lambda1=1, lambda2=1,
                             iter_callback=lambda x: None):
     """Morphological Active Contours without Edges (MorphACWE)
@@ -268,8 +269,8 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     ----------
     image : (M, N) or (L, M, N) array
         Grayscale image or volume to be segmented.
-    iterations : uint
-        Number of iterations to run
+    num_iter : uint
+        Number of num_iter to run
     init_level_set : str, (M, N) array, or (L, M, N) array
         Initial level set. If an array is given, it will be binarized and used
         as the initial level set. If a string is given, it defines the method
@@ -332,7 +333,7 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
 
     iter_callback(u)
 
-    for _ in range(iterations):
+    for _ in range(num_iter):
 
         # inside = u > 0
         # outside = u <= 0
@@ -356,7 +357,8 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     return u
 
 
-def morphological_geodesic_active_contour(gimage, iterations,
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+def morphological_geodesic_active_contour(gimage, num_iter,
                                           init_level_set='circle', smoothing=1,
                                           threshold='auto', balloon=0,
                                           iter_callback=lambda x: None):
@@ -379,8 +381,8 @@ def morphological_geodesic_active_contour(gimage, iterations,
         perform this preprocessing. Note that the quality of
         `morphological_geodesic_active_contour` might greatly depend on this
         preprocessing.
-    iterations : uint
-        Number of iterations to run.
+    num_iter : uint
+        Number of num_iter to run.
     init_level_set : str, (M, N) array, or (L, M, N) array
         Initial level set. If an array is given, it will be binarized and used
         as the initial level set. If a string is given, it defines the method
@@ -455,7 +457,7 @@ def morphological_geodesic_active_contour(gimage, iterations,
 
     iter_callback(u)
 
-    for _ in range(iterations):
+    for _ in range(num_iter):
 
         # Balloon
         if balloon > 0:

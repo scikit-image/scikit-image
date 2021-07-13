@@ -17,7 +17,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                  cnp.uint8_t[:, :, ::1] mask,
                  np_floats[:, ::1] segments,
                  float step,
-                 Py_ssize_t max_iter,
+                 Py_ssize_t max_num_iter,
                  np_floats[::1] spacing,
                  bint slic_zero,
                  Py_ssize_t start_label=1,
@@ -34,7 +34,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
     step : np_floats
         The size of the step between two seeds in voxels.
-    max_iter : int
+    max_num_iter : int
         The maximum number of k-means iterations.
     spacing : 1D array of np_floats, shape (3,)
         The voxel spacing along each image dimension. This parameter
@@ -125,7 +125,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
     cdef np_floats spatial_weight = 1.0 / (step * step)
 
     with nogil:
-        for i in range(max_iter):
+        for i in range(max_num_iter):
             change = False
             distance[:, :, :] = DBL_MAX
 

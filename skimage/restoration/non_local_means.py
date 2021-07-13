@@ -140,7 +140,8 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     --------
     >>> a = np.zeros((40, 40))
     >>> a[10:-10, 10:-10] = 1.
-    >>> a += 0.3 * np.random.randn(*a.shape)
+    >>> rng = np.random.default_rng()
+    >>> a += 0.3 * rng.standard_normal(a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
 
     """

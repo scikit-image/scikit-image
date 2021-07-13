@@ -8,8 +8,8 @@ different levels are represented by parent-child relationships.
 
 These representations allow efficient implementations of many algorithms, such
 as attribute operators. Unlike morphological openings and closings, these
-operators do not require a fixed structuring element, but rather act with a
-flexible structuring element that meets a certain criterion.
+operators do not require a fixed footprint, but rather act with a flexible
+footprint that meets a certain criterion.
 
 This implementation provides functions for:
 1. max-tree generation
@@ -153,7 +153,7 @@ def area_opening(image, area_threshold=64, connectivity=1,
     area_threshold pixels.
 
     Area openings are similar to morphological openings, but
-    they do not use a fixed structuring element, but rather a deformable
+    they do not use a fixed footprint, but rather a deformable
     one, with surface = area_threshold. Consequently, the area_opening
     with area_threshold=1 is the identity.
 
@@ -354,7 +354,7 @@ def area_closing(image, area_threshold=64, connectivity=1,
     area_threshold pixels.
 
     Area closings are similar to morphological closings, but
-    they do not use a fixed structuring element, but rather a deformable
+    they do not use a fixed footprint, but rather a deformable
     one, with surface = area_threshold.
 
     In the binary case, area closings are equivalent to
