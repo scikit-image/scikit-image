@@ -1,6 +1,6 @@
 import os
 
-from skimage import data, img_as_float, io, img_as_uint
+from skimage import data, img_as_float, io, img_as_ubyte
 
 from skimage.viewer import ImageViewer
 from skimage.viewer.qt import QtWidgets, QtCore, has_qt
@@ -110,7 +110,7 @@ def test_save_buttons():
 
     img = io.imread(filename)
 
-    assert_almost_equal(img, img_as_uint(viewer.image))
+    assert_almost_equal(img, img_as_ubyte(viewer.image))
 
     img = io.pop()
     assert_almost_equal(img, viewer.image)
