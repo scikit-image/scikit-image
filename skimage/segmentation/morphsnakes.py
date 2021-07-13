@@ -314,6 +314,7 @@ def morphological_chan_vese(image, num_iter, init_level_set='checkerboard',
     return u
 
 
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
 def morphological_geodesic_active_contour(gimage, num_iter,
                                           init_level_set='disk', smoothing=1,
                                           threshold='auto', balloon=0,
