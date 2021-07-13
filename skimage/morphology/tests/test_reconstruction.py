@@ -8,10 +8,11 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
+import pytest
+from numpy.testing import assert_array_almost_equal
 
+from skimage._shared._warnings import expected_warnings
 from skimage.morphology.grayreconstruct import reconstruction
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal
 
 
 def test_zeros():
@@ -83,30 +84,30 @@ def test_fill_hole():
 def test_invalid_seed():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         reconstruction(seed * 2, mask,
                        method='dilation')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         reconstruction(seed * 0.5, mask,
                        method='erosion')
 
 
-def test_invalid_selem():
+def test_invalid_footprint():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         reconstruction(seed, mask,
-                       selem=np.ones((4, 4)))
-    with testing.raises(ValueError):
+                       footprint=np.ones((4, 4)))
+    with pytest.raises(ValueError):
         reconstruction(seed, mask,
-                       selem=np.ones((3, 4)))
-    reconstruction(seed, mask, selem=np.ones((3, 3)))
+                       footprint=np.ones((3, 4)))
+    reconstruction(seed, mask, footprint=np.ones((3, 3)))
 
 
 def test_invalid_method():
     seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
     mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         reconstruction(seed, mask, method='foo')
 
 
@@ -125,9 +126,9 @@ def test_invalid_offset_not_none():
                      [1, 1, 1, 1, 1, 4, 4, 4],
                      [1, 1, 1, 1, 1, 4, 4, 4],
                      [1, 1, 1, 1, 1, 4, 4, 4]])
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         reconstruction(image, mask, method='dilation',
-                       selem=np.ones((3, 3)), offset=np.array([3, 0]))
+                       footprint=np.ones((3, 3)), offset=np.array([3, 0]))
 
 
 def test_offset_not_none():
@@ -138,10 +139,17 @@ def test_offset_not_none():
 
     assert_array_almost_equal(
         reconstruction(seed, mask, method='dilation',
-                       selem=np.ones(3), offset=np.array([0])), expected)
+                       footprint=np.ones(3), offset=np.array([0])), expected)
 
 
 def test_deprecated_import():
     msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
-    with testing.expected_warnings([msg]):
+    with expected_warnings([msg]):
         from skimage.morphology.greyreconstruct import reconstruction
+
+
+def test_selem_kwarg_deprecation():
+    seed = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    mask = np.array([0, 8, 6, 8, 8, 8, 8, 4, 4, 0])
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        reconstruction(seed, mask, method='dilation', selem=np.ones(3))

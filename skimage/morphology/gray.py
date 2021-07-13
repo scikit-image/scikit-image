@@ -2,73 +2,76 @@
 Grayscale morphological operations
 """
 import functools
+
 import numpy as np
 from scipy import ndimage as ndi
-from .misc import default_selem
+
+from .._shared.utils import deprecate_kwarg
 from ..util import crop
+from .misc import default_footprint
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
 
-def _shift_selem(selem, shift_x, shift_y):
-    """Shift the binary image `selem` in the left and/or up.
+def _shift_footprint(footprint, shift_x, shift_y):
+    """Shift the binary image `footprint` in the left and/or up.
 
-    This only affects 2D structuring elements with even number of rows
+    This only affects 2D footprints with even number of rows
     or columns.
 
     Parameters
     ----------
-    selem : 2D array, shape (M, N)
-        The input structuring element.
+    footprint : 2D array, shape (M, N)
+        The input footprint.
     shift_x, shift_y : bool
-        Whether to move `selem` along each axis.
+        Whether to move `footprint` along each axis.
 
     Returns
     -------
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
-        The shifted structuring element.
+        The shifted footprint.
     """
-    if selem.ndim != 2:
-        # do nothing for 1D or 3D or higher structuring elements
-        return selem
-    m, n = selem.shape
+    if footprint.ndim != 2:
+        # do nothing for 1D or 3D or higher footprints
+        return footprint
+    m, n = footprint.shape
     if m % 2 == 0:
-        extra_row = np.zeros((1, n), selem.dtype)
+        extra_row = np.zeros((1, n), footprint.dtype)
         if shift_x:
-            selem = np.vstack((selem, extra_row))
+            footprint = np.vstack((footprint, extra_row))
         else:
-            selem = np.vstack((extra_row, selem))
+            footprint = np.vstack((extra_row, footprint))
         m += 1
     if n % 2 == 0:
-        extra_col = np.zeros((m, 1), selem.dtype)
+        extra_col = np.zeros((m, 1), footprint.dtype)
         if shift_y:
-            selem = np.hstack((selem, extra_col))
+            footprint = np.hstack((footprint, extra_col))
         else:
-            selem = np.hstack((extra_col, selem))
-    return selem
+            footprint = np.hstack((extra_col, footprint))
+    return footprint
 
 
-def _invert_selem(selem):
-    """Change the order of the values in `selem`.
+def _invert_footprint(footprint):
+    """Change the order of the values in `footprint`.
 
     This is a patch for the *weird* footprint inversion in
     `ndi.grey_morphology` [1]_.
 
     Parameters
     ----------
-    selem : array
-        The input structuring element.
+    footprint : array
+        The input footprint.
 
     Returns
     -------
-    inverted : array, same shape and type as `selem`
-        The structuring element, in opposite order.
+    inverted : array, same shape and type as `footprint`
+        The footprint, in opposite order.
 
     Examples
     --------
-    >>> selem = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
-    >>> _invert_selem(selem)
+    >>> footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    >>> _invert_footprint(footprint)
     array([[1, 1, 0],
            [1, 1, 0],
            [0, 0, 0]], dtype=uint8)
@@ -77,19 +80,19 @@ def _invert_selem(selem):
     ----------
     .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
     """
-    inverted = selem[(slice(None, None, -1),) * selem.ndim]
+    inverted = footprint[(slice(None, None, -1),) * footprint.ndim]
     return inverted
 
 
-def pad_for_eccentric_selems(func):
+def pad_for_eccentric_footprints(func):
     """Pad input images for certain morphological operations.
 
     Parameters
     ----------
     func : callable
         A morphological function, either opening or closing, that
-        supports eccentric structuring elements. Its parameters must
-        include at least `image`, `selem`, and `out`.
+        supports eccentric footprints. Its parameters must
+        include at least `image`, `footprint`, and `out`.
 
     Returns
     -------
@@ -102,12 +105,12 @@ def pad_for_eccentric_selems(func):
     opening, closing.
     """
     @functools.wraps(func)
-    def func_out(image, selem, out=None, *args, **kwargs):
+    def func_out(image, footprint, out=None, *args, **kwargs):
         pad_widths = []
         padding = False
         if out is None:
             out = np.empty_like(image)
-        for axis_len in selem.shape:
+        for axis_len in footprint.shape:
             if axis_len % 2 == 0:
                 axis_pad_width = axis_len - 1
                 padding = True
@@ -119,7 +122,7 @@ def pad_for_eccentric_selems(func):
             out_temp = np.empty_like(image)
         else:
             out_temp = out
-        out_temp = func(image, selem, out=out_temp, *args, **kwargs)
+        out_temp = func(image, footprint, out=out_temp, *args, **kwargs)
         if padding:
             out[:] = crop(out_temp, pad_widths)
         else:
@@ -128,8 +131,9 @@ def pad_for_eccentric_selems(func):
     return func_out
 
 
-@default_selem
-def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -140,15 +144,16 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
+        shift footprint about center point. This only affects
+        eccentric footprints (i.e. footprint with even numbered
+        sides).
 
     Returns
     -------
@@ -159,7 +164,7 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
     lower algorithm complexity makes the `skimage.filters.rank.minimum`
-    function more efficient for larger images and structuring elements.
+    function more efficient for larger images and footprints.
 
     Examples
     --------
@@ -179,16 +184,17 @@ def erosion(image, selem=None, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    selem = np.array(selem)
-    selem = _shift_selem(selem, shift_x, shift_y)
+    footprint = np.array(footprint)
+    footprint = _shift_footprint(footprint, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
-    ndi.grey_erosion(image, footprint=selem, output=out)
+    ndi.grey_erosion(image, footprint=footprint, output=out)
     return out
 
 
-@default_selem
-def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -199,15 +205,16 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        Shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
+        Shift footprint about center point. This only affects
+        eccentric footprints (i.e. footprint with even numbered
+        sides).
 
     Returns
     -------
@@ -218,7 +225,7 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
     -----
     For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
     algorithm complexity makes the `skimage.filters.rank.maximum` function more
-    efficient for larger images and structuring elements.
+    efficient for larger images and footprints.
 
     Examples
     --------
@@ -238,23 +245,24 @@ def dilation(image, selem=None, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    selem = np.array(selem)
-    selem = _shift_selem(selem, shift_x, shift_y)
-    # Inside ndi.grey_dilation, the structuring element is inverted,
-    # e.g. `selem = selem[::-1, ::-1]` for 2D [1]_, for reasons unknown to
-    # this author (@jni). To "patch" this behaviour, we invert our own
-    # selem before passing it to `ndi.grey_dilation`.
+    footprint = np.array(footprint)
+    footprint = _shift_footprint(footprint, shift_x, shift_y)
+    # Inside ndi.grey_dilation, the footprint is inverted,
+    # e.g. `footprint = footprint[::-1, ::-1]` for 2D [1]_, for reasons unknown
+    # to this author (@jni). To "patch" this behaviour, we invert our own
+    # footprint before passing it to `ndi.grey_dilation`.
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
-    selem = _invert_selem(selem)
+    footprint = _invert_footprint(footprint)
     if out is None:
         out = np.empty_like(image)
-    ndi.grey_dilation(image, footprint=selem, output=out)
+    ndi.grey_dilation(image, footprint=footprint, output=out)
     return out
 
 
-@default_selem
-@pad_for_eccentric_selems
-def opening(image, selem=None, out=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@default_footprint
+@pad_for_eccentric_footprints
+def opening(image, footprint=None, out=None):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
@@ -266,9 +274,9 @@ def opening(image, selem=None, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -296,15 +304,16 @@ def opening(image, selem=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    eroded = erosion(image, selem)
-    # note: shift_x, shift_y do nothing if selem side length is odd
-    out = dilation(eroded, selem, out=out, shift_x=True, shift_y=True)
+    eroded = erosion(image, footprint)
+    # note: shift_x, shift_y do nothing if footprint side length is odd
+    out = dilation(eroded, footprint, out=out, shift_x=True, shift_y=True)
     return out
 
 
-@default_selem
-@pad_for_eccentric_selems
-def closing(image, selem=None, out=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@default_footprint
+@pad_for_eccentric_footprints
+def closing(image, footprint=None, out=None):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
@@ -316,9 +325,9 @@ def closing(image, selem=None, out=None):
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -346,27 +355,28 @@ def closing(image, selem=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    dilated = dilation(image, selem)
-    # note: shift_x, shift_y do nothing if selem side length is odd
-    out = erosion(dilated, selem, out=out, shift_x=True, shift_y=True)
+    dilated = dilation(image, footprint)
+    # note: shift_x, shift_y do nothing if footprint side length is odd
+    out = erosion(dilated, footprint, out=out, shift_x=True, shift_y=True)
     return out
 
 
-@default_selem
-def white_tophat(image, selem=None, out=None):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def white_tophat(image, footprint=None, out=None):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
     morphological opening. This operation returns the bright spots of the image
-    that are smaller than the structuring element.
+    that are smaller than the footprint.
 
     Parameters
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -402,9 +412,9 @@ def white_tophat(image, selem=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    selem = np.array(selem)
+    footprint = np.array(footprint)
     if out is image:
-        opened = opening(image, selem)
+        opened = opening(image, footprint)
         if np.issubdtype(opened.dtype, bool):
             np.logical_xor(out, opened, out=out)
         else:
@@ -421,26 +431,27 @@ def white_tophat(image, selem=None, out=None):
         out_ = out.view(dtype=np.uint8)
     else:
         out_ = out
-    out_ = ndi.white_tophat(image_, footprint=selem, output=out_)
+    out_ = ndi.white_tophat(image_, footprint=footprint, output=out_)
     return out
 
 
-@default_selem
-def black_tophat(image, selem=None, out=None):
+@default_footprint
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def black_tophat(image, footprint=None, out=None):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
     the original image. This operation returns the dark spots of the image that
-    are smaller than the structuring element. Note that dark spots in the
+    are smaller than the footprint. Note that dark spots in the
     original image are bright spots after the black top hat.
 
     Parameters
     ----------
     image : ndarray
         Image array.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped structuring element (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -480,7 +491,7 @@ def black_tophat(image, selem=None, out=None):
         original = image.copy()
     else:
         original = image
-    out = closing(image, selem, out=out)
+    out = closing(image, footprint, out=out)
     if np.issubdtype(out.dtype, np.bool_):
         np.logical_xor(out, original, out=out)
     else:

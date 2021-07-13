@@ -65,8 +65,6 @@ jobs:
             OPTIONS_NAME: "install-from-sdist"
 
 
-
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v1
@@ -120,6 +118,9 @@ jobs:
             fi
             source tools/github/script.sh
 
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
 
 
   test_skimage_macos:
@@ -192,4 +193,6 @@ jobs:
             fi
             source tools/github/script.sh
 
-
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing

@@ -156,6 +156,12 @@ jobs:
 
   - bash: |
       set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
+      $PYTHON -m asv check -v -E existing
+    displayName: Check benchmarks
+
+  - bash: |
+      set -ex
       export PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Install the doc dependencies
@@ -183,13 +189,14 @@ jobs:
 
       # Run example applications
       for f in doc/examples/*/*.py; do
-        if [[ "${f}" == *"plot_3d_interaction"* ]]; then
-          echo "skipped"
-        else
-          $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
-          if [ $? -ne 0 ]; then
-            exit 1
-          fi
+        # Comment out any plotly.io.show() calls before running the example.
+        # Plotly opens a web browser, which often seemed to cause the CI to
+        # hang and timeout.
+        sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
+
+        $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
+        if [ $? -ne 0 ]; then
+          exit 1
         fi
       done
     condition: eq(variables['TEST_EXAMPLES'], 'true')
