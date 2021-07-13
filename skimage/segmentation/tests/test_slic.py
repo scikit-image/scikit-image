@@ -1,12 +1,11 @@
 from itertools import product
 
-import pytest
 import numpy as np
-from skimage.segmentation import slic
+import pytest
+from numpy.testing import assert_equal
 
-from skimage._shared import testing
-from skimage._shared.testing import (test_parallel, assert_equal,
-                                     expected_warnings)
+from skimage._shared.testing import test_parallel, expected_warnings
+from skimage.segmentation import slic
 
 
 @test_parallel()
@@ -29,6 +28,12 @@ def test_color_2d():
     assert_equal(seg[10:, :10], 2)
     assert_equal(seg[:10, 10:], 1)
     assert_equal(seg[10:, 10:], 3)
+
+
+def test_max_iter_kwarg_deprecation():
+    img = np.zeros((20, 21, 3))
+    with expected_warnings(["`max_iter` is a deprecated argument"]):
+        slic(img, max_iter=10, start_label=0)
 
 
 def test_multichannel_2d():
@@ -171,7 +176,7 @@ def test_spacing():
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], float) + 1
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         slic(img, channel_axis=-1, convert2lab=True, start_label=0)
 
 
