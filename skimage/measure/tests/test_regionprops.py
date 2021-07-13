@@ -1,5 +1,4 @@
 import math
-from collections.abc import Iterable
 
 import numpy as np
 from numpy import array
@@ -582,10 +581,19 @@ def test_regionprops_table_equal_to_original():
     out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
                                   properties=COL_DTYPES.keys())
 
-    for prop in COL_DTYPES.keys():
-        for i in range(len(regions)):
-            if not isinstance(regions[i][prop], Iterable):
-                assert regions[i][prop] == out_table[prop][i]
+    for prop, dtype in COL_DTYPES.items():
+        for i, reg in enumerate(regions):
+            rp = reg[prop]
+            if np.isscalar(rp) or \
+                    prop in OBJECT_COLUMNS or \
+                    dtype is np.object_:
+                assert_array_equal(rp, out_table[prop][i])
+            else:
+                shape = rp.shape if isinstance(rp, np.ndarray) else (len(rp),)
+                for ind in np.ndindex(shape):
+                    modified_prop = "-".join(map(str, (prop,) + ind))
+                    loc = ind if len(ind) > 1 else ind[0]
+                    assert_equal(rp[loc], out_table[modified_prop][i])
 
 
 def test_regionprops_table_no_regions():
@@ -714,9 +722,16 @@ def test_multichannel():
     labels = slic(astro.astype(float), start_label=1)
 
     segment_idx = np.max(labels) // 2
-    region = regionprops(labels, astro_green)[segment_idx]
-    region_multi = regionprops(labels, astro)[segment_idx]
-    for prop in PROPS:
+    region = regionprops(labels,
+                         astro_green,
+                         extra_properties=[median_intensity]
+                         )[segment_idx]
+    region_multi = regionprops(labels,
+                               astro,
+                               extra_properties=[median_intensity]
+                               )[segment_idx]
+
+    for prop in list(PROPS.keys()) + ["median_intensity"]:
         p = region[prop]
         p_multi = region_multi[prop]
         if np.shape(p) == np.shape(p_multi):

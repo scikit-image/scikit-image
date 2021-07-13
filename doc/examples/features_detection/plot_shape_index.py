@@ -52,10 +52,8 @@ def create_test_image(
     """
     Generate a test image with random noise, uneven illumination and spots.
     """
-    state = np.random.get_state()
-    np.random.seed(314159265)  # some digits of pi
-
-    image = np.random.normal(
+    rng = np.random.default_rng()
+    image = rng.normal(
         loc=0.25,
         scale=0.25,
         size=(image_size, image_size)
@@ -63,25 +61,23 @@ def create_test_image(
 
     for _ in range(spot_count):
         rr, cc = disk(
-            (np.random.randint(image.shape[0]),
-             np.random.randint(image.shape[1])),
+            (rng.integers(image.shape[0]),
+             rng.integers(image.shape[1])),
             spot_radius,
             shape=image.shape
         )
         image[rr, cc] = 1
 
-    image *= np.random.normal(loc=1.0, scale=0.1, size=image.shape)
+    image *= rng.normal(loc=1.0, scale=0.1, size=image.shape)
 
     image *= ndi.zoom(
-        np.random.normal(
+        rng.normal(
             loc=1.0,
             scale=0.5,
             size=(cloud_noise_size, cloud_noise_size)
         ),
         image_size / cloud_noise_size
     )
-
-    np.random.set_state(state)
 
     return ndi.gaussian_filter(image, sigma=2.0)
 

@@ -36,7 +36,7 @@ def equalize_adapthist(image, kernel_size=None,
     ----------
     image : (N1, ...,NN[, C]) ndarray
         Input image.
-    kernel_size: int or array_like, optional
+    kernel_size : int or array_like, optional
         Defines the shape of contextual regions used in the algorithm. If
         iterable is passed, it must have the same number of elements as
         ``image.ndim`` (without color channel). If integer, it is broadcasted
@@ -102,7 +102,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     ----------
     image : (N1,...,NN) ndarray
         Input image.
-    kernel_size: int or N-tuple of int
+    kernel_size : int or N-tuple of int
         Defines the shape of contextual regions used in the algorithm.
     clip_limit : float
         Normalized clipping limit between 0 and 1 (higher values give more

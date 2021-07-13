@@ -14,13 +14,16 @@ class SetMetricsSuite(object):
 
     def setup(self):
         try:
-            from skimage.metrics import hausdorff_distance
+            from skimage.metrics import hausdorff_distance, hausdorff_pair
         except ImportError:
-            raise NotImplementedError("hausdorff_distance unavailable")
+            raise NotImplementedError("Hausdorff metrics unavailable")
         points_a = (1, 0)
         points_b = (5, 2)
         self.coords_a[points_a] = True
         self.coords_b[points_b] = True
 
-    def time_hausdorff(self):
+    def time_hausdorff_distance(self):
         metrics.hausdorff_distance(self.coords_a, self.coords_b)
+
+    def time_hausdorff_pair(self):
+        metrics.hausdorff_pair(self.coords_a, self.coords_b)

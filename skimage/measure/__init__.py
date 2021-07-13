@@ -14,6 +14,7 @@ from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
+from ._blur_effect import blur_effect
 
 
 __all__ = ['find_contours',
@@ -46,4 +47,5 @@ __all__ = ['find_contours',
            'points_in_poly',
            'grid_points_in_poly',
            'shannon_entropy',
+           'blur_effect',
            ]

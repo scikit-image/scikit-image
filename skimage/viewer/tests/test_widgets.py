@@ -87,7 +87,6 @@ def test_slider_float():
     assert_almost_equal(sld.val, 2.5, 2)
 
 
-@testing.skipif(True, reason="Can't automatically close window. See #3081.")
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_save_buttons():
     viewer = get_image_viewer()

@@ -7,7 +7,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, warn
+from .._shared.utils import check_nD, deprecate_kwarg, warn
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -34,7 +34,7 @@ def skeletonize(image, *, method=None):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -47,7 +47,6 @@ def skeletonize(image, *, method=None):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -108,7 +107,7 @@ def skeletonize_2d(image):
     skeleton : ndarray
         A matrix containing the thinned image.
 
-    See also
+    See Also
     --------
     medial_axis
 
@@ -132,7 +131,6 @@ def skeletonize_2d(image):
     .. [Zha84] A fast parallel algorithm for thinning digital patterns,
            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
            March 1984, Volume 27, Number 3.
-
 
     Examples
     --------
@@ -256,7 +254,8 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
-def thin(image, max_iter=None):
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def thin(image, max_num_iter=None):
     """
     Perform morphological thinning of a binary image.
 
@@ -264,8 +263,7 @@ def thin(image, max_iter=None):
     ----------
     image : binary (M, N) ndarray
         The image to be thinned.
-
-    max_iter : int, number of iterations, optional
+    max_num_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
         If this parameter is specified it thus sets an upper bound on
@@ -276,7 +274,7 @@ def thin(image, max_iter=None):
     out : ndarray of bool
         Thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 
@@ -335,10 +333,10 @@ def thin(image, max_iter=None):
                      [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
-    max_iter = max_iter or np.inf
-    n_iter = 0
+    max_num_iter = max_num_iter or np.inf
+    num_iter = 0
     n_pts_old, n_pts_new = np.inf, np.sum(skel)
-    while n_pts_old != n_pts_new and n_iter < max_iter:
+    while n_pts_old != n_pts_new and num_iter < max_num_iter:
         n_pts_old = n_pts_new
 
         # perform the two "subiterations" described in the paper
@@ -351,7 +349,7 @@ def thin(image, max_iter=None):
             skel[D] = 0
 
         n_pts_new = np.sum(skel)  # count points after thinning
-        n_iter += 1
+        num_iter += 1
 
     return skel.astype(bool)
 
@@ -361,9 +359,8 @@ def thin(image, max_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-def medial_axis(image, mask=None, return_distance=False):
-    """
-    Compute the medial axis transform of a binary image
+def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
+    """Compute the medial axis transform of a binary image.
 
     Parameters
     ----------
@@ -374,6 +371,15 @@ def medial_axis(image, mask=None, return_distance=False):
         value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        .. versionadded:: 0.19
 
     Returns
     -------
@@ -383,7 +389,7 @@ def medial_axis(image, mask=None, return_distance=False):
         Distance transform of the image (only returned if `return_distance`
         is True)
 
-    See also
+    See Also
     --------
     skeletonize
 
@@ -490,7 +496,7 @@ def medial_axis(image, mask=None, return_distance=False):
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    generator = np.random.RandomState(0)
+    generator = np.random.default_rng(random_state)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
@@ -532,8 +538,6 @@ def _table_lookup(image, table):
     table : ndarray
         A 512-element table giving the transform of each pixel given
         the values of that pixel and its 8-connected neighbors.
-    border_value : bool
-        The value of pixels beyond the border of the image.
 
     Returns
     -------
@@ -543,7 +547,6 @@ def _table_lookup(image, table):
     Notes
     -----
     The pixels are numbered like this::
-
 
       0 1 2
       3 4 5
@@ -593,7 +596,7 @@ def skeletonize_3d(image):
     skeleton : ndarray
         The thinned image.
 
-    See also
+    See Also
     --------
     skeletonize, medial_axis
 
