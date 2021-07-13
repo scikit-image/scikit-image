@@ -403,6 +403,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         key_numbers = np.arange(nKey)
         for o in range(self.n_octaves):
             in_oct = self.octaves == o
+            if np.count_nonzero(in_oct) == 0:
+                continue
             positions = self.positions[in_oct]
             scales = self.scales[in_oct]
             sigmas = self.sigmas[in_oct]
@@ -499,10 +501,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         dog_scalespace = [np.diff(layer, axis=2) for layer in gaussian_scalespace]
 
         positions, scales, sigmas, octaves = self._find_localize_evaluate(dog_scalespace, image.shape)
+        if len(positions) == 0:
+            raise RuntimeError(
+                "SIFT found no features. Try passing in an image containing "
+                "greater intensity contrasts between adjacent pixels.")
 
         self._compute_orientation(positions, scales, sigmas, octaves, gaussian_scalespace)
 
-        self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
+        self.keypoints = self.positions.round().astype(np.int)
 
     def extract(self, image):
         """Extract the descriptors for all keypoints in the image.
@@ -541,9 +547,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         dog_scalespace = [np.diff(layer, axis=2) for layer in gaussian_scalespace]
 
         positions, scales, sigmas, octaves = self._find_localize_evaluate(dog_scalespace, image.shape)
+        if len(positions) == 0:
+            raise RuntimeError(
+                "SIFT found no features. Try passing in an image containing "
+                "greater intensity contrasts between adjacent pixels.")
 
         gradientSpace = self._compute_orientation(positions, scales, sigmas, octaves, gaussian_scalespace)
 
         self._compute_descriptor(gradientSpace)
 
-        self.keypoints = np.vstack([k.round().astype(np.int) for k in positions])
+        self.keypoints = self.positions.round().astype(np.int)
