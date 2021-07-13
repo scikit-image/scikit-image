@@ -167,9 +167,9 @@ def structural_similarity(im1, im2,
         raise ValueError(
             "win_size exceeds image extent.",
             "Either ensure that your images are ",
-            "at least 7x7; or pass win_size explicitly",
-            " in the function call, with an odd value ",
-            "less or equal to the smaller side of your ",
+            "at least 7x7; or pass win_size explicitly ",
+            "in the function call, with an odd value ",
+            "less than or equal to the smaller side of your ",
             "images. If your images are multichannel ",
             "(with color channels), set channel_axis to ",
             "the axis number corresponding to the channels.")

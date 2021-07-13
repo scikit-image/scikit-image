@@ -225,12 +225,14 @@ def test_mssim_mixed_dtype():
 
 def test_structural_similarity_small_image():
     X = np.zeros((5, 5), dtype=np.double)
-    Y = np.zeros((5, 5), dtype=np.double)
+    # structural_similarity can be computed for small images if win_size is
+    # a) odd and b) less than or equal to the images' smaller side
     assert_equal(structural_similarity(X, X, win_size=3), 1.0)
     assert_equal(structural_similarity(X, X, win_size=5), 1.0)
-    # when user don't specify win_size with small image
+    # structural_similarity errors for small images if user doesn't specify
+    # win_size
     with testing.raises(ValueError):
-        structural_similarity(Y, Y)
+        structural_similarity(X, X)
 
 
 def test_invalid_input():
