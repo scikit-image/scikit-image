@@ -165,7 +165,7 @@ def structural_similarity(im1, im2,
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
-            "win_size exceeds image extent.",
+            "win_size exceeds image extent. ",
             "Either ensure that your images are ",
             "at least 7x7; or pass win_size explicitly ",
             "in the function call, with an odd value ",
