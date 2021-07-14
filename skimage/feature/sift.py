@@ -197,9 +197,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
                 octave[:, :, s] = gaussian(octave[..., s - 1],
-                                           ((1 / delta) *
-                                            np.sqrt((current_sigma * k) ** 2
-                                                    - current_sigma ** 2)),
+                                           ((1 / delta)
+                                            * np.sqrt((current_sigma * k) ** 2
+                                                      - current_sigma ** 2)),
                                            mode='reflect')
                 current_sigma = current_sigma * k
                 sigmas[o, s] = current_sigma
@@ -249,22 +249,46 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                               positions[:, 2]])
 
         h[:, 1, 0] = h[:, 0, 1] = 0.25 * (
-                d[positions[:, 0] + 1, positions[:, 1] + 1, positions[:, 2]]
-                - d[positions[:, 0] - 1, positions[:, 1] + 1, positions[:, 2]]
-                - d[positions[:, 0] + 1, positions[:, 1] - 1, positions[:, 2]]
-                + d[positions[:, 0] - 1, positions[:, 1] - 1, positions[:, 2]])
+                                    d[positions[:, 0] + 1,
+                                      positions[:, 1] + 1,
+                                      positions[:, 2]]
+                                    - d[positions[:, 0] - 1,
+                                        positions[:, 1] + 1,
+                                        positions[:, 2]]
+                                    - d[positions[:, 0] + 1,
+                                        positions[:, 1] - 1,
+                                        positions[:, 2]]
+                                    + d[positions[:, 0] - 1,
+                                        positions[:, 1] - 1,
+                                        positions[:, 2]])
 
         h[:, 2, 0] = h[:, 0, 2] = 0.25 * (
-                d[positions[:, 0] + 1, positions[:, 1], positions[:, 2] + 1]
-                - d[positions[:, 0] + 1, positions[:, 1], positions[:, 2] - 1]
-                + d[positions[:, 0] - 1, positions[:, 1], positions[:, 2] - 1]
-                - d[positions[:, 0] - 1, positions[:, 1], positions[:, 2] + 1])
+                                    d[positions[:, 0] + 1,
+                                      positions[:, 1],
+                                      positions[:, 2] + 1]
+                                    - d[positions[:, 0] + 1,
+                                        positions[:, 1],
+                                        positions[:, 2] - 1]
+                                    + d[positions[:, 0] - 1,
+                                        positions[:, 1],
+                                        positions[:, 2] - 1]
+                                    - d[positions[:, 0] - 1,
+                                        positions[:, 1],
+                                        positions[:, 2] + 1])
 
         h[:, 2, 1] = h[:, 1, 2] = 0.25 * (
-                d[positions[:, 0], positions[:, 1] + 1, positions[:, 2] + 1]
-                - d[positions[:, 0], positions[:, 1] + 1, positions[:, 2] - 1]
-                + d[positions[:, 0], positions[:, 1] - 1, positions[:, 2] - 1]
-                - d[positions[:, 0], positions[:, 1] - 1, positions[:, 2] + 1])
+                                    d[positions[:, 0],
+                                      positions[:, 1] + 1,
+                                      positions[:, 2] + 1]
+                                    - d[positions[:, 0],
+                                        positions[:, 1] + 1,
+                                        positions[:, 2] - 1]
+                                    + d[positions[:, 0],
+                                        positions[:, 1] - 1,
+                                        positions[:, 2] - 1]
+                                    - d[positions[:, 0],
+                                        positions[:, 1] - 1,
+                                        positions[:, 2] + 1])
 
     def _find_localize_evaluate(self, dogspace, img_shape):
         """Source: "Anatomy of the SIFT Method" Alg. 4-9
@@ -323,8 +347,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # values at interpolated point
             w = vals + 0.5 * np.sum(J * off, axis=1)
             H = H[finished, :2, :2]
-            sigmaratio = (self.scalespace_sigmas[0, 1] /
-                          self.scalespace_sigmas[0, 0])
+            sigmaratio = (self.scalespace_sigmas[0, 1]
+                          / self.scalespace_sigmas[0, 0])
 
             contrast_threshold = self.c_dog / self.n_scales
             edge_threshold = np.square(self.c_edge + 1) / self.c_edge
@@ -544,10 +568,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                        2 * np.pi))
 
                 # the histograms/bins that get the contribution
-                near_y = dist_y <= (
-                        (self.lambda_descr * 2 * sigma[k]) / self.n_hist)
-                near_x = dist_x <= (
-                        (self.lambda_descr * 2 * sigma[k]) / self.n_hist)
+                near_y = dist_y <= ((self.lambda_descr * 2 * sigma[k])
+                                    / self.n_hist)
+                near_x = dist_x <= ((self.lambda_descr * 2 * sigma[k])
+                                    / self.n_hist)
                 near_t = np.argmin(dist_t, axis=0)
                 near_t_val = np.min(dist_t, axis=0)
 
@@ -568,10 +592,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                       * magnitude[comb_pos[0]])
 
                 # the weight is shared linearly between the 2 nearest bins
-                w1 = w0 * ((self.n_ori / (2 * np.pi)) *
-                           near_t_val[comb_pos[0]])
-                w2 = w0 * (1 - (self.n_ori / (2 * np.pi)) *
-                           near_t_val[comb_pos[0]])
+                w1 = w0 * ((self.n_ori / (2 * np.pi))
+                           * near_t_val[comb_pos[0]])
+                w2 = w0 * (1 - (self.n_ori / (2 * np.pi))
+                           * near_t_val[comb_pos[0]])
                 k_index = near_t[comb_pos[0]]
                 np.add.at(histograms, (comb_pos[1], comb_pos[2], k_index), w1)
                 np.add.at(histograms,
