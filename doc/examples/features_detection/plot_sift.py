@@ -33,8 +33,10 @@ descriptor_extractor.detect_and_extract(img3)
 keypoints3 = descriptor_extractor.keypoints
 descriptors3 = descriptor_extractor.descriptors
 
-matches12 = match_descriptors(descriptors1, descriptors2, max_ratio=0.6, cross_check=True)
-matches13 = match_descriptors(descriptors1, descriptors3, max_ratio=0.6, cross_check=True)
+matches12 = match_descriptors(descriptors1, descriptors2, max_ratio=0.6,
+                              cross_check=True)
+matches13 = match_descriptors(descriptors1, descriptors3, max_ratio=0.6,
+                              cross_check=True)
 
 fig, ax = plt.subplots(nrows=2, ncols=1)
 
