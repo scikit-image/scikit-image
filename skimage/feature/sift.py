@@ -455,7 +455,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 near_t_val = np.min(dist_t, axis=0)
 
                 # every contribution in y direction is combined with every in x direction
-                # y: histogram 3 and 4, x: histogram 2 -> contribute to (3,2) and (4,2)
+                # for example y: histogram 3 and 4, x: histogram 2 -> contribute to (3,2) and (4,2)
                 comb = np.logical_and(near_x.T[:, None, :], near_y.T[:, :, None])
                 comb_pos = np.where(comb)
 
