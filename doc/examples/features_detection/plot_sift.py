@@ -13,7 +13,6 @@ from skimage.feature import (match_descriptors, SIFT, plot_matches)
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
-
 img1 = rgb2gray(data.astronaut())
 img2 = transform.rotate(img1, 180)
 tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
@@ -48,6 +47,5 @@ ax[0].set_title("Original Image vs. Transformed Image")
 plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
 ax[1].axis('off')
 ax[1].set_title("Original Image vs. Transformed Image")
-
 
 plt.show()
