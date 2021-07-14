@@ -248,47 +248,44 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                               positions[:, 1],
                               positions[:, 2]])
 
-        h[:, 1, 0] = h[:, 0, 1] = 0.25 * (
-                                    d[positions[:, 0] + 1,
-                                      positions[:, 1] + 1,
-                                      positions[:, 2]]
-                                    - d[positions[:, 0] - 1,
-                                        positions[:, 1] + 1,
-                                        positions[:, 2]]
-                                    - d[positions[:, 0] + 1,
-                                        positions[:, 1] - 1,
-                                        positions[:, 2]]
-                                    + d[positions[:, 0] - 1,
-                                        positions[:, 1] - 1,
-                                        positions[:, 2]])
+        h[:, 1, 0] = h[:, 0, 1] = 0.25 * (d[positions[:, 0] + 1,
+                                            positions[:, 1] + 1,
+                                            positions[:, 2]]
+                                          - d[positions[:, 0] - 1,
+                                              positions[:, 1] + 1,
+                                              positions[:, 2]]
+                                          - d[positions[:, 0] + 1,
+                                              positions[:, 1] - 1,
+                                              positions[:, 2]]
+                                          + d[positions[:, 0] - 1,
+                                              positions[:, 1] - 1,
+                                              positions[:, 2]])
 
-        h[:, 2, 0] = h[:, 0, 2] = 0.25 * (
-                                    d[positions[:, 0] + 1,
-                                      positions[:, 1],
-                                      positions[:, 2] + 1]
-                                    - d[positions[:, 0] + 1,
-                                        positions[:, 1],
-                                        positions[:, 2] - 1]
-                                    + d[positions[:, 0] - 1,
-                                        positions[:, 1],
-                                        positions[:, 2] - 1]
-                                    - d[positions[:, 0] - 1,
-                                        positions[:, 1],
-                                        positions[:, 2] + 1])
+        h[:, 2, 0] = h[:, 0, 2] = 0.25 * (d[positions[:, 0] + 1,
+                                            positions[:, 1],
+                                            positions[:, 2] + 1]
+                                          - d[positions[:, 0] + 1,
+                                              positions[:, 1],
+                                              positions[:, 2] - 1]
+                                          + d[positions[:, 0] - 1,
+                                              positions[:, 1],
+                                              positions[:, 2] - 1]
+                                          - d[positions[:, 0] - 1,
+                                              positions[:, 1],
+                                              positions[:, 2] + 1])
 
-        h[:, 2, 1] = h[:, 1, 2] = 0.25 * (
-                                    d[positions[:, 0],
-                                      positions[:, 1] + 1,
-                                      positions[:, 2] + 1]
-                                    - d[positions[:, 0],
-                                        positions[:, 1] + 1,
-                                        positions[:, 2] - 1]
-                                    + d[positions[:, 0],
-                                        positions[:, 1] - 1,
-                                        positions[:, 2] - 1]
-                                    - d[positions[:, 0],
-                                        positions[:, 1] - 1,
-                                        positions[:, 2] + 1])
+        h[:, 2, 1] = h[:, 1, 2] = 0.25 * (d[positions[:, 0],
+                                            positions[:, 1] + 1,
+                                            positions[:, 2] + 1]
+                                          - d[positions[:, 0],
+                                              positions[:, 1] + 1,
+                                              positions[:, 2] - 1]
+                                          + d[positions[:, 0],
+                                              positions[:, 1] - 1,
+                                              positions[:, 2] - 1]
+                                          - d[positions[:, 0],
+                                              positions[:, 1] - 1,
+                                              positions[:, 2] + 1])
 
     def _find_localize_evaluate(self, dogspace, img_shape):
         """Source: "Anatomy of the SIFT Method" Alg. 4-9
