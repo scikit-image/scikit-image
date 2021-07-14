@@ -59,11 +59,11 @@ def test_keypoints_sift(dtype):
                                       [25.6, 32.25397888, 40.63746693, 51.2,
                                        64.50795775, 81.27493386]])
 
-    assert detector_extractor.keypoints.dtype == np.int
-    assert detector_extractor.octaves.dtype == np.int
+    assert detector_extractor.keypoints.dtype == np.int64
+    assert detector_extractor.octaves.dtype == np.int64
     assert detector_extractor.positions.dtype == np.float64
     assert detector_extractor.orientations.dtype == np.float64
-    assert detector_extractor.scales.dtype == np.int
+    assert detector_extractor.scales.dtype == np.int64
     assert detector_extractor.sigmas.dtype == np.float64
     assert detector_extractor.scalespace_sigmas.dtype == np.float64
 
