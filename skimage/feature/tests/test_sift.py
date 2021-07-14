@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage import data
 from skimage._shared.testing import test_parallel
-from skimage.feature.sift import SIFT
+from skimage.feature import SIFT
 from skimage.util.dtype import _convert
 
 
@@ -63,6 +63,11 @@ def test_keypoints_sift(dtype):
     assert_almost_equal(exp_sigmas, detector_extractor.sigmas[:10], decimal=4)
     assert_almost_equal(exp_scalespace_sigmas, detector_extractor.scalespace_sigmas)
 
+    detector_extractor2 = SIFT()
+    detector_extractor2.detect(img)
+    detector_extractor2.extract(img)
+    assert_almost_equal(detector_extractor.keypoints[:10, 0], detector_extractor2.keypoints[:10, 0])
+    assert_almost_equal(detector_extractor.keypoints[:10, 0], detector_extractor2.keypoints[:10, 0])
 
 def test_descriptor_sift():
     detector_extractor = SIFT(n_hist=2, n_ori=4)
