@@ -22,6 +22,7 @@ from .template import match_template
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
+from .sift import SIFT
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
@@ -98,6 +99,7 @@ __all__ = ['canny',
            'BRIEF',
            'CENSURE',
            'ORB',
+           'SIFT',
            'match_descriptors',
            'plot_matches',
            'blob_dog',
