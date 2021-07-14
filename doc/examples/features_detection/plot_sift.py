@@ -1,7 +1,7 @@
 """
-==========================================
+==============================================
 SIFT feature detector and descriptor extractor
-==========================================
+==============================================
 
 This example demonstrates the SIFT feature detection and its description
 algorithm.
