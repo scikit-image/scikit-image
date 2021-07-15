@@ -1,12 +1,13 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_array_equal
+
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.segmentation import chan_vese
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
-from skimage._shared.utils import _supported_float_type
 
-
-@testing.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_chan_vese_flat_level_set(dtype):
     # because the algorithm evolves the level set around the
     # zero-level, it the level-set has no zero level, the algorithm
@@ -37,7 +38,9 @@ def test_chan_vese_simple_shape():
     assert_array_equal(result, img)
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
 def test_chan_vese_extended_output(dtype):
     img = np.zeros((10, 10), dtype=dtype)
     img[3:6, 3:6] = 1
@@ -57,7 +60,7 @@ def test_chan_vese_remove_noise():
                               [0, 1, 1, 1, 0]])
     img = ref.copy()
     img[8, 3] = 1
-    result = chan_vese(img, mu=0.3, tol=1e-3, max_iter=100, dt=10,
+    result = chan_vese(img, mu=0.3, tol=1e-3, max_num_iter=100, dt=10,
                        init_level_set="disk").astype(float)
     assert_array_equal(result, ref)
 
@@ -65,7 +68,7 @@ def test_chan_vese_remove_noise():
 def test_chan_vese_incorrect_image_type():
     img = np.zeros((10, 10, 3))
     ls = np.zeros((10, 9))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set=ls)
 
 
@@ -74,17 +77,23 @@ def test_chan_vese_gap_closing():
     ref[8:15, :] = np.ones((7, 20))
     img = ref.copy()
     img[:, 6] = np.zeros((20))
-    result = chan_vese(img, mu=0.7, tol=1e-3, max_iter=1000, dt=1000,
+    result = chan_vese(img, mu=0.7, tol=1e-3, max_num_iter=1000, dt=1000,
                        init_level_set="disk").astype(float)
     assert_array_equal(result, ref)
+
+
+def test_chan_vese_max_iter_deprecation():
+    img = np.zeros((20, 20))
+    with expected_warnings(["`max_iter` is a deprecated argument"]):
+        chan_vese(img, max_iter=10)
 
 
 def test_chan_vese_incorrect_level_set():
     img = np.zeros((10, 10))
     ls = np.zeros((10, 9))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set=ls)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         chan_vese(img, mu=0.0, init_level_set="a")
 
 

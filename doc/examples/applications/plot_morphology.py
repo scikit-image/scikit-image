@@ -55,7 +55,7 @@ def plot_comparison(original, filtered, filter_name):
 #
 # Morphological ``erosion`` sets a pixel at (i, j) to the *minimum over all
 # pixels in the neighborhood centered at (i, j)*. The structuring element,
-# ``selem``, passed to ``erosion`` is a boolean array that describes this
+# ``footprint``, passed to ``erosion`` is a boolean array that describes this
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
@@ -64,8 +64,8 @@ from skimage.morphology import (erosion, dilation, opening, closing,  # noqa
 from skimage.morphology import black_tophat, skeletonize, convex_hull_image  # noqa
 from skimage.morphology import disk  # noqa
 
-selem = disk(6)
-eroded = erosion(orig_phantom, selem)
+footprint = disk(6)
+eroded = erosion(orig_phantom, footprint)
 plot_comparison(orig_phantom, eroded, 'erosion')
 
 ######################################################################
@@ -81,7 +81,7 @@ plot_comparison(orig_phantom, eroded, 'erosion')
 # pixels in the neighborhood centered at (i, j)*. Dilation enlarges bright
 # regions and shrinks dark regions.
 
-dilated = dilation(orig_phantom, selem)
+dilated = dilation(orig_phantom, footprint)
 plot_comparison(orig_phantom, dilated, 'dilation')
 
 ######################################################################
@@ -97,7 +97,7 @@ plot_comparison(orig_phantom, dilated, 'dilation')
 # a dilation*. Opening can remove small bright spots (i.e. "salt") and
 # connect small dark cracks.
 
-opened = opening(orig_phantom, selem)
+opened = opening(orig_phantom, footprint)
 plot_comparison(orig_phantom, opened, 'opening')
 
 ######################################################################
@@ -124,7 +124,7 @@ plot_comparison(orig_phantom, opened, 'opening')
 phantom = orig_phantom.copy()
 phantom[10:30, 200:210] = 0
 
-closed = closing(phantom, selem)
+closed = closing(phantom, footprint)
 plot_comparison(phantom, closed, 'closing')
 
 ######################################################################
@@ -149,7 +149,7 @@ phantom = orig_phantom.copy()
 phantom[340:350, 200:210] = 255
 phantom[100:110, 200:210] = 0
 
-w_tophat = white_tophat(phantom, selem)
+w_tophat = white_tophat(phantom, footprint)
 plot_comparison(phantom, w_tophat, 'white tophat')
 
 ######################################################################
@@ -165,7 +165,7 @@ plot_comparison(phantom, w_tophat, 'white tophat')
 # minus the original image**. This operation returns the *dark spots of the
 # image that are smaller than the structuring element*.
 
-b_tophat = black_tophat(phantom, selem)
+b_tophat = black_tophat(phantom, footprint)
 plot_comparison(phantom, b_tophat, 'black tophat')
 
 ######################################################################

@@ -11,11 +11,16 @@ from skimage.restoration import rolling_ball
 from skimage.restoration.rolling_ball import ellipsoid_kernel
 
 
-def test_ellipsoid_const():
-    img = 155 * np.ones((100, 100), dtype=np.uint8)
+@pytest.mark.parametrize(
+    'dtype',
+    [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_ellipsoid_const(dtype):
+    img = 155 * np.ones((100, 100), dtype=dtype)
     kernel = ellipsoid_kernel((25, 53), 50)
     background = rolling_ball(img, kernel=kernel)
     assert np.allclose(img - background, np.zeros_like(img))
+    assert background.dtype == img.dtype
 
 
 def test_nan_const():

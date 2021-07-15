@@ -1,13 +1,12 @@
 import functools
-from warnings import warn
 
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
+from .._shared import utils
+from .._shared.utils import _supported_float_type, check_shape_equality, warn
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared import utils
-from .._shared.utils import warn, check_shape_equality
 
 
 __all__ = ['structural_similarity']
@@ -100,6 +99,7 @@ def structural_similarity(im1, im2,
 
     """
     check_shape_equality(im1, im2)
+    float_type = _supported_float_type(im1.dtype)
 
     if channel_axis is not None:
         # loop over channels
@@ -111,11 +111,12 @@ def structural_similarity(im1, im2,
                     full=full)
         args.update(kwargs)
         nch = im1.shape[channel_axis]
-        mssim = np.empty(nch)
+        mssim = np.empty(nch, dtype=float_type)
+
         if gradient:
-            G = np.empty(im1.shape)
+            G = np.empty(im1.shape, dtype=float_type)
         if full:
-            S = np.empty(im1.shape)
+            S = np.empty(im1.shape, dtype=float_type)
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
@@ -194,8 +195,8 @@ def structural_similarity(im1, im2,
         filter_args = {'size': win_size}
 
     # ndimage filters need floating point data
-    im1 = im1.astype(np.float64)
-    im2 = im2.astype(np.float64)
+    im1 = im1.astype(float_type, copy=False)
+    im2 = im2.astype(float_type, copy=False)
 
     NP = win_size ** ndim
 
@@ -231,8 +232,8 @@ def structural_similarity(im1, im2,
     # to avoid edge effects will ignore filter radius strip around edges
     pad = (win_size - 1) // 2
 
-    # compute (weighted) mean of ssim
-    mssim = crop(S, pad).mean()
+    # compute (weighted) mean of ssim. Use float64 for accuracy.
+    mssim = crop(S, pad).mean(dtype=np.float64)
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.
