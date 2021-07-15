@@ -628,7 +628,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     Notes
     -----
     For boolean images, this function returns False only if all values are
-    the same (the method, threshold and percentile arguments are ignored).
+    the same (the method, threshold, and percentile arguments are ignored).
 
     References
     ----------

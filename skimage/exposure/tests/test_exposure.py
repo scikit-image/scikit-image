@@ -749,7 +749,7 @@ def test_is_low_contrast():
 
 
 def test_is_low_contrast_boolean():
-    image = np.zeros((8, 8))
+    image = np.zeros((8, 8), dtype=bool)
     assert exposure.is_low_contrast(image)
 
     image[:5] = 1
