@@ -3,7 +3,8 @@ import numpy as np
 from scipy.ndimage.filters import maximum_filter
 from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..feature import peak_local_max
-from .._shared.utils import check_nD
+from ..util import img_as_float
+from .._shared.utils import check_nD, _supported_float_type
 from ..transform import rescale
 from ..filters import gaussian
 
@@ -149,8 +150,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.n_ori = n_ori
 
         self.delta_min = 1 / upsampling
-        self.deltas = self.delta_min * np.power(2,
-                                                np.arange(self.n_octaves - 1))
+        self.deltas = (self.delta_min
+                       * np.power(2, np.arange(self.n_octaves - 1)))
         self.scalespace_sigmas = None
         self.keypoints = None
         self.positions = None
@@ -172,12 +173,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         downscaling (octaves) the image.
         """
         scalespace = []
+        dtype = image.dtype
+        self.deltas = self.deltas.astype(dtype)
         if self.upsampling > 1:
             image = rescale(image, self.upsampling, order=3)
 
         # all sigmas for the gaussian scalespace
         sigmas = np.empty((self.n_octaves,
-                           self.n_scales + 3))
+                           self.n_scales + 3), dtype=dtype)
         current_sigma = self.sigma_min
 
         # smooth to sigma_min, assuming sigma_in
@@ -192,7 +195,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         for o in range(self.n_octaves):
             delta = self.delta_min * 2 ** o
             sigmas[o, 0] = current_sigma
-            octave = np.empty(image.shape + (self.n_scales + 3,))
+            octave = np.empty(image.shape + (self.n_scales + 3,), dtype=dtype)
             octave[:, :, 0] = image
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
@@ -299,6 +302,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         extrema_scales = []
         extrema_sigmas = []
         threshold = self.c_dog * 0.8
+        dtype = dogspace[0].dtype
         for o, (octave, delta) in enumerate(zip(dogspace, self.deltas)):
             # find extrema
             maxima = peak_local_max(octave, threshold_abs=threshold)
@@ -307,9 +311,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # localize extrema
             dim = octave.shape
-            off = np.empty_like(keys)  # offset and Jacobian
-            J = np.empty_like(keys)
-            H = np.empty((len(keys), 3, 3))  # Hessian
+            off = np.empty_like(keys, dtype=dtype)  # offset and Jacobian
+            J = np.empty_like(keys, dtype=dtype)
+            H = np.empty((len(keys), 3, 3), dtype=dtype)  # Hessian
             # take first derivative of the whole octave
             grad = np.gradient(octave)
             # mask for all extrema that still have to be tested
@@ -360,7 +364,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             keys = keys[contrast_filter][edge_filter]
             off = off[contrast_filter][edge_filter]
-            yx = (keys[:, 0:2] + off[:, 0:2]) * delta
+            yx = ((keys[:, 0:2] + off[:, 0:2]) * delta).astype(dtype)
 
             sigmas = self.scalespace_sigmas[o, keys[:, 2]] * np.power(
                 sigmaratio, off[:, 2])
@@ -372,8 +376,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
 
-        octave_indices = np.hstack(
-            [np.full(len(p), i) for i, p in enumerate(extrema_pos)])
+        octave_indices = np.hstack([np.full(len(p), i)
+                                    for i, p in enumerate(extrema_pos)])
         return np.vstack(extrema_pos), np.hstack(extrema_scales), np.hstack(
             extrema_sigmas), octave_indices
 
@@ -392,7 +396,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         keypoint_angles = []
         keypoint_octave = []
         keypoints_valid = np.ones_like(sigmas_oct, dtype=bool)
-        orientations = np.zeros_like(sigmas_oct)
+        orientations = np.zeros_like(sigmas_oct, dtype=positions_oct.dtype)
         key_count = 0
         for o in range(self.n_octaves):
             in_oct = octaves == o
@@ -622,6 +626,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         """
         check_nD(image, 2)
+        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
 
@@ -652,6 +659,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         """
         check_nD(image, 2)
+        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
 
@@ -672,6 +682,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         """
         check_nD(image, 2)
+        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
 

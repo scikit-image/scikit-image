@@ -17,7 +17,7 @@ img = data.coins()
 def test_keypoints_sift(dtype):
     _img = _convert(img, dtype)
     detector_extractor = SIFT()
-    detector_extractor.detect(_img)
+    detector_extractor.detect_and_extract(_img)
 
     exp_keypoint_rows = np.array([201, 41, 209, 180, 142, 182, 208, 34, 43,
                                   64])
@@ -70,13 +70,13 @@ def test_keypoints_sift(dtype):
     assert_almost_equal(exp_position_cols,
                         detector_extractor.positions[:10, 1], decimal=4)
     assert_almost_equal(exp_orientations,
-                        detector_extractor.orientations[:10])
+                        detector_extractor.orientations[:10], decimal=4)
     assert_almost_equal(exp_scales,
                         detector_extractor.scales[:10])
     assert_almost_equal(exp_sigmas,
                         detector_extractor.sigmas[:10], decimal=4)
     assert_almost_equal(exp_scalespace_sigmas,
-                        detector_extractor.scalespace_sigmas)
+                        detector_extractor.scalespace_sigmas, decimal=4)
 
     detector_extractor2 = SIFT()
     detector_extractor2.detect(img)
