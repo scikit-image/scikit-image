@@ -233,8 +233,9 @@ def test_mssim_mixed_dtype():
     assert_almost_equal(mssim, mssim_mixed)
 
 
-def test_structural_similarity_small_image():
-    X = np.zeros((5, 5), dtype=np.double)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_structural_similarity_small_image(dtype):
+    X = np.zeros((5, 5), dtype=dtype)
     # structural_similarity can be computed for small images if win_size is
     # a) odd and b) less than or equal to the images' smaller side
     assert_equal(structural_similarity(X, X, win_size=3), 1.0)
