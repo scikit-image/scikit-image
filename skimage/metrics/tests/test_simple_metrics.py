@@ -66,7 +66,7 @@ def test_PSNR_float(dtype):
     with expected_warnings(['Inputs have mismatched dtype']):
         p_mixed = peak_signal_noise_ratio(cam / 255.,
                                           np.float32(cam_noisy / 255.))
-    assert_almost_equal(p_mixed, p_float64, decimal=5)
+    assert_almost_equal(p_mixed, p_float64, decimal=decimal)
 
 
 def test_PSNR_errors():
