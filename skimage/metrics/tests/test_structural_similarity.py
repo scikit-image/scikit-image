@@ -242,7 +242,7 @@ def test_structural_similarity_small_image(dtype):
     assert_equal(structural_similarity(X, X, win_size=5), 1.0)
     # structural_similarity errors for small images if user doesn't specify
     # win_size
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, X)
 
 
