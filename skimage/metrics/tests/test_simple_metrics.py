@@ -39,19 +39,28 @@ def test_PSNR_vs_IPOL():
     assert_almost_equal(p, p_IPOL, decimal=4)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_PSNR_float(dtype):
     p_uint8 = peak_signal_noise_ratio(cam, cam_noisy)
     camf = (cam / 255.).astype(dtype, copy=False)
     camf_noisy = (cam_noisy / 255.).astype(dtype, copy=False)
     p_float64 = peak_signal_noise_ratio(camf, camf_noisy, data_range=1)
     assert p_float64.dtype == np.float64
-    assert_almost_equal(p_uint8, p_float64, decimal=5)
+    decimal = 3 if dtype == np.float16 else 5
+    assert_almost_equal(p_uint8, p_float64, decimal=decimal)
 
     # mixed precision inputs
     p_mixed = peak_signal_noise_ratio(cam / 255., np.float32(cam_noisy / 255.),
                                       data_range=1)
-    assert_almost_equal(p_mixed, p_float64, decimal=5)
+
+    assert_almost_equal(p_mixed, p_float64, decimal=decimal)
+
+    # mismatched dtype results in a warning if data_range is unspecified
+    with expected_warnings(['Inputs have mismatched dtype']):
+        p_mixed = peak_signal_noise_ratio(cam / 255.,
+                                          np.float32(cam_noisy / 255.))
+    assert_almost_equal(p_mixed, p_float64, decimal=decimal)
+
 
     # mismatched dtype results in a warning if data_range is unspecified
     with expected_warnings(['Inputs have mismatched dtype']):
@@ -115,8 +124,9 @@ def test_nmi_different_sizes():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_nmi_random(dtype):
-    random1 = np.random.random((100, 100))
-    random2 = np.random.random((100, 100))
+    rng = np.random.default_rng()
+    random1 = rng.random((100, 100)).astype(dtype)
+    random2 = rng.random((100, 100)).astype(dtype)
     nmi = normalized_mutual_information(random1, random2, bins=10)
     assert nmi.dtype == np.float64
     assert_almost_equal(nmi, 1, decimal=2)
