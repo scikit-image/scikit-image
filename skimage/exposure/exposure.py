@@ -648,7 +648,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     image = np.asanyarray(image)
 
     if image.dtype == bool:
-        return not ((b.max() == 1) and (b.min() == 0))
+        return not ((image.max() == 1) and (image.min() == 0))
 
     if image.ndim == 3:
         if image.shape[2] == 4:
