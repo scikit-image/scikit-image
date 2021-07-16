@@ -105,10 +105,10 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
     if (input_dtype in (bool, bool) or out_dtype in (bool, bool)):
         raise ValueError('dtype cannot be bool.')
     if input_dtype not in (np.uint8, np.uint16):
-        message = ('Possible precision loss converting image of type {} to '
-                   'uint8 as required by rank filters. Convert manually using '
-                   'skimage.util.img_as_ubyte to silence this warning.'
-                   .format(input_dtype))
+        message = (f'Possible precision loss converting image of type '
+                   f'{input_dtype} to uint8 as required by rank filters. '
+                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'silence this warning.')
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
@@ -142,9 +142,9 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2 ** 10:
-        warn("Bad rank filter performance is expected due to a "
-             "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+        warn(f"Bad rank filter performance is expected due to a "
+             f"large number of bins ({n_bins}), equivalent to an approximate "
+             f"bitdepth of {np.log2(n_bins):.1f}.",
              stacklevel=2)
 
     return image, footprint, out, mask, n_bins
@@ -188,10 +188,10 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
     """
     check_nD(image, 3)
     if image.dtype not in (np.uint8, np.uint16):
-        message = ('Possible precision loss converting image of type {} to '
-                   'uint8 as required by rank filters. Convert manually using '
-                   'skimage.util.img_as_ubyte to silence this warning.'
-                   .format(image.dtype))
+        message = (f'Possible precision loss converting image of type '
+                   f'{image.dtype} to uint8 as required by rank filters. '
+                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'silence this warning.')
         warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
@@ -227,11 +227,10 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn("Bad rank filter performance is expected due to a "
-             "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+        warn(f"Bad rank filter performance is expected due to a "
+             f"large number of bins ({n_bins}), equivalent to an approximate "
+             f"bitdepth of {np.log2(n_bins):.1f}.",
              stacklevel=2)
-
     return image, footprint, out, mask, n_bins
 
 
