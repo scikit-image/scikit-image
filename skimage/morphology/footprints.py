@@ -418,13 +418,15 @@ def ball(radius, dtype=np.uint8):
     return np.array(s <= radius * radius, dtype=dtype)
 
 
-def octagon(m, n, dtype=np.uint8):
+def octagon(m, n, dtype=np.uint8, *, decomposition=None):
     """Generates an octagon shaped footprint.
 
     For a given size of (m) horizontal and vertical sides
     and a given (n) height or width of slanted sides octagon is generated.
     The slanted sides are 45 or 135 degrees to the horizontal axis
-    and hence the widths and heights are equal.
+    and hence the widths and heights are equal. The overall size of the
+    footprint will be ``m + 2 * n`` (note that `m` must be odd to get an
+    odd-sized footprint).
 
     Parameters
     ----------
@@ -437,24 +439,57 @@ def octagon(m, n, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
 
     Returns
     -------
     footprint : ndarray
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
     """
-    from . import convex_hull_image
-    footprint = np.zeros((m + 2 * n, m + 2 * n))
-    footprint[0, n] = 1
-    footprint[n, 0] = 1
-    footprint[0, m + n - 1] = 1
-    footprint[m + n - 1, 0] = 1
-    footprint[-1, n] = 1
-    footprint[n, -1] = 1
-    footprint[-1, m + n - 1] = 1
-    footprint[m + n - 1, -1] = 1
-    footprint = convex_hull_image(footprint).astype(dtype)
+    if m == n == 0:
+        raise ValueError("m and n cannot both be zero")
+
+    # TODO?: warn about even footprint size when m is even
+
+    if decomposition is None:
+        from . import convex_hull_image
+        footprint = np.zeros((m + 2 * n, m + 2 * n))
+        footprint[0, n] = 1
+        footprint[n, 0] = 1
+        footprint[0, m + n - 1] = 1
+        footprint[m + n - 1, 0] = 1
+        footprint[-1, n] = 1
+        footprint[n, -1] = 1
+        footprint[-1, m + n - 1] = 1
+        footprint[m + n - 1, -1] = 1
+        footprint = convex_hull_image(footprint).astype(dtype)
+    elif decomposition == 'sequence':
+        # special handling for edge cases with small m and/or n
+        if m <= 2 and n <= 2:
+            return ((octagon(m, n, dtype=dtype, decomposition=None), 1),)
+
+        # general approach for larger m and/or n
+        if m == 0:
+            m = 2
+            n -= 1
+        sequence = []
+        if m > 1:
+            sequence += list(square(m, dtype=dtype, decomposition='sequence'))
+        if n > 0:
+            sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
+        footprint = tuple(sequence)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
 
 

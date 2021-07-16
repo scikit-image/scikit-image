@@ -114,6 +114,31 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
     "function",
     ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
 )
+@pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
+@pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_octagon_decomposition(function, m, n, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    if m == 0 and n == 0:
+        with pytest.raises(ValueError):
+            footprints.octagon(m, n, decomposition=decomposition)
+    else:
+        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
+        footprint = footprints.octagon(m, n, decomposition=decomposition)
+        img = _get_decomp_test_data(function)
+        func = getattr(binary, function)
+        expected = func(img, footprint=footprint_ndarray)
+        out = func(img, footprint=footprint)
+        assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
 @pytest.mark.parametrize("radius", (1, 2, 5))
 @pytest.mark.parametrize("decomposition", ['sequence'])
 def test_diamond_decomposition(function, radius, decomposition):

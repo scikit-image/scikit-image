@@ -159,7 +159,7 @@ class TestSElem():
         (footprints.octahedron, (3,), True),
         (footprints.rectangle, (3, 4), True),
         (footprints.ellipse, (3, 4), False),
-        (footprints.octagon, (3, 4), False),
+        (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
     ]
 )
