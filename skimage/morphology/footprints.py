@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+from numbers import Integral
+
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -5,7 +8,31 @@ from .. import draw
 from .._shared.utils import deprecate_kwarg
 
 
-def square(width, dtype=np.uint8):
+def _footprint_is_sequence(footprint):
+    if hasattr(footprint, '__array_interface__'):
+        return False
+
+    def _validate_sequence_element(t):
+        return (
+            isinstance(t, Sequence)
+            and len(t) == 2
+            and hasattr(t[0], '__array_interface__')
+            and isinstance(t[1], Integral)
+        )
+
+    if isinstance(footprint, Sequence):
+        if not all(_validate_sequence_element(t) for t in footprint):
+            raise ValueError(
+                "All elements of footprint sequence must be a 2-tuple where "
+                "the first element of the tuple is an ndarray and the second "
+                "is an integer indicating the number of iterations."
+            )
+    else:
+        raise ValueError("footprint must be either an ndarray or Sequence")
+    return True
+
+
+def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
     Every pixel along the perimeter has a chessboard distance
@@ -20,20 +47,61 @@ def square(width, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
+        With 'separable', this function uses separable 1D footprints for each
+        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        be architecture-dependent.
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood.
+        neighborhood. When `decomposition` is None, this is just a
+        numpy.ndarray. Otherwise, this will be a tuple whose length is equal to
+        the number of unique structuring elements to apply (see Notes for more
+        detail)
+
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
 
     """
-    return np.ones((width, width), dtype=dtype)
+    if decomposition is None:
+        return np.ones((width, width), dtype=dtype)
+
+    if decomposition == 'separable' or width % 2 == 0:
+        sequence = [(np.ones((width, 1), dtype=dtype), 1),
+                    (np.ones((1, width), dtype=dtype), 1)]
+    elif decomposition == 'sequence':
+        # only handles odd widths
+        sequence = [(np.ones((3, 3), dtype=dtype), _decompose_size(width, 3))]
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return tuple(sequence)
+
+
+def _decompose_size(size, kernel_size=3):
+    """Determine number of repeated iterations for a `kernel_size` kernel.
+
+    Returns how many repeated morphology operations with an element of size
+    `kernel_size` is equivalent to a morphology with a single kernel of size
+    `n`.
+
+    """
+    if kernel_size % 2 != 1:
+        raise ValueError("only odd length kernel_size is supported")
+    return 1 + (size - kernel_size) // (kernel_size - 1)
 
 
 @deprecate_kwarg({"height": "ncols", "width": "nrows"},
                  removed_version="0.20.0")
-def rectangle(nrows, ncols, dtype=np.uint8):
+def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -50,6 +118,14 @@ def rectangle(nrows, ncols, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
+        With 'separable', this function uses separable 1D footprints for each
+        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        be architecture-dependent.
 
     Returns
     -------
@@ -59,14 +135,42 @@ def rectangle(nrows, ncols, dtype=np.uint8):
 
     Notes
     -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
+
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
+    if decomposition is None:  # TODO: check optimal width setting here
+        return np.ones((nrows, ncols), dtype=dtype)
 
-    return np.ones((nrows, ncols), dtype=dtype)
+    even_rows = nrows % 2 == 0
+    even_cols = ncols % 2 == 0
+    if decomposition == 'separable' or even_rows or even_cols:
+        sequence = [(np.ones((nrows, 1), dtype=dtype), 1),
+                    (np.ones((1, ncols), dtype=dtype), 1)]
+    elif decomposition == 'sequence':
+        # this branch only support odd nrows, ncols
+        sq_size = 3
+        sq_reps = _decompose_size(min(nrows, ncols), sq_size)
+        sequence = [(np.ones((3, 3), dtype=dtype), sq_reps)]
+        if nrows > ncols:
+            nextra = nrows - ncols
+            sequence.append(
+                (np.ones((sq_size, 1), dtype=dtype), nextra // (sq_size - 1))
+            )
+        elif ncols > nrows:
+            nextra = ncols - nrows
+            sequence.append(
+                (np.ones((1, sq_size), dtype=dtype), nextra // (sq_size - 1))
+            )
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return tuple(sequence)
 
 
-def diamond(radius, dtype=np.uint8):
+def diamond(radius, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, diamond-shaped footprint.
 
     A pixel is part of the neighborhood (i.e. labeled 1) if
@@ -82,16 +186,35 @@ def diamond(radius, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
 
     Returns
     -------
     footprint : ndarray
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
     """
-    L = np.arange(0, radius * 2 + 1)
-    I, J = np.meshgrid(L, L)
-    return np.array(np.abs(I - radius) + np.abs(J - radius) <= radius,
-                    dtype=dtype)
+    if decomposition is None:
+        L = np.arange(0, radius * 2 + 1)
+        I, J = np.meshgrid(L, L)
+        footprint = np.array(np.abs(I - radius) + np.abs(J - radius) <= radius,
+                             dtype=dtype)
+    elif decomposition == 'sequence':
+        fp = diamond(1, dtype=dtype, decomposition=None)
+        nreps = _decompose_size(2*radius + 1, fp.shape[0])
+        footprint = ((fp, nreps),)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return footprint
 
 
 def disk(radius, dtype=np.uint8):
@@ -162,7 +285,7 @@ def ellipse(width, height, dtype=np.uint8):
     return footprint
 
 
-def cube(width, dtype=np.uint8):
+def cube(width, dtype=np.uint8, *, decomposition=None):
     """ Generates a cube-shaped footprint.
 
     This is the 3D equivalent of a square.
@@ -178,6 +301,11 @@ def cube(width, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
 
     Returns
     -------
@@ -185,11 +313,31 @@ def cube(width, dtype=np.uint8):
         A footprint consisting only of ones, i.e. every pixel belongs to the
         neighborhood.
 
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
+
     """
-    return np.ones((width, width, width), dtype=dtype)
+    if decomposition == None:
+        return np.ones((width, width, width), dtype=dtype)
+
+    if decomposition == 'separable' or width % 2 == 0:
+        sequence = [(np.ones((width, 1, 1), dtype=dtype), 1),
+                    (np.ones((1, width, 1), dtype=dtype), 1),
+                    (np.ones((1, 1, width), dtype=dtype), 1)]
+    elif decomposition == 'sequence':
+        # only handles odd widths
+        sequence = [
+            (np.ones((3, 3, 3), dtype=dtype), _decompose_size(width, 3))
+        ]
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return tuple(sequence)
 
 
-def octahedron(radius, dtype=np.uint8):
+def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     """Generates a octahedron-shaped footprint.
 
     This is the 3D equivalent of a diamond.
@@ -206,19 +354,38 @@ def octahedron(radius, dtype=np.uint8):
     ----------------
     dtype : data-type
         The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
 
     Returns
     -------
     footprint : ndarray
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
     """
     # note that in contrast to diamond(), this method allows non-integer radii
-    n = 2 * radius + 1
-    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
-                       -radius:radius:n * 1j,
-                       -radius:radius:n * 1j]
-    s = np.abs(X) + np.abs(Y) + np.abs(Z)
-    return np.array(s <= radius, dtype=dtype)
+    if decomposition is None:
+        n = 2 * radius + 1
+        Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                           -radius:radius:n * 1j,
+                           -radius:radius:n * 1j]
+        s = np.abs(X) + np.abs(Y) + np.abs(Z)
+        footprint = np.array(s <= radius, dtype=dtype)
+    elif decomposition == 'sequence':
+        fp = octahedron(1, dtype=dtype, decomposition=None)
+        nreps = _decompose_size(2*radius + 1, fp.shape[0])
+        footprint = ((fp, nreps),)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return footprint
 
 
 def ball(radius, dtype=np.uint8):

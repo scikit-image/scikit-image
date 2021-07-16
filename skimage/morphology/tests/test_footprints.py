@@ -5,6 +5,7 @@ Tests for Morphological footprints
 Author: Damian Eads
 """
 import numpy as np
+import pytest
 from numpy.testing import assert_equal
 
 from skimage import data
@@ -145,3 +146,29 @@ class TestSElem():
         actual_mask2 = footprints.star(1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
+
+
+@pytest.mark.parametrize(
+    'function, args, supports_decomposition',
+    [
+        (footprints.disk, (3,), False),
+        (footprints.ball, (3,), False),
+        (footprints.square, (3,), True),
+        (footprints.cube, (3,), True),
+        (footprints.diamond, (3,), True),
+        (footprints.octahedron, (3,), True),
+        (footprints.rectangle, (3, 4), True),
+        (footprints.ellipse, (3, 4), False),
+        (footprints.octagon, (3, 4), False),
+        (footprints.star, (3,), False),
+    ]
+)
+@pytest.mark.parametrize("dtype", [np.uint8, np.float64])
+def test_footprint_dtype(function, args, supports_decomposition, dtype):
+    # make sure footprint dtype matches what was requested
+    footprint = function(*args, dtype=dtype)
+    assert footprint.dtype == dtype
+
+    if supports_decomposition:
+        sequence = function(*args, dtype=dtype, decomposition='sequence')
+        assert all([fp_tuple[0].dtype == dtype for fp_tuple in sequence])

@@ -1,11 +1,30 @@
 """
 Binary morphological operations
 """
+import functools
+
 import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.utils import deprecate_kwarg
+from .footprints import _footprint_is_sequence
 from .misc import default_footprint
+
+
+def _iterate_binary_func(binary_func, image, footprint, out):
+    """Helper to call `binary_func` for each footprint in a sequence.
+
+    binary_func is a binary morphology function that accepts "structure",
+    "output" and "iterations" keyword arguments
+    (e.g. `scipy.ndimage.binary_erosion`).
+    """
+    fp, num_iter = footprint[0]
+    binary_func(image, structure=fp, output=out, iterations=num_iter)
+    for fp, num_iter in footprint[1:]:
+        # Note: out.copy() because the computation cannot be in-place!
+        #       SciPy <= 1.7 did not automatically make a copy if needed.
+        binary_func(out.copy(), structure=fp, output=out, iterations=num_iter)
+    return out
 
 
 # The default_footprint decorator provides a diamond footprint as
@@ -43,6 +62,11 @@ def binary_erosion(image, footprint=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
+
+    if isinstance(footprint, tuple) and isinstance(footprint[0], tuple):
+        binary_func = functools.partial(ndi.binary_erosion, border_value=True)
+        return _iterate_binary_func(binary_func, image, footprint, out)
+
     ndi.binary_erosion(image, structure=footprint, output=out,
                        border_value=True)
     return out
@@ -79,6 +103,10 @@ def binary_dilation(image, footprint=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
+
+    if _footprint_is_sequence(footprint):
+        return _iterate_binary_func(ndi.binary_dilation, image, footprint, out)
+
     ndi.binary_dilation(image, structure=footprint, output=out)
     return out
 
