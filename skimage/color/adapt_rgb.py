@@ -18,12 +18,10 @@ def is_rgb_like(image, channel_axis=-1):
     for functions that don't accept volumes as input, since checking an image's
     shape is fragile.
     """
-    if channel_axis is None:
-        return False
     return (image.ndim == 3) and (image.shape[channel_axis] in (3, 4))
 
 
-def adapt_rgb(apply_to_rgb):
+def adapt_rgb(apply_to_rgb, channel_axis=-1):
     """Return decorator that adapts to RGB images to a gray-scale filter.
 
     This function is only intended to be used for functions that don't accept
@@ -33,14 +31,28 @@ def adapt_rgb(apply_to_rgb):
     ----------
     apply_to_rgb : function
         Function that returns a filtered image from an image-filter and RGB
-        image. This will only be called if the image is RGB-like.
+        image. This will only be called if the image is RGB-like. This function
+        must have an argument named `channel_axis` that specified which axis of
+        the image corresponds to channels.
     """
+    sig = inspect.signature(apply_to_rgb)
+    if 'channel_axis' not in sig.parameters:
+        if channel_axis == -1:
+            channel_kwarg = {}
+        else:
+            # only raise on channel_axis != -1 for backwards compatibility
+            raise ValueError(
+                "apply_to_rgb must take an argument named `channel_axis`"
+            )
+    else:
+        channel_kwarg = dict(channel_axis=channel_axis)
+
     def decorator(image_filter):
         @functools.wraps(image_filter)
         def image_filter_adapted(image, *args, **kwargs):
-            channel_axis = kwargs.get('channel_axis', -1)
             if is_rgb_like(image, channel_axis=channel_axis):
-                return apply_to_rgb(image_filter, image, *args, **kwargs)
+                return apply_to_rgb(image_filter, image, *args,
+                                    **channel_kwarg, **kwargs)
             else:
                 return image_filter(image, *args, **kwargs)
         return image_filter_adapted
@@ -58,8 +70,6 @@ def hsv_value(image_filter, image, *args, channel_axis=-1, **kwargs):
         Function that filters a gray-scale image.
     image : array
         Input image. Note that RGBA images are treated as RGB.
-    channel_axis : int or None, optional
-        This parameter specifies which axis corresponds to `channels`.
     """
     # Slice the first three channels so that we remove any alpha channels.
     channel_axis = channel_axis % image.ndim
@@ -83,8 +93,6 @@ def each_channel(image_filter, image, *args, channel_axis=-1, **kwargs):
         Function that filters a gray-scale image.
     image : array
         Input image.
-    channel_axis : int or None, optional
-        This parameter specifies which axis corresponds to `channels`.
     """
     c_new = [image_filter(c, *args, **kwargs)
              for c in np.moveaxis(image, source=channel_axis, destination=0)]

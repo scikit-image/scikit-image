@@ -372,8 +372,7 @@ def test_adapthist_grayscale():
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
-@pytest.mark.parametrize("channel_axis", [0, 1, -1])
-def test_adapthist_color(channel_axis):
+def test_adapthist_color():
     """Test an RGB color uint16 image
     """
     img = util.img_as_uint(data.astronaut())
@@ -381,11 +380,7 @@ def test_adapthist_color(channel_axis):
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-
-    _img = np.moveaxis(img, source=-1, destination=channel_axis)
-    adapted = exposure.equalize_adapthist(_img, clip_limit=0.01,
-                                          channel_axis=channel_axis)
-    adapted = np.moveaxis(adapted, source=channel_axis, destination=-1)
+    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert adapted.min() == 0
     assert adapted.max() == 1.0
