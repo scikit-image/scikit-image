@@ -1,10 +1,8 @@
 import functools
-import inspect
 
 import numpy as np
 
 from .. import color
-from .._shared.utils import slice_at_axis
 from ..util.dtype import _convert
 
 
@@ -21,7 +19,7 @@ def is_rgb_like(image, channel_axis=-1):
     return (image.ndim == 3) and (image.shape[channel_axis] in (3, 4))
 
 
-def adapt_rgb(apply_to_rgb, channel_axis=-1):
+def adapt_rgb(apply_to_rgb):
     """Return decorator that adapts to RGB images to a gray-scale filter.
 
     This function is only intended to be used for functions that don't accept
@@ -31,35 +29,20 @@ def adapt_rgb(apply_to_rgb, channel_axis=-1):
     ----------
     apply_to_rgb : function
         Function that returns a filtered image from an image-filter and RGB
-        image. This will only be called if the image is RGB-like. This function
-        must have an argument named `channel_axis` that specified which axis of
-        the image corresponds to channels.
+        image. This will only be called if the image is RGB-like.
     """
-    sig = inspect.signature(apply_to_rgb)
-    if 'channel_axis' not in sig.parameters:
-        if channel_axis == -1:
-            channel_kwarg = {}
-        else:
-            # only raise on channel_axis != -1 for backwards compatibility
-            raise ValueError(
-                "apply_to_rgb must take an argument named `channel_axis`"
-            )
-    else:
-        channel_kwarg = dict(channel_axis=channel_axis)
-
     def decorator(image_filter):
         @functools.wraps(image_filter)
         def image_filter_adapted(image, *args, **kwargs):
-            if is_rgb_like(image, channel_axis=channel_axis):
-                return apply_to_rgb(image_filter, image, *args,
-                                    **channel_kwarg, **kwargs)
+            if is_rgb_like(image):
+                return apply_to_rgb(image_filter, image, *args, **kwargs)
             else:
                 return image_filter(image, *args, **kwargs)
         return image_filter_adapted
     return decorator
 
 
-def hsv_value(image_filter, image, *args, channel_axis=-1, **kwargs):
+def hsv_value(image_filter, image, *args, **kwargs):
     """Return color image by applying `image_filter` on HSV-value of `image`.
 
     Note that this function is intended for use with `adapt_rgb`.
@@ -72,17 +55,14 @@ def hsv_value(image_filter, image, *args, channel_axis=-1, **kwargs):
         Input image. Note that RGBA images are treated as RGB.
     """
     # Slice the first three channels so that we remove any alpha channels.
-    channel_axis = channel_axis % image.ndim
-    image = image[slice_at_axis(slice(3), axis=channel_axis)]
-    hsv = color.rgb2hsv(image, channel_axis=channel_axis)
-    v_slice = slice_at_axis(2, axis=channel_axis)
-    value = hsv[v_slice].copy()
+    hsv = color.rgb2hsv(image[:, :, :3])
+    value = hsv[:, :, 2].copy()
     value = image_filter(value, *args, **kwargs)
-    hsv[v_slice] = _convert(value, hsv.dtype)
-    return color.hsv2rgb(hsv, channel_axis=channel_axis)
+    hsv[:, :, 2] = _convert(value, hsv.dtype)
+    return color.hsv2rgb(hsv)
 
 
-def each_channel(image_filter, image, *args, channel_axis=-1, **kwargs):
+def each_channel(image_filter, image, *args, **kwargs):
     """Return color image by applying `image_filter` on channels of `image`.
 
     Note that this function is intended for use with `adapt_rgb`.
@@ -95,5 +75,5 @@ def each_channel(image_filter, image, *args, channel_axis=-1, **kwargs):
         Input image.
     """
     c_new = [image_filter(c, *args, **kwargs)
-             for c in np.moveaxis(image, source=channel_axis, destination=0)]
-    return np.stack(c_new, axis=channel_axis)
+             for c in np.moveaxis(image, -1, 0)]
+    return np.stack(c_new, axis=-1)
