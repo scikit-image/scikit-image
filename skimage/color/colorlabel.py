@@ -81,7 +81,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     ----------
     label : array, shape (M, N)
         Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N, 3), optional
+    image : array, shape (M, N) or (..., 3, ...), optional
         Image used as underlay for labels. If the input is an RGB image, it's
         converted to grayscale before coloring.
     colors : list, optional
