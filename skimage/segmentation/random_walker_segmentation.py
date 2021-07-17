@@ -429,7 +429,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
             f"{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bf' and None")
+            f" 'cg', 'cg_j', 'bf', and None")
 
     # Spacing kwarg checks
     if spacing is None:
