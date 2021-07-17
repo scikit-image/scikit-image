@@ -519,6 +519,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     -------
     footprint : ndarray
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        The footprint will have shape ``(2 * height + 1, 2 * width + 1)``.
 
     Examples
     --------
