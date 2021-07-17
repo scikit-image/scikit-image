@@ -84,8 +84,8 @@ def _validate_inputs(image, markers, mask, connectivity):
     else:
         markers = np.asanyarray(markers) * mask
         if markers.shape != image.shape:
-            message = (f"`markers` (shape {markers.shape}) must have same shape as "
-                       f"`image` (shape {image.shape})")
+            message = (f"`markers` (shape {markers.shape}) must have same "
+                       f"shape as `image` (shape {image.shape})")
             raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
