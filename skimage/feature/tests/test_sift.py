@@ -128,7 +128,7 @@ def test_descriptor_sift():
     assert keypoints_count == detector_extractor.scales.shape[0]
 
 
-def test_no_descriptors_extracted_orb():
+def test_no_descriptors_extracted_sift():
     img = np.ones((128, 128))
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
