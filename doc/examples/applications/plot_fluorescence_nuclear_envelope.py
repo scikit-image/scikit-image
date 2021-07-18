@@ -16,6 +16,7 @@ online tutorial [1]_ based on publication [2]_
 
 import imageio
 import matplotlib.pyplot as plt
+import plotly.io
 import plotly.express as px
 from scipy import ndimage as ndi
 
@@ -34,13 +35,14 @@ print(f'shape: {one.shape}')
 #####################################################################
 # The dataset is a 2D image stack with 15 frames (time points) and 2 channels.
 
-px.imshow(
+fig = px.imshow(
     one,
     facet_col=1,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point', 'facet_col': 'channel'}
 )
+plotly.io.show(fig)
 
 #####################################################################
 # To begin with, let us consider the first channel of the first image.
