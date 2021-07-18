@@ -16,6 +16,7 @@ online tutorial [1]_ based on publication [2]_
 
 import imageio
 import matplotlib.pyplot as plt
+import numpy as np
 import plotly.io
 import plotly.express as px
 from scipy import ndimage as ndi
@@ -49,27 +50,56 @@ plotly.io.show(fig)
 
 ch0t0 = one[0, 0, :, :]
 
+#####################################################################
+# Segment the nucleus rim
+# =======================
+
 smooth = filters.gaussian(ch0t0, sigma=2)
 
 thresh = smooth > 0.1
 
 fill = ndi.binary_fill_holes(thresh)
 
-fig, ax = plt.subplots(1, 4, figsize=(12, 3), sharey=True)
+#####################################################################
+# Although it is not strictly necessary, let us discard the other nucleus part
+# visible in the bottom right-hand corner.
 
-ax[0].imshow(ch0t0, cmap=plt.cm.gray)
-ax[0].set_title('0) Raw')
+label = measure.label(fill)
+regions = measure.regionprops_table(label, properties=('label', 'area'))
+label_small = regions['label'][np.argmin(regions['area'])]
+label[label == label_small] = 0  # background value
 
-ax[1].imshow(smooth, cmap=plt.cm.gray)
-ax[1].set_title('1) Smooth out')
+expand = segmentation.expand_labels(label, distance=4)
 
-ax[2].imshow(thresh, cmap=plt.cm.gray)
-ax[2].set_title('2) Threshold')
+erode = morphology.erosion(label)
 
-ax[3].imshow(fill, cmap=plt.cm.gray)
-ax[3].set_title('3) Fill in')
+fig, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
 
-for a in ax:
+ax[0, 0].imshow(ch0t0, cmap=plt.cm.gray)
+ax[0, 0].set_title('a) Raw')
+
+ax[0, 1].imshow(smooth, cmap=plt.cm.gray)
+ax[0, 1].set_title('b) Blur')
+
+ax[0, 2].imshow(thresh, cmap=plt.cm.gray)
+ax[0, 2].set_title('c) Threshold')
+
+ax[0, 3].imshow(fill, cmap=plt.cm.gray)
+ax[0, 3].set_title('c-1) Fill in')
+
+ax[1, 0].imshow(label, cmap=plt.cm.gray)
+ax[1, 0].set_title('c-2) Keep one nucleus')
+
+ax[1, 1].imshow(expand, cmap=plt.cm.gray)
+ax[1, 1].set_title('d) Expand')
+
+ax[1, 2].imshow(erode, cmap=plt.cm.gray)
+ax[1, 2].set_title('e) Erode')
+
+ax[1, 3].imshow(expand - erode, cmap=plt.cm.gray)
+ax[1, 3].set_title('f) Nucleus Rim')
+
+for a in ax.ravel():
     a.axis('off')
 
 plt.show()
