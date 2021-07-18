@@ -81,8 +81,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None,
         out = labels
 
     if mask is not None:
-        err_msg = (f"labels and mask should have the same shape but "
-                   f"are {out.shape} and {mask.shape}")
+        err_msg = (f'labels and mask should have the same shape but '
+                   f'are {out.shape} and {mask.shape}')
         if out.shape != mask.shape:
             raise(ValueError, err_msg)
         if mask.dtype != bool:
