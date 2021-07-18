@@ -140,7 +140,8 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     --------
     >>> a = np.zeros((40, 40))
     >>> a[10:-10, 10:-10] = 1.
-    >>> a += 0.3 * np.random.randn(*a.shape)
+    >>> rng = np.random.default_rng()
+    >>> a += 0.3 * rng.standard_normal(a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
 
     """
@@ -161,10 +162,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         preserve_range = True
 
     image = convert_to_float(image, preserve_range)
-
-    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if not image.flags.c_contiguous:
         image = np.ascontiguousarray(image)
+
+    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if channel_axis is not None:  # 2-D images
         if fast_mode:
             return _fast_nl_means_denoising_2d(image, **kwargs)

@@ -21,8 +21,8 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
             f'be in [1, ..., {image.ndim}]. Got {connectivity}.'
         )
 
-    selem = _resolve_neighborhood(None, connectivity, image.ndim)
-    result = ndimage.label(image, structure=selem)
+    footprint = _resolve_neighborhood(None, connectivity, image.ndim)
+    result = ndimage.label(image, structure=footprint)
 
     if return_num:
         return result

@@ -748,6 +748,14 @@ def test_is_low_contrast():
     assert not exposure.is_low_contrast(image, upper_percentile=100)
 
 
+def test_is_low_contrast_boolean():
+    image = np.zeros((8, 8), dtype=bool)
+    assert exposure.is_low_contrast(image)
+
+    image[:5] = 1
+    assert not exposure.is_low_contrast(image)
+
+
 # Test Dask Compatibility
 # =======================
 

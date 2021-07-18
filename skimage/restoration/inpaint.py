@@ -257,8 +257,12 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         raise TypeError('Masked arrays are not supported')
 
     image = skimage.img_as_float(image)
-    mask = mask.astype(bool, copy=False)
 
+    # float16->float32 and float128->float64
+    float_dtype = utils._supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
+    mask = mask.astype(bool, copy=False)
     if not multichannel:
         image = image[..., np.newaxis]
     out = np.copy(image)

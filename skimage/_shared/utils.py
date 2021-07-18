@@ -482,33 +482,6 @@ def check_nD(array, ndim, arg_name='image'):
         raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
-def check_random_state(seed):
-    """Turn seed into a `np.random.RandomState` instance.
-
-    Parameters
-    ----------
-    seed : None, int or np.random.RandomState
-           If `seed` is None, return the RandomState singleton used by `np.random`.
-           If `seed` is an int, return a new RandomState instance seeded with `seed`.
-           If `seed` is already a RandomState instance, return it.
-
-    Raises
-    ------
-    ValueError
-        If `seed` is of the wrong type.
-
-    """
-    # Function originally from scikit-learn's module sklearn.utils.validation
-    if seed is None or seed is np.random:
-        return np.random.mtrand._rand
-    if isinstance(seed, (numbers.Integral, np.integer)):
-        return np.random.RandomState(seed)
-    if isinstance(seed, np.random.RandomState):
-        return seed
-    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
-                     ' instance' % seed)
-
-
 def convert_to_float(image, preserve_range):
     """Convert input image to float image with the appropriate range.
 
@@ -531,6 +504,8 @@ def convert_to_float(image, preserve_range):
         Transformed version of the input.
 
     """
+    if image.dtype == np.float16:
+        return image.astype(np.float32)
     if preserve_range:
         # Convert image to double only if it is not single or double
         # precision float
