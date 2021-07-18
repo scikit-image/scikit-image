@@ -178,8 +178,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                vol. 60, pp. 91–110.
                :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
-        .. [3] Ives Rey Otero and Mauricio Delbracio. "Anatomy of the SIFT
-               Method", Image Processing On Line, 4 (2014), pp. 370–396.
+        .. [3] I. R. Otero and M. Delbracio. "Anatomy of the SIFT Method",
+               Image Processing On Line, 4 (2014), pp. 370–396.
                :DOI:`10.5201/ipol.2014.82`
 
         Examples
