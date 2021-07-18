@@ -86,12 +86,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         ----------
         .. [1] D.G. Lowe
               "Object recognition from local scale-invariant features"
-              https://doi.org/10.1109/ICCV.1999.790410
+              :DOI:`10.1109/ICCV.1999.790410`
 
         .. [2] Ives Rey Otero and Mauricio Delbracio
               "Anatomy of the SIFT Method"
               Image Processing On Line, 4 (2014), pp. 370–396.
-              https://doi.org/10.5201/ipol.2014.82
+              :DOI:`10.5201/ipol.2014.82`
 
         Examples
         --------
