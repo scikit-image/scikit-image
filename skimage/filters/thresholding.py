@@ -212,8 +212,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         raise ValueError("len(block_size) must equal image.ndim.")
     block_size = tuple(block_size)
     if any(b % 2 == 0 for b in block_size):
-        raise ValueError(f"block_size must be odd! Given block_size "
-                         f"{block_size} contains even values.")
+        raise ValueError(f'block_size must be odd! Given block_size '
+                         f'{block_size} contains even values.')
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -322,9 +322,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = (f"threshold_otsu is expected to work correctly only for "
-               f"grayscale images; image shape {image.shape} looks like "
-               f"an RGB image")
+        msg = (f'threshold_otsu is expected to work correctly only for '
+               f'grayscale images; image shape {image.shape} looks like '
+               f'that of an RGB image.')
         warn(msg)
 
     # Check if the image has more than one intensity value; if not, return that
@@ -1204,9 +1204,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     """
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = (f"threshold_multiotsu is expected to work correctly only for "
-               f"grayscale images; image shape {image.shape} looks like an "
-               f"RGB image")
+        msg = (f'threshold_multiotsu is expected to work correctly only for '
+               f'grayscale images; image shape {image.shape} looks like an '
+               f'RGB image')
         warn(msg)
 
     # calculating the histogram and the probability of each gray level.
@@ -1218,8 +1218,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = (f"The input image has only {nvalues} different values. "
-               f"It can not be thresholded in {classes} classes")
+        msg = (f'The input image has only {nvalues} different values. '
+               f'It cannot be thresholded in {classes} classes.')
         raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]

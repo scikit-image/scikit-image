@@ -142,9 +142,9 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2 ** 10:
-        warn(f"Bad rank filter performance is expected due to a "
-             f"large number of bins ({n_bins}), equivalent to an approximate "
-             f"bitdepth of {np.log2(n_bins):.1f}.",
+        warn(f'Bad rank filter performance is expected due to a '
+             f'large number of bins ({n_bins}), equivalent to an approximate '
+             f'bitdepth of {np.log2(n_bins):.1f}.',
              stacklevel=2)
 
     return image, footprint, out, mask, n_bins
@@ -227,9 +227,9 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(f"Bad rank filter performance is expected due to a "
-             f"large number of bins ({n_bins}), equivalent to an approximate "
-             f"bitdepth of {np.log2(n_bins):.1f}.",
+        warn(f'Bad rank filter performance is expected due to a '
+             f'large number of bins ({n_bins}), equivalent to an approximate '
+             f'bitdepth of {np.log2(n_bins):.1f}.',
              stacklevel=2)
     return image, footprint, out, mask, n_bins
 
