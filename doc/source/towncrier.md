@@ -1,5 +1,3 @@
-:orphan:
-
 If automated deployment of release notes fails you can follow the manual
 instructions in this document.
 
