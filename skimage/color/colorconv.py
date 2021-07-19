@@ -497,7 +497,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
 
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
-# "Quantification of histochemical staining by color deconvolution.,"
+# "Quantification of histochemical staining by color deconvolution,"
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
 # pp. 291-9, Aug. 2001.
