@@ -68,8 +68,8 @@ def _validate_inputs(image, markers, mask, connectivity):
         mask = np.asanyarray(mask, dtype=bool)
         n_pixels = np.sum(mask)
         if mask.shape != image.shape:
-            message = ("`mask` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(mask.shape, image.shape))
+            message = (f'`mask` (shape {mask.shape}) must have same shape '
+                       f'as `image` (shape {image.shape})')
             raise ValueError(message)
     if markers is None:
         markers_bool = local_minima(image, connectivity=connectivity) * mask
@@ -84,8 +84,8 @@ def _validate_inputs(image, markers, mask, connectivity):
     else:
         markers = np.asanyarray(markers) * mask
         if markers.shape != image.shape:
-            message = ("`markers` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(markers.shape, image.shape))
+            message = (f'`markers` (shape {markers.shape}) must have same '
+                       f'shape as `image` (shape {image.shape})')
             raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
