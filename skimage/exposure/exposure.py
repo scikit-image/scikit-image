@@ -585,7 +585,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     ----------
     .. [1] Gustav J. Braun, "Image Lightness Rescaling Using Sigmoidal Contrast
            Enhancement Functions",
-           http://www.cis.rit.edu/fairchild/PDFs/PAP07.pdf
+           http://markfairchild.org/PDFs/PAP07.pdf
 
     """
     _assert_non_negative(image)
@@ -625,6 +625,11 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     out : bool
         True when the image is determined to be low contrast.
 
+    Notes
+    -----
+    For boolean images, this function returns False only if all values are
+    the same (the method, threshold, and percentile arguments are ignored).
+
     References
     ----------
     .. [1] https://scikit-image.org/docs/dev/user_guide/data_types.html
@@ -641,6 +646,10 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     False
     """
     image = np.asanyarray(image)
+
+    if image.dtype == bool:
+        return not ((image.max() == 1) and (image.min() == 0))
+
     if image.ndim == 3:
         if image.shape[2] == 4:
             image = rgba2rgb(image)
