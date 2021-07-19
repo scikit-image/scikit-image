@@ -322,10 +322,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = (f'threshold_otsu is expected to work correctly only for '
-               f'grayscale images; image shape {image.shape} looks like '
-               f'that of an RGB image.')
-        warn(msg)
+        warn(f'threshold_otsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # Check if the image has more than one intensity value; if not, return that
     # value
@@ -1204,10 +1203,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     """
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = (f'threshold_multiotsu is expected to work correctly only for '
-               f'grayscale images; image shape {image.shape} looks like an '
-               f'RGB image')
-        warn(msg)
+        warn(f'threshold_multiotsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like an '
+             f'RGB image')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
