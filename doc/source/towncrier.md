@@ -1,3 +1,5 @@
+:orphan:
+
 If automated deployment of release notes fails you can follow the manual
 instructions in this document.
 
@@ -13,7 +15,7 @@ machine.
 ```
 cd <path/to/scikit-image/repository>
 pip install -r requirements/_release_docs.txt
-python tools/aggregate_contributors <path/to/scikit-image>
+python tools/aggregate_contributors .
 towncrier build --version=<your.release.version>
 cat "reviewers_and_authors.txt" >>   \
     doc/release/release_<your release version>.rst

@@ -3,10 +3,7 @@ github api this script extracts information about project contributors."""
 
 import os
 import argparse
-from datetime import datetime
 from collections import OrderedDict
-import string
-from pathlib import Path
 from warnings import warn
 
 from github import Github
@@ -55,7 +52,7 @@ def get_remote():
         )
 
     g = Github(GH_TOKEN)
-    remote = g.get_repo(f"scikit-image/scikit-image")
+    remote = g.get_repo("scikit-image/scikit-image")
     return remote
 
 
@@ -161,7 +158,7 @@ def save_contributors_info(authors, committers, reviewers):
 def get_user_args():
     """Parse sys args"""
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument("pdir", help="Root directory of the scikit-image project.")
+    parser.add_argument("pdir", help="Scikit-image project root directory")
     user_args = parser.parse_args()
     return user_args
 
@@ -177,7 +174,8 @@ def get_project_dir(pdir):
     # check if the project directory is correct
     if not os.path.isfile(os.path.join(pdir, "pyproject.toml")):
         raise ValueError(
-            "Consider changing to the scikit-image main directory or passing it as an argument"
+            "Consider changing to the scikit-image main directory"
+            " or passing it as an argument"
         )
     return pdir
 
