@@ -46,9 +46,13 @@ def binary_erosion(image, footprint=None, out=None):
     ----------
     image : ndarray
         Binary input image.
-    footprint : ndarray, optional
+    footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
+        in ``skimage.morphology.footprints``.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -90,7 +94,10 @@ def binary_dilation(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -130,7 +137,10 @@ def binary_opening(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -165,7 +175,10 @@ def binary_closing(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1).
+        If None, use a cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.

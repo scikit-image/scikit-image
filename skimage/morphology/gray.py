@@ -171,7 +171,10 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -238,7 +241,10 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
@@ -317,7 +323,10 @@ def opening(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -368,7 +377,10 @@ def closing(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -434,7 +446,10 @@ def white_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -511,7 +526,10 @@ def black_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
