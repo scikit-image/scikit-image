@@ -59,12 +59,12 @@ def square(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
+        given an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
         axis. Whether 'seqeunce' or 'separable' is computationally faster may
@@ -73,11 +73,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     Returns
     -------
     footprint : ndarray or tuple
-        A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood. When `decomposition` is None, this is just a
-        numpy.ndarray. Otherwise, this will be a tuple whose length is equal to
-        the number of unique structuring elements to apply (see Notes for more
-        detail)
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
+        this will be a tuple whose length is equal to the number of unique
+        structuring elements to apply (see Notes for more detail)
 
     Notes
     -----
@@ -85,6 +84,12 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
 
+    For binary morphology, using ``decomposition='sequence'``
+    was observed to give better performance, with the magnitude of the
+    performance increase rapidly increasing with footprint size. For grayscale
+    morphology with square footprints, it is recommended to use
+    ``decomposition=None`` since the internal SciPy functions that are called
+    already have a fast implementation based on separable 1D sliding windows.
     """
     if decomposition is None:
         return np.ones((width, width), dtype=dtype)
@@ -130,12 +135,12 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
+        given an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
         axis. Whether 'seqeunce' or 'separable' is computationally faster may
@@ -143,15 +148,25 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood.
+        neighborhood. When `decomposition` is None, this is just a
+        numpy.ndarray. Otherwise, this will be a tuple whose length is equal to
+        the number of unique structuring elements to apply (see Notes for more
+        detail)
 
     Notes
     -----
     When `decomposition` is not None, each element of the `footprint`
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
+
+    For binary morphology, using ``decomposition='sequence'``
+    was observed to give better performance, with the magnitude of the
+    performance increase rapidly increasing with footprint size. For grayscale
+    morphology with rectangular footprints, it is recommended to use
+    ``decomposition=None`` since the internal SciPy functions that are called
+    already have a fast implementation based on separable 1D sliding windows.
 
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
@@ -198,9 +213,9 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
@@ -208,14 +223,23 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
+        this will be a tuple whose length is equal to the number of unique
+        structuring elements to apply (see Notes for more detail)
 
     Notes
     -----
     When `decomposition` is not None, each element of the `footprint`
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
+
+    For either binary or grayscale morphology, using
+    ``decomposition='sequence'`` was observed to have a performance benefit,
+    with the magnitude of the benefit increasing with increasing footprint
+    size.
+
     """
     if decomposition is None:
         L = np.arange(0, radius * 2 + 1)
@@ -244,7 +268,7 @@ def disk(radius, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
 
     Returns
@@ -272,7 +296,7 @@ def ellipse(width, height, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
 
     Returns
@@ -313,19 +337,21 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
+        given an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
 
     Returns
     -------
-    footprint : ndarray
-        A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood.
+    footprint : ndarray or tuple
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
+        this will be a tuple whose length is equal to the number of unique
+        structuring elements to apply (see Notes for more detail)
 
     Notes
     -----
@@ -333,6 +359,12 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
 
+    For binary morphology, using ``decomposition='sequence'``
+    was observed to give better performance, with the magnitude of the
+    performance increase rapidly increasing with footprint size. For grayscale
+    morphology with square footprints, it is recommended to use
+    ``decomposition=None`` since the internal SciPy functions that are called
+    already have a fast implementation based on separable 1D sliding windows.
     """
     if decomposition == None:
         return np.ones((width, width, width), dtype=dtype)
@@ -366,9 +398,9 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
@@ -376,14 +408,22 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
+        this will be a tuple whose length is equal to the number of unique
+        structuring elements to apply (see Notes for more detail)
 
     Notes
     -----
     When `decomposition` is not None, each element of the `footprint`
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
+
+    For either binary or grayscale morphology, using
+    ``decomposition='sequence'`` was observed to have a performance benefit,
+    with the magnitude of the benefit increasing with increasing footprint
+    size.
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     if decomposition is None:
@@ -416,12 +456,12 @@ def ball(radius, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
@@ -451,9 +491,9 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}
+    decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
@@ -461,14 +501,22 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
 
     Returns
     -------
-    footprint : ndarray
+    footprint : ndarray or tuple
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
+        this will be a tuple whose length is equal to the number of unique
+        structuring elements to apply (see Notes for more detail)
 
     Notes
     -----
     When `decomposition` is not None, each element of the `footprint`
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
+
+    For either binary or grayscale morphology, using
+    ``decomposition='sequence'`` was observed to have a performance benefit,
+    with the magnitude of the benefit increasing with increasing footprint
+    size.
     """
     if m == n == 0:
         raise ValueError("m and n cannot both be zero")
@@ -522,7 +570,7 @@ def star(a, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type
+    dtype : data-type, optional
         The data type of the footprint.
 
     Returns
