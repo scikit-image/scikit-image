@@ -10,6 +10,18 @@ from skimage.morphology import gray, footprints
 from skimage.util import img_as_uint, img_as_ubyte
 
 
+@pytest.fixture
+def cam_image():
+    from skimage import data
+    return np.ascontiguousarray(data.camera()[64:112, 64:96])
+
+
+@pytest.fixture
+def cell3d_image():
+    from skimage import data
+    return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
+
+
 class TestMorphology():
 
     # These expected outputs were generated with skimage v0.12.1
@@ -290,3 +302,125 @@ def test_deprecated_import():
 def test_selem_kwarg_deprecation(function):
     with expected_warnings(["`selem` is a deprecated argument name"]):
         getattr(gray, function)(np.zeros((4, 4)), selem=np.ones((3, 3)))
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("size", (7,))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_square_decomposition(cam_image, function, size, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.square(size, decomposition=None)
+    footprint = footprints.square(size, decomposition=decomposition)
+    func = getattr(gray, function)
+    expected = func(cam_image, footprint=footprint_ndarray)
+    out = func(cam_image, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("nrows", (3, 11))
+@pytest.mark.parametrize("ncols", (3, 11))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_rectangle_decomposition(cam_image, function, nrows, ncols,
+                                 decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
+    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
+    func = getattr(gray, function)
+    expected = func(cam_image, footprint=footprint_ndarray)
+    out = func(cam_image, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("radius", (2, 3))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_diamond_decomposition(cam_image, function, radius, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.square(radius, decomposition=None)
+    footprint = footprints.square(radius, decomposition=decomposition)
+    func = getattr(gray, function)
+    expected = func(cam_image, footprint=footprint_ndarray)
+    out = func(cam_image, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("m", (0, 1, 3, 5))
+@pytest.mark.parametrize("n", (0, 1, 2, 3))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_octagon_decomposition(cam_image, function, m, n, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    if m == 0 and n == 0:
+        with pytest.raises(ValueError):
+            footprints.octagon(m, n, decomposition=decomposition)
+    else:
+        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
+        footprint = footprints.octagon(m, n, decomposition=decomposition)
+        func = getattr(gray, function)
+        expected = func(cam_image, footprint=footprint_ndarray)
+        out = func(cam_image, footprint=footprint)
+        assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("size", (5,))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_cube_decomposition(cell3d_image, function, size, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.cube(size, decomposition=None)
+    footprint = footprints.cube(size, decomposition=decomposition)
+    func = getattr(gray, function)
+    expected = func(cell3d_image, footprint=footprint_ndarray)
+    out = func(cell3d_image, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
+                 "black_tophat"],
+)
+@pytest.mark.parametrize("radius", (3,))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_octahedron_decomposition(cell3d_image, function, radius,
+                                  decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
+    footprint = footprints.octahedron(radius, decomposition=decomposition)
+    func = getattr(gray, function)
+    expected = func(cell3d_image, footprint=footprint_ndarray)
+    out = func(cell3d_image, footprint=footprint)
+    assert_array_equal(expected, out)

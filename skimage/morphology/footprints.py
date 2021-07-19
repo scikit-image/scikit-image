@@ -32,6 +32,20 @@ def _footprint_is_sequence(footprint):
     return True
 
 
+def _shape_from_sequence(footprint_sequence):
+    """Determine the shape of composite footprint"""
+    if not _footprint_is_sequence(footprint_sequence):
+        raise ValueError("expected a sequence of footprints")
+    ndim = footprint_sequence[0][0].ndim
+    shape = [0,] * ndim
+    for d in range(ndim):
+        fp, nreps = footprint_sequence[0]
+        shape[d] = fp.shape[d] + (nreps - 1) * (fp.shape[d] - 1)
+        for fp, nreps in footprint_sequence[1:]:
+            shape[d] += nreps * (fp.shape[d] - 1)
+    return tuple(shape)
+
+
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 

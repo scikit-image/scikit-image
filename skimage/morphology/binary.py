@@ -63,7 +63,7 @@ def binary_erosion(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
-    if isinstance(footprint, tuple) and isinstance(footprint[0], tuple):
+    if _footprint_is_sequence(footprint):
         binary_func = functools.partial(ndi.binary_erosion, border_value=True)
         return _iterate_binary_func(binary_func, image, footprint, out)
 
