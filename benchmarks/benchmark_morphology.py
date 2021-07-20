@@ -68,7 +68,7 @@ class BinaryMorphology2D(object):
         # (so it will not become fully False for any of the footprints).
         self.image = rng.standard_normal(shape) < 3.5
         fp_func = getattr(morphology, footprint)
-        allow_decomp = ("rectangle", "square", "diamond", "octagon")
+        allow_decomp = ("rectangle", "square", "diamond", "octagon", "disk")
         allow_separable = ("rectangle", "square")
         footprint_kwargs = {}
         if decomposition is not None and footprint not in allow_decomp:
@@ -117,7 +117,7 @@ class BinaryMorphology3D(object):
         # make an image that is mostly True, with a few isolated False areas
         self.image = rng.standard_normal(shape) > -3
         fp_func = getattr(morphology, footprint)
-        allow_decomp = ("cube", "octahedron")
+        allow_decomp = ("cube", "octahedron", "ball")
         allow_separable = ("cube",)
         if decomposition == "separable" and footprint != "cube":
             raise NotImplementedError("separable unavailable")
