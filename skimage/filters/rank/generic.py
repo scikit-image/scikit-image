@@ -231,6 +231,7 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
              f'large number of bins ({n_bins}), equivalent to an approximate '
              f'bitdepth of {np.log2(n_bins):.1f}.',
              stacklevel=2)
+
     return image, footprint, out, mask, n_bins
 
 
