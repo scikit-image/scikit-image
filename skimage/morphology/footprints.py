@@ -221,12 +221,12 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
         if nrows > ncols:
             nextra = nrows - ncols
             sequence.append(
-                (np.ones((sq_size, 1), dtype=dtype), nextra // (sq_size - 1))
+                (np.ones((nextra + 1, 1), dtype=dtype), 1)
             )
         elif ncols > nrows:
             nextra = ncols - nrows
             sequence.append(
-                (np.ones((1, sq_size), dtype=dtype), nextra // (sq_size - 1))
+                (np.ones((1, nextra + 1), dtype=dtype), 1)
             )
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
