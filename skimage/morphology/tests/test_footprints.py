@@ -9,7 +9,7 @@ import pytest
 from numpy.testing import assert_equal
 
 from skimage._shared.testing import fetch
-from skimage.morphology import binary_dilation, footprints
+from skimage.morphology import footprints
 
 
 class TestSElem():
