@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage import data
 from skimage._shared.testing import fetch
 from skimage.morphology import footprints
 
@@ -112,7 +111,8 @@ class TestSElem():
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=np.uint8)
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]],
+                                  dtype=np.uint8)
         actual_mask1 = footprints.ellipse(5, 3)
         expected_mask2 = np.array([[1, 1, 1],
                                    [1, 1, 1],
