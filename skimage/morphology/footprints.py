@@ -451,9 +451,9 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given a result equivalent to a single, larger footprint, but with
-        better computational performance. For disk footprints, the sequence
-        decomposition is not exactly equivalent to decomposition=None.
-        See Notes for more details.
+        better computational performance. For disk footprints, the 'sequence'
+        or 'crosses' decompositions are not always exactly equivalent to
+        ``decomposition=None``. See Notes for more details.
 
     Returns
     -------
@@ -479,6 +479,15 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     that a hexadecagon is the closest approximation to a disk that can be
     achieved for decomposition with footprints of shape (3, 3).
 
+    The disk produced by the ``decomposition='crosses'`` is often but not
+    always  identical to that with ``decomposition=None``. It tends to give a
+    closer approximation than ``decomposition='sequence'``, at a performance
+    that is fairly comparable. The individual cross-shaped elements are not
+    limited to extent (3, 3) in size. Unlike the 'seqeuence' decomposition, the
+    'crosses' decomposition can also accurately approximate the shape of disks
+    with ``strict_radius=True``. The method is based on an adaption of
+    algorithm 1 given in [4]_.
+
     References
     ----------
     .. [1] Park, H and Chin R.T. Decomposition of structuring elements for
@@ -491,6 +500,10 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            morphological transformations. Image and Vision Computing, Vol. 15,
            Issue 11, 1997.
            :DOI:`10.1016/S0262-8856(97)00026-7`
+    .. [4] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
+           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
+           Image Processing, (1 November 1990).
+           :DOI:`10.1117/12.23608`
     """
     if decomposition is None:
         L = np.arange(-radius, radius + 1)
@@ -530,9 +543,9 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     [1]_ and corresponds roughly to algorithm 1 of that publication (some
     details had to be modified to get reliable operation).
 
-    .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric Convex
-           Templates. Proc. SPIE 1350, Image Algebra and Morphological Image
-           Processing, (1 November 1990).
+    .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
+           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
+           Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
     """
     quadrant = footprint[footprint.shape[0] // 2:, footprint.shape[1] // 2:]
@@ -587,6 +600,23 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     footprint : ndarray
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
         The footprint will have shape ``(2 * height + 1, 2 * width + 1)``.
+
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
+
+    The ellipse produced by the ``decomposition='crosses'`` is often but not
+    always  identical to that with ``decomposition=None``. The method is based
+    on an adaption of algorithm 1 given in [1]_.
+
+    References
+    ----------
+    .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
+           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
+           Image Processing, (1 November 1990).
+           :DOI:`10.1117/12.23608`
 
     Examples
     --------
