@@ -40,7 +40,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from skimage.morphology import (cube, diamond, octagon, octahedron, rectangle,
                                 square)
-from skimage.morphology.footprints import footprint_from_sequence
 
 # Generate 2D and 3D structuring elements.
 footprint_dict = {
@@ -62,8 +61,8 @@ footprint_dict = {
                              cube(11, decomposition="separable")),
     "cube(11) (sequence)": (cube(11, decomposition=None),
                             cube(11, decomposition="sequence")),
-    "octahedron(5) (sequence)": (octahedron(9, decomposition=None),
-                                 octahedron(5, decomposition="sequence")),
+    "octahedron(7) (sequence)": (octahedron(7, decomposition=None),
+                                 octahedron(7, decomposition="sequence")),
 }
 
 # Visualize the elements
@@ -79,7 +78,8 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
         ax = fig.add_subplot(1, num_seq + 1, num_seq + 1)
         ax.imshow(footprint, cmap=cmap, vmin=0, vmax=1)
     else:
-        ax = fig.add_subplot(1, num_seq + 1, num_seq + 1, projection=Axes3D.name)
+        ax = fig.add_subplot(1, num_seq + 1, num_seq + 1,
+                             projection=Axes3D.name)
         ax.voxels(footprint, cmap=cmap)
 
     ax.set_title(title.split(' (')[0], fontdict=fontdict)
