@@ -109,6 +109,13 @@ class TestRank():
         check()
 
     @parametrize('filter', all_rank_filters)
+    def test_rank_filter_footprint_sequence_unsupported(self, filter):
+        footprint_sequence = morphology.disk(3, decomposition="sequence")
+        with pytest.raises(ValueError):
+            getattr(rank, filter)(self.image.astype(np.uint8),
+                                  footprint_sequence)
+
+    @parametrize('filter', all_rank_filters)
     def test_rank_filter_selem_kwarg_deprecation(self, filter):
         with expected_warnings(["`selem` is a deprecated argument name"]):
             getattr(rank, filter)(self.image.astype(np.uint8),
