@@ -200,7 +200,7 @@ incompatible with prior versions, although over a longer time scale.
 Not making the proposed API changes
 ...................................
 
-Another possibility is to reject backwards compatible API changes outright,
+Another possibility is to reject backwards incompatible API changes outright,
 except in extreme cases. The core team feels that this is essentially
 equivalent to pinning the library at 0.19.
 
