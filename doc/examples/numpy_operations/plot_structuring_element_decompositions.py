@@ -101,10 +101,9 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
         ax.set_xlabel(f'num_reps = {num_reps}')
     fig.tight_layout()
 
-    if ndim == 2:
-        # draw dividing line between seqeuence element plots and composite plot
-        line_pos = num_seq / (num_seq + 1)
-        line = plt.Line2D([line_pos, line_pos], [0, 1], color="black")
-        fig.add_artist(line)
+    # draw dividing line between seqeuence element plots and composite plot
+    line_pos = num_seq / (num_seq + 1)
+    line = plt.Line2D([line_pos, line_pos], [0, 1], color="black")
+    fig.add_artist(line)
 
 plt.show()
