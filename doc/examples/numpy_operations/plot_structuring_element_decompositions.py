@@ -37,8 +37,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from mpl_toolkits.mplot3d import Axes3D
 
-from skimage.morphology import (ball, cube, diamond, disk, octagon, octahedron,
-                                rectangle, square)
+from skimage.morphology import (ball, cube, diamond, disk, ellipse, octagon,
+                                octahedron, rectangle, square)
 from skimage.morphology.footprints import footprint_from_sequence
 
 # Generate 2D and 3D structuring elements.
@@ -55,9 +55,18 @@ footprint_dict = {
                                               decomposition="sequence")),
     "diamond(5) (sequence)": (diamond(5, decomposition=None),
                               diamond(5, decomposition="sequence")),
-    "disk(7) (sequence)": (disk(7, strict_radius=False, decomposition=None),
-                           disk(7, strict_radius=False,
-                                decomposition="sequence")),
+    "disk(7, strict_radius=False) (sequence)": (
+        disk(7, strict_radius=False, decomposition=None),
+        disk(7, strict_radius=False, decomposition="sequence")
+    ),
+    "disk(7, strict_radius=True) (crosses)": (
+        disk(7, strict_radius=True, decomposition=None),
+        disk(7, strict_radius=True, decomposition="crosses")
+    ),
+    "ellipse(4, 9) (crosses)": (
+        ellipse(4, 9, decomposition=None),
+        ellipse(4, 9, decomposition="crosses")
+    ),
     "disk(20) (sequence)": (disk(20, strict_radius=False, decomposition=None),
                             disk(20, strict_radius=False,
                                  decomposition="sequence")),
@@ -83,7 +92,9 @@ fontdict = dict(fontsize=16, fontweight='bold')
 for title, (footprint, footprint_sequence) in footprint_dict.items():
     ndim = footprint.ndim
     num_seq = len(footprint_sequence)
-    approximate_decomposition = 'ball' in title or 'disk' in title
+    approximate_decomposition = (
+        'ball' in title or 'disk' in title or 'ellipse' in title
+    )
     if approximate_decomposition:
         # Two extra plot in approximate cases to show both:
         # 1.) decomposition=None idea footprint
