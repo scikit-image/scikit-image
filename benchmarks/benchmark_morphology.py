@@ -59,7 +59,7 @@ class BinaryMorphology2D(object):
         ((512, 512),),
         ("square", "diamond", "octagon", "disk", "ellipse", "star"),
         (1, 3, 5, 15, 25, 40),
-        (None, "sequence", "separable"),
+        (None, "sequence", "separable", "crosses"),
     ]
 
     def setup(self, shape, footprint, radius, decomposition):
@@ -68,12 +68,18 @@ class BinaryMorphology2D(object):
         # (so it will not become fully False for any of the footprints).
         self.image = rng.standard_normal(shape) < 3.5
         fp_func = getattr(morphology, footprint)
-        allow_decomp = ("rectangle", "square", "diamond", "octagon", "disk")
+        allow_sequence = ("rectangle", "square", "diamond", "octagon", "disk")
         allow_separable = ("rectangle", "square")
+        allow_crosses = ("disk", "ellipse")
+        allow_decomp = tuple(
+            set(allow_sequence) | set(allow_separable) | set(allow_crosses)
+        )
         footprint_kwargs = {}
-        if decomposition is not None and footprint not in allow_decomp:
+        if decomposition == "sequence" and footprint not in allow_sequence:
             raise NotImplementedError("decomposition unimplemented")
         elif decomposition == "separable" and footprint not in allow_separable:
+            raise NotImplementedError("separable decomposition unavailable")
+        elif decomposition == "crosses" and footprint not in allow_crosses:
             raise NotImplementedError("separable decomposition unavailable")
         if footprint in allow_decomp:
             footprint_kwargs["decomposition"] = decomposition
