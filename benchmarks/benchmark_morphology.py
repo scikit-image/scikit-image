@@ -99,7 +99,12 @@ class BinaryMorphology2D(object):
             m = n = max((2 * radius) // 3, 1)
             self.footprint = fp_func(m, n, **footprint_kwargs)
         elif footprint == "ellipse":
-            self.footprint = fp_func(radius, radius, **footprint_kwargs)
+            if radius > 1:
+                # make somewhat elliptical
+                self.footprint = fp_func(radius - 1, radius + 1,
+                                         **footprint_kwargs)
+            else:
+                self.footprint = fp_func(radius, radius, **footprint_kwargs)
 
     def time_erosion(
         self, shape, footprint, radius, *args
