@@ -1204,8 +1204,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
         warn(f'threshold_multiotsu is expected to work correctly only for '
-             f'grayscale images; image shape {image.shape} looks like an '
-             f'RGB image')
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
