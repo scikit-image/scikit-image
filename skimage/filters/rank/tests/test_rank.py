@@ -110,7 +110,7 @@ class TestRank():
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter_footprint_sequence_unsupported(self, filter):
-        footprint_sequence = morphology.disk(3, decomposition="sequence")
+        footprint_sequence = morphology.diamond(3, decomposition="sequence")
         with pytest.raises(ValueError):
             getattr(rank, filter)(self.image.astype(np.uint8),
                                   footprint_sequence)
