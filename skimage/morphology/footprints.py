@@ -447,7 +447,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         If False, extend the radius by 0.5. This allows the circle to expand
         further within a cube that remains of size ``2 * radius + 1`` along
         each axis. This parameter is ignored if decomposition is not None.
-    decomposition : {None, 'sequence'}, optional
+    decomposition : {None, 'sequence', 'crosses'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given a result equivalent to a single, larger footprint, but with
@@ -576,6 +576,11 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     ----------------
     dtype : data-type, optional
         The data type of the footprint.
+    decomposition : {None, 'crosses'}, optional
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        given an identical result to a single, larger footprint, but with
+        better computational performance. See Notes for more details.
 
     Returns
     -------
