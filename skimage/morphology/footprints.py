@@ -286,7 +286,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
                              dtype=dtype)
     elif decomposition == 'sequence':
         fp = diamond(1, dtype=dtype, decomposition=None)
-        nreps = _decompose_size(2*radius + 1, fp.shape[0])
+        nreps = _decompose_size(2 * radius + 1, fp.shape[0])
         footprint = ((fp, nreps),)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
@@ -473,7 +473,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
         footprint = np.array(s <= radius, dtype=dtype)
     elif decomposition == 'sequence':
         fp = octahedron(1, dtype=dtype, decomposition=None)
-        nreps = _decompose_size(2*radius + 1, fp.shape[0])
+        nreps = _decompose_size(2 * radius + 1, fp.shape[0])
         footprint = ((fp, nreps),)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
