@@ -194,6 +194,37 @@ def test_nsphere_series_approximation(function, radius):
         assert error / expected.size <= max_error
 
 
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
+@pytest.mark.parametrize("strict_radius", [False, True])
+def test_disk_crosses_approximation(radius, strict_radius):
+    fp_func = footprints.disk
+    expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
+    footprint_sequence = fp_func(radius, strict_radius=strict_radius,
+                                 decomposition="crosses")
+    approximate = _composite_footprint_from_sequence(footprint_sequence)
+    assert approximate.shape == expected.shape
+
+    # verify that maximum error does not exceed some fraction of the size
+    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    max_error = 0.05
+    assert error / expected.size <= max_error
+
+
+@pytest.mark.parametrize("width", [3, 8, 20, 50])
+@pytest.mark.parametrize("height", [3, 8, 20, 50])
+def test_ellipse_crosses_approximation(width, height):
+    fp_func = footprints.ellipse
+    expected = fp_func(width, height, decomposition=None)
+    footprint_sequence = fp_func(width, height, decomposition="crosses")
+    approximate = _composite_footprint_from_sequence(footprint_sequence)
+    assert approximate.shape == expected.shape
+
+    # verify that maximum error does not exceed some fraction of the size
+    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    max_error = 0.05
+    assert error / expected.size <= max_error
+
+
 def test_disk_series_approximation_unavailable():
     # ValueError if radius is too large (only precomputed up to radius=250)
     with pytest.raises(ValueError):

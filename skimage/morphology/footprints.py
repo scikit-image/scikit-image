@@ -501,7 +501,8 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     elif decomposition == 'sequence':
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
-        fp = disk(radius, dtype, strict_radius=False, decomposition=None)
+        fp = disk(radius, dtype, strict_radius=strict_radius,
+                  decomposition=None)
         sequence = _cross_decomposition(fp)
     return sequence
 
@@ -526,7 +527,8 @@ def _cross_decomposition(footprint, dtype=np.uint8):
 
     This is a decomposition of the footprint into a sequence of
     (possibly asymmetric) cross-shaped elements. This technique was proposed in
-    [1]_ and corresponds roughly to algorithm 1 of that publication.
+    [1]_ and corresponds roughly to algorithm 1 of that publication (some
+    details had to be modified to get reliable operation).
 
     .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric Convex
            Templates. Proc. SPIE 1350, Image Algebra and Morphological Image
@@ -541,6 +543,8 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     sum0 = 0
     for i in range(col_sums.size - 1):
         if col_sums[i] > col_sums[i + 1]:
+            if i == 0:
+                continue
             key = (col_sums[i_prev] - col_sums[i], i - i_prev)
             sum0 += key[0]
             if key not in idx:
