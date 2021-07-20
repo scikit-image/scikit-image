@@ -475,7 +475,9 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     computed with kwargs ``strict_radius=False, decomposition=None``.
 
     Empirically, the series decomposition at large radius approaches a
-    hexadecagon (a 16-sided polygon [2]_).
+    hexadecagon (a 16-sided polygon [2]_). In [3]_, the authors demonstrate
+    that a hexadecagon is the closest approximation to a disk that can be
+    achieved for decomposition with footprints of shape (3, 3).
 
     References
     ----------
@@ -485,6 +487,10 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            UK.
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
     .. [2] https://en.wikipedia.org/wiki/Hexadecagon
+    .. [3] Vanrell, M and Vitrià, J. Optimal 3 × 3 decomposable disks for
+           morphological transformations. Image and Vision Computing, Vol. 15,
+           Issue 11, 1997.
+           :DOI:`10.1016/S0262-8856(97)00026-7`
     """
     if decomposition is None:
         L = np.arange(-radius, radius + 1)
@@ -494,7 +500,59 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
     elif decomposition == 'sequence':
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
+    elif decomposition == 'crosses':
+        fp = disk(radius, dtype, strict_radius=False, decomposition=None)
+        sequence = _cross_decomposition(fp)
     return sequence
+
+
+def _cross(r0, r1, dtype=np.uint8):
+    """Cross-shaped structuring element of shape (r0, r1).
+
+    Only the central row and column are ones.
+    """
+    s0 = int(2 * r0 + 1)
+    s1 = int(2 * r1 + 1)
+    c = np.zeros((s0, s1), dtype=dtype)
+    if r1 != 0:
+        c[r0, :] = 1
+    if r0 != 0:
+        c[:, r1] = 1
+    return c
+
+
+def _cross_decomposition(footprint, dtype=np.uint8):
+    """ Decompose a symmetric convex footprint into cross-shaped elements.
+
+    This is a decomposition of the footprint into a sequence of
+    (possibly asymmetric) cross-shaped elements. This technique was proposed in
+    [1]_ and corresponds roughly to algorithm 1 of that publication.
+
+    .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric Convex
+           Templates. Proc. SPIE 1350, Image Algebra and Morphological Image
+           Processing, (1 November 1990).
+           :DOI:`10.1117/12.23608`
+    """
+    quadrant = footprint[footprint.shape[0] // 2:, footprint.shape[1] // 2:]
+    col_sums = quadrant.sum(0, dtype=int)
+    col_sums = np.concatenate((col_sums, np.asarray([0,], dtype=int)))
+    i_prev = 0
+    idx = {}
+    sum0 = 0
+    for i in range(col_sums.size - 1):
+        if col_sums[i] > col_sums[i + 1]:
+            key = (col_sums[i_prev] - col_sums[i], i - i_prev)
+            sum0 += key[0]
+            if key not in idx:
+                idx[key] = 1
+            else:
+                idx[key] += 1
+            i_prev = i
+    n = quadrant.shape[0] - 1 - sum0
+    if n > 0:
+        key = (n, 0)
+        idx[key] = idx.get(key, 0) + 1
+    return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
 
 
 def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
@@ -534,10 +592,15 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
 
     """
-    footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
-    rows, cols = draw.ellipse(height, width, height + 1, width + 1)
-    footprint[rows, cols] = 1
-    return footprint
+    if decomposition is None:
+        footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
+        rows, cols = draw.ellipse(height, width, height + 1, width + 1)
+        footprint[rows, cols] = 1
+        return footprint
+    elif decomposition == 'crosses':
+        fp = ellipse(width, height, dtype, decomposition=None)
+        sequence = _cross_decomposition(fp)
+    return sequence
 
 
 def cube(width, dtype=np.uint8, *, decomposition=None):
