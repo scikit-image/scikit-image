@@ -12,22 +12,6 @@ from skimage._shared.testing import fetch
 from skimage.morphology import binary_dilation, footprints
 
 
-def _composite_footprint_from_sequence(seq):
-    """Generate a single array footprint equivalent to a footprint sequence.
-    """
-    ndim = seq[0][0].ndim
-    size = [0,] * ndim
-    for d in range(ndim):
-        fp, nreps = seq[0]
-        size[d] = fp.shape[d] + (nreps - 1) * (fp.shape[d] - 1)
-        for fp, nreps in seq[1:]:
-            size[d] += nreps * (fp.shape[d] - 1)
-    size = tuple(size)
-    imag = np.zeros(size, dtype=bool)
-    imag[tuple(s // 2 for s in size)] = 1
-    return binary_dilation(imag, seq)
-
-
 class TestSElem():
 
     def test_square_footprint(self):
@@ -198,7 +182,6 @@ def test_nsphere_series_approximation(function, radius):
     expected = fp_func(radius, strict_radius=False, decomposition=None)
     footprint_sequence = fp_func(radius, strict_radius=False,
                                  decomposition="sequence")
-
     approximate = footprints.footprint_from_sequence(footprint_sequence)
     assert approximate.shape == expected.shape
 
@@ -212,10 +195,12 @@ def test_nsphere_series_approximation(function, radius):
 
 
 def test_disk_series_approximation_unavailable():
+    # ValueError if radius is too large (only precomputed up to radius=250)
     with pytest.raises(ValueError):
         footprints.disk(radius=10000, decomposition="sequence")
 
 
 def test_ball_series_approximation_unavailable():
+    # ValueError if radius is too large (only precomputed up to radius=100)
     with pytest.raises(ValueError):
         footprints.ball(radius=10000, decomposition="sequence")
