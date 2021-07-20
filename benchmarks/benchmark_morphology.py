@@ -164,7 +164,7 @@ class BinaryMorphology3D(object):
         elif footprint in ["ball", "octahedron"]:
             self.footprint = fp_func(radius, **footprint_kwargs)
 
-    def time_binary_erosion(
+    def time_erosion(
         self, shape, footprint, radius, *args
     ):
         morphology.binary_erosion(self.image, self.footprint)
