@@ -125,7 +125,7 @@ class BinaryMorphology2D(object):
         elif footprint == "ellipse":
             self.footprint = fp_func(radius, radius, **footprint_kwargs)
 
-    def time_binary_erosion(
+    def time_erosion(
         self, shape, footprint, radius, *args
     ):
         morphology.binary_erosion(self.image, self.footprint)
@@ -168,3 +168,22 @@ class BinaryMorphology3D(object):
         self, shape, footprint, radius, *args
     ):
         morphology.binary_erosion(self.image, self.footprint)
+
+
+# Repeat the same footprint tests for grayscale morphology
+# just need to call morphology.erosion instead of morphology.binary_erosion
+
+class GrayMorphology2D(BinaryMorphology2D):
+
+    def time_erosion(
+        self, shape, footprint, radius, *args
+    ):
+        morphology.erosion(self.image, self.footprint)
+
+
+class GrayMorphology3D(BinaryMorphology3D):
+
+    def time_erosion(
+        self, shape, footprint, radius, *args
+    ):
+        morphology.erosion(self.image, self.footprint)
