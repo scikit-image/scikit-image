@@ -41,7 +41,7 @@ def _shape_from_sequence(footprints, require_odd_size=False):
     if not _footprint_is_sequence(footprints):
         raise ValueError("expected a sequence of footprints")
     ndim = footprints[0][0].ndim
-    shape = [0,] * ndim
+    shape = [0] * ndim
 
     def _odd_size(size, require_odd_size):
         if require_odd_size and size % 2 == 0:
@@ -404,7 +404,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     ``decomposition=None`` since the internal SciPy functions that are called
     already have a fast implementation based on separable 1D sliding windows.
     """
-    if decomposition == None:
+    if decomposition is None:
         return np.ones((width, width, width), dtype=dtype)
 
     if decomposition == 'separable' or width % 2 == 0:

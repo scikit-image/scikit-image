@@ -98,14 +98,14 @@ class BinaryMorphology2D(object):
         # (so it will not become fully False for any of the footprints).
         self.image = rng.standard_normal(shape) < 3.5
         fp_func = getattr(morphology, footprint)
-        _allow_decomp = ("rectangle", "square", "diamond", "octagon")
-        _allow_separable = ("rectangle", "square")
+        allow_decomp = ("rectangle", "square", "diamond", "octagon")
+        allow_separable = ("rectangle", "square")
         footprint_kwargs = {}
-        if decomposition is not None and footprint not in _allow_decomp:
+        if decomposition is not None and footprint not in allow_decomp:
             raise NotImplementedError("decomposition unimplemented")
-        elif decomposition == "separable" and footprint not in _allow_separable:
+        elif decomposition == "separable" and footprint not in allow_separable:
             raise NotImplementedError("separable decomposition unavailable")
-        if footprint in _allow_decomp:
+        if footprint in allow_decomp:
             footprint_kwargs["decomposition"] = decomposition
         if footprint in ["rectangle", "square"]:
             size = 2 * radius + 1
@@ -147,16 +147,16 @@ class BinaryMorphology3D(object):
         # make an image that is mostly True, with a few isolated False areas
         self.image = rng.standard_normal(shape) > -3
         fp_func = getattr(morphology, footprint)
-        _allow_decomp = ("cube", "octahedron")
-        _allow_separable = ("cube",)
+        allow_decomp = ("cube", "octahedron")
+        allow_separable = ("cube",)
         if decomposition == "separable" and footprint != "cube":
             raise NotImplementedError("separable unavailable")
         footprint_kwargs = {}
-        if decomposition is not None and footprint not in _allow_decomp:
+        if decomposition is not None and footprint not in allow_decomp:
             raise NotImplementedError("decomposition unimplemented")
-        elif decomposition == "separable" and footprint not in _allow_separable:
+        elif decomposition == "separable" and footprint not in allow_separable:
             raise NotImplementedError("separable decomposition unavailable")
-        if footprint in _allow_decomp:
+        if footprint in allow_decomp:
             footprint_kwargs["decomposition"] = decomposition
         if footprint == "cube":
             size = 2 * radius + 1
