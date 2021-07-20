@@ -249,7 +249,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     ----------------
     dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
+    decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
@@ -434,7 +434,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     ----------------
     dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
+    decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
@@ -527,7 +527,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
     ----------------
     dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
+    decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
         given an identical result to a single, larger footprint, but with
