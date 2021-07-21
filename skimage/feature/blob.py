@@ -490,15 +490,11 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     if log_scale:
-        # for anisotropic data, we use the "highest resolution/variance" axis
-        standard_axis = np.argmax(min_sigma)
-        start = np.log10(min_sigma[standard_axis])
-        stop = np.log10(max_sigma[standard_axis])
-        scale = np.logspace(start, stop, num_sigma)[:, np.newaxis]
-        sigma_list = scale * min_sigma / np.max(min_sigma)
+        start = np.log10(min_sigma)
+        stop = np.log10(max_sigma)
+        sigma_list = np.logspace(start, stop, num_sigma)
     else:
-        scale = np.linspace(0, 1, num_sigma)[:, np.newaxis]
-        sigma_list = scale * (max_sigma - min_sigma) + min_sigma
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     # computing gaussian laplace
     # average s**2 provides scale invariance
