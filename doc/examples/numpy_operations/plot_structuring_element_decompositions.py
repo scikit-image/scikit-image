@@ -12,11 +12,10 @@ an equivalent series of smaller footprints. Most often this is done to provide
 a performance benefit.
 
 As a concrete example, dilation with a square footprint of size (15, 15) is
-equivalent to:
-- decomposition with a rectangle of size (15, 1) followed by a rectangle of
- size (1, 15).
-- the same rectangular elements as above, but in opposite order
-- decomposition with a rectangle of (3, 3) for 7 iterations.
+equivalent to dilation with a rectangle of size (15, 1) followed by a
+dilation with a rectangle of size (1, 15). It is also equivalent to 7
+consecutive dilations with a shape (3, 3) square.
+
 There are many possible decompositions and which one performs best may be
 architecture-dependent.
 
