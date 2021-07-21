@@ -1,0 +1,1 @@
+Use Towncrier for aggregating release notes.
