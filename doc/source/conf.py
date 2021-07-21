@@ -395,12 +395,6 @@ intersphinx_mapping = {
                    (None, './_intersphinx/matplotlib-objects.inv'))
 }
 
-# ----------------------------------------------------------------------------
-# Towncrier manual Instructions
-# ----------------------------------------------------------------------------
-
-exclude_patterns = ['towncrier.md']
-
 
 # ----------------------------------------------------------------------------
 # Source code links
