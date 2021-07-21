@@ -32,9 +32,9 @@ requires = [
 
 [tool.towncrier]
   filename = "doc/release/release_{version}.rst"
-  directory = "doc/source/upcoming_changes"
+  directory = "doc/release/upcoming_changes"
   issue_format = "`#{issue} <https://github.com/scikit-image/scikit-image/issues/{issue}>`_"  
-  template = "doc/source/upcoming_changes/towncrier_template.jinja"
+  template = "doc/release/upcoming_changes/towncrier_template.jinja"
   type = [
     { name = "API Changes",               directory = "api",          showcontent = true },
     { name = "Improvements",              directory = "improvements", showcontent = true },

@@ -24,12 +24,12 @@ a patch release is required for an older version, a branch can be created from
 the appropriate point in main and the following instructions are still apt.
 
 If you have issues with the automated process of release notes generation you
-can follow the steps described in doc/source/towncrier.md. By default release
+can follow the steps described in doc/release/upcoming_changes/README.md. By default release
 notes are created automatically using a Github action that uses the Towncrier
 package and a custom script for aggregating the contributors. Towncrier relies
 on “news fragments” being generated appropriately by contributors for each PR
 that was merged. You can review the upcoming changes that will be part of the
-release notes in `doc/source/upcoming_changes`. These will be deleted upon each
+release notes in `doc/release/upcoming_changes`. These will be deleted upon each
 release. In addition to the news fragments, `tools/aggregate_contributors.py`
 will compile information across all PRs that are part of the release.
 

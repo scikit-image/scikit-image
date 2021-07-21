@@ -7,13 +7,13 @@ A description of the automated aggregation process is described in RELEASE.txt.
 
 All non trivial changes must be accompanied by a [news fragment
 entry](https://github.com/twisted/towncrier#news-fragments). The fragment file
-name should be “doc/source/upcoming_changes/<PR number>.<type>.rst” where
+name should be “doc/release/upcoming_changes/<PR number>.<type>.rst” where
 "type" can be one of  api, improvements, deprecated, process, feature, bugfix,
 doc, (or trivial if you do not wish the changes included in the release notes.
 
 Example: 5456.bugfix.rst
 
-In brief, the contents of the rst file should be brief, in sentence case, in an
+The contents of the rst file should be brief, in sentence case, in an
 imperative tone, and targetted to end users. See [this
 link](https://pip.pypa.io/en/stable/development/contributing/?highlight=towncrier#news-entries)
 for a more detailed description.
