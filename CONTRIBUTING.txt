@@ -115,6 +115,12 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 5. Document changes
 
+   The release notes are managed using towncrier:
+   https://pypi.org/project/towncrier
+
+   All non trivial changes must be accompanied by a news fragment:
+   https://github.com/scikit-image/scikit-image/tree/master/doc/release/upcoming_changes/README.md
+
    If your change introduces any API modifications, please update
    ``doc/source/api_changes.txt``.
 
