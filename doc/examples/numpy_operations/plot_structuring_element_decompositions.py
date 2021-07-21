@@ -1,7 +1,7 @@
 """
-==========================================
-Decomposition of flat structuring elements
-==========================================
+=======================================================
+Decomposition of flat footprints (structuring elements)
+=======================================================
 
 Many footprints (structuring elements) can be decomposed into an equivalent
 series of smaller structuring elements. The term "flat" refers to a footprints
