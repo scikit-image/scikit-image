@@ -270,9 +270,13 @@ jobs:
           git config --global user.name "github-actions"
           git add remote origin https://github.com/scikit-image/scikit-image.git
 
-          # Commit newsfragments deletion and the new release notes
-          git commit -m "${COMMIT_MSG}"
-          git push origin "main"
+          if  grep '^v[0-9]*\.[0-9]*\.[0-9]*$' <(echo "${RELEASE_VERSION}") ; then
+            # Commit newsfragments deletion and the new release notes
+            git commit -m "${COMMIT_MSG}"
+            git push origin "main"
+          else
+            echo ${RELEASE_VERSION} was inferred to be a release candidate
+          fi
         env:
           COMMIT_MSG: |
             Auto release automated commit: ${{ github.sha }}
