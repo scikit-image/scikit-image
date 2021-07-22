@@ -805,7 +805,7 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
                mode='reflect'),
         dtype=np.float64)
     cdef double [:, :, ::1] weights = np.zeros_like(padded[..., 0])
-    cdef double [:, :, ::1] integral = np.empty_like(padded[..., 0])
+    cdef double [:, :, ::1] integral = np.zeros_like(padded[..., 0])
     cdef double [:, :, :, ::1] result = np.zeros_like(padded)
 
     cdef Py_ssize_t n_pln, n_row, n_col, t_pln, t_row, t_col, \
