@@ -537,21 +537,21 @@ def test_denoise_nl_means_4d():
     for ch in range(img.shape[-1]):
         denoised_3d[..., ch] = restoration.denoise_nl_means(
             imgn[..., ch],
-            multichannel=False,
+            channel_axis=None,
             **nlmeans_kwargs)
     psnr_3d = peak_signal_noise_ratio(img, denoised_3d, data_range=1.)
     assert psnr_3d > psnr_noisy
 
     # denoise as 4D
     denoised_4d = restoration.denoise_nl_means(imgn,
-                                               multichannel=False,
+                                               channel_axis=None,
                                                **nlmeans_kwargs)
     psnr_4d = peak_signal_noise_ratio(img, denoised_4d, data_range=1.)
     assert psnr_4d > psnr_3d
 
     # denoise as 3D + channels instead
     denoised_3dmc = restoration.denoise_nl_means(imgn,
-                                                 multichannel=True,
+                                                 channel_axis=-1,
                                                  **nlmeans_kwargs)
     psnr_3dmc = peak_signal_noise_ratio(img, denoised_3dmc, data_range=1.)
     assert psnr_3dmc > psnr_3d
@@ -567,7 +567,7 @@ def test_denoise_nl_means_4d_multichannel():
 
     denoised_4dmc = restoration.denoise_nl_means(imgn, 3, 3, h=0.35 * sigma,
                                                  fast_mode=True,
-                                                 multichannel=True,
+                                                 channel_axis=None,
                                                  sigma=sigma)
     psnr_4dmc = peak_signal_noise_ratio(img, denoised_4dmc, data_range=1.)
     assert psnr_4dmc > psnr_noisy
@@ -577,31 +577,31 @@ def test_denoise_nl_means_wrong_dimension():
     # 1D not implemented
     img = np.zeros((5, ))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=False)
+        restoration.denoise_nl_means(img, channel_axis=None)
 
     img = np.zeros((5, 3))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=True)
+        restoration.denoise_nl_means(img, channel_axis=-1)
 
     # 3D + channels only for fast mode
     img = np.zeros((5, 5, 5, 5))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=True, fast_mode=False)
+        restoration.denoise_nl_means(img, channel_axis=-1, fast_mode=False)
 
     # 4D only for fast mode
     img = np.zeros((5, 5, 5, 5))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=False, fast_mode=False)
+        restoration.denoise_nl_means(img, channel_axis=None, fast_mode=False)
 
     # 4D + channels only for fast mode
     img = np.zeros((5, 5, 5, 5, 5))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=True, fast_mode=False)
+        restoration.denoise_nl_means(img, channel_axis=-1, fast_mode=False)
 
     # 5D not implemented
     img = np.zeros((5, 5, 5, 5, 5))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, multichannel=False)
+        restoration.denoise_nl_means(img, channel_axis=None)
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
