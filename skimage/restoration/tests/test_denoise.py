@@ -489,25 +489,25 @@ def test_denoise_nl_means_3d(fast_mode, dtype):
 def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
     # for true 3D data, 3D denoising is better than denoising as 2D+channels
     dtype = np.float64
-    rstate = np.random.RandomState(5)
 
     # synthetic 3d volume
     img = data.binary_blobs(length=32, n_dim=3, seed=5)
     img = img[:, :24, :16].astype(dtype, copy=False)
 
     sigma = 0.2
-    imgn = img + sigma * rstate.randn(*img.shape)
+    rng = np.random.default_rng(5)
+    imgn = img + sigma * rng.standard_normal(img.shape)
     imgn = imgn.astype(dtype)
 
     # test 3D denoising (channel_axis = None)
     denoised_ok_multichannel = restoration.denoise_nl_means(
-        imgn, 3, 2, h=0.6 * sigma, sigma=sigma, fast_mode=fast_mode,
+        imgn.copy(), 3, 2, h=0.6 * sigma, sigma=sigma, fast_mode=fast_mode,
         channel_axis=None)
 
     # set a channel axis: one dimension is (incorrectly) considered "channels"
     imgn = np.moveaxis(imgn, -1, channel_axis)
     denoised_wrong_multichannel = restoration.denoise_nl_means(
-        imgn, 3, 2, h=0.6 * sigma, sigma=sigma, fast_mode=fast_mode,
+        imgn.copy(), 3, 2, h=0.6 * sigma, sigma=sigma, fast_mode=fast_mode,
         channel_axis=channel_axis
     )
     denoised_wrong_multichannel = np.moveaxis(
@@ -516,6 +516,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
 
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
+    print(f"psnr_wrong={psnr_wrong}, psnr_ok={psnr_ok}")
     assert psnr_ok > psnr_wrong
 
 
@@ -567,7 +568,7 @@ def test_denoise_nl_means_4d_multichannel():
 
     denoised_4dmc = restoration.denoise_nl_means(imgn, 3, 3, h=0.35 * sigma,
                                                  fast_mode=True,
-                                                 channel_axis=None,
+                                                 channel_axis=-1,
                                                  sigma=sigma)
     psnr_4dmc = peak_signal_noise_ratio(img, denoised_4dmc, data_range=1.)
     assert psnr_4dmc > psnr_noisy
