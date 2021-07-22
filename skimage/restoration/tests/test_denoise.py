@@ -520,12 +520,12 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
 
 
 def test_denoise_nl_means_4d():
-    rstate = np.random.RandomState(5)
+    rng = np.random.default_rng(5)
     img = np.zeros((10, 10, 8, 5))
     img[2:-2, 2:-2, 2:-2, :2] = 0.5
     img[2:-2, 2:-2, 2:-2, 2:] = 1.
     sigma = 0.3
-    imgn = img + sigma * rstate.randn(*img.shape)
+    imgn = img + sigma * rng.standard_normal(img.shape)
 
     nlmeans_kwargs = dict(patch_size=3, patch_distance=2, h=0.3 * sigma,
                           sigma=sigma, fast_mode=True)
