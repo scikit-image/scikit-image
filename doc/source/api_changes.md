@@ -1,4 +1,4 @@
-## Version 0.16
+# Version 0.16
 
 
 - The following functions are deprecated and will be removed in 0.18:
@@ -14,7 +14,7 @@
   ``skimage.metrics.contingency_table``
 - A new example of plotting these evaluation metrics has been added to the docs.
 
-## Version 0.15
+# Version 0.15
 
 
 - ``skimage.feature.canny`` now uses a more accurate Gaussian filter
@@ -23,7 +23,7 @@
   ``skimage.filters.threshold_sauvola``
   now accept a tuple as ``window_size`` besides integers.
 
-## Version 0.14
+# Version 0.14
 
 
 - ``skimage.filters.gaussian_filter`` has been removed. Use
@@ -52,7 +52,7 @@
 - In ``skimage.feature.hog`` visualise has been changed to visualize.
 - `freeimage` plugin of ``skimage.io`` has been removed.
 
-## Version 0.13
+# Version 0.13
 
 
 - `skimage.filter` has been removed. Use `skimage.filters` instead.
@@ -73,9 +73,9 @@
 - Parameters ``ntiles_x``, ``ntiles_y`` have been removed from
   ``skimage.exposure.equalize_adapthist``.
 - The ``freeimage`` io plugin is no longer supported, and will use ``imageio``
-  instead.  We will completely remove the ``freeimage`` plugin in ## Version 0.14.
+  instead.  We will completely remove the ``freeimage`` plugin in # Version 0.14.
 
-## Version 0.12
+# Version 0.12
 
 
 - ``equalize_adapthist`` now takes a ``kernel_size`` keyword argument, replacing
@@ -94,19 +94,19 @@
 - `skimage.filters.denoise_*` have moved to `skimage.restoration.denoise_*`.
 - `skimage.data.lena` has been removed.
 
-## Version 0.11
+# Version 0.11
 
 
 - The ``skimage.filter`` subpackage has been renamed to ``skimage.filters``.
 - Some edge detectors returned values greater than 1--their results are now
   appropriately scaled with a factor of ``sqrt(2)``.
 
-## Version 0.10
+# Version 0.10
 
 
 - Removed ``skimage.io.video`` functionality due to broken gstreamer bindings
 
-## Version 0.9
+# Version 0.9
 
 
 - No longer wrap ``imread`` output in an ``Image`` class
@@ -120,11 +120,11 @@
   `skimage.transform.probabilistic_hough`,`skimage.transform.hough_peaks`.
   Their functionality still exists, but under different names.
 
-## Version 0.4
+# Version 0.4
 
 - Switch mask and radius arguments for ``median_filter``
 
-## Version 0.3
+# Version 0.3
 
 - Remove ``as_grey``, ``dtype`` keyword from ImageCollection
 - Remove ``dtype`` from imread
