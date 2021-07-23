@@ -1,4 +1,4 @@
-scikit-image: image processing in Python
+Overview
 ========================================
 
 [scikit-image](https://scikit-image.org) builds on

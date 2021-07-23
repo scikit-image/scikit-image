@@ -15,19 +15,11 @@ Sections
    :hidden:
 
    overview
-   api/api
-   api_changes
-   install
    user_guide
-   glossary
    contribute
-   license
-   auto_examples/index
+   api/api
    release_notes
-   core_developer
-   skips/index
-   values
-   conduct/code_of_conduct
+   about
 
 .. list-table::
    :class: contentstable

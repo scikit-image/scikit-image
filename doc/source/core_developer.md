@@ -1,7 +1,7 @@
 (core_dev)=
 
-Core Developer Guide
-====================
+# Core Developer Guide
+
 
 Welcome, new core developer!  The core team appreciate the quality of
 your work, and enjoy working with you; we have therefore invited you
@@ -17,8 +17,7 @@ As a core team member, you gain the responsibility of shepherding
 other contributors through the review process; here are some
 guidelines.
 
-All Contributors Are Treated The Same
--------------------------------------
+## All Contributors Are Treated The Same
 
 You now have the ability to push changes directly to the main
 branch, but should never do so; instead, continue making pull requests
@@ -37,16 +36,16 @@ feature to merge, unless you have a good reason not to do so.
 [gh_sqmrg]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/merging-a-pull-request#merging-a-pull-request-on-github
 
 (sec:reviewing)=
-Reviewing
----------
 
-### How to Conduct A Good Review
+## Reviewing
 
 *Always* be kind to contributors. Nearly all of `scikit-image` is
 volunteer work, for which we are tremendously grateful. Provide
 constructive criticism on ideas and implementations, and remind
 yourself of how it felt when your own work was being evaluated as a
 novice.
+
+### How to Conduct A Good Review
 
 `scikit-image` strongly values mentorship in code review.  New users
 often need more handholding, having little to no git
@@ -135,8 +134,7 @@ speak up in case they are not fine with the current state of the pull request.
 Another exceptional situation is one where the first approving review happened
 a long time ago and many changes have taken place in the meantime.
 
-Closing issues and pull requests
---------------------------------
+## Closing issues and pull requests
 
 Sometimes, an issue must be closed that was not fully resolved. This can be
 for a number of reasons:
@@ -178,8 +176,7 @@ closing, your message should:
 These points help ensure that all contributors feel welcome and empowered to
 keep contributing, regardless of the outcome of past contributions.
 
-Further resources
------------------
+## Further resources
 
 As a core member, you should be familiar with community and developer
 resources such as:
@@ -202,8 +199,7 @@ resources such as:
 
 You are not required to monitor all of the social resources.
 
-Inviting New Core Members
--------------------------
+## Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
@@ -214,8 +210,8 @@ significant changes of their own, contributed to the discussion and
 review of others' work, and collaborated in a way befitting our
 community values.
 
-Contribute To This Guide!
--------------------------
+## Contribute To This Guide!
+
 
 This guide reflects the experience of the current core developers.  We
 may well have missed things that, by now, have become second
@@ -223,8 +219,8 @@ nature—things that you, as a new team member, will spot more easily.
 Please ask the other core developers if you have any questions, and
 submit a pull request with insights gained.
 
-Conclusion
-----------
+## Conclusion
+
 
 We are excited to have you on board!  We look forward to your
 contributions to the code base and the community.  Thank you in

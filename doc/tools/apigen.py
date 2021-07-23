@@ -475,7 +475,7 @@ class ApiDocWriter(object):
         # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
         # if it is `skimage.submodule.subsubmodule`, ignore.
 
-        title = "API Reference for skimage |version|"
+        title = "API"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
 
@@ -504,4 +504,19 @@ class ApiDocWriter(object):
         w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
+
+        subtitle = "API Changes"
+        w('\n' + subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+        w('.. toctree::\n')
+        w('   :maxdepth: 1\n\n')
+        w('   ../api_changes\n\n')
+
+        subtitle = "Proposed API Changes"
+        w('\n' + subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+        w('.. toctree::\n')
+        w('   :maxdepth: 2\n\n')
+        w('   ../skips/index\n\n')
+
         idx.close()

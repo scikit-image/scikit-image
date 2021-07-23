@@ -1,6 +1,6 @@
 .. _howto_contribute:
 
-How to contribute to scikit-image
+How to contribute
 =================================
 
 Developing Open Source is great fun!  Join us on the `scikit-image mailing

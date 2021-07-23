@@ -1,7 +1,5 @@
-.. _using-git:
-
-Working with *scikit-image* source code
-================================================
+Introduction to working with source code
+----------------------------------------------
 
 Contents:
 

@@ -38,7 +38,7 @@ So now you are on the branch with the changes to be incorporated upstream.  The
 rest of this section assumes you are on this branch.
 
 A few commits
-=============
+***************
 
 If there are only a few commits, consider rebasing to upstream::
 
@@ -52,7 +52,7 @@ github pull requests manually, because github will not be able to detect the
 changes have already been merged.
 
 A long series of commits
-========================
+************************
 
 If there are a longer series of related commits, consider a merge instead::
 
@@ -68,7 +68,7 @@ the main history with a merge, rather than appearing to have been made directly
 on top of trunk.
 
 Check the history
-=================
+******************
 
 Now, in either case, you should check that the history is sensible and you have
 the right commits::
@@ -84,7 +84,7 @@ at the end). So, it shows the commits unique to this branch compared to trunk.
 The ``-p`` option shows the diff for these commits in patch form.
 
 Push to trunk
-=============
+***************
 
 ::
 

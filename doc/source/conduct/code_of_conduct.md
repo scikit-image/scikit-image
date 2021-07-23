@@ -1,4 +1,4 @@
-scikit-image Code of Conduct
+Code of Conduct
 ============================
 
 scikit-image adopts the [SciPy code of conduct][scipy_coc].

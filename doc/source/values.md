@@ -1,4 +1,5 @@
-# Our mission
+Our mission
+========
 
 scikit-image aims to be the reference library for scientific image analysis in
 Python. We accomplish this by:

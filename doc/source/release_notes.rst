@@ -3,7 +3,7 @@
 
 .. contents:: |nbsp|
 
-Release notes
+Changelog
 =============
 
 .. include:: ../release/_release_notes_for_docs.rst
