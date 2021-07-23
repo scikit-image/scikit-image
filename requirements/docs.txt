@@ -16,3 +16,4 @@ myst-parser
 ipywidgets
 plotly>=4.14.0
 kaleido
+pydata-sphinx-theme
