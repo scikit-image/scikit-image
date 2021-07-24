@@ -971,7 +971,8 @@ def _mean_std(image, w):
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
     return m, s
  
- def _only_mean(image, w):
+def _only_mean(image, w):
+  
     """Return local mean of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation.
@@ -991,33 +992,33 @@ def _mean_std(image, w):
         Local mean of the image.
     """
 
-    if not isinstance(w, Iterable):
-        w = (w,) * image.ndim
-    _validate_window_size(w)
+   if not isinstance(w, Iterable):
+       w = (w,) * image.ndim
+   _validate_window_size(w)
 
-    pad_width = tuple((k // 2 + 1, k // 2) for k in w)
-    padded = np.pad(image.astype('float'), pad_width,
+   pad_width = tuple((k // 2 + 1, k // 2) for k in w)
+   padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
-    #padded_sq = padded * padded
+   #padded_sq = padded * padded
 
-    integral = integral_image(padded)
-    #integral_sq = integral_image(padded_sq)
+   integral = integral_image(padded)
+   #integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros(tuple(k + 1 for k in w))
-    for indices in itertools.product(*([[0, -1]] * image.ndim)):
-        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+   kern = np.zeros(tuple(k + 1 for k in w))
+   for indices in itertools.product(*([[0, -1]] * image.ndim)):
+       kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
-    total_window_size = np.prod(w)
-    sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, pad_width) / total_window_size
-    #sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    #g2 = crop(sum_sq_full, pad_width) / total_window_size
-    # Note: we use np.clip because g2 is not guaranteed to be greater than
-    # m*m when floating point error is considered
-    #s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m#, s
+   total_window_size = np.prod(w)
+   sum_full = ndi.correlate(integral, kern, mode='constant')
+   m = crop(sum_full, pad_width) / total_window_size
+   #sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
+   #g2 = crop(sum_sq_full, pad_width) / total_window_size
+   # Note: we use np.clip because g2 is not guaranteed to be greater than
+   # m*m when floating point error is considered
+   #s = np.sqrt(np.clip(g2 - m * m, 0, None))
+   return m#, s
   
- def threshold_singh(image, window_size=15, k=0.2, r=None):
+def threshold_singh(image, window_size=15, k=0.2, r=None):
     """Applies Singh local threshold to an array.
 
     The threshold T is calculated for every pixel in the image using
@@ -1065,10 +1066,10 @@ def _mean_std(image, w):
     >>> binary_image = image > t_singh
     """
     
-    m = _only_mean(image, window_size)
-    d = image - m
+   m = _only_mean(image, window_size)
+   d = image - m
     
-    return m * (1 + k * ((d / 1-d) - 1))
+   return m * (1 + k * ((d / 1-d) - 1))
 
 
 def threshold_niblack(image, window_size=15, k=0.2):
