@@ -82,8 +82,6 @@ Other (2021)
 * Monitor when multibuild devel gets merged into master for python 3.8
   compatibility https://github.com/matthew-brett/multibuild/issues/284
   and update osx_install to point to the correct branch
-* Once NumPy is set to >= 1.17, consider removing
-  ``skimage.morphology._util._fast_pad``.
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 
