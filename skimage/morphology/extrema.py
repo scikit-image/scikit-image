@@ -393,7 +393,7 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
         # from the image border
-        image = _util._fast_pad(image, image.min())
+        image = np.pad(image, 1, mode='constant', constant_values=image.min())
 
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
