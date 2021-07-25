@@ -39,36 +39,11 @@ extensions = ['sphinx_copybutton',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery'
+              'sphinx_gallery.gen_gallery',
+              'myst_parser',
               ]
 
 autosummary_generate = True
-
-#------------------------------------------------------------------------
-# Sphinx-gallery configuration
-#------------------------------------------------------------------------
-
-sphinx_gallery_conf = {
-    'doc_module': ('skimage',),
-    # path to your examples scripts
-    'examples_dirs': '../examples',
-    # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples',
-    'backreferences_dir': 'api',
-    'reference_url': {'skimage': None},
-    'subsection_order': ExplicitOrder([
-        '../examples/data',
-        '../examples/numpy_operations',
-        '../examples/color_exposure',
-        '../examples/edges',
-        '../examples/transform',
-        '../examples/filters',
-        '../examples/features_detection',
-        '../examples/segmentation',
-        '../examples/applications',
-        '../examples/developers',
-    ]),
-}
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -97,6 +72,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
+# Changes to `root_doc` in newest versions of Sphinx (we're still on v2)
 master_doc = 'index'
 
 # General information about the project.
@@ -156,6 +132,79 @@ pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+from packaging.version import parse
+v = parse(release)
+if v.release is None:
+    raise ValueError(
+        'Ill-formed version: {!r}. Version should follow '
+        'PEP440'.format(version))
+
+if v.is_devrelease:
+    binder_branch = 'main'
+else:
+    major, minor = v.release[:2]
+    binder_branch = 'v{}.{}.x'.format(major, minor)
+
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery_png'
+from plotly.io._sg_scraper import plotly_sg_scraper
+image_scrapers = ('matplotlib', plotly_sg_scraper,)
+
+sphinx_gallery_conf = {
+    'doc_module': ('skimage',),
+    # path to your examples scripts
+    'examples_dirs': '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'auto_examples',
+    'backreferences_dir': 'api',
+    'reference_url': {'skimage': None},
+    'image_scrapers': image_scrapers,
+    # Default thumbnail size (400, 280)
+    # Default CSS rescales (160, 112)
+    # Size is decreased to reduce webpage loading time
+    'thumbnail_size': (280, 196),
+    'subsection_order': ExplicitOrder([
+        '../examples/data',
+        '../examples/numpy_operations',
+        '../examples/color_exposure',
+        '../examples/edges',
+        '../examples/transform',
+        '../examples/registration',
+        '../examples/filters',
+        '../examples/features_detection',
+        '../examples/segmentation',
+        '../examples/applications',
+        '../examples/developers',
+    ]),
+    'binder': {
+        # Required keys
+        'org': 'scikit-image',
+        'repo': 'scikit-image',
+        'branch': binder_branch,  # Can be any branch, tag, or commit hash
+        'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
+        'dependencies': '../../.binder/requirements.txt',
+        # Optional keys
+        'use_jupyter_lab': False
+     },
+    # Remove sphinx_gallery_thumbnail_number from generated files
+    'remove_config_comments':True,
+}
+
+from sphinx_gallery.utils import _has_optipng
+if _has_optipng():
+    # This option requires optipng to compress images
+    # Optimization level between 0-7
+    # sphinx-gallery default: -o7
+    # optipng default: -o2
+    # We choose -o1 as it produces a sufficient optimization
+    # See #4800
+    sphinx_gallery_conf['compress_images'] = ('images', 'thumbnails', '-o1')
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -304,7 +353,6 @@ plot_basedir = os.path.join(curpath, "plots")
 plot_pre_code = """
 import numpy as np
 import matplotlib.pyplot as plt
-np.random.seed(0)
 
 import matplotlib
 matplotlib.rcParams.update({
@@ -337,14 +385,14 @@ _python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
 _python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('https://docs.scipy.org/doc/numpy',
+    'numpy': ('https://numpy.org/doc/stable',
               (None, './_intersphinx/numpy-objects.inv')),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('http://scikit-learn.org/stable',
+    'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
-                   (None, 'https://matplotlib.org/objects.inv'))
+                   (None, './_intersphinx/matplotlib-objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
@@ -377,6 +425,9 @@ def linkcode_resolve(domain, info):
         except:
             return None
 
+    # Strip decorators which would resolve to the source of the decorator
+    obj = inspect.unwrap(obj)
+
     try:
         fn = inspect.getsourcefile(obj)
     except:
@@ -385,20 +436,18 @@ def linkcode_resolve(domain, info):
         return None
 
     try:
-        source, lineno = inspect.findsource(obj)
+        source, start_line = inspect.getsourcelines(obj)
     except:
-        lineno = None
-
-    if lineno:
-        linespec = "#L%d" % (lineno + 1)
-    else:
         linespec = ""
+    else:
+        stop_line = start_line + len(source) - 1
+        linespec = f"#L{start_line}-L{stop_line}"
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "master/skimage/%s%s" % (fn, linespec))
+                "main/skimage/%s%s" % (fn, linespec))
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

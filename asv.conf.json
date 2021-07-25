@@ -9,7 +9,7 @@
     "project_url": "https://scikit-image.org/",
     "repo": ".",
 
-    "branches": ["master"],
+    "branches": ["main"],
     "dvcs": "git",
     "environment_type": "conda",
     "install_timeout": 1200,
@@ -18,8 +18,9 @@
     "pythons": ["3.7"],
     "matrix": {
          "cython": [],
-         "numpy": ["1.15", "1.16"],
-         "scipy": []
+         "numpy": ["1.17"],
+         "scipy": [],
+         "pooch": []
     },
 
     "env_dir": ".asv/env",

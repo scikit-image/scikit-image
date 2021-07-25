@@ -16,10 +16,9 @@ perception of red, green and blue than equal weights. [1]_
 
 References
 ----------
-.. [1] http://www.poynton.com/PDFs/ColorFAQ.pdf
+.. [1] http://poynton.ca/PDFs/ColorFAQ.pdf
 
 """
-import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data

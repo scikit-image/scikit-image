@@ -2,7 +2,7 @@ import math
 import numpy as np
 from numpy.linalg import inv, pinv
 from scipy import optimize
-from .._shared.utils import check_random_state
+from warnings import warn
 
 
 def _check_data_dim(data, dim):
@@ -47,11 +47,11 @@ class LineModelND(BaseModel):
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
-    >>> lm.estimate(np.array([x, y]).T)
+    >>> lm.estimate(np.stack([x, y], axis=-1))
     True
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
-    >>> res = lm.residuals(np.array([x, y]).T)
+    >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -269,6 +269,10 @@ class CircleModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
+        # to prevent integer overflow, cast data to float, if it isn't already
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
+
         x = data[:, 0]
         y = data[:, 1]
 
@@ -277,12 +281,12 @@ class CircleModel(BaseModel):
         sum_x = np.sum(x)
         sum_y = np.sum(y)
         sum_xy = np.sum(x * y)
-        m1 = np.array([[np.sum(x ** 2), sum_xy, sum_x],
+        m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
                        [sum_xy, np.sum(y ** 2), sum_y],
-                       [sum_x, sum_y, float(len(x))]])
-        m2 = np.array([[np.sum(x * x2y2),
+                       [sum_x, sum_y, len(x)]])
+        m2 = np.stack([[np.sum(x * x2y2),
                         np.sum(y * x2y2),
-                        np.sum(x2y2)]]).T
+                        np.sum(x2y2)]], axis=-1)
         a, b, c = pinv(m1) @ m2
         a, b, c = a[0], b[0], c[0]
         xc = a / 2
@@ -413,13 +417,17 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        # to prevent integer overflow, cast data to float, if it isn't already
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
+
         x = data[:, 0]
         y = data[:, 1]
 
         # Quadratic part of design matrix [eqn. 15] from [1]
         D1 = np.vstack([x ** 2, x * y, y ** 2]).T
         # Linear part of design matrix [eqn. 16] from [1]
-        D2 = np.vstack([x, y, np.ones(len(x))]).T
+        D2 = np.vstack([x, y, np.ones_like(x)]).T
 
         # forming scatter matrix [eqn. 17] from [1]
         S1 = D1.T @ D1
@@ -580,6 +588,7 @@ class EllipseModel(BaseModel):
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     """Determine number trials such that at least one outlier-free subset is
     sampled for the given inlier/outlier ratio.
+
     Parameters
     ----------
     n_inliers : int
@@ -590,6 +599,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         Minimum number of samples chosen randomly from original data.
     probability : float
         Probability (confidence) that one outlier-free sample is generated.
+
     Returns
     -------
     trials : int
@@ -691,13 +701,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
             N >= log(1 - probability) / log(1 - e**m)
 
         where the probability (confidence) is typically set to a high value
-        such as 0.99, and e is the current fraction of inliers w.r.t. the
-        total number of samples.
-    random_state : int, RandomState instance or None, optional
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`.
+        such as 0.99, e is the current fraction of inliers w.r.t. the
+        total number of samples, and m is the min_samples value.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
 
@@ -724,8 +736,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> x = xc + a * np.cos(t)
     >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
-    >>> np.random.seed(seed=1234)
-    >>> data += np.random.normal(size=data.shape)
+    >>> rng = np.random.default_rng(203560)  # do not copy this value
+    >>> data += rng.normal(size=data.shape)
 
     Add some faulty data:
 
@@ -746,8 +758,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
     >>> abs(np.round(ransac_model.params))
-    array([20., 30.,  5., 10.,  0.])
-    >>> inliers # doctest: +SKIP
+    array([20., 30., 10.,  6.,  2.])
+    >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -761,18 +773,20 @@ def ransac(data, model_class, min_samples, residual_threshold,
     we also show how to use a proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
-    >>> np.random.seed(0)
-    >>> src = 100 * np.random.rand(50, 2)
-    >>> model0 = SimilarityTransform(scale=0.5, rotation=1, translation=(10, 20))
+    >>> rng = np.random.default_rng()
+    >>> src = 100 * rng.random((50, 2))
+    >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
+    ...                              translation=(10, 20))
     >>> dst = model0(src)
     >>> dst[0] = (10000, 10000)
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
     >>> ratio = 0.5  # use half of the samples
     >>> min_samples = int(ratio * len(src))
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples, 10,
+    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples,
+    ...                         10,
     ...                         initial_inliers=np.ones(len(src), dtype=bool))
-    >>> inliers
+    >>> inliers  # doctest: +SKIP
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -787,7 +801,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inlier_residuals_sum = np.inf
     best_inliers = None
 
-    random_state = check_random_state(random_state)
+    random_state = np.random.default_rng(random_state)
 
     # in case data is not pair of input and output, male it like it
     if not isinstance(data, (tuple, list)):
@@ -868,9 +882,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 break
 
     # estimate final model using all inliers
-    if best_inliers is not None:
+    if best_inliers is not None and any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
         best_model.estimate(*data_inliers)
+    else:
+        best_model = None
+        best_inliers = None
+        warn("No inliers found. Model not fitted")
 
     return best_model, best_inliers

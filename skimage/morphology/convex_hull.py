@@ -18,6 +18,58 @@ def _offsets_diamond(ndim):
     return offsets
 
 
+def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
+    r"""Checks all the coordinates for inclusiveness in the convex hull.
+
+    Parameters
+    ----------
+    gridcoords : (M, N) ndarray
+        Coordinates of ``N`` points in ``M`` dimensions.
+    hull_equations : (M, N) ndarray
+        Hyperplane equations of the facets of the convex hull.
+    tolerance : float
+        Tolerance when determining whether a point is inside the hull. Due
+        to numerical floating point errors, a tolerance of 0 can result in
+        some points erroneously being classified as being outside the hull.
+
+    Returns
+    -------
+    coords_in_hull : ndarray of bool
+        Binary 1D ndarray representing points in n-dimensional space
+        with value ``True`` set for points inside the convex hull.
+
+    Notes
+    -----
+    Checking the inclusiveness of coordinates in a convex hull requires
+    intermediate calculations of dot products which are memory-intensive.
+    Thus, the convex hull equations are checked individually with all
+    coordinates to keep within the memory limit.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/5019
+
+    """
+    ndim, n_coords = gridcoords.shape
+    n_hull_equations = hull_equations.shape[0]
+    coords_in_hull = np.ones(n_coords, dtype=bool)
+
+    # Pre-allocate arrays to cache intermediate results for reducing overheads
+    dot_array = np.empty(n_coords, dtype=np.float64)
+    test_ineq_temp = np.empty(n_coords, dtype=np.float64)
+    coords_single_ineq = np.empty(n_coords, dtype=bool)
+
+    # A point is in the hull if it satisfies all of the hull's inequalities
+    for idx in range(n_hull_equations):
+        # Tests a hyperplane equation on all coordinates of volume
+        np.dot(hull_equations[idx, :ndim], gridcoords, out=dot_array)
+        np.add(dot_array, hull_equations[idx, ndim:], out=test_ineq_temp)
+        np.less(test_ineq_temp, tolerance, out=coords_single_ineq)
+        coords_in_hull *= coords_single_ineq
+
+    return coords_in_hull
+
+
 def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     """Compute the convex hull image of a binary image.
 
@@ -51,7 +103,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     if np.count_nonzero(image) == 0:
         warn("Input image is entirely zero, no valid convex hull. "
              "Returning empty image", UserWarning)
-        return np.zeros(image.shape, dtype=np.bool_)
+        return np.zeros(image.shape, dtype=bool)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
@@ -85,15 +137,15 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
-        # A point is in the hull if it satisfies all of the hull's inequalities
-        coords_in_hull = np.all(hull.equations[:, :ndim].dot(gridcoords) +
-                                hull.equations[:, ndim:] < tolerance, axis=0)
+
+        coords_in_hull = _check_coords_in_hull(gridcoords,
+                                               hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
 
     return mask
 
 
-def convex_hull_object(image, neighbors=None, *, connectivity=None):
+def convex_hull_object(image, *, connectivity=2):
     r"""Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -103,13 +155,10 @@ def convex_hull_object(image, neighbors=None, *, connectivity=None):
     ----------
     image : (M, N) ndarray
         Binary input image.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4 or 8 adjacent pixels as neighbors.
-        If ``None``, set to 8. **Deprecated, use** ``connectivity`` **instead.**
     connectivity : {1, 2}, int, optional
         Determines the neighbors of each pixel. Adjacent elements
         within a squared distance of ``connectivity`` from pixel center
-        are considered neighbors. If ``None``, set to 2::
+        are considered neighbors.::
 
             1-connectivity      2-connectivity
                   [ ]           [ ]  [ ]  [ ]
@@ -134,24 +183,8 @@ def convex_hull_object(image, neighbors=None, *, connectivity=None):
     if image.ndim > 2:
         raise ValueError("Input must be a 2D image")
 
-    if neighbors is None and connectivity is None:
-        connectivity = 2
-    elif neighbors is not None:
-        # Backward-compatibility
-        if neighbors == 4:
-            connectivity = 1
-        elif neighbors == 8:
-            connectivity = 2
-        else:
-            raise ValueError('`neighbors` must be either 4 or 8.')
-        warn("The argument `neighbors` is deprecated and will be removed in "
-             "scikit-image 0.18, use `connectivity` instead. "
-             "For neighbors={neighbors}, use connectivity={connectivity}"
-             "".format(neighbors=neighbors, connectivity=connectivity),
-             stacklevel=2)
-    else:
-        if connectivity not in (1, 2):
-            raise ValueError('`connectivity` must be either 1 or 2.')
+    if connectivity not in (1, 2):
+        raise ValueError('`connectivity` must be either 1 or 2.')
 
     labeled_im = label(image, connectivity=connectivity, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)

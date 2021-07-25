@@ -7,7 +7,7 @@ from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 
 
 # This basic blob detection algorithm is based on:
@@ -115,7 +115,9 @@ def _blob_overlap(blob1, blob2, *, sigma_dim=1):
 
     # we divide coordinates by sigma * sqrt(ndim) to rescale space to isotropy,
     # giving spheres of radius = 1 or < 1.
-    if blob1[-1] > blob2[-1]:
+    if blob1[-1] == blob2[-1] == 0:
+        return 0.0
+    elif blob1[-1] > blob2[-1]:
         max_sigma = blob1[-sigma_dim:]
         r1 = 1
         r2 = blob2[-1] / blob1[-1]
@@ -182,7 +184,34 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
                 else:
                     blob1[-1] = 0
 
-    return np.array([b for b in blobs_array if b[-1] > 0])
+    return np.stack([b for b in blobs_array if b[-1] > 0])
+
+
+def _format_exclude_border(img_ndim, exclude_border):
+    """Format an ``exclude_border`` argument as a tuple of ints for calling
+    ``peak_local_max``.
+    """
+    if isinstance(exclude_border, tuple):
+        if len(exclude_border) != img_ndim:
+            raise ValueError(
+                "`exclude_border` should have the same length as the "
+                "dimensionality of the image.")
+        for exclude in exclude_border:
+            if not isinstance(exclude, int):
+                raise ValueError(
+                    "exclude border, when expressed as a tuple, must only "
+                    "contain ints.")
+        return exclude_border
+    elif isinstance(exclude_border, int):
+        return (exclude_border,) * img_ndim + (0,)
+    elif exclude_border is True:
+        raise ValueError("exclude_border cannot be True")
+    elif exclude_border is False:
+        return (0,) * (img_ndim + 1)
+    else:
+        raise ValueError(
+            f"Unsupported value ({exclude_border}) for exclude_border"
+        )
 
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
@@ -218,9 +247,15 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
-    exclude_border : int or bool, optional
-        If nonzero int, `exclude_border` excludes blobs from
-        within `exclude_border`-pixels of the border of the image.
+    exclude_border : tuple of ints, int, or False, optional
+        If tuple of ints, the length of the tuple must match the input array's
+        dimensionality.  Each element of the tuple will exclude peaks from
+        within `exclude_border`-pixels of the border of the image along that
+        dimension.
+        If nonzero int, `exclude_border` excludes peaks from within
+        `exclude_border`-pixels of the border of the image.
+        If zero or False, peaks are identified regardless of their
+        distance from the border.
 
     Returns
     -------
@@ -234,6 +269,10 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         anisotropic gaussian is used (sigmas per dimension), the detected sigma
         is returned for each dimension.
 
+    See also
+    --------
+    skimage.filters.difference_of_gaussians
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
@@ -242,30 +281,30 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     --------
     >>> from skimage import data, feature
     >>> feature.blob_dog(data.coins(), threshold=.5, max_sigma=40)
-    array([[267.      , 359.      ,  16.777216],
-           [267.      , 115.      ,  10.48576 ],
-           [263.      , 302.      ,  16.777216],
-           [263.      , 245.      ,  16.777216],
-           [261.      , 173.      ,  16.777216],
-           [260.      ,  46.      ,  16.777216],
-           [198.      , 155.      ,  10.48576 ],
-           [196.      ,  43.      ,  10.48576 ],
-           [195.      , 102.      ,  16.777216],
-           [194.      , 277.      ,  16.777216],
+    array([[120.      , 272.      ,  16.777216],
            [193.      , 213.      ,  16.777216],
+           [263.      , 245.      ,  16.777216],
            [185.      , 347.      ,  16.777216],
            [128.      , 154.      ,  10.48576 ],
+           [198.      , 155.      ,  10.48576 ],
+           [124.      , 337.      ,  10.48576 ],
+           [ 45.      , 336.      ,  16.777216],
+           [195.      , 102.      ,  16.777216],
+           [125.      ,  45.      ,  16.777216],
+           [261.      , 173.      ,  16.777216],
+           [194.      , 277.      ,  16.777216],
            [127.      , 102.      ,  10.48576 ],
            [125.      , 208.      ,  10.48576 ],
-           [125.      ,  45.      ,  16.777216],
-           [124.      , 337.      ,  10.48576 ],
-           [120.      , 272.      ,  16.777216],
-           [ 58.      , 100.      ,  10.48576 ],
+           [267.      , 115.      ,  10.48576 ],
+           [263.      , 302.      ,  16.777216],
+           [196.      ,  43.      ,  10.48576 ],
+           [260.      ,  46.      ,  16.777216],
+           [267.      , 359.      ,  16.777216],
            [ 54.      , 276.      ,  10.48576 ],
-           [ 54.      ,  42.      ,  16.777216],
-           [ 52.      , 216.      ,  16.777216],
+           [ 58.      , 100.      ,  10.48576 ],
            [ 52.      , 155.      ,  16.777216],
-           [ 45.      , 336.      ,  16.777216]])
+           [ 52.      , 216.      ,  16.777216],
+           [ 54.      ,  42.      ,  16.777216]])
 
     Notes
     -----
@@ -273,6 +312,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     # if both min and max sigma are scalar, function returns only one sigma
     scalar_sigma = np.isscalar(max_sigma) and np.isscalar(min_sigma)
@@ -280,13 +321,13 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
     if np.isscalar(max_sigma):
-        max_sigma = np.full(image.ndim, max_sigma, dtype=float)
+        max_sigma = np.full(image.ndim, max_sigma, dtype=float_dtype)
     if np.isscalar(min_sigma):
-        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float_dtype)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=float)
-    max_sigma = np.asarray(max_sigma, dtype=float)
+    min_sigma = np.asarray(min_sigma, dtype=float_dtype)
+    max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
@@ -304,17 +345,21 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     image_cube = np.stack(dog_images, axis=-1)
 
-    # local_maxima = get_local_maxima(image_cube, threshold)
-    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3,) * (image.ndim + 1)),
-                                  threshold_rel=0.0,
-                                  exclude_border=exclude_border)
+    exclude_border = _format_exclude_border(image.ndim, exclude_border)
+    local_maxima = peak_local_max(
+        image_cube,
+        threshold_abs=threshold,
+        footprint=np.ones((3,) * (image.ndim + 1)),
+        threshold_rel=0.0,
+        exclude_border=exclude_border,
+    )
+
     # Catch no peaks
     if local_maxima.size == 0:
         return np.empty((0, 3))
 
     # Convert local_maxima to float64
-    lm = local_maxima.astype(np.float64)
+    lm = local_maxima.astype(float_dtype)
 
     # translate final column of lm, which contains the index of the
     # sigma that produced the maximum intensity value, into the sigma
@@ -369,9 +414,15 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    exclude_border : int or bool, optional
-        If nonzero int, `exclude_border` excludes blobs from
-        within `exclude_border`-pixels of the border of the image.
+    exclude_border : tuple of ints, int, or False, optional
+        If tuple of ints, the length of the tuple must match the input array's
+        dimensionality.  Each element of the tuple will exclude peaks from
+        within `exclude_border`-pixels of the border of the image along that
+        dimension.
+        If nonzero int, `exclude_border` excludes peaks from within
+        `exclude_border`-pixels of the border of the image.
+        If zero or False, peaks are identified regardless of their
+        distance from the border.
 
     Returns
     -------
@@ -395,22 +446,22 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     >>> img = data.coins()
     >>> img = exposure.equalize_hist(img)  # improves detection
     >>> feature.blob_log(img, threshold = .3)
-    array([[266.        , 115.        ,  11.88888889],
-           [263.        , 302.        ,  17.33333333],
-           [263.        , 244.        ,  17.33333333],
-           [260.        , 174.        ,  17.33333333],
+    array([[124.        , 336.        ,  11.88888889],
            [198.        , 155.        ,  11.88888889],
-           [198.        , 103.        ,  11.88888889],
-           [197.        ,  44.        ,  11.88888889],
-           [194.        , 276.        ,  17.33333333],
            [194.        , 213.        ,  17.33333333],
-           [185.        , 344.        ,  17.33333333],
-           [128.        , 154.        ,  11.88888889],
-           [127.        , 102.        ,  11.88888889],
-           [126.        , 208.        ,  11.88888889],
-           [126.        ,  46.        ,  11.88888889],
-           [124.        , 336.        ,  11.88888889],
            [121.        , 272.        ,  17.33333333],
+           [263.        , 244.        ,  17.33333333],
+           [194.        , 276.        ,  17.33333333],
+           [266.        , 115.        ,  11.88888889],
+           [128.        , 154.        ,  11.88888889],
+           [260.        , 174.        ,  17.33333333],
+           [198.        , 103.        ,  11.88888889],
+           [126.        , 208.        ,  11.88888889],
+           [127.        , 102.        ,  11.88888889],
+           [263.        , 302.        ,  17.33333333],
+           [197.        ,  44.        ,  11.88888889],
+           [185.        , 344.        ,  17.33333333],
+           [126.        ,  46.        ,  11.88888889],
            [113.        , 323.        ,   1.        ]])
 
     Notes
@@ -419,6 +470,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     # if both min and max sigma are scalar, function returns only one sigma
     scalar_sigma = (
@@ -428,13 +481,13 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
     if np.isscalar(max_sigma):
-        max_sigma = np.full(image.ndim, max_sigma, dtype=float)
+        max_sigma = np.full(image.ndim, max_sigma, dtype=float_dtype)
     if np.isscalar(min_sigma):
-        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float_dtype)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=float)
-    max_sigma = np.asarray(max_sigma, dtype=float)
+    min_sigma = np.asarray(min_sigma, dtype=float_dtype)
+    max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     if log_scale:
         # for anisotropic data, we use the "highest resolution/variance" axis
@@ -454,17 +507,21 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     image_cube = np.stack(gl_images, axis=-1)
 
-    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3,) * (image.ndim + 1)),
-                                  threshold_rel=0.0,
-                                  exclude_border=exclude_border)
+    exclude_border = _format_exclude_border(image.ndim, exclude_border)
+    local_maxima = peak_local_max(
+        image_cube,
+        threshold_abs=threshold,
+        footprint=np.ones((3,) * (image.ndim + 1)),
+        threshold_rel=0.0,
+        exclude_border=exclude_border,
+    )
 
     # Catch no peaks
     if local_maxima.size == 0:
         return np.empty((0, 3))
 
     # Convert local_maxima to float64
-    lm = local_maxima.astype(np.float64)
+    lm = local_maxima.astype(float_dtype)
 
     # translate final column of lm, which contains the index of the
     # sigma that produced the maximum intensity value, into the sigma
@@ -536,23 +593,23 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     >>> from skimage import data, feature
     >>> img = data.coins()
     >>> feature.blob_doh(img)
-    array([[270.        , 363.        ,  30.        ],
+    array([[197.        , 153.        ,  20.33333333],
+           [124.        , 336.        ,  20.33333333],
+           [126.        , 153.        ,  20.33333333],
+           [195.        , 100.        ,  23.55555556],
+           [192.        , 212.        ,  23.55555556],
+           [121.        , 271.        ,  30.        ],
+           [126.        , 101.        ,  20.33333333],
+           [193.        , 275.        ,  23.55555556],
+           [123.        , 205.        ,  20.33333333],
+           [270.        , 363.        ,  30.        ],
            [265.        , 113.        ,  23.55555556],
            [262.        , 243.        ,  23.55555556],
-           [260.        , 173.        ,  30.        ],
-           [197.        , 153.        ,  20.33333333],
-           [197.        ,  44.        ,  20.33333333],
-           [195.        , 100.        ,  23.55555556],
-           [193.        , 275.        ,  23.55555556],
-           [192.        , 212.        ,  23.55555556],
            [185.        , 348.        ,  30.        ],
            [156.        , 302.        ,  30.        ],
-           [126.        , 153.        ,  20.33333333],
-           [126.        , 101.        ,  20.33333333],
-           [124.        , 336.        ,  20.33333333],
-           [123.        , 205.        ,  20.33333333],
            [123.        ,  44.        ,  23.55555556],
-           [121.        , 271.        ,  30.        ]])
+           [260.        , 173.        ,  30.        ],
+           [197.        ,  44.        ,  20.33333333]])
 
     Notes
     -----
@@ -567,6 +624,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     check_nD(image, 2)
 
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     image = integral_image(image)
 
     if log_scale:

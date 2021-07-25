@@ -1,0 +1,103 @@
+name: Benchmark
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    name: Linux
+    runs-on: ubuntu-20.04
+    env:
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_MAXSIZE: 400M
+
+    steps:
+      # We need the full repo to avoid this issue
+      # https://github.com/actions/checkout/issues/23
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          installer-url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+
+      - name: Setup some dependencies
+        shell: bash -l {0}
+        run: |
+          pip install asv
+          sudo apt-get update -y && sudo apt-get install -y ccache
+          # Make gcc/gxx symlinks first in path
+          sudo /usr/sbin/update-ccache-symlinks
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+
+      - name: "Prepare ccache"
+        id: prepare-ccache
+        shell: bash -l {0}
+        run: |
+          echo "::set-output name=key::benchmark-$RUNNER_OS"
+          echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
+          ccache -p
+          ccache -z
+
+      - name: "Restore ccache"
+        uses: actions/cache@v1.1.0
+        with:
+          path: .ccache
+          key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
+          restore-keys: |
+            ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-
+
+      - name: Run benchmarks
+        shell: bash -l {0}
+        id: benchmark
+        env:
+          OPENBLAS_NUM_THREADS: 1
+          MKL_NUM_THREADS: 1
+          OMP_NUM_THREADS: 1
+          ASV_FACTOR: 1.5
+          ASV_SKIP_SLOW: 1
+        run: |
+          set -x
+
+          # ID this runner
+          asv machine --yes
+
+          echo "Baseline:  ${{ github.event.pull_request.base.sha }} (${{ github.event.pull_request.base.label }})"
+          echo "Contender: ${GITHUB_SHA} (${{ github.event.pull_request.head.label }})"
+
+          # Use mamba for env creation
+          export CONDA_EXE=$(which mamba)
+
+          # Run benchmarks for current commit against base
+          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
+          asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
+              | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
+              | tee benchmarks.log
+
+          # Report and export results for subsequent steps
+          if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
+              exit 1
+          fi
+
+      - name: "Check ccache performance"
+        shell: bash -l {0}
+        run: ccache -s
+        if: always()
+
+      - name: Add instructions to artifact
+        if: always()
+        run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: asv-benchmark-results-${{ runner.os }}
+          path: .asv/results

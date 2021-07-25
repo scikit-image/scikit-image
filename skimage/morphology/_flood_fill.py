@@ -1,20 +1,23 @@
-"""flood_fill.py - inplace flood fill algorithm
+"""flood_fill.py - in place flood fill algorithm
 
 This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
 """
 
+from warnings import warn
+
 import numpy as np
-import warnings
 
-from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
-                      _fast_pad)
-from ._util import _offsets_to_raveled_neighbors
+from .._shared.utils import deprecate_kwarg
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
+from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
+                    _set_border_values,)
 
 
-def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
-               tolerance=None, inplace=False):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def flood_fill(image, seed_point, new_value, *, footprint=None,
+               connectivity=None, tolerance=None, in_place=False,
+               inplace=None):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -30,25 +33,30 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     new_value : `image` type
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
-        equal to `connectivity` are considered neighbors. Ignored if `selem` is
-        not None.
+        equal to `connectivity` are considered neighbors. Ignored if
+        `footprint` is not None.
     tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         value of `image` at `seed_point` to be filled.  This is fastest.
         If a tolerance is provided, adjacent points with values within plus or
         minus tolerance from the seed point are filled (inclusive).
-    inplace : bool, optional
-        If True, flood filling is applied to `image` inplace.  If False, the
+    in_place : bool, optional
+        If True, flood filling is applied to `image` in place.  If False, the
         flood filled result is returned without modifying the input `image`
         (default).
+    inplace : bool, optional
+        This parameter is deprecated and will be removed in version 0.19.0
+        in favor of in_place. If True, flood filling is applied to `image`
+        inplace. If False, the flood filled result is returned without
+        modifying the input `image` (default).
 
     Returns
     -------
@@ -100,17 +108,26 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    mask = flood(image, seed_point, selem=selem, connectivity=connectivity,
-                 tolerance=tolerance)
+    if inplace is not None:
+        warn('The `inplace` parameter is depreciated and will be removed '
+             'in version 0.19.0. Use `in_place` instead.',
+             stacklevel=2,
+             category=FutureWarning)
+        in_place = inplace
 
-    if not inplace:
+    mask = flood(image, seed_point, footprint=footprint,
+                 connectivity=connectivity, tolerance=tolerance)
+
+    if not in_place:
         image = image.copy()
 
     image[mask] = new_value
     return image
 
 
-def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def flood(image, seed_point, *, footprint=None, connectivity=None,
+          tolerance=None):
     """Mask corresponding to a flood fill.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -123,16 +140,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     seed_point : tuple or int
         The point in `image` used as the starting point for the flood fill.  If
         the image is 1D, this point may be given as an integer.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        `footprint` is not None.
     tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
@@ -213,11 +230,9 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
         image = np.ascontiguousarray(image)
         order = 'C'
 
-    seed_value = image[seed_point]
-
     # Shortcut for rank zero
     if 0 in image.shape:
-        return np.zeros(image.shape, dtype=np.bool)
+        return np.zeros(image.shape, dtype=bool)
 
     # Convenience for 1d input
     try:
@@ -225,20 +240,25 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     except TypeError:
         seed_point = (seed_point,)
 
-    selem = _resolve_neighborhood(selem, connectivity, image.ndim)
+    seed_value = image[seed_point]
+    seed_point = tuple(np.asarray(seed_point) % image.shape)
+
+    footprint = _resolve_neighborhood(footprint, connectivity, image.ndim)
 
     # Must annotate borders
-    working_image = _fast_pad(image, image.min())
+    working_image = np.pad(image, 1, mode='constant',
+                           constant_values=image.min())
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
-    ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
+    ravelled_seed_idx = np.ravel_multi_index([i + 1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, selem, center=((1,) * image.ndim))
+        working_image.shape, footprint, center=((1,) * image.ndim),
+        order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
-    flags = np.zeros(working_image.shape, dtype=np.uint8)
-    _set_edge_values_inplace(flags, value=2)
+    flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)
+    _set_border_values(flags, value=2)
 
     try:
         if tolerance is not None:
@@ -253,16 +273,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
             high_tol = min(max_value, seed_value + tolerance)
             low_tol = max(min_value, seed_value - tolerance)
 
-            _flood_fill_tolerance(working_image.ravel(),
-                                  flags.ravel(),
+            _flood_fill_tolerance(working_image.ravel(order),
+                                  flags.ravel(order),
                                   neighbor_offsets,
                                   ravelled_seed_idx,
                                   seed_value,
                                   low_tol,
                                   high_tol)
         else:
-            _flood_fill_equal(working_image.ravel(),
-                              flags.ravel(),
+            _flood_fill_equal(working_image.ravel(order),
+                              flags.ravel(order),
                               neighbor_offsets,
                               ravelled_seed_idx,
                               seed_value)
@@ -275,4 +295,4 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
             raise
 
     # Output what the user requested; view does not create a new copy.
-    return flags[(slice(1, -1),) * image.ndim].view(np.bool)
+    return flags[(slice(1, -1),) * image.ndim].view(bool)

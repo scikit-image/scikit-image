@@ -4,7 +4,8 @@ import numpy as np
 __all__ = ['contingency_table']
 
 
-def contingency_table(im_true, im_test, *, ignore_labels=(), normalize=False):
+def contingency_table(im_true, im_test, *, ignore_labels=None,
+                      normalize=False):
     """
     Return the contingency table for all regions in matched segmentations.
 
@@ -27,14 +28,12 @@ def contingency_table(im_true, im_test, *, ignore_labels=(), normalize=False):
         labeled `i` in `im_true` and `j` in `im_test`.
     """
 
-    im_test_r = im_test.ravel()
-    im_true_r = im_true.ravel()
-    ignored = np.zeros(im_true_r.shape, np.bool)
-    for label in ignore_labels:
-        ignored[im_true_r == label] = True
-    data = np.ones(im_true_r.shape)
-    data[ignored] = 0
+    if ignore_labels is None:
+        ignore_labels = []
+    im_test_r = im_test.reshape(-1)
+    im_true_r = im_true.reshape(-1)
+    data = np.isin(im_true_r, ignore_labels, invert=True).astype(float)
     if normalize:
-        data = data / im_true.size
+        data /= np.count_nonzero(data)
     cont = sparse.coo_matrix((data, (im_true_r, im_test_r))).tocsr()
     return cont

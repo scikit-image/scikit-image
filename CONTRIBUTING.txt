@@ -1,17 +1,15 @@
 .. _howto_contribute:
 
-How to contribute to ``skimage``
-================================
+How to contribute to scikit-image
+=================================
 
 Developing Open Source is great fun!  Join us on the `scikit-image mailing
-list <https://mail.python.org/mailman/listinfo/scikit-image>`_ and tell us
+list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ and tell us
 which of the following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
-* If you're looking for something to implement, you can find a list of
-  `requested features on GitHub <https://github.com/scikit-image/scikit-image/wiki/Requested-features>`__.
-  In addition, you can browse the
-  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?state=open>`__.
+* If you're looking for something to implement or to fix, you can browse the
+  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
 * The technical detail of the `development process`_ is summed up below.
   Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
 
@@ -46,12 +44,21 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
+.. note::
+
+    Although our code is hosted on `github
+    <https://github.com/scikit-image/>`_, our dataset is stored on `gitlab
+    <https://gitlab.com/scikit-image/data>`_ and fetched with `pooch
+    <https://github.com/fatiando/pooch>`_. New data must be submitted on
+    gitlab. Once merged, the data registry ``skimage/data/_registry.py``
+    in the main codebase on github must be updated.
+
 2. Develop your contribution:
 
    * Pull the latest changes from upstream::
 
-      git checkout master
-      git pull upstream master
+      git checkout main
+      git pull upstream main
 
    * Create a branch for the feature you want to work on. Since the
      branch name will appear in the merge message, use a sensible name
@@ -69,18 +76,17 @@ Here's the long and short of it:
 
    * Enter your GitHub username and password (repeat contributors or advanced
      users can remove this step by `connecting to GitHub with SSH
-     <https://help.github.com/en/articles/connecting-to-github-with-ssh>`_).
+     <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
 
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
    * If you want, post on the `mailing list
-     <https://mail.python.org/mailman/listinfo/scikit-image>`_ to explain your changes or
+     <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
-<gitwash/index>` on how to use Git with ``scikit-image``
-(`<https://scikit-image.org/docs/dev/gitwash/index.html>`_).
+<gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
 4. Review process:
 
@@ -122,14 +128,14 @@ For a more detailed discussion, read these :doc:`detailed documents
    bug, also add "Closes #123" where 123 is the issue number.
 
 
-Divergence between ``upstream master`` and your feature branch
---------------------------------------------------------------
+Divergence between ``upstream main`` and your feature branch
+------------------------------------------------------------
 
 If GitHub indicates that the branch of your Pull Request can no longer
-be merged automatically, merge the master branch into yours::
+be merged automatically, merge the main branch into yours::
 
-   git fetch upstream master
-   git merge upstream/master
+   git fetch upstream main
+   git merge upstream/main
 
 If any conflicts occur, they need to be fixed before continuing.  See
 which files are in conflict using::
@@ -148,8 +154,8 @@ Inside the conflicted file, you'll find sections like these::
    <<<<<<< HEAD
    The way the text looks in your branch
    =======
-   The way the text looks in the master branch
-   >>>>>>> master
+   The way the text looks in the main branch
+   >>>>>>> main
 
 Choose one version of the text that should be kept, and delete the
 rest::
@@ -173,46 +179,8 @@ Once you've fixed all merge conflicts, do::
 Build environment setup
 -----------------------
 
-Once you've cloned your fork of the scikit-image repository,
-you should set up a Python development environment tailored for scikit-image.
-You may choose the environment manager of your choice.
-Here we provide instructions for two popular environment managers:
-``venv`` (pip based) and ``conda`` (Anaconda or Miniconda).
-
-venv
-====
-When using ``venv``, you may find the following bash commands useful::
-
-  # Create a virtualenv named ``skimage-dev`` that lives in the directory of
-  # the same name
-  python -m venv skimage-dev
-  # Activate it
-  source skimage-dev/bin/activate
-  # Install all development and runtime dependencies of scikit-image
-  pip install -r <(cat requirements/*.txt)
-  # Build and install scikit-image from source
-  pip install -e .
-  # Test your installation
-  pytest skimage
-
-conda
-=====
-
-When using conda, you may find the following bash commands useful::
-
-  # Create a conda environment named ``skimage-dev``
-  conda create --name skimage-dev
-  # Activate it
-  conda activate skimage-dev
-  # Install major development and runtime dependencies of scikit-image
-  # (the rest can be installed from conda-forge or pip, if needed)
-  conda install `for i in requirements/{default,build}.txt; do echo -n " --file $i "; done`
-  # Install minimal testing dependencies
-  conda install pytest
-  # Install scikit-image from source
-  pip install -e . --no-deps
-  # Test your installation
-  pytest skimage
+Please refer to :ref:`installing-scikit-image` for development installation
+instructions.
 
 Guidelines
 ----------
@@ -220,13 +188,18 @@ Guidelines
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
-* For new functionality, always add an example to the gallery.
-* No changes are ever committed without review and approval by two core
-  team members.  Ask on the
-  `mailing list <https://mail.python.org/mailman/listinfo/scikit-image>`_ if
+* For new functionality, always add an example to the gallery (see
+  :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
+* No changes are ever merged without review and approval by two core team members.
+  There are two exceptions to this rule. First, pull requests which affect
+  only the documentation require review and approval by only one core team
+  member in most cases. If the maintainer feels the changes are large or
+  likely to be controversial, two reviews should still be encouraged. The
+  second case is that of minor fixes which restore CI to a working state,
+  because these should be merged fairly quickly. Reach out on the
+  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
-* Examples in the gallery should have a maximum figure width of 8 inches.
 
 Stylistic Guidelines
 --------------------
@@ -243,7 +216,9 @@ Stylistic Guidelines
    import matplotlib.pyplot as plt
    from scipy import ndimage as ndi
 
-   cimport numpy as cnp  # in Cython code
+   # only in Cython code
+   cimport numpy as cnp
+   cnp.import_array()
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
@@ -275,40 +250,8 @@ Stylistic Guidelines
 
 Testing
 -------
-``scikit-image`` has an extensive test suite that ensures correct
-execution on your system.  The test suite has to pass before a pull
-request can be merged, and tests should be added to cover any
-modifications to the code base.
 
-We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
-testing framework, with tests located in the various
-``skimage/submodule/tests`` folders.
-
-To use ``pytest``, ensure that Cython extensions are built and that
-the library is installed in development mode::
-
-    $ pip install -e .
-
-Now, run all tests using::
-
-    $ PYTHONPATH=. pytest skimage
-
-Or the tests for a specific submodule::
-
-    $ PYTHONPATH=. pytest skimage/morphology
-
-Or tests from a specific file::
-
-    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py
-
-Or a single test within that file::
-
-    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
-
-Use ``--doctest-modules`` to run doctests.
-For example, run all tests and all doctests using::
-
-    $ PYTHONPATH=. pytest --doctest-modules skimage
+See the testing section of the Installation guide.
 
 Test coverage
 -------------
@@ -347,7 +290,7 @@ successfully passes all tests. To do so,
   your scikit-image fork
 
 It corresponds to steps one and two in
-`Travis-CI documentation <https://about.travis-ci.org/docs/user/getting-started/>`__
+`Travis-CI documentation <https://docs.travis-ci.com/user/tutorial/#to-get-started-with-travis-ci-using-github>`__
 (Step three is already done in scikit-image).
 
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
@@ -378,8 +321,9 @@ To rebuild a full clean documentation, run:
 Requirements
 ~~~~~~~~~~~~
 
-`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
-the documentation.
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`_,
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_,
+and LaTeX are needed to build the documentation.
 
 **Sphinx:**
 
@@ -389,6 +333,29 @@ can be installed using: ``scikit-image/requirements/docs.txt`` file.
 .. code:: sh
 
     pip install -r requirements/docs.txt
+
+.. _sphinx_gallery:
+
+**Sphinx-Gallery:**
+
+The above install command includes the installation of
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_, which we use to create
+the :ref:`examples_gallery`.
+Refer to the Sphinx-Gallery documentation for complete instructions on syntax and usage.
+
+If you are contributing an example to the gallery or editing an existing one,
+build the docs (see above) and open a web browser to check how your edits
+render at ``scikit-image/doc/build/html/auto_examples/``: navigate to the file
+you have added or changed.
+
+When adding an example, visit also
+``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
+thumbnail renders on the gallery's homepage. To change the thumbnail image,
+please refer to `this section
+<https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
+of the Sphinx-Gallery docs.
+
+Note that gallery examples should have a maximum figure width of 8 inches.
 
 **LaTeX Ubuntu:**
 
@@ -436,7 +403,7 @@ scikit-image/tools/deploy-docs.sh
 -  Paste the output into the secure: field of ``.travis.yml``.
 -  The decrypted GH\_TOKEN env var will be available for travis scripts
 
-https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 https://docs.travis-ci.com/user/encryption-keys/
 
 Deprecation cycle
@@ -534,7 +501,7 @@ Benchmarks
 
 While not mandatory for most pull requests, we ask that performance related
 PRs include a benchmark in order to clearly depict the use-case that is being
-optimized for. A historical view of our snapshots can be found on 
+optimized for. A historical view of our snapshots can be found on
 at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
 
 In this section we will review how to setup the benchmarks,
@@ -565,7 +532,7 @@ Writing a benchmark
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
 a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
-The ``time_`` method should only contain code you wish to benchmark. 
+The ``time_`` method should only contain code you wish to benchmark.
 Therefore it is useful to move everything that prepares the benchmark scenario
 into the ``setup`` method. This function is called before calling a ``time_``
 method and its execution time is not factored into the benchmarks.
@@ -594,7 +561,32 @@ included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
 more about the features of `asv`, please refer to the official
-`airpseed velocity documentation <http://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+`airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+
+Also, the benchmark files need to be importable when benchmarking old versions
+of scikit-image. So if anything from scikit-image is imported at the top level,
+it should be done as:
+
+.. code-block:: python
+
+    try:
+        from skimage import metrics
+    except ImportError:
+        pass
+
+The benchmarks themselves don't need any guarding against missing features,
+only the top-level imports.
+
+To allow tests of newer functions to be marked as "n/a" (not available)
+rather than "failed" for older versions, the setup method itself can raise a
+NotImplemented error.  See the following example for the registration module:
+
+.. code-block:: python
+
+    try:
+        from skimage import registration
+    except ImportError:
+        raise NotImplementedError("registration module not available")
 
 Testing the benchmarks locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -619,22 +611,22 @@ of time since building scikit-image can be a time consuming task::
 
   asv run -E existing -b TransformSuite
 
-Comparing results to master
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Comparing results to main
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Often, the goal of a PR is to compare the results of the modifications in terms
-speed to a snapshot of the code that is in the master branch of the
+speed to a snapshot of the code that is in the main branch of the
 ``scikit-image`` repository. The command ``asv continuous`` is of help here::
 
-  asv continuous master -b TransformSuite
+  asv continuous main -b TransformSuite
 
 This call will build out the environments specified in the ``asv.conf.json``
 file and compare the performance of the benchmark between your current commit
-and the code in the master branch.
+and the code in the main branch.
 
 The output may look something like::
 
-  $ asv continuous master -b TransformSuite
+  $ asv continuous main -b TransformSuite
   · Creating environments
   · Discovering benchmarks
   ·· Uninstalling from conda-py3.7-cython-numpy1.15-scipy
@@ -646,5 +638,17 @@ The output may look something like::
 
   BENCHMARKS NOT SIGNIFICANTLY CHANGED.
 
-In this case, the differences between HEAD and master are not significant
+In this case, the differences between HEAD and main are not significant
 enough for airspeed velocity to report.
+
+It is also possible to get a comparison of results for two specific revisions
+for which benchmark results have previously been run via the `asv compare`
+command::
+
+    asv compare v0.14.5 v0.17.2
+
+Finally, one can also run ASV benchmarks only for a specific commit hash or
+release tag by appending ``^!`` to the commit or tag name. For example to run
+the skimage.filter module benchmarks on release v0.17.2:
+
+asv run -b Filter v0.17.2^!

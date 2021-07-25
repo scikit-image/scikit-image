@@ -20,7 +20,6 @@ def test_format_filename():
     assert fname is None
 
 
-@testing.skipif(True, reason="Can't automatically close window. See #3081.")
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_open_file_dialog():
     QApp = utils.init_qtapp()
@@ -30,7 +29,6 @@ def test_open_file_dialog():
     assert filename is None
 
 
-@testing.skipif(True, reason="Can't automatically close window. See #3081.")
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_save_file_dialog():
     QApp = utils.init_qtapp()

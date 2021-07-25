@@ -86,7 +86,7 @@ class SaveButtons(BaseWidget):
         if not filename:
             return
         image = self.plugin.filtered_image
-        if image.dtype == np.bool:
+        if image.dtype == bool:
             # TODO: This check/conversion should probably be in `imsave`.
             image = img_as_ubyte(image)
         io.imsave(filename, image)

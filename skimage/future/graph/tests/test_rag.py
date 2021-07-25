@@ -13,8 +13,6 @@ def max_edge(g, src, dst, n):
     return {'weight': max(w1, w2)}
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_rag_merge():
     g = graph.rag.RAG()
 
@@ -49,8 +47,6 @@ def test_rag_merge():
     assert list(g.edges()) == []
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_threshold_cut():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -75,8 +71,6 @@ def test_threshold_cut():
     assert new_labels.max() == 1
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_cut_normalized():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -103,8 +97,6 @@ def test_cut_normalized():
     assert new_labels.max() == 1
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
@@ -135,8 +127,6 @@ def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
                                     _weight_mean_color)
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_rag_hierarchical():
     img = np.zeros((8, 8, 3), dtype='uint8')
     labels = np.zeros((8, 8), dtype='uint8')
@@ -167,8 +157,6 @@ def test_rag_hierarchical():
     assert np.all(result == result[0, 0])
 
 
-@testing.skipif(not is_installed('networkx'),
-                reason="networkx not installed")
 def test_ncut_stable_subgraph():
     """ Test to catch an error thrown when subgraph has all equal edges. """
 
@@ -190,9 +178,10 @@ def test_reproducibility():
     when specifying random_state
     """
     img = data.coffee()
-    labels1 = segmentation.slic(img, compactness=30, n_segments=400)
+    labels1 = segmentation.slic(
+        img, compactness=30, n_segments=400, start_label=0)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
-    results = [None] * 10
+    results = [None] * 4
     for i in range(len(results)):
         results[i] = graph.cut_normalized(
             labels1, g, in_place=False, thresh=1e-3, random_state=1234)

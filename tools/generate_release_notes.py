@@ -7,7 +7,7 @@ export GH_TOKEN=<your-gh-api-token>
 
 Then, for a major release:
 ```
-python /path/to/generate_release_notes.py v0.14.0 master --version 0.15.0
+python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
 ```
 
 For a minor release:
@@ -199,7 +199,7 @@ analysis, filtering, morphology, feature detection, and more.
 print("""
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 """
 )

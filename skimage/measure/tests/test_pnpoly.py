@@ -22,7 +22,7 @@ class TestNpnpoly():
         assert(not points_in_poly([[0.7, 0.5]], v)[0])
 
     def test_type(self):
-        assert(points_in_poly([[0, 0]], [[0, 0]]).dtype == np.bool)
+        assert(points_in_poly([[0, 0]], [[0, 0]]).dtype == bool)
 
 
 def test_grid_points_in_poly():

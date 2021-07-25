@@ -1,31 +1,34 @@
 """Test for correctness of color distance functions"""
-from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from skimage._shared.testing import assert_allclose
+import pytest
+from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
-from skimage.color import (deltaE_cie76,
-                           deltaE_ciede94,
-                           deltaE_ciede2000,
-                           deltaE_cmc)
+from skimage._shared.testing import fetch
+from skimage._shared.utils import _supported_float_type
+from skimage.color.delta_e import (deltaE_cie76, deltaE_ciede94,
+                                   deltaE_ciede2000, deltaE_cmc)
 
 
-def test_ciede2000_dE():
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_ciede2000_dE(dtype):
     data = load_ciede2000_data()
     N = len(data)
-    lab1 = np.zeros((N, 3))
+    lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
     lab1[:, 1] = data['a1']
     lab1[:, 2] = data['b1']
 
-    lab2 = np.zeros((N, 3))
+    lab2 = np.zeros((N, 3), dtype=dtype)
     lab2[:, 0] = data['L2']
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_ciede2000(lab1, lab2)
+    assert dE2.dtype == _supported_float_type(dtype)
 
-    assert_allclose(dE2, data['dE'], rtol=1.e-4)
+    rtol = 1e-2 if dtype == np.float32 else 1e-4
+    assert_allclose(dE2, data['dE'], rtol=rtol)
 
 
 def load_ciede2000_data():
@@ -55,24 +58,26 @@ def load_ciede2000_data():
              ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = pjoin(dirname(abspath(__file__)), 'ciede2000_test_data.txt')
+    path = fetch('color/tests/ciede2000_test_data.txt')
     return np.loadtxt(path, dtype=dtype)
 
 
-def test_cie76():
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_cie76(dtype):
     data = load_ciede2000_data()
     N = len(data)
-    lab1 = np.zeros((N, 3))
+    lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
     lab1[:, 1] = data['a1']
     lab1[:, 2] = data['b1']
 
-    lab2 = np.zeros((N, 3))
+    lab2 = np.zeros((N, 3), dtype=dtype)
     lab2[:, 0] = data['L2']
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_cie76(lab1, lab2)
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         4.00106328, 6.31415011, 9.1776999, 2.06270077, 2.36957073,
         2.91529271, 2.23606798, 2.23606798, 4.98000036, 4.9800004,
@@ -82,23 +87,26 @@ def test_cie76():
         2.21334297, 1.53890382, 4.60630929, 6.58467989, 3.88641412,
         1.50514845, 2.3237848, 0.94413208, 1.31910843
     ])
-    assert_allclose(dE2, oracle, rtol=1.e-8)
+    rtol = 1e-5 if dtype == np.float32 else 1e-8
+    assert_allclose(dE2, oracle, rtol=rtol)
 
 
-def test_ciede94():
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_ciede94(dtype):
     data = load_ciede2000_data()
     N = len(data)
-    lab1 = np.zeros((N, 3))
+    lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
     lab1[:, 1] = data['a1']
     lab1[:, 2] = data['b1']
 
-    lab2 = np.zeros((N, 3))
+    lab2 = np.zeros((N, 3), dtype=dtype)
     lab2[:, 0] = data['L2']
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_ciede94(lab1, lab2)
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.39503887, 1.93410055, 2.45433566, 0.68449187, 0.6695627,
         0.69194527, 2.23606798, 2.03163832, 4.80069441, 4.80069445,
@@ -108,23 +116,26 @@ def test_ciede94():
         1.24808929, 1.29795787, 1.82045088, 2.55613309, 1.42491303,
         1.41945261, 2.3225685, 0.93853308, 1.30654464
     ])
-    assert_allclose(dE2, oracle, rtol=1.e-8)
+    rtol = 1e-5 if dtype == np.float32 else 1e-8
+    assert_allclose(dE2, oracle, rtol=rtol)
 
 
-def test_cmc():
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_cmc(dtype):
     data = load_ciede2000_data()
     N = len(data)
-    lab1 = np.zeros((N, 3))
+    lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
     lab1[:, 1] = data['a1']
     lab1[:, 2] = data['b1']
 
-    lab2 = np.zeros((N, 3))
+    lab2 = np.zeros((N, 3), dtype=dtype)
     lab2[:, 0] = data['L2']
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
     dE2 = deltaE_cmc(lab1, lab2)
+    assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.73873611, 2.49660844, 3.30494501, 0.85735576, 0.88332927,
         0.97822692, 3.50480874, 2.87930032, 6.5783807, 6.57838075,
@@ -134,8 +145,25 @@ def test_cmc():
         1.2548143, 1.76838061, 2.02583367, 3.08695508, 1.74893533,
         1.90095165, 1.70258148, 1.80317207, 2.44934417
     ])
+    rtol = 1e-5 if dtype == np.float32 else 1e-8
+    assert_allclose(dE2, oracle, rtol=rtol)
 
-    assert_allclose(dE2, oracle, rtol=1.e-8)
+    # Equal or close colors make `delta_e.get_dH2` function to return
+    # negative values resulting in NaNs when passed to sqrt (see #1908
+    # issue on Github):
+    lab1 = lab2
+    expected = np.zeros_like(oracle)
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+
+    lab2[0, 0] += np.finfo(float).eps
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+
+    # Single item case:
+    lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
+    assert_equal(deltaE_cmc(lab1, lab2), 0)
+
+    lab2[0] += np.finfo(float).eps
+    assert_equal(deltaE_cmc(lab1, lab2), 0)
 
 
 def test_single_color_cie76():

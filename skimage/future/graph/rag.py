@@ -29,7 +29,7 @@ def _edge_generator_from_csr(csr_matrix):
     Examples
     --------
 
-    >>> dense = np.eye(2, dtype=np.float)
+    >>> dense = np.eye(2, dtype=float)
     >>> csr = sparse.csr_matrix(dense)
     >>> edges = _edge_generator_from_csr(csr)
     >>> list(edges)
@@ -152,7 +152,7 @@ class RAG(nx.Graph):
                 function=_add_edge_filter,
                 footprint=fp,
                 mode='nearest',
-                output=as_strided(np.empty((1,), dtype=np.float_),
+                output=as_strided(np.empty((1,), dtype=float),
                                   shape=label_image.shape,
                                   strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
@@ -424,10 +424,10 @@ def rag_boundary(labels, edge_map, connectivity=2):
     n = np.max(labels_large) + 1
 
     # use a dummy broadcast array as data for RAG
-    ones = as_strided(np.ones((1,), dtype=np.float), shape=labels_small.shape,
+    ones = as_strided(np.ones((1,), dtype=float), shape=labels_small.shape,
                       strides=(0,))
     count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
-                                     dtype=np.int_, shape=(n, n)).tocsr()
+                                     dtype=int, shape=(n, n)).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
     data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))

@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..util import img_as_float
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 
 
 class FeatureDetector(object):
@@ -73,7 +73,6 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         the other, ``'vertical'``.
 
     """
-
     image1 = img_as_float(image1)
     image2 = img_as_float(image2)
 
@@ -123,12 +122,14 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
     ax.imshow(image, cmap='gray')
     ax.axis((0, image1.shape[1] + offset[1], image1.shape[0] + offset[0], 0))
 
+    rng = np.random.default_rng()
+
     for i in range(matches.shape[0]):
         idx1 = matches[i, 0]
         idx2 = matches[i, 1]
 
         if matches_color is None:
-            color = np.random.rand(3)
+            color = rng.random(3)
         else:
             color = matches_color
 
@@ -140,7 +141,17 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
     check_nD(image, 2)
-    return img_as_float(image)
+    image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    return image.astype(float_dtype, copy=False)
+
+
+def _prepare_grayscale_input_nD(image):
+    image = np.squeeze(image)
+    check_nD(image, range(2, 6))
+    image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    return image.astype(float_dtype, copy=False)
 
 
 def _mask_border_keypoints(image_shape, keypoints, distance):

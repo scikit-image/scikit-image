@@ -1,0 +1,31 @@
+[build-system]
+requires = [
+    "wheel",
+    "setuptools<=51.0.0",
+    "Cython>=0.29.18",
+
+    # We follow scipy for much of these pinnings
+    # https://github.com/scipy/scipy/blob/master/pyproject.toml
+    # numpy 1.19 was the first minor release to provide aarch64 wheels, but
+    # wheels require fixes contained in numpy 1.19.2
+    "numpy==1.19.2; python_version=='3.6' and platform_machine=='aarch64'",
+    "numpy==1.19.2; python_version=='3.7' and platform_machine=='aarch64'",
+    "numpy==1.19.2; python_version=='3.8' and platform_machine=='aarch64'",
+
+    # default numpy requirements
+    "numpy==1.17.3; python_version=='3.6' and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
+    "numpy==1.17.3; python_version=='3.7' and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
+    "numpy==1.17.3; python_version=='3.8' and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
+    "numpy==1.19.3; python_version=='3.9' and platform_python_implementation != 'PyPy'",
+
+    # First PyPy versions for which there are numpy wheels
+    "numpy==1.19.0; python_version=='3.6' and platform_python_implementation=='PyPy'",
+    "numpy==1.20.0; python_version=='3.7' and platform_python_implementation=='PyPy'",
+
+    # For Python versions which aren't yet officially supported,
+    # we specify an unpinned NumPy which allows source distributions
+    # to be used and allows wheels to be used as soon as they
+    # become available.
+    "numpy; python_version>='3.10'",
+    "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
+]

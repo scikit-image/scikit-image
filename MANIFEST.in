@@ -1,6 +1,7 @@
 include setup*.py
 include MANIFEST.in
-include LICENSE.txt
+include pyproject.toml
+include *.md
 include *.txt
 include *.rst
 recursive-include requirements *.txt
@@ -9,6 +10,7 @@ include Makefile
 include skimage/scripts/skivi
 recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.npy *.txt *.in *.cpp *.md
 recursive-include skimage/data *
+recursive-include skimage/*/tests/data *
 
 include doc/Makefile
 recursive-include doc/examples *.txt

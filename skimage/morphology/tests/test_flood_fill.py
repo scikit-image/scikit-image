@@ -1,6 +1,7 @@
 import numpy as np
-from pytest import raises
+import pytest
 
+from skimage._shared.testing import expected_warnings
 from skimage.morphology import flood, flood_fill
 
 eps = 1e-12
@@ -12,15 +13,21 @@ def test_empty_input():
     assert output.size == 0
 
     # Boolean output type
-    assert flood(np.empty(0), ()).dtype == np.bool
+    assert flood(np.empty(0), ()).dtype == bool
 
     # Maintain shape, even with zero size present
     assert flood(np.empty((20, 0, 4)), ()).shape == (20, 0, 4)
 
 
+def test_selem_kwarg_deprecation():
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        output = flood_fill(np.empty(0), (), 2, selem=None)
+    assert output.size == 0
+
+
 def test_float16():
     image = np.array([9., 0.1, 42], dtype=np.float16)
-    with raises(TypeError, match="dtype of `image` is float16"):
+    with pytest.raises(TypeError, match="dtype of `image` is float16"):
         flood_fill(image, 0, 1)
 
 
@@ -54,7 +61,7 @@ def test_inplace_int():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]])
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    flood_fill(image, (0, 0), 5, in_place=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
                          [5, 1, 1, 5, 2, 2, 5],
@@ -72,7 +79,7 @@ def test_inplace_float():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    flood_fill(image, (0, 0), 5, in_place=True)
 
     expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
                          [5., 1., 1., 5., 2., 2., 5.],
@@ -93,7 +100,7 @@ def test_inplace_noncontiguous():
     # Transpose is noncontiguous
     image2 = image[::2, ::2]
 
-    flood_fill(image2, (0, 0), 5, inplace=True)
+    flood_fill(image2, (0, 0), 5, in_place=True)
 
     # The inplace modified result
     expected2 = np.array([[5, 5, 5, 5],
@@ -108,6 +115,50 @@ def test_inplace_noncontiguous():
                          [5, 1, 1, 0, 2, 2, 5],
                          [1, 0, 0, 0, 0, 0, 3],
                          [5, 1, 1, 1, 3, 3, 4]])
+
+    np.testing.assert_allclose(image, expected)
+
+
+def test_inplace_int_deprecated():
+    """This test is deprecated and will be removed in
+    version 0.19.0. See #4248.
+    """
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]])
+
+    with expected_warnings(['The `inplace`']):
+        flood_fill(image, (0, 0), 5, inplace=True)
+
+    expected = np.array([[5, 5, 5, 5, 5, 5, 5],
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [1, 5, 5, 5, 5, 5, 3],
+                         [5, 1, 1, 1, 3, 3, 4]])
+
+    np.testing.assert_array_equal(image, expected)
+
+
+def test_inplace_float_deprecated():
+    """This test is deprecated and will be removed in
+    version 0.19.0. See #4248.
+    """
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
+
+    with expected_warnings(['The `inplace`']):
+        flood_fill(image, (0, 0), 5, inplace=True)
+
+    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [1., 5., 5., 5., 5., 5., 3.],
+                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
 
     np.testing.assert_allclose(image, expected)
 
@@ -160,14 +211,14 @@ def test_neighbors():
     np.testing.assert_equal(output2, expected)
 
 
-def test_selem():
-    # Basic tests for nonstandard structuring elements
-    selem = np.array([[0, 1, 1],
-                      [0, 1, 1],
-                      [0, 0, 0]])  # Cannot grow left or down
+def test_footprint():
+    # Basic tests for nonstandard footprints
+    footprint = np.array([[0, 1, 1],
+                          [0, 1, 1],
+                          [0, 0, 0]])  # Cannot grow left or down
 
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (3, 1), 255,
-                        selem=selem)
+                        footprint=footprint)
 
     expected = np.array([[0, 255, 255, 255, 255, 255],
                          [0, 255, 255, 255, 255, 255],
@@ -177,12 +228,12 @@ def test_selem():
 
     np.testing.assert_equal(output, expected)
 
-    selem = np.array([[0, 0, 0],
-                      [1, 1, 0],
-                      [1, 1, 0]])  # Cannot grow right or up
+    footprint = np.array([[0, 0, 0],
+                          [1, 1, 0],
+                          [1, 1, 0]])  # Cannot grow right or up
 
     output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
-                        selem=selem)
+                        footprint=footprint)
 
     expected = np.array([[  0,   0,   0,   0,   0,   0],
                          [255, 255, 255, 255, 255,   0],
@@ -199,14 +250,52 @@ def test_basic_nd():
         hypercube = np.zeros(shape)
         slice_mid = tuple(slice(1, -1, None) for dim in range(dimension))
         hypercube[slice_mid] = 1  # sum is 3**dimension
-        filled = flood_fill(hypercube, (2,)*dimension, 2)
+        filled = flood_fill(hypercube, (2,) * dimension, 2)
 
         # Test that the middle sum is correct
         assert filled.sum() == 3**dimension * 2
 
         # Test that the entire array is as expected
         np.testing.assert_equal(
-            filled, np.pad(np.ones((3,)*dimension) * 2, 1, 'constant'))
+            filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant'))
+
+
+@pytest.mark.parametrize("tolerance", [None, 0])
+def test_f_order(tolerance):
+    image = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ], order="F")
+    expected = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ], dtype=bool)
+
+    mask = flood(image, seed_point=(1, 0), tolerance=tolerance)
+    np.testing.assert_array_equal(expected, mask)
+
+    mask = flood(image, seed_point=(2, 1), tolerance=tolerance)
+    np.testing.assert_array_equal(expected, mask)
+
+
+def test_negative_indexing_seed_point():
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
+
+    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [1., 5., 5., 5., 5., 5., 3.],
+                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
+
+    image = flood_fill(image, (0, -1), 5)
+
+    np.testing.assert_allclose(image, expected)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,9 @@
 import numpy as np
 cimport numpy as cnp
 
+from .._shared.fused_numerics cimport np_floats
+cnp.import_array()
+
 
 cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low,
                              Py_ssize_t high) nogil:
@@ -35,8 +38,8 @@ cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low,
     return x
 
 
-cdef inline cnp.double_t _integ(
-    cnp.double_t[:, ::1] img, Py_ssize_t r, Py_ssize_t c,
+cdef inline np_floats _integ(
+    np_floats[:, ::1] img, Py_ssize_t r, Py_ssize_t c,
         Py_ssize_t rl, Py_ssize_t cl) nogil:
     """Integrate over the integral image in the given window
 
@@ -68,14 +71,14 @@ cdef inline cnp.double_t _integ(
     r2 = _clip(r + rl, 0, img.shape[0] - 1)
     c2 = _clip(c + cl, 0, img.shape[1] - 1)
 
-    cdef cnp.double_t ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
+    cdef np_floats ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
 
     if (ans < 0):
         return 0
     return ans
 
 
-def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
+def _hessian_matrix_det(np_floats[:, ::1] img, np_floats sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
@@ -108,6 +111,10 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
     the result obtained if someone computed the Hessian and took it's
     determinant.
     """
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
     cdef Py_ssize_t size = int(3 * sigma)
     cdef Py_ssize_t height = img.shape[0]
@@ -118,11 +125,11 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
     cdef Py_ssize_t l = size / 3
     cdef Py_ssize_t w = size
     cdef Py_ssize_t b = (size - 1) / 2
-    cdef cnp.double_t mid, side, tl, tr, bl, br
-    cdef cnp.double_t[:, ::1] out = np.zeros_like(img, dtype=np.double)
-    cdef cnp.double_t w_i = 1.0 / size / size
+    cdef np_floats mid, side, tl, tr, bl, br
+    cdef np_floats[:, ::1] out = np.zeros_like(img, dtype=dtype)
+    cdef np_floats w_i = 1.0 / size / size
 
-    cdef float dxx, dyy, dxy
+    cdef np_floats dxx, dyy, dxy
 
     with nogil:
         if size % 2 == 0:
