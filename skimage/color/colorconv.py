@@ -153,9 +153,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
 
 def _validate_channel_axis(channel_axis, ndim):
     if not isinstance(channel_axis, int):
-        raise TypeError("channel_axis must be an integer")
+        raise np.AxisError("channel_axis must be an integer")
     if channel_axis < -ndim or channel_axis >= ndim:
-        raise ValueError("channel_axis exceeds array dimensions")
+        raise np.AxisError("channel_axis exceeds array dimensions")
 
 
 def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
