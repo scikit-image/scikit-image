@@ -139,7 +139,7 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     arr = np.asanyarray(arr)
 
     if arr.shape[channel_axis] != 3:
-        msg = ("the input array must have shape 3 along `channel_axis`, "
+        msg = (f"the input array must have size 3 along `channel_axis`, "
                f"got {arr.shape}")
         raise ValueError(msg)
 
@@ -184,7 +184,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     Raises
     ------
     ValueError
-        If `rgba` is not at least 2-D with shape (..., 4, ...).
+        If `rgba` is not at least 2D with shape (..., 4, ...).
 
     References
     ----------
@@ -202,7 +202,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     channel_axis = channel_axis % arr.ndim
 
     if arr.shape[channel_axis] != 4:
-        msg = ("the input array must have shape 4 along `channel_axis`, "
+        msg = (f"the input array must have size 4 along `channel_axis`, "
                f"got {arr.shape}")
         raise ValueError(msg)
 

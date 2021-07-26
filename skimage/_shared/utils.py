@@ -484,7 +484,7 @@ def _reshape_nd(arr, ndim, dim):
     (1, 1, 1, 7)
     """
     if arr.ndim != 1:
-        raise ValueError("arr must be a 1d array")
+        raise ValueError("arr must be a 1D array")
     new_shape = [1] * ndim
     new_shape[dim] = -1
     return np.reshape(arr, new_shape)
