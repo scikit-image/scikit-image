@@ -84,8 +84,6 @@ Other (2021)
   and update osx_install to point to the correct branch
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* Once NumPy is set to >= 1.17, consider removing
-  ``skimage.morphology._util._fast_pad``.
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 
