@@ -95,9 +95,10 @@ class TestColorconv():
         with pytest.raises(ValueError):
             rgba2rgb(self.img_grayscale)
 
-    def test_rgba2rgb_error_channel_axis_None(self):
-        with pytest.raises(np.AxisError):
-            rgba2rgb(self.img_rgba, channel_axis=None)
+    @pytest.mark.parametrize("channel_axis", [None, 1.5])
+    def test_rgba2rgb_error_channel_axis_invalid(self, channel_axis):
+        with pytest.raises(TypeError):
+            rgba2rgb(self.img_rgba, channel_axis=channel_axis)
 
     @pytest.mark.parametrize("channel_axis", [-4, 3])
     def test_rgba2rgb_error_channel_axis_out_of_range(self, channel_axis):
