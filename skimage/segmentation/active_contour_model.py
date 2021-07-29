@@ -1,13 +1,16 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
+
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..util import img_as_float
 from ..filters import sobel
 
 
+@deprecate_kwarg({'max_iterations': 'max_num_iter'}, removed_version="1.0")
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1,
+                   max_num_iter=2500, convergence=0.1,
                    *,
                    boundary_condition='periodic',
                    coordinates='rc'):
@@ -42,7 +45,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Explicit time stepping parameter.
     max_px_move : float, optional
         Maximum pixel distance to move per iteration.
-    max_iterations : int, optional
+    max_num_iter : int, optional
         Maximum iterations to optimize snake shape.
     convergence : float, optional
         Convergence criteria.
@@ -81,7 +84,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian(img, 2)
+    >>> img = gaussian(img, 2, preserve_range=False)
 
     Initialize spline:
 
@@ -99,16 +102,20 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     if coordinates != 'rc':
         raise ValueError('Coordinate values must be set in a row column '
                          'format. `coordinates` must be set to "rc".')
-    max_iterations = int(max_iterations)
-    if max_iterations <= 0:
-        raise ValueError("max_iterations should be >0.")
+    max_num_iter = int(max_num_iter)
+    if max_num_iter <= 0:
+        raise ValueError("max_num_iter should be >0.")
     convergence_order = 10
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
                  'fixed-free', 'fixed-fixed', 'free-free']
     if boundary_condition not in valid_bcs:
         raise ValueError("Invalid boundary condition.\n" +
                          "Should be one of: "+", ".join(valid_bcs)+'.')
+
     img = img_as_float(image)
+    float_dtype = _supported_float_type(image)
+    img = img.astype(float_dtype, copy=False)
+
     RGB = img.ndim == 3
 
     # Find edges using sobel:
@@ -134,21 +141,23 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                img.T, kx=2, ky=2, s=0)
 
     snake_xy = snake[:, ::-1]
-    x, y = snake_xy[:, 0].astype(float), snake_xy[:, 1].astype(float)
+    x = snake_xy[:, 0].astype(float_dtype)
+    y = snake_xy[:, 1].astype(float_dtype)
     n = len(x)
-    xsave = np.empty((convergence_order, n))
-    ysave = np.empty((convergence_order, n))
+    xsave = np.empty((convergence_order, n), dtype=float_dtype)
+    ysave = np.empty((convergence_order, n), dtype=float_dtype)
 
-    # Build snake shape matrix for Euler equation
-    a = np.roll(np.eye(n), -1, axis=0) + \
-        np.roll(np.eye(n), -1, axis=1) - \
-        2*np.eye(n)  # second order derivative, central difference
-    b = np.roll(np.eye(n), -2, axis=0) + \
-        np.roll(np.eye(n), -2, axis=1) - \
-        4*np.roll(np.eye(n), -1, axis=0) - \
-        4*np.roll(np.eye(n), -1, axis=1) + \
-        6*np.eye(n)  # fourth order derivative, central difference
-    A = -alpha*a + beta*b
+    # Build snake shape matrix for Euler equation in double precision
+    eye_n = np.eye(n, dtype=float)
+    a = (np.roll(eye_n, -1, axis=0)
+         + np.roll(eye_n, -1, axis=1)
+         - 2 * eye_n)  # second order derivative, central difference
+    b = (np.roll(eye_n, -2, axis=0)
+         + np.roll(eye_n, -2, axis=1)
+         - 4 * np.roll(eye_n, -1, axis=0)
+         - 4 * np.roll(eye_n, -1, axis=1)
+         + 6 * eye_n)  # fourth order derivative, central difference
+    A = -alpha * a + beta * b
 
     # Impose boundary conditions different from periodic:
     sfixed = False
@@ -179,12 +188,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         efree = True
 
     # Only one inversion is needed for implicit spline energy minimization:
-    inv = np.linalg.inv(A + gamma*np.eye(n))
+    inv = np.linalg.inv(A + gamma * eye_n)
+    # can use float_dtype once we have computed the inverse in double precision
+    inv = inv.astype(float_dtype, copy=False)
 
     # Explicit time stepping for image energy minimization:
-    for i in range(max_iterations):
-        fx = intp(x, y, dx=1, grid=False)
-        fy = intp(x, y, dy=1, grid=False)
+    for i in range(max_num_iter):
+        # RectBivariateSpline always returns float64, so call astype here
+        fx = intp(x, y, dx=1, grid=False).astype(float_dtype, copy=False)
+        fy = intp(x, y, dy=1, grid=False).astype(float_dtype, copy=False)
+
         if sfixed:
             fx[0] = 0
             fy[0] = 0
@@ -201,8 +214,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         yn = inv @ (gamma*y + fy)
 
         # Movements are capped to max_px_move per iteration:
-        dx = max_px_move*np.tanh(xn-x)
-        dy = max_px_move*np.tanh(yn-y)
+        dx = max_px_move * np.tanh(xn - x)
+        dy = max_px_move * np.tanh(yn - y)
         if sfixed:
             dx[0] = 0
             dy[0] = 0
@@ -214,13 +227,13 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
         # Convergence criteria needs to compare to a number of previous
         # configurations since oscillations can occur.
-        j = i % (convergence_order+1)
+        j = i % (convergence_order + 1)
         if j < convergence_order:
             xsave[j, :] = x
             ysave[j, :] = y
         else:
-            dist = np.min(np.max(np.abs(xsave-x[None, :]) +
-                                 np.abs(ysave-y[None, :]), 1))
+            dist = np.min(np.max(np.abs(xsave - x[None, :])
+                                 + np.abs(ysave - y[None, :]), 1))
             if dist < convergence:
                 break
 

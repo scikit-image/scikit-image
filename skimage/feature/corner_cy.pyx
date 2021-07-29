@@ -13,7 +13,7 @@ from ..util import img_as_float64
 cnp.import_array()
 
 
-def _corner_moravec(image, Py_ssize_t window_size=1):
+def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
@@ -59,13 +59,17 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
            [0, 0, 0, 0, 0, 0, 0]])
     """
 
-    cdef Py_ssize_t rows = image.shape[0]
-    cdef Py_ssize_t cols = image.shape[1]
+    cdef Py_ssize_t rows = cimage.shape[0]
+    cdef Py_ssize_t cols = cimage.shape[1]
 
-    cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float64(image))
-    cdef double[:, ::1] out = np.zeros(image.shape, dtype=np.double)
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
-    cdef double msum, min_msum, t
+    cdef np_floats[:, ::1] out = np.zeros((rows, cols), dtype=dtype)
+
+    cdef np_floats msum, min_msum, t
     cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
 
     with nogil:

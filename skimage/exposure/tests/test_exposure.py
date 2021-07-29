@@ -310,13 +310,15 @@ def test_rescale_nan_warning(in_range, out_range):
     # versions above 1.17
     # TODO: Remove once NumPy removes this DeprecationWarning
     numpy_warning_1_17_plus = (
-        r"Passing `np.nan` to mean no clipping in np.clip "
-        r"has always been unreliable|\A\Z"
+        "Passing `np.nan` to mean no clipping in np.clip"
     )
 
-    with expected_warnings(
-            [msg, numpy_warning_1_17_plus]
-    ):
+    if in_range == "image":
+        exp_warn = [msg, numpy_warning_1_17_plus]
+    else:
+        exp_warn = [msg]
+
+    with expected_warnings(exp_warn):
         exposure.rescale_intensity(image, in_range, out_range)
 
 
@@ -744,6 +746,14 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+def test_is_low_contrast_boolean():
+    image = np.zeros((8, 8), dtype=bool)
+    assert exposure.is_low_contrast(image)
+
+    image[:5] = 1
+    assert not exposure.is_low_contrast(image)
 
 
 # Test Dask Compatibility

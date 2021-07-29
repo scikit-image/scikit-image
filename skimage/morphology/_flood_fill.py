@@ -4,16 +4,20 @@ This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
 """
 
-import numpy as np
 from warnings import warn
 
-from ._util import (_resolve_neighborhood, _set_border_values,
-                    _fast_pad, _offsets_to_raveled_neighbors)
+import numpy as np
+
+from .._shared.utils import deprecate_kwarg
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
+from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
+                    _set_border_values,)
 
 
-def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
-               tolerance=None, in_place=False, inplace=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def flood_fill(image, seed_point, new_value, *, footprint=None,
+               connectivity=None, tolerance=None, in_place=False,
+               inplace=None):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -29,16 +33,16 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     new_value : `image` type
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
-        equal to `connectivity` are considered neighbors. Ignored if `selem` is
-        not None.
+        equal to `connectivity` are considered neighbors. Ignored if
+        `footprint` is not None.
     tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         value of `image` at `seed_point` to be filled.  This is fastest.
@@ -111,8 +115,8 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
              category=FutureWarning)
         in_place = inplace
 
-    mask = flood(image, seed_point, selem=selem, connectivity=connectivity,
-                 tolerance=tolerance)
+    mask = flood(image, seed_point, footprint=footprint,
+                 connectivity=connectivity, tolerance=tolerance)
 
     if not in_place:
         image = image.copy()
@@ -121,7 +125,9 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     return image
 
 
-def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def flood(image, seed_point, *, footprint=None, connectivity=None,
+          tolerance=None):
     """Mask corresponding to a flood fill.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -134,16 +140,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     seed_point : tuple or int
         The point in `image` used as the starting point for the flood fill.  If
         the image is 1D, this point may be given as an integer.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood (fully connected).
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel. It must contain only 1's and 0's, have the
+        same number of dimensions as `image`. If not given, all adjacent pixels
+        are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        `footprint` is not None.
     tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
@@ -237,16 +243,18 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     seed_value = image[seed_point]
     seed_point = tuple(np.asarray(seed_point) % image.shape)
 
-    selem = _resolve_neighborhood(selem, connectivity, image.ndim)
+    footprint = _resolve_neighborhood(footprint, connectivity, image.ndim)
 
     # Must annotate borders
-    working_image = _fast_pad(image, image.min(), order=order)
+    working_image = np.pad(image, 1, mode='constant',
+                           constant_values=image.min())
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index([i + 1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, selem, center=((1,) * image.ndim), order=order)
+        working_image.shape, footprint, center=((1,) * image.ndim),
+        order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
     flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)

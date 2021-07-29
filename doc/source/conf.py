@@ -196,11 +196,6 @@ sphinx_gallery_conf = {
     'remove_config_comments':True,
 }
 
-# set plotly renderer to capture _repr_html_ for sphinx-gallery
-import plotly.io as pio
-pio.renderers.default = 'sphinx_gallery'
-
-
 from sphinx_gallery.utils import _has_optipng
 if _has_optipng():
     # This option requires optipng to compress images
@@ -358,7 +353,6 @@ plot_basedir = os.path.join(curpath, "plots")
 plot_pre_code = """
 import numpy as np
 import matplotlib.pyplot as plt
-np.random.seed(0)
 
 import matplotlib
 matplotlib.rcParams.update({
@@ -398,7 +392,7 @@ intersphinx_mapping = {
     'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
-                   (None, 'https://matplotlib.org/objects.inv'))
+                   (None, './_intersphinx/matplotlib-objects.inv'))
 }
 
 # ----------------------------------------------------------------------------

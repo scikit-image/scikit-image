@@ -12,8 +12,8 @@ snake-like path:
 /--------------------------/
 \--------------------------...
 
-The local histogram is updated at each pixel as the structuring element window
-moves by, i.e. only those pixels entering and leaving the structuring element
+The local histogram is updated at each pixel as the footprint window
+moves by, i.e. only those pixels entering and leaving the footprint
 update the local histogram. The histogram size is 8-bit (256 bins) for 8-bit
 images and 2- to 16-bit for 16-bit images depending on the maximum value of the
 image.
@@ -24,7 +24,7 @@ image) where non zero values are the part of the image participating in the
 histogram computation. By default the entire image is filtered.
 
 This implementation outperforms :func:`skimage.morphology.dilation`
-for large structuring elements.
+for large footprints.
 
 Input images will be cast in unsigned 8-bit integer or unsigned 16-bit integer
 if necessary. The number of histogram bins is then determined from the maximum
@@ -48,13 +48,13 @@ References
 
 """
 
-
 import warnings
+
 import numpy as np
 from scipy import ndimage as ndi
-from ...util import img_as_ubyte
-from ..._shared.utils import check_nD, warn
 
+from ..._shared.utils import check_nD, deprecate_kwarg, warn
+from ...util import img_as_ubyte
 from . import generic_cy
 
 
@@ -64,15 +64,15 @@ __all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
-                      pixel_size=1):
+def _preprocess_input(image, footprint=None, out=None, mask=None,
+                      out_dtype=None, pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    footprint : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -88,7 +88,7 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     Returns
     -------
     image : 2-D array (np.uint8 or np.uint16)
-    selem : 2-D array (np.uint8)
+    footprint : 2-D array (np.uint8)
         The neighborhood expressed as a binary 2-D array.
     out : 3-D array (same dtype out_dtype or as input)
         Output array. The two first dimensions are the spatial ones, the third
@@ -105,15 +105,15 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     if (input_dtype in (bool, bool) or out_dtype in (bool, bool)):
         raise ValueError('dtype cannot be bool.')
     if input_dtype not in (np.uint8, np.uint16):
-        message = ('Possible precision loss converting image of type {} to '
-                   'uint8 as required by rank filters. Convert manually using '
-                   'skimage.util.img_as_ubyte to silence this warning.'
-                   .format(input_dtype))
+        message = (f'Possible precision loss converting image of type '
+                   f'{input_dtype} to uint8 as required by rank filters. '
+                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'silence this warning.')
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
-    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
-    if selem.ndim != image.ndim:
+    footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
+    if footprint.ndim != image.ndim:
         raise ValueError('Image dimensions and neighborhood dimensions'
                          'do not match')
 
@@ -142,23 +142,23 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2 ** 10:
-        warn("Bad rank filter performance is expected due to a "
-             "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+        warn(f'Bad rank filter performance is expected due to a '
+             f'large number of bins ({n_bins}), equivalent to an approximate '
+             f'bitdepth of {np.log2(n_bins):.1f}.',
              stacklevel=2)
 
-    return image, selem, out, mask, n_bins
+    return image, footprint, out, mask, n_bins
 
 
-def _handle_input_3D(image, selem=None, out=None, mask=None, out_dtype=None,
-                      pixel_size=1):
+def _handle_input_3D(image, footprint=None, out=None, mask=None,
+                     out_dtype=None, pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
     ----------
     image : 3-D array (integer or float)
         Input image.
-    selem : 3-D array (integer or float), optional
+    footprint : 3-D array (integer or float), optional
         The neighborhood expressed as a 3-D array of 1's and 0's.
     out : 3-D array (integer or float), optional
         If None, a new array is allocated.
@@ -174,7 +174,7 @@ def _handle_input_3D(image, selem=None, out=None, mask=None, out_dtype=None,
     Returns
     -------
     image : 3-D array (np.uint8 or np.uint16)
-    selem : 3-D array (np.uint8)
+    footprint : 3-D array (np.uint8)
         The neighborhood expressed as a binary 3-D array.
     out : 3-D array (same dtype out_dtype or as input)
         Output array. The two first dimensions are the spatial ones, the third
@@ -188,15 +188,15 @@ def _handle_input_3D(image, selem=None, out=None, mask=None, out_dtype=None,
     """
     check_nD(image, 3)
     if image.dtype not in (np.uint8, np.uint16):
-        message = ('Possible precision loss converting image of type {} to '
-                   'uint8 as required by rank filters. Convert manually using '
-                   'skimage.util.img_as_ubyte to silence this warning.'
-                   .format(image.dtype))
+        message = (f'Possible precision loss converting image of type '
+                   f'{image.dtype} to uint8 as required by rank filters. '
+                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'silence this warning.')
         warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
-    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
-    if selem.ndim != image.ndim:
+    footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
+    if footprint.ndim != image.ndim:
         raise ValueError('Image dimensions and neighborhood dimensions'
                          'do not match')
     image = np.ascontiguousarray(image)
@@ -227,16 +227,16 @@ def _handle_input_3D(image, selem=None, out=None, mask=None, out_dtype=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn("Bad rank filter performance is expected due to a "
-             "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+        warn(f'Bad rank filter performance is expected due to a '
+             f'large number of bins ({n_bins}), equivalent to an approximate '
+             f'bitdepth of {np.log2(n_bins):.1f}.',
              stacklevel=2)
 
-    return image, selem, out, mask, n_bins
+    return image, footprint, out, mask, n_bins
 
 
-def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
-                            out_dtype=None):
+def _apply_scalar_per_pixel(func, image, footprint, out, mask, shift_x,
+                            shift_y, out_dtype=None):
     """Process the specific cython function to the image.
 
     Parameters
@@ -245,7 +245,7 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Cython function to apply.
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float)
+    footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float)
         If None, a new array is allocated.
@@ -253,40 +253,40 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
-                                                        out, mask,
-                                                        out_dtype)
+    image, footprint, out, mask, n_bins = _preprocess_input(image, footprint,
+                                                            out, mask,
+                                                            out_dtype)
 
     # apply cython function
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
     return np.squeeze(out, axis=-1)
 
 
-def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
-                               shift_z, out_dtype=None):
+def _apply_scalar_per_pixel_3D(func, image, footprint, out, mask, shift_x,
+                               shift_y, shift_z, out_dtype=None):
 
-    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
-                                                       out_dtype)
+    image, footprint, out, mask, n_bins = _handle_input_3D(
+        image, footprint, out, mask, out_dtype
+    )
 
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
+    func(image, footprint, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
          mask=mask, out=out, n_bins=n_bins)
 
     return out.reshape(out.shape[:3])
 
 
-def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
-                            out_dtype=None, pixel_size=1):
+def _apply_vector_per_pixel(func, image, footprint, out, mask, shift_x,
+                            shift_y, out_dtype=None, pixel_size=1):
     """
 
     Parameters
@@ -295,7 +295,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Cython function to apply.
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float)
+    footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float)
         If None, a new array is allocated.
@@ -303,9 +303,8 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
@@ -319,23 +318,25 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         ``image.max() + 1`` if no value is provided as a parameter.
         Effectively, each pixel is a N-D feature vector that is the histogram.
         The sum of the elements in the feature vector will be 1, unless no
-        pixels in the window were covered by both selem and mask, in which
+        pixels in the window were covered by both footprint and mask, in which
         case all elements will be 0.
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
-                                                        out, mask,
-                                                        out_dtype,
-                                                        pixel_size)
+    image, footprint, out, mask, n_bins = _preprocess_input(image, footprint,
+                                                            out, mask,
+                                                            out_dtype,
+                                                            pixel_size)
 
     # apply cython function
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
     return out
 
-def autolevel(image, selem, out=None, mask=None,
+
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def autolevel(image, footprint, out=None, mask=None,
               shift_x=False, shift_y=False, shift_z=False):
     """Auto-level image using local histogram.
 
@@ -346,7 +347,7 @@ def autolevel(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -354,9 +355,8 @@ def autolevel(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -370,7 +370,8 @@ def autolevel(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import autolevel
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> auto = autolevel(img, disk(5))
     >>> auto_vol = autolevel(volume, ball(5))
 
@@ -378,17 +379,18 @@ def autolevel(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._autolevel, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def equalize(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def equalize(image, footprint, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
 
@@ -396,7 +398,7 @@ def equalize(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -404,9 +406,8 @@ def equalize(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -420,7 +421,8 @@ def equalize(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import equalize
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> equ = equalize(img, disk(5))
     >>> equ_vol = equalize(volume, ball(5))
 
@@ -428,17 +430,18 @@ def equalize(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._equalize, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def gradient(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def gradient(image, footprint, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -446,7 +449,7 @@ def gradient(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -454,9 +457,8 @@ def gradient(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -470,7 +472,8 @@ def gradient(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import gradient
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = gradient(img, disk(5))
     >>> out_vol = gradient(volume, ball(5))
 
@@ -478,17 +481,18 @@ def gradient(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._gradient, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._gradient, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._gradient_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def maximum(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def maximum(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Return local maximum of an image.
 
@@ -496,7 +500,7 @@ def maximum(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -504,9 +508,8 @@ def maximum(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -520,7 +523,7 @@ def maximum(image, selem, out=None, mask=None,
     Notes
     -----
     The lower algorithm complexity makes `skimage.filters.rank.maximum`
-    more efficient for larger images and structuring elements.
+    more efficient for larger images and footprints.
 
     Examples
     --------
@@ -529,7 +532,8 @@ def maximum(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import maximum
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = maximum(img, disk(5))
     >>> out_vol = maximum(volume, ball(5))
 
@@ -537,17 +541,18 @@ def maximum(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._maximum, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._maximum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._maximum_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def mean(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def mean(image, footprint, out=None, mask=None,
          shift_x=False, shift_y=False, shift_z=False):
     """Return local mean of an image.
 
@@ -555,7 +560,7 @@ def mean(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -563,9 +568,8 @@ def mean(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -579,7 +583,8 @@ def mean(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = mean(img, disk(5))
     >>> avg_vol = mean(volume, ball(5))
 
@@ -587,17 +592,18 @@ def mean(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._mean, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._mean, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._mean_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def geometric_mean(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def geometric_mean(image, footprint, out=None, mask=None,
                    shift_x=False, shift_y=False, shift_z=False):
     """Return local geometric mean of an image.
 
@@ -605,7 +611,7 @@ def geometric_mean(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -613,9 +619,8 @@ def geometric_mean(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -629,7 +634,8 @@ def geometric_mean(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = geometric_mean(img, disk(5))
     >>> avg_vol = geometric_mean(volume, ball(5))
 
@@ -642,17 +648,18 @@ def geometric_mean(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem,
-                                       out=out, mask=mask,
+        return _apply_scalar_per_pixel(generic_cy._geometric_mean, image,
+                                       footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._geometric_mean_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def subtract_mean(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def subtract_mean(image, footprint, out=None, mask=None,
                   shift_x=False, shift_y=False, shift_z=False):
     """Return image subtracted from its local mean.
 
@@ -660,7 +667,7 @@ def subtract_mean(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -668,9 +675,8 @@ def subtract_mean(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -692,7 +698,8 @@ def subtract_mean(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import subtract_mean
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = subtract_mean(img, disk(5))
     >>> out_vol = subtract_mean(volume, ball(5))
 
@@ -700,17 +707,18 @@ def subtract_mean(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
-                                       out=out, mask=mask,
+        return _apply_scalar_per_pixel(generic_cy._subtract_mean, image,
+                                       footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._subtract_mean_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def median(image, selem=None, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def median(image, footprint=None, out=None, mask=None,
            shift_x=False, shift_y=False, shift_z=False):
     """Return local median of an image.
 
@@ -718,7 +726,7 @@ def median(image, selem=None, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's. If None, a
         full square of size 3 is used.
     out : ([P,] M, N) array (same dtype as input)
@@ -727,9 +735,8 @@ def median(image, selem=None, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -748,27 +755,29 @@ def median(image, selem=None, out=None, mask=None,
     >>> from skimage.filters.rank import median
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> med = median(img, disk(5))
     >>> med_vol = median(volume, ball(5))
 
     """
 
     np_image = np.asanyarray(image)
-    if selem is None:
-        selem = ndi.generate_binary_structure(image.ndim, image.ndim)
+    if footprint is None:
+        footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._median, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._median, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._median_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def minimum(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def minimum(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Return local minimum of an image.
 
@@ -776,7 +785,7 @@ def minimum(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -784,9 +793,8 @@ def minimum(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -800,7 +808,7 @@ def minimum(image, selem, out=None, mask=None,
     Notes
     -----
     The lower algorithm complexity makes `skimage.filters.rank.minimum` more
-    efficient for larger images and structuring elements.
+    efficient for larger images and footprints.
 
     Examples
     --------
@@ -809,7 +817,8 @@ def minimum(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import minimum
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = minimum(img, disk(5))
     >>> out_vol = minimum(volume, ball(5))
 
@@ -817,17 +826,18 @@ def minimum(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._minimum, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._minimum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._minimum_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def modal(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def modal(image, footprint, out=None, mask=None,
           shift_x=False, shift_y=False, shift_z=False):
     """Return local mode of an image.
 
@@ -837,7 +847,7 @@ def modal(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -845,9 +855,8 @@ def modal(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -861,7 +870,8 @@ def modal(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import modal
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = modal(img, disk(5))
     >>> out_vol = modal(volume, ball(5))
 
@@ -869,17 +879,18 @@ def modal(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._modal, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._modal, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._modal_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def enhance_contrast(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def enhance_contrast(image, footprint, out=None, mask=None,
                      shift_x=False, shift_y=False, shift_z=False):
     """Enhance contrast of an image.
 
@@ -891,7 +902,7 @@ def enhance_contrast(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -899,9 +910,8 @@ def enhance_contrast(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -915,7 +925,8 @@ def enhance_contrast(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import enhance_contrast
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = enhance_contrast(img, disk(5))
     >>> out_vol = enhance_contrast(volume, ball(5))
 
@@ -924,27 +935,28 @@ def enhance_contrast(image, selem, out=None, mask=None,
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
         return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image,
-                                       selem, out=out, mask=mask,
+                                       footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._enhance_contrast_3D,
-                                          image, selem, out=out, mask=mask,
+                                          image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def pop(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def pop(image, footprint, out=None, mask=None,
         shift_x=False, shift_y=False, shift_z=False):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
-    in the structuring element and the mask.
+    in the footprint and the mask.
 
     Parameters
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -952,9 +964,8 @@ def pop(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -981,17 +992,18 @@ def pop(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._pop, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._pop, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._pop_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def sum(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def sum(image, footprint, out=None, mask=None,
         shift_x=False, shift_y=False, shift_z=False):
     """Return the local sum of pixels.
 
@@ -1002,7 +1014,7 @@ def sum(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -1010,9 +1022,8 @@ def sum(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1039,17 +1050,18 @@ def sum(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._sum, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._sum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._sum_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def threshold(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def threshold(image, footprint, out=None, mask=None,
               shift_x=False, shift_y=False, shift_z=False):
     """Local threshold of an image.
 
@@ -1060,7 +1072,7 @@ def threshold(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -1068,9 +1080,8 @@ def threshold(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1097,17 +1108,18 @@ def threshold(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._threshold, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._threshold, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._threshold_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def noise_filter(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def noise_filter(image, footprint, out=None, mask=None,
                  shift_x=False, shift_y=False, shift_z=False):
     """Noise feature.
 
@@ -1115,7 +1127,7 @@ def noise_filter(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -1123,9 +1135,8 @@ def noise_filter(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     References
     ----------
@@ -1144,7 +1155,8 @@ def noise_filter(image, selem, out=None, mask=None,
     >>> from skimage.filters.rank import noise_filter
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = noise_filter(img, disk(5))
     >>> out_vol = noise_filter(volume, ball(5))
 
@@ -1152,32 +1164,33 @@ def noise_filter(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        # ensure that the central pixel in the structuring element is empty
-        centre_r = int(selem.shape[0] / 2) + shift_y
-        centre_c = int(selem.shape[1] / 2) + shift_x
+        # ensure that the central pixel in the footprint is empty
+        centre_r = int(footprint.shape[0] / 2) + shift_y
+        centre_c = int(footprint.shape[1] / 2) + shift_x
         # make a local copy
-        selem_cpy = selem.copy()
-        selem_cpy[centre_r, centre_c] = 0
+        footprint_cpy = footprint.copy()
+        footprint_cpy[centre_r, centre_c] = 0
 
         return _apply_scalar_per_pixel(generic_cy._noise_filter, image,
-                                       selem_cpy, out=out, mask=mask,
+                                       footprint_cpy, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
-        # ensure that the central pixel in the structuring element is empty
-        centre_r = int(selem.shape[0] / 2) + shift_y
-        centre_c = int(selem.shape[1] / 2) + shift_x
-        centre_z = int(selem.shape[2] / 2) + shift_z
+        # ensure that the central pixel in the footprint is empty
+        centre_r = int(footprint.shape[0] / 2) + shift_y
+        centre_c = int(footprint.shape[1] / 2) + shift_x
+        centre_z = int(footprint.shape[2] / 2) + shift_z
         # make a local copy
-        selem_cpy = selem.copy()
-        selem_cpy[centre_r, centre_c, centre_z] = 0
+        footprint_cpy = footprint.copy()
+        footprint_cpy[centre_r, centre_c, centre_z] = 0
 
         return _apply_scalar_per_pixel_3D(generic_cy._noise_filter_3D,
-                                          image, selem_cpy, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
+                                          image, footprint_cpy, out=out,
+                                          mask=mask, shift_x=shift_x,
+                                          shift_y=shift_y, shift_z=shift_z)
 
 
-def entropy(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def entropy(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Local entropy.
 
@@ -1189,7 +1202,7 @@ def entropy(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -1197,9 +1210,8 @@ def entropy(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1217,7 +1229,8 @@ def entropy(image, selem, out=None, mask=None,
     >>> from skimage.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> ent = entropy(img, disk(5))
     >>> ent_vol = entropy(volume, ball(5))
 
@@ -1225,18 +1238,19 @@ def entropy(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._entropy, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
                                        out_dtype=np.double)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z, out_dtype=np.double)
 
 
-def otsu(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def otsu(image, footprint, out=None, mask=None,
          shift_x=False, shift_y=False, shift_z=False):
     """Local Otsu's threshold value for each pixel.
 
@@ -1244,7 +1258,7 @@ def otsu(image, selem, out=None, mask=None,
     ----------
     image : ([P,] M, N) ndarray (uint8, uint16)
         Input image.
-    selem : ndarray
+    footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
@@ -1252,9 +1266,8 @@ def otsu(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1272,7 +1285,8 @@ def otsu(image, selem, out=None, mask=None,
     >>> from skimage.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> local_otsu = otsu(img, disk(5))
     >>> thresh_image = img >= local_otsu
     >>> local_otsu_vol = otsu(volume, ball(5))
@@ -1282,17 +1296,18 @@ def otsu(image, selem, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._otsu, image, selem,
+        return _apply_scalar_per_pixel(generic_cy._otsu, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
-                                          selem, out=out, mask=mask,
+                                          footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
 
 
-def windowed_histogram(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def windowed_histogram(image, footprint, out=None, mask=None,
                        shift_x=False, shift_y=False, n_bins=None):
     """Normalized sliding window histogram
 
@@ -1300,7 +1315,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float)
+    footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -1308,9 +1323,8 @@ def windowed_histogram(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     n_bins : int or None
         The number of histogram bins. Will default to ``image.max() + 1``
         if None is passed.
@@ -1323,7 +1337,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
         provided as a parameter. Effectively, each pixel is a N-D feature
         vector that is the histogram. The sum of the elements in the feature
         vector will be 1, unless no pixels in the window were covered by both
-        selem and mask, in which case all elements will be 0.
+        footprint and mask, in which case all elements will be 0.
 
     Examples
     --------
@@ -1332,7 +1346,8 @@ def windowed_histogram(image, selem, out=None, mask=None,
     >>> from skimage.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> hist_img = windowed_histogram(img, disk(5))
 
     """
@@ -1340,14 +1355,15 @@ def windowed_histogram(image, selem, out=None, mask=None,
     if n_bins is None:
         n_bins = int(image.max()) + 1
 
-    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
+    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.double,
                                    pixel_size=n_bins)
 
 
-def majority(image, selem, *, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def majority(image, footprint, *, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
@@ -1356,7 +1372,7 @@ def majority(image, selem, *, out=None, mask=None,
     ----------
     image : ndarray
         Image array (uint8, uint16 array).
-    selem : 2-D array (integer or float)
+    footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray (integer or float), optional
         If None, a new array will be allocated.
@@ -1364,9 +1380,8 @@ def majority(image, selem, *, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -1380,7 +1395,8 @@ def majority(image, selem, *, out=None, mask=None,
     >>> from skimage.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
-    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> rng = np.random.default_rng()
+    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> maj_img = majority(img, disk(5))
     >>> maj_img_vol = majority(volume, ball(5))
 
@@ -1389,10 +1405,10 @@ def majority(image, selem, *, out=None, mask=None,
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
         return _apply_scalar_per_pixel(generic_cy._majority, image,
-                                       selem, out=out, mask=mask,
+                                       footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._majority_3D,
-                                          image, selem, out=out, mask=mask,
+                                          image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)

@@ -29,7 +29,7 @@ def test_montage_simple_rgb():
             )
     arr_in = arr_in.reshape(n_images, n_rows, n_cols, n_channels)
 
-    with expected_warnings(["'multichannel' is a deprecated argument"]):
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
         arr_out = montage(arr_in, multichannel=True)
     arr_ref = np.array(
         [[[ 0,  1],

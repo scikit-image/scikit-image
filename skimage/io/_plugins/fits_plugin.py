@@ -24,7 +24,7 @@ def imread(fname):
     -------
     img_array : ndarray
         Unlike plugins such as PIL, where different color bands/channels are
-        stored in the third dimension, FITS images are greyscale-only and can
+        stored in the third dimension, FITS images are grayscale-only and can
         be N-dimensional, so an array of the native FITS dimensionality is
         returned, without color channels.
 
@@ -62,7 +62,7 @@ def imread_collection(load_pattern, conserve_memory=True):
     load_pattern : str or list
         List of extensions to load. Filename globbing is currently
         unsupported.
-    converve_memory : bool
+    conserve_memory : bool
         If True, never keep more than one in memory at a specific
         time. Otherwise, images will be cached once they are loaded.
 

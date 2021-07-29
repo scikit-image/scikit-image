@@ -3,6 +3,7 @@ import numpy as np
 from numpy.lib import NumpyVersion as Version
 import skimage
 from skimage import segmentation
+from . import _channel_kwarg
 
 
 class SlicSegmentation:
@@ -21,11 +22,11 @@ class SlicSegmentation:
 
     def time_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=False, **self.slic_kwargs)
+                          **_channel_kwarg(False), **self.slic_kwargs)
 
     def time_slic_basic_multichannel(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=True, **self.slic_kwargs)
+                          **_channel_kwarg(True), **self.slic_kwargs)
 
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
@@ -46,11 +47,11 @@ class SlicSegmentation:
 
     def peakmem_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=False, **self.slic_kwargs)
+                          **_channel_kwarg(False), **self.slic_kwargs)
 
     def peakmem_slic_basic_multichannel(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=True, **self.slic_kwargs)
+                          **_channel_kwarg(True), **self.slic_kwargs)
 
 
 class MaskSlicSegmentation(SlicSegmentation):
@@ -76,8 +77,8 @@ class MaskSlicSegmentation(SlicSegmentation):
 
     def time_mask_slic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          mask=self.msk, multichannel=False)
+                          mask=self.msk, **_channel_kwarg(False))
 
     def time_mask_slic_multichannel(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          mask=self.msk_slice, multichannel=True)
+                          mask=self.msk_slice, **_channel_kwarg(True))
