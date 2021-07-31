@@ -71,7 +71,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
-        # Use precomputed histogram for supporting functions.
+        # Use precomputed histogram for supporting functions
         sig = inspect.signature(func)
         _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
 
