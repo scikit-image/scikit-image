@@ -284,6 +284,14 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
+        
+        if counts[0] == 0 or counts[-1] == 0:
+            # Trim histogram from both ends by removing starting and
+            # ending zeroes as in histogram(..., source_range="image")
+            cond = counts > 0
+            start = np.argmax(cond)
+            end = cond.size - np.argmax(cond[::-1])
+            counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image'
