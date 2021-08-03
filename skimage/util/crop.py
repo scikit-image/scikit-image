@@ -2,11 +2,10 @@ import numpy as np
 
 __all__ = ['crop']
 
-def crop(image, bounding_box, axis=[]):
+def crop(image, bounding_box, axis=None):
     """Cropping images from a bounding box.
-        Bounding_box (which is a 2-tuple (min_val, max_val) for each axis) 
-        and (optional) axis for corresponding axis order to bounding_box, 
-        
+        Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
+        and (optional) axis for corresponding axis order to bounding_box.
 
     Parameters
     ----------
@@ -17,7 +16,7 @@ def crop(image, bounding_box, axis=[]):
     axis : tuple, optional
         Axis order for cropping.
         if provided, same legth as bounding_box.
-        Default: []
+        Default: None
 
 
     Returns
@@ -63,10 +62,8 @@ def crop(image, bounding_box, axis=[]):
             raise ValueError("axis must be positive")
         if not all(a < image.ndim for a in axis):
             raise ValueError("axis must be less than image.ndim")
-        
-        
 
-    bbox_with_axis = [(bbox, axis) for bbox, axis in zip(bounding_box, axis)]
+    bbox_with_axis = list(zip(bounding_box, axis))
     # sort axis by decreasing
     bbox_with_axis.sort(key=lambda x: x[1], reverse=True)
     full_bbox_data = []
@@ -83,10 +80,9 @@ def crop(image, bounding_box, axis=[]):
                 raise ValueError("In bounding_box, values must be positive")
 
             if axis_min > image.shape[idx]:
-                raise ValueError(f"Invalid bounding_box!")
+                raise ValueError("Invalid bounding_box!")
             if axis_max > image.shape[idx]:
-                raise ValueError(f"Invalid bounding_box!")
-            
+                raise ValueError("Invalid bounding_box!")
             full_bbox_data.append(range(*bbox))
         else:
             full_bbox_data.append(range(image.shape[idx]))
