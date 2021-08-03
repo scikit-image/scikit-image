@@ -104,11 +104,12 @@ For a more detailed discussion, read these :doc:`detailed documents
      and commit. As soon as those changes are pushed up (to the same branch as
      before) the pull request will update automatically.
 
-   * Continuous integration services are triggered after each Pull Request
-     update to build the code, run unit tests, measure code coverage and check
-     coding style (PEP8) of your branch. The tests must pass before your
-     PR can be merged. If CI fails, you can find out why by clicking on the
-     "failed" icon (red cross) and inspecting the build and test log.
+   * Continuous integration (CI) services are triggered after each pull request
+     submission to build the package, run unit tests, measure code coverage,
+     and check the coding style (PEP8) of your branch. The tests must pass
+     before your PR can be merged. If CI fails, you can find out why by
+     clicking on the "failed" icon (red cross) and inspecting the build and
+     test logs.
 
    * A pull request must be approved by two core team members before merging.
 
