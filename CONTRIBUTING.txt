@@ -78,8 +78,8 @@ Here's the long and short of it:
      users can remove this step by `connecting to GitHub with SSH
      <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
 
-   * Go to GitHub. The new branch will show up with a green Pull Request
-     button - click it.
+   * Go to GitHub. The new branch will show up with a green "pull request"
+     button -- click it.
 
    * If you want, post on the `mailing list
      <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ to explain your changes or
@@ -91,7 +91,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 4. Review process:
 
    * Reviewers (the other developers and interested community members) will
-     write inline and/or general comments on your Pull Request (PR) to help
+     write inline and/or general comments on your pull request (PR) to help
      you improve its implementation, documentation, and style.  Every single
      developer working on the project has their code reviewed, and we've come
      to see it as a friendly conversation from which we all learn and the
@@ -131,7 +131,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 Divergence between ``upstream main`` and your feature branch
 ------------------------------------------------------------
 
-If GitHub indicates that the branch of your Pull Request can no longer
+If GitHub indicates that the branch of your PR can no longer
 be merged automatically, merge the main branch into yours::
 
    git fetch upstream main
