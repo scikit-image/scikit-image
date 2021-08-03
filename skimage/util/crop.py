@@ -30,12 +30,16 @@ def crop(image, bounding_box, axis=None):
     >>> from skimage.util.crop import crop
     >>> img = data.camera()
     >>> img.shape
+    (512, 512)
     >>> cropped_img = crop(img, [(0, 100)])
     >>> cropped_img.shape
+    (100, 512)
     >>> cropped_img = crop(img, [(0, 100), (0, 100)])
     >>> cropped_img.shape
+    (100, 100)
     >>> cropped_img = crop(img, [(0, 100), (0, 75)], axis=[1, 0])
     >>> cropped_img.shape
+    (75, 100)
     """
 
 
