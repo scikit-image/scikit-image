@@ -2,6 +2,7 @@ import numpy as np
 
 __all__ = ['crop']
 
+
 def crop(image, bounding_box, axis=None):
     """Cropping images from a bounding box.
         Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
@@ -42,7 +43,6 @@ def crop(image, bounding_box, axis=None):
     (75, 100)
     """
 
-
     # empty legth of bounding box detected on None detected
     if not bounding_box:
         return image
@@ -76,7 +76,8 @@ def crop(image, bounding_box, axis=None):
             bbox, _ = bbox_with_axis.pop()
             axis_min, axis_max = bbox
             if axis_min > axis_max:
-                raise ValueError("In bounding_box, tuple should be sorted (min_val, max_val)")
+                raise ValueError(
+                    "In bounding_box, tuple should be sorted (min_val, max_val)")
 
             if axis_min < 0:
                 raise ValueError("In bounding_box, values must be positive")
