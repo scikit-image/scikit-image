@@ -11,11 +11,13 @@ def test_2d_crop_1():
 
 
 def test_2d_crop_2():
+    data = np.random.random((50, 50))
     out_data = crop(data, [(0, 25)], axis=[1])
     assert out_data.shape == (50, 25)
 
 
 def test_2d_crop_3():
+    data = np.random.random((50, 50))
     out_data = crop(data, [(0, 25), (0, 30)], axis=[1, 0])
     assert out_data.shape == (30, 25)
 
