@@ -318,17 +318,36 @@ cdef inline double _integral_to_distance_2d(double [:, ::] integral,
                                             Py_ssize_t offset,
                                             double h2s2) nogil:
     """
+    Parameters
+    ----------
+    integral : ndarray
+        The integral image as computed by ``_integral_image_2d``.
+    row, col : Py_ssize_t
+        Index of the patch's center pixel.
+    offset : Py_ssize_t
+        The non-local means patch radius.
+    h2s2 : float
+        Normalization factor related to the image standard deviation and `h`
+        parameter.
+
+    Returns
+    -------
+    distance : float
+        The patch distance
+
+    Notes
+    -----
+    Used in `_fast_nl_means_denoising_2d` which is a fast non-local means
+    algorithm using integral images as described in [1]_, [2]_.
+
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
-
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
-
-    Used in _fast_nl_means_denoising_2d
+    .. [1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen. Fast
+           nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+           International Symposium on Biomedical Imaging: From Nano to Macro,
+           2008, pp. 1331-1334.
+    .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
     cdef double distance = (integral[row + offset, col + offset] +
                             integral[row - offset, col - offset] -
@@ -342,19 +361,38 @@ cdef inline double _integral_to_distance_3d(double[:, :, ::] integral,
                                             Py_ssize_t col, Py_ssize_t offset,
                                             double s_cube_h_square) nogil:
     """
+    Parameters
+    ----------
+    integral : ndarray
+        The integral image as computed by ``_integral_image_3d``.
+    pln, row, col : Py_ssize_t
+        Index of the patch's center pixel.
+    offset : Py_ssize_t
+        The non-local means patch radius.
+    s_cube_h_square : float
+        Normalization factor related to the image standard deviation and `h`
+        parameter.
+
+    Returns
+    -------
+    distance : float
+        The patch distance
+
+    Notes
+    -----
+    Used in `_fast_nl_means_denoising_3d` which is a fast non-local means
+    algorithm using integral images as described in [1]_, [2]_.
+
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
-
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
-
-    Used in _fast_nl_means_denoising_3d
+    .. [1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen. Fast
+           nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+           International Symposium on Biomedical Imaging: From Nano to Macro,
+           2008, pp. 1331-1334.
+    .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
-    cdef double distance= (
+    cdef double distance = (
         integral[pln + offset, row + offset, col + offset] -
         integral[pln - offset, row - offset, col - offset] +
         integral[pln - offset, row - offset, col + offset] +
@@ -372,25 +410,40 @@ cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
                                             Py_ssize_t offset,
                                             double s4_h_square) nogil:
     """
+    Parameters
+    ----------
+    integral : ndarray
+        The integral image as computed by ``_integral_image_4d``.
+    time, pln, row, col : Py_ssize_t
+        Index of the patch's center pixel.
+    offset : Py_ssize_t
+        The non-local means patch radius.
+    s4_h_square : float
+        Normalization factor related to the image standard deviation and `h`
+        parameter.
+
+    Returns
+    -------
+    distance : float
+        The patch distance
+
+    Notes
+    -----
+    Used in _fast_nl_means_denoising_4d which is a fast non-local means
+    algorithm using integral images as described in [1]_, [2]_. The
+    coefficients for the terms in the 4D case were determined using Eq. 54 of
+    [3]_ as implemented in the ``integral_image_coefficients`` function.
+
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
-
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
-
-    Used in _fast_nl_means_denoising_4d
-
-    The coefficients for the terms were determined using Eq. 54 of [1]_ as
-    implemented in the integral_image_coefficients function.
-
-    E. Tapia.  A note on the computation of high-dimensional integral images.
-    Pattern Recognition Letters 2011. Vol. 32, pp.197-201.
-
-
+    .. [1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen. Fast
+           nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+           International Symposium on Biomedical Imaging: From Nano to Macro,
+           2008, pp. 1331-1334.
+    .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
+    .. [3] Tapia, E. A note on the computation of high-dimensional integral
+           images. Pattern Recognition Letters, 2011, Vol. 32, pp.197-201.
     """
     cdef double distance
     distance = (
@@ -410,7 +463,7 @@ cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
         integral[time + offset, pln + offset, row - offset, col + offset] -
         integral[time + offset, pln + offset, row + offset, col - offset] +
         integral[time + offset, pln + offset, row + offset, col + offset])
-    return  max(distance, 0.0) / s4_h_square
+    return max(distance, 0.0) / s4_h_square
 
 
 cdef inline void _integral_image_2d(double [:, :, ::] padded,
@@ -419,9 +472,8 @@ cdef inline void _integral_image_2d(double [:, :, ::] padded,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
                                     double var_diff) nogil:
-    """
-    Computes the integral of the squared difference between an image ``padded``
-    and the same image shifted by ``(t_row, t_col)``.
+    """ Compute the integral of the squared difference between an image
+    ``padded`` and the same image shifted by ``(t_row, t_col)``.
 
     Parameters
     ----------
@@ -475,8 +527,7 @@ cdef inline void _integral_image_3d(double [:, :, :, ::] padded,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
                                     double var_diff) nogil:
-    """
-    Computes the integral of the squared difference between an image ``padded``
+    """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 
     Parameters
@@ -623,8 +674,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
 def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                                 Py_ssize_t s, Py_ssize_t d,
                                 double h, double var):
-    """
-    Perform fast non-local means denoising on 2-D array, with the outer
+    """Perform fast non-local means denoising on 2-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
 
     Parameters
@@ -649,13 +699,13 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
 
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
+    ..[1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+          nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+          International Symposium on Biomedical Imaging: From Nano to Macro,
+          2008, pp. 1331-1334.
 
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
+    ..[2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+          Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
     cdef double DISTANCE_CUTOFF = 5.0
@@ -747,8 +797,7 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
 def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
                                 Py_ssize_t s=5, Py_ssize_t d=7, double h=0.1,
                                 double var=0.):
-    """
-    Perform fast non-local means denoising on 3-D array, with the outer
+    """Perform fast non-local means denoising on 3-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
 
     Parameters
@@ -773,13 +822,13 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
 
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
+    ..[1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+          nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+          International Symposium on Biomedical Imaging: From Nano to Macro,
+          2008, pp. 1331-1334.
 
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
+    ..[2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+          Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
     cdef double DISTANCE_CUTOFF = 5.0
@@ -926,13 +975,13 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
 
     References
     ----------
-    J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
-    nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
-    International Symposium on Biomedical Imaging: From Nano to Macro,
-    2008, pp. 1331-1334.
+    ..[1] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
+          nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
+          International Symposium on Biomedical Imaging: From Nano to Macro,
+          2008, pp. 1331-1334.
 
-    Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
+    ..[2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
+          Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
     cdef double DISTANCE_CUTOFF = 5.0
