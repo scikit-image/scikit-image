@@ -13,7 +13,7 @@ from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
-           'reshape_nd']
+           'reshape_nd', 'identity']
 
 
 class skimage_deprecation(Warning):
@@ -664,3 +664,8 @@ def _supported_float_type(input_dtype, allow_complex=False):
     if not allow_complex and input_dtype.kind == 'c':
         raise ValueError("complex valued input is not supported")
     return new_float_type.get(input_dtype.char, np.float64)
+
+
+def identity(image, *args, **kwargs):
+    """Returns the first argument unmodified."""
+    return image

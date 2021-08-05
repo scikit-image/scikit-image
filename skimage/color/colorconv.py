@@ -57,7 +57,7 @@ from scipy import linalg
 
 
 from .._shared.utils import (_supported_float_type, channel_as_last_axis,
-                             reshape_nd, slice_at_axis)
+                             identity, reshape_nd, slice_at_axis)
 from ..util import dtype, dtype_limits
 
 
@@ -107,9 +107,6 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
-    def identity(im, channel_axis=-1):
-        return im
-
     fromdict = {'rgb': identity, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
                 'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
                 'ypbpr': ypbpr2rgb, 'ycbcr': ycbcr2rgb, 'ydbdr': ydbdr2rgb}
