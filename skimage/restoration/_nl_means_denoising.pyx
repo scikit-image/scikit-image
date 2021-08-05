@@ -410,7 +410,7 @@ cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
         integral[time + offset, pln + offset, row - offset, col + offset] -
         integral[time + offset, pln + offset, row + offset, col - offset] +
         integral[time + offset, pln + offset, row + offset, col + offset])
-    return  max(distance, 0.0) / (s4_h_square)
+    return  max(distance, 0.0) / s4_h_square
 
 
 cdef inline void _integral_image_2d(double [:, :, ::] padded,
@@ -542,8 +542,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
                                     Py_ssize_t t_col, Py_ssize_t n_time, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col, Py_ssize_t n_channels,
                                     double var_diff) nogil:
-    """
-    Computes the integral of the squared difference between an image ``padded``
+    """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 
     Parameters
@@ -568,7 +567,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
     var_diff : double
         The double of the expected noise variance. If non-zero, this
         is used to reduce the apparent patch distances by the expected
-         distance due to the noise.
+        distance due to the noise.
 
     Notes
     -----
@@ -914,7 +913,7 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
     d : tuple of Py_ssize_t, optional
         Maximal distance in pixels along each axis to search for patches used for denoising.
     h : double, optional
-        cut-off distance (in gray levels). The higher h, the more permissive
+        Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
     var : double
         Expected noise variance.  If non-zero, this is used to reduce the
@@ -933,7 +932,7 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
     2008, pp. 1331-1334.
 
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
-    Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
+    Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
     cdef double DISTANCE_CUTOFF = 5.0
