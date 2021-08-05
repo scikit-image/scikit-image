@@ -56,8 +56,8 @@ import numpy as np
 from scipy import linalg
 
 
-from .._shared.utils import (_reshape_nd, _supported_float_type,
-                             channel_as_last_axis, slice_at_axis)
+from .._shared.utils import (_supported_float_type, channel_as_last_axis,
+                             reshape_nd, slice_at_axis)
 from ..util import dtype, dtype_limits
 
 
@@ -220,7 +220,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
         raise ValueError('background RGB values must be floats between '
                          '0 and 1.')
     # reshape background for broadcasting along non-channel axes
-    background = _reshape_nd(background, arr.ndim, channel_axis)
+    background = reshape_nd(background, arr.ndim, channel_axis)
 
     alpha = arr[slice_at_axis(slice(3, 4), axis=channel_axis)]
     channels = arr[slice_at_axis(slice(3), axis=channel_axis)]

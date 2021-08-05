@@ -5,14 +5,15 @@ import warnings
 from collections.abc import Iterable
 
 import numpy as np
-from numpy.lib import NumpyVersion
 import scipy
+from numpy.lib import NumpyVersion
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
+           'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
+           'reshape_nd']
 
 
 class skimage_deprecation(Warning):
@@ -455,7 +456,7 @@ def slice_at_axis(sl, axis):
     return (slice(None),) * axis + (sl,) + (...,)
 
 
-def _reshape_nd(arr, ndim, dim):
+def reshape_nd(arr, ndim, dim):
     """Reshape a 1D array to have n dimensions, all singletons but one.
 
     Parameters
