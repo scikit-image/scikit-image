@@ -77,7 +77,7 @@ class TestColorconv():
                           ])
 
     # RGBA to RGB
-    @pytest.mark.parametrize("channel_axis", [0, 1, 2, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, 2, -1, -2, -3])
     def test_rgba2rgb_conversion(self, channel_axis):
         rgba = self.img_rgba
 
@@ -117,7 +117,7 @@ class TestColorconv():
         assert rgba2rgb(rgba32).dtype == rgba32.dtype
 
     # RGB to HSV
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgb2hsv_conversion(self, channel_axis):
         rgb = img_as_float(self.img_rgb)[::16, ::16]
 
@@ -144,7 +144,7 @@ class TestColorconv():
         assert rgb2hsv(rgb32).dtype == rgb32.dtype
 
     # HSV to RGB
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_hsv2rgb_conversion(self, channel_axis):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
         # create HSV image with colorsys
@@ -175,7 +175,7 @@ class TestColorconv():
         assert hsv2rgb(hsv32).dtype == hsv32.dtype
 
     # RGB to XYZ
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgb2xyz_conversion(self, channel_axis):
         gt = np.array([[[0.950456, 1.      , 1.088754],
                         [0.538003, 0.787329, 1.06942 ],
@@ -220,7 +220,7 @@ class TestColorconv():
         assert xyz2rgb(img32).dtype == img32.dtype
 
     # RGB<->XYZ roundtrip on another image
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_xyz_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
 
@@ -237,7 +237,7 @@ class TestColorconv():
         assert_equal(img_as_ubyte(img_out), img_in)
 
     # HED<->RGB roundtrip with float image
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_hed_rgb_float_roundtrip(self, channel_axis):
         img_in = self.img_stains
         img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)
@@ -270,7 +270,7 @@ class TestColorconv():
         assert_array_almost_equal(img_out, img_in)
 
     # RGB to RGB CIE
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgb2rgbcie_conversion(self, channel_axis):
         gt = np.array([[[ 0.1488856 ,  0.18288098,  0.19277574],
                         [ 0.01163224,  0.16649536,  0.18948516],
@@ -298,7 +298,7 @@ class TestColorconv():
         assert rgb2rgbcie(img32).dtype == img32.dtype
 
     # RGB CIE to RGB
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgbcie2rgb_conversion(self, channel_axis):
         rgb = np.moveaxis(
             self.colbars_array, source=-1, destination=channel_axis
@@ -350,7 +350,7 @@ class TestColorconv():
         with pytest.raises(ValueError):
             convert_colorspace(self.colbars_array, 'RGB', 'nokey')
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgb2gray(self, channel_axis):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(float)
         x = np.moveaxis(x, source=-1, destination=channel_axis)
@@ -404,7 +404,7 @@ class TestColorconv():
                                       xyz2lab(self.xyz_array, I, "2"),
                                       decimal=2)
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_xyz2lab_channel_axis(self, channel_axis):
         # test conversion with channels along a specified axis
         xyz = np.moveaxis(self.xyz_array, source=-1, destination=channel_axis)
@@ -445,7 +445,7 @@ class TestColorconv():
         with pytest.raises(ValueError):
             lab2xyz(lab_array_I_obs, "d50", "42")   # Not a degree
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab2xyz_channel_axis(self, channel_axis):
         # test conversion with channels along a specified axis
         lab = np.moveaxis(self.lab_array, source=-1, destination=channel_axis)
@@ -481,7 +481,7 @@ class TestColorconv():
             rgb2lab(self.colbars_array), gt_array, decimal=2
         )
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
@@ -531,7 +531,7 @@ class TestColorconv():
                                       xyz2luv(self.xyz_array, I, "2"),
                                       decimal=2)
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_xyz2luv_channel_axis(self, channel_axis):
         # test conversion with channels along a specified axis
         xyz = np.moveaxis(self.xyz_array, source=-1, destination=channel_axis)
@@ -565,7 +565,7 @@ class TestColorconv():
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_luv2xyz_channel_axis(self, channel_axis):
         # test conversion with channels along a specified axis
         luv = np.moveaxis(self.luv_array, source=-1, destination=channel_axis)
@@ -614,7 +614,7 @@ class TestColorconv():
         assert luv2rgb(img).dtype == img.dtype
         assert luv2rgb(img32).dtype == img32.dtype
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1 -2])
     def test_luv_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
@@ -646,7 +646,7 @@ class TestColorconv():
             with expected_warnings(['Color data out of range']):
                 lab2xyz(lab)
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_lch_roundtrip(self, channel_axis):
         rgb = img_as_float(self.img_rgb)
         rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
@@ -713,7 +713,7 @@ class TestColorconv():
             rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]])
         )
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_yuv_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
@@ -787,7 +787,7 @@ def test_gray2rgb():
 
 
 @pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
-@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+@pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgba(shape, channel_axis):
     # nD case
     img = np.random.random(shape)
@@ -811,7 +811,7 @@ def test_gray2rgba(shape, channel_axis):
 
 
 @pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
-@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+@pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgb_channel_axis(shape, channel_axis):
     # nD case
     img = np.random.random(shape)
