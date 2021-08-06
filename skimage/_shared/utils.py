@@ -450,8 +450,8 @@ def slice_at_axis(sl, axis):
 
     Examples
     --------
-    >>> _slice_at_axis(slice(None, 3, -1), 1)
-    (slice(None, None, None), slice(None, 3, -1), (...,))
+    >>> slice_at_axis(slice(None, 3, -1), 1)
+    (slice(None, None, None), slice(None, 3, -1), Ellipsis)
     """
     return (slice(None),) * axis + (sl,) + (...,)
 
