@@ -6,8 +6,6 @@ export PIP_DEFAULT_TIMEOUT=60
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
 
-export TEST_ARGS="--doctest-modules --cov=skimage"
-
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
     local retry_max=3

@@ -116,7 +116,6 @@ jobs:
                     pip install -r ./requirements/extras.txt
                 fi
             fi
-            echo "TEST_ARGS=${TEST_ARGS}"
             source tools/github/script.sh
 
       - name: Check benchmarks
