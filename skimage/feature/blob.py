@@ -346,7 +346,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
 
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
-    # normalization factor for consistency DoG magnitude
+    # normalization factor for consistency in DoG magnitude
     sf = 1 / (sigma_ratio - 1)
 
     # computing difference between two successive Gaussian blurred images
