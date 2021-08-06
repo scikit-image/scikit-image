@@ -214,7 +214,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         )
 
 
-def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
+def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
              overlap=.5, *, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
@@ -284,31 +284,32 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Examples
     --------
     >>> from skimage import data, feature
-    >>> feature.blob_dog(data.coins(), threshold=.5, max_sigma=40)
-    array([[120.      , 272.      ,  16.777216],
-           [193.      , 213.      ,  16.777216],
-           [263.      , 245.      ,  16.777216],
-           [185.      , 347.      ,  16.777216],
-           [128.      , 154.      ,  10.48576 ],
-           [198.      , 155.      ,  10.48576 ],
-           [124.      , 337.      ,  10.48576 ],
-           [ 45.      , 336.      ,  16.777216],
-           [195.      , 102.      ,  16.777216],
-           [125.      ,  45.      ,  16.777216],
-           [261.      , 173.      ,  16.777216],
-           [194.      , 277.      ,  16.777216],
-           [127.      , 102.      ,  10.48576 ],
-           [125.      , 208.      ,  10.48576 ],
-           [267.      , 115.      ,  10.48576 ],
-           [263.      , 302.      ,  16.777216],
-           [196.      ,  43.      ,  10.48576 ],
-           [260.      ,  46.      ,  16.777216],
-           [267.      , 359.      ,  16.777216],
-           [ 54.      , 276.      ,  10.48576 ],
-           [ 58.      , 100.      ,  10.48576 ],
-           [ 52.      , 155.      ,  16.777216],
-           [ 52.      , 216.      ,  16.777216],
-           [ 54.      ,  42.      ,  16.777216]])
+    >>> coins = data.coins()
+    >>> feature.blob_dog(coins, threshold=.05, min_sigma=10, max_sigma=40)
+    array([[128., 155.,  10.],
+           [198., 155.,  10.],
+           [124., 338.,  10.],
+           [127., 102.,  10.],
+           [193., 281.,  10.],
+           [126., 208.,  10.],
+           [267., 115.,  10.],
+           [197., 102.,  10.],
+           [198., 215.,  10.],
+           [123., 279.,  10.],
+           [126.,  46.,  10.],
+           [259., 247.,  10.],
+           [196.,  43.,  10.],
+           [ 54., 276.,  10.],
+           [267., 358.,  10.],
+           [ 58., 100.,  10.],
+           [259., 305.,  10.],
+           [185., 347.,  16.],
+           [261., 174.,  16.],
+           [ 46., 336.,  16.],
+           [ 54., 217.,  10.],
+           [ 55., 157.,  10.],
+           [ 57.,  41.,  10.],
+           [260.,  47.,  16.]])
 
     Notes
     -----
@@ -342,12 +343,16 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
+    # normalization factor for consistency DoG magnitude
+    sf = 1 / (sigma_ratio - 1)
+
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
     dog_images = [
-        (gaussian_images[i] - gaussian_images[i + 1]) for i in range(k)
+        (gaussian_images[i] - gaussian_images[i + 1]) * sf for i in range(k)
     ]
+
 
     image_cube = np.stack(dog_images, axis=-1)
 
