@@ -130,6 +130,13 @@ def test_blob_dog_excl_border():
     assert blobs.shape[0] == 0, msg
 
 
+@pytest.mark.parametrize('sigma_ratio', [0.5, 1.0])
+def test_blob_dog_invalid_sigma_ratio(sigma_ratio):
+
+    with pytest.raises(ValueError):
+        blob_dog(np.zeros((8, 8)), sigma_ratio=sigma_ratio)
+
+
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )

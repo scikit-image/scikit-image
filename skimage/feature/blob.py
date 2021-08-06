@@ -334,6 +334,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     min_sigma = np.asarray(min_sigma, dtype=float_dtype)
     max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
+    if sigma_ratio <= 1.0:
+        raise ValueError('sigma_ratio must be > 1.0')
+
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
 
