@@ -11,7 +11,11 @@ jobs:
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
-
+        CCACHE_BASEDIR: "${{ github.workspace }}"
+        CCACHE_DIR: "${{ github.workspace }}/.ccache"
+        CCACHE_COMPRESS: true
+        CCACHE_COMPRESSLEVEL: 6
+        CCACHE_MAXSIZE: 400M
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
@@ -72,6 +76,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
 
+      - name: Install Ccache
+        run: |
+            sudo apt-get update -y && sudo apt-get install -y ccache
+
+      - name: Prepare Ccache
+        id: prepare-ccache
+        shell: bash -l {0}
+        run: |
+            echo "::set-output name=key::benchmark-$RUNNER_OS"
+            echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
+            ccache -p
+            ccache -z
+
+      - name: Restore Ccache
+        uses: actions/cache@v1.1.0
+        with:
+            path: .ccache
+            key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
+            restore-keys: |
+                ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-
+
       - name: Build package
         env:
             VERSION: ${{ matrix.python-version }}
@@ -90,6 +115,11 @@ jobs:
             else
                 pip install -vv -e .;
             fi
+
+      - name: Check ccache performance
+        shell: bash -l {0}
+        run: ccache -s
+        if: always()
 
       - name: Run tests
         env:
