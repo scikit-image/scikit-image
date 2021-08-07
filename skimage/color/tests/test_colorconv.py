@@ -313,7 +313,7 @@ class TestColorconv():
                                   self.lab_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["A", "B", "C", "d50", "d55", "d65"]:
+        for I in ["d50", "d55", "d65"]:
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
@@ -322,10 +322,19 @@ class TestColorconv():
                 assert_array_almost_equal(lab_array_I_obs,
                                           xyz2lab(self.xyz_array, I, obs),
                                           decimal=2)
-        for I in ["d75", "e"]:
-            fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
-            lab_array_I_obs = np.load(fetch(fname))
-            assert_array_almost_equal(lab_array_I_obs,
+        for I in ["A", "B", "C", "d75"]:
+            I = I.lower()
+            for obs in ["2", "10"]:
+                obs = obs.lower()
+                fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
+                lab_array_I_obs = np.load(fetch(fname))
+                assert_array_almost_equal(lab_array_I_obs,
+                                          xyz2lab(self.xyz_array, I, obs),
+                                          decimal=2)
+        I= "e"
+        fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
+        lab_array_I_obs = np.load(fetch(fname))
+        assert_array_almost_equal(lab_array_I_obs,
                                       xyz2lab(self.xyz_array, I, "2"),
                                       decimal=2)
 
@@ -341,7 +350,7 @@ class TestColorconv():
                                   self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["A", "B", "C", "d50", "d55", "d65"]:
+        for I in [ "d50", "d55", "d65"]:
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
@@ -349,11 +358,19 @@ class TestColorconv():
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
-        for I in ["d75", "e"]:
-            fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
-            lab_array_I_obs = np.load(fetch(fname))
-            assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
-                                      self.xyz_array, decimal=3)
+        for I in ["A", "B", "C", "d75"]:
+            I = I.lower()
+            for obs in ["2", "10"]:
+                obs = obs.lower()
+                fname = "color/tests/data/lab_array_{0}_{1}.npy".format(I, obs)
+                lab_array_I_obs = np.load(fetch(fname))
+                assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
+                                          self.xyz_array, decimal=3)
+        I = "e"
+        fname = "color/tests/data/lab_array_{0}_2.npy".format(I)
+        lab_array_I_obs = np.load(fetch(fname))
+        assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
+                                  self.xyz_array, decimal=3)
 
         # And we include a call to test the exception handling in the code.
         try:
@@ -418,7 +435,7 @@ class TestColorconv():
                                   self.luv_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["A", "B", "C", "d50", "d55", "d65"]:
+        for I in ["d50", "d55", "d65"]:
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
@@ -427,10 +444,19 @@ class TestColorconv():
                 assert_array_almost_equal(luv_array_I_obs,
                                           xyz2luv(self.xyz_array, I, obs),
                                           decimal=2)
-        for I in ["d75", "e"]:
-            fname = "color/tests/data/luv_array_{0}_2.npy".format(I)
-            luv_array_I_obs = np.load(fetch(fname))
-            assert_array_almost_equal(luv_array_I_obs,
+        for I in ["A", "B", "C", "d75"]:
+            I = I.lower()
+            for obs in ["2", "10"]:
+                obs = obs.lower()
+                fname = "color/tests/data/luv_array_{0}_{1}.npy".format(I, obs)
+                luv_array_I_obs = np.load(fetch(fname))
+                assert_array_almost_equal(luv_array_I_obs,
+                                          xyz2luv(self.xyz_array, I, obs),
+                                          decimal=2)
+        I = "e"
+        fname = "color/tests/data/luv_array_{0}_2.npy".format(I)
+        luv_array_I_obs = np.load(fetch(fname))
+        assert_array_almost_equal(luv_array_I_obs,
                                       xyz2luv(self.xyz_array, I, "2"),
                                       decimal=2)
 
@@ -446,7 +472,7 @@ class TestColorconv():
                                   self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
-        for I in ["A", "B", "C", "d50", "d55", "d65"]:
+        for I in ["d50", "d55", "d65"]:
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
@@ -454,10 +480,18 @@ class TestColorconv():
                 luv_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
-        for I in ["d75", "e"]:
-            fname = "color/tests/data/luv_array_{0}_2.npy".format(I, obs)
-            luv_array_I_obs = np.load(fetch(fname))
-            assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
+        for I in ["A", "B", "C", "d75"]:
+            I = I.lower()
+            for obs in ["2", "10"]:
+                obs = obs.lower()
+                fname = "color/tests/data/luv_array_{0}_{1}.npy".format(I, obs)
+                luv_array_I_obs = np.load(fetch(fname))
+                assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
+                                          self.xyz_array, decimal=3)
+        I = "e"
+        fname = "color/tests/data/luv_array_{0}_2.npy".format(I, obs)
+        luv_array_I_obs = np.load(fetch(fname))
+        assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
 
     def test_luv2xyz_dtype(self):
