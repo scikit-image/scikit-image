@@ -1,20 +1,19 @@
 import itertools
-import pytest
 
 import numpy as np
-from skimage.color.colorlabel import label2rgb
-from skimage.color.colorconv import rgb2hsv, hsv2rgb
+import pytest
+from numpy.testing import (assert_array_almost_equal,
+                           assert_array_equal, assert_no_warnings,
+                           assert_warns)
 
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_almost_equal,
-                                     assert_array_equal, assert_warns,
-                                     assert_no_warnings)
+from skimage.color.colorconv import hsv2rgb, rgb2hsv
+from skimage.color.colorlabel import label2rgb
 
 
 def test_shape_mismatch():
     image = np.ones((3, 3))
     label = np.ones((2, 2))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         label2rgb(image, label, bg_label=-1)
 
 
@@ -23,7 +22,7 @@ def test_wrong_kind():
     # Must not raise an error.
     label2rgb(label, bg_label=-1)
     # kind='foo' is wrong.
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         label2rgb(label, kind='foo', bg_label=-1)
 
 

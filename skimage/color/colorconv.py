@@ -49,11 +49,13 @@ References
 .. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-
 import functools
-import numpy as np
 from warnings import warn
+
+import numpy as np
 from scipy import linalg
+
+from .._shared.utils import _supported_float_type
 from ..util import dtype, dtype_limits
 
 
@@ -125,7 +127,12 @@ def _prepare_colorarray(arr, force_copy=False):
         raise ValueError("Input array must have a shape == (..., 3)), "
                          f"got {arr.shape}")
 
-    return dtype.img_as_float(arr, force_copy=force_copy)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        _func = dtype.img_as_float32
+    else:
+        _func = dtype.img_as_float64
+    return _func(arr, force_copy=force_copy)
 
 
 def rgba2rgb(rgba, background=(1, 1, 1)):
@@ -167,7 +174,11 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
                f"got {arr.shape}")
         raise ValueError(msg)
 
-    arr = dtype.img_as_float(arr)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        arr = dtype.img_as_float32(arr)
+    else:
+        arr = dtype.img_as_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -483,9 +494,10 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
 
+
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
-# "Quantification of histochemical staining by color deconvolution.,"
+# "Quantification of histochemical staining by color deconvolution,"
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
 # pp. 291-9, Aug. 2001.
@@ -1562,7 +1574,12 @@ def _prepare_lab_array(arr, force_copy=True):
     shape = arr.shape
     if shape[-1] < 3:
         raise ValueError('Input array has less than 3 color channels')
-    return dtype.img_as_float(arr, force_copy=force_copy)
+    float_dtype = _supported_float_type(arr.dtype)
+    if float_dtype == np.float32:
+        _func = dtype.img_as_float32
+    else:
+        _func = dtype.img_as_float64
+    return _func(arr, force_copy=force_copy)
 
 
 def rgb2yuv(rgb):

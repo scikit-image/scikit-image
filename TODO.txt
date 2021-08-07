@@ -25,8 +25,7 @@ Version 0.20
   Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
   setup.py
 * Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py` and
-  `tools/travis/script.sh`
+  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
 Version 1.0
 -----------
@@ -41,15 +40,8 @@ Version 1.0
 
 Other (2021)
 ------------
-* Monitor when multibuild devel gets merged into master for python 3.8
-  compatibility https://github.com/matthew-brett/multibuild/issues/284
-  and update osx_install to point to the correct branch
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* Once NumPy is set to >= 1.17, consider removing
-  ``skimage.morphology._util._fast_pad``.
-* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
-  when texlive 2020 is available.
 
 Other (2022)
 ------------

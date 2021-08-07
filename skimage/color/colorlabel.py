@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import warn
+from .._shared.utils import _supported_float_type, warn
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
@@ -178,7 +178,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
 
-        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        image = img_as_float(image).astype(float_dtype, copy=False)
         if image.ndim > label.ndim:
             hsv = rgb2hsv(image)
             hsv[..., 1] *= saturation
@@ -200,7 +201,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     label = label.astype(new_type)
 
     mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
-                                                              bg_label, bg_color)
+                                                              bg_label,
+                                                              bg_color)
 
     if len(mapped_labels_flat) == 0:
         return image

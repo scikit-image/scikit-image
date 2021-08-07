@@ -31,25 +31,26 @@ def test_blob_dog(dtype):
         # account for internal scaling to [0, 1] by img_as_float
         threshold /= img.ptp()
 
-    blobs = blob_dog(img, min_sigma=5, max_sigma=50, threshold=threshold)
+    blobs = blob_dog(img, min_sigma=4, max_sigma=50, threshold=threshold)
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
+    ratio_thresh = 0.25
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
     assert abs(b[1] - 130) <= thresh
-    assert abs(radius(b) - 5) <= thresh
+    assert abs(radius(b) - 5) <= ratio_thresh * 5
 
     b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
-    assert abs(radius(b) - 25) <= thresh
+    assert abs(radius(b) - 25) <= ratio_thresh * 25
 
     b = s[2]
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
-    assert abs(radius(b) - 45) <= thresh
+    assert abs(radius(b)- 45) <= ratio_thresh * 45
 
     # Testing no peaks
     img_empty = np.zeros((100, 100), dtype=dtype)
@@ -75,7 +76,7 @@ def test_blob_dog(dtype):
     assert b[0] == r + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r) < 1.1
 
     # Testing 3D anisotropic
     r = 10
@@ -96,9 +97,9 @@ def test_blob_dog(dtype):
     assert b[0] == r / 2 + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r / 2) < 1
-    assert abs(math.sqrt(3) * b[4] - r) < 1
-    assert abs(math.sqrt(3) * b[5] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r / 2) < 1.1
+    assert abs(math.sqrt(3) * b[4] - r) < 1.1
+    assert abs(math.sqrt(3) * b[5] - r) < 1.1
 
 
 def test_blob_dog_excl_border():
