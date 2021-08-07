@@ -32,13 +32,23 @@ Supported color spaces
 * LCH CIE : Lightness, Chroma, Hue
         Defined in terms of LAB CIE.  C and H are the polar representation of
         a and b.  The polar angle C is defined to be on ``(0, 2*pi)``
+* C1C2C3 : Hexadecimal color #c1c2c3
+        C1C2C3 color space is obtained from RGB manipulation
+        and is invariant to shadowing effects of light
+        interaction particularly for matte objects
+* MAXRGB : max(R), max(G), max(B)
+        MaxRGB is an extremely simple method of estimating the chromaticity
+        of the scene illumination for color constancy and automatic white
+        balancing based on the assumption that the triple of maxima obtained
+        independently from each of the three color channels represents the
+        color of the illumination
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
 :author: Matt Terry (lab2lch)
 :author: Alex Izvorski (yuv2rgb, rgb2yuv and related)
-
+:author: Imran Salam (rgb2c1c2c3 and rgb2maxrgb)
 :license: modified BSD
 
 References
@@ -688,6 +698,96 @@ def rgb2xyz(rgb):
     arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
     arr[~mask] /= 12.92
     return arr @ xyz_from_rgb.T.astype(arr.dtype)
+
+
+def rgb2c1c2c3(rgb):
+    """RGB to C1C2C3 color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in C1C2C3 format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+
+    Notes
+    -----
+    C1C2C3 color space is obtained from RGB manipulation
+    and is invariant to shadowing effects of light
+    interaction particularly for matte objects
+
+    References
+    ----------
+    .. [1] https://arxiv.org/abs/1702.05421
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> img = data.astronaut()
+    >>> img_c1c2c3 = rgb2c1c2c3(img)
+    """
+    out = np.arctan(rgb / np.dstack((
+        np.maximum(rgb[..., 1], rgb[..., 2]) + np.finfo(float).eps,
+        np.maximum(rgb[..., 0], rgb[..., 2]) + np.finfo(float).eps,
+        np.maximum(rgb[..., 0], rgb[..., 1]) + np.finfo(float).eps
+    )))
+    return out
+
+
+def rgb2maxrgb(rgb):
+    """RGB to MAXRGB color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in MAX RGB format, in a 3-D array of shape ``(.., .., 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+
+    Notes
+    ------
+    MaxRGB is an extremely simple method of estimating the chromaticity
+    of the scene illumination for color constancy and automatic white
+    balancing based on the assumption that the triple of maxima obtained
+    independently from each of the three color channels represents the
+    color of the illumination
+
+    References
+    ----------
+    .. [1] https://docs.gimp.org/en/plug-in-max-rgb.html
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> img = data.astronaut()
+    >>> img_c1c2c3 = rgb2maxrgb(img)
+    """
+    rgb = np.copy(rgb)
+    R = rgb[:, :, 0]
+    G = rgb[:, :, 1]
+    B = rgb[:, :, 2]
+    M = np.max(rgb, axis=-1)
+    R[R < M] = 0
+    G[G < M] = 0
+    B[B < M] = 0
+    out = np.dstack((R, G, B))
+    return out
 
 
 def rgb2rgbcie(rgb):

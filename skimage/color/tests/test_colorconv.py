@@ -35,6 +35,10 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2yiq, yiq2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
+                           rgba2rgb,
+                           rgb2c1c2c3,
+                           rgb2maxrgb,
+                           guess_spatial_dimensions)
                            rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb, gray2rgba)
 from skimage.util import img_as_float, img_as_ubyte, img_as_float32
@@ -604,6 +608,20 @@ class TestColorconv():
                        for pt in rgb.reshape(-1, 3)]
                       )
         assert_almost_equal(yiq, gt, decimal=2)
+
+
+def test_rgb2c1c2c3():
+    x = np.ones((1, 1, 3))
+    y = rgb2c1c2c3(x)
+    expected_output = np.arctan(np.ones((1, 1, 3)))
+    assert_equal(y, expected_output)
+
+
+def test_rgb2maxrgb():
+    x = np.array([[[1., 2., 3.]]])
+    y = rgb2maxrgb(x)
+    expected_output = np.array([[[0., 0., 3.]]])
+    assert_equal(y, expected_output)
 
 
 def test_gray2rgb():
