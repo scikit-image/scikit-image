@@ -4,20 +4,19 @@ __all__ = ['crop']
 
 
 def crop(image, bounding_box, axis=None):
-    """Cropping images from a bounding box.
+    """Crop an image from a bounding box.
         Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
         and (optional) axis for corresponding axis order to bounding_box.
 
     Parameters
     ----------
-    Image : ndarray
+    image : ndarray
         Input array.
-    Bounding_box : list of 2-tuple (x, y) where x < y.
+    bounding_box : list of 2-tuple (x, y) where x < y.
         Bounding box.
     axis : tuple, optional
         Axis order for cropping.
         if provided, same legth as bounding_box.
-        Default: None
 
 
     Returns
@@ -43,7 +42,7 @@ def crop(image, bounding_box, axis=None):
     (75, 100)
     """
 
-    # empty legth of bounding box detected on None detected
+    # empty length of bounding box detected on None detected
     if not bounding_box:
         return image
 
@@ -79,9 +78,7 @@ def crop(image, bounding_box, axis=None):
                 raise ValueError(
                     "In bounding_box, tuple should be sorted (min_val, max_val)")
 
-            if axis_min < 0:
-                raise ValueError("In bounding_box, values must be positive")
-            if axis_max < 0:
+            if axis_max < 0 or axis_min < 0:
                 raise ValueError("In bounding_box, values must be positive")
 
             if axis_min > image.shape[idx]:
