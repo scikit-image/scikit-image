@@ -415,15 +415,16 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             gradient_space.append(np.gradient(octave))
             delta = self.deltas[o]
-            dim = octave.shape[0:2]
-            yx = positions / delta  # convert to octaves dimensions
+            oshape = octave.shape[0:2]
+            # convert to octave's dimensions
+            yx = positions / delta
             sigma = sigmas / delta
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
             Min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
             Max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
-                             (dim[0] - 1, dim[1] - 1)).astype(int)
+                             (oshape[0] - 1, oshape[1] - 1)).astype(int)
             # orientation histogram
             hist = np.empty(self.n_bins, dtype=octave.dtype)
             avg_kernel = np.full((3,), 1 / 3, dtype=octave.dtype)
