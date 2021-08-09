@@ -421,14 +421,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
-            Min = np.maximum(0, np.add(np.subtract(yx, radius[:, np.newaxis]),
-                                       0.5)).astype(np.int)
+            Min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
             Max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
-                             (dim[0] - 1, dim[1] - 1)).astype(np.int)
-
+                             (dim[0] - 1, dim[1] - 1)).astype(int)
+            # orientation histogram
+            hist = np.empty(self.n_bins, dtype=octave.dtype)
+            avg_kernel = np.full((3,), 1 / 3, dtype=octave.dtype)
             for k in range(len(yx)):
                 if np.all(Min[k] > 0) and np.all(Max[k] > Min[k]):
-                    hist = np.zeros(self.n_bins)  # orientation histogram
+                    hist[:] = 0
 
                     # use the patch coordinates to get the gradient and then
                     # normalize them
@@ -445,9 +446,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     theta = np.mod(np.arctan2(gradientX, gradientY),
                                    2 * np.pi)  # angles
                     # more weight to center values
-                    kernel = np.exp(-np.divide(np.add(np.square(n),
-                                                      np.square(m)),
-                                               2 * (self.lambda_ori
+                    kernel = np.exp(np.divide(n * n + m * m,
+                                              -2 * (self.lambda_ori
                                                     * sigma[k]) ** 2))
 
                     # fill the histogram
@@ -457,14 +457,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                     # smooth the histogram and find the maximum
                     hist = np.concatenate((hist[-3:], hist, hist[:3]))
-                    avg_kernel = np.full((3,), 1 / 3)
                     for _ in range(6):  # number of smoothings
                         hist = np.convolve(hist, avg_kernel, mode='same')
                     hist = hist[3:-3]
                     max_filter = ndi.maximum_filter(hist, [3])
                     # if an angle is in 80% percent range of the maximum, a
                     # new keypoint is created for it
-                    maxima = np.where(np.logical_and(
+                    maxima = np.nonzero(np.logical_and(
                         hist >= (self.c_max * np.max(hist)),
                         max_filter == hist))
 
