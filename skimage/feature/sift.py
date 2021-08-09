@@ -55,9 +55,7 @@ def _hessian(d, positions):
 
 
 def _offsets(grad, hess):
-    """Compute position refinement offsets from gradient and Hessian.
-
-    """
+    """Compute position refinement offsets from gradient and Hessian."""
     h00, h11, h22, h01, h02, h12 = hess
     g0, g1, g2 = grad
     det = h00 * h11 * h22
@@ -376,10 +374,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
 
-        octave_indices = np.hstack([np.full(len(p), i)
-                                    for i, p in enumerate(extrema_pos)])
-        return np.vstack(extrema_pos), np.hstack(extrema_scales), np.hstack(
-            extrema_sigmas), octave_indices
+        octave_indices = np.concatenate([np.full(len(p), i)
+                                        for i, p in enumerate(extrema_pos)])
+        extrema_pos = np.concatenate(extrema_pos)
+        extrema_scales = np.concatenate(extrema_scales)
+        extrema_sigmas = np.concatenate(extrema_sigmas)
+        return extrema_pos, extrema_scales, extrema_sigmas, octave_indices
 
     def _fit(self, h):
         """Refine the position of the peak by fitting it to a parabola"""
@@ -447,7 +447,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     np.add.at(hist, bins, kernel * magnitude)
 
                     # smooth the histogram and find the maximum
-                    hist = np.hstack((hist[-3:], hist, hist[:3]))
+                    hist = np.concatenate((hist[-3:], hist, hist[:3]))
                     for _ in range(6):  # number of smoothings
                         hist = np.convolve(hist, np.ones(3) / 3, mode='same')
                     hist = hist[3:-3]
@@ -476,15 +476,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 else:
                     keypoints_valid[key_count] = False
                 key_count += 1
-        self.positions = np.vstack(
+        self.positions = np.concatenate(
             (positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
-        self.scales = np.hstack(
+        self.scales = np.concatenate(
             (scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
-        self.sigmas = np.hstack(
+        self.sigmas = np.concatenate(
             (sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
-        self.orientations = np.hstack(
+        self.orientations = np.concatenate(
             (orientations[keypoints_valid], keypoint_angles))
-        self.octaves = np.hstack(
+        self.octaves = np.concatenate(
             (octaves[keypoints_valid], keypoint_octave))
         # return the gradientspace to reuse it to find the descriptor
         return gradientSpace
