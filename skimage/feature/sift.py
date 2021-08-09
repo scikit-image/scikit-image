@@ -9,6 +9,25 @@ from ..transform import rescale
 from ..filters import gaussian
 
 
+def sparse_gradient(vol, positions):
+    """Gradient of a 3D volume at the provided `positions`.
+
+    For SIFT we only need the gradient at specific positions and do not need
+    the gradient at the edge positions, so can just use this simple
+    implementation instead of numpy.gradient.
+    """
+    p0 = positions[..., 0]
+    p1 = positions[..., 1]
+    p2 = positions[..., 2]
+    g0 = vol[p0 + 1, p1, p2] - vol[p0 - 1, p1, p2]
+    g0 *= 0.5
+    g1 = vol[p0, p1 + 1, p2] - vol[p0, p1 - 1, p2]
+    g1 *= 0.5
+    g2 = vol[p0, p1, p2 + 1] - vol[p0, p1, p2 - 1]
+    g2 *= 0.5
+    return g0, g1, g2
+
+
 class SIFT(FeatureDetector, DescriptorExtractor):
     """SIFT feature detection and descriptor extraction.
 
@@ -307,37 +326,39 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # find extrema
             maxima = peak_local_max(octave, threshold_abs=threshold)
             minima = peak_local_max(-octave, threshold_abs=threshold)
-            keys = np.vstack((maxima, minima))
+            keys = np.concatenate((maxima, minima), axis=0)
 
             # localize extrema
-            dim = octave.shape
-            off = np.empty_like(keys, dtype=dtype)  # offset and Jacobian
-            J = np.empty_like(keys, dtype=dtype)
+            oshape = octave.shape
             H = np.empty((len(keys), 3, 3), dtype=dtype)  # Hessian
-            # take first derivative of the whole octave
-            grad = np.gradient(octave)
             # mask for all extrema that still have to be tested
-            still_in = np.ones(len(keys), dtype=bool)
             for i in range(5):
-                still_in = np.logical_and(still_in, self._inrange(keys, dim))
-                # Jacoby of all extrema
-                J = np.swapaxes(np.array([ax[keys[still_in, 0],
-                                             keys[still_in, 1],
-                                             keys[still_in, 2]] for ax in grad]
-                                         ), 0, 1)
+                if i > 0:
+                    # exclude any keys that have moved out of bounds
+                    keys = keys[self._inrange(keys, oshape), :]
+
+                # Jacobian and Hessian of all extrema
+                grad = sparse_gradient(octave, keys)
+                J = np.stack(grad, axis=1)
                 self._hessian(H, octave, keys)
-                off = np.linalg.solve(-H, J)  # offset of the extremum
+
+                # solve for offset of the extremum
+                off = np.linalg.solve(-H, J)
+                if i == 4:
+                    break
                 # offset is too big and an increase would not bring us out of
                 # bounds
-                wrong_position_pos = np.logical_and(off > 0.5,
-                                                    keys + 1 < tuple(
-                                                        [a - 1 for a in dim]))
+                wrong_position_pos = np.logical_and(
+                    off > 0.5,
+                    keys + 1 < tuple([a - 1 for a in oshape])
+                )
                 wrong_position_neg = np.logical_and(off < -0.5, keys - 1 > 0)
                 if (not np.any(np.logical_or(wrong_position_neg,
-                                             wrong_position_pos))) or i == 4:
+                                             wrong_position_pos))):
                     break
-                keys[np.where(wrong_position_pos)] += 1
-                keys[np.where(wrong_position_neg)] -= 1
+                keys[wrong_position_pos] += 1
+                keys[wrong_position_neg] -= 1
+
             # mask for all extrema that have been localized successfully
             finished = np.all(np.abs(off) < 0.5, axis=1)
             keys = keys[finished]
