@@ -231,9 +231,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.descriptors = None
 
     def _number_of_octaves(self, n, image_shape):
-        sMin = 12  # minimum size of last octave
+        size_min = 12  # minimum size of last octave
         s0 = min(image_shape) * self.upsampling
-        max_octaves = int(math.log2(s0 / sMin) + 1)
+        max_octaves = int(math.log2(s0 / size_min) + 1)
         if max_octaves < n:
             warnings.warn(
                 f"Reducing n_octaves to {max_octaves} due to small image size."
@@ -422,20 +422,20 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
-            Min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
-            Max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
-                             (oshape[0] - 1, oshape[1] - 1)).astype(int)
+            p_min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
+            p_max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
+                               (oshape[0] - 1, oshape[1] - 1)).astype(int)
             # orientation histogram
             hist = np.empty(self.n_bins, dtype=octave.dtype)
             avg_kernel = np.full((3,), 1 / 3, dtype=octave.dtype)
             for k in range(len(yx)):
-                if np.all(Min[k] > 0) and np.all(Max[k] > Min[k]):
+                if np.all(p_min[k] > 0) and np.all(p_max[k] > p_min[k]):
                     hist[:] = 0
 
                     # use the patch coordinates to get the gradient and then
                     # normalize them
-                    m, n = np.meshgrid(np.arange(Min[k, 0], Max[k, 0] + 1),
-                                       np.arange(Min[k, 1], Max[k, 1] + 1),
+                    m, n = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
+                                       np.arange(p_min[k, 1], p_max[k, 1] + 1),
                                        indexing='ij', sparse=True)
                     gradientY = gradient_space[o][0][m, n, scales[k]]
                     gradientX = gradient_space[o][1][m, n, scales[k]]
@@ -534,10 +534,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # dimensions of the patch
             radius = self.lambda_descr * (1 + 1 / self.n_hist) * sigma
             radiusPatch = np.sqrt(2) * radius
-            Min = np.array(
+            p_min = np.array(
                 np.maximum(0, yx - radiusPatch[:, np.newaxis] + 0.5),
                 dtype=int)
-            Max = np.array(
+            p_max = np.array(
                 np.minimum(yx + radiusPatch[:, np.newaxis] + 0.5,
                            (dim[0] - 1, dim[1] - 1)), dtype=int)
 
@@ -545,11 +545,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             hists = np.arange(1, self.n_hist + 1)
             # indices of the bins
             bins = np.arange(1, self.n_ori + 1)
-            for k in range(len(Max)):
+            for k in range(len(p_max)):
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
                 # the patch
-                m, n = np.meshgrid(np.arange(Min[k, 0], Max[k, 0]),
-                                   np.arange(Min[k, 1], Max[k, 1]),
+                m, n = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
+                                   np.arange(p_min[k, 1], p_max[k, 1]),
                                    indexing='ij', sparse=True)
                 y_mn = m - yx[k, 0]  # normalized coordinates
                 x_mn = n - yx[k, 1]
