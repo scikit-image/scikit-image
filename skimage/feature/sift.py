@@ -1,3 +1,6 @@
+import math
+import warnings
+
 import numpy as np
 
 from scipy.ndimage.filters import maximum_filter
@@ -229,9 +232,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     def _number_of_octaves(self, n, image_shape):
         sMin = 12  # minimum size of last octave
-        s0 = np.min(image_shape)
-        return int(
-            np.min((n, (np.log(s0 / sMin) / np.log(2)) + self.upsampling)))
+        s0 = min(image_shape) * self.upsampling
+        max_octaves = int(math.log2(s0 / sMin) + 1)
+        if max_octaves < n:
+            warnings.warn(
+                f"Reducing n_octaves to {max_octaves} due to small image size."
+            )
+            n = max_octaves
+        return n
 
     def _create_scalespace(self, image):
         """Source: "Anatomy of the SIFT Method" Alg. 1
@@ -251,7 +259,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(image,
-                         (1 / self.delta_min) * np.sqrt(
+                         (1 / self.delta_min) * math.sqrt(
                              self.sigma_min ** 2 - self.sigma_in ** 2),
                          mode='reflect')
 
@@ -448,8 +456,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                     # smooth the histogram and find the maximum
                     hist = np.concatenate((hist[-3:], hist, hist[:3]))
+                    avg_kernel = np.full((3,), 1 / 3)
                     for _ in range(6):  # number of smoothings
-                        hist = np.convolve(hist, np.ones(3) / 3, mode='same')
+                        hist = np.convolve(hist, avg_kernel, mode='same')
                     hist = hist[3:-3]
                     max_filter = maximum_filter(hist, [3])
                     # if an angle is in 80% percent range of the maximum, a
@@ -490,10 +499,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return gradientSpace
 
     def _rotate(self, y, x, angle):
-        c = np.cos(angle)
-        s = np.sin(angle)
-        rY = (c * y - s * x)
-        rX = (s * y + c * x)
+        c = math.cos(angle)
+        s = math.sin(angle)
+        rY = c * y - s * x
+        rX = s * y + c * x
         return rY, rX
 
     def _compute_descriptor(self, gradientspace):
