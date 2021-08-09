@@ -873,33 +873,9 @@ def rgb2gray(rgb, *, channel_axis=-1):
     >>> img = data.astronaut()
     >>> img_gray = rgb2gray(img)
     """
-
-    if rgb.ndim == 2:
-        warn('The behavior of rgb2gray will change in scikit-image 0.19. '
-             'Currently, rgb2gray allows 2D grayscale image to be passed '
-             'as inputs and leaves them unmodified as outputs. '
-             'Starting from version 0.19, 2D arrays will '
-             'be treated as 1D images with 3 channels.',
-             FutureWarning, stacklevel=2)
-        return np.ascontiguousarray(rgb)
-
-    if rgb.shape[-1] > 3:
-        warn('Non RGB image conversion is now deprecated. For RGBA images, '
-             'please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
-             'a ValueError will be raised if input image last dimension '
-             'length is not 3.', FutureWarning, stacklevel=2)
-        rgb = rgb[..., :3]
-
     rgb = _prepare_colorarray(rgb)
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return rgb @ coeffs
-
-
-@functools.wraps(rgb2gray)
-def rgb2grey(rgb):
-    warn('rgb2grey is deprecated. It will be removed in version 0.19.'
-         'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
-    return rgb2gray(rgb)
 
 
 def gray2rgba(image, alpha=None, *, channel_axis=-1):
@@ -967,13 +943,6 @@ def gray2rgb(image, *, channel_axis=-1):
     will be shape ``(M, 3)``.
     """
     return np.stack(3 * (image,), axis=channel_axis)
-
-
-@functools.wraps(gray2rgb)
-def grey2rgb(image):
-    warn('grey2rgb is deprecated. It will be removed in version 0.19.'
-         'Please use gray2rgb instead.', FutureWarning, stacklevel=2)
-    return gray2rgb(image)
 
 
 @channel_as_last_axis()

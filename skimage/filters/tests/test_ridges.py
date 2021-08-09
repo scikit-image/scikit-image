@@ -236,14 +236,6 @@ def test_border_management(func, tol):
     assert abs(inside_mean - border_mean) < tol
 
 
-@pytest.mark.parametrize('func', [sato, hessian])
-def test_border_warning(func):
-    img = rgb2gray(retina()[300:500, 700:900])
-
-    with expected_warnings(["implicitly used 'constant' as the border mode"]):
-        func(img, sigmas=[1])
-
-
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()
