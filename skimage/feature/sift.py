@@ -540,6 +540,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 np.minimum(yx + radiusPatch[:, np.newaxis] + 0.5,
                            (dim[0] - 1, dim[1] - 1)), dtype=int)
 
+            # indices of the histograms
+            hists = np.arange(1, self.n_hist + 1)
+            # indices of the bins
+            bins = np.arange(1, self.n_ori + 1)
             for k in range(len(Max)):
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
                 # the patch
@@ -566,10 +570,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 magnitude = np.sqrt(np.square(gradientY)
                                     + np.square(gradientX)) * kernel
 
-                # indices of the histograms
-                hists = np.arange(1, self.n_hist + 1)
-                # indices of the bins
-                bins = np.arange(1, self.n_ori + 1)
                 yj_xi = ((hists - (1 + self.n_hist) / 2)
                          * ((2 * self.lambda_descr * sigma[k]) / self.n_hist))
                 ok = (2 * np.pi * bins) / self.n_ori
