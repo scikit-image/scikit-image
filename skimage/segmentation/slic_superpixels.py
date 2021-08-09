@@ -214,8 +214,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
       `channel_axis=-1`.
 
     * `start_label` is introduced to handle the issue [4]_. Label indexing
-      starts at 1 by default. The labels' index starting at 0 will be
-      deprecated in future versions.
+      starts at 1 by default.
 
     References
     ----------
