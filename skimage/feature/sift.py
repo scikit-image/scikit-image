@@ -542,16 +542,19 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             for k in range(len(Max)):
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
-                m, n = np.mgrid[Min[k, 0]:Max[k, 0],
-                                Min[k, 1]: Max[k, 1]]  # the patch
-                y_mn = np.copy(m) - yx[k, 0]  # normalized coordinates
-                x_mn = np.copy(n) - yx[k, 1]
+                # the patch
+                m, n = np.meshgrid(np.arange(Min[k, 0], Max[k, 0]),
+                                   np.arange(Min[k, 1], Max[k, 1]),
+                                   indexing='ij', sparse=True)
+                y_mn = m - yx[k, 0]  # normalized coordinates
+                x_mn = n - yx[k, 1]
                 y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations[k])
 
                 inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
                 y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
-                m, n = m[inRadius], n[inRadius]
-
+                m_idx, n_idx = np.where(inRadius)
+                m = m[m_idx, 0]
+                n = n[0, n_idx]
                 gradientY = gradient[0][m, n, scales[k]]
                 gradientX = gradient[1][m, n, scales[k]]
 
