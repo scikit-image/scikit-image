@@ -9,6 +9,13 @@ from ..transform import rescale
 from ..filters import gaussian
 
 
+def _edge_response(H):
+    eig, _ = np.linalg.eig(H)
+    trace = eig[:, 1] + eig[:, 0]
+    determinant = eig[:, 1] * eig[:, 0]
+    return np.square(trace) / determinant
+
+
 def sparse_gradient(vol, positions):
     """Gradient of a 3D volume at the provided `positions`.
 
@@ -377,11 +384,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # filter for contrast, edgeness and borders
             contrast_filter = np.abs(w) > contrast_threshold
-            eig, _ = np.linalg.eig(H[contrast_filter])
-            trace = eig[:, 1] + eig[:, 0]
-            determinant = eig[:, 1] * eig[:, 0]
-            edge_respone = np.square(trace) / determinant
-            edge_filter = np.abs(edge_respone) <= edge_threshold
+            edge_response = _edge_response(H[contrast_filter])
+            edge_filter = np.abs(edge_response) <= edge_threshold
 
             keys = keys[contrast_filter][edge_filter]
             off = off[contrast_filter][edge_filter]
