@@ -9,11 +9,12 @@ from ..transform import rescale
 from ..filters import gaussian
 
 
-def _edge_response(H):
-    eig, _ = np.linalg.eig(H)
-    trace = eig[:, 1] + eig[:, 0]
-    determinant = eig[:, 1] * eig[:, 0]
-    return np.square(trace) / determinant
+def _edgeness(H):
+    """Compute edgeness (eq. 18 of Otero et. al. IPOL paper)"""
+    hxx, hyy, hxy = H[:, 0, 0], H[:, 1, 1], H[:, 0, 1]
+    trace = hxx + hyy
+    determinant = hxx * hyy - hxy * hxy
+    return (trace * trace) / determinant
 
 
 def sparse_gradient(vol, positions):
@@ -379,12 +380,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             sigmaratio = (self.scalespace_sigmas[0, 1]
                           / self.scalespace_sigmas[0, 0])
 
-            contrast_threshold = self.c_dog / self.n_scales
-            edge_threshold = np.square(self.c_edge + 1) / self.c_edge
-
             # filter for contrast, edgeness and borders
+            contrast_threshold = self.c_dog / self.n_scales
             contrast_filter = np.abs(w) > contrast_threshold
-            edge_response = _edge_response(H[contrast_filter])
+
+            edge_threshold = np.square(self.c_edge + 1) / self.c_edge
+            edge_response = _edgeness(H[contrast_filter])
             edge_filter = np.abs(edge_response) <= edge_threshold
 
             keys = keys[contrast_filter][edge_filter]
