@@ -2,8 +2,8 @@ import math
 import warnings
 
 import numpy as np
+import scipy.ndimage as ndi
 
-from scipy.ndimage.filters import maximum_filter
 from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..feature import peak_local_max
 from ..util import img_as_float
@@ -460,7 +460,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     for _ in range(6):  # number of smoothings
                         hist = np.convolve(hist, avg_kernel, mode='same')
                     hist = hist[3:-3]
-                    max_filter = maximum_filter(hist, [3])
+                    max_filter = ndi.maximum_filter(hist, [3])
                     # if an angle is in 80% percent range of the maximum, a
                     # new keypoint is created for it
                     maxima = np.where(np.logical_and(
