@@ -398,7 +398,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """Source: "Anatomy of the SIFT Method" Alg. 11
         Calculates the orientation of the gradient around every keypoint
         """
-        gradientSpace = []
+        gradient_space = []
         # list for keypoints that have more than one reference orientation
         keypoint_indices = []
         keypoint_angles = []
@@ -413,7 +413,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             sigmas = sigmas_oct[in_oct]
             octave = gaussian_scalespace[o]
 
-            gradientSpace.append(np.gradient(octave))
+            gradient_space.append(np.gradient(octave))
             delta = self.deltas[o]
             dim = octave.shape[0:2]
             yx = positions / delta  # convert to octaves dimensions
@@ -436,8 +436,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     m, n = np.meshgrid(np.arange(Min[k, 0], Max[k, 0] + 1),
                                        np.arange(Min[k, 1], Max[k, 1] + 1),
                                        indexing='ij', sparse=True)
-                    gradientY = gradientSpace[o][0][m, n, scales[k]]
-                    gradientX = gradientSpace[o][1][m, n, scales[k]]
+                    gradientY = gradient_space[o][0][m, n, scales[k]]
+                    gradientX = gradient_space[o][1][m, n, scales[k]]
                     m = m - yx[k, 0]
                     n = n - yx[k, 1]
 
@@ -495,8 +495,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             (orientations[keypoints_valid], keypoint_angles))
         self.octaves = np.concatenate(
             (octaves[keypoints_valid], keypoint_octave))
-        # return the gradientspace to reuse it to find the descriptor
-        return gradientSpace
+        # return the gradient_space to reuse it to find the descriptor
+        return gradient_space
 
     def _rotate(self, y, x, angle):
         c = math.cos(angle)
@@ -505,7 +505,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         rX = s * y + c * x
         return rY, rX
 
-    def _compute_descriptor(self, gradientspace):
+    def _compute_descriptor(self, gradient_space):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
@@ -523,7 +523,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             sigmas = self.sigmas[in_oct]
             orientations = self.orientations[in_oct]
             numbers = key_numbers[in_oct]
-            gradient = gradientspace[o]
+            gradient = gradient_space[o]
 
             delta = self.deltas[o]
             dim = gradient[0].shape[0:2]
@@ -676,10 +676,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         gaussian_scalespace = self._create_scalespace(image)
 
-        gradientSpace = [np.gradient(octave) for octave in
+        gradient_space = [np.gradient(octave) for octave in
                          gaussian_scalespace]
 
-        self._compute_descriptor(gradientSpace)
+        self._compute_descriptor(gradient_space)
 
     def detect_and_extract(self, image):
         """Detect the keypoints and extract their descriptors.
@@ -709,9 +709,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 "SIFT found no features. Try passing in an image containing "
                 "greater intensity contrasts between adjacent pixels.")
 
-        gradientSpace = self._compute_orientation(positions, scales, sigmas,
+        gradient_space = self._compute_orientation(positions, scales, sigmas,
                                                   octaves, gaussian_scalespace)
 
-        self._compute_descriptor(gradientSpace)
+        self._compute_descriptor(gradient_space)
 
         self.keypoints = self.positions.round().astype(np.int)
