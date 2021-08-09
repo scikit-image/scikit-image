@@ -562,16 +562,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradientY = gradient[0][m, n, scales[k]]
                 gradientX = gradient[1][m, n, scales[k]]
 
-                theta = np.mod(
-                    np.arctan2(gradientX, gradientY) - orientations[k],
-                    2 * np.pi)
+                theta = np.arctan2(gradientX, gradientY) - orientations[k]
+                lam_sig = self.lambda_descr * sigma[k]
+                lam_sig_ratio = 2 * lam_sig / self.n_hist
                 kernel = np.exp(-(np.square(y_mn) + np.square(x_mn))
-                                / (2 * (self.lambda_descr * sigma[k]) ** 2))
+                                / (2 * lam_sig ** 2))
                 magnitude = np.sqrt(np.square(gradientY)
                                     + np.square(gradientX)) * kernel
 
-                yj_xi = ((hists - (1 + self.n_hist) / 2)
-                         * ((2 * self.lambda_descr * sigma[k]) / self.n_hist))
+                yj_xi = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
                 ok = (2 * np.pi * bins) / self.n_ori
 
                 # distances to the histograms and bins
@@ -581,10 +580,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                        2 * np.pi))
 
                 # the histograms/bins that get the contribution
-                near_y = dist_y <= ((self.lambda_descr * 2 * sigma[k])
-                                    / self.n_hist)
-                near_x = dist_x <= ((self.lambda_descr * 2 * sigma[k])
-                                    / self.n_hist)
+                near_y = dist_y <= lam_sig_ratio
+                near_x = dist_x <= lam_sig_ratio
                 near_t = np.argmin(dist_t, axis=0)
                 near_t_val = np.min(dist_t, axis=0)
 
@@ -598,9 +595,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                 # the weights/contributions are shared bilinearly between the
                 # histograms
-                w0 = ((1 - (self.n_hist / (2 * self.lambda_descr * sigma[k]))
+                w0 = ((1 - (1 / lam_sig_ratio)
                        * dist_y[comb_pos[1], comb_pos[0]])
-                      * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k]))
+                      * (1 - (1 / lam_sig_ratio)
                          * dist_x[comb_pos[2], comb_pos[0]])
                       * magnitude[comb_pos[0]])
 
