@@ -359,7 +359,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                           / self.scalespace_sigmas[0, 0])
 
             # filter for contrast, edgeness and borders
-            contrast_threshold = self.c_dog / self.n_scales
+            contrast_threshold = self.c_dog
             contrast_filter = np.abs(w) > contrast_threshold
 
             edge_threshold = np.square(self.c_edge + 1) / self.c_edge
