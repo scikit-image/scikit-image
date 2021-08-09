@@ -9,15 +9,14 @@ from ..transform import rescale
 from ..filters import gaussian
 
 
-def _edgeness(H):
+def _edgeness(hxx, hyy, hxy):
     """Compute edgeness (eq. 18 of Otero et. al. IPOL paper)"""
-    hxx, hyy, hxy = H[:, 0, 0], H[:, 1, 1], H[:, 0, 1]
     trace = hxx + hyy
     determinant = hxx * hyy - hxy * hxy
     return (trace * trace) / determinant
 
 
-def sparse_gradient(vol, positions):
+def _sparse_gradient(vol, positions):
     """Gradient of a 3D volume at the provided `positions`.
 
     For SIFT we only need the gradient at specific positions and do not need
@@ -34,6 +33,48 @@ def sparse_gradient(vol, positions):
     g2 = vol[p0, p1, p2 + 1] - vol[p0, p1, p2 - 1]
     g2 *= 0.5
     return g0, g1, g2
+
+
+def _hessian(d, positions):
+    """Source: "Anatomy of the SIFT Method"  p.380 (13)"""
+    p0 = positions[..., 0]
+    p1 = positions[..., 1]
+    p2 = positions[..., 2]
+    two_d0 = 2 * d[p0, p1, p2]
+    # 0 = row, 1 = col, 2 = octave
+    h00 = d[p0 - 1, p1, p2] + d[p0 + 1, p1, p2] - two_d0
+    h11 = d[p0, p1 - 1, p2] + d[p0, p1 + 1, p2] - two_d0
+    h22 = d[p0, p1, p2 - 1] + d[p0, p1, p2 + 1] - two_d0
+    h01 = 0.25 * (d[p0 + 1, p1 + 1, p2]- d[p0 - 1, p1 + 1, p2]
+                  - d[p0 + 1, p1 - 1, p2] + d[p0 - 1, p1 - 1, p2])
+    h02 = 0.25 * (d[p0 + 1, p1, p2 + 1] - d[p0 + 1, p1, p2 - 1]
+                  + d[p0 - 1, p1, p2 - 1] - d[p0 - 1, p1, p2 + 1])
+    h12 = 0.25 * (d[p0, p1 + 1, p2 + 1] - d[p0, p1 + 1, p2 - 1]
+                  + d[p0, p1 - 1, p2 - 1] - d[p0, p1 - 1, p2 + 1])
+    return (h00, h11, h22, h01, h02, h12)
+
+
+def _offsets(grad, hess):
+    """Compute position refinement offsets from gradient and Hessian.
+
+    """
+    h00, h11, h22, h01, h02, h12 = hess
+    g0, g1, g2 = grad
+    det = h00 * h11 * h22
+    det -= h00 * h12 * h12
+    det -= h01 * h01 * h22
+    det += 2 * h01 * h02 * h12
+    det -= h02 * h02 * h11
+    aa = (h11*h22 - h12*h12) / det
+    ab = (h02*h12 - h01*h22) / det
+    ac = (h01*h12 - h02*h11) / det
+    bb = (h00*h22 - h02*h02) / det
+    bc = (h01*h02 - h00*h12) / det
+    cc = (h00*h11 - h01*h01) / det
+    offset0 = -aa * g0 - ab * g1 - ac * g2
+    offset1 = -ab * g0 - bb * g1 - bc * g2
+    offset2 = -ac * g0 - bc * g1 - cc * g2
+    return np.stack((offset0, offset1, offset2), axis=-1)
 
 
 class SIFT(FeatureDetector, DescriptorExtractor):
@@ -244,79 +285,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return ((a[:, 0] > 0) & (a[:, 0] < dim[0] - 1)
                 & (a[:, 1] > 0) & (a[:, 1] < dim[1] - 1))
 
-    def _hessian(self, h, d, positions):
-        """Source: "Anatomy of the SIFT Method"  p.380 (13)"""
-        h[:, 0, 0] = (d[positions[:, 0] - 1,
-                        positions[:, 1],
-                        positions[:, 2]]
-                      + d[positions[:, 0] + 1,
-                          positions[:, 1],
-                          positions[:, 2]]
-                      - 2 * d[
-                          positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2]])
-
-        h[:, 1, 1] = (d[positions[:, 0],
-                        positions[:, 1] - 1,
-                        positions[:, 2]]
-                      + d[positions[:, 0],
-                          positions[:, 1] + 1,
-                          positions[:, 2]]
-                      - 2 * d[
-                          positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2]])
-
-        h[:, 2, 2] = (d[positions[:, 0],
-                        positions[:, 1],
-                        positions[:, 2] - 1]
-                      + d[positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2] + 1]
-                      - 2 * d[positions[:, 0],
-                              positions[:, 1],
-                              positions[:, 2]])
-
-        h[:, 1, 0] = h[:, 0, 1] = 0.25 * (d[positions[:, 0] + 1,
-                                            positions[:, 1] + 1,
-                                            positions[:, 2]]
-                                          - d[positions[:, 0] - 1,
-                                              positions[:, 1] + 1,
-                                              positions[:, 2]]
-                                          - d[positions[:, 0] + 1,
-                                              positions[:, 1] - 1,
-                                              positions[:, 2]]
-                                          + d[positions[:, 0] - 1,
-                                              positions[:, 1] - 1,
-                                              positions[:, 2]])
-
-        h[:, 2, 0] = h[:, 0, 2] = 0.25 * (d[positions[:, 0] + 1,
-                                            positions[:, 1],
-                                            positions[:, 2] + 1]
-                                          - d[positions[:, 0] + 1,
-                                              positions[:, 1],
-                                              positions[:, 2] - 1]
-                                          + d[positions[:, 0] - 1,
-                                              positions[:, 1],
-                                              positions[:, 2] - 1]
-                                          - d[positions[:, 0] - 1,
-                                              positions[:, 1],
-                                              positions[:, 2] + 1])
-
-        h[:, 2, 1] = h[:, 1, 2] = 0.25 * (d[positions[:, 0],
-                                            positions[:, 1] + 1,
-                                            positions[:, 2] + 1]
-                                          - d[positions[:, 0],
-                                              positions[:, 1] + 1,
-                                              positions[:, 2] - 1]
-                                          + d[positions[:, 0],
-                                              positions[:, 1] - 1,
-                                              positions[:, 2] - 1]
-                                          - d[positions[:, 0],
-                                              positions[:, 1] - 1,
-                                              positions[:, 2] + 1])
-
     def _find_localize_evaluate(self, dogspace, img_shape):
         """Source: "Anatomy of the SIFT Method" Alg. 4-9
         1) first find all extrema of a (3, 3, 3) neighborhood
@@ -338,7 +306,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # localize extrema
             oshape = octave.shape
-            H = np.empty((len(keys), 3, 3), dtype=dtype)  # Hessian
             # mask for all extrema that still have to be tested
             for i in range(5):
                 if i > 0:
@@ -346,12 +313,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     keys = keys[self._inrange(keys, oshape), :]
 
                 # Jacobian and Hessian of all extrema
-                grad = sparse_gradient(octave, keys)
-                J = np.stack(grad, axis=1)
-                self._hessian(H, octave, keys)
+                grad = _sparse_gradient(octave, keys)
+                hess = _hessian(octave, keys)
 
                 # solve for offset of the extremum
-                off = np.linalg.solve(-H, J)
+                off = _offsets(grad, hess)
                 if i == 4:
                     break
                 # offset is too big and an increase would not bring us out of
@@ -370,13 +336,19 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # mask for all extrema that have been localized successfully
             finished = np.all(np.abs(off) < 0.5, axis=1)
             keys = keys[finished]
+            off = off[finished]
+            grad = [g[finished] for g in grad]
+
             # value of extremum in octave
             vals = octave[keys[:, 0], keys[:, 1], keys[:, 2]]
-            J = J[finished]
-            off = off[finished]
             # values at interpolated point
-            w = vals + 0.5 * np.sum(J * off, axis=1)
-            H = H[finished, :2, :2]
+            w = vals
+            for i in range(3):
+                w += 0.5 * grad[i] * off[:, i]
+
+            h00, h11, h01 = \
+                hess[0][finished], hess[1][finished], hess[3][finished]
+
             sigmaratio = (self.scalespace_sigmas[0, 1]
                           / self.scalespace_sigmas[0, 0])
 
@@ -385,7 +357,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             contrast_filter = np.abs(w) > contrast_threshold
 
             edge_threshold = np.square(self.c_edge + 1) / self.c_edge
-            edge_response = _edgeness(H[contrast_filter])
+            edge_response = _edgeness(h00[contrast_filter],
+                                      h11[contrast_filter],
+                                      h01[contrast_filter])
             edge_filter = np.abs(edge_response) <= edge_threshold
 
             keys = keys[contrast_filter][edge_filter]
