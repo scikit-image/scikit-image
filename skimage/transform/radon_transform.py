@@ -5,7 +5,7 @@ from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
-from .._shared.utils import deprecate_kwarg, convert_to_float
+from .._shared.utils import convert_to_float
 from warnings import warn
 from functools import partial
 
@@ -181,8 +181,6 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
-@deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
-                 removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True,
            preserve_range=True):

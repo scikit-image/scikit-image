@@ -545,11 +545,10 @@ def _validate_interpolation_order(image_dtype, order):
                          "range 0-5.")
 
     if image_dtype == bool and order != 0:
-        warn("Input image dtype is bool. Interpolation is not defined "
+        raise ValueError(
+            "Input image dtype is bool. Interpolation is not defined "
              "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type. Starting from version "
-             "0.19 a ValueError will be raised instead of this warning.",
-             FutureWarning, stacklevel=2)
+             "cast input image to another data type.")
 
     return order
 

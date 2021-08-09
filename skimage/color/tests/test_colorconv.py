@@ -290,13 +290,13 @@ class TestColorconv():
         assert rgb2gray(x[:5, :5]).flags["C_CONTIGUOUS"]
 
     def test_rgb2gray_alpha(self):
-        x = np.random.rand(10, 10, 4)
-        with expected_warnings(['Non RGB image conversion']):
-            assert rgb2gray(x).ndim == 2
+        x = np.empty((10, 10, 4))
+        with pytest.raises(ValueError):
+            rgb2gray(x)
 
     def test_rgb2gray_on_gray(self):
-        with expected_warnings(['The behavior of rgb2gray will change']):
-            rgb2gray(np.random.rand(5, 5))
+        with pytest.raises(ValueError):
+            rgb2gray(np.empty((5, 5)))
 
     def test_rgb2gray_dtype(self):
         img = np.random.rand(10, 10, 3).astype('float64')
@@ -633,38 +633,10 @@ def test_gray2rgb():
 
 def test_gray2rgb_rgb():
     x = np.random.rand(5, 5, 4)
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        y = gray2rgb(x)
-    assert_equal(x, y)
-
-
-def test_gray2rgb_alpha():
-    x = np.random.random((5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    x = np.random.random((5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
-        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images',
-                            'alpha argument is deprecated']):
-        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
-                              alpha=True)[0, 0, 3], 1)
-    with expected_warnings(['alpha argument is deprecated']):
-        assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
-                              alpha=True)[0, 0, 3], 255)
+    y = gray2rgb(x)
+    assert y.shape == (x.shape + (3,))
+    for i in range(3):
+        assert_equal(x, y[..., i])
 
 
 @pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
@@ -743,18 +715,8 @@ def test_gray2rgba_alpha():
                                     (4, 5, 4, 5, 3)]))
 def test_nD_gray_conversion(func, shape):
     img = np.random.rand(*shape)
-
-    msg_list = []
-    if img.ndim == 3 and func == gray2rgb:
-        msg_list.append('Pass-through of possibly RGB images in gray2rgb')
-    elif img.ndim == 2 and func == rgb2gray:
-        msg_list.append('The behavior of rgb2gray will change')
-
-    with expected_warnings(msg_list):
-        out = func(img)
-
+    out = func(img)
     common_ndim = min(out.ndim, len(shape))
-
     assert out.shape[:common_ndim] == shape[:common_ndim]
 
 

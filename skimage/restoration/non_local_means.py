@@ -15,7 +15,7 @@ from ._nl_means_denoising import (_nl_means_denoising_2d,
 @utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
-                     preserve_range=None, channel_axis=None):
+                     preserve_range=False, channel_axis=None):
     """Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
 
@@ -157,15 +157,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         raise NotImplementedError(
             "Non-local means denoising is only implemented for 2D, "
             "3D or 4D grayscale or multichannel images.")
-
-    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. By default denoise_nl_means will '
-             'assume you want to preserve the range of your image '
-             '(preserve_range=True). In scikit-image 0.19 this behavior will '
-             'change to preserve_range=False. To avoid this warning, '
-             'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
-        preserve_range = True
 
     image = convert_to_float(image, preserve_range)
     if not image.flags.c_contiguous:
