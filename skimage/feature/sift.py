@@ -510,14 +510,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
-        nKey = len(self.scales)
-        self.descriptors = np.empty((nKey, self.n_hist ** 2 * self.n_ori),
+        n_key = len(self.scales)
+        self.descriptors = np.empty((n_key, self.n_hist ** 2 * self.n_ori),
                                     dtype=np.uint8)
         key_count = 0
-        key_numbers = np.arange(nKey)
+        key_numbers = np.arange(n_key)
         for o in range(self.n_octaves):
             in_oct = self.octaves == o
-            if np.count_nonzero(in_oct) == 0:
+            if not np.any(in_oct):
                 continue
             positions = self.positions[in_oct]
             scales = self.scales[in_oct]
@@ -533,12 +533,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # dimensions of the patch
             radius = self.lambda_descr * (1 + 1 / self.n_hist) * sigma
-            radiusPatch = np.sqrt(2) * radius
-            p_min = np.array(
-                np.maximum(0, yx - radiusPatch[:, np.newaxis] + 0.5),
+            radius_patch = np.sqrt(2) * radius
+            p_min = np.asarray(
+                np.maximum(0, yx - radius_patch[:, np.newaxis] + 0.5),
                 dtype=int)
-            p_max = np.array(
-                np.minimum(yx + radiusPatch[:, np.newaxis] + 0.5,
+            p_max = np.asarray(
+                np.minimum(yx + radius_patch[:, np.newaxis] + 0.5,
                            (dim[0] - 1, dim[1] - 1)), dtype=int)
 
             # indices of the histograms
@@ -557,7 +557,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                 inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
                 y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
-                m_idx, n_idx = np.where(inRadius)
+                m_idx, n_idx = np.nonzero(inRadius)
                 m = m[m_idx, 0]
                 n = n[0, n_idx]
                 gradientY = gradient[0][m, n, scales[k]]
@@ -566,8 +566,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 theta = np.arctan2(gradientX, gradientY) - orientations[k]
                 lam_sig = self.lambda_descr * sigma[k]
                 lam_sig_ratio = 2 * lam_sig / self.n_hist
-                kernel = np.exp(-(np.square(y_mn) + np.square(x_mn))
-                                / (2 * lam_sig ** 2))
+                kernel = np.exp((y_mn * y_mn + x_mn * x_mn)
+                                / (-2 * lam_sig ** 2))
                 magnitude = np.sqrt(np.square(gradientY)
                                     + np.square(gradientX)) * kernel
 
@@ -592,7 +592,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # -> contribute to (3,2) and (4,2)
                 comb = np.logical_and(near_x.T[:, None, :],
                                       near_y.T[:, :, None])
-                comb_pos = np.where(comb)
+                comb_pos = np.nonzero(comb)
 
                 # the weights/contributions are shared bilinearly between the
                 # histograms
