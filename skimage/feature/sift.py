@@ -432,12 +432,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                     # use the patch coordinates to get the gradient and then
                     # normalize them
-                    n, m = np.mgrid[Min[k, 0]:(Max[k, 0] + 1),
-                                    Min[k, 1]: (Max[k, 1] + 1)]
-                    gradientY = gradientSpace[o][0][n, m, scales[k]]
-                    gradientX = gradientSpace[o][1][n, m, scales[k]]
-                    n = np.subtract(n, yx[k, 0])
-                    m = np.subtract(m, yx[k, 1])
+                    m, n = np.meshgrid(np.arange(Min[k, 0], Max[k, 0] + 1),
+                                       np.arange(Min[k, 1], Max[k, 1] + 1),
+                                       indexing='ij', sparse=True)
+                    gradientY = gradientSpace[o][0][m, n, scales[k]]
+                    gradientX = gradientSpace[o][1][m, n, scales[k]]
+                    m = m - yx[k, 0]
+                    n = n - yx[k, 1]
 
                     magnitude = np.sqrt(np.square(gradientY) + np.square(
                         gradientX))  # gradient magnitude
