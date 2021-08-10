@@ -434,20 +434,22 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                     # use the patch coordinates to get the gradient and then
                     # normalize them
-                    m, n = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
+                    r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
                                        np.arange(p_min[k, 1], p_max[k, 1] + 1),
                                        indexing='ij', sparse=True)
-                    gradientY = gradient_space[o][0][m, n, scales[k]]
-                    gradientX = gradient_space[o][1][m, n, scales[k]]
-                    m = m - yx[k, 0]
-                    n = n - yx[k, 1]
+                    gradient_row = gradient_space[o][0][r, c, scales[k]]
+                    gradient_col = gradient_space[o][1][r, c, scales[k]]
+                    r = r - yx[k, 0]
+                    c = c - yx[k, 1]
 
-                    magnitude = np.sqrt(np.square(gradientY) + np.square(
-                        gradientX))  # gradient magnitude
-                    theta = np.mod(np.arctan2(gradientX, gradientY),
-                                   2 * np.pi)  # angles
+                    # gradient magnitude and angles
+                    magnitude = np.sqrt(np.square(gradient_row) + np.square(
+                        gradient_col))
+                    theta = np.mod(np.arctan2(gradient_col, gradient_row),
+                                   2 * np.pi)
+
                     # more weight to center values
-                    kernel = np.exp(np.divide(n * n + m * m,
+                    kernel = np.exp(np.divide(r * r + c * c,
                                               -2 * (self.lambda_ori
                                                     * sigma[k]) ** 2))
 
@@ -499,12 +501,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         # return the gradient_space to reuse it to find the descriptor
         return gradient_space
 
-    def _rotate(self, y, x, angle):
+    def _rotate(self, row, col, angle):
         c = math.cos(angle)
         s = math.sin(angle)
-        rY = c * y - s * x
-        rX = s * y + c * x
-        return rY, rX
+        rot_row = c * row + s * col
+        rot_col = -s * row + c * col
+        return rot_row, rot_col
 
     def _compute_descriptor(self, gradient_space):
         """Source: "Anatomy of the SIFT Method" Alg. 12
@@ -548,41 +550,46 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             for k in range(len(p_max)):
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
                 # the patch
-                m, n = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
+                r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
                                    np.arange(p_min[k, 1], p_max[k, 1]),
                                    indexing='ij', sparse=True)
-                y_mn = m - yx[k, 0]  # normalized coordinates
-                x_mn = n - yx[k, 1]
-                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations[k])
+                # normalized coordinates
+                r_norm = r - yx[k, 0]
+                c_norm = c - yx[k, 1]
+                r_norm, c_norm = self._rotate(r_norm, c_norm,
+                                              orientations[k])
 
-                inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
-                y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
-                m_idx, n_idx = np.nonzero(inRadius)
-                m = m[m_idx, 0]
-                n = n[0, n_idx]
-                gradientY = gradient[0][m, n, scales[k]]
-                gradientX = gradient[1][m, n, scales[k]]
-
-                theta = np.arctan2(gradientX, gradientY) - orientations[k]
+                # select coordinates and gradient values within the patch
+                inside = np.maximum(np.abs(r_norm), np.abs(c_norm)) < radius[k]
+                r_norm, c_norm = r_norm[inside], c_norm[inside]
+                r_idx, c_idx = np.nonzero(inside)
+                r = r[r_idx, 0]
+                c = c[0, c_idx]
+                gradient_row = gradient[0][r, c, scales[k]]
+                gradient_col = gradient[1][r, c, scales[k]]
+                # compute the (relative) gradient orientation
+                theta = np.arctan2(gradient_col, gradient_row) - orientations[k]
                 lam_sig = self.lambda_descr * sigma[k]
                 lam_sig_ratio = 2 * lam_sig / self.n_hist
-                kernel = np.exp((y_mn * y_mn + x_mn * x_mn)
+                # Gaussian weighted kernel magnitude
+                kernel = np.exp((r_norm * r_norm + c_norm * c_norm)
                                 / (-2 * lam_sig ** 2))
-                magnitude = np.sqrt(np.square(gradientY)
-                                    + np.square(gradientX)) * kernel
+                magnitude = np.sqrt(np.square(gradient_row)
+                                    + np.square(gradient_col)) * kernel
 
-                yj_xi = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
-                ok = (2 * np.pi * bins) / self.n_ori
+
+                rc_bins = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
+                ori_bins = (2 * np.pi * bins) / self.n_ori
 
                 # distances to the histograms and bins
-                dist_y = np.abs(np.subtract.outer(yj_xi, y_mn))
-                dist_x = np.abs(np.subtract.outer(yj_xi, x_mn))
-                dist_t = np.abs(np.mod(np.subtract.outer(ok, theta),
+                dist_r = np.abs(np.subtract.outer(rc_bins, r_norm))
+                dist_c = np.abs(np.subtract.outer(rc_bins, c_norm))
+                dist_t = np.abs(np.mod(np.subtract.outer(ori_bins, theta),
                                        2 * np.pi))
 
                 # the histograms/bins that get the contribution
-                near_y = dist_y <= lam_sig_ratio
-                near_x = dist_x <= lam_sig_ratio
+                near_r = dist_r <= lam_sig_ratio
+                near_c = dist_c <= lam_sig_ratio
                 near_t = np.argmin(dist_t, axis=0)
                 near_t_val = np.min(dist_t, axis=0)
 
@@ -590,16 +597,16 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # x direction
                 # for example y: histogram 3 and 4, x: histogram 2
                 # -> contribute to (3,2) and (4,2)
-                comb = np.logical_and(near_x.T[:, None, :],
-                                      near_y.T[:, :, None])
+                comb = np.logical_and(near_c.T[:, None, :],
+                                      near_r.T[:, :, None])
                 comb_pos = np.nonzero(comb)
 
                 # the weights/contributions are shared bilinearly between the
                 # histograms
                 w0 = ((1 - (1 / lam_sig_ratio)
-                       * dist_y[comb_pos[1], comb_pos[0]])
+                       * dist_r[comb_pos[1], comb_pos[0]])
                       * (1 - (1 / lam_sig_ratio)
-                         * dist_x[comb_pos[2], comb_pos[0]])
+                         * dist_c[comb_pos[2], comb_pos[0]])
                       * magnitude[comb_pos[0]])
 
                 # the weight is shared linearly between the 2 nearest bins
