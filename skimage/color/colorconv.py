@@ -536,7 +536,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(f"Unknown illuminant/observer combination"
-        f"(\'{illuminant}\', \'{observer}\')")
+                         f"(\'{illuminant}\', \'{observer}\')")
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -912,7 +912,7 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
 
     if not np.can_cast(alpha, arr.dtype):
         warn(f"alpha can't be safely cast to image dtype {arr.dtype.name}",
-            stacklevel=2)
+             stacklevel=2)
     if np.isscalar(alpha):
         alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
     elif alpha.shape != arr.shape:
