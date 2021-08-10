@@ -598,6 +598,12 @@ def test_adjust_gamma_neggative():
         exposure.adjust_gamma(image, -1)
 
 
+def test_adjust_gamma_u8_overflow():
+    img = 255 * np.ones((2, 2), dtype=np.uint8)
+
+    assert np.all(exposure.adjust_gamma(img, gamma=1, gain=1.1) == 255)
+
+
 # Test Logarithmic Correction
 # ===========================
 
