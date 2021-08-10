@@ -285,17 +285,21 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         k = 2 ** (1 / self.n_scales)
         # one octave is represented by a 3D image with depth (n_scales+x)
         for o in range(self.n_octaves):
-            octave = np.empty(image.shape + (self.n_scales + 3,), dtype=dtype)
-            octave[:, :, 0] = image
+            # Temporarily put scales axis first so octave[i] is C-contiguous
+            # (this makes Gaussian filtering faster).
+            octave = np.empty((self.n_scales + 3,) + image.shape, dtype=dtype,
+                              order='C')
+            octave[0] = image
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
-                octave[:, :, s] = gaussian(octave[..., s - 1],
-                                           gaussian_sigmas[o, s - 1],
-                                           mode='reflect')
-            scalespace.append(octave)
+                gaussian(octave[s - 1],
+                         gaussian_sigmas[o, s - 1],
+                         mode='reflect', output=octave[s])
+            # move scales to last axis as expected by other methods
+            scalespace.append(np.moveaxis(octave, 0, -1))
             if o < self.n_octaves - 1:
                 # downscale the image by taking every second pixel
-                image = octave[:, :, self.n_scales][::2, ::2]
+                image = octave[self.n_scales][::2, ::2]
         return scalespace
 
     def _inrange(self, a, dim):
