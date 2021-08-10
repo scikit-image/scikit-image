@@ -217,10 +217,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.lambda_descr = lambda_descr
         self.n_hist = n_hist
         self.n_ori = n_ori
-
         self.delta_min = 1 / upsampling
-        self.deltas = (self.delta_min
-                       * np.power(2, np.arange(self.n_octaves - 1)))
+        self.deltas = self._deltas()
         self.scalespace_sigmas = None
         self.keypoints = None
         self.positions = None
@@ -241,6 +239,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             n = max_octaves
         return n
 
+    def _deltas(self, dtype=float):
+        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
+        return deltas.astype(dtype, copy=False)
+
     def _create_scalespace(self, image):
         """Source: "Anatomy of the SIFT Method" Alg. 1
         Construction of the scalespace by gradually blurring (scales) and
@@ -248,7 +250,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """
         scalespace = []
         dtype = image.dtype
-        self.deltas = self.deltas.astype(dtype)
         if self.upsampling > 1:
             image = rescale(image, self.upsampling, order=3)
 
@@ -651,6 +652,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -684,6 +686,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -707,6 +710,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
