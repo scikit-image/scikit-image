@@ -4,12 +4,12 @@ import warnings
 import numpy as np
 import scipy.ndimage as ndi
 
-from ..feature.util import (FeatureDetector, DescriptorExtractor)
-from ..feature import peak_local_max
-from ..util import img_as_float
 from .._shared.utils import check_nD, _supported_float_type
-from ..transform import rescale
+from ..feature import peak_local_max
+from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
+from ..transform import rescale
+from ..util import img_as_float
 
 
 def _edgeness(hxx, hyy, hxy):
@@ -48,7 +48,7 @@ def _hessian(d, positions):
     h00 = d[p0 - 1, p1, p2] + d[p0 + 1, p1, p2] - two_d0
     h11 = d[p0, p1 - 1, p2] + d[p0, p1 + 1, p2] - two_d0
     h22 = d[p0, p1, p2 - 1] + d[p0, p1, p2 + 1] - two_d0
-    h01 = 0.25 * (d[p0 + 1, p1 + 1, p2]- d[p0 - 1, p1 + 1, p2]
+    h01 = 0.25 * (d[p0 + 1, p1 + 1, p2] - d[p0 - 1, p1 + 1, p2]
                   - d[p0 + 1, p1 - 1, p2] + d[p0 - 1, p1 - 1, p2])
     h02 = 0.25 * (d[p0 + 1, p1, p2 + 1] - d[p0 + 1, p1, p2 - 1]
                   + d[p0 - 1, p1, p2 - 1] - d[p0 - 1, p1, p2 + 1])
@@ -549,6 +549,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             bins = np.arange(1, self.n_ori + 1)
             for k in range(len(p_max)):
                 rad_k = radius[k]
+                ori = orientations[k]
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
                 # the patch
                 r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
@@ -557,8 +558,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # normalized coordinates
                 r_norm = r - yx[k, 0]
                 c_norm = c - yx[k, 1]
-                r_norm, c_norm = self._rotate(r_norm, c_norm,
-                                              orientations[k])
+                r_norm, c_norm = self._rotate(r_norm, c_norm, ori)
 
                 # select coordinates and gradient values within the patch
                 inside = np.maximum(np.abs(r_norm), np.abs(c_norm)) < rad_k
@@ -569,7 +569,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradient_row = gradient[0][r, c, scales[k]]
                 gradient_col = gradient[1][r, c, scales[k]]
                 # compute the (relative) gradient orientation
-                theta = np.arctan2(gradient_col, gradient_row) - orientations[k]
+                theta = np.arctan2(gradient_col, gradient_row) - ori
                 lam_sig = self.lambda_descr * sigma[k]
                 # Gaussian weighted kernel magnitude
                 kernel = np.exp((r_norm * r_norm + c_norm * c_norm)
@@ -688,7 +688,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         gaussian_scalespace = self._create_scalespace(image)
 
         gradient_space = [np.gradient(octave) for octave in
-                         gaussian_scalespace]
+                          gaussian_scalespace]
 
         self._compute_descriptor(gradient_space)
 
@@ -721,7 +721,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 "greater intensity contrasts between adjacent pixels.")
 
         gradient_space = self._compute_orientation(positions, scales, sigmas,
-                                                  octaves, gaussian_scalespace)
+                                                   octaves,
+                                                   gaussian_scalespace)
 
         self._compute_descriptor(gradient_space)
 
