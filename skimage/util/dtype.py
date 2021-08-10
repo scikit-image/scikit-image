@@ -130,12 +130,12 @@ def _scale(a, n, m, copy=True):
     if n > m and a.max() < 2 ** m:
         mnew = int(np.ceil(m / 2) * 2)
         if mnew > m:
-            dtype = "int{}".format(mnew)
+            dtype = f"int{mnew}"
         else:
-            dtype = "uint{}".format(mnew)
+            dtype = f"uint{mnew}"
         n = int(np.ceil(n / 2) * 2)
-        warn("Downcasting {} to {} without scaling because max "
-             "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
+        warn(f"Downcasting {a.dtype} to {dtype} without scaling because max "
+             f"value {a.max()} fits in {dtype}",
              stacklevel=3)
         return a.astype(_dtype_bits(kind, m))
     elif n == m:
@@ -252,8 +252,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError("Can not convert from {} to {}."
-                         .format(dtypeobj_in, dtypeobj_out))
+        raise ValueError(f"Can not convert from {dtypeobj_in} to {dtypeobj_out}.")
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min
