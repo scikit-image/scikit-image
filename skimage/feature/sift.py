@@ -10,6 +10,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
 from ..transform import rescale
 from ..util import img_as_float
+from ._sift import _update_histogram
 
 
 def _edgeness(hxx, hyy, hxy):
@@ -590,8 +591,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # Gaussian weighted kernel magnitude
                 kernel = np.exp((r_norm * r_norm + c_norm * c_norm)
                                 / (-2 * lam_sig ** 2))
-                magnitude = np.sqrt(np.square(gradient_row)
-                                    + np.square(gradient_col)) * kernel
+                magnitude = np.sqrt(gradient_row * gradient_row
+                                    + gradient_col * gradient_col) * kernel
 
                 lam_sig_ratio = 2 * lam_sig / self.n_hist
                 rc_bins = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
@@ -601,42 +602,20 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # distances to the histograms and bins
                 dist_r = np.abs(np.subtract.outer(rc_bins, r_norm))
                 dist_c = np.abs(np.subtract.outer(rc_bins, c_norm))
-                dist_t = np.abs(np.mod(np.subtract.outer(ori_bins, theta),
-                                       2 * np.pi))
+                dist_t = np.subtract.outer(ori_bins, theta)
+                dist_t[dist_t < 0] += 2 * np.pi
+                dist_t[dist_t > 2*np.pi] -= 2 * np.pi
 
-                # the histograms/bins that get the contribution
-                near_r = dist_r <= rc_bin_spacing
-                near_c = dist_c <= rc_bin_spacing
+                # the orientation histograms/bins that get the contribution
                 near_t = np.argmin(dist_t, axis=0)
                 near_t_val = np.min(dist_t, axis=0)
 
-                # every contribution in y direction is combined with every in
-                # x direction
-                # for example y: histogram 3 and 4, x: histogram 2
-                # -> contribute to (3,2) and (4,2)
-                #
-                # comb shape = (r_norm.size, self.n_hist, self.n_hist)
-                # comb axes correspond to (patch_index, row, col)
-                comb = np.logical_and(near_c.T[:, None, :],
-                                      near_r.T[:, :, None])
-                patch_idx, row_idx, column_idx = np.nonzero(comb)
-
-                # the weights/contributions are shared bilinearly between the
-                # histograms
-                inv_spacing = 1 / rc_bin_spacing
-                w0 = ((1 - inv_spacing * dist_r[row_idx, patch_idx])
-                      * (1 - inv_spacing * dist_c[column_idx, patch_idx])
-                      * magnitude[patch_idx])
-
-                # the weight is shared linearly between the 2 nearest bins
-                w1 = w0 * ((self.n_ori / (2 * np.pi))
-                           * near_t_val[patch_idx])
-                w2 = w0 * (1 - (self.n_ori / (2 * np.pi))
-                           * near_t_val[patch_idx])
-                k_index = near_t[patch_idx]
-                k_index2 = np.mod((k_index + 1), self.n_ori)
-                np.add.at(histograms, (row_idx, column_idx, k_index), w1)
-                np.add.at(histograms, (row_idx, column_idx, k_index2), w2)
+                # create the histogram
+                n_patch = len(magnitude)
+                _update_histogram(histograms, near_t, magnitude,
+                                  near_t_val, dist_r, dist_c,
+                                  n_patch, self.n_hist, self.n_ori,
+                                  rc_bin_spacing)
 
                 # convert the histograms to a 1d descriptor
                 histograms = histograms.flatten()

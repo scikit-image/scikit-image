@@ -19,6 +19,7 @@ def configuration(parent_package='', top_path=None):
             '_texture.pyx',
             '_hessian_det_appx.pyx',
             '_hoghistogram.pyx',
+            '_sift.pyx',
             ], working_path=base_path)
     # _haar uses c++, so it must be cythonized separately
     cython(['_cascade.pyx',
@@ -44,6 +45,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_haar', sources=['_haar.cpp'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'],
                          language="c++")
+    config.add_extension('_sift', sources=['_sift.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 
