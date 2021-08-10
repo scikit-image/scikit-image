@@ -264,28 +264,38 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                              self.sigma_min ** 2 - self.sigma_in ** 2),
                          mode='reflect')
 
+        # Eq. 10:  sigmas.shape = (n_octaves, n_scales + 3).
+        # The three extra scales are:
+        #    One for the differences needed for DoG and two auxilliary
+        #    images (one at either end) for peak_local_max with exclude
+        #    border = True (see Fig. 5)
+        # The smoothing doubles after n_scales steps.
+        tmp = np.power(2, np.arange(self.n_scales + 3) / self.n_scales)
+        tmp *= self.sigma_min
+        sigmas = (self.deltas[:, np.newaxis]
+                  / self.deltas[0] * tmp[np.newaxis, :])
+        self.scalespace_sigmas = sigmas
+
+        # Eq. 7: Gaussian smoothing depends on difference with previous sigma
+        #        gaussian_sigmas.shape = (n_octaves, n_scales + 2)
+        var_diff = np.diff(sigmas * sigmas, axis=1)
+        gaussian_sigmas = np.sqrt(var_diff) / self.deltas[:, np.newaxis]
+
         # after n_scales steps we doubled the smoothing
         k = 2 ** (1 / self.n_scales)
         # one octave is represented by a 3D image with depth (n_scales+x)
         for o in range(self.n_octaves):
-            delta = self.delta_min * 2 ** o
-            sigmas[o, 0] = current_sigma
             octave = np.empty(image.shape + (self.n_scales + 3,), dtype=dtype)
             octave[:, :, 0] = image
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
                 octave[:, :, s] = gaussian(octave[..., s - 1],
-                                           ((1 / delta)
-                                            * np.sqrt((current_sigma * k) ** 2
-                                                      - current_sigma ** 2)),
+                                           gaussian_sigmas[o, s - 1],
                                            mode='reflect')
-                current_sigma = current_sigma * k
-                sigmas[o, s] = current_sigma
             scalespace.append(octave)
-            # downscale the image by taking every second pixel
-            image = octave[:, :, self.n_scales][::2, ::2]
-            current_sigma = sigmas[o, self.n_scales]
-        self.scalespace_sigmas = sigmas
+            if o < self.n_octaves - 1:
+                # downscale the image by taking every second pixel
+                image = octave[:, :, self.n_scales][::2, ::2]
         return scalespace
 
     def _inrange(self, a, dim):
