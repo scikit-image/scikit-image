@@ -592,7 +592,7 @@ def test_adjust_gamma_greater_one():
     assert_array_equal(result, expected)
 
 
-def test_adjust_gamma_neggative():
+def test_adjust_gamma_negative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
     with testing.raises(ValueError):
         exposure.adjust_gamma(image, -1)
@@ -732,10 +732,10 @@ def test_adjust_inv_sigmoid_cutoff_half():
     assert_array_equal(result, expected)
 
 
-def test_negative():
+def test_adjust_sigmoid_negative():
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
     with testing.raises(ValueError):
-        exposure.adjust_gamma(image)
+        exposure.adjust_sigmoid(image)
 
 
 def test_is_low_contrast():
