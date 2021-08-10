@@ -37,7 +37,8 @@ matches12 = match_descriptors(descriptors1, descriptors2, max_ratio=0.6,
                               cross_check=True)
 matches13 = match_descriptors(descriptors1, descriptors3, max_ratio=0.6,
                               cross_check=True)
-
+print(f"len(matches12)={len(matches12)}")
+print(f"len(matches13)={len(matches13)}")
 fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()

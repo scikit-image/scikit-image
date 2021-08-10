@@ -548,6 +548,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # indices of the bins
             bins = np.arange(1, self.n_ori + 1)
             for k in range(len(p_max)):
+                rad_k = radius[k]
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
                 # the patch
                 r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
@@ -560,7 +561,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                               orientations[k])
 
                 # select coordinates and gradient values within the patch
-                inside = np.maximum(np.abs(r_norm), np.abs(c_norm)) < radius[k]
+                inside = np.maximum(np.abs(r_norm), np.abs(c_norm)) < rad_k
                 r_norm, c_norm = r_norm[inside], c_norm[inside]
                 r_idx, c_idx = np.nonzero(inside)
                 r = r[r_idx, 0]
@@ -570,15 +571,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # compute the (relative) gradient orientation
                 theta = np.arctan2(gradient_col, gradient_row) - orientations[k]
                 lam_sig = self.lambda_descr * sigma[k]
-                lam_sig_ratio = 2 * lam_sig / self.n_hist
                 # Gaussian weighted kernel magnitude
                 kernel = np.exp((r_norm * r_norm + c_norm * c_norm)
                                 / (-2 * lam_sig ** 2))
                 magnitude = np.sqrt(np.square(gradient_row)
                                     + np.square(gradient_col)) * kernel
 
-
+                lam_sig_ratio = 2 * lam_sig / self.n_hist
                 rc_bins = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
+                rc_bin_spacing = lam_sig_ratio
                 ori_bins = (2 * np.pi * bins) / self.n_ori
 
                 # distances to the histograms and bins
@@ -588,8 +589,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                        2 * np.pi))
 
                 # the histograms/bins that get the contribution
-                near_r = dist_r <= lam_sig_ratio
-                near_c = dist_c <= lam_sig_ratio
+                near_r = dist_r <= rc_bin_spacing
+                near_c = dist_c <= rc_bin_spacing
                 near_t = np.argmin(dist_t, axis=0)
                 near_t_val = np.min(dist_t, axis=0)
 
@@ -597,27 +598,29 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # x direction
                 # for example y: histogram 3 and 4, x: histogram 2
                 # -> contribute to (3,2) and (4,2)
+                #
+                # comb shape = (r_norm.size, self.n_hist, self.n_hist)
+                # comb axes correspond to (patch_index, row, col)
                 comb = np.logical_and(near_c.T[:, None, :],
                                       near_r.T[:, :, None])
-                comb_pos = np.nonzero(comb)
+                patch_idx, row_idx, column_idx = np.nonzero(comb)
 
                 # the weights/contributions are shared bilinearly between the
                 # histograms
-                w0 = ((1 - (1 / lam_sig_ratio)
-                       * dist_r[comb_pos[1], comb_pos[0]])
-                      * (1 - (1 / lam_sig_ratio)
-                         * dist_c[comb_pos[2], comb_pos[0]])
-                      * magnitude[comb_pos[0]])
+                inv_spacing = 1 / rc_bin_spacing
+                w0 = ((1 - inv_spacing * dist_r[row_idx, patch_idx])
+                      * (1 - inv_spacing * dist_c[column_idx, patch_idx])
+                      * magnitude[patch_idx])
 
                 # the weight is shared linearly between the 2 nearest bins
                 w1 = w0 * ((self.n_ori / (2 * np.pi))
-                           * near_t_val[comb_pos[0]])
+                           * near_t_val[patch_idx])
                 w2 = w0 * (1 - (self.n_ori / (2 * np.pi))
-                           * near_t_val[comb_pos[0]])
-                k_index = near_t[comb_pos[0]]
-                np.add.at(histograms, (comb_pos[1], comb_pos[2], k_index), w1)
+                           * near_t_val[patch_idx])
+                k_index = near_t[patch_idx]
+                np.add.at(histograms, (row_idx, column_idx, k_index), w1)
                 np.add.at(histograms,
-                          (comb_pos[1], comb_pos[2],
+                          (row_idx, column_idx,
                            np.mod((k_index + 1), self.n_ori)),
                           w2)
 
