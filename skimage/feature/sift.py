@@ -630,9 +630,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 histograms = np.minimum(histograms,
                                         0.2 * np.linalg.norm(histograms))
                 # normalize the descriptor
-                descriptor = np.minimum(
-                    np.floor((512 * histograms) / np.linalg.norm(histograms)),
-                    255).astype(np.uint8)
+                descriptor = (512 * histograms) / np.linalg.norm(histograms)
+                # quantize the descriptor
+                descriptor = np.minimum(np.floor(descriptor), 255)
                 self.descriptors[numbers[k], :] = descriptor
                 key_count += 1
 
