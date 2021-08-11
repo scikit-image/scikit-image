@@ -5,12 +5,11 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from .._shared.utils import check_nD, _supported_float_type
-from ..feature import peak_local_max
 from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
 from ..transform import rescale
 from ..util import img_as_float
-from ._sift import _update_histogram
+from ._sift import _update_histogram, _local_max
 
 
 def _edgeness(hxx, hyy, hxy):
@@ -322,9 +321,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         dtype = dogspace[0].dtype
         for o, (octave, delta) in enumerate(zip(dogspace, self.deltas)):
             # find extrema
-            maxima = peak_local_max(octave, threshold_abs=threshold)
-            minima = peak_local_max(-octave, threshold_abs=threshold)
-            keys = np.concatenate((maxima, minima), axis=0)
+            keys = _local_max(np.ascontiguousarray(octave), threshold)
+            if keys.size == 0:
+                continue
 
             # localize extrema
             oshape = octave.shape
@@ -398,6 +397,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_pos.append(yx[border_filter])
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
+
+        if not extrema_pos:
+            raise RuntimeError(
+                "SIFT found no features. Try passing in an image containing "
+                "greater intensity contrasts between adjacent pixels.")
 
         octave_indices = np.concatenate([np.full(len(p), i)
                                         for i, p in enumerate(extrema_pos)])
@@ -652,10 +656,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         positions, scales, sigmas, octaves = self._find_localize_evaluate(
             dog_scalespace, image.shape)
-        if len(positions) == 0:
-            raise RuntimeError(
-                "SIFT found no features. Try passing in an image containing "
-                "greater intensity contrasts between adjacent pixels.")
 
         self._compute_orientation(positions, scales, sigmas, octaves,
                                   gaussian_scalespace)

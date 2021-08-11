@@ -3,6 +3,8 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
+import numpy as np
+
 from libc.math cimport M_PI
 from .._shared.fused_numerics cimport np_floats
 
@@ -42,3 +44,50 @@ cpdef _update_histogram(np_floats[:, :, ::1] histograms,
                     k_index2 = k_index + 1
                 histograms[r, c, k_index] += w1
                 histograms[r, c, k_index2] += w2
+
+
+cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
+    cdef:
+        Py_ssize_t n_r = octave.shape[0]
+        Py_ssize_t n_c = octave.shape[1]
+        Py_ssize_t n_s = octave.shape[2]
+        Py_ssize_t r, c, s
+        np_floats* center_ptr
+        Py_ssize_t neighbor_offsets[26]
+        np_floats center_val, val
+        int n = 0
+
+    for r in range(-1, 2):
+        for c in range(-1, 2):
+            for s in range(-1, 2):
+                if (r != 0 or c != 0 or s != 0):
+                    neighbor_offsets[n] = (r * n_c + c) * n_s + s
+                    n += 1
+
+    maxima_coords = []
+    for r in range(1, n_r - 1):
+        for c in range(1, n_c - 1):
+            for s in range(1, n_s - 1):
+                center_ptr = &octave[r, c, s]
+                center_val = center_ptr[0]
+                if abs(center_val) < thresh:
+                    continue
+                is_local_min = True
+                for n in range(26):
+                    val = center_ptr[neighbor_offsets[n]]
+                    if val <= center_val:
+                        is_local_min = False
+                        break
+
+                if is_local_min:
+                    is_local_max = False
+                else:
+                    is_local_max = True
+                    for n in range(26):
+                        val = center_ptr[neighbor_offsets[n]]
+                        if val >= center_val:
+                            is_local_max = False
+                            break
+                if is_local_min or is_local_max:
+                    maxima_coords.append((r, c, s))
+    return np.asarray(maxima_coords, dtype=np.intp)
