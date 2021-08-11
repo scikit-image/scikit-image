@@ -9,7 +9,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
 from ..transform import rescale
 from ..util import img_as_float
-from ._sift import _update_histogram, _local_max
+from ._sift import _local_max, _ori_distances, _update_histogram
 
 
 def _edgeness(hxx, hyy, hxy):
@@ -606,13 +606,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # distances to the histograms and bins
                 dist_r = np.abs(np.subtract.outer(rc_bins, r_norm))
                 dist_c = np.abs(np.subtract.outer(rc_bins, c_norm))
-                dist_t = np.subtract.outer(ori_bins, theta)
-                dist_t[dist_t < 0] += 2 * np.pi
-                dist_t[dist_t > 2*np.pi] -= 2 * np.pi
 
                 # the orientation histograms/bins that get the contribution
-                near_t = np.argmin(dist_t, axis=0)
-                near_t_val = np.min(dist_t, axis=0)
+                ori_bins = ori_bins.astype(np.float64, copy=False)
+                theta = theta.astype(np.float64, copy=False)
+                near_t, near_t_val = _ori_distances(ori_bins, theta)
 
                 # create the histogram
                 n_patch = len(magnitude)

@@ -9,6 +9,35 @@ from libc.math cimport M_PI
 from .._shared.fused_numerics cimport np_floats
 
 
+cpdef _ori_distances(double[::1] ori_bins,
+                     double[::1] theta):
+    """Compute angular minima and their indices."""
+    cdef:
+        Py_ssize_t n_theta = theta.size
+        Py_ssize_t n_ori = ori_bins.size
+        Py_ssize_t i, j, idx_min
+        double th, dist, dist_min
+        double two_pi = 2 * M_PI
+        Py_ssize_t[::1] near_t = np.empty((n_theta, ), dtype=np.intp)
+        double[::1] near_t_vals = np.empty((n_theta, ),
+                                           dtype=np.float64)
+    for i in range(n_theta):
+        dist_min = 100.
+        th = theta[i]
+        for j in range(n_ori):
+            dist = ori_bins[j] - th
+            if dist > two_pi:
+                dist -= two_pi
+            elif dist < 0:
+                dist += two_pi
+            if dist < dist_min:
+                idx_min = j
+                dist_min = dist
+        near_t[i] = idx_min
+        near_t_vals[i] = dist_min
+    return np.asarray(near_t), np.asarray(near_t_vals)
+
+
 cpdef _update_histogram(np_floats[:, :, ::1] histograms,
                         const Py_ssize_t[::1] near_t,
                         np_floats[::1] magnitude,  # const
