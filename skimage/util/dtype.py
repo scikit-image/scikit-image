@@ -130,9 +130,9 @@ def _scale(a, n, m, copy=True):
     if n > m and a.max() < 2 ** m:
         mnew = int(np.ceil(m / 2) * 2)
         if mnew > m:
-            dtype = f"int{mnew}"
+            dtype = f'int{mnew}'
         else:
-            dtype = f"uint{mnew}"
+            dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
         warn(f"Downcasting {a.dtype} to {dtype} without scaling because max "
              f"value {a.max()} fits in {dtype}",
@@ -252,8 +252,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError(f"Can not convert from "
-                         f"{dtypeobj_in} to {dtypeobj_out}.")
+        raise ValueError(f'Can not convert from {dtypeobj_in} to '
+                         f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min

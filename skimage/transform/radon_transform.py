@@ -485,8 +485,8 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                          'of radon_image (%s)'
                          % (image.shape, reconstructed_shape))
     elif image.dtype != dtype:
-        warn(f"image dtype does not match output dtype: "
-             f"image is cast to {dtype}")
+        warn(f'image dtype does not match output dtype: '
+             f'image is cast to {dtype}')
 
     image = np.asarray(image, dtype=dtype)
 

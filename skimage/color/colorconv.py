@@ -536,7 +536,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(f"Unknown illuminant/observer combination"
-                         f"(\'{illuminant}\', \'{observer}\')")
+                         f"('{illuminant}', '{observer}')")
 
 
 # Haematoxylin-Eosin-DAB colorspace
