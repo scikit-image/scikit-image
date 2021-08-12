@@ -23,16 +23,16 @@ img3 = transform.warp(img1, tform)
 descriptor_extractor = SIFT()
 
 descriptor_extractor.detect_and_extract(img1)
-keypoints1 = descriptor_extractor.keypoints[:100]
-descriptors1 = descriptor_extractor.descriptors[:100]
+keypoints1 = descriptor_extractor.keypoints
+descriptors1 = descriptor_extractor.descriptors
 
 descriptor_extractor.detect_and_extract(img2)
-keypoints2 = descriptor_extractor.keypoints[:100]
-descriptors2 = descriptor_extractor.descriptors[:100]
+keypoints2 = descriptor_extractor.keypoints
+descriptors2 = descriptor_extractor.descriptors
 
 descriptor_extractor.detect_and_extract(img3)
-keypoints3 = descriptor_extractor.keypoints[:100]
-descriptors3 = descriptor_extractor.descriptors[:100]
+keypoints3 = descriptor_extractor.keypoints
+descriptors3 = descriptor_extractor.descriptors
 
 matches12 = match_descriptors(descriptors1, descriptors2, max_ratio=0.6,
                               cross_check=True)
