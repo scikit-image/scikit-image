@@ -732,12 +732,6 @@ def test_adjust_inv_sigmoid_cutoff_half():
     assert_array_equal(result, expected)
 
 
-def test_adjust_sigmoid_negative():
-    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with testing.raises(ValueError):
-        exposure.adjust_sigmoid(image)
-
-
 def test_is_low_contrast():
     image = np.linspace(0, 0.04, 100)
     assert exposure.is_low_contrast(image)
@@ -760,6 +754,18 @@ def test_is_low_contrast_boolean():
 
     image[:5] = 1
     assert not exposure.is_low_contrast(image)
+
+
+# Test negative input
+#####################
+
+@pytest.mark.parametrize("exposure_func", [exposure.adjust_gamma,
+                                           exposure.adjust_log,
+                                           exposure.adjust_sigmoid])
+def test_negative_input(exposure_func):
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
+    with testing.raises(ValueError):
+        exposure_func(image)
 
 
 # Test Dask Compatibility
