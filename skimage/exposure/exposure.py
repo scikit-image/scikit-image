@@ -59,7 +59,8 @@ def _bincount_histogram(image, source_range):
         The values at the center of the bins.
     """
     if source_range not in ['image', 'dtype']:
-        raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
+        raise ValueError(f'Incorrect value for `source_range` '
+                         f'argument: {source_range}')
     if source_range == 'image':
         image_min = int(image.min().astype(np.int64))
         image_max = int(image.max().astype(np.int64))

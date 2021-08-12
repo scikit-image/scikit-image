@@ -117,10 +117,10 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     fromspace = fromspace.lower()
     tospace = tospace.lower()
     if fromspace not in fromdict:
-        msg = '`fromspace` has to be one of {}'.format(fromdict.keys())
+        msg = f'`fromspace` has to be one of {fromdict.keys()}'
         raise ValueError(msg)
     if tospace not in todict:
-        msg = '`tospace` has to be one of {}'.format(todict.keys())
+        msg = f'`tospace` has to be one of {todict.keys()}'
         raise ValueError(msg)
 
     return todict[tospace](
@@ -535,8 +535,8 @@ def get_xyz_coords(illuminant, observer, dtype=float):
     try:
         return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
-        raise ValueError("Unknown illuminant/observer combination\
-        (\'{0}\', \'{1}\')".format(illuminant, observer))
+        raise ValueError(f"Unknown illuminant/observer combination"
+                         f"('{illuminant}', '{observer}')")
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -911,8 +911,8 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         alpha = alpha_max
 
     if not np.can_cast(alpha, arr.dtype):
-        warn("alpha can't be safely cast to image dtype {}"
-             .format(arr.dtype.name), stacklevel=2)
+        warn(f"alpha can't be safely cast to image dtype {arr.dtype.name}",
+             stacklevel=2)
     if np.isscalar(alpha):
         alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
     elif alpha.shape != arr.shape:
