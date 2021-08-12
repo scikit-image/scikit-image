@@ -252,7 +252,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError(f'Can not convert from {dtypeobj_in} to '
+        raise ValueError(f'Cannot convert from {dtypeobj_in} to '
                          f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
