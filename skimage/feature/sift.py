@@ -1,5 +1,4 @@
 import math
-import warnings
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -98,7 +97,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             of 1 (no upscaling), 2 or 4. Method: Bi-cubic interpolation.
         n_octaves : int, optional
             Maximum number of octaves. With every octave the image size is
-            halved and the sigma doubled.
+            halved and the sigma doubled. The number of octaves will be
+            reduced as needed to keep at least 12 pixels along each dimension
+            at the smallest scale.
         n_scales : int, optional
             Maximum number of scales in every octave.
         sigma_min : float, optional
@@ -251,12 +252,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         size_min = 12  # minimum size of last octave
         s0 = min(image_shape) * self.upsampling
         max_octaves = int(math.log2(s0 / size_min) + 1)
-        if max_octaves < n:
-            warnings.warn(
-                f"Reducing n_octaves to {max_octaves} due to small image size."
-            )
-            n = max_octaves
-        return n
+        return max_octaves
 
     def _deltas(self, dtype=float):
         deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
