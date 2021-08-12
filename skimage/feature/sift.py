@@ -125,7 +125,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         n_ori : int, optional
             The number of bins in the histograms of the descriptor patch.
 
-
         Attributes
         ----------
         delta_min : float
@@ -150,17 +149,27 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         descriptors : (N, n_hist*n_hist*n_ori) array
             The descriptors of a keypoint.
 
+        Notes
+        -----
+        The SIFT algorithm was developed by David Lowe [1]_, [2]_. The
+        implementation here closely follows the detailed description in [3]_,
+        including use of the same default parameters.
 
         References
         ----------
-        .. [1] D.G. Lowe
-              "Object recognition from local scale-invariant features"
-              https://doi.org/10.1109/ICCV.1999.790410
+        .. [1] D.G. Lowe. "Object recognition from local scale-invariant
+               features", Proceedings of the Seventh IEEE International
+               Conference on Computer Vision, 1999, vol.2, pp. 1150-1157.
+               :DOI:`10.1109/ICCV.1999.790410`
 
-        .. [2] Ives Rey Otero and Mauricio Delbracio
-              "Anatomy of the SIFT Method"
-              Image Processing On Line, 4 (2014), pp. 370–396.
-              https://doi.org/10.5201/ipol.2014.82
+        .. [2] D.G. Lowe. "Distinctive Image Features from Scale-Invariant
+               Keypoints", International Journal of Computer Vision, 2004,
+               vol. 60, pp. 91–110.
+               :DOI:`10.1023/B:VISI.0000029664.99615.94`
+
+        .. [3] Ives Rey Otero and Mauricio Delbracio. "Anatomy of the SIFT
+               Method", Image Processing On Line, 4 (2014), pp. 370–396.
+               :DOI:`10.5201/ipol.2014.82`
 
         Examples
         --------
@@ -177,23 +186,23 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         ...                             detector_extractor2.descriptors,
         ...                             max_ratio=0.6)
         >>> matches[10:15]
-        array([[ 11,  11],
-               [ 12, 568],
-               [ 13,  13],
-               [ 14, 569],
-               [ 15,  15]])
+        array([[ 10, 271],
+               [ 11, 275],
+               [ 12, 298],
+               [ 13, 272],
+               [ 14, 222]])
         >>> detector_extractor1.keypoints[matches[10:15, 0]]
-        array([[170, 241],
-               [341, 287],
-               [234,  13],
-               [232, 378],
-               [206, 307]])
+        array([[ 95, 214],
+               [ 97, 211],
+               [ 98, 188],
+               [102, 215],
+               [104, 262]])
         >>> detector_extractor2.keypoints[matches[10:15, 1]]
-        array([[271, 170],
-               [383,  95],
-               [499, 234],
-               [191, 260],
-               [205, 206]])
+        array([[297,  95],
+               [301,  97],
+               [323,  98],
+               [297, 102],
+               [249, 104]])
 
         """
 
