@@ -11,7 +11,22 @@ from .._shared.fused_numerics cimport np_floats
 
 cpdef _ori_distances(double[::1] ori_bins,
                      double[::1] theta):
-    """Compute angular minima and their indices."""
+    """Compute angular minima and their indices.
+
+    Parameters
+    ----------
+    ori_bins : ndarray
+        The orientation histogram bins.
+    theta : ndarray
+        The orientation computed for each pixel in the patch.
+
+    Returns
+    -------
+    near_t : ndarray
+        The histogram bin index corresponding to each pixel in the patch.
+    near_t_val : ndarray
+        The distance between the orientation of each pixel and the nearest bin.
+    """
     cdef:
         Py_ssize_t n_theta = theta.size
         Py_ssize_t n_ori = ori_bins.size
@@ -40,16 +55,40 @@ cpdef _ori_distances(double[::1] ori_bins,
 
 cpdef _update_histogram(np_floats[:, :, ::1] histograms,
                         const Py_ssize_t[::1] near_t,
-                        np_floats[::1] magnitude,  # const
                         np_floats[::1] near_t_val,  # const
+                        np_floats[::1] magnitude,  # const
                         np_floats[:, ::1] dist_r,  # const
                         np_floats[:, ::1] dist_c,  # const
-                        Py_ssize_t n_patch,
-                        Py_ssize_t n_hist,
-                        Py_ssize_t n_ori,
                         np_floats rc_bin_spacing):
+    """Compute an array of orientation histograms (Eq. 28 of Otero et. al.)
+
+    Parameters
+    ----------
+    histogram : (n_hist, n_hist, n_ori) ndarray
+        An array of zeros that will contain the histogram output. `n_ori` is
+        the number of orientation bins and `n_hist` is the number of spatial
+        bins along each axis.
+    near_t : (n_patch,) ndarray
+        The orientation histogram bins obtained from `_ori_distances`.
+    near_t_val : (n_patch,) ndarray
+        The orientation histogram values obtained from `_ori_distances`.
+    magnitude : (n_patch,) ndarray
+        The magnitude weights based on spatial distance.
+    dist_r : (n_hist, n_patch) ndarray
+        Row distances between each point in the patch and the nearest row
+        histogram bin. Shape (n_hist, n_patch).
+    dist_c : (n_hist, n_patch) ndarray
+        Column distances between each point in the patch and the nearest column
+        histogram bin.  Shape (n_hist, n_patch).
+    rc_bin_spacing : float
+        The spacing between spatial histogram bins along a single axis.
+
+    """
     cdef:
         Py_ssize_t i, p, r, c, k_index, k_index2
+        Py_ssize_t n_patch = len(magnitude)
+        Py_ssize_t n_hist = histograms.shape[0]
+        Py_ssize_t n_ori = histograms.shape[2]
         np_floats t_val, val_norm1, w0, w1, w2, inv_spacing
     inv_spacing = 1 / rc_bin_spacing
     val_norm1 = n_ori / (2 * M_PI)

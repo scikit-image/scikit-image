@@ -39,7 +39,10 @@ def _sparse_gradient(vol, positions):
 
 
 def _hessian(d, positions):
-    """Source: "Anatomy of the SIFT Method"  p.380 (13)"""
+    """Compute the non-redundant 3D Hessian terms at the requested positions.
+
+    Source: "Anatomy of the SIFT Method"  p.380 (13)
+    """
     p0 = positions[..., 0]
     p1 = positions[..., 1]
     p2 = positions[..., 2]
@@ -58,7 +61,14 @@ def _hessian(d, positions):
 
 
 def _offsets(grad, hess):
-    """Compute position refinement offsets from gradient and Hessian."""
+    """Compute position refinement offsets from gradient and Hessian.
+
+    This is equivalent to np.linalg.solve(-H, J) where H is the Hessian
+    matrix and J is the gradient (Jacobian).
+
+    This analytical solution is adapted from (BSD-licensed) C code by
+    Otero et. al (see SIFT docstring References).
+    """
     h00, h11, h22, h01, h02, h12 = hess
     g0, g1, g2 = grad
     det = h00 * h11 * h22
@@ -624,10 +634,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
                 # create the histogram
                 n_patch = len(magnitude)
-                _update_histogram(histograms, near_t, magnitude,
-                                  near_t_val, dist_r, dist_c,
-                                  n_patch, self.n_hist, self.n_ori,
-                                  rc_bin_spacing)
+                _update_histogram(histograms, near_t, near_t_val, magnitude,
+                                  dist_r, dist_c, rc_bin_spacing)
 
                 # convert the histograms to a 1d descriptor
                 histograms = histograms.flatten()
