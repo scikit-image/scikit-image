@@ -329,6 +329,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             oshape = octave.shape
             # mask for all extrema that still have to be tested
             refinement_iterations = 5
+            offset_max = 0.6
             for i in range(refinement_iterations):
                 if i > 0:
                     # exclude any keys that have moved out of bounds
@@ -345,10 +346,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # offset is too big and an increase would not bring us out of
                 # bounds
                 wrong_position_pos = np.logical_and(
-                    off > 0.5,
+                    off > offset_max,
                     keys + 1 < tuple([a - 1 for a in oshape])
                 )
-                wrong_position_neg = np.logical_and(off < -0.5, keys - 1 > 0)
+                wrong_position_neg = np.logical_and(off < -offset_max, keys - 1 > 0)
                 if (not np.any(np.logical_or(wrong_position_neg,
                                              wrong_position_pos))):
                     break
@@ -356,7 +357,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 keys[wrong_position_neg] -= 1
 
             # mask for all extrema that have been localized successfully
-            finished = np.all(np.abs(off) < 0.5, axis=1)
+            finished = np.all(np.abs(off) < offset_max, axis=1)
             keys = keys[finished]
             off = off[finished]
             grad = [g[finished] for g in grad]
