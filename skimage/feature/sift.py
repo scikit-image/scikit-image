@@ -445,7 +445,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         keypoint_angles = []
         keypoint_octave = []
         keypoints_valid = np.ones_like(sigmas_oct, dtype=bool)
-        orientations = np.zeros_like(sigmas_oct, dtype=positions_oct.dtype)
+        float_dtype = gaussian_scalespace[0].dtype
+        orientations = np.zeros_like(sigmas_oct, dtype=float_dtype)
         key_count = 0
         for o in range(self.n_octaves):
             in_oct = octaves == o
@@ -467,8 +468,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             p_max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
                                (oshape[0] - 1, oshape[1] - 1)).astype(int)
             # orientation histogram
-            hist = np.empty(self.n_bins, dtype=octave.dtype)
-            avg_kernel = np.full((3,), 1 / 3, dtype=octave.dtype)
+            hist = np.empty(self.n_bins, dtype=float_dtype)
+            avg_kernel = np.full((3,), 1 / 3, dtype=float_dtype)
             for k in range(len(yx)):
                 if np.all(p_min[k] > 0) and np.all(p_max[k] > p_min[k]):
                     hist[:] = 0
@@ -480,8 +481,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                        indexing='ij', sparse=True)
                     gradient_row = gradient_space[o][0][r, c, scales[k]]
                     gradient_col = gradient_space[o][1][r, c, scales[k]]
-                    r = r - yx[k, 0]
-                    c = c - yx[k, 1]
+                    r = r.astype(float_dtype, copy=False)
+                    c = c.astype(float_dtype, copy=False)
+                    r -= yx[k, 0]
+                    c -= yx[k, 1]
 
                     # gradient magnitude and angles
                     magnitude = np.sqrt(np.square(gradient_row) + np.square(
@@ -505,6 +508,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                         hist = np.convolve(hist, avg_kernel, mode='same')
                     hist = hist[3:-3]
                     max_filter = ndi.maximum_filter(hist, [3])
+
                     # if an angle is in 80% percent range of the maximum, a
                     # new keypoint is created for it
                     maxima = np.nonzero(np.logical_and(
@@ -556,10 +560,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         n_key = len(self.scales)
         self.descriptors = np.empty((n_key, self.n_hist ** 2 * self.n_ori),
                                     dtype=np.uint8)
+
+        float_dtype = gradient_space[0][0].dtype
         # indices of the histograms
-        hists = np.arange(1, self.n_hist + 1)
+        hists = np.arange(1, self.n_hist + 1, dtype=float_dtype)
         # indices of the bins
-        bins = np.arange(1, self.n_ori + 1)
+        bins = np.arange(1, self.n_ori + 1, dtype=float_dtype)
 
         key_numbers = np.arange(n_key)
         for o in range(self.n_octaves):
@@ -591,14 +597,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             for k in range(len(p_max)):
                 rad_k = radius[k]
                 ori = orientations[k]
-                histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
+                histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori),
+                                      dtype=float_dtype)
                 # the patch
                 r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
                                    np.arange(p_min[k, 1], p_max[k, 1]),
                                    indexing='ij', sparse=True)
                 # normalized coordinates
-                r_norm = r - center_pos[k, 0]
-                c_norm = c - center_pos[k, 1]
+                r_norm = np.subtract(r, center_pos[k, 0], dtype=float_dtype)
+                c_norm = np.subtract(c, center_pos[k, 1], dtype=float_dtype)
                 r_norm, c_norm = self._rotate(r_norm, c_norm, ori)
 
                 # select coordinates and gradient values within the patch
@@ -628,8 +635,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 dist_c = np.abs(np.subtract.outer(rc_bins, c_norm))
 
                 # the orientation histograms/bins that get the contribution
-                ori_bins = ori_bins.astype(np.float64, copy=False)
-                theta = theta.astype(np.float64, copy=False)
                 near_t, near_t_val = _ori_distances(ori_bins, theta)
 
                 # create the histogram

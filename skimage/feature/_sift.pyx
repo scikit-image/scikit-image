@@ -4,13 +4,14 @@
 #cython: wraparound=False
 
 import numpy as np
-
+cimport numpy as cnp
 from libc.math cimport M_PI
+
 from .._shared.fused_numerics cimport np_floats
 
 
-cpdef _ori_distances(double[::1] ori_bins,
-                     double[::1] theta):
+cpdef _ori_distances(np_floats[::1] ori_bins,
+                     np_floats[::1] theta):
     """Compute angular minima and their indices.
 
     Parameters
@@ -34,8 +35,13 @@ cpdef _ori_distances(double[::1] ori_bins,
         double th, dist, dist_min
         double two_pi = 2 * M_PI
         Py_ssize_t[::1] near_t = np.empty((n_theta, ), dtype=np.intp)
-        double[::1] near_t_vals = np.empty((n_theta, ),
-                                           dtype=np.float64)
+
+    if np_floats == cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+    cdef np_floats[::1] near_t_vals = np.empty((n_theta, ), dtype=dtype)
+
     for i in range(n_theta):
         dist_min = 100.
         th = theta[i]

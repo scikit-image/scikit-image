@@ -7,21 +7,25 @@ This example demonstrates the SIFT feature detection and its description
 algorithm.
 
 """
+import numpy as np
 from skimage import data
 from skimage import transform
 from skimage.feature import (match_descriptors, SIFT, plot_matches)
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
-img1 = rgb2gray(data.astronaut())
+img1 = rgb2gray(data.astronaut()).astype(np.float32)
 img2 = transform.rotate(img1, 180)
 tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
                                   translation=(0, -200))
 img3 = transform.warp(img1, tform)
 
 descriptor_extractor = SIFT()
-
+import time
+tstart = time.time()
 descriptor_extractor.detect_and_extract(img1)
+dur = time.time() - tstart
+print(f"duration = {dur}")
 keypoints1 = descriptor_extractor.keypoints
 descriptors1 = descriptor_extractor.descriptors
 
