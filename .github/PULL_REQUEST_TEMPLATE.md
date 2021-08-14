@@ -14,6 +14,7 @@
   existing benchmark
 - Unit tests
 - Clean style in [the spirit of PEP8](https://www.python.org/dev/peps/pep-0008/)
+- Standard commit messages
 
 <!-- For detailed information on these and other aspects see -->
 <!-- the scikit-image contribution guidelines. -->
