@@ -1,5 +1,6 @@
 import numpy
 
+from .._shared import utils
 
 __all__ = ['apply_parallel']
 
@@ -55,9 +56,12 @@ def _ensure_dask_array(array, chunks=None):
     return da.from_array(array, chunks=chunks)
 
 
+@utils.channel_as_last_axis(channel_arg_positions=(1,))
+@utils.deprecate_multichannel_kwarg()
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
-                   multichannel=False, compute=None):
+                   compute=None, channel_axis=None,
+                   multichannel=False):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -97,21 +101,26 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
         .. versionadded:: 0.18
            ``dtype`` was added in 0.18.
+    compute : bool, optional
+        If ``True``, compute eagerly returning a NumPy Array.
+        If ``False``, compute lazily returning a Dask Array.
+        If ``None`` (default), compute based on array type provided
+        (eagerly for NumPy Arrays and lazily for Dask Arrays).
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
     multichannel : bool, optional
         If `chunks` is None and `multichannel` is True, this function will keep
         only a single chunk along the channels axis. When `depth` is specified
         as a scalar value, that depth will be applied only to the non-channels
         axes (a depth of 0 will be used along the channels axis). If the user
         manually specified both `chunks` and a `depth` tuple, then this
-        argument will have no effect.
+        argument will have no effect. This argument is deprecated: specify
+        `channel_axis` instead.
 
         .. versionadded:: 0.18
            ``multichannel`` was added in 0.18.
-    compute : bool, optional
-        If ``True``, compute eagerly returning a NumPy Array.
-        If ``False``, compute lazily returning a Dask Array.
-        If ``None`` (default), compute based on array type provided
-        (eagerly for NumPy Arrays and lazily for Dask Arrays).
 
     Returns
     -------
@@ -149,7 +158,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4
-        if multichannel:
+        if channel_axis is not None:
             chunks = _get_chunks(shape[:-1], ncpu) + (shape[-1],)
         else:
             chunks = _get_chunks(shape, ncpu)
@@ -161,7 +170,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     elif mode == 'edge':
         mode = 'nearest'
 
-    if multichannel and numpy.isscalar(depth):
+    if channel_axis is not None and numpy.isscalar(depth):
         # depth is only used along the non-channel axes
         depth = (depth,) * (len(array.shape) - 1) + (0,)
 

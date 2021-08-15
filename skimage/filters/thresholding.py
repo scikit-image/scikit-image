@@ -1,18 +1,19 @@
 import itertools
 import math
-import numpy as np
-from scipy import ndimage as ndi
+import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
+
+import numpy as np
+from scipy import ndimage as ndi
+
+from .._shared.utils import check_nD, deprecate_kwarg, safe_as_int, warn
 from ..exposure import histogram
-from .._shared.utils import check_nD, warn, safe_as_int
+from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
+                                  _get_multiotsu_thresh_indices_lut)
 from ..transform import integral_image
 from ..util import dtype_limits
-from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                  _get_multiotsu_thresh_indices)
-
-from ._sparse import correlate_sparse, _validate_window_size
-
+from ._sparse import _correlate_sparse, _validate_window_size
 
 __all__ = ['try_all_threshold',
            'threshold_otsu',
@@ -53,6 +54,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Compute the image histogram for better performances
+    nbins = 256  # Default in threshold functions
+    hist = histogram(image.ravel(), nbins, source_range='image')
+
     # Handle default value
     methods = methods or {}
 
@@ -66,9 +71,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
+        # Use precomputed histogram for supporting functions
+        sig = inspect.signature(func)
+        _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
+
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
@@ -153,9 +162,9 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     Parameters
     ----------
-    image : (N, M) ndarray
-        Input image.
-    block_size : int
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+    block_size : int or sequence of int
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
@@ -186,13 +195,15 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     Returns
     -------
-    threshold : (N, M) ndarray
+    threshold : (N, M[, ..., P]) ndarray
         Threshold image. All pixels in the input image higher than the
         corresponding pixel in the threshold image are considered foreground.
 
     References
     ----------
-    .. [1] https://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+           (2nd Edition)." Prentice-Hall Inc., 2002: 600--612.
+           ISBN: 0-201-18075-8
 
     Examples
     --------
@@ -202,11 +213,16 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = image > threshold_local(image, 15, 'generic',
     ...                                         param=func)
+
     """
-    if block_size % 2 == 0:
-        raise ValueError("The kwarg ``block_size`` must be odd! Given "
-                         "``block_size`` {0} is even.".format(block_size))
-    check_nD(image, 2)
+    if np.isscalar(block_size):
+        block_size = (block_size,) * image.ndim
+    elif len(block_size) != image.ndim:
+        raise ValueError("len(block_size) must equal image.ndim.")
+    block_size = tuple(block_size)
+    if any(b % 2 == 0 for b in block_size):
+        raise ValueError(f'block_size must be odd! Given block_size '
+                         f'{block_size} contains even values.')
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -214,18 +230,14 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
-            sigma = (block_size - 1) / 6.0
+            sigma = tuple([(b - 1) / 6.0 for b in block_size])
         else:
             sigma = param
         ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
                             cval=cval)
     elif method == 'mean':
-        mask = 1. / block_size * np.ones((block_size,))
-        # separation of filters to speedup convolution
-        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode,
-                       cval=cval)
-        ndi.convolve1d(thresh_image, mask, axis=1, output=thresh_image,
-                       mode=mode, cval=cval)
+        ndi.uniform_filter(image, block_size, output=thresh_image, mode=mode,
+                           cval=cval)
     elif method == 'median':
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)
@@ -272,6 +284,14 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
+
+        if counts[0] == 0 or counts[-1] == 0:
+            # Trim histogram from both ends by removing starting and
+            # ending zeroes as in histogram(..., source_range="image")
+            cond = counts > 0
+            start = np.argmax(cond)
+            end = cond.size - np.argmax(cond[::-1])
+            counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image'
@@ -287,7 +307,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
+    image : (N, M[, ..., P]) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -319,9 +339,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+        warn(f'threshold_otsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # Check if the image has more than one intensity value; if not, return that
     # value
@@ -357,8 +377,8 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -432,8 +452,8 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
@@ -589,8 +609,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
 
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
@@ -671,9 +691,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = initial_guess - image_min
         image_max = np.max(image) + image_min
         if not 0 < t_next < np.max(image):
-            msg = ('The initial guess for threshold_li must be within the '
-                   'range of the image. Got {} for image min {} and max {} '
-                   .format(initial_guess, image_min, image_max))
+            msg = (f'The initial guess for threshold_li must be within the '
+                   f'range of the image. Got {initial_guess} for image min '
+                   f'{image_min} and max {image_max}.')
             raise ValueError(msg)
     else:
         raise TypeError('Incorrect type for `initial_guess`; should be '
@@ -707,7 +727,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
     The histogram of the input ``image`` is computed if not provided and
@@ -719,12 +740,12 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N) ndarray, optional
-        Input image.
+    image : (N, M[, ..., P]) ndarray, optional
+        Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximum number of iterations to smooth the histogram.
     hist : array, or 2-tuple of arrays, optional
         Histogram to determine the threshold from and a corresponding array
@@ -781,7 +802,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     smooth_hist = counts.astype(np.float64, copy=False)
 
-    for counter in range(max_iter):
+    for counter in range(max_num_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
         maximum_idxs = find_local_maxima_idx(smooth_hist)
         if len(maximum_idxs) < 3:
@@ -789,7 +810,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
-    elif counter == max_iter - 1:
+    elif counter == max_num_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram'
                            'smoothing')
 
@@ -915,8 +936,8 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     w : int, or iterable of int
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -944,20 +965,24 @@ def _mean_std(image, w):
     pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
-    padded_sq = padded * padded
 
     integral = integral_image(padded)
-    integral_sq = integral_image(padded_sq)
+    padded *= padded
+    integral_sq = integral_image(padded)
 
-    kern = np.zeros(tuple(k + 1 for k in w))
-    for indices in itertools.product(*([[0, -1]] * image.ndim)):
-        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+    # Create lists of non-zero kernel indices and values
+    kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
+    kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+                     for indices in kernel_indices]
 
     total_window_size = np.prod(w)
-    sum_full = correlate_sparse(integral, kern, mode='valid')
-    m = sum_full / total_window_size
-    sum_sq_full = correlate_sparse(integral_sq, kern, mode='valid')
-    g2 = sum_sq_full / total_window_size
+    kernel_shape = tuple(_w + 1 for _w in w)
+    m = _correlate_sparse(integral, kernel_shape, kernel_indices,
+                          kernel_values)
+    m /= total_window_size
+    g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
+                           kernel_values)
+    g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
@@ -979,8 +1004,8 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -1040,12 +1065,12 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     pixel (x,y) neighborhood defined by a rectangular window with size w
     times w centered around the pixel. k is a configurable parameter
     that weights the effect of standard deviation.
-    R is the maximum standard deviation of a greyscale image.
+    R is the maximum standard deviation of a grayscale image.
 
     Parameters
     ----------
-    image : ndarray
-        Input image.
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
@@ -1143,7 +1168,7 @@ def threshold_multiotsu(image, classes=3, nbins=256, *, bin_width_stage1=None):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, ..., P]) ndarray
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
@@ -1205,9 +1230,9 @@ def threshold_multiotsu(image, classes=3, nbins=256, *, bin_width_stage1=None):
 
     """
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = ("threshold_multiotsu is expected to work correctly only for "
-               "grayscale images; image shape {0} looks like an RGB image")
-        warn(msg.format(image.shape))
+        warn(f'threshold_multiotsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
@@ -1228,9 +1253,9 @@ def threshold_multiotsu(image, classes=3, nbins=256, *, bin_width_stage1=None):
             raise ValueError("bin_width_stage1 must be a positive integer")
 
     if nvalues < classes:
-        msg = ("The input image has only {} different values. "
-               "It can not be thresholded in {} classes")
-        raise ValueError(msg.format(nvalues, classes))
+        msg = (f'The input image has only {nvalues} different values. '
+               f'It cannot be thresholded in {classes} classes.')
+        raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:

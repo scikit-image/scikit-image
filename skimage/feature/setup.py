@@ -47,6 +47,7 @@ def configuration(parent_package='', top_path=None):
 
     return config
 
+
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',

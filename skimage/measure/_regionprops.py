@@ -93,9 +93,9 @@ COL_DTYPES = {
     'label': int,
     'local_centroid': float,
     'major_axis_length': float,
-    'max_intensity': int,
+    'max_intensity': float,
     'mean_intensity': float,
-    'min_intensity': int,
+    'min_intensity': float,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -162,9 +162,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
     propmasks = [(sample == n) for n in labels]
+
+    rng = np.random.default_rng()
+
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, np.random.random(sample.shape))
+            return func(mask, rng.random(sample.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
@@ -255,7 +258,14 @@ class RegionProperties:
             # determine whether func requires intensity image
             if n_args == 2:
                 if self._intensity_image is not None:
-                    return func(self.image, self.intensity_image)
+                    if self._multichannel:
+                        multichannel_list = [func(self.image,
+                                                  self.intensity_image[..., i])
+                                             for i in range(
+                            self.intensity_image.shape[-1])]
+                        return np.stack(multichannel_list, axis=-1)
+                    else:
+                        return func(self.image, self.intensity_image)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"
@@ -398,7 +408,8 @@ class RegionProperties:
 
     @property
     def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0)
+        return np.max(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def mean_intensity(self):
@@ -406,7 +417,8 @@ class RegionProperties:
 
     @property
     def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0)
+        return np.min(self.intensity_image[self.image], axis=0)\
+                 .astype(np.double)
 
     @property
     def major_axis_length(self):
@@ -719,7 +731,8 @@ def regionprops_table(label_image, intensity_image=None,
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -881,7 +894,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0

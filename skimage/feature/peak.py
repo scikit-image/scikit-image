@@ -17,7 +17,13 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
 
-    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm)
+    if np.isfinite(num_peaks):
+        max_out = int(num_peaks)
+    else:
+        max_out = None
+
+    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm,
+                           max_out=max_out)
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
@@ -281,7 +287,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             # Get roi mask
             label_mask = labels[roi] == label_idx + 1
             # Extract image roi
-            img_object = image[roi]
+            img_object = image[roi].copy()
             # Ensure masked values don't affect roi's local peaks
             img_object[np.logical_not(label_mask)] = bg_val
 

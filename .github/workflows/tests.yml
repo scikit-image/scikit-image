@@ -7,7 +7,7 @@ jobs:
 
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
@@ -63,8 +63,6 @@ jobs:
             OPTIONS_NAME: "install-from-sdist"
 
 
-
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v1
@@ -84,8 +82,9 @@ jobs:
         run: |
             set -ex
             source tools/github/before_install.sh
+            set -ex
             python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST ]]; then
+            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
                 pip uninstall cython -y;
                 pip install dist/scikit-image-*.tar.gz;
             else
@@ -117,6 +116,9 @@ jobs:
             fi
             source tools/github/script.sh
 
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
 
 
   test_skimage_macos:
@@ -144,7 +146,7 @@ jobs:
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-    
+
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
@@ -189,4 +191,6 @@ jobs:
             fi
             source tools/github/script.sh
 
-
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing

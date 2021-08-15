@@ -66,7 +66,8 @@ plt.tight_layout()
 from skimage.filters.rank import median
 from skimage.morphology import disk, ball
 
-noise = np.random.random(noisy_image.shape)
+rng = np.random.default_rng()
+noise = rng.random(noisy_image.shape)
 noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
@@ -256,12 +257,20 @@ from skimage.filters.rank import autolevel_percentile
 
 image = data.camera()
 
-selem = disk(20)
-loc_autolevel = autolevel(image, selem=selem)
-loc_perc_autolevel0 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
-loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
-loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
-loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.15, p1=.85)
+footprint = disk(20)
+loc_autolevel = autolevel(image, footprint=footprint)
+loc_perc_autolevel0 = autolevel_percentile(
+    image, footprint=footprint, p0=.01, p1=.99
+)
+loc_perc_autolevel1 = autolevel_percentile(
+    image, footprint=footprint, p0=.05, p1=.95
+)
+loc_perc_autolevel2 = autolevel_percentile(
+    image, footprint=footprint, p0=.1, p1=.9
+)
+loc_perc_autolevel3 = autolevel_percentile(
+    image, footprint=footprint, p0=.15, p1=.85
+)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
                          sharex=True, sharey=True)
@@ -371,10 +380,10 @@ from skimage import exposure
 p8 = data.page()
 
 radius = 10
-selem = disk(radius)
+footprint = disk(radius)
 
 # t_loc_otsu is an image
-t_loc_otsu = otsu(p8, selem)
+t_loc_otsu = otsu(p8, footprint)
 loc_otsu = p8 >= t_loc_otsu
 
 # t_glob_otsu is a scalar
@@ -579,18 +588,18 @@ def exec_and_timeit(func):
 
 
 @exec_and_timeit
-def cr_med(image, selem):
-    return median(image=image, selem=selem)
+def cr_med(image, footprint):
+    return median(image=image, footprint=footprint)
 
 
 @exec_and_timeit
-def cr_max(image, selem):
-    return maximum(image=image, selem=selem)
+def cr_max(image, footprint):
+    return maximum(image=image, footprint=footprint)
 
 
 @exec_and_timeit
-def cm_dil(image, selem):
-    return dilation(image=image, selem=selem)
+def cm_dil(image, footprint):
+    return dilation(image=image, footprint=footprint)
 
 
 @exec_and_timeit
@@ -635,7 +644,7 @@ elem = disk(r + 1)
 rec = []
 s_range = range(100, 1000, 100)
 for s in s_range:
-    a = (np.random.random((s, s)) * 256).astype(np.uint8)
+    a = (rng.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_max(a, elem)
     (rcm, ms_rcm) = cm_dil(a, elem)
     rec.append((ms_rc, ms_rcm))
@@ -703,7 +712,7 @@ elem = disk(r + 1)
 rec = []
 s_range = [100, 200, 500, 1000]
 for s in s_range:
-    a = (np.random.random((s, s)) * 256).astype(np.uint8)
+    a = (rng.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_med(a, elem)
     rndi, ms_ndi = ndi_med(a, r)
     rec.append((ms_rc, ms_ndi))

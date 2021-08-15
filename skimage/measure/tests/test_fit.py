@@ -211,14 +211,18 @@ def test_ellipse_model_estimate_from_data():
         [643, 926], [644, 975], [643, 655], [646, 705], [651, 664], [651, 984],
         [647, 665], [651, 715], [651, 725], [651, 734], [647, 809], [651, 825],
         [651, 873], [647, 900], [652, 917], [651, 944], [652, 742], [648, 811],
-        [651, 994], [652, 783], [650, 911], [654, 879]])
+        [651, 994], [652, 783], [650, 911], [654, 879]], dtype=np.int32)
 
     # estimate parameters of real data
     model = EllipseModel()
     model.estimate(data)
 
     # test whether estimated parameters are smaller then 1000, so means stable
-    assert_array_less(np.abs(model.params[:4]), np.array([2e3] * 4))
+    assert_array_less(model.params[:4], np.full(4, 1000))
+
+    # test whether all parameters are more than 0. Negative values were the
+    # result of an integer overflow
+    assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 
 @xfail(condition=arch32,
@@ -265,10 +269,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    random_state = np.random.RandomState(1)
+    random_state = np.random.RandomState(12373240)
 
     # generate original data without noise
-    src = 100 * random_state.random_sample((50, 2))
+    src = 100 * random_state.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -280,8 +284,7 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                random_state=random_state)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)

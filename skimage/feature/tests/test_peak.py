@@ -1,15 +1,15 @@
 import itertools
 import numpy as np
 import pytest
-import unittest
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import assert_array_almost_equal
-from skimage._shared.testing import assert_equal
+from numpy.testing import assert_array_almost_equal, assert_equal
 from scipy import ndimage as ndi
+
+from skimage._shared._warnings import expected_warnings
 from skimage.feature import peak
 
 
 np.random.seed(21)
+
 
 class TestPeakLocalMax():
     def test_trivial_case(self):
@@ -82,7 +82,8 @@ class TestPeakLocalMax():
         image[1, 5] = 12
         image[3, 5] = 8
         image[5, 3] = 7
-        assert len(peak.peak_local_max(image, min_distance=1, threshold_abs=0)) == 5
+        assert len(peak.peak_local_max(image, min_distance=1,
+                                       threshold_abs=0)) == 5
         peaks_limited = peak.peak_local_max(
             image, min_distance=1, threshold_abs=0, num_peaks=2)
         assert len(peaks_limited) == 2
@@ -111,7 +112,6 @@ class TestPeakLocalMax():
             image, min_distance=1, threshold_abs=0, labels=labels, num_peaks=2)
         assert len(peaks_limited) == 2
 
-
     def test_num_peaks_tot_vs_labels_4quadrants(self):
         np.random.seed(21)
         image = np.random.uniform(size=(20, 30))
@@ -133,12 +133,11 @@ class TestPeakLocalMax():
                                      num_peaks_per_label=2)
         assert len(result) == 2
 
-
     def test_num_peaks3D(self):
         # Issue 1354: the old code only hold for 2D arrays
         # and this code would die with IndexError
         image = np.zeros((10, 10, 100))
-        image[5,5,::5] = np.arange(20)
+        image[5, 5, ::5] = np.arange(20)
         peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
         assert len(peaks_limited) == 2
 
@@ -153,7 +152,7 @@ class TestPeakLocalMax():
         for imin, imax in ((0, 20), (20, 40)):
             for jmin, jmax in ((0, 30), (30, 60)):
                 expected[imin:imax, jmin:jmax] = ndi.maximum_filter(
-                                image[imin:imax, jmin:jmax], footprint=footprint)
+                    image[imin:imax, jmin:jmax], footprint=footprint)
         expected = (expected == image)
         with expected_warnings(["indices argument is deprecated"]):
             result = peak.peak_local_max(image, labels=labels, min_distance=1,
@@ -378,12 +377,15 @@ class TestPeakLocalMax():
         image = np.zeros((30, 30, 30))
         image[15, 15, 15] = 1
         image[5, 5, 5] = 1
-        assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[15, 15, 15]])
-        assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[15, 15, 15]])
-        assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                          exclude_border=False).tolist()) == \
+        assert_equal(
+            peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+            [[15, 15, 15]])
+        assert_equal(
+            peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+            [[15, 15, 15]])
+        assert sorted(
+            peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                exclude_border=False).tolist()) == \
             [[5, 5, 5], [15, 15, 15]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
@@ -393,13 +395,16 @@ class TestPeakLocalMax():
         image = np.zeros((30, 30, 30, 30))
         image[15, 15, 15, 15] = 1
         image[5, 5, 5, 5] = 1
-        assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[15, 15, 15, 15]])
-        assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[15, 15, 15, 15]])
-        assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
-                                          exclude_border=False).tolist()) == \
-            [[5, 5, 5, 5], [15, 15, 15, 15]]
+        assert_equal(
+            peak.peak_local_max(image, min_distance=10, threshold_rel=0),
+            [[15, 15, 15, 15]])
+        assert_equal(
+            peak.peak_local_max(image, min_distance=6, threshold_rel=0),
+            [[15, 15, 15, 15]])
+        assert sorted(
+            peak.peak_local_max(image, min_distance=10, threshold_rel=0,
+                                exclude_border=False).tolist()
+        ) == [[5, 5, 5, 5], [15, 15, 15, 15]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
             [[5, 5, 5, 5], [15, 15, 15, 15]]
@@ -487,7 +492,23 @@ def test_exclude_border_errors():
         assert peak.peak_local_max(image, exclude_border=-1)
 
 
-class TestProminentPeaks(unittest.TestCase):
+def test_input_values_with_labels():
+    # Issue #5235: input values may be modified when labels are used
+
+    img = np.random.rand(128, 128)
+    labels = np.zeros((128, 128), int)
+
+    labels[10:20, 10:20] = 1
+    labels[12:16, 12:16] = 0
+
+    img_before = img.copy()
+
+    _ = peak.peak_local_max(img, labels=labels)
+
+    assert_equal(img, img_before)
+
+
+class TestProminentPeaks():
     def test_isolated_peaks(self):
         image = np.zeros((15, 15))
         x0, y0, i0 = (12, 8, 1)
@@ -498,10 +519,10 @@ class TestProminentPeaks(unittest.TestCase):
         image[y2, x2] = i2
         out = peak._prominent_peaks(image)
         assert len(out[0]) == 3
-        for i, x, y in zip (out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i1, i2))
-            self.assertTrue(x in (x0, x1, x2))
-            self.assertTrue(y in (y0, y1, y2))
+        for i, x, y in zip(out[0], out[1], out[2]):
+            assert i in (i0, i1, i2)
+            assert x in (x0, x1, x2)
+            assert y in (y0, y1, y2)
 
     def test_threshold(self):
         image = np.zeros((15, 15))
@@ -513,20 +534,20 @@ class TestProminentPeaks(unittest.TestCase):
         image[y2, x2] = i2
         out = peak._prominent_peaks(image, threshold=None)
         assert len(out[0]) == 3
-        for i, x, y in zip (out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i1, i2))
-            self.assertTrue(x in (x0, x1, x2))
+        for i, x, y in zip(out[0], out[1], out[2]):
+            assert i in (i0, i1, i2)
+            assert x in (x0, x1, x2)
         out = peak._prominent_peaks(image, threshold=9)
         assert len(out[0]) == 2
-        for i, x, y in zip (out[0], out[1], out[2]):
-            self.assertTrue(i in (i0, i2))
-            self.assertTrue(x in (x0, x2))
-            self.assertTrue(y in (y0, y2))
+        for i, x, y in zip(out[0], out[1], out[2]):
+            assert i in (i0, i2)
+            assert x in (x0, x2)
+            assert y in (y0, y2)
 
     def test_peaks_in_contact(self):
         image = np.zeros((15, 15))
         x0, y0, i0 = (8, 8, 1)
-        x1, y1, i1 = (7, 7, 1) # prominent peak
+        x1, y1, i1 = (7, 7, 1)  # prominent peak
         x2, y2, i2 = (6, 6, 1)
         image[y0, x0] = i0
         image[y1, x1] = i1

@@ -16,8 +16,7 @@ def configuration(parent_package='', top_path=None):
             'rank/generic_cy.pyx',
             'rank/percentile_cy.pyx',
             'rank/bilateral_cy.pyx',
-            '_multiotsu.pyx',
-            '_sparse_cy.pyx'], working_path=base_path)
+            '_multiotsu.pyx'], working_path=base_path)
 
     config.add_extension('rank.core_cy', sources=['rank/core_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -32,9 +31,6 @@ def configuration(parent_package='', top_path=None):
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
         'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension(
-        '_sparse_cy', sources=['_sparse_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
 
     return config
