@@ -142,11 +142,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     min_distance : int, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float, optional
+    threshold_abs : float or None, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
-    threshold_rel : float, optional
-        Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
     exclude_border : int, tuple of ints, or bool, optional
         If positive integer, `exclude_border` excludes peaks from within
         `exclude_border`-pixels of the border of the image.
