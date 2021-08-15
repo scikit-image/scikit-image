@@ -495,7 +495,9 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
     l1, l2 = hessian_matrix_eigvals(H)
 
-    return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
+    # don't warn on divide by 0 as occurs in the docstring example
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
