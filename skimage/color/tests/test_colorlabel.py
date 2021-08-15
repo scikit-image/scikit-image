@@ -253,9 +253,9 @@ def test_overlay_custom_saturation():
 def test_saturation_warning():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
-    with testing.expected_warnings(["saturation must be in range"]):
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=2)
-    with testing.expected_warnings(["saturation must be in range"]):
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=-1)
