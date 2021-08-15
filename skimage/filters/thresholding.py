@@ -1,5 +1,6 @@
 import itertools
 import math
+import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
 
@@ -53,6 +54,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Compute the image histogram for better performances
+    nbins = 256  # Default in threshold functions
+    hist = histogram(image.ravel(), nbins, source_range='image')
+
     # Handle default value
     methods = methods or {}
 
@@ -66,9 +71,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
+        # Use precomputed histogram for supporting functions
+        sig = inspect.signature(func)
+        _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
+
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
@@ -275,6 +284,14 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
+        
+        if counts[0] == 0 or counts[-1] == 0:
+            # Trim histogram from both ends by removing starting and
+            # ending zeroes as in histogram(..., source_range="image")
+            cond = counts > 0
+            start = np.argmax(cond)
+            end = cond.size - np.argmax(cond[::-1])
+            counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image'

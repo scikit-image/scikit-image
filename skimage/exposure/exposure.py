@@ -59,7 +59,8 @@ def _bincount_histogram(image, source_range):
         The values at the center of the bins.
     """
     if source_range not in ['image', 'dtype']:
-        raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
+        raise ValueError(f'Incorrect value for `source_range` '
+                         f'argument: {source_range}')
     if source_range == 'image':
         image_min = int(image.min().astype(np.int64))
         image_max = int(image.max().astype(np.int64))
@@ -437,10 +438,11 @@ def _assert_non_negative(image):
 
 
 def _adjust_gamma_u8(image, gamma, gain):
-    """LUT based implmentation of gamma adjustement.
+    """LUT based implementation of gamma adjustment.
 
     """
-    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma)).astype('uint8')
+    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma))
+    lut = np.minimum(lut, 255).astype('uint8')
     return lut[image]
 
 
