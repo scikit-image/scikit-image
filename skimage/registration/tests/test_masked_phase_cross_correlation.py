@@ -8,22 +8,12 @@ from skimage._shared.fft import fftmodule as fft
 from skimage._shared.testing import fetch, expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, stereo_motorcycle
-from skimage.feature import masked_register_translation as _deprecated
 from skimage.io import imread
 from skimage.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
     cross_correlate_masked)
 from skimage.registration import phase_cross_correlation
 
-
-def test_detrecated_masked_register_translation():
-    reference_image, moving_image, _ = stereo_motorcycle()
-    ref_mask = np.random.choice(
-        [True, False], reference_image.shape, p=[3 / 4, 1 / 4])
-    with expected_warnings(["Function ``masked_register_translation``"]):
-        assert_equal(_deprecated(reference_image, moving_image, ref_mask),
-                     phase_cross_correlation(reference_image, moving_image,
-                                             reference_mask=ref_mask))
 
 def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as

@@ -5,7 +5,7 @@ from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
-from .._shared.utils import deprecate_kwarg, convert_to_float
+from .._shared.utils import convert_to_float
 from warnings import warn
 from functools import partial
 
@@ -181,8 +181,6 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
-@deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
-                 removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True,
            preserve_range=True):
@@ -487,8 +485,8 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                          'of radon_image (%s)'
                          % (image.shape, reconstructed_shape))
     elif image.dtype != dtype:
-        warn("image dtype does not match output dtype: "
-             "image is cast to {}".format(dtype))
+        warn(f'image dtype does not match output dtype: '
+             f'image is cast to {dtype}')
 
     image = np.asarray(image, dtype=dtype)
 

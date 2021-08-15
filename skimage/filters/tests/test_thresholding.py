@@ -270,6 +270,19 @@ def test_otsu_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=counts) < 103
+    
+    
+def test_otsu_zero_count_histogram():
+    """Issue #5497.
+    
+    As the histogram returned by np.bincount starts with zero,
+    it resulted in NaN-related issues.
+    """
+    x = np.array([1, 2])
+
+    t1 = threshold_otsu(x)
+    t2 = threshold_otsu(hist=np.bincount(x))
+    assert t1 == t2
 
 
 def test_otsu_coins_image():

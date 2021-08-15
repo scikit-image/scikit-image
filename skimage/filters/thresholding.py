@@ -1,5 +1,6 @@
 import itertools
 import math
+import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
 
@@ -55,6 +56,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Compute the image histogram for better performances
+    nbins = 256  # Default in threshold functions
+    hist = histogram(image.ravel(), nbins, source_range='image')
+
     # Handle default value
     methods = methods or {}
 
@@ -68,9 +73,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
+        # Use precomputed histogram for supporting functions
+        sig = inspect.signature(func)
+        _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
+
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
@@ -214,8 +223,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         raise ValueError("len(block_size) must equal image.ndim.")
     block_size = tuple(block_size)
     if any(b % 2 == 0 for b in block_size):
-        raise ValueError("block_size must be odd! Given block_size"
-                         "{0} contains even values.".format(block_size))
+        raise ValueError(f'block_size must be odd! Given block_size '
+                         f'{block_size} contains even values.')
     float_dtype = _supported_float_type(image)
     image = image.astype(float_dtype, copy=False)
     thresh_image = np.zeros(image.shape, dtype=float_dtype)
@@ -279,6 +288,14 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
+
+        if counts[0] == 0 or counts[-1] == 0:
+            # Trim histogram from both ends by removing starting and
+            # ending zeroes as in histogram(..., source_range="image")
+            cond = counts > 0
+            start = np.argmax(cond)
+            end = cond.size - np.argmax(cond[::-1])
+            counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image'
@@ -326,9 +343,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+        warn(f'threshold_otsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # Check if the image has more than one intensity value; if not, return that
     # value
@@ -678,9 +695,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = initial_guess - image_min
         image_max = np.max(image) + image_min
         if not 0 < t_next < np.max(image):
-            msg = ('The initial guess for threshold_li must be within the '
-                   'range of the image. Got {} for image min {} and max {} '
-                   .format(initial_guess, image_min, image_max))
+            msg = (f'The initial guess for threshold_li must be within the '
+                   f'range of the image. Got {initial_guess} for image min '
+                   f'{image_min} and max {image_max}.')
             raise ValueError(msg)
     else:
         raise TypeError('Incorrect type for `initial_guess`; should be '
@@ -1213,9 +1230,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     """
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = ("threshold_multiotsu is expected to work correctly only for "
-               "grayscale images; image shape {0} looks like an RGB image")
-        warn(msg.format(image.shape))
+        warn(f'threshold_multiotsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
@@ -1226,9 +1243,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = ("The input image has only {} different values. "
-               "It can not be thresholded in {} classes")
-        raise ValueError(msg.format(nvalues, classes))
+        msg = (f'The input image has only {nvalues} different values. '
+               f'It cannot be thresholded in {classes} classes.')
+        raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:
