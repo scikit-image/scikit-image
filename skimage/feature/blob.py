@@ -215,7 +215,7 @@ def _format_exclude_border(img_ndim, exclude_border):
 
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
-             overlap=.5, *, exclude_border=False):
+             overlap=.5, *, threshold_rel=None, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method [1]_, [2]_.
@@ -240,13 +240,20 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
-    threshold : float, optional.
+    threshold : float or None, optional.
         The absolute lower bound for scale space maxima. Local maxima smaller
-        than thresh are ignored. Reduce this to detect blobs with less
-        intensities.
+        than `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities. If `threshold_rel` is also specified, whichever threshold
+        is larger will be used. If None, `threshold_rel` is used instead.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(dog_space) * threshold_rel``. Where ``dog_space`` refers to the
+        stack of difference-of-Gaussian (DoG) images computed internally. This
+        should have a value between 0 and 1. If None, `threshold_abs` is used
+        instead.
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -363,9 +370,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     local_maxima = peak_local_max(
         image_cube,
         threshold_abs=threshold,
-        footprint=np.ones((3,) * (image.ndim + 1)),
-        threshold_rel=0.0,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
+        footprint=np.ones((3,) * (image.ndim + 1)),
     )
 
     # Catch no peaks
