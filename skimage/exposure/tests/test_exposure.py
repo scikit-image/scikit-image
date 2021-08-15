@@ -592,10 +592,16 @@ def test_adjust_gamma_greater_one():
     assert_array_equal(result, expected)
 
 
-def test_adjust_gamma_neggative():
+def test_adjust_gamma_negative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
     with testing.raises(ValueError):
         exposure.adjust_gamma(image, -1)
+
+
+def test_adjust_gamma_u8_overflow():
+    img = 255 * np.ones((2, 2), dtype=np.uint8)
+
+    assert np.all(exposure.adjust_gamma(img, gamma=1, gain=1.1) == 255)
 
 
 # Test Logarithmic Correction
@@ -726,12 +732,6 @@ def test_adjust_inv_sigmoid_cutoff_half():
     assert_array_equal(result, expected)
 
 
-def test_negative():
-    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with testing.raises(ValueError):
-        exposure.adjust_gamma(image)
-
-
 def test_is_low_contrast():
     image = np.linspace(0, 0.04, 100)
     assert exposure.is_low_contrast(image)
@@ -746,6 +746,26 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+def test_is_low_contrast_boolean():
+    image = np.zeros((8, 8), dtype=bool)
+    assert exposure.is_low_contrast(image)
+
+    image[:5] = 1
+    assert not exposure.is_low_contrast(image)
+
+
+# Test negative input
+#####################
+
+@pytest.mark.parametrize("exposure_func", [exposure.adjust_gamma,
+                                           exposure.adjust_log,
+                                           exposure.adjust_sigmoid])
+def test_negative_input(exposure_func):
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
+    with testing.raises(ValueError):
+        exposure_func(image)
 
 
 # Test Dask Compatibility

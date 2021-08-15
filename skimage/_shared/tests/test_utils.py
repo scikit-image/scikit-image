@@ -1,14 +1,16 @@
 import sys
-import pytest
+
 import numpy as np
 import numpy.testing as npt
+import pytest
+
+from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
                                    _supported_float_type,
                                    channel_as_last_axis)
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -185,8 +187,8 @@ def test_validate_interpolation_order(dtype, order):
             _validate_interpolation_order(dtype, order)
     elif dtype == bool and order != 0:
         # Deprecated order for bool array
-        with expected_warnings(["Input image dtype is bool"]):
-            assert _validate_interpolation_order(bool, order) == order
+        with pytest.raises(ValueError):
+            _validate_interpolation_order(bool, order)
     else:
         # Valid use case
         assert _validate_interpolation_order(dtype, order) == order

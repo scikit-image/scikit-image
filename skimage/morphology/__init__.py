@@ -15,7 +15,6 @@ from ._flood_fill import flood, flood_fill
 from .max_tree import (max_tree, area_opening, area_closing,
                        diameter_opening, diameter_closing,
                        max_tree_local_maxima)
-from ._deprecated import watershed
 
 __all__ = ['binary_erosion',
            'binary_dilation',
@@ -37,7 +36,6 @@ __all__ = ['binary_erosion',
            'octagon',
            'star',
            'label',
-           'watershed',
            'skeletonize',
            'skeletonize_3d',
            'thin',

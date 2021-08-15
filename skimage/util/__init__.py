@@ -18,14 +18,6 @@ from ._map_array import map_array
 from ._label import label_points
 
 
-@functools.wraps(np.pad)
-def pad(*args, **kwargs):
-    warnings.warn("skimage.util.pad is deprecated and will be removed in "
-                  "version 0.19. Please use numpy.pad instead.",
-                  FutureWarning, stacklevel=2)
-    return np.pad(*args, **kwargs)
-
-
 __all__ = ['img_as_float32',
            'img_as_float64',
            'img_as_float',
@@ -36,7 +28,6 @@ __all__ = ['img_as_float32',
            'dtype_limits',
            'view_as_blocks',
            'view_as_windows',
-           'pad',
            'crop',
            'compare_images',
            'map_array',
