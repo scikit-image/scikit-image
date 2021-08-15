@@ -1,6 +1,8 @@
 
 import numpy as np
 from scipy import ndimage as ndi
+
+from .._shared.utils import _supported_float_type
 from ..morphology import dilation, erosion, square
 from ..util import img_as_float, view_as_windows
 from ..color import gray2rgb
@@ -32,8 +34,7 @@ def _find_boundaries_subpixel(label_img):
     edges = np.ones(label_img_expanded.shape, dtype=bool)
     edges[pixels] = False
     label_img_expanded[edges] = max_label
-    windows = view_as_windows(np.pad(label_img_expanded, 1,
-                                     mode='constant', constant_values=0),
+    windows = view_as_windows(np.pad(label_img_expanded, 1, mode='edge'),
                               (3,) * ndim)
 
     boundaries = np.zeros_like(edges)
@@ -159,21 +160,27 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     if label_img.dtype == 'bool':
         label_img = label_img.astype(np.uint8)
     ndim = label_img.ndim
-    selem = ndi.generate_binary_structure(ndim, connectivity)
+    footprint = ndi.generate_binary_structure(ndim, connectivity)
     if mode != 'subpixel':
-        boundaries = dilation(label_img, selem) != erosion(label_img, selem)
+        boundaries = (
+            dilation(label_img, footprint) != erosion(label_img, footprint)
+        )
         if mode == 'inner':
             foreground_image = (label_img != background)
             boundaries &= foreground_image
         elif mode == 'outer':
             max_label = np.iinfo(label_img.dtype).max
             background_image = (label_img == background)
-            selem = ndi.generate_binary_structure(ndim, ndim)
+            footprint = ndi.generate_binary_structure(ndim, ndim)
             inverted_background = np.array(label_img, copy=True)
             inverted_background[background_image] = max_label
-            adjacent_objects = ((dilation(label_img, selem) !=
-                                 erosion(inverted_background, selem)) &
-                                ~background_image)
+            adjacent_objects = (
+                (
+                    dilation(label_img, footprint)
+                    != erosion(inverted_background, footprint)
+                )
+                & ~background_image
+            )
             boundaries &= (background_image | adjacent_objects)
         return boundaries
     else:
@@ -212,7 +219,9 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
     --------
     find_boundaries
     """
+    float_dtype = _supported_float_type(image)
     marked = img_as_float(image, force_copy=True)
+    marked = marked.astype(float_dtype, copy=False)
     if marked.ndim == 2:
         marked = gray2rgb(marked)
     if mode == 'subpixel':
