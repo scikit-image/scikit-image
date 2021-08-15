@@ -1,14 +1,14 @@
-import numpy as np
-from scipy.ndimage import gaussian_filter, gaussian_laplace
 import math
-from math import sqrt, log
-from scipy import spatial
-from ..util import img_as_float
-from .peak import peak_local_max
-from ._hessian_det_appx import _hessian_matrix_det
-from ..transform import integral_image
-from .._shared.utils import _supported_float_type, check_nD
 
+import numpy as np
+import scipy.ndimage as ndi
+from scipy import spatial
+
+from .._shared.utils import _supported_float_type, check_nD
+from ..transform import integral_image
+from ..util import img_as_float
+from ._hessian_det_appx import _hessian_matrix_det
+from .peak import peak_local_max
 
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
@@ -48,7 +48,7 @@ def _compute_disk_overlap(d, r1, r2):
     c = d + r2 - r1
     d = d + r2 + r1
     area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
-            0.5 * sqrt(abs(a * b * c * d)))
+            0.5 * math.sqrt(abs(a * b * c * d)))
     return area / (math.pi * (min(r1, r2) ** 2))
 
 
@@ -111,7 +111,7 @@ def _blob_overlap(blob1, blob2, *, sigma_dim=1):
     ndim = len(blob1) - sigma_dim
     if ndim > 3:
         return 0.0
-    root_ndim = sqrt(ndim)
+    root_ndim = math.sqrt(ndim)
 
     # we divide coordinates by sigma * sqrt(ndim) to rescale space to isotropy,
     # giving spheres of radius = 1 or < 1.
@@ -168,7 +168,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
         `array` with overlapping blobs removed.
     """
     sigma = blobs_array[:, -sigma_dim:].max()
-    distance = 2 * sigma * sqrt(blobs_array.shape[1] - sigma_dim)
+    distance = 2 * sigma * math.sqrt(blobs_array.shape[1] - sigma_dim)
     tree = spatial.cKDTree(blobs_array[:, :-sigma_dim])
     pairs = np.array(list(tree.query_pairs(distance)))
     if len(pairs) == 0:
@@ -340,7 +340,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
 
-    gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
+    gaussian_images = [ndi.gaussian_filter(image, s) for s in sigma_list]
 
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
@@ -496,19 +496,15 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     max_sigma = np.asarray(max_sigma, dtype=float_dtype)
 
     if log_scale:
-        # for anisotropic data, we use the "highest resolution/variance" axis
-        standard_axis = np.argmax(min_sigma)
-        start = np.log10(min_sigma[standard_axis])
-        stop = np.log10(max_sigma[standard_axis])
-        scale = np.logspace(start, stop, num_sigma)[:, np.newaxis]
-        sigma_list = scale * min_sigma / np.max(min_sigma)
+        start = np.log10(min_sigma)
+        stop = np.log10(max_sigma)
+        sigma_list = np.logspace(start, stop, num_sigma)
     else:
-        scale = np.linspace(0, 1, num_sigma)[:, np.newaxis]
-        sigma_list = scale * (max_sigma - min_sigma) + min_sigma
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     # computing gaussian laplace
     # average s**2 provides scale invariance
-    gl_images = [-gaussian_laplace(image, s) * np.mean(s) ** 2
+    gl_images = [-ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
                  for s in sigma_list]
 
     image_cube = np.stack(gl_images, axis=-1)
@@ -636,7 +632,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     image = integral_image(image)
 
     if log_scale:
-        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        start, stop = math.log(min_sigma, 10), math.log(max_sigma, 10)
         sigma_list = np.logspace(start, stop, num_sigma)
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
