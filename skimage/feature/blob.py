@@ -218,7 +218,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5, *, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
-    Blobs are found using the Difference of Gaussian (DoG) method [1]_.
+    Blobs are found using the Difference of Gaussian (DoG) method [1]_, [2]_.
     For each blob found, the method returns its coordinates and the standard
     deviation of the Gaussian kernel that detected the blob.
 
@@ -276,6 +276,10 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
+    .. [2] Lowe, D. G. "Distinctive Image Features from Scale-Invariant
+        Keypoints." International Journal of Computer Vision 60, 91–110 (2004).
+        https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
+        :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
     Examples
     --------
@@ -339,9 +343,11 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
     # computing difference between two successive Gaussian blurred images
-    # multiplying with average standard deviation provides scale invariance
-    dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
-                  * np.mean(sigma_list[i]) for i in range(k)]
+    # to obtain an approximation of the scale invariant Laplacian of the
+    # Gaussian operator
+    dog_images = [
+        (gaussian_images[i] - gaussian_images[i + 1]) for i in range(k)
+    ]
 
     image_cube = np.stack(dog_images, axis=-1)
 

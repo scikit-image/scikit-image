@@ -151,11 +151,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         anti_aliasing = not image.dtype == bool
 
     if image.dtype == bool and anti_aliasing:
-        warn("Input image dtype is bool. Gaussian convolution is not defined "
-             "with bool data type. Please set anti_aliasing to False or "
-             "explicitely cast input image to another data type. Starting "
-             "from version 0.19 a ValueError will be raised instead of this "
-             "warning.", FutureWarning, stacklevel=2)
+        raise ValueError("anti_aliasing must be False for boolean images")
 
     factors = (np.asarray(input_shape, dtype=float) /
                np.asarray(output_shape, dtype=float))
