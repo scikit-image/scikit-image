@@ -13,7 +13,8 @@ from skimage.feature.blob import _blob_overlap
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_dog(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog(dtype, threshold_type):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
 
@@ -26,12 +27,23 @@ def test_blob_dog(dtype):
     xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    threshold = 2.0
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 2.0
+        if img.dtype.kind != 'f':
+            # account for internal scaling to [0, 1] by img_as_float
+            threshold /= img.ptp()
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
-    blobs = blob_dog(img, min_sigma=4, max_sigma=50, threshold=threshold)
+    blobs = blob_dog(
+        img,
+        min_sigma=4,
+        max_sigma=50,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
+    )
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
@@ -60,17 +72,28 @@ def test_blob_dog(dtype):
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_dog_3d(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d(dtype, threshold_type):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    threshold = 0.001
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = 0
+    elif threshold_type == 'relative':
+        threshold = 0
+        threshold_rel = 0.5
 
     blobs = blob_dog(
-        im3, min_sigma=3, max_sigma=10, sigma_ratio=1.2, threshold=threshold
+        im3,
+        min_sigma=3,
+        max_sigma=10,
+        sigma_ratio=1.2,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -84,14 +107,20 @@ def test_blob_dog_3d(dtype):
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_dog_3d_anisotropic(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    threshold=0.001
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
     blobs = blob_dog(
         im3.astype(dtype, copy=False),
@@ -99,6 +128,7 @@ def test_blob_dog_3d_anisotropic(dtype):
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
         threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
