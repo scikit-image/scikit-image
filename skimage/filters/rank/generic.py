@@ -8,9 +8,9 @@ similar to the method described in [1]_. A histogram is built using a moving
 window in order to limit redundant computation. The moving window follows a
 snake-like path:
 
-...------------------------\
-/--------------------------/
-\--------------------------...
+...------------------------↘
+↙--------------------------↙
+↘--------------------------...
 
 The local histogram is updated at each pixel as the footprint window
 moves by, i.e. only those pixels entering and leaving the footprint
@@ -47,8 +47,6 @@ References
        Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
 """
-
-import warnings
 
 import numpy as np
 from scipy import ndimage as ndi
