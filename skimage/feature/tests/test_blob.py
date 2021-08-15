@@ -56,16 +56,18 @@ def test_blob_dog(dtype):
     img_empty = np.zeros((100, 100), dtype=dtype)
     assert blob_dog(img_empty).size == 0
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+def test_blob_dog_3d(dtype):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    threshold = 0.1
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    threshold = 0.001
 
     blobs = blob_dog(
         im3, min_sigma=3, max_sigma=10, sigma_ratio=1.2, threshold=threshold
@@ -78,18 +80,25 @@ def test_blob_dog(dtype):
     assert b[2] == r + pad + 1
     assert abs(math.sqrt(3) * b[3] - r) < 1.1
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+def test_blob_dog_3d_anisotropic(dtype):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
+    threshold=0.001
+
     blobs = blob_dog(
         im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=threshold
+        threshold=threshold,
     )
     b = blobs[0]
 
@@ -128,13 +137,6 @@ def test_blob_dog_excl_border():
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
-
-
-@pytest.mark.parametrize('sigma_ratio', [0.5, 1.0])
-def test_blob_dog_invalid_sigma_ratio(sigma_ratio):
-
-    with pytest.raises(ValueError):
-        blob_dog(np.zeros((8, 8)), sigma_ratio=sigma_ratio)
 
 
 @pytest.mark.parametrize(
