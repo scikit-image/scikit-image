@@ -218,6 +218,10 @@ def setup_test():
         )
 
         warnings.filterwarnings(
+            'default', message='TiffWriter:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
         )
 
