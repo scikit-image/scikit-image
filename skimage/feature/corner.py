@@ -378,7 +378,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]
+    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]  # doctest: +SKIP
     array([[0., 0., 0., 0., 0.],
            [0., 2., 4., 2., 0.],
            [0., 4., 0., 4., 0.],
