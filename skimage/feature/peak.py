@@ -375,7 +375,7 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
 
     # Sort the list of peaks by intensity, not left-right, so larger peaks
     # in Hough space cannot be arbitrarily suppressed by smaller neighbors
-    props = sorted(props, key=lambda x: x.max_intensity)[::-1]
+    props = sorted(props, key=lambda x: x.intensity_max)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     img_peaks = []
