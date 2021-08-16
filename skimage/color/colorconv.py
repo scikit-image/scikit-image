@@ -255,12 +255,16 @@ def rgb2hsv(rgb, *, channel_axis=-1):
 
     Notes
     -----
-    Conversion between RGB and HSV color spaces results in some loss of
-    precision, due to integer arithmetic and rounding [1]_.
+    The HSV color space was proposed in [1]_. Conversion between RGB and HSV
+    color spaces results in some loss of precision, due to integer arithmetic
+    and rounding [2]_.
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] Smith, A. R. "Color gamut transform pairs", ACM SIGGRAPH Computer
+           Graphics, 1978, 12(3), pp. 12–19.
+           :DOI:`10.1145/965139.807361`
+    .. [2] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
@@ -313,12 +317,16 @@ def hsv2rgb(hsv, *, channel_axis=-1):
 
     Notes
     -----
-    Conversion between RGB and HSV color spaces results in some loss of
-    precision, due to integer arithmetic and rounding [1]_.
+    The HSV color space was proposed in [1]_. Conversion between RGB and HSV
+    color spaces results in some loss of precision, due to integer arithmetic
+    and rounding [2]_.
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] Smith, A. R. "Color gamut transform pairs", ACM SIGGRAPH Computer
+           Graphics, 1978, 12(3), pp. 12–19.
+           :DOI:`10.1145/965139.807361`
+    .. [2] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
