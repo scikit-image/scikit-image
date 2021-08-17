@@ -163,10 +163,11 @@ Bugfixes
 - Fix return dtype of ``_label2rgb_avg`` function.
 - Ensure ``skimage.color.separate_stains`` does not return negative values.
 - Prevent integer overflow in ``EllipseModel``.
-- Fixed off-by one error in pixel bins in Hough line transform.
+- Fixed off-by one error in pixel bins in Hough line transform,
+  ``skimage.transform.hough_line``.
 - Handle 1D arrays properly in ``skimage.filters.gaussian``.
 - Fix Laplacian matrix size bug in ``skimage.segmentation.random_walker``.
-- Regionprops table (``skimage.measure.reginoprops_table``) dtype bugfix.
+- Regionprops table (``skimage.measure.regionprops_table``) dtype bugfix.
 - Fix ``skimage.transform.rescale`` when using a small scale factor.
 - Fix ``skimage.measure.label`` segfault.
 - Watershed (``skimage.segmentation.watershed``): consider connectivity when
