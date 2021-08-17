@@ -41,12 +41,14 @@ Improvements
   (``skimage.segmentation.slice``) was improved for the case where a mask
   is supplied by the user (#4903). The specific superpixels produced by
   masked SLIC will not be identical to those produced by prior releases.
-- ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to a
-  LUT (#4966).  
+- ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to
+  a LUT (#4966).
 - ``measure.label`` has been accelerated for boolean input images, by using
   ``scipy.ndimage``'s implementation for this case (#4945).
 - ``util.apply_parallel`` now works with multichannel data (#4927).
 - ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
+- Many more functions throughout the library now have single precision
+  (float32) support.
 
 
 API Changes
@@ -58,16 +60,19 @@ API Changes
   indicate that the image is grayscale. Specifically, existing code with
   ``multichannel=True`` should be updated to use ``channel_axis=-1`` and code
   with ``multichannel=False`` should now specify ``channel_axis=None``.
+- Most functions now return float32 images when the input has float32 dtype.
 - A default value has been added to ``measure.find_contours``, corresponding to
   the half distance between the min and max values of the image 
   #4862
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
   descriptive name.
 - The ``level`` parameter of ``measure.find_contours`` is now a keyword
-  argument, with a default value set to (max(image) - min(image)) / 2.
+  argument, with a default value set to ``(max(image) - min(image)) / 2``.
 - ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
   to add support for Minkowski distances.
-
+- ``skimage.transforms.integral_image`` now promotes floating point inputs to
+  double precision by default (for accuracy). A new ``dtype`` keyword argument
+  can be used to override this behavior when desired.
 
 Bugfixes
 --------
@@ -87,11 +92,127 @@ Bugfixes
 Deprecations
 ------------
 
+Completed deprecations from prior releases
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 - In ``measure.label``, the deprecated ``neighbors`` parameter has been
-  removed.
-- The ``multichannel`` argument has been deprecated throughout the library and
+  removed (use ``connectivity`` instead).
+- The deprecated ``skimage.color.rgb2grey`` and ``skimage.color.grey2rgb``
+  functions have been removed (use ``skimage.color.rgb2gray`` and
+  ``skimage.color.gray2rgb`` instead).
+- ``skimage.color.rgb2gray`` no longer allows grayscale or RGBA inputs.
+- The deprecated ``alpha`` parameter of ``skimage.color.gray2rgb`` has now been
+  removed. Use ``skimage.color.gray2rgba`` for conversion to RGBA.
+- Attempting to warp a boolean image with ``order > 0`` now raises a ValueError.
+- When warping or rescaling boolean images, setting ``anti-aliasing=True`` will
+  raise a ValueError.
+- The ``bg_label`` parameter of ``skimage.color.label2rgb`` is now 0.
+- The deprecated ``filter`` parameter of ``skimage.transform.iradon`` has now
+  been removed (use ``filter_name`` instead).
+- The deprecated ``skimage.draw.circle`` function has been removed (use
+  ``skimage.draw.disk`` instead).
+- The deprecated ``skimage.feature.register_translation`` function has
+  been removed (use ``skimage.registration.phase_cross_correlation`` instead).
+- The deprecated ``skimage.feature.masked_register_translation`` function has
+  been removed (use ``skimage.registration.phase_cross_correlation`` instead).
+- The deprecated ``skimage.measure.marching_cubes_classic`` function has
+  been removed (use ``skimage.measure.marching_cubes`` instead).
+- The deprecated ``skimage.measure.marching_cubes_lewiner`` function has
+  been removed (use ``skimage.measure.marching_cubes`` instead).
+- The deprecated ``skimage.segmentation.circle_level_set`` function has been
+  removed (use ``skimage.segmentation.disk_level_set`` instead).
+- The deprecated ``inplace`` parameter of ``skimage.morphology.flood_fill``
+- The deprecated ``skimage.util.pad`` function has been removed (use
+  ``numpy.pad`` instead).
+  been removed (use ``in_place`` instead).
+- The default boundary ``mode`` in ``skimage.filters.hessian`` is now
+  ``'reflect'``.
+- The default boundary ``mode`` in ``skimage.filters.sato`` is now
+  ``'reflect'``.
+- The default boundary ``mode`` in ``skimage.measure.profile_line`` is now
+  ``'reflect'``.
+- The default value of ``preserve_range`` in
+  ``skimage.restoration.denoise_nl_means`` is now False.
+- The default value of ``start_label`` in ``skimage.segmentation.slic`` is now
+  1.
+
+Newly introduced deprecations:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- The ``multichannel`` argument is now deprecated throughout the library and
   will be removed in 1.0. The new ``channel_axis`` argument should be used
-  instead.
+  instead. Existing code with ``multichannel=True`` should be updated to use
+  ``channel_axis=-1`` and code with ``multichannel=False`` should now specify
+  ``channel_axis=None``.
+- ``skimage.feature.greycomatrix`` and ``skimage.feature.greycoprops`` are
+  deprecated in favor of ``skimage.feature.graycomatrix`` and
+  ``skimage.feature.graycoprops``.
+- The ``skimage.morphology.grey`` module has been renamed
+  ``skimage.morphology.gray``. The old name is deprecated.
+- The ``skimage.morphology.greyreconstruct`` module has been renamed
+  ``skimage.morphology.grayreconstruct``. The old name is deprecated.
+- see **API Changes** section regarding functions with deprecated argument
+  names related to the number of iterations. ``num_iterations`` and
+  ``max_num_iter`` are now used throughout the library.
+- see **API Changes** section on deprecation of the ``selem`` argument in favor
+  of ``footprint`` throughout the library
+- Deprecate ``in_place`` in favor of the use of an explicit ``out`` argument
+  in ``skimage.morphology.remove_small_objects``,
+  ``skimage.morphology.remove_small_holes`` and
+  ``skimage.segmentation.clear_border``
+- The ``input`` argument of ``skimage.measure.label`` has been renamed
+  ``label_image``. The old name is deprecated.
+- standardize on ``num_iter`` for paramters describing the number of iterations
+  and ``max_num_iter`` for parameters specifying an iteration limit. Functions
+  where the old argument names have now been deprecated are::
+
+    skimage.filters.threshold_minimum
+    skimage.morphology.thin
+    skimage.restoration.denoise_tv_bregman
+    skimage.restoration.richardson_lucy
+    skimage.segmentation.active_contour
+    skimage.segmentation.chan_vese
+    skimage.segmentation.morphological_chan_vese
+    skimage.segmentation.morphological_geodesic_active_contour
+    skimage.segmentation.slic
+
+- The names of several parameters in ``skimage.measure.regionprops`` have been
+  updated so that properties are better grouped by the first word(s) of the
+  name. The old names will continue to work for backwards compatibility.
+  The specific names that were updated are::
+
+    ============================ ============================
+    Old Name                     New Name
+    ============================ ============================
+    max_intensity                intensity_max
+    mean_intensity               intensity_mean
+    min_intensity                intensity_min
+
+    bbox_area                    area_bbox
+    convex_area                  area_convex
+    filled_area                  area_filled
+
+    convex_image                 image_convex
+    filled_image                 image_filled
+    intensity_image              image_intensity
+
+    local_centroid               centroid_local
+    weighted_centroid            centroid_weighted
+    weighted_local_centroid      centroid_weighted_local
+
+    major_axis_length            axis_major_length
+    minor_axis_length            axis_minor_length
+
+    weighted_moments             moments_weighted
+    weighted_moments_central     moments_weighted_central
+    weighted_moments_hu          moments_weighted_hu
+    weighted_moments_normalized  moments_weighted_normalized
+
+    equivalent_diameter          equivalent_diameter_area
+    ============================ ============================
+
+- The ``selem`` argument has been renamed to ``footprint`` throughout the
+  library. The ``footprint`` argument is now deprecated.
 
 
 Development process
