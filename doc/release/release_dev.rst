@@ -82,7 +82,6 @@ Documentation
 - Make more comprehensive 'see also' sections in filters
 - Specify the release note version instead of the misleading `latest`
 - Remove misleading comment in ``plot_thresholding.py`` example.
-- Fix sphinx: role already being registered
 - Fix sphinx layout to make the search engine work with recent sphinx versions
 - Draw node IDs in RAG example
 - Update sigma_color description in denoise_bilateral
@@ -161,8 +160,6 @@ Bugfixes
   is avoided (#5047).
 - Nonzero values at the image edge are no longer incorrectly marked as a
   boundary when using ``find_bounaries`` with mode='subpixel' (#5447).
-- Fix large array labelling in ``skimage.measure.label``.
-- Only use retry_if_failed with recent pooch.
 - Fix return dtype of ``_label2rgb_avg`` function.
 - Ensure ``skimage.color.separate_stains`` does not return negative values.
 - Prevent integer overflow in ``EllipseModel``.
@@ -321,16 +318,11 @@ Development process
   uncaught warnings via ``SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL`` environment
   variable.
 - Increase automation in release process.
-- Build aarch64 wheels
 - Release wheels before source
-- Update pyproject.toml to ensure pypy compatibility and aarch compatibility
-- Add numpy version specification on aarch for cpython 3.8
 - update minimum supported Matplotlib, NumPy, SciPy and Pillow
 - Pin pillow to !=8.3.0
-- Use manylinux2010 for python 3.9+
 - Rename `master` to `main` throughout
 - Ensure that README.txt has write permissions for subsequent imports.
-- Fixup test for INSTALL_FROM_SDIST
 - Run face classification gallery example with a single thread
 - Enable pip and skimage.data caching on Azure
 - Fix CircleCI caching
@@ -343,7 +335,6 @@ Development process
 - Update pip during dev environment installation
 - Add benchmark checks to CI
 - Resolve stochastic rank filter test failures on CI
-- Use latest Ubuntu image to fix QEMU CPU detection issue
 - Ensure that README.txt has write permissions for subsequent imports.
 - Decorators for helping with the multichannel->channel_axis transition
 
