@@ -14,14 +14,8 @@ from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
-
-
-@functools.wraps(np.pad)
-def pad(*args, **kwargs):
-    warnings.warn("skimage.util.pad is deprecated and will be removed in "
-                  "version 0.19. Please use numpy.pad instead.",
-                  FutureWarning, stacklevel=2)
-    return np.pad(*args, **kwargs)
+from ._map_array import map_array
+from ._label import label_points
 
 
 __all__ = ['img_as_float32',
@@ -34,9 +28,9 @@ __all__ = ['img_as_float32',
            'dtype_limits',
            'view_as_blocks',
            'view_as_windows',
-           'pad',
            'crop',
            'compare_images',
+           'map_array',
            'montage',
            'random_noise',
            'regular_grid',
@@ -44,4 +38,5 @@ __all__ = ['img_as_float32',
            'apply_parallel',
            'invert',
            'unique_rows',
+           'label_points',
            ]

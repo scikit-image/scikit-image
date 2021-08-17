@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 
 img = data.coffee()
-labels = segmentation.slic(img, compactness=30, n_segments=400)
+labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_mean_color(img, labels)
 
 fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(6, 8))

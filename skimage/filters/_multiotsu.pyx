@@ -6,7 +6,7 @@ import numpy as np
 
 cimport numpy as cnp
 cimport cython
-
+cnp.import_array()
 
 def _get_multiotsu_thresh_indices_lut(float [::1] prob,
                                       Py_ssize_t thresh_count):
@@ -35,7 +35,7 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
 
     """
@@ -103,7 +103,7 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t i, j, idx
@@ -203,7 +203,7 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t idx
@@ -302,7 +302,7 @@ cdef void _set_moments_lut_first_row(float [::1] prob,
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t i
@@ -399,7 +399,7 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t idx

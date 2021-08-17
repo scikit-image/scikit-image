@@ -35,7 +35,7 @@ violates these assumptions about the dtype range::
 
    >>> from skimage.util import img_as_float
    >>> image = np.arange(0, 50, 10, dtype=np.uint8)
-   >>> print(image.astype(np.float)) # These float values are out of range.
+   >>> print(image.astype(float)) # These float values are out of range.
    [  0.  10.  20.  30.  40.]
    >>> print(img_as_float(image))
    [ 0.          0.03921569  0.07843137  0.11764706  0.15686275]
@@ -238,4 +238,4 @@ References
 
 .. _numpy: https://docs.scipy.org/doc/numpy/user/
 .. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
-.. _OpenCV: http://opencv.org/
+.. _OpenCV: https://opencv.org/

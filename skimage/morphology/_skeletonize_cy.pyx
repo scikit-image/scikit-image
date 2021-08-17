@@ -5,6 +5,8 @@
 
 import numpy as np
 cimport numpy as cnp
+cnp.import_array()
+
 
 def _fast_skeletonize(image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
@@ -112,7 +114,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:nrows-1, 1:ncols-1].astype(np.bool)
+    return _skeleton[1:nrows-1, 1:ncols-1].astype(bool)
 
 
 """

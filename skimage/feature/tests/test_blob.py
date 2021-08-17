@@ -1,77 +1,134 @@
+import math
+
 import numpy as np
-from skimage.draw import circle
+import pytest
+from numpy.testing import assert_almost_equal
+
+from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
 from skimage.feature.blob import _blob_overlap
-import math
-from numpy.testing import assert_almost_equal
 
 
-def test_blob_dog():
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog(dtype, threshold_type):
     r2 = math.sqrt(2)
-    img = np.ones((512, 512))
+    img = np.ones((512, 512), dtype=dtype)
 
-    xs, ys = circle(400, 130, 5)
+    xs, ys = disk((400, 130), 5)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 25)
+    xs, ys = disk((100, 300), 25)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 45)
+    xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    blobs = blob_dog(img, min_sigma=5, max_sigma=50)
+    if threshold_type == 'absolute':
+        threshold = 2.0
+        if img.dtype.kind != 'f':
+            # account for internal scaling to [0, 1] by img_as_float
+            threshold /= img.ptp()
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
+
+    blobs = blob_dog(
+        img,
+        min_sigma=4,
+        max_sigma=50,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
+    )
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
+    ratio_thresh = 0.25
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
     assert abs(b[1] - 130) <= thresh
-    assert abs(radius(b) - 5) <= thresh
+    assert abs(radius(b) - 5) <= ratio_thresh * 5
 
     b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
-    assert abs(radius(b) - 25) <= thresh
+    assert abs(radius(b) - 25) <= ratio_thresh * 25
 
     b = s[2]
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
-    assert abs(radius(b) - 45) <= thresh
+    assert abs(radius(b)- 45) <= ratio_thresh * 45
 
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100), dtype=dtype)
     assert blob_dog(img_empty).size == 0
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d(dtype, threshold_type):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    blobs = blob_dog(im3, min_sigma=3, max_sigma=10,
-                          sigma_ratio=1.2, threshold=0.1)
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = 0
+    elif threshold_type == 'relative':
+        threshold = 0
+        threshold_rel = 0.5
+
+    blobs = blob_dog(
+        im3,
+        min_sigma=3,
+        max_sigma=10,
+        sigma_ratio=1.2,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
+    )
     b = blobs[0]
 
     assert b.shape == (4,)
     assert b[0] == r + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r) < 1.1
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
+
     blobs = blob_dog(
-        im3,
+        im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=0.1
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -79,21 +136,17 @@ def test_blob_dog():
     assert b[0] == r / 2 + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r / 2) < 1
-    assert abs(math.sqrt(3) * b[4] - r) < 1
-    assert abs(math.sqrt(3) * b[5] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r / 2) < 1.1
+    assert abs(math.sqrt(3) * b[4] - r) < 1.1
+    assert abs(math.sqrt(3) * b[5] - r) < 1.1
 
+
+def test_blob_dog_excl_border():
     # Testing exclude border
 
     # image where blob is 5 px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
-    img[xs, ys] = 255
-
-
-def test_blob_dog_excl_border():
-    img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
+    xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
     blobs = blob_dog(
         img,
@@ -110,29 +163,37 @@ def test_blob_dog_excl_border():
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
 
 
-def test_blob_log():
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+def test_blob_log(dtype):
     r2 = math.sqrt(2)
-    img = np.ones((256, 256))
+    img = np.ones((256, 256), dtype=dtype)
 
-    xs, ys = circle(200, 65, 5)
+    xs, ys = disk((200, 65), 5)
     img[xs, ys] = 255
 
-    xs, ys = circle(80, 25, 15)
+    xs, ys = disk((80, 25), 15)
     img[xs, ys] = 255
 
-    xs, ys = circle(50, 150, 25)
+    xs, ys = disk((50, 150), 25)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 175, 30)
+    xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
-    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
+    threshold = 1
+    if img.dtype.kind != 'f':
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= img.ptp()
+
+    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=threshold)
 
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
@@ -163,7 +224,7 @@ def test_blob_log():
         img,
         min_sigma=5,
         max_sigma=20,
-        threshold=1,
+        threshold=threshold,
         log_scale=True)
 
     b = s[0]
@@ -187,8 +248,22 @@ def test_blob_log():
     assert abs(radius(b) - 30) <= thresh
 
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100))
     assert blob_log(img_empty).size == 0
+
+
+def test_blob_log_no_warnings():
+    img = np.ones((11, 11))
+
+    xs, ys = disk((5, 5), 2)
+    img[xs, ys] = 255
+
+    xs, ys = disk((7, 6), 2)
+    img[xs, ys] = 255
+
+    with pytest.warns(None) as records:
+        blob_log(img, max_sigma=20, num_sigma=10, threshold=.1)
+    assert len(records) == 0
 
 
 def test_blob_log_3d():
@@ -234,7 +309,7 @@ def test_blob_log_3d_anisotropic():
 def test_blob_log_exclude_border():
     # image where blob is 5 px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
+    xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
 
     blobs = blob_log(
@@ -246,37 +321,46 @@ def test_blob_log_exclude_border():
     b = blobs[0]
     assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
 
-    blobs = blob_dog(
+    blobs = blob_log(
         img,
         min_sigma=1.5,
         max_sigma=5,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
 
 
-def test_blob_doh():
-    img = np.ones((512, 512), dtype=np.uint8)
+@pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
+def test_blob_doh(dtype):
+    img = np.ones((512, 512), dtype=dtype)
 
-    xs, ys = circle(400, 130, 20)
+    xs, ys = disk((400, 130), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(460, 50, 30)
+    xs, ys = disk((460, 50), 30)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 40)
+    xs, ys = disk((100, 300), 40)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 50)
+    xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
+
+    # Note: have to either scale up threshold or rescale the image to the range
+    #       [0, 1] internally.
+    threshold = 0.05
+    if img.dtype.kind == 'f':
+        # account for lack of internal scaling to [0, 1] by img_as_float
+        ptp = img.ptp()
+        threshold *= ptp ** 2
 
     blobs = blob_doh(
         img,
         min_sigma=1,
         max_sigma=60,
         num_sigma=10,
-        threshold=.05)
+        threshold=threshold)
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)
@@ -306,16 +390,16 @@ def test_blob_doh():
 def test_blob_doh_log_scale():
     img = np.ones((512, 512), dtype=np.uint8)
 
-    xs, ys = circle(400, 130, 20)
+    xs, ys = disk((400, 130), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(460, 50, 30)
+    xs, ys = disk((460, 50), 30)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 40)
+    xs, ys = disk((100, 300), 40)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 50)
+    xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
     blobs = blob_doh(
@@ -335,12 +419,12 @@ def test_blob_doh_log_scale():
     assert abs(b[1] - 130) <= thresh
     assert abs(radius(b) - 20) <= thresh
 
-    b = s[1]
+    b = s[2]
     assert abs(b[0] - 460) <= thresh
     assert abs(b[1] - 50) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    b = s[2]
+    b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b) - 40) <= thresh
@@ -353,17 +437,17 @@ def test_blob_doh_log_scale():
 
 def test_blob_doh_no_peaks():
     # Testing no peaks
-    img_empty = np.zeros((100,100))
+    img_empty = np.zeros((100, 100))
     assert blob_doh(img_empty).size == 0
 
 
 def test_blob_doh_overlap():
     img = np.ones((256, 256), dtype=np.uint8)
 
-    xs, ys = circle(100, 100, 20)
+    xs, ys = disk((100, 100), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(120, 100, 30)
+    xs, ys = disk((120, 100), 30)
     img[xs, ys] = 255
 
     blobs = blob_doh(
@@ -388,7 +472,7 @@ def test_blob_log_overlap_3d():
                    mode='constant')
     im3 = np.logical_or(blob1, blob2)
 
-    blobs = blob_log(im3,  min_sigma=2, max_sigma=10, overlap=0.1)
+    blobs = blob_log(im3, min_sigma=2, max_sigma=10, overlap=0.1)
     assert len(blobs) == 1
 
 

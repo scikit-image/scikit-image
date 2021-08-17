@@ -184,7 +184,7 @@ class Slider(BaseWidget):
     def val(self, value):
         if self.value_type == 'float':
             value = (value - self._low) / self._scale
-        self.slider.setValue(value)
+        self.slider.setValue(int(value))
 
 
 class ComboBox(BaseWidget):

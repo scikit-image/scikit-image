@@ -46,8 +46,6 @@ from skimage import color
 from skimage.util.shape import view_as_windows
 from skimage.util import montage
 
-np.random.seed(42)
-
 patch_shape = 8, 8
 n_filters = 49
 

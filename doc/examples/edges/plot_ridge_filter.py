@@ -57,17 +57,13 @@ def identity(image, **kwargs):
 image = color.rgb2gray(data.retina())[300:700, 700:900]
 cmap = plt.cm.gray
 
-kwargs = {}
-kwargs['sigmas'] = [1]
+kwargs = {'sigmas': [1], 'mode': 'reflect'}
 
 fig, axes = plt.subplots(2, 5)
 for i, black_ridges in enumerate([1, 0]):
     for j, func in enumerate([identity, meijering, sato, frangi, hessian]):
         kwargs['black_ridges'] = black_ridges
         result = func(image, **kwargs)
-        if func in (meijering, frangi):
-            # Crop by 4 pixels for rendering purpose.
-            result = result[4:-4, 4:-4]
         axes[i, j].imshow(result, cmap=cmap, aspect='auto')
         if i == 0:
             axes[i, j].set_title(['Original\nimage', 'Meijering\nneuriteness',

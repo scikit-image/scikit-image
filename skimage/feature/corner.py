@@ -3,20 +3,21 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
+from scipy import spatial
 
 from ..util import img_as_float
-from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D
-from ..feature.corner_cy import _corner_fast
+from .peak import peak_local_max
+from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
+from .corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import safe_as_int
+from .._shared.utils import _supported_float_type, safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
-    """Compute derivatives in x and y direction using the Sobel operator.
+    """Compute derivatives in axis directions using the Sobel operator.
 
     Parameters
     ----------
@@ -30,77 +31,112 @@ def _compute_derivatives(image, mode='constant', cval=0):
 
     Returns
     -------
-    imx : ndarray
-        Derivative in x-direction.
-    imy : ndarray
-        Derivative in y-direction.
+    derivatives : list of ndarray
+        Derivatives in each axis direction.
 
     """
 
-    imy = ndi.sobel(image, axis=0, mode=mode, cval=cval)
-    imx = ndi.sobel(image, axis=1, mode=mode, cval=cval)
+    derivatives = [ndi.sobel(image, axis=i, mode=mode, cval=cval)
+                   for i in range(image.ndim)]
 
-    return imx, imy
+    return derivatives
 
 
-def structure_tensor(image, sigma=1, mode='constant', cval=0):
+def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute structure tensor using sum of squared differences.
 
-    The structure tensor A is defined as::
+    The (2-dimensional) structure tensor A is defined as::
 
-        A = [Axx Axy]
-            [Axy Ayy]
+        A = [Arr Arc]
+            [Arc Acc]
 
     which is approximated by the weighted sum of squared differences in a local
-    window around each pixel in the image.
+    window around each pixel in the image. This formula can be extended to a
+    larger number of dimensions (see [1]_).
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    sigma : float, optional
+    sigma : float or array-like of float, optional
         Standard deviation used for the Gaussian kernel, which is used as a
         weighting function for the local summation of squared differences.
+        If sigma is an iterable, its length must be equal to `image.ndim` and
+        each element is used for the Gaussian kernel applied along its
+        respective axis.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    order : {'rc', 'xy'}, optional
+        NOTE: Only applies in 2D. Higher dimensions must always use 'rc' order.
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'rc' indicates the use of
+        the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
+        usage of the last axis initially (Axx, Axy, Ayy).
 
     Returns
     -------
-    Axx : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Axy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Ayy : ndarray
-        Element of the structure tensor for each pixel in the input image.
+    A_elems : list of ndarray
+        Upper-diagonal elements of the structure tensor for each pixel in the
+        input image.
 
     Examples
     --------
     >>> from skimage.feature import structure_tensor
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> Axx
+    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    >>> Acc
     array([[0., 0., 0., 0., 0.],
            [0., 1., 0., 1., 0.],
            [0., 4., 0., 4., 0.],
            [0., 1., 0., 1., 0.],
            [0., 0., 0., 0., 0.]])
 
+    See also
+    --------
+    structure_tensor_eigenvalues
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Structure_tensor
     """
+    if order == 'xy' and image.ndim > 2:
+        raise ValueError('Only "rc" order is supported for dim > 2.')
 
-    image = _prepare_grayscale_input_2D(image)
+    if order is None:
+        if image.ndim == 2:
+            # The legacy 2D code followed (x, y) convention, so we swap the
+            # axis order to maintain compatibility with old code
+            warn('deprecation warning: the default order of the structure '
+                 'tensor values will be "row-column" instead of "xy" starting '
+                 'in skimage version 0.20. Use order="rc" or order="xy" to '
+                 'set this explicitly.  (Specify order="xy" to maintain the '
+                 'old behavior.)', category=FutureWarning, stacklevel=2)
+            order = 'xy'
+        else:
+            order = 'rc'
 
-    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
+    if not np.isscalar(sigma):
+        sigma = tuple(sigma)
+        if len(sigma) != image.ndim:
+            raise ValueError('sigma must have as many elements as image '
+                             'has axes')
 
-    # structure tensore
-    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    image = _prepare_grayscale_input_nD(image)
 
-    return Axx, Axy, Ayy
+    derivatives = _compute_derivatives(image, mode=mode, cval=cval)
+
+    if order == 'xy':
+        derivatives = reversed(derivatives)
+
+    # structure tensor
+    A_elems = [ndi.gaussian_filter(der0 * der1, sigma, mode=mode, cval=cval)
+               for der0, der1 in combinations_with_replacement(derivatives, 2)]
+
+    return A_elems
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
@@ -156,6 +192,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     """
 
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
@@ -168,32 +206,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
-
     return H_elems
-
-
-def _hessian_matrix_image(H_elems):
-    """Convert the upper-diagonal elements of the Hessian matrix to a matrix.
-
-    Parameters
-    ----------
-    H_elems : list of array
-        The upper-diagonal elements of the Hessian matrix, as returned by
-        `hessian_matrix`.
-
-    Returns
-    -------
-    hessian_image : array
-        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
-        containing the Hessian matrix corresponding to each coordinate.
-    """
-    image = H_elems[0]
-    hessian_image = np.zeros(image.shape + (image.ndim, image.ndim))
-    for idx, (row, col) in \
-            enumerate(combinations_with_replacement(range(image.ndim), 2)):
-        hessian_image[..., row, col] = H_elems[idx]
-        hessian_image[..., col, row] = H_elems[idx]
-    return hessian_image
 
 
 def hessian_matrix_det(image, sigma=1, approximate=True):
@@ -233,11 +246,13 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     computed the Hessian and took its determinant.
     """
     image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     if image.ndim == 2 and approximate:
         integral = integral_image(image)
         return np.array(_hessian_matrix_det(integral, sigma))
     else:  # slower brute-force implementation for nD images
-        hessian_mat_array = _hessian_matrix_image(hessian_matrix(image, sigma))
+        hessian_mat_array = _symmetric_image(hessian_matrix(image, sigma))
         return np.linalg.det(hessian_mat_array)
 
 
@@ -247,8 +262,99 @@ def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
     return l1, l2
 
 
+def _symmetric_compute_eigenvalues(S_elems):
+    """Compute eigenvalues from the upperdiagonal entries of a symmetric matrix
+
+    Parameters
+    ----------
+    S_elems : list of ndarray
+        The upper-diagonal elements of the matrix, as returned by
+        `hessian_matrix` or `structure_tensor`.
+
+    Returns
+    -------
+    eigs : ndarray
+        The eigenvalues of the matrix, in decreasing order. The eigenvalues are
+        the leading dimension. That is, ``eigs[i, j, k]`` contains the
+        ith-largest eigenvalue at position (j, k).
+    """
+
+    if len(S_elems) == 3:  # Use fast Cython code for 2D
+        eigs = np.stack(_image_orthogonal_matrix22_eigvals(*S_elems))
+    else:
+        matrices = _symmetric_image(S_elems)
+        # eigvalsh returns eigenvalues in increasing order. We want decreasing
+        eigs = np.linalg.eigvalsh(matrices)[..., ::-1]
+        leading_axes = tuple(range(eigs.ndim - 1))
+        eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
+    return eigs
+
+
+def _symmetric_image(S_elems):
+    """Convert the upper-diagonal elements of a matrix to the full
+    symmetric matrix.
+
+    Parameters
+    ----------
+    S_elems : list of array
+        The upper-diagonal elements of the matrix, as returned by
+        `hessian_matrix` or `structure_tensor`.
+
+    Returns
+    -------
+    image : array
+        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
+        containing the matrix corresponding to each coordinate.
+    """
+    image = S_elems[0]
+    symmetric_image = np.zeros(image.shape + (image.ndim, image.ndim),
+                               dtype=S_elems[0].dtype)
+    for idx, (row, col) in \
+            enumerate(combinations_with_replacement(range(image.ndim), 2)):
+        symmetric_image[..., row, col] = S_elems[idx]
+        symmetric_image[..., col, row] = S_elems[idx]
+    return symmetric_image
+
+
+def structure_tensor_eigenvalues(A_elems):
+    """Compute eigenvalues of structure tensor.
+
+    Parameters
+    ----------
+    A_elems : list of ndarray
+        The upper-diagonal elements of the structure tensor, as returned
+        by `structure_tensor`.
+
+    Returns
+    -------
+    ndarray
+        The eigenvalues of the structure tensor, in decreasing order. The
+        eigenvalues are the leading dimension. That is, the coordinate
+        [i, j, k] corresponds to the ith-largest eigenvalue at position (j, k).
+
+    Examples
+    --------
+    >>> from skimage.feature import structure_tensor
+    >>> from skimage.feature import structure_tensor_eigenvalues
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    >>> structure_tensor_eigenvalues(A_elems)[0]
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
+
+    See also
+    --------
+    structure_tensor
+    """
+    return _symmetric_compute_eigenvalues(A_elems)
+
+
 def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute Eigen values of structure tensor.
+    """Compute eigenvalues of structure tensor.
 
     Parameters
     ----------
@@ -271,8 +377,8 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
+    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]
     array([[0., 0., 0., 0., 0.],
            [0., 2., 4., 2., 0.],
            [0., 4., 0., 4., 0.],
@@ -280,12 +386,16 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
            [0., 0., 0., 0., 0.]])
 
     """
+    warn('deprecation warning: the function structure_tensor_eigvals is '
+         'deprecated and will be removed in version 0.20. Please use '
+         'structure_tensor_eigenvalues instead.',
+         category=FutureWarning, stacklevel=2)
 
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
 def hessian_matrix_eigvals(H_elems):
-    """Compute Eigenvalues of Hessian matrix.
+    """Compute eigenvalues of Hessian matrix.
 
     Parameters
     ----------
@@ -313,15 +423,7 @@ def hessian_matrix_eigvals(H_elems):
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
     """
-    if len(H_elems) == 3:  # Use fast Cython code for 2D
-        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
-    else:
-        matrices = _hessian_matrix_image(H_elems)
-        # eigvalsh returns eigenvalues in increasing order. We want decreasing
-        eigvals = np.linalg.eigvalsh(matrices)[..., ::-1]
-        leading_axes = tuple(range(eigvals.ndim - 1))
-        eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
-    return eigvals
+    return _symmetric_compute_eigenvalues(H_elems)
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
@@ -353,7 +455,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used for
@@ -429,14 +531,17 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
            :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
-    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
-    imxx, imxy = _compute_derivatives(imx, mode=mode, cval=cval)
-    imyx, imyy = _compute_derivatives(imy, mode=mode, cval=cval)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
+    imy, imx = _compute_derivatives(image, mode=mode, cval=cval)
+    imxy, imxx = _compute_derivatives(imx, mode=mode, cval=cval)
+    imyy, imyx = _compute_derivatives(imy, mode=mode, cval=cval)
 
     numerator = (imxx * imy ** 2 + imyy * imx ** 2 - 2 * imxy * imx * imy)
     denominator = (imx ** 2 + imy ** 2)
 
-    response = np.zeros_like(image, dtype=np.double)
+    response = np.zeros_like(image, dtype=float_dtype)
 
     mask = denominator != 0
     response[mask] = numerator[mask] / denominator[mask]
@@ -509,12 +614,12 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # determinant
-    detA = Axx * Ayy - Axy ** 2
+    detA = Arr * Acc - Arc ** 2
     # trace
-    traceA = Axx + Ayy
+    traceA = Arr + Acc
 
     if method == 'k':
         response = detA - k * traceA ** 2
@@ -578,10 +683,10 @@ def corner_shi_tomasi(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # minimum eigenvalue of A
-    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy) ** 2 + 4 * Axy ** 2)) / 2
+    response = ((Arr + Acc) - np.sqrt((Arr - Acc) ** 2 + 4 * Arc ** 2)) / 2
 
     return response
 
@@ -652,15 +757,15 @@ def corner_foerstner(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # determinant
-    detA = Axx * Ayy - Axy ** 2
+    detA = Arr * Acc - Arc ** 2
     # trace
-    traceA = Axx + Ayy
+    traceA = Arr + Acc
 
-    w = np.zeros_like(image, dtype=np.double)
-    q = np.zeros_like(image, dtype=np.double)
+    w = np.zeros_like(image, dtype=detA.dtype)
+    q = np.zeros_like(w)
 
     mask = traceA != 0
 
@@ -797,16 +902,18 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # window extent in one direction
     wext = (window_size - 1) // 2
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     image = np.pad(image, pad_width=wext, mode='constant', constant_values=0)
 
     # add pad width, make sure to not modify the input values in-place
     corners = safe_as_int(corners + wext)
 
     # normal equation arrays
-    N_dot = np.zeros((2, 2), dtype=np.double)
-    N_edge = np.zeros((2, 2), dtype=np.double)
-    b_dot = np.zeros((2, ), dtype=np.double)
-    b_edge = np.zeros((2, ), dtype=np.double)
+    N_dot = np.zeros((2, 2), dtype=float_dtype)
+    N_edge = np.zeros((2, 2), dtype=float_dtype)
+    b_dot = np.zeros((2, ), dtype=float_dtype)
+    b_edge = np.zeros((2, ), dtype=float_dtype)
 
     # critical statistical test values
     redundancy = window_size ** 2 - 2
@@ -816,7 +923,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # coordinates of pixels within window
     y, x = np.mgrid[- wext:wext + 1, - wext:wext + 1]
 
-    corners_subpix = np.zeros_like(corners, dtype=np.double)
+    corners_subpix = np.zeros_like(corners, dtype=float_dtype)
 
     for i, (y0, x0) in enumerate(corners):
 
@@ -827,9 +934,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
         maxx = x0 + wext + 2
         window = image[miny:maxy, minx:maxx]
 
-        winx, winy = _compute_derivatives(window, mode='constant', cval=0)
+        winy, winx = _compute_derivatives(window, mode='constant', cval=0)
 
-        # compute gradient suares and remove border
+        # compute gradient squares and remove border
         winx_winx = (winx * winx)[1:-1, 1:-1]
         winx_winy = (winx * winy)[1:-1, 1:-1]
         winy_winy = (winy * winy)[1:-1, 1:-1]
@@ -915,16 +1022,34 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
-    """Find corners in corner measure response image.
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf,
+                 p_norm=np.inf):
+    """Find peaks in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
     multiple connected peaks with the same accumulator value.
 
     Parameters
     ----------
+    image : ndarray
+        Input image.
+    min_distance : int, optional
+        The minimal allowed distance separating peaks.
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
+    p_norm : float
+        Which Minkowski p-norm to use. Should be in the range [1, inf].
+        A finite large p may cause a ValueError if overflow can occur.
+        ``inf`` corresponds to the Chebyshev distance and 2 to the
+        Euclidean distance.
+
+    Returns
+    -------
+    output : ndarray or ndarray of bools
+
+        * If `indices = True`  : (row, column, ...) coordinates of peaks.
+        * If `indices = False` : Boolean array shaped like `image`, with peaks
+          represented by True values.
 
     See also
     --------
@@ -932,9 +1057,13 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
 
     Notes
     -----
-    The `num_peaks` limit is applied before suppression of
-    connected peaks. If you want to limit the number of peaks
-    after suppression, you should set `num_peaks=np.inf` and
+    .. versionchanged:: 0.18
+        The default value of `threshold_rel` has changed to None, which
+        corresponds to letting `skimage.feature.peak_local_max` decide on the
+        default. This is equivalent to `threshold_rel=0`.
+
+    The `num_peaks` limit is applied before suppression of connected peaks.
+    To limit the number of peaks after suppression, set `num_peaks=np.inf` and
     post-process the output of this function.
 
     Examples
@@ -949,41 +1078,49 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
            [0., 0., 1., 1., 0.],
            [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
-    array([[3, 3],
-           [3, 2],
+    array([[2, 2],
            [2, 3],
-           [2, 2]])
+           [3, 2],
+           [3, 3]])
     >>> corner_peaks(response)
     array([[2, 2]])
 
     """
-    if threshold_rel is None:
-        threshold_rel = 0.1
-        warn("Until the version 0.16, threshold_rel was set to 0.1 by default."
-             "Starting from version 0.16, the default value is set to None."
-             "Until version 0.18, a None value corresponds to a threshold value of 0.1."
-             "The default behavior will match skimage.feature.peak_local_max.",
-             category=FutureWarning, stacklevel=2)
+    if np.isinf(num_peaks):
+        num_peaks = None
 
-    peaks = peak_local_max(image, min_distance=min_distance,
-                           threshold_abs=threshold_abs,
-                           threshold_rel=threshold_rel,
-                           exclude_border=exclude_border,
-                           indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels,
-                           num_peaks_per_label=num_peaks_per_label)
-    if min_distance > 0:
-        coords = np.transpose(peaks.nonzero())
-        for r, c in coords:
-            if peaks[r, c]:
-                peaks[max((r - min_distance), 0):r + min_distance + 1,
-                      max((c - min_distance), 0):c + min_distance + 1] = False
-                peaks[r, c] = True
+    # Get the coordinates of the detected peaks
+    coords = peak_local_max(image, min_distance=min_distance,
+                            threshold_abs=threshold_abs,
+                            threshold_rel=threshold_rel,
+                            exclude_border=exclude_border,
+                            num_peaks=np.inf,
+                            footprint=footprint, labels=labels,
+                            num_peaks_per_label=num_peaks_per_label)
 
-    if indices is True:
-        return np.transpose(peaks.nonzero())
-    else:
-        return peaks
+    if len(coords):
+        # Use KDtree to find the peaks that are too close to each other
+        tree = spatial.cKDTree(coords)
+
+        rejected_peaks_indices = set()
+        for idx, point in enumerate(coords):
+            if idx not in rejected_peaks_indices:
+                candidates = tree.query_ball_point(point, r=min_distance,
+                                                   p=p_norm)
+                candidates.remove(idx)
+                rejected_peaks_indices.update(candidates)
+
+        # Remove the peaks that are too close to each other
+        coords = np.delete(coords, tuple(rejected_peaks_indices),
+                           axis=0)[:num_peaks]
+
+    if indices:
+        return coords
+
+    peaks = np.zeros_like(image, dtype=bool)
+    peaks[tuple(coords.T)] = True
+
+    return peaks
 
 
 def corner_moravec(image, window_size=1):
@@ -1030,7 +1167,10 @@ def corner_moravec(image, window_size=1):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]])
     """
-    return _corner_moravec(image, window_size)
+    image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+    return _corner_moravec(np.ascontiguousarray(image), window_size)
 
 
 def corner_orientations(image, corners, mask):
@@ -1096,4 +1236,5 @@ def corner_orientations(image, corners, mask):
     array([  45.,  135.,  -45., -135.])
 
     """
+    image = _prepare_grayscale_input_2D(image)
     return _corner_orientations(image, corners, mask)

@@ -11,7 +11,8 @@ features to detect faces vs. non-faces.
 Notes
 -----
 
-This example relies on scikit-learn for feature selection and classification.
+This example relies on `scikit-learn <https://scikit-learn.org/>`_ for feature
+selection and classification.
 
 References
 ----------
@@ -19,7 +20,7 @@ References
 .. [1] Viola, Paul, and Michael J. Jones. "Robust real-time face
        detection." International journal of computer vision 57.2
        (2004): 137-154.
-       http://www.merl.com/publications/docs/TR2004-043.pdf
+       https://www.merl.com/publications/docs/TR2004-043.pdf
        :DOI:`10.1109/CVPR.2001.990517`
 
 """
@@ -72,10 +73,12 @@ feature_types = ['type-2-x', 'type-2-y']
 X = delayed(extract_feature_image(img, feature_types) for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_full_feature_comp = time() - t_start
 
+# Label images (100 faces and 100 non-faces)
 y = np.array([1] * 100 + [0] * 100)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0,
                                                     stratify=y)
@@ -114,7 +117,7 @@ for idx, ax in enumerate(axes.ravel()):
     ax.set_xticks([])
     ax.set_yticks([])
 
-fig.suptitle('The most important features')
+_ = fig.suptitle('The most important features')
 
 ###########################################################################
 # We can select the most important features by checking the cumulative sum
@@ -123,7 +126,7 @@ fig.suptitle('The most important features')
 # of the total number of features).
 
 cdf_feature_importances = np.cumsum(clf.feature_importances_[idx_sorted])
-cdf_feature_importances /= np.max(cdf_feature_importances)
+cdf_feature_importances /= cdf_feature_importances[-1]  # divide by max value
 sig_feature_count = np.count_nonzero(cdf_feature_importances < 0.7)
 sig_feature_percent = round(sig_feature_count /
                             len(cdf_feature_importances) * 100, 1)
@@ -142,7 +145,7 @@ X = delayed(extract_feature_image(img, feature_type_sel, feature_coord_sel)
             for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_subs_feature_comp = time() - t_start
 
 y = np.array([1] * 100 + [0] * 100)

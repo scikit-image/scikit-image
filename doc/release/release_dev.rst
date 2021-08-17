@@ -11,69 +11,91 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
-Starting from this release, scikit-image will follow the spirit of the recently
-introduced numpy deprecation policy -- NEP 29
-(https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
-Accordingly, scikit-image 0.16 drops the support for Python 3.5.
-This release of scikit-image officially supports Python 3.6 and 3.7.
 
 New Features
 ------------
-- Added majority rank filter - ``filters.rank.majority``.
+
+- Added support for processing images with channels located along any array
+  axis. This is in contrast to previous releases where channels were required
+  to be the last axis of an image. See more info on the new ``channel_axis``
+  argument under the API section of the release notes.
+- Added a new keyword only parameter ``random_state`` to
+  ``morphology.medial_axis`` and ``restoration.unsupervised_wiener``.
+- Seeding random number generators will not give the same results as the
+  underlying generator was updated to use ``numpy.random.Generator``.
+
+Documentation
+-------------
+
+- A new doc tutorial presenting a 3D biomedical imaging example has been added
+  to the gallery (#4946). The technical content benefited from conversations
+  with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
+- Documentation has been added to the contributing notes about how to submit a
+  gallery example 
 
 
 Improvements
 ------------
 
+- The performance of the SLIC superpixels algorithm
+  (``skimage.segmentation.slice``) was improved for the case where a mask
+  is supplied by the user (#4903). The specific superpixels produced by
+  masked SLIC will not be identical to those produced by prior releases.
+- ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to a
+  LUT (#4966).  
+- ``measure.label`` has been accelerated for boolean input images, by using
+  ``scipy.ndimage``'s implementation for this case (#4945).
+- ``util.apply_parallel`` now works with multichannel data (#4927).
+- ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
+
 
 API Changes
 -----------
-- Deprecated subpackage ``skimage.novice`` has been removed.
-- Default value of ``multichannel`` parameters has been set to False in
-  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``, and
-  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
-  anymore, so, please, make sure that the parameter is fixed to a proper value.
-- Deprecated argument ``visualise`` has been removed from
-  ``skimage.feature.hog``. Use ``visualize`` instead.¨
-- ``skimage.transform.seam_carve`` has been completely removed from the
-  library due to licensing restrictions.
-- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
-  ``skimage.io.imread``. Use ``as_gray`` instead.
-- Parameter ``min_size`` has been removed from
-  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
-- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
-  removed.
-- ``skimage.measure._regionprops`` has been completely switched to using
-  row-column coordinates. Old x-y interface is not longer available.
-- Default value of ``behavior`` parameter has been set to ``ndimage`` in
-  ``skimage.filters.median``.
-- Parameter ``flatten`` in `skimage.io.imread` has been removed in
-  favor of ``as_gray``.
-- Parameters ``Hxx, Hxy, Hyy`` have been removed from
-  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
-- Default value of ``order`` parameter has been set to ``rc`` in
-  ``skimage.feature.hessian_matrix``.
-- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
-- When used with floating point inputs, ``denoise_wavelet`` no longer rescales
-  the range of the data or clips the output to the range [0, 1] or [-1, 1].
-  For non-float inputs, rescaling and clipping still occurs as in prior
-  releases (although with a bugfix related to the scaling of ``sigma``).
+
+- The ``multichannel`` boolean argument has been deprecated. All functions with
+  multichannel support now use an integer ``channel_axis`` to specify which
+  axis corresponds to channels. Setting ``channel_axis`` to None is used to
+  indicate that the image is grayscale. Specifically, existing code with
+  ``multichannel=True`` should be updated to use ``channel_axis=-1`` and code
+  with ``multichannel=False`` should now specify ``channel_axis=None``.
+- A default value has been added to ``measure.find_contours``, corresponding to
+  the half distance between the min and max values of the image 
+  #4862
+- ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
+  descriptive name.
+- The ``level`` parameter of ``measure.find_contours`` is now a keyword
+  argument, with a default value set to (max(image) - min(image)) / 2.
+- ``p_norm`` argument was added to ``skimage.feature.peak_local_max``
+  to add support for Minkowski distances.
 
 
 Bugfixes
 --------
-- ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
-  rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
-  preserve the relative scale of the noise estimate. To restore the old,
-  behaviour, the user can manually specify ``rescale_sigma=False``.
+
+- Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
+  dimensions or more (#4823)
+- ``min_distance`` is now enforced for ``skimage.feature.peak_local_max``
+  (#2592).
+- Peak detection in labels is fixed in ``skimage.feature.peak_local_max``
+  (#4756).
+- Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
+  is avoided (#5047).
+- Nonzero values at the image edge are no longer incorrectly marked as a
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
 
 
 Deprecations
 ------------
-- Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
-  deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+
+- In ``measure.label``, the deprecated ``neighbors`` parameter has been
+  removed.
+- The ``multichannel`` argument has been deprecated throughout the library and
+  will be removed in 1.0. The new ``channel_axis`` argument should be used
+  instead.
+
+
+Development process
+-------------------
 
 
 Contributors to this release
