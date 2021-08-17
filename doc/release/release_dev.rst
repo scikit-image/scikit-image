@@ -53,8 +53,46 @@ Documentation
 - A new doc tutorial presenting a 3D biomedical imaging example has been added
   to the gallery (#4946). The technical content benefited from conversations
   with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
+- New gallery example for 3D structure tensor
+- New gallery example displaying a 3D dataset
+- Extended rolling ball example with ECG data (1D)
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
+- Autoformat docstrings in morphology/*
+- Display plotly figures from gallery example even when running script at CLI.
+- Single out docs-only PRs in review process.
+- Use matplotlib's infinite axline to demonstrate hough transform.
+- Clarify disk documentation inconsistency regarding 'shape'.
+- docs: fix simple typo, convertions -> conversions.
+- Fixes to linspace in example.
+- Minor fixes to Hough line transform code and examples.
+- Added 1/2 pixel bounds to extent of displayed images in several examples.
+- Add release step on github to RELEASE.txt.
+- Remove reference to opencv in threshold_local documentation.
+- Update structure_tensor docstring to include per-axis sigma.
+- Fix typo in _shared/utils.py docs.
+- Proofread and crosslink examples with immunohistochemistry image.
+- Spelling correction: witch -> which.
+- Mention possible filters in radon_transform -> filtered-back-projection
+- Fix dtype info in documentation for watershed.
+- Proofread gallery example for Radon transform.
+- Use internal function for noise + clarify code in Canny example.
+- Make more comprehensive 'see also' sections in filters
+- Specify the release note version instead of the misleading `latest`
+- Remove misleading comment in ``plot_thresholding.py`` example.
+- Fix sphinx: role already being registered
+- Fix sphinx layout to make the search engine work with recent sphinx versions
+- Draw node IDs in RAG example
+- Update sigma_color description in denoise_bilateral
+- Update intersphinx fallback inventories + add matplotlib fallback inventory
+- Fix numpy deprecation in ``plot_local_equalize.py``
+- Rename ``label`` variable in ``plot_regionprops.py`` to circumvent link issue
+  in docs.
+- Avoid duplicate API documentation for ImageViewer, CollectionViewer
+- Fix 'blog_dog' typo in ``gaussian`` docs
+- Update reference link documentation in the ``adjust_sigmoid`` function.
+- Fix reference to multiscale_basic_features in TrainableSegmenter
+- Slight ``shape_index`` docstring modification to specify 2D array
 
 
 Improvements
