@@ -19,10 +19,33 @@ New Features
   axis. This is in contrast to previous releases where channels were required
   to be the last axis of an image. See more info on the new ``channel_axis``
   argument under the API section of the release notes.
+- A no-reference measure of perceptual blur was added
+  (``skimage.measure.blur_effect``).
+- Non-local means (``skimage.restoration.denoise_nl_means``) now supports
+  3D multichannel, 4D and 4D multichannel data when ``fast_mode=True``.
+- An n-dimensional Fourier-domain Butterworth filter
+  (``skimage.filters.butterworth``) was added.
+- Color conversion functions now have a new ``channel_axis`` keyword argument
+  that allows specification of which axis of an array corresponds to channels.
+  For backwards compatibility, this parameter defaults to ``channel_axis=-1``,
+  indicating that channels are along the last axis.
 - Added a new keyword only parameter ``random_state`` to
   ``morphology.medial_axis`` and ``restoration.unsupervised_wiener``.
 - Seeding random number generators will not give the same results as the
   underlying generator was updated to use ``numpy.random.Generator``.
+- Added ``saturation`` parameter to ``skimage.color.label2rgb``
+- Added normalized mutual information metric
+  ``skimage.metrics.normalized_mutual_information``
+- threshold_local now supports n-dimensional inputs and anisotropic block_size
+- New ``skimage.util.label_points`` function for assigning labels to points.
+- Added nD support to several geometric transform classes
+- Added ``skimage.metrics.hausdorff_pair`` to find points separated by the
+  Hausdorff distance.
+- Additional colorspace ``illuminants`` and ``observers`` parameter options
+  were added to ``skimage.color.lab2rgb``, ``skimage.color.rgb2lab``,
+  ``skimage.color.xyz2lab``, ``skimage.color.lab2xyz``,
+  ``skimage.color.xyz2luv`` and ``skimage.color.luv2xyz``.
+
 
 Documentation
 -------------
@@ -37,6 +60,12 @@ Documentation
 Improvements
 ------------
 
+- Many more functions throughout the library now have single precision
+  (float32) support.
+- Biharmonic  inpainting (``skimage.restoration.inpaint_biharmonic``) was
+  refactored and is orders of magnitude faster than before.
+- Salt-and-pepper noise generation with ``skimage.util.random_noise`` is now
+  faster.
 - The performance of the SLIC superpixels algorithm
   (``skimage.segmentation.slice``) was improved for the case where a mask
   is supplied by the user (#4903). The specific superpixels produced by
@@ -47,9 +76,15 @@ Improvements
   ``scipy.ndimage``'s implementation for this case (#4945).
 - ``util.apply_parallel`` now works with multichannel data (#4927).
 - ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
-- Many more functions throughout the library now have single precision
-  (float32) support.
-
+- Fast, non-Cython implementation for ``skimage.filters.correlate_sparse``
+- For efficiency, the histogram is now precomputed within
+  ``skimage.filters.try_all_threshold``.
+- Faster ``skimage.filters.find_local_max`` when given a finite ``num_peaks``.
+- All filters in the ``skimage.filters.rank`` module now release the GIL,
+  enabling multithreaded use.
+- ``skimage.restoration.denoise_tv_bregman`` and
+  ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
+  multithreaded use.
 
 API Changes
 -----------
@@ -73,6 +108,8 @@ API Changes
 - ``skimage.transforms.integral_image`` now promotes floating point inputs to
   double precision by default (for accuracy). A new ``dtype`` keyword argument
   can be used to override this behavior when desired.
+- Color conversion functions now have a new ``channel_axis`` keyword argument
+  (see **New Features** section).
 
 Bugfixes
 --------
@@ -217,6 +254,43 @@ Newly introduced deprecations:
 
 Development process
 -------------------
+
+- Test setup and teardown functions added to allow raising an error on any
+  uncaught warnings via ``SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL`` environment
+  variable.
+- Increase automation in release process.
+- Build aarch64 wheels
+- Release wheels before source
+- Update pyproject.toml to ensure pypy compatibility and aarch compatibility
+- Add numpy version specification on aarch for cpython 3.8
+- update minimum supported Matplotlib, NumPy, SciPy and Pillow
+- Pin pillow to !=8.3.0
+- Use manylinux2010 for python 3.9+
+- Rename `master` to `main` throughout
+- Ensure that README.txt has write permissions for subsequent imports.
+- Fixup test for INSTALL_FROM_SDIST
+- Run face classification gallery example with a single thread
+- Enable pip and skimage.data caching on Azure
+- Fix CircleCI caching
+- Fix Azure CI caching
+- Fix Cython warnings
+- disable calls to plotly.io.show when running on Azure
+- Remove legacy Travis-CI scripts and update contributor documentation
+  accordingly
+- Increase cibuildwheel verbosity
+- Update pip during dev environment installation
+- Add benchmark checks to CI
+- Resolve stochastic rank filter test failures on CI
+- Use latest Ubuntu image to fix QEMU CPU detection issue
+- Ensure that README.txt has write permissions for subsequent imports.
+- Decorators for helping with the multichannel->channel_axis transition
+
+Other Updates
+-------------
+- refactor np.random.x to use np.random.Generator
+- avoid warnings about use of deprecated `scipy.linalg.pinv2`
+- Simplify resize implementation using new SciPy 1.6 zoom option
+
 
 
 Contributors to this release
