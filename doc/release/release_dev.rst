@@ -56,6 +56,8 @@ Documentation
 - New gallery example for 3D structure tensor
 - New gallery example displaying a 3D dataset
 - Extended rolling ball example with ECG data (1D)
+- The stain unmixing gallery example was fixed and now displays proper
+  separation of the stains.
 - Documentation has been added to the contributing notes about how to submit a
   gallery example 
 - Autoformat docstrings in morphology/*
@@ -123,6 +125,8 @@ Improvements
 - ``skimage.restoration.denoise_tv_bregman`` and
   ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
   multithreaded use.
+- A ``skimage.color.label2rgb`` performance regression was addressed
+
 
 API Changes
 -----------
@@ -135,7 +139,7 @@ API Changes
   with ``multichannel=False`` should now specify ``channel_axis=None``.
 - Most functions now return float32 images when the input has float32 dtype.
 - A default value has been added to ``measure.find_contours``, corresponding to
-  the half distance between the min and max values of the image 
+  the half distance between the min and max values of the image
   #4862
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
   descriptive name.
@@ -149,19 +153,39 @@ API Changes
 - Color conversion functions now have a new ``channel_axis`` keyword argument
   (see **New Features** section).
 
+
 Bugfixes
 --------
 
-- Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
-  dimensions or more (#4823)
-- ``min_distance`` is now enforced for ``skimage.feature.peak_local_max``
-  (#2592).
-- Peak detection in labels is fixed in ``skimage.feature.peak_local_max``
-  (#4756).
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
 - Nonzero values at the image edge are no longer incorrectly marked as a
-  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447).
+- Fix large array labelling in ``skimage.measure.label``.
+- Only use retry_if_failed with recent pooch.
+- Fix return dtype of ``_label2rgb_avg`` function.
+- Ensure ``skimage.color.separate_stains`` does not return negative values.
+- Prevent integer overflow in ``EllipseModel``.
+- Fixed off-by one error in pixel bins in Hough line transform.
+- Handle 1D arrays properly in ``skimage.filters.gaussian``.
+- Fix Laplacian matrix size bug in ``skimage.segmentation.random_walker``.
+- Regionprops table (``skimage.measure.reginoprops_table``) dtype bugfix.
+- Fix ``skimage.transform.rescale`` when using a small scale factor.
+- Fix ``skimage.measure.label`` segfault.
+- Watershed (``skimage.segmentation.watershed``): consider connectivity when
+  calculating markers.
+- Fix ``skimage.transform.warp`` output dtype when order=0.
+- Fix multichannel ``intensity_image`` extra_properties in regionprops.
+- Fix error message for ``skimage.metric.structural_similarity`` when image is
+  too small.
+- Do not mark image edges in 'subpixel' mode of
+  ``skimage.segmentation.find_boundaries``.
+- Fix behavior of ``skimage.exposure.is_low_contrast`` for boolean inputs.
+- Fix wrong syntax for the string argument of ValueError in
+  ``skimage.metric.structural_similarity`` .
+- Fixed NaN issue in ``skimage.filters.threshold_otsu``.
+- Fix ``skimage.feature.blob_dog`` docstring example and normalization.
+- Fix uint8 overflow in ``skimage.exposure.adjust_gamma``.
 
 
 Deprecations
@@ -323,12 +347,14 @@ Development process
 - Ensure that README.txt has write permissions for subsequent imports.
 - Decorators for helping with the multichannel->channel_axis transition
 
+
 Other Updates
 -------------
 - refactor np.random.x to use np.random.Generator
 - avoid warnings about use of deprecated `scipy.linalg.pinv2`
 - Simplify resize implementation using new SciPy 1.6 zoom option
-
+- Fix duplicate test function names in ``test_unsharp_mask.py``
+- Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature
 
 
 Contributors to this release
