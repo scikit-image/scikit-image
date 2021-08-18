@@ -28,7 +28,7 @@ def _validate_feature_type(feature_type):
             if feat_t not in FEATURE_TYPE:
                 raise ValueError(
                                 f'The given feature type is unknown. Got {feat_t} instead of one'
-                                'of {FEATURE_TYPE}.')
+                                f'of {FEATURE_TYPE}.')
     return feature_type_
 
 
