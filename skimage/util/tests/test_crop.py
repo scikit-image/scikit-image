@@ -1,5 +1,5 @@
 import numpy as np
-
+import pytest
 from skimage import data
 from skimage.util.crop import bounding_box_crop
 
@@ -7,13 +7,13 @@ from skimage.util.crop import bounding_box_crop
 def test_2d_crop_1():
     data = np.random.random((50, 50))
     out_data = bounding_box_crop(data, [(0, 25)])
-    assert out_data.shape == (25, 50)
+    np.testing.assert_array_equal(out_data, data[:25, :])
 
 
 def test_2d_crop_2():
     data = np.random.random((50, 50))
-    out_data = bounding_box_crop(data, [(0, 25)], axis=[1])
-    assert out_data.shape == (50, 25)
+    out_data = bounding_box_crop(data, [(0, 25)], axes=[1])
+    np.testing.assert_array_equal(out_data, data[:, :25])
 
 
 def test_copy():
@@ -27,11 +27,23 @@ def test_copy():
 
 def test_2d_crop_3():
     data = np.random.random((50, 50))
-    out_data = bounding_box_crop(data, [(0, 25), (0, 30)], axis=[1, 0])
-    assert out_data.shape == (30, 25)
+    out_data = bounding_box_crop(data, [(0, 25), (0, 30)], axes=[1, 0])
+    np.testing.assert_array_equal(out_data, data[:30, :25])
 
 
 def test_nd_crop():
     data = np.random.random((50, 50, 50))
     out_data = bounding_box_crop(data, [(0, 25)])
-    assert out_data.shape == (25, 50, 50)
+    np.testing.assert_array_equal(out_data, data[:25, :, :])
+
+
+def test_axes_invalid():
+    data = np.random.random((2, 3))
+    with pytest.raises(ValueError):
+        bounding_box_crop(data, [(0, 3)], axes=[2])
+
+def test_axes_limit_invalid():
+    data = np.random.random((50, 50))
+    with pytest.raises(ValueError):
+        bounding_box_crop(data, [(0, 51)], axes=[0])
+    

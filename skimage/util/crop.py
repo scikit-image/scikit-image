@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ['bounding_box_crop']
 
 
-def bounding_box_crop(image, bounding_box, axis=None, copy=False):
+def bounding_box_crop(image, bounding_box, axes=None, copy=False):
     """Crop an image from a bounding box.
         Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
         and (optional) axis for corresponding axis order to bounding_box.
@@ -16,7 +16,8 @@ def bounding_box_crop(image, bounding_box, axis=None, copy=False):
         Bounding box.
     axis : tuple, optional
         Axis order for cropping.
-        if provided, same legth as bounding_box.
+        if provided, needs to be same legth as bounding_box.
+        else, sequential cropping on axis starting from 0th axis to nth axis.
     copy : bool, optional
         If True, ensure output is not a view of input.
 
@@ -38,7 +39,7 @@ def bounding_box_crop(image, bounding_box, axis=None, copy=False):
     >>> cropped_img = bounding_box_crop(img, [(0, 100), (0, 100)])
     >>> cropped_img.shape
     (100, 100)
-    >>> cropped_img = bounding_box_crop(img, [(0, 100), (0, 75)], axis=[1, 0])
+    >>> cropped_img = bounding_box_crop(img, [(0, 100), (0, 75)], axes=[1, 0])
     >>> cropped_img.shape
     (75, 100)
     """
@@ -51,46 +52,35 @@ def bounding_box_crop(image, bounding_box, axis=None, copy=False):
     if not isinstance(image, np.ndarray):
         raise ValueError("data must be numpy array")
 
-    # if not axis provided,
-    # consider sequential cropping on axis
-    if not axis:
-        axis = list(range(len(bounding_box)))
+    # if not axes provided,
+    # consider sequential cropping on axes
+    if not axes:
+        axes = list(range(len(bounding_box)))
     else:
-        if len(axis) != len(set(axis)):
-            raise ValueError("axis must be unique")
-        if len(axis) != len(bounding_box):
-            raise ValueError("axis and bounding_box must have same length")
-        if not all(isinstance(a, int) for a in axis):
-            raise ValueError("axis must be integer")
-        if not all(a >= 0 for a in axis):
-            raise ValueError("axis must be positive")
-        if not all(a < image.ndim for a in axis):
-            raise ValueError("axis must be less than image.ndim")
+        if len(axes) != len(set(axes)):
+            raise ValueError("axes must be unique")
+        if len(axes) != len(bounding_box):
+            raise ValueError("axes and bounding_box must have same length")
+        if not all(isinstance(a, int) for a in axes):
+            raise ValueError("axes must be integer")
+        if not all(a >= -image.ndim and a < image.ndim for a in axes):
+            raise ValueError(f"axis {axes} is out of range for image with "
+                             f"{image.ndim} dimensions.")
 
-    bbox_with_axis = list(zip(bounding_box, axis))
-    # sort axis by decreasing
-    bbox_with_axis.sort(key=lambda x: x[1], reverse=True)
-    full_bbox_data = []
-    for idx in range(image.ndim):
-        if bbox_with_axis and bbox_with_axis[-1][1] == idx:
-            bbox, _ = bbox_with_axis.pop()
-            axis_min, axis_max = bbox
-            if axis_min > axis_max:
-                raise ValueError(
-                    "In bounding_box, tuple should be sorted (min_val, max_val)")
-
-            if axis_max < 0 or axis_min < 0:
-                raise ValueError("In bounding_box, values must be positive")
-
-            if axis_min > image.shape[idx]:
-                raise ValueError("Invalid bounding_box!")
-            if axis_max > image.shape[idx]:
-                raise ValueError("Invalid bounding_box!")
-            full_bbox_data.append(slice(bbox[0], bbox[1]))
-        else:
-            full_bbox_data.append(slice(image.shape[idx]))
-
-    full_bbox_data = tuple(full_bbox_data) # avoid numpy warning
+    slices = [slice(None)] * image.ndim
+    for box, ax in zip(bounding_box, axes):
+        axis_min, axis_max = box
+        if axis_min > axis_max:
+            raise ValueError(
+                "In bounding_box, tuple should be sorted (min_val, max_val).")
+        if axis_min < 0:
+            raise ValueError("In bounding_box, values must be positive.")
+        if axis_max > image.shape[ax]:
+            raise ValueError(
+                f"Bounding box {box} exceeds image dimension on axis {ax}.")
+        slices[ax] = slice(axis_min, axis_max)
+    slices = tuple(slices)
+    
     if copy:
-        return image[full_bbox_data].copy()
-    return image[full_bbox_data]
+        return image[slices].copy()
+    return image[slices]
