@@ -240,7 +240,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
-    threshold : float or None, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
         intensities. If `threshold_rel` is also specified, whichever threshold
@@ -424,12 +424,12 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     num_sigma : int, optional
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
-    threshold : float or None, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
         intensities. If `threshold_rel` is also specified, whichever threshold
         is larger will be used. If None, `threshold_rel` is used instead.
-   overlap : float, optional
+    overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
     log_scale : bool, optional
@@ -585,7 +585,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     num_sigma : int, optional
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
-    threshold : float or None, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
         intensities. If `threshold_rel` is also specified, whichever threshold
