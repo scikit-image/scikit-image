@@ -455,7 +455,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used for

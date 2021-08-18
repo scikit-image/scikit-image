@@ -38,11 +38,6 @@ Version 1.0
 * Remove the deprecation warning for `input` kwarg of the `label`
   function in `skimage/measure/_label.py`
 
-Other (2021)
-------------
-* When ``numpy`` is set to > 1.16, one may simplify the implementation of
-  of `feature.blob_log` using the vectorized version of ``np.logspace``.
-
 Other (2022)
 ------------
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and

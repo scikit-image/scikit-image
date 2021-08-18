@@ -438,10 +438,11 @@ def _assert_non_negative(image):
 
 
 def _adjust_gamma_u8(image, gamma, gain):
-    """LUT based implmentation of gamma adjustement.
+    """LUT based implementation of gamma adjustment.
 
     """
-    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma)).astype('uint8')
+    lut = (255 * gain * (np.linspace(0, 1, 256) ** gamma))
+    lut = np.minimum(lut, 255).astype('uint8')
     return lut[image]
 
 
