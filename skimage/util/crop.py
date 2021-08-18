@@ -1,9 +1,9 @@
 import numpy as np
 
-__all__ = ['crop']
+__all__ = ['bounding_box_crop']
 
 
-def crop(image, bounding_box, axis=None):
+def bounding_box_crop(image, bounding_box, axis=None, copy=False):
     """Crop an image from a bounding box.
         Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
         and (optional) axis for corresponding axis order to bounding_box.
@@ -17,7 +17,8 @@ def crop(image, bounding_box, axis=None):
     axis : tuple, optional
         Axis order for cropping.
         if provided, same legth as bounding_box.
-
+    copy : bool, optional
+        If True, ensure output is not a view of input.
 
     Returns
     ----------
@@ -27,17 +28,17 @@ def crop(image, bounding_box, axis=None):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.util.crop import crop
+    >>> from skimage.util.crop import bounding_box_crop
     >>> img = data.camera()
     >>> img.shape
     (512, 512)
-    >>> cropped_img = crop(img, [(0, 100)])
+    >>> cropped_img = bounding_box_crop(img, [(0, 100)])
     >>> cropped_img.shape
     (100, 512)
-    >>> cropped_img = crop(img, [(0, 100), (0, 100)])
+    >>> cropped_img = bounding_box_crop(img, [(0, 100), (0, 100)])
     >>> cropped_img.shape
     (100, 100)
-    >>> cropped_img = crop(img, [(0, 100), (0, 75)], axis=[1, 0])
+    >>> cropped_img = bounding_box_crop(img, [(0, 100), (0, 75)], axis=[1, 0])
     >>> cropped_img.shape
     (75, 100)
     """
@@ -85,8 +86,11 @@ def crop(image, bounding_box, axis=None):
                 raise ValueError("Invalid bounding_box!")
             if axis_max > image.shape[idx]:
                 raise ValueError("Invalid bounding_box!")
-            full_bbox_data.append(range(*bbox))
+            full_bbox_data.append(slice(bbox[0], bbox[1]))
         else:
-            full_bbox_data.append(range(image.shape[idx]))
+            full_bbox_data.append(slice(image.shape[idx]))
 
-    return image[np.ix_(*full_bbox_data)]
+    full_bbox_data = tuple(full_bbox_data) # avoid numpy warning
+    if copy:
+        return image[full_bbox_data].copy()
+    return image[full_bbox_data]
