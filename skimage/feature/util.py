@@ -108,7 +108,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         offset[1] = 0
     else:
         mesg = (f"plot_matches accepts either 'horizontal' or 'vertical' for "
-                "alignment, but '{alignment}' was given. See "
+                f"alignment, but '{alignment}' was given. See "
                 "https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matches "  # noqa
                 "for details.")
         raise ValueError(mesg)
