@@ -190,14 +190,13 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                 raise ValueError(f'Bilateral filter is only implemented for '
                                  f'2D grayscale images (image.ndim == 2) and '
                                  f'2D multichannel (image.ndim == 3) images, '
-                                 f'but the input image has {image.ndim} dimensions. '
-                                 f'')
+                                 f'but the input image has {image.ndim} dimensions.')
         elif image.shape[2] not in (3, 4):
             if image.shape[2] > 4:
                 msg = (f'The last axis of the input image is interpreted as '
                        f'channels. Input image with shape {image.shape} has {image.shape[2]} channels '
                        f'in last axis. ``denoise_bilateral`` is implemented '
-                       f'for 2D grayscale and color images only')
+                       f'for 2D grayscale and color images only.')
                 warn(msg)
             else:
                 msg = f'Input image must be grayscale, RGB, or RGBA; ' \
@@ -207,9 +206,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         if image.ndim > 2:
             raise ValueError(f'Bilateral filter is not implemented for '
                              f'grayscale images of 3 or more dimensions, '
-                             f'but input image has {image.shape} dimension. Use '
-                             f'``channel_axis=-1`` for 2-D RGB '
-                             f'images.')
+                             f'but input image has {image.shape} shape. Use '
+                             f'``channel_axis=-1`` for 2D RGB images.')
 
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)

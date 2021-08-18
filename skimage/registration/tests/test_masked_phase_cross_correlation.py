@@ -16,7 +16,7 @@ from skimage.registration._masked_phase_cross_correlation import (
 from skimage.registration import phase_cross_correlation
 
 
-def test_detrecated_masked_register_translation():
+def test_deprecated_masked_register_translation():
     reference_image, moving_image, _ = stereo_motorcycle()
     ref_mask = np.random.choice(
         [True, False], reference_image.shape, p=[3 / 4, 1 / 4])
