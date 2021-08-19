@@ -973,25 +973,24 @@ def _mean_std(image, w):
   
   
 def _only_mean(image, w):
-  
-    """Return local mean of each pixel using a
-    neighborhood defined by a rectangular window size ``w``.
-    The algorithm uses integral images to speedup computation.
+  """Return local mean of each pixel using a
+  neighborhood defined by a rectangular window size ``w``.
+  The algorithm uses integral images to speedup computation.
 
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    w : int, or iterable of int
-        Window size specified as a single odd integer (3, 5, 7, …),
-        or an iterable of length ``image.ndim`` containing only odd
-        integers (e.g. ``(1, 5, 5)``).
+   Parameters
+   ----------    
+   image : ndarray     
+   Input image.
+   w : int, or iterable of int
+       Window size specified as a single odd integer (3, 5, 7, …),
+       or an iterable of length ``image.ndim`` containing only odd
+       integers (e.g. ``(1, 5, 5)``).
 
-    Returns
-    -------
-    m : ndarray of float, same shape as ``image``
-        Local mean of the image.
-    """
+   Returns
+   -------
+   m : ndarray of float, same shape as ``image``
+       Local mean of the image.
+   """
 
   if not isinstance(w, Iterable):
       w = (w,) * image.ndim
