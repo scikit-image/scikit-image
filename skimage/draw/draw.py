@@ -331,7 +331,7 @@ def set_color(image, coords, color, alpha=1):
     color = np.array(color, ndmin=1, copy=False)
 
     if image.shape[-1] != color.shape[-1]:
-        raise ValueError(f'Color shape ({color.shape[0]}) must watch last '
+        raise ValueError(f'Color shape ({color.shape[0]}) must match last '
                           'image dimension ({image.shape[-1]}).')
 
     if np.isscalar(alpha):
