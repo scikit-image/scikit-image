@@ -861,7 +861,7 @@ def regionprops_table(label_image, intensity_image=None,
     >>>
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
-    >>> props = measure.regionprops_table(label_image, image_intensity=image,
+    >>> props = measure.regionprops_table(label_image, intensity_image=image,
     ...                                   properties=('label',),
     ...                                   extra_properties=(quartiles,))
     >>> import pandas as pd # doctest: +SKIP
