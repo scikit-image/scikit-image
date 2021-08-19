@@ -450,8 +450,8 @@ def slice_at_axis(sl, axis):
 
     Examples
     --------
-    >>> _slice_at_axis(slice(None, 3, -1), 1)
-    (slice(None, None, None), slice(None, 3, -1), (...,))
+    >>> slice_at_axis(slice(None, 3, -1), 1)
+    (slice(None, None, None), slice(None, 3, -1), Ellipsis)
     """
     return (slice(None),) * axis + (sl,) + (...,)
 
@@ -477,11 +477,11 @@ def reshape_nd(arr, ndim, dim):
     --------
     >>> rng = np.random.default_rng()
     >>> arr = rng.random(7)
-    >>> _reshape_nd(arr, 2, 0).shape
+    >>> reshape_nd(arr, 2, 0).shape
     (7, 1)
-    >>> _reshape_nd(arr, 3, 1).shape
+    >>> reshape_nd(arr, 3, 1).shape
     (1, 7, 1)
-    >>> _reshape_nd(arr, 4, -1).shape
+    >>> reshape_nd(arr, 4, -1).shape
     (1, 1, 1, 7)
     """
     if arr.ndim != 1:
