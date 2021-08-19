@@ -77,17 +77,25 @@ class TestRank():
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
+    @parametrize('outdt', [None, np.float32, np.float64])
     @parametrize('filter', all_rank_filters)
-    def test_rank_filter(self, filter):
+    def test_rank_filter(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
-            result = getattr(rank, filter)(self.image, self.footprint)
+            if outdt is not None:
+                out = np.zeros_like(expected, dtype=outdt)
+            else:
+                out = None
+            result = getattr(rank, filter)(self.image, self.footprint, out=out)
             if filter == "entropy":
                 # There may be some arch dependent rounding errors
                 # See the discussions in
                 # https://github.com/scikit-image/scikit-image/issues/3091
                 # https://github.com/scikit-image/scikit-image/issues/2528
+                if outdt is not None:
+                    # Adjust expected precision
+                    expected = expected.astype(outdt)
                 assert_allclose(expected, result, atol=0, rtol=1E-15)
             elif filter == "otsu":
                 # OTSU May also have some optimization dependent failures
@@ -104,6 +112,14 @@ class TestRank():
                 result[19, 18] = 172
                 assert_array_almost_equal(expected, result)
             else:
+                if outdt is not None:
+                    # Avoid rounding issues comparing to expected result
+                    if filter == 'sum':
+                        # sum test data seems to be 8-bit disguised as 16-bit
+                        datadt = np.uint8
+                    else:
+                        datadt = expected.dtype
+                    result = result.astype(datadt)
                 assert_array_almost_equal(expected, result)
 
         check()
@@ -114,16 +130,29 @@ class TestRank():
             getattr(rank, filter)(self.image.astype(np.uint8),
                                   selem=self.footprint)
 
+    @parametrize('outdt', [None, np.float32, np.float64])
     @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
                             'majority', 'maximum', 'mean', 'geometric_mean',
                             'subtract_mean', 'median', 'minimum', 'modal',
                             'enhance_contrast', 'pop', 'sum', 'threshold',
                             'noise_filter', 'entropy'])
-    def test_rank_filters_3D(self, filter):
+    def test_rank_filters_3D(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs_3d[filter]
-            result = getattr(rank, filter)(self.volume, self.footprint_3d)
+            if outdt is not None:
+                out = np.zeros_like(expected, dtype=outdt)
+            else:
+                out = None
+            result = getattr(rank, filter)(self.volume, self.footprint_3d, out=out)
+            if outdt is not None:
+                # Avoid rounding issues comparing to expected result
+                if filter == 'sum':
+                    # sum test data seems to be 8-bit disguised as 16-bit
+                    datadt = np.uint8
+                else:
+                    datadt = expected.dtype
+                result = result.astype(datadt)
             assert_array_almost_equal(expected, result)
 
         check()
