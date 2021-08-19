@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from skimage.transform import SimilarityTransform, warp, resize_local_mean
 import warnings
@@ -55,21 +56,16 @@ class WarpSuite:
 
 
 class ResizeLocalMeanSuite:
-    params = ([np.uint8, np.uint16, np.float32, np.float64],
-              [128, 512, 1024, 2048],
-              [128, 512, 1024],
-              [2, 3],
-              [2, 3],
-              [True, False]
+    params = ([np.float32, np.float64],
+              [(512, 512), (2048, 2048), (192, 192, 192)],
+              [(512, 512), (2048, 2048), (192, 192, 192)],
               )
-    param_names = ['dtype', 'shape_in', 'shape_out', 'ndim_in',
-                   'ndim_out', 'grid_mode']
+    param_names = ['dtype', 'shape_in', 'shape_out']
 
-    def setup(self, dtype, shape_in, shape_out, ndim_in, ndim_out, grid_mode):
-        self.shape_in = ndim_in * (shape_in, )
-        self.image = np.zeros(self.shape_in, dtype=dtype)
-        self.shape_out = ndim_out * (shape_out, )
-        self.grid_mode = grid_mode
+    timeout = 180
 
-    def time_resize_local_mean(self):
-        resize_local_mean(self.image, self.shape_out, self.grid_mode)
+    def setup(self, dtype, shape_in, shape_out):
+        self.image = np.zeros(shape_in, dtype=dtype)
+
+    def time_resize_local_mean(self, dtype, shape_in, shape_out):
+        resize_local_mean(self.image, shape_out)

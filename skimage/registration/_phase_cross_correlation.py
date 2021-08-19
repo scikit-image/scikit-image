@@ -4,7 +4,14 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-from .._shared.fft import fftmodule as fft
+# TODO: remove except case once minimum SciPy is >= 1.4
+try:
+    from scipy.fft import fftn, ifftn
+except ImportError:
+    # scipy < 1.4 does not have an fft module
+    from scipy.fftpack import fftn, ifftn
+from scipy.fftpack import fftfreq
+
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -66,8 +73,10 @@ def _upsampled_dft(data, upsampled_region_size,
 
     for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
         kernel = ((np.arange(ups_size) - ax_offset)[:, None]
-                  * fft.fftfreq(n_items, upsample_factor))
+                  * fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
+        # use kernel with same precision as the data
+        kernel = kernel.astype(data.dtype, copy=False)
 
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
@@ -201,22 +210,24 @@ def phase_cross_correlation(reference_image, moving_image, *,
         target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fft.fftn(reference_image)
-        target_freq = fft.fftn(moving_image)
+        src_freq = fftn(reference_image)
+        target_freq = fftn(moving_image)
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = fft.ifftn(image_product)
+    cross_correlation = ifftn(image_product)
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
-    shifts = np.stack(maxima).astype(np.float64)
+    float_dtype = image_product.real.dtype
+
+    shifts = np.stack(maxima).astype(float_dtype, copy=False)
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
@@ -229,11 +240,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
+        upsample_factor = np.array(upsample_factor, dtype=float_dtype)
         shifts = np.round(shifts * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
-        upsample_factor = np.array(upsample_factor, dtype=np.float64)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
@@ -245,9 +256,10 @@ def phase_cross_correlation(reference_image, moving_image, *,
                                   cross_correlation.shape)
         CCmax = cross_correlation[maxima]
 
-        maxima = np.stack(maxima).astype(np.float64) - dftshift
+        maxima = np.stack(maxima).astype(float_dtype, copy=False)
+        maxima -= dftshift
 
-        shifts = shifts + maxima / upsample_factor
+        shifts += maxima / upsample_factor
 
         if return_error:
             src_amp = np.sum(np.real(src_freq * src_freq.conj()))

@@ -24,7 +24,7 @@ class TrainableSegmenter(object):
         function computing features on all pixels of the image, to be passed
         to the classifier. The output should be of shape
         ``(m_features, *labels.shape)``. If None,
-        :func:`skimage.segmentation.multiscale_basic_features` is used.
+        :func:`skimage.feature.multiscale_basic_features` is used.
 
     Methods
     -------

@@ -4,10 +4,12 @@ from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.utils import deprecate_kwarg
 from .rank import generic
 
 
-def median(image, selem=None, out=None, mode='nearest', cval=0.0,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
            behavior='ndimage'):
     """Return local median of an image.
 
@@ -15,11 +17,11 @@ def median(image, selem=None, out=None, mode='nearest', cval=0.0,
     ----------
     image : array-like
         Input image.
-    selem : ndarray, optional
-        If ``behavior=='rank'``, ``selem`` is a 2-D array of 1's and 0's.
-        If ``behavior=='ndimage'``, ``selem`` is a N-D array of 1's and 0's
+    footprint : ndarray, optional
+        If ``behavior=='rank'``, ``footprint`` is a 2-D array of 1's and 0's.
+        If ``behavior=='ndimage'``, ``footprint`` is a N-D array of 1's and 0's
         with the same number of dimension than ``image``.
-        If None, ``selem`` will be a N-D array with 3 elements for each
+        If None, ``footprint`` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.)
     out : ndarray, (same dtype as image), optional
         If None, a new array is allocated.
@@ -71,8 +73,8 @@ def median(image, selem=None, out=None, mode='nearest', cval=0.0,
             warn("Change 'behavior' to 'ndimage' if you want to use the "
                  "parameters 'mode' or 'cval'. They will be discarded "
                  "otherwise.")
-        return generic.median(image, selem=selem, out=out)
-    if selem is None:
-        selem = ndi.generate_binary_structure(image.ndim, image.ndim)
-    return ndi.median_filter(image, footprint=selem, output=out, mode=mode,
+        return generic.median(image, footprint=footprint, out=out)
+    if footprint is None:
+        footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
+    return ndi.median_filter(image, footprint=footprint, output=out, mode=mode,
                              cval=cval)

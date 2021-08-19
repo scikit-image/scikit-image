@@ -32,7 +32,7 @@ def _gaussian_weight(array, sigma_squared, *, dtype=float):
     gaussian : ndarray
         The input array filtered by the Gaussian.
     """
-    return np.exp(-0.5 * (array ** 2  / sigma_squared), dtype=dtype)
+    return np.exp(-0.5 * (array ** 2 / sigma_squared), dtype=dtype)
 
 
 def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
@@ -177,7 +177,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> noisy = astro + 0.6 * astro.std() * rng.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
-    ...                              multichannel=True)
+    ...                              channel_axis=-1)
     """
     if channel_axis is not None:
         if image.ndim != 3:
@@ -208,7 +208,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
             raise ValueError("Bilateral filter is not implemented for "
                              "grayscale images of 3 or more dimensions, "
                              "but input image has {0} dimension. Use "
-                             "``multichannel=True`` for 2-D RGB "
+                             "``channel_axis=-1`` for 2-D RGB "
                              "images.".format(image.shape))
 
     if win_size is None:
@@ -237,7 +237,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     color_lut = _compute_color_lut(bins, sigma_color, max_value,
                                    dtype=image.dtype)
 
-    range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
+    range_lut = _compute_spatial_lut(win_size, sigma_spatial,
+                                     dtype=image.dtype)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
@@ -256,8 +257,10 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
-                       *, channel_axis=None, multichannel=False):
+@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def denoise_tv_bregman(image, weight, max_num_iter=100, eps=1e-3,
+                       isotropic=True, *, channel_axis=None,
+                       multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -279,7 +282,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
 
             SUM((u(n) - u(n-1))**2) < eps
 
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
@@ -327,18 +330,19 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
         channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
         for c in range(image.shape[-1]):
             # the algorithm below expects 3 dimensions to always be present.
-            # slicing the array in this fashion preserves the channel dimension for us
+            # slicing the array in this fashion preserves the channel dimension
+            # for us
             channel_in = np.ascontiguousarray(image[..., c:c+1])
 
             _denoise_tv_bregman(channel_in, image.dtype.type(weight),
-                                max_iter, eps, isotropic, channel_out)
+                                max_num_iter, eps, isotropic, channel_out)
 
             out[..., c] = channel_out[..., 0]
 
     else:
         image = np.ascontiguousarray(image)
 
-        _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+        _denoise_tv_bregman(image, image.dtype.type(weight), max_num_iter, eps,
                             isotropic, out)
 
     return np.squeeze(out[1:-1, 1:-1])
@@ -639,7 +643,6 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for image
-        dlen = wavelet.dec_len
         wavelet_levels = pywt.dwtn_max_level(image.shape, wavelet)
 
         # Skip coarsest wavelet scales (see Notes in docstring).
@@ -979,7 +982,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
     >>> sigma = 0.1
     >>> rng = np.random.default_rng()
     >>> img = img + sigma * rng.standard_normal(img.shape)
-    >>> sigma_hat = estimate_sigma(img, multichannel=False)
+    >>> sigma_hat = estimate_sigma(img, channel_axis=None)
     """
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim

@@ -15,6 +15,10 @@ https://scikit-image.org
 New Features
 ------------
 
+- Added support for processing images with channels located along any array
+  axis. This is in contrast to previous releases where channels were required
+  to be the last axis of an image. See more info on the new ``channel_axis``
+  argument under the API section of the release notes.
 - Added a new keyword only parameter ``random_state`` to
   ``morphology.medial_axis`` and ``restoration.unsupervised_wiener``.
 - Seeding random number generators will not give the same results as the
@@ -48,6 +52,12 @@ Improvements
 API Changes
 -----------
 
+- The ``multichannel`` boolean argument has been deprecated. All functions with
+  multichannel support now use an integer ``channel_axis`` to specify which
+  axis corresponds to channels. Setting ``channel_axis`` to None is used to
+  indicate that the image is grayscale. Specifically, existing code with
+  ``multichannel=True`` should be updated to use ``channel_axis=-1`` and code
+  with ``multichannel=False`` should now specify ``channel_axis=None``.
 - A default value has been added to ``measure.find_contours``, corresponding to
   the half distance between the min and max values of the image 
   #4862
@@ -70,12 +80,18 @@ Bugfixes
   (#4756).
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
+- Nonzero values at the image edge are no longer incorrectly marked as a
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
+
 
 Deprecations
 ------------
 
 - In ``measure.label``, the deprecated ``neighbors`` parameter has been
   removed.
+- The ``multichannel`` argument has been deprecated throughout the library and
+  will be removed in 1.0. The new ``channel_axis`` argument should be used
+  instead.
 
 
 Development process

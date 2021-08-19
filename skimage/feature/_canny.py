@@ -14,23 +14,42 @@ Original author: Lee Kamentsky
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage import generate_binary_structure, binary_erosion, label
+
 from ..filters import gaussian
-from .. import dtype_limits, img_as_float
+from .. import dtype_limits
 from .._shared.utils import check_nD
 
 
-def smooth_with_function_and_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels.
+def _preprocess(image, mask, sigma, mode, cval):
+    """Generate a smoothed image and an eroded mask.
+
+    The image is smoothed using a gaussian filter ignoring masked
+    pixels and the mask is eroded.
 
     Parameters
     ----------
     image : array
-        Image you want to smooth.
-    function : callable
-        A function that does image smoothing.
+        Image to be smoothed.
     mask : array
         Mask with 1's for significant pixels, 0's for masked pixels.
+    sigma : scalar or sequence of scalars
+        Standard deviation for Gaussian kernel. The standard
+        deviations of the Gaussian filter are given for each axis as a
+        sequence, or as a single number, in which case it is equal for
+        all axes.
+    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
+        The ``mode`` parameter determines how the array borders are
+        handled, where ``cval`` is the value when mode is equal to
+        'constant'.
+    cval : float, optional
+        Value to fill past edges of input if `mode` is 'constant'.
+
+    Returns
+    -------
+    smoothed_image : ndarray
+        The smoothed array
+    eroded_mask : ndarray
+        The eroded mask.
 
     Notes
     -----
@@ -42,16 +61,147 @@ def smooth_with_function_and_mask(image, function, mask):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
-    bleed_over = function(mask.astype(float))
-    masked_image = np.zeros(image.shape, image.dtype)
+
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
+                           preserve_range=False)
+    if mask is None:
+        # Smooth the masked image
+        smoothed_image = gaussian(image, **gaussian_kwargs)
+        eroded_mask = np.ones(image.shape, dtype=bool)
+        eroded_mask[:1, :] = 0
+        eroded_mask[-1:, :] = 0
+        eroded_mask[:, :1] = 0
+        eroded_mask[:, -1:] = 0
+        return smoothed_image, eroded_mask
+
+    masked_image = np.zeros_like(image)
     masked_image[mask] = image[mask]
-    smoothed_image = function(masked_image)
-    output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
-    return output_image
+
+    # Compute the fractional contribution of masked pixels by applying
+    # the function to the mask (which gets you the fraction of the
+    # pixel data that's due to significant points)
+    bleed_over = (
+        gaussian(mask.astype(float), **gaussian_kwargs) + np.finfo(float).eps
+    )
+
+    # Smooth the masked image
+    smoothed_image = gaussian(masked_image, **gaussian_kwargs)
+
+    # Lower the result by the bleed-over fraction, so you can
+    # recalibrate by dividing by the function on the mask to recover
+    # the effect of smoothing from just the significant pixels.
+    smoothed_image /= bleed_over
+
+    # Make the eroded mask. Setting the border value to zero will wipe
+    # out the image edges for us.
+    s = ndi.generate_binary_structure(2, 2)
+    eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
+
+    return smoothed_image, eroded_mask
 
 
-def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
-          use_quantiles=False):
+def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
+                      col_slices, out):
+    """Get the magnitudes shifted left to make a matrix of the points to
+    the right of pts. Similarly, shift left and down to get the points
+    to the top right of pts.
+    """
+    r_0, r_1, r_2, r_3 = row_slices
+    c_0, c_1, c_2, c_3 = col_slices
+    c1 = magnitude[r_0, c_0][pts[r_1, c_1]]
+    c2 = magnitude[r_2, c_2][pts[r_3, c_3]]
+    m = magnitude[pts]
+    w = w_num[pts] / w_denum[pts]
+    c_plus = c2 * w + c1 * (1 - w) <= m
+    c1 = magnitude[r_1, c_1][pts[r_0, c_0]]
+    c2 = magnitude[r_3, c_3][pts[r_2, c_2]]
+    c_minus = c2 * w + c1 * (1 - w) <= m
+    out[pts] = c_plus & c_minus
+
+    return out
+
+
+def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
+    """Edge thinning by non-maximum suppression.
+
+    Finds the normal to the edge at each point using the arctangent of the
+    ratio of the Y sobel over the X sobel - pragmatically, we can
+    look at the signs of X and Y and the relative magnitude of X vs Y
+    to sort the points into 4 categories: horizontal, vertical,
+    diagonal and antidiagonal.
+
+    Look in the normal and reverse directions to see if the values
+    in either of those directions are greater than the point in question.
+    Use interpolation (via _set_local_maxima) to get a mix of points
+    instead of picking the one that's the closest to the normal.
+    """
+    abs_isobel = np.abs(isobel)
+    abs_jsobel = np.abs(jsobel)
+
+    eroded_mask = eroded_mask & (magnitude > 0)
+
+    # Normals' orientations
+    is_horizontal = eroded_mask & (abs_isobel >= abs_jsobel)
+    is_vertical = eroded_mask & (abs_isobel <= abs_jsobel)
+    is_up = (isobel >= 0)
+    is_down = (isobel <= 0)
+    is_right = (jsobel >= 0)
+    is_left = (jsobel <= 0)
+    #
+    # --------- Find local maxima --------------
+    #
+    # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
+    # 90-135 degrees and 135-180 degrees.
+    #
+    local_maxima = np.zeros(magnitude.shape, bool)
+    # ----- 0 to 45 degrees ------
+    # Mix diagonal and horizontal
+    pts_plus = is_up & is_right
+    pts_minus = is_down & is_left
+    pts = ((pts_plus | pts_minus) & is_horizontal)
+    # Get the magnitudes shifted left to make a matrix of the points to the
+    # right of pts. Similarly, shift left and down to get the points to the
+    # top right of pts.
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_jsobel, abs_isobel,
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        local_maxima)
+    # ----- 45 to 90 degrees ------
+    # Mix diagonal and vertical
+    #
+    pts = ((pts_plus | pts_minus) & is_vertical)
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_isobel, abs_jsobel,
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        local_maxima)
+    # ----- 90 to 135 degrees ------
+    # Mix anti-diagonal and vertical
+    #
+    pts_plus = is_down & is_right
+    pts_minus = is_up & is_left
+    pts = ((pts_plus | pts_minus) & is_vertical)
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_isobel, abs_jsobel,
+        [slice(None), slice(None), slice(-1), slice(1, None)],
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        local_maxima)
+    # ----- 135 to 180 degrees ------
+    # Mix anti-diagonal and anti-horizontal
+    #
+    pts = ((pts_plus | pts_minus) & is_horizontal)
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_jsobel, abs_isobel,
+        [slice(-1), slice(1, None), slice(-1), slice(1, None)],
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        local_maxima)
+
+    return local_maxima
+
+
+def canny(image, sigma=1., low_threshold=None, high_threshold=None,
+          mask=None, use_quantiles=False, *, mode='constant', cval=0.0):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -69,9 +219,16 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
     use_quantiles : bool, optional
-        If True then treat low_threshold and high_threshold as quantiles of the
-        edge magnitude image, rather than absolute edge magnitude values. If True
-        then the thresholds must be in the range [0, 1].
+        If ``True`` then treat low_threshold and high_threshold as
+        quantiles of the edge magnitude image, rather than absolute
+        edge magnitude values. If ``True`` then the thresholds must be
+        in the range [0, 1].
+    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
+        The ``mode`` parameter determines how the array borders are
+        handled during Gaussian filtering, where ``cval`` is the value when
+        mode is equal to 'constant'.
+    cval : float, optional
+        Value to fill past edges of input if `mode` is 'constant'.
 
     Returns
     -------
@@ -124,37 +281,14 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results
     >>> edges2 = feature.canny(im, sigma=3)
+
     """
 
-    #
-    # The steps involved:
-    #
-    # * Smooth using the Gaussian with sigma above.
-    #
-    # * Apply the horizontal and vertical Sobel operators to get the gradients
-    #   within the image. The edge strength is the sum of the magnitudes
-    #   of the gradients in each direction.
-    #
-    # * Find the normal to the edge at each point using the arctangent of the
-    #   ratio of the Y sobel over the X sobel - pragmatically, we can
-    #   look at the signs of X and Y and the relative magnitude of X vs Y
-    #   to sort the points into 4 categories: horizontal, vertical,
-    #   diagonal and antidiagonal.
-    #
-    # * Look in the normal and reverse directions to see if the values
-    #   in either of those directions are greater than the point in question.
-    #   Use interpolation to get a mix of points instead of picking the one
-    #   that's the closest to the normal.
-    #
-    # * Label all points above the high threshold as edges.
-    # * Recursively label any point above the low threshold that is 8-connected
-    #   to a labeled point as an edge.
-    #
     # Regarding masks, any point touching a masked point will have a gradient
     # that is "infected" by the masked point, so it's enough to erode the
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
-    #
+
     check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
@@ -164,7 +298,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         if not(0.0 <= low_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
-        low_threshold = low_threshold / dtype_max
+        low_threshold /= dtype_max
 
     if high_threshold is None:
         high_threshold = 0.2
@@ -172,112 +306,28 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         if not(0.0 <= high_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
-        high_threshold = high_threshold / dtype_max
+        high_threshold /= dtype_max
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=bool)
+    if high_threshold < low_threshold:
+        raise ValueError("low_threshold should be lower then high_threshold")
 
-    def fsmooth(x):
-        return img_as_float(gaussian(x, sigma, mode='constant'))
+    # Image filtering
+    smoothed, eroded_mask = _preprocess(image, mask, sigma, mode, cval)
 
-    smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
+    # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
-    abs_isobel = np.abs(isobel)
-    abs_jsobel = np.abs(jsobel)
     magnitude = np.hypot(isobel, jsobel)
 
-    #
-    # Make the eroded mask. Setting the border value to zero will wipe
-    # out the image edges for us.
-    #
-    s = generate_binary_structure(2, 2)
-    eroded_mask = binary_erosion(mask, s, border_value=0)
-    eroded_mask = eroded_mask & (magnitude > 0)
-    #
-    #--------- Find local maxima --------------
-    #
-    # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
-    # 90-135 degrees and 135-180 degrees.
-    #
-    local_maxima = np.zeros(image.shape, bool)
-    #----- 0 to 45 degrees ------
-    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
-    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
-    # Get the magnitudes shifted left to make a matrix of the points to the
-    # right of pts. Similarly, shift left and down to get the points to the
-    # top right of pts.
-    c1 = magnitude[1:, :][pts[:-1, :]]
-    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
-    m = magnitude[pts]
-    w = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:-1, :][pts[1:, :]]
-    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
-    #----- 45 to 90 degrees ------
-    # Mix diagonal and vertical
-    #
-    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
-    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
-    c1 = magnitude[:, 1:][pts[:, :-1]]
-    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
-    m = magnitude[pts]
-    w = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:, :-1][pts[:, 1:]]
-    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
-    #----- 90 to 135 degrees ------
-    # Mix anti-diagonal and vertical
-    #
-    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
-    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
-    c1a = magnitude[:, 1:][pts[:, :-1]]
-    c2a = magnitude[:-1, 1:][pts[1:, :-1]]
-    m = magnitude[pts]
-    w = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus = c2a * w + c1a * (1.0 - w) <= m
-    c1 = magnitude[:, :-1][pts[:, 1:]]
-    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
-    c_minus = c2 * w + c1 * (1.0 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
-    #----- 135 to 180 degrees ------
-    # Mix anti-diagonal and anti-horizontal
-    #
-    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
-    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
-    pts = pts_plus | pts_minus
-    pts = eroded_mask & pts
-    c1 = magnitude[:-1, :][pts[1:, :]]
-    c2 = magnitude[:-1, 1:][pts[1:, :-1]]
-    m = magnitude[pts]
-    w = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[1:, :][pts[:-1, :]]
-    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
-
-    #
-    #---- If use_quantiles is set then calculate the thresholds to use
-    #
     if use_quantiles:
-        high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
-        low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
+        low_threshold, high_threshold = np.percentile(magnitude,
+                                                      [100.0 * low_threshold,
+                                                       100.0 * high_threshold])
 
-    #
-    #---- Create two masks at the two thresholds.
-    #
-    high_mask = local_maxima & (magnitude >= high_threshold)
+    # Non-maximum suppression
+    local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
+
+    # Double thresholding and edge traking
     low_mask = local_maxima & (magnitude >= low_threshold)
 
     #
@@ -285,14 +335,13 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     # some high_mask component in them
     #
     strel = np.ones((3, 3), bool)
-    labels, count = label(low_mask, strel)
+    labels, count = ndi.label(low_mask, strel)
     if count == 0:
         return low_mask
 
-    sums = (np.array(ndi.sum(high_mask, labels,
-                             np.arange(count, dtype=np.int32) + 1),
-                     copy=False, ndmin=1))
+    high_mask = local_maxima & (magnitude >= high_threshold)
+    nonzero_sums = np.unique(labels[high_mask])
     good_label = np.zeros((count + 1,), bool)
-    good_label[1:] = sums > 0
+    good_label[nonzero_sums] = True
     output_mask = good_label[labels]
     return output_mask

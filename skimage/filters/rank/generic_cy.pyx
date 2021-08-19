@@ -424,388 +424,388 @@ cdef inline void _kernel_majority(dtype_t_out* out, Py_ssize_t odepth,
 
 
 def _autolevel(dtype_t[:, ::1] image,
-               char[:, ::1] selem,
+               char[:, ::1] footprint,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_autolevel[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_autolevel[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _autolevel_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                  char[:, :, ::1] footprint,
+                  char[:, :, ::1] mask,
+                  dtype_t_out[:, :, :, ::1] out,
+                  signed char shift_x, signed char shift_y, signed char shift_z,
+                  Py_ssize_t n_bins):
 
-    _core_3D(_kernel_autolevel[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_autolevel[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _equalize(dtype_t[:, ::1] image,
-              char[:, ::1] selem,
+              char[:, ::1] footprint,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_equalize[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_equalize[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _equalize_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
+                 char[:, :, ::1] footprint,
                  char[:, :, ::1] mask,
                  dtype_t_out[:, :, :, ::1] out,
                  signed char shift_x, signed char shift_y, signed char shift_z,
                  Py_ssize_t n_bins):
 
-    _core_3D(_kernel_equalize[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_equalize[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _gradient(dtype_t[:, ::1] image,
-              char[:, ::1] selem,
+              char[:, ::1] footprint,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_gradient[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_gradient[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _gradient_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
+                 char[:, :, ::1] footprint,
                  char[:, :, ::1] mask,
                  dtype_t_out[:, :, :, ::1] out,
                  signed char shift_x, signed char shift_y, signed char shift_z,
                  Py_ssize_t n_bins):
 
-    _core_3D(_kernel_gradient[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_gradient[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _maximum(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
+             char[:, ::1] footprint,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_maximum[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_maximum[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _maximum_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                char[:, :, ::1] footprint,
+                char[:, :, ::1] mask,
+                dtype_t_out[:, :, :, ::1] out,
+                signed char shift_x, signed char shift_y, signed char shift_z,
+                Py_ssize_t n_bins):
 
-    _core_3D(_kernel_maximum[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_maximum[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _mean(dtype_t[:, ::1] image,
-          char[:, ::1] selem,
+          char[:, ::1] footprint,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_mean[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _mean_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+             char[:, :, ::1] footprint,
+             char[:, :, ::1] mask,
+             dtype_t_out[:, :, :, ::1] out,
+             signed char shift_x, signed char shift_y, signed char shift_z,
+             Py_ssize_t n_bins):
 
-    _core_3D(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_mean[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _geometric_mean(dtype_t[:, ::1] image,
-                    char[:, ::1] selem,
+                    char[:, ::1] footprint,
                     char[:, ::1] mask,
                     dtype_t_out[:, :, ::1] out,
                     signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_geometric_mean[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, 0, 0, 0, 0, n_bins)
+    _core(_kernel_geometric_mean[dtype_t_out, dtype_t], image, footprint, mask,
+          out, shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _geometric_mean_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                       char[:, :, ::1] footprint,
+                       char[:, :, ::1] mask,
+                       dtype_t_out[:, :, :, ::1] out,
+                       signed char shift_x, signed char shift_y, signed char shift_z,
+                       Py_ssize_t n_bins):
 
-    _core_3D(_kernel_geometric_mean[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_geometric_mean[dtype_t_out, dtype_t], image, footprint,
+             mask, out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _subtract_mean(dtype_t[:, ::1] image,
-                   char[:, ::1] selem,
+                   char[:, ::1] footprint,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
                    signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_subtract_mean[dtype_t_out, dtype_t], image, selem, mask,
+    _core(_kernel_subtract_mean[dtype_t_out, dtype_t], image, footprint, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _subtract_mean_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                      char[:, :, ::1] footprint,
+                      char[:, :, ::1] mask,
+                      dtype_t_out[:, :, :, ::1] out,
+                      signed char shift_x, signed char shift_y, signed char shift_z,
+                      Py_ssize_t n_bins):
 
-    _core_3D(_kernel_subtract_mean[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_subtract_mean[dtype_t_out, dtype_t], image, footprint,
+             mask, out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _median(dtype_t[:, ::1] image,
-            char[:, ::1] selem,
+            char[:, ::1] footprint,
             char[:, ::1] mask,
             dtype_t_out[:, :, ::1] out,
             signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_median[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_median[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _median_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+               char[:, :, ::1] footprint,
+               char[:, :, ::1] mask,
+               dtype_t_out[:, :, :, ::1] out,
+               signed char shift_x, signed char shift_y, signed char shift_z,
+               Py_ssize_t n_bins):
 
-    _core_3D(_kernel_median[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_median[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _minimum(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
+             char[:, ::1] footprint,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_minimum[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_minimum[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _minimum_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                char[:, :, ::1] footprint,
+                char[:, :, ::1] mask,
+                dtype_t_out[:, :, :, ::1] out,
+                signed char shift_x, signed char shift_y, signed char shift_z,
+                Py_ssize_t n_bins):
 
-    _core_3D(_kernel_minimum[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_minimum[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _enhance_contrast(dtype_t[:, ::1] image,
-                      char[:, ::1] selem,
+                      char[:, ::1] footprint,
                       char[:, ::1] mask,
                       dtype_t_out[:, :, ::1] out,
                       signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, selem, mask,
+    _core(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, footprint, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _enhance_contrast_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                         char[:, :, ::1] footprint,
+                         char[:, :, ::1] mask,
+                         dtype_t_out[:, :, :, ::1] out,
+                         signed char shift_x, signed char shift_y, signed char shift_z,
+                         Py_ssize_t n_bins):
 
-    _core_3D(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, footprint,
+             mask, out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _modal(dtype_t[:, ::1] image,
-           char[:, ::1] selem,
+           char[:, ::1] footprint,
            char[:, ::1] mask,
            dtype_t_out[:, :, ::1] out,
            signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_modal[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_modal[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _modal_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+              char[:, :, ::1] footprint,
+              char[:, :, ::1] mask,
+              dtype_t_out[:, :, :, ::1] out,
+              signed char shift_x, signed char shift_y, signed char shift_z,
+              Py_ssize_t n_bins):
 
-    _core_3D(_kernel_modal[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_modal[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _pop(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
+         char[:, ::1] footprint,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_pop[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _pop_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+            char[:, :, ::1] footprint,
+            char[:, :, ::1] mask,
+            dtype_t_out[:, :, :, ::1] out,
+            signed char shift_x, signed char shift_y, signed char shift_z,
+            Py_ssize_t n_bins):
 
-    _core_3D(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_pop[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _sum(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
+         char[:, ::1] footprint,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask,
+    _core(_kernel_sum[dtype_t_out, dtype_t], image, footprint, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _sum_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+            char[:, :, ::1] footprint,
+            char[:, :, ::1] mask,
+            dtype_t_out[:, :, :, ::1] out,
+            signed char shift_x, signed char shift_y, signed char shift_z,
+            Py_ssize_t n_bins):
 
-    _core_3D(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_sum[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _threshold(dtype_t[:, ::1] image,
-               char[:, ::1] selem,
+               char[:, ::1] footprint,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_threshold[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_threshold[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _threshold_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                  char[:, :, ::1] footprint,
+                  char[:, :, ::1] mask,
+                  dtype_t_out[:, :, :, ::1] out,
+                  signed char shift_x, signed char shift_y, signed char shift_z,
+                  Py_ssize_t n_bins):
 
-    _core_3D(_kernel_threshold[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_threshold[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _noise_filter(dtype_t[:, ::1] image,
-                  char[:, ::1] selem,
+                  char[:, ::1] footprint,
                   char[:, ::1] mask,
                   dtype_t_out[:, :, ::1] out,
                   signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_noise_filter[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, 0, 0, 0, 0, n_bins)
+    _core(_kernel_noise_filter[dtype_t_out, dtype_t], image, footprint, mask,
+          out, shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _noise_filter_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                     char[:, :, ::1] footprint,
+                     char[:, :, ::1] mask,
+                     dtype_t_out[:, :, :, ::1] out,
+                     signed char shift_x, signed char shift_y, signed char shift_z,
+                     Py_ssize_t n_bins):
 
-    _core_3D(_kernel_noise_filter[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_noise_filter[dtype_t_out, dtype_t], image, footprint,
+             mask, out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _entropy(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
+             char[:, ::1] footprint,
              char[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_entropy[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_entropy[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _entropy_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+                char[:, :, ::1] footprint,
+                char[:, :, ::1] mask,
+                dtype_t_out[:, :, :, ::1] out,
+                signed char shift_x, signed char shift_y, signed char shift_z,
+                Py_ssize_t n_bins):
 
-    _core_3D(_kernel_entropy[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_entropy[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _otsu(dtype_t[:, ::1] image,
-          char[:, ::1] selem,
+          char[:, ::1] footprint,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_otsu[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_otsu[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _otsu_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
-                 char[:, :, ::1] mask,
-                 dtype_t_out[:, :, :, ::1] out,
-                 signed char shift_x, signed char shift_y, signed char shift_z,
-                 Py_ssize_t n_bins):
+             char[:, :, ::1] footprint,
+             char[:, :, ::1] mask,
+             dtype_t_out[:, :, :, ::1] out,
+             signed char shift_x, signed char shift_y, signed char shift_z,
+             Py_ssize_t n_bins):
 
-    _core_3D(_kernel_otsu[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core_3D(_kernel_otsu[dtype_t_out, dtype_t], image, footprint, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
 
 
 def _windowed_hist(dtype_t[:, ::1] image,
-                   char[:, ::1] selem,
+                   char[:, ::1] footprint,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
                    signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_win_hist[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_win_hist[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _majority(dtype_t[:, ::1] image,
-              char[:, ::1] selem,
+              char[:, ::1] footprint,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
-    _core(_kernel_majority[dtype_t_out, dtype_t], image, selem, mask, out,
+    _core(_kernel_majority[dtype_t_out, dtype_t], image, footprint, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
 def _majority_3D(dtype_t[:, :, ::1] image,
-                 char[:, :, ::1] selem,
+                 char[:, :, ::1] footprint,
                  char[:, :, ::1] mask,
                  dtype_t_out[:, :, :, ::1] out,
                  signed char shift_x, signed char shift_y, signed char shift_z,
                  Py_ssize_t n_bins):
 
-    _core_3D(_kernel_majority[dtype_t_out, dtype_t], image, selem, mask, out,
-             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+    _core_3D(_kernel_majority[dtype_t_out, dtype_t], image, footprint, mask,
+             out, shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)

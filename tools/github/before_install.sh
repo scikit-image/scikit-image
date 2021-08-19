@@ -43,16 +43,10 @@ python -m pip install $PIP_FLAGS -r requirements/default.txt
 python -m pip list
 
 section () {
-    echo -en "travis_fold:start:$1\r"
     tools/header.py $1
 }
 
-section_end () {
-    echo -en "travis_fold:end:$1\r"
-}
-
 export -f section
-export -f section_end
 export -f retry
 
 set +ex

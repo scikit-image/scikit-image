@@ -1,18 +1,19 @@
 import itertools
 import math
-import numpy as np
-from scipy import ndimage as ndi
+import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
+
+import numpy as np
+from scipy import ndimage as ndi
+
+from .._shared.utils import check_nD, deprecate_kwarg, warn
 from ..exposure import histogram
-from .._shared.utils import check_nD, warn
+from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
+                                  _get_multiotsu_thresh_indices_lut)
 from ..transform import integral_image
 from ..util import dtype_limits
-from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
-                                  _get_multiotsu_thresh_indices)
-
-from ._sparse import _validate_window_size, _correlate_sparse
-
+from ._sparse import _correlate_sparse, _validate_window_size
 
 __all__ = ['try_all_threshold',
            'threshold_otsu',
@@ -53,6 +54,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Compute the image histogram for better performances
+    nbins = 256  # Default in threshold functions
+    hist = histogram(image.ravel(), nbins, source_range='image')
+
     # Handle default value
     methods = methods or {}
 
@@ -66,9 +71,13 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
+        # Use precomputed histogram for supporting functions
+        sig = inspect.signature(func)
+        _kwargs = dict(hist=hist) if 'hist' in sig.parameters else {}
+
         ax[i].set_title(name)
         try:
-            ax[i].imshow(func(image), cmap=plt.cm.gray)
+            ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
             ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
                        ha="center", va="center", transform=ax[i].transAxes)
@@ -212,8 +221,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         raise ValueError("len(block_size) must equal image.ndim.")
     block_size = tuple(block_size)
     if any(b % 2 == 0 for b in block_size):
-        raise ValueError("block_size must be odd! Given block_size"
-                         "{0} contains even values.".format(block_size))
+        raise ValueError(f'block_size must be odd! Given block_size '
+                         f'{block_size} contains even values.')
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -275,6 +284,14 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
+        
+        if counts[0] == 0 or counts[-1] == 0:
+            # Trim histogram from both ends by removing starting and
+            # ending zeroes as in histogram(..., source_range="image")
+            cond = counts > 0
+            start = np.argmax(cond)
+            end = cond.size - np.argmax(cond[::-1])
+            counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image'
@@ -322,9 +339,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     The input image must be grayscale.
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-              "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+        warn(f'threshold_otsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # Check if the image has more than one intensity value; if not, return that
     # value
@@ -674,9 +691,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = initial_guess - image_min
         image_max = np.max(image) + image_min
         if not 0 < t_next < np.max(image):
-            msg = ('The initial guess for threshold_li must be within the '
-                   'range of the image. Got {} for image min {} and max {} '
-                   .format(initial_guess, image_min, image_max))
+            msg = (f'The initial guess for threshold_li must be within the '
+                   f'range of the image. Got {initial_guess} for image min '
+                   f'{image_min} and max {image_max}.')
             raise ValueError(msg)
     else:
         raise TypeError('Incorrect type for `initial_guess`; should be '
@@ -710,7 +727,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
     The histogram of the input ``image`` is computed if not provided and
@@ -727,7 +745,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximum number of iterations to smooth the histogram.
     hist : array, or 2-tuple of arrays, optional
         Histogram to determine the threshold from and a corresponding array
@@ -784,7 +802,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     smooth_hist = counts.astype(np.float64, copy=False)
 
-    for counter in range(max_iter):
+    for counter in range(max_num_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
         maximum_idxs = find_local_maxima_idx(smooth_hist)
         if len(maximum_idxs) < 3:
@@ -792,7 +810,7 @@ def threshold_minimum(image=None, nbins=256, max_iter=10000, *, hist=None):
 
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
-    elif counter == max_iter - 1:
+    elif counter == max_num_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram'
                            'smoothing')
 
@@ -1202,9 +1220,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     """
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        msg = ("threshold_multiotsu is expected to work correctly only for "
-               "grayscale images; image shape {0} looks like an RGB image")
-        warn(msg.format(image.shape))
+        warn(f'threshold_multiotsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like '
+             f'that of an RGB image.')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
@@ -1215,9 +1233,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = ("The input image has only {} different values. "
-               "It can not be thresholded in {} classes")
-        raise ValueError(msg.format(nvalues, classes))
+        msg = (f'The input image has only {nvalues} different values. '
+               f'It cannot be thresholded in {classes} classes.')
+        raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:
