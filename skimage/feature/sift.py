@@ -467,36 +467,35 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             hist = np.empty(self.n_bins, dtype=float_dtype)
             avg_kernel = np.full((3,), 1 / 3, dtype=float_dtype)
             for k in range(len(yx)):
-                if np.all(p_min[k] > 0) and np.all(p_max[k] > p_min[k]):
-                    hist[:] = 0
+                hist[:] = 0
 
-                    # use the patch coordinates to get the gradient and then
-                    # normalize them
-                    r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
-                                       np.arange(p_min[k, 1], p_max[k, 1] + 1),
-                                       indexing='ij', sparse=True)
-                    gradient_row = gradient_space[o][0][r, c, scales[k]]
-                    gradient_col = gradient_space[o][1][r, c, scales[k]]
-                    r = r.astype(float_dtype, copy=False)
-                    c = c.astype(float_dtype, copy=False)
-                    r -= yx[k, 0]
-                    c -= yx[k, 1]
+                # use the patch coordinates to get the gradient and then
+                # normalize them
+                r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
+                                   np.arange(p_min[k, 1], p_max[k, 1] + 1),
+                                   indexing='ij', sparse=True)
+                gradient_row = gradient_space[o][0][r, c, scales[k]]
+                gradient_col = gradient_space[o][1][r, c, scales[k]]
+                r = r.astype(float_dtype, copy=False)
+                c = c.astype(float_dtype, copy=False)
+                r -= yx[k, 0]
+                c -= yx[k, 1]
 
-                    # gradient magnitude and angles
-                    magnitude = np.sqrt(np.square(gradient_row) + np.square(
-                        gradient_col))
-                    theta = np.mod(np.arctan2(gradient_col, gradient_row),
-                                   2 * np.pi)
+                # gradient magnitude and angles
+                magnitude = np.sqrt(np.square(gradient_row) + np.square(
+                    gradient_col))
+                theta = np.mod(np.arctan2(gradient_col, gradient_row),
+                               2 * np.pi)
 
-                    # more weight to center values
-                    kernel = np.exp(np.divide(r * r + c * c,
-                                              -2 * (self.lambda_ori
-                                                    * sigma[k]) ** 2))
+                # more weight to center values
+                kernel = np.exp(np.divide(r * r + c * c,
+                                          -2 * (self.lambda_ori
+                                                * sigma[k]) ** 2))
 
-                    # fill the histogram
-                    bins = np.floor((theta / (2 * np.pi) * self.n_bins + 0.5)
-                                    % self.n_bins).astype(np.int)
-                    np.add.at(hist, bins, kernel * magnitude)
+                # fill the histogram
+                bins = np.floor((theta / (2 * np.pi) * self.n_bins + 0.5)
+                                % self.n_bins).astype(np.int)
+                np.add.at(hist, bins, kernel * magnitude)
 
                 # smooth the histogram and find the maximum
                 hist = np.concatenate((hist[-6:], hist, hist[:6]))
@@ -505,29 +504,27 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 hist = hist[6:-6]
                 max_filter = ndi.maximum_filter(hist, [3], mode='wrap')
 
-                    # if an angle is in 80% percent range of the maximum, a
-                    # new keypoint is created for it
-                    maxima = np.nonzero(np.logical_and(
-                        hist >= (self.c_max * np.max(hist)),
-                        max_filter == hist))
+                # if an angle is in 80% percent range of the maximum, a
+                # new keypoint is created for it
+                maxima = np.nonzero(np.logical_and(
+                    hist >= (self.c_max * np.max(hist)),
+                    max_filter == hist))
 
-                    # save the angles
-                    for c, m in enumerate(maxima[0]):
-                        neigh = np.arange(m - 1, m + 2) % len(hist)
-                        # use neighbors to fit a parabola, to get more accurate
-                        # result
-                        ori = ((m + self._fit(hist[neigh]) + 0.5)
-                               * 2 * np.pi / self.n_bins)
-                        if ori > np.pi:
-                            ori -= 2 * np.pi
-                        if c == 0:
-                            orientations[key_count] = ori
-                        else:
-                            keypoint_indices.append(key_count)
-                            keypoint_angles.append(ori)
-                            keypoint_octave.append(o)
-                else:
-                    keypoints_valid[key_count] = False
+                # save the angles
+                for c, m in enumerate(maxima[0]):
+                    neigh = np.arange(m - 1, m + 2) % len(hist)
+                    # use neighbors to fit a parabola, to get more accurate
+                    # result
+                    ori = ((m + self._fit(hist[neigh]) + 0.5)
+                           * 2 * np.pi / self.n_bins)
+                    if ori > np.pi:
+                        ori -= 2 * np.pi
+                    if c == 0:
+                        orientations[key_count] = ori
+                    else:
+                        keypoint_indices.append(key_count)
+                        keypoint_angles.append(ori)
+                        keypoint_octave.append(o)
                 key_count += 1
         self.positions = np.concatenate(
             (positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
