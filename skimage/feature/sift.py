@@ -498,12 +498,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                     % self.n_bins).astype(np.int)
                     np.add.at(hist, bins, kernel * magnitude)
 
-                    # smooth the histogram and find the maximum
-                    hist = np.concatenate((hist[-3:], hist, hist[:3]))
-                    for _ in range(6):  # number of smoothings
-                        hist = np.convolve(hist, avg_kernel, mode='same')
-                    hist = hist[3:-3]
-                    max_filter = ndi.maximum_filter(hist, [3])
+                # smooth the histogram and find the maximum
+                hist = np.concatenate((hist[-6:], hist, hist[:6]))
+                for _ in range(6):  # number of smoothings
+                    hist = np.convolve(hist, avg_kernel, mode='same')
+                hist = hist[6:-6]
+                max_filter = ndi.maximum_filter(hist, [3], mode='wrap')
 
                     # if an angle is in 80% percent range of the maximum, a
                     # new keypoint is created for it
