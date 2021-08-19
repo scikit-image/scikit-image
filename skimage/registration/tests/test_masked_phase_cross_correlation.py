@@ -8,6 +8,8 @@ from skimage._shared.fft import fftmodule as fft
 from skimage._shared.testing import fetch, expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, stereo_motorcycle
+
+
 from skimage.io import imread
 from skimage.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
@@ -97,11 +99,9 @@ def test_masked_registration_padfield_data():
     for xi, yi in shifts:
 
         fixed_image = imread(
-            fetch('registration/tests/data/OriginalX{:d}Y{:d}.png'
-                  ''.format(xi, yi)))
+            fetch(f'registration/tests/data/OriginalX{xi}Y{yi}.png'))
         moving_image = imread(
-            fetch('registration/tests/data/TransformedX{:d}Y{:d}.png'
-                  ''.format(xi, yi)))
+            fetch(f'registration/tests/data/TransformedX{xi}Y{yi}.png'))
 
         # Valid pixels are 1
         fixed_mask = (fixed_image != 0)
