@@ -5,7 +5,7 @@
 
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport M_PI
+from libc.math cimport M_PI, floor
 
 from .._shared.fused_numerics cimport np_floats
 
@@ -165,3 +165,37 @@ cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
                 if is_local_min or is_local_max:
                     maxima_coords.append((r, c, s))
     return np.asarray(maxima_coords, dtype=np.intp)
+
+cpdef _oversample_bilin(np_floats[:, ::1] im_in, np_floats delta):
+    cdef:
+        Py_ssize_t n_r = im_in.shape[0]
+        Py_ssize_t n_c = im_in.shape[1]
+        Py_ssize_t n_r_out = int(n_r / delta)
+        Py_ssize_t n_c_out = int(n_c / delta)
+        Py_ssize_t r, c, rm, cm, rp, cp
+        np_floats r_out, c_out, fractional_r, fractional_c
+        np_floats[:, ::1] im_out = np.empty((n_r_out, n_c_out, ), dtype=float)
+
+    for r in range(n_r_out):
+        for c in range(n_c_out):
+            r_out, c_out = r * delta, c * delta
+            rm, cm = int(r_out), int(c_out)
+            rp, cp = rm + 1, cm + 1
+
+            if rp >= n_r:
+                rp = 2 * n_r - 1 - rp
+            if rm >= n_r:
+                rm = 2 * n_r - 1 - rm
+            if cp >= n_c:
+                cp = 2 * n_c - 1 - cp
+            if cm >= n_c:
+                cm = 2 * n_c - 1 - cm
+
+            fractional_r = r_out - floor(r_out)
+            fractional_c = c_out - floor(c_out)
+
+            im_out[r, c] = fractional_r * (fractional_c * im_in[rp, cp]
+                                           + (1 - fractional_c) * im_in[rp, cm])\
+                           + (1-fractional_r) * (fractional_c * im_in[rm, cp]
+                                                 + (1 - fractional_c) * im_in[rm, cm])
+    return np.asarray(im_out)
