@@ -969,8 +969,9 @@ def _mean_std(image, w):
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m, s
- 
+    return m, s 
+  
+  
 def _only_mean(image, w):
   
     """Return local mean of each pixel using a
