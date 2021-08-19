@@ -144,7 +144,8 @@ class TestRank():
                 out = np.zeros_like(expected, dtype=outdt)
             else:
                 out = None
-            result = getattr(rank, filter)(self.volume, self.footprint_3d, out=out)
+            result = getattr(rank, filter)(self.volume, self.footprint_3d,
+                                           out=out)
             if outdt is not None:
                 # Avoid rounding issues comparing to expected result
                 if filter == 'sum':
