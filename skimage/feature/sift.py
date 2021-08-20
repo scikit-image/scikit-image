@@ -718,10 +718,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         positions, scales, sigmas, octaves = self._find_localize_evaluate(
             dog_scalespace, image.shape)
-        if len(positions) == 0:
-            raise RuntimeError(
-                "SIFT found no features. Try passing in an image containing "
-                "greater intensity contrasts between adjacent pixels.")
 
         gradient_space = self._compute_orientation(positions, scales, sigmas,
                                                    octaves,
