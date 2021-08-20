@@ -1,12 +1,90 @@
-import numpy as np
+import math
 
-from scipy.ndimage.filters import maximum_filter
-from ..feature.util import (FeatureDetector, DescriptorExtractor)
-from ..feature import peak_local_max
-from ..util import img_as_float
+import numpy as np
+import scipy.ndimage as ndi
+
 from .._shared.utils import check_nD, _supported_float_type
-from ..transform import rescale
+from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
+from ..transform import rescale
+from ..util import img_as_float
+from ._sift import _local_max, _ori_distances, _update_histogram
+
+
+def _edgeness(hxx, hyy, hxy):
+    """Compute edgeness (eq. 18 of Otero et. al. IPOL paper)"""
+    trace = hxx + hyy
+    determinant = hxx * hyy - hxy * hxy
+    return (trace * trace) / determinant
+
+
+def _sparse_gradient(vol, positions):
+    """Gradient of a 3D volume at the provided `positions`.
+
+    For SIFT we only need the gradient at specific positions and do not need
+    the gradient at the edge positions, so can just use this simple
+    implementation instead of numpy.gradient.
+    """
+    p0 = positions[..., 0]
+    p1 = positions[..., 1]
+    p2 = positions[..., 2]
+    g0 = vol[p0 + 1, p1, p2] - vol[p0 - 1, p1, p2]
+    g0 *= 0.5
+    g1 = vol[p0, p1 + 1, p2] - vol[p0, p1 - 1, p2]
+    g1 *= 0.5
+    g2 = vol[p0, p1, p2 + 1] - vol[p0, p1, p2 - 1]
+    g2 *= 0.5
+    return g0, g1, g2
+
+
+def _hessian(d, positions):
+    """Compute the non-redundant 3D Hessian terms at the requested positions.
+
+    Source: "Anatomy of the SIFT Method"  p.380 (13)
+    """
+    p0 = positions[..., 0]
+    p1 = positions[..., 1]
+    p2 = positions[..., 2]
+    two_d0 = 2 * d[p0, p1, p2]
+    # 0 = row, 1 = col, 2 = octave
+    h00 = d[p0 - 1, p1, p2] + d[p0 + 1, p1, p2] - two_d0
+    h11 = d[p0, p1 - 1, p2] + d[p0, p1 + 1, p2] - two_d0
+    h22 = d[p0, p1, p2 - 1] + d[p0, p1, p2 + 1] - two_d0
+    h01 = 0.25 * (d[p0 + 1, p1 + 1, p2] - d[p0 - 1, p1 + 1, p2]
+                  - d[p0 + 1, p1 - 1, p2] + d[p0 - 1, p1 - 1, p2])
+    h02 = 0.25 * (d[p0 + 1, p1, p2 + 1] - d[p0 + 1, p1, p2 - 1]
+                  + d[p0 - 1, p1, p2 - 1] - d[p0 - 1, p1, p2 + 1])
+    h12 = 0.25 * (d[p0, p1 + 1, p2 + 1] - d[p0, p1 + 1, p2 - 1]
+                  + d[p0, p1 - 1, p2 - 1] - d[p0, p1 - 1, p2 + 1])
+    return (h00, h11, h22, h01, h02, h12)
+
+
+def _offsets(grad, hess):
+    """Compute position refinement offsets from gradient and Hessian.
+
+    This is equivalent to np.linalg.solve(-H, J) where H is the Hessian
+    matrix and J is the gradient (Jacobian).
+
+    This analytical solution is adapted from (BSD-licensed) C code by
+    Otero et. al (see SIFT docstring References).
+    """
+    h00, h11, h22, h01, h02, h12 = hess
+    g0, g1, g2 = grad
+    det = h00 * h11 * h22
+    det -= h00 * h12 * h12
+    det -= h01 * h01 * h22
+    det += 2 * h01 * h02 * h12
+    det -= h02 * h02 * h11
+    aa = (h11*h22 - h12*h12) / det
+    ab = (h02*h12 - h01*h22) / det
+    ac = (h01*h12 - h02*h11) / det
+    bb = (h00*h22 - h02*h02) / det
+    bc = (h01*h02 - h00*h12) / det
+    cc = (h00*h11 - h01*h01) / det
+    offset0 = -aa * g0 - ab * g1 - ac * g2
+    offset1 = -ab * g0 - bb * g1 - bc * g2
+    offset2 = -ac * g0 - bc * g1 - cc * g2
+    return np.stack((offset0, offset1, offset2), axis=-1)
 
 
 class SIFT(FeatureDetector, DescriptorExtractor):
@@ -19,7 +97,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             of 1 (no upscaling), 2 or 4. Method: Bi-cubic interpolation.
         n_octaves : int, optional
             Maximum number of octaves. With every octave the image size is
-            halved and the sigma doubled.
+            halved and the sigma doubled. The number of octaves will be
+            reduced as needed to keep at least 12 pixels along each dimension
+            at the smallest scale.
         n_scales : int, optional
             Maximum number of scales in every octave.
         sigma_min : float, optional
@@ -56,7 +136,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         n_ori : int, optional
             The number of bins in the histograms of the descriptor patch.
 
-
         Attributes
         ----------
         delta_min : float
@@ -81,17 +160,27 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         descriptors : (N, n_hist*n_hist*n_ori) array
             The descriptors of a keypoint.
 
+        Notes
+        -----
+        The SIFT algorithm was developed by David Lowe [1]_, [2]_. The
+        implementation here closely follows the detailed description in [3]_,
+        including use of the same default parameters.
 
         References
         ----------
-        .. [1] D.G. Lowe
-              "Object recognition from local scale-invariant features"
-              :DOI:`10.1109/ICCV.1999.790410`
+        .. [1] D.G. Lowe. "Object recognition from local scale-invariant
+               features", Proceedings of the Seventh IEEE International
+               Conference on Computer Vision, 1999, vol.2, pp. 1150-1157.
+               :DOI:`10.1109/ICCV.1999.790410`
 
-        .. [2] Ives Rey Otero and Mauricio Delbracio
-              "Anatomy of the SIFT Method"
-              Image Processing On Line, 4 (2014), pp. 370–396.
-              :DOI:`10.5201/ipol.2014.82`
+        .. [2] D.G. Lowe. "Distinctive Image Features from Scale-Invariant
+               Keypoints", International Journal of Computer Vision, 2004,
+               vol. 60, pp. 91–110.
+               :DOI:`10.1023/B:VISI.0000029664.99615.94`
+
+        .. [3] I. R. Otero and M. Delbracio. "Anatomy of the SIFT Method",
+               Image Processing On Line, 4 (2014), pp. 370–396.
+               :DOI:`10.5201/ipol.2014.82`
 
         Examples
         --------
@@ -108,23 +197,23 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         ...                             detector_extractor2.descriptors,
         ...                             max_ratio=0.6)
         >>> matches[10:15]
-        array([[ 11,  11],
-               [ 12, 568],
-               [ 13,  13],
-               [ 14, 569],
-               [ 15,  15]])
+        array([[ 10, 271],
+               [ 11, 275],
+               [ 12, 298],
+               [ 13, 272],
+               [ 14, 222]])
         >>> detector_extractor1.keypoints[matches[10:15, 0]]
-        array([[170, 241],
-               [341, 287],
-               [234,  13],
-               [232, 378],
-               [206, 307]])
+        array([[ 95, 214],
+               [ 97, 211],
+               [ 98, 188],
+               [102, 215],
+               [104, 262]])
         >>> detector_extractor2.keypoints[matches[10:15, 1]]
-        array([[271, 170],
-               [383,  95],
-               [499, 234],
-               [191, 260],
-               [205, 206]])
+        array([[297,  95],
+               [301,  97],
+               [323,  98],
+               [297, 102],
+               [249, 104]])
 
         """
 
@@ -148,10 +237,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.lambda_descr = lambda_descr
         self.n_hist = n_hist
         self.n_ori = n_ori
-
         self.delta_min = 1 / upsampling
-        self.deltas = (self.delta_min
-                       * np.power(2, np.arange(self.n_octaves - 1)))
+        self.deltas = self._deltas()
         self.scalespace_sigmas = None
         self.keypoints = None
         self.positions = None
@@ -162,10 +249,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.descriptors = None
 
     def _number_of_octaves(self, n, image_shape):
-        sMin = 12  # minimum size of last octave
-        s0 = np.min(image_shape)
-        return int(
-            np.min((n, (np.log(s0 / sMin) / np.log(2)) + self.upsampling)))
+        size_min = 12  # minimum size of last octave
+        s0 = min(image_shape) * self.upsampling
+        max_octaves = int(math.log2(s0 / size_min) + 1)
+        return max_octaves
+
+    def _deltas(self, dtype=float):
+        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
+        return deltas.astype(dtype, copy=False)
 
     def _create_scalespace(self, image):
         """Source: "Anatomy of the SIFT Method" Alg. 1
@@ -174,7 +265,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """
         scalespace = []
         dtype = image.dtype
-        self.deltas = self.deltas.astype(dtype)
         if self.upsampling > 1:
             image = rescale(image, self.upsampling, order=3)
 
@@ -185,110 +275,51 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(image,
-                         (1 / self.delta_min) * np.sqrt(
+                         (1 / self.delta_min) * math.sqrt(
                              self.sigma_min ** 2 - self.sigma_in ** 2),
                          mode='reflect')
+
+        # Eq. 10:  sigmas.shape = (n_octaves, n_scales + 3).
+        # The three extra scales are:
+        #    One for the differences needed for DoG and two auxilliary
+        #    images (one at either end) for peak_local_max with exclude
+        #    border = True (see Fig. 5)
+        # The smoothing doubles after n_scales steps.
+        tmp = np.power(2, np.arange(self.n_scales + 3) / self.n_scales)
+        tmp *= self.sigma_min
+        sigmas = (self.deltas[:, np.newaxis]
+                  / self.deltas[0] * tmp[np.newaxis, :])
+        self.scalespace_sigmas = sigmas
+
+        # Eq. 7: Gaussian smoothing depends on difference with previous sigma
+        #        gaussian_sigmas.shape = (n_octaves, n_scales + 2)
+        var_diff = np.diff(sigmas * sigmas, axis=1)
+        gaussian_sigmas = np.sqrt(var_diff) / self.deltas[:, np.newaxis]
 
         # after n_scales steps we doubled the smoothing
         k = 2 ** (1 / self.n_scales)
         # one octave is represented by a 3D image with depth (n_scales+x)
         for o in range(self.n_octaves):
-            delta = self.delta_min * 2 ** o
-            sigmas[o, 0] = current_sigma
-            octave = np.empty(image.shape + (self.n_scales + 3,), dtype=dtype)
-            octave[:, :, 0] = image
+            # Temporarily put scales axis first so octave[i] is C-contiguous
+            # (this makes Gaussian filtering faster).
+            octave = np.empty((self.n_scales + 3,) + image.shape, dtype=dtype,
+                              order='C')
+            octave[0] = image
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
-                octave[:, :, s] = gaussian(octave[..., s - 1],
-                                           ((1 / delta)
-                                            * np.sqrt((current_sigma * k) ** 2
-                                                      - current_sigma ** 2)),
-                                           mode='reflect')
-                current_sigma = current_sigma * k
-                sigmas[o, s] = current_sigma
-            scalespace.append(octave)
-            # downscale the image by taking every second pixel
-            image = octave[:, :, self.n_scales][::2, ::2]
-            current_sigma = sigmas[o, self.n_scales]
-        self.scalespace_sigmas = sigmas
+                gaussian(octave[s - 1],
+                         gaussian_sigmas[o, s - 1],
+                         mode='reflect', output=octave[s])
+            # move scales to last axis as expected by other methods
+            scalespace.append(np.moveaxis(octave, 0, -1))
+            if o < self.n_octaves - 1:
+                # downscale the image by taking every second pixel
+                image = octave[self.n_scales][::2, ::2]
         return scalespace
 
     def _inrange(self, a, dim):
         return ((a[:, 0] > 0) & (a[:, 0] < dim[0] - 1)
                 & (a[:, 1] > 0) & (a[:, 1] < dim[1] - 1))
-
-    def _hessian(self, h, d, positions):
-        """Source: "Anatomy of the SIFT Method"  p.380 (13)"""
-        h[:, 0, 0] = (d[positions[:, 0] - 1,
-                        positions[:, 1],
-                        positions[:, 2]]
-                      + d[positions[:, 0] + 1,
-                          positions[:, 1],
-                          positions[:, 2]]
-                      - 2 * d[
-                          positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2]])
-
-        h[:, 1, 1] = (d[positions[:, 0],
-                        positions[:, 1] - 1,
-                        positions[:, 2]]
-                      + d[positions[:, 0],
-                          positions[:, 1] + 1,
-                          positions[:, 2]]
-                      - 2 * d[
-                          positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2]])
-
-        h[:, 2, 2] = (d[positions[:, 0],
-                        positions[:, 1],
-                        positions[:, 2] - 1]
-                      + d[positions[:, 0],
-                          positions[:, 1],
-                          positions[:, 2] + 1]
-                      - 2 * d[positions[:, 0],
-                              positions[:, 1],
-                              positions[:, 2]])
-
-        h[:, 1, 0] = h[:, 0, 1] = 0.25 * (d[positions[:, 0] + 1,
-                                            positions[:, 1] + 1,
-                                            positions[:, 2]]
-                                          - d[positions[:, 0] - 1,
-                                              positions[:, 1] + 1,
-                                              positions[:, 2]]
-                                          - d[positions[:, 0] + 1,
-                                              positions[:, 1] - 1,
-                                              positions[:, 2]]
-                                          + d[positions[:, 0] - 1,
-                                              positions[:, 1] - 1,
-                                              positions[:, 2]])
-
-        h[:, 2, 0] = h[:, 0, 2] = 0.25 * (d[positions[:, 0] + 1,
-                                            positions[:, 1],
-                                            positions[:, 2] + 1]
-                                          - d[positions[:, 0] + 1,
-                                              positions[:, 1],
-                                              positions[:, 2] - 1]
-                                          + d[positions[:, 0] - 1,
-                                              positions[:, 1],
-                                              positions[:, 2] - 1]
-                                          - d[positions[:, 0] - 1,
-                                              positions[:, 1],
-                                              positions[:, 2] + 1])
-
-        h[:, 2, 1] = h[:, 1, 2] = 0.25 * (d[positions[:, 0],
-                                            positions[:, 1] + 1,
-                                            positions[:, 2] + 1]
-                                          - d[positions[:, 0],
-                                              positions[:, 1] + 1,
-                                              positions[:, 2] - 1]
-                                          + d[positions[:, 0],
-                                              positions[:, 1] - 1,
-                                              positions[:, 2] - 1]
-                                          - d[positions[:, 0],
-                                              positions[:, 1] - 1,
-                                              positions[:, 2] + 1])
 
     def _find_localize_evaluate(self, dogspace, img_shape):
         """Source: "Anatomy of the SIFT Method" Alg. 4-9
@@ -305,62 +336,69 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         dtype = dogspace[0].dtype
         for o, (octave, delta) in enumerate(zip(dogspace, self.deltas)):
             # find extrema
-            maxima = peak_local_max(octave, threshold_abs=threshold)
-            minima = peak_local_max(-octave, threshold_abs=threshold)
-            keys = np.vstack((maxima, minima))
+            keys = _local_max(np.ascontiguousarray(octave), threshold)
+            if keys.size == 0:
+                continue
 
             # localize extrema
-            dim = octave.shape
-            off = np.empty_like(keys, dtype=dtype)  # offset and Jacobian
-            J = np.empty_like(keys, dtype=dtype)
-            H = np.empty((len(keys), 3, 3), dtype=dtype)  # Hessian
-            # take first derivative of the whole octave
-            grad = np.gradient(octave)
+            oshape = octave.shape
             # mask for all extrema that still have to be tested
-            still_in = np.ones(len(keys), dtype=bool)
-            for i in range(5):
-                still_in = np.logical_and(still_in, self._inrange(keys, dim))
-                # Jacoby of all extrema
-                J = np.swapaxes(np.array([ax[keys[still_in, 0],
-                                             keys[still_in, 1],
-                                             keys[still_in, 2]] for ax in grad]
-                                         ), 0, 1)
-                self._hessian(H, octave, keys)
-                off = np.linalg.solve(-H, J)  # offset of the extremum
+            refinement_iterations = 5
+            offset_max = 0.6
+            for i in range(refinement_iterations):
+                if i > 0:
+                    # exclude any keys that have moved out of bounds
+                    keys = keys[self._inrange(keys, oshape), :]
+
+                # Jacobian and Hessian of all extrema
+                grad = _sparse_gradient(octave, keys)
+                hess = _hessian(octave, keys)
+
+                # solve for offset of the extremum
+                off = _offsets(grad, hess)
+                if i == refinement_iterations - 1:
+                    break
                 # offset is too big and an increase would not bring us out of
                 # bounds
-                wrong_position_pos = np.logical_and(off > 0.5,
-                                                    keys + 1 < tuple(
-                                                        [a - 1 for a in dim]))
-                wrong_position_neg = np.logical_and(off < -0.5, keys - 1 > 0)
+                wrong_position_pos = np.logical_and(
+                    off > offset_max,
+                    keys + 1 < tuple([a - 1 for a in oshape])
+                )
+                wrong_position_neg = np.logical_and(off < -offset_max, keys - 1 > 0)
                 if (not np.any(np.logical_or(wrong_position_neg,
-                                             wrong_position_pos))) or i == 4:
+                                             wrong_position_pos))):
                     break
-                keys[np.where(wrong_position_pos)] += 1
-                keys[np.where(wrong_position_neg)] -= 1
+                keys[wrong_position_pos] += 1
+                keys[wrong_position_neg] -= 1
+
             # mask for all extrema that have been localized successfully
-            finished = np.all(np.abs(off) < 0.5, axis=1)
+            finished = np.all(np.abs(off) < offset_max, axis=1)
             keys = keys[finished]
+            off = off[finished]
+            grad = [g[finished] for g in grad]
+
             # value of extremum in octave
             vals = octave[keys[:, 0], keys[:, 1], keys[:, 2]]
-            J = J[finished]
-            off = off[finished]
             # values at interpolated point
-            w = vals + 0.5 * np.sum(J * off, axis=1)
-            H = H[finished, :2, :2]
+            w = vals
+            for i in range(3):
+                w += 0.5 * grad[i] * off[:, i]
+
+            h00, h11, h01 = \
+                hess[0][finished], hess[1][finished], hess[3][finished]
+
             sigmaratio = (self.scalespace_sigmas[0, 1]
                           / self.scalespace_sigmas[0, 0])
 
-            contrast_threshold = self.c_dog / self.n_scales
-            edge_threshold = np.square(self.c_edge + 1) / self.c_edge
-
             # filter for contrast, edgeness and borders
+            contrast_threshold = self.c_dog
             contrast_filter = np.abs(w) > contrast_threshold
-            eig, _ = np.linalg.eig(H[contrast_filter])
-            trace = eig[:, 1] + eig[:, 0]
-            determinant = eig[:, 1] * eig[:, 0]
-            edge_respone = np.square(trace) / determinant
-            edge_filter = np.abs(edge_respone) <= edge_threshold
+
+            edge_threshold = np.square(self.c_edge + 1) / self.c_edge
+            edge_response = _edgeness(h00[contrast_filter],
+                                      h11[contrast_filter],
+                                      h01[contrast_filter])
+            edge_filter = np.abs(edge_response) <= edge_threshold
 
             keys = keys[contrast_filter][edge_filter]
             off = off[contrast_filter][edge_filter]
@@ -376,10 +414,17 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
 
-        octave_indices = np.hstack([np.full(len(p), i)
-                                    for i, p in enumerate(extrema_pos)])
-        return np.vstack(extrema_pos), np.hstack(extrema_scales), np.hstack(
-            extrema_sigmas), octave_indices
+        if not extrema_pos:
+            raise RuntimeError(
+                "SIFT found no features. Try passing in an image containing "
+                "greater intensity contrasts between adjacent pixels.")
+
+        octave_indices = np.concatenate([np.full(len(p), i)
+                                        for i, p in enumerate(extrema_pos)])
+        extrema_pos = np.concatenate(extrema_pos)
+        extrema_scales = np.concatenate(extrema_scales)
+        extrema_sigmas = np.concatenate(extrema_sigmas)
+        return extrema_pos, extrema_scales, extrema_sigmas, octave_indices
 
     def _fit(self, h):
         """Refine the position of the peak by fitting it to a parabola"""
@@ -390,13 +435,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         """Source: "Anatomy of the SIFT Method" Alg. 11
         Calculates the orientation of the gradient around every keypoint
         """
-        gradientSpace = []
+        gradient_space = []
         # list for keypoints that have more than one reference orientation
         keypoint_indices = []
         keypoint_angles = []
         keypoint_octave = []
         keypoints_valid = np.ones_like(sigmas_oct, dtype=bool)
-        orientations = np.zeros_like(sigmas_oct, dtype=positions_oct.dtype)
+        float_dtype = gaussian_scalespace[0].dtype
+        orientations = np.zeros_like(sigmas_oct, dtype=float_dtype)
         key_count = 0
         for o in range(self.n_octaves):
             in_oct = octaves == o
@@ -405,40 +451,46 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             sigmas = sigmas_oct[in_oct]
             octave = gaussian_scalespace[o]
 
-            gradientSpace.append(np.gradient(octave))
+            gradient_space.append(np.gradient(octave))
             delta = self.deltas[o]
-            dim = octave.shape[0:2]
-            yx = positions / delta  # convert to octaves dimensions
+            oshape = octave.shape[0:2]
+            # convert to octave's dimensions
+            yx = positions / delta
             sigma = sigmas / delta
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
-            Min = np.maximum(0, np.add(np.subtract(yx, radius[:, np.newaxis]),
-                                       0.5)).astype(np.int)
-            Max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
-                             (dim[0] - 1, dim[1] - 1)).astype(np.int)
-
+            p_min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
+            p_max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
+                               (oshape[0] - 1, oshape[1] - 1)).astype(int)
+            # orientation histogram
+            hist = np.empty(self.n_bins, dtype=float_dtype)
+            avg_kernel = np.full((3,), 1 / 3, dtype=float_dtype)
             for k in range(len(yx)):
-                if np.all(Min[k] > 0) and np.all(Max[k] > Min[k]):
-                    hist = np.zeros(self.n_bins)  # orientation histogram
+                if np.all(p_min[k] > 0) and np.all(p_max[k] > p_min[k]):
+                    hist[:] = 0
 
                     # use the patch coordinates to get the gradient and then
                     # normalize them
-                    n, m = np.mgrid[Min[k, 0]:(Max[k, 0] + 1),
-                                    Min[k, 1]: (Max[k, 1] + 1)]
-                    gradientY = gradientSpace[o][0][n, m, scales[k]]
-                    gradientX = gradientSpace[o][1][n, m, scales[k]]
-                    n = np.subtract(n, yx[k, 0])
-                    m = np.subtract(m, yx[k, 1])
+                    r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0] + 1),
+                                       np.arange(p_min[k, 1], p_max[k, 1] + 1),
+                                       indexing='ij', sparse=True)
+                    gradient_row = gradient_space[o][0][r, c, scales[k]]
+                    gradient_col = gradient_space[o][1][r, c, scales[k]]
+                    r = r.astype(float_dtype, copy=False)
+                    c = c.astype(float_dtype, copy=False)
+                    r -= yx[k, 0]
+                    c -= yx[k, 1]
 
-                    magnitude = np.sqrt(np.square(gradientY) + np.square(
-                        gradientX))  # gradient magnitude
-                    theta = np.mod(np.arctan2(gradientX, gradientY),
-                                   2 * np.pi)  # angles
+                    # gradient magnitude and angles
+                    magnitude = np.sqrt(np.square(gradient_row) + np.square(
+                        gradient_col))
+                    theta = np.mod(np.arctan2(gradient_col, gradient_row),
+                                   2 * np.pi)
+
                     # more weight to center values
-                    kernel = np.exp(-np.divide(np.add(np.square(n),
-                                                      np.square(m)),
-                                               2 * (self.lambda_ori
+                    kernel = np.exp(np.divide(r * r + c * c,
+                                              -2 * (self.lambda_ori
                                                     * sigma[k]) ** 2))
 
                     # fill the histogram
@@ -447,14 +499,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     np.add.at(hist, bins, kernel * magnitude)
 
                     # smooth the histogram and find the maximum
-                    hist = np.hstack((hist[-3:], hist, hist[:3]))
+                    hist = np.concatenate((hist[-3:], hist, hist[:3]))
                     for _ in range(6):  # number of smoothings
-                        hist = np.convolve(hist, np.ones(3) / 3, mode='same')
+                        hist = np.convolve(hist, avg_kernel, mode='same')
                     hist = hist[3:-3]
-                    max_filter = maximum_filter(hist, [3])
+                    max_filter = ndi.maximum_filter(hist, [3])
+
                     # if an angle is in 80% percent range of the maximum, a
                     # new keypoint is created for it
-                    maxima = np.where(np.logical_and(
+                    maxima = np.nonzero(np.logical_and(
                         hist >= (self.c_max * np.max(hist)),
                         max_filter == hist))
 
@@ -476,133 +529,114 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 else:
                     keypoints_valid[key_count] = False
                 key_count += 1
-        self.positions = np.vstack(
+        self.positions = np.concatenate(
             (positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
-        self.scales = np.hstack(
+        self.scales = np.concatenate(
             (scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
-        self.sigmas = np.hstack(
+        self.sigmas = np.concatenate(
             (sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
-        self.orientations = np.hstack(
+        self.orientations = np.concatenate(
             (orientations[keypoints_valid], keypoint_angles))
-        self.octaves = np.hstack(
+        self.octaves = np.concatenate(
             (octaves[keypoints_valid], keypoint_octave))
-        # return the gradientspace to reuse it to find the descriptor
-        return gradientSpace
+        # return the gradient_space to reuse it to find the descriptor
+        return gradient_space
 
-    def _rotate(self, y, x, angle):
-        c = np.cos(angle)
-        s = np.sin(angle)
-        rY = (c * y - s * x)
-        rX = (s * y + c * x)
-        return rY, rX
+    def _rotate(self, row, col, angle):
+        c = math.cos(angle)
+        s = math.sin(angle)
+        rot_row = c * row + s * col
+        rot_col = -s * row + c * col
+        return rot_row, rot_col
 
-    def _compute_descriptor(self, gradientspace):
+    def _compute_descriptor(self, gradient_space):
         """Source: "Anatomy of the SIFT Method" Alg. 12
         Calculates the descriptor for every keypoint
         """
-        nKey = len(self.scales)
-        self.descriptors = np.empty((nKey, self.n_hist ** 2 * self.n_ori),
+        n_key = len(self.scales)
+        self.descriptors = np.empty((n_key, self.n_hist ** 2 * self.n_ori),
                                     dtype=np.uint8)
-        key_count = 0
-        key_numbers = np.arange(nKey)
+
+        float_dtype = gradient_space[0][0].dtype
+        # indices of the histograms
+        hists = np.arange(1, self.n_hist + 1, dtype=float_dtype)
+        # indices of the bins
+        bins = np.arange(1, self.n_ori + 1, dtype=float_dtype)
+
+        key_numbers = np.arange(n_key)
         for o in range(self.n_octaves):
             in_oct = self.octaves == o
-            if np.count_nonzero(in_oct) == 0:
+            if not np.any(in_oct):
                 continue
             positions = self.positions[in_oct]
             scales = self.scales[in_oct]
             sigmas = self.sigmas[in_oct]
             orientations = self.orientations[in_oct]
             numbers = key_numbers[in_oct]
-            gradient = gradientspace[o]
+            gradient = gradient_space[o]
 
             delta = self.deltas[o]
             dim = gradient[0].shape[0:2]
-            yx = positions / delta
+            center_pos = positions / delta
             sigma = sigmas / delta
 
             # dimensions of the patch
             radius = self.lambda_descr * (1 + 1 / self.n_hist) * sigma
-            radiusPatch = np.sqrt(2) * radius
-            Min = np.array(
-                np.maximum(0, yx - radiusPatch[:, np.newaxis] + 0.5),
+            radius_patch = math.sqrt(2) * radius
+            p_min = np.asarray(
+                np.maximum(0, center_pos - radius_patch[:, np.newaxis] + 0.5),
                 dtype=int)
-            Max = np.array(
-                np.minimum(yx + radiusPatch[:, np.newaxis] + 0.5,
+            p_max = np.asarray(
+                np.minimum(center_pos + radius_patch[:, np.newaxis] + 0.5,
                            (dim[0] - 1, dim[1] - 1)), dtype=int)
 
-            for k in range(len(Max)):
-                histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori))
-                m, n = np.mgrid[Min[k, 0]:Max[k, 0],
-                                Min[k, 1]: Max[k, 1]]  # the patch
-                y_mn = np.copy(m) - yx[k, 0]  # normalized coordinates
-                x_mn = np.copy(n) - yx[k, 1]
-                y_mn, x_mn = self._rotate(y_mn, x_mn, -orientations[k])
+            for k in range(len(p_max)):
+                rad_k = radius[k]
+                ori = orientations[k]
+                histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori),
+                                      dtype=float_dtype)
+                # the patch
+                r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
+                                   np.arange(p_min[k, 1], p_max[k, 1]),
+                                   indexing='ij', sparse=True)
+                # normalized coordinates
+                r_norm = np.subtract(r, center_pos[k, 0], dtype=float_dtype)
+                c_norm = np.subtract(c, center_pos[k, 1], dtype=float_dtype)
+                r_norm, c_norm = self._rotate(r_norm, c_norm, ori)
 
-                inRadius = np.maximum(np.abs(y_mn), np.abs(x_mn)) < radius[k]
-                y_mn, x_mn = y_mn[inRadius], x_mn[inRadius]
-                m, n = m[inRadius], n[inRadius]
+                # select coordinates and gradient values within the patch
+                inside = np.maximum(np.abs(r_norm), np.abs(c_norm)) < rad_k
+                r_norm, c_norm = r_norm[inside], c_norm[inside]
+                r_idx, c_idx = np.nonzero(inside)
+                r = r[r_idx, 0]
+                c = c[0, c_idx]
+                gradient_row = gradient[0][r, c, scales[k]]
+                gradient_col = gradient[1][r, c, scales[k]]
+                # compute the (relative) gradient orientation
+                theta = np.arctan2(gradient_col, gradient_row) - ori
+                lam_sig = self.lambda_descr * sigma[k]
+                # Gaussian weighted kernel magnitude
+                kernel = np.exp((r_norm * r_norm + c_norm * c_norm)
+                                / (-2 * lam_sig ** 2))
+                magnitude = np.sqrt(gradient_row * gradient_row
+                                    + gradient_col * gradient_col) * kernel
 
-                gradientY = gradient[0][m, n, scales[k]]
-                gradientX = gradient[1][m, n, scales[k]]
-
-                theta = np.mod(
-                    np.arctan2(gradientX, gradientY) - orientations[k],
-                    2 * np.pi)
-                kernel = np.exp(-(np.square(y_mn) + np.square(x_mn))
-                                / (2 * (self.lambda_descr * sigma[k]) ** 2))
-                magnitude = np.sqrt(np.square(gradientY)
-                                    + np.square(gradientX)) * kernel
-
-                # indices of the histograms
-                hists = np.arange(1, self.n_hist + 1)
-                # indices of the bins
-                bins = np.arange(1, self.n_ori + 1)
-                yj_xi = ((hists - (1 + self.n_hist) / 2)
-                         * ((2 * self.lambda_descr * sigma[k]) / self.n_hist))
-                ok = (2 * np.pi * bins) / self.n_ori
+                lam_sig_ratio = 2 * lam_sig / self.n_hist
+                rc_bins = (hists - (1 + self.n_hist) / 2) * lam_sig_ratio
+                rc_bin_spacing = lam_sig_ratio
+                ori_bins = (2 * np.pi * bins) / self.n_ori
 
                 # distances to the histograms and bins
-                dist_y = np.abs(np.subtract.outer(yj_xi, y_mn))
-                dist_x = np.abs(np.subtract.outer(yj_xi, x_mn))
-                dist_t = np.abs(np.mod(np.subtract.outer(ok, theta),
-                                       2 * np.pi))
+                dist_r = np.abs(np.subtract.outer(rc_bins, r_norm))
+                dist_c = np.abs(np.subtract.outer(rc_bins, c_norm))
 
-                # the histograms/bins that get the contribution
-                near_y = dist_y <= ((self.lambda_descr * 2 * sigma[k])
-                                    / self.n_hist)
-                near_x = dist_x <= ((self.lambda_descr * 2 * sigma[k])
-                                    / self.n_hist)
-                near_t = np.argmin(dist_t, axis=0)
-                near_t_val = np.min(dist_t, axis=0)
+                # the orientation histograms/bins that get the contribution
+                near_t, near_t_val = _ori_distances(ori_bins, theta)
 
-                # every contribution in y direction is combined with every in
-                # x direction
-                # for example y: histogram 3 and 4, x: histogram 2
-                # -> contribute to (3,2) and (4,2)
-                comb = np.logical_and(near_x.T[:, None, :],
-                                      near_y.T[:, :, None])
-                comb_pos = np.where(comb)
-
-                # the weights/contributions are shared bilinearly between the
-                # histograms
-                w0 = ((1 - (self.n_hist / (2 * self.lambda_descr * sigma[k]))
-                       * dist_y[comb_pos[1], comb_pos[0]])
-                      * (1 - (self.n_hist / (2 * self.lambda_descr * sigma[k]))
-                         * dist_x[comb_pos[2], comb_pos[0]])
-                      * magnitude[comb_pos[0]])
-
-                # the weight is shared linearly between the 2 nearest bins
-                w1 = w0 * ((self.n_ori / (2 * np.pi))
-                           * near_t_val[comb_pos[0]])
-                w2 = w0 * (1 - (self.n_ori / (2 * np.pi))
-                           * near_t_val[comb_pos[0]])
-                k_index = near_t[comb_pos[0]]
-                np.add.at(histograms, (comb_pos[1], comb_pos[2], k_index), w1)
-                np.add.at(histograms,
-                          (comb_pos[1], comb_pos[2],
-                           np.mod((k_index + 1), self.n_ori)),
-                          w2)
+                # create the histogram
+                n_patch = len(magnitude)
+                _update_histogram(histograms, near_t, near_t_val, magnitude,
+                                  dist_r, dist_c, rc_bin_spacing)
 
                 # convert the histograms to a 1d descriptor
                 histograms = histograms.flatten()
@@ -610,11 +644,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 histograms = np.minimum(histograms,
                                         0.2 * np.linalg.norm(histograms))
                 # normalize the descriptor
-                descriptor = np.minimum(
-                    np.floor((512 * histograms) / np.linalg.norm(histograms)),
-                    255).astype(np.uint8)
+                descriptor = (512 * histograms) / np.linalg.norm(histograms)
+                # quantize the descriptor
+                descriptor = np.minimum(np.floor(descriptor), 255)
                 self.descriptors[numbers[k], :] = descriptor
-                key_count += 1
 
     def detect(self, image):
         """Detect the keypoints.
@@ -631,6 +664,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -639,10 +673,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         positions, scales, sigmas, octaves = self._find_localize_evaluate(
             dog_scalespace, image.shape)
-        if len(positions) == 0:
-            raise RuntimeError(
-                "SIFT found no features. Try passing in an image containing "
-                "greater intensity contrasts between adjacent pixels.")
 
         self._compute_orientation(positions, scales, sigmas, octaves,
                                   gaussian_scalespace)
@@ -664,13 +694,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
-        gradientSpace = [np.gradient(octave) for octave in
-                         gaussian_scalespace]
+        gradient_space = [np.gradient(octave) for octave in
+                          gaussian_scalespace]
 
-        self._compute_descriptor(gradientSpace)
+        self._compute_descriptor(gradient_space)
 
     def detect_and_extract(self, image):
         """Detect the keypoints and extract their descriptors.
@@ -687,6 +718,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         image = image.astype(float_dtype, copy=False)
 
         self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -700,9 +732,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 "SIFT found no features. Try passing in an image containing "
                 "greater intensity contrasts between adjacent pixels.")
 
-        gradientSpace = self._compute_orientation(positions, scales, sigmas,
-                                                  octaves, gaussian_scalespace)
+        gradient_space = self._compute_orientation(positions, scales, sigmas,
+                                                   octaves,
+                                                   gaussian_scalespace)
 
-        self._compute_descriptor(gradientSpace)
+        self._compute_descriptor(gradient_space)
 
         self.keypoints = self.positions.round().astype(np.int)
