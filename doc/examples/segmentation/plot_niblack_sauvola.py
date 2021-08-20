@@ -1,6 +1,6 @@
 """
 ================================
-Niblack,Sauvola,Singh Thresholding
+Niblack,Sauvola and Singh Thresholding
 ================================
 
 Niblack,Sauvola and Singh thresholds are local thresholding techniques that are
