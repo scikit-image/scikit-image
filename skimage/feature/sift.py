@@ -264,7 +264,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         scalespace = []
         dtype = image.dtype
         if self.upsampling > 1:
-            image = _oversample_bilin(image, 1/self.upsampling)
+            image = _oversample_bilin(image, self.deltas[0])
 
         # all sigmas for the gaussian scalespace
         sigmas = np.empty((self.n_octaves,
