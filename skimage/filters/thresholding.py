@@ -972,7 +972,7 @@ def _mean_std(image, w):
     return m, s
   
   
-  def _only_mean(image, w):
+def _only_mean(image, w):
   """Return local mean of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation.
