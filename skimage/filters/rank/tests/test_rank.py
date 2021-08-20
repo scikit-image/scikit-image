@@ -114,12 +114,7 @@ class TestRank():
             else:
                 if outdt is not None:
                     # Avoid rounding issues comparing to expected result
-                    if filter == 'sum':
-                        # sum test data seems to be 8-bit disguised as 16-bit
-                        datadt = np.uint8
-                    else:
-                        datadt = expected.dtype
-                    result = result.astype(datadt)
+                    result = result.astype(expected.dtype)
                 assert_array_almost_equal(expected, result)
 
         check()
