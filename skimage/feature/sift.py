@@ -7,8 +7,8 @@ from .._shared.utils import check_nD, _supported_float_type
 from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
 from ..util import img_as_float
-from ._sift import _oversample_bilin, _local_max, _ori_distances, \
-    _update_histogram
+from ._sift import (_local_max, _ori_distances, _oversample_bilin,
+                    _update_histogram)
 
 
 def _edgeness(hxx, hyy, hxy):
