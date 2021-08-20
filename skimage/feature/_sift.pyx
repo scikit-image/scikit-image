@@ -174,7 +174,12 @@ cpdef _oversample_bilin(np_floats[:, ::1] im_in, np_floats delta):
         Py_ssize_t n_c_out = int(n_c / delta)
         Py_ssize_t r, c, rm, cm, rp, cp
         np_floats r_out, c_out, fractional_r, fractional_c
-        np_floats[:, ::1] im_out = np.empty((n_r_out, n_c_out, ), dtype=float)
+
+    if np_floats == cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+    cdef np_floats[:, ::1] im_out = np.empty((n_r_out, n_c_out, ), dtype=dtype)
 
     for r in range(n_r_out):
         for c in range(n_c_out):
