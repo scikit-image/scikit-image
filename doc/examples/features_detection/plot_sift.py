@@ -7,12 +7,13 @@ This example demonstrates the SIFT feature detection and its description
 algorithm.
 
 """
+import matplotlib.pyplot as plt
 import numpy as np
+
 from skimage import data
 from skimage import transform
-from skimage.feature import (match_descriptors, SIFT, plot_matches)
 from skimage.color import rgb2gray
-import matplotlib.pyplot as plt
+from skimage.feature import match_descriptors, plot_matches, SIFT
 
 img1 = rgb2gray(data.astronaut())
 img2 = transform.rotate(img1, 180)
