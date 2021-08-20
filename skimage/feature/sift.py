@@ -75,12 +75,12 @@ def _offsets(grad, hess):
     det -= h01 * h01 * h22
     det += 2 * h01 * h02 * h12
     det -= h02 * h02 * h11
-    aa = (h11*h22 - h12*h12) / det
-    ab = (h02*h12 - h01*h22) / det
-    ac = (h01*h12 - h02*h11) / det
-    bb = (h00*h22 - h02*h02) / det
-    bc = (h01*h02 - h00*h12) / det
-    cc = (h00*h11 - h01*h01) / det
+    aa = (h11 * h22 - h12 * h12) / det
+    ab = (h02 * h12 - h01 * h22) / det
+    ac = (h01 * h12 - h02 * h11) / det
+    bb = (h00 * h22 - h02 * h02) / det
+    bc = (h01 * h02 - h00 * h12) / det
+    cc = (h00 * h11 - h01 * h01) / det
     offset0 = -aa * g0 - ab * g1 - ac * g2
     offset1 = -ab * g0 - bb * g1 - bc * g2
     offset2 = -ac * g0 - bc * g1 - cc * g2
@@ -254,7 +254,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         max_octaves = int(math.log2(s0 / size_min) + 1)
         if max_octaves < self.n_octaves:
             self.n_octaves = max_octaves
-
 
     def _deltas(self, dtype=float):
         deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
