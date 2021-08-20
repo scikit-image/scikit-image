@@ -7,7 +7,8 @@ from .._shared.utils import check_nD, _supported_float_type
 from ..feature.util import (FeatureDetector, DescriptorExtractor)
 from ..filters import gaussian
 from ..util import img_as_float
-from ._sift import _oversample_bilin, _local_max, _ori_distances, _update_histogram
+from ._sift import _oversample_bilin, _local_max, _ori_distances, \
+    _update_histogram
 
 def _edgeness(hxx, hyy, hxy):
     """Compute edgeness (eq. 18 of Otero et. al. IPOL paper)"""
@@ -334,7 +335,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # localize extrema
             oshape = octave.shape
-            # mask for all extrema that still have to be tested
             refinement_iterations = 5
             offset_max = 0.6
             for i in range(refinement_iterations):
@@ -356,7 +356,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     off > offset_max,
                     keys + 1 < tuple([a - 1 for a in oshape])
                 )
-                wrong_position_neg = np.logical_and(off < -offset_max, keys - 1 > 0)
+                wrong_position_neg = np.logical_and(
+                    off < -offset_max,
+                    keys - 1 > 0
+                )
                 if (not np.any(np.logical_or(wrong_position_neg,
                                              wrong_position_pos))):
                     break
