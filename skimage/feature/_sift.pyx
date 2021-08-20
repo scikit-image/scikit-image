@@ -70,7 +70,7 @@ cpdef _update_histogram(np_floats[:, :, ::1] histograms,
 
     Parameters
     ----------
-    histogram : (n_hist, n_hist, n_ori) ndarray
+    histograms : (n_hist, n_hist, n_ori) ndarray
         An array of zeros that will contain the histogram output. `n_ori` is
         the number of orientation bins and `n_hist` is the number of spatial
         bins along each axis.
