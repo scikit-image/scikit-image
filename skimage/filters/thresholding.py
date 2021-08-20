@@ -1047,7 +1047,7 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
     This algorithm is originally designed for text recognition.
     References
     ----------
-    [1] T Romen Singh, Sudipta Roy, O Imocha Singh, 
+    [1] T Romen Singh, Sudipta Roy, O Imocha Singh,
         Tejmani Sinam, Kh Manglem Singh.
         "A New Local Adaptive Thresholding Technique in Binarization." IJCSI
     International Journal of Computer Science Issues. 2011; 8(6-2): 271-276.
