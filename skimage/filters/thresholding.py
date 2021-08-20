@@ -971,7 +971,7 @@ def _mean_std(image, w):
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
     return m, s
 
- 
+
 def _only_mean(image, w):
     """Return local mean of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
