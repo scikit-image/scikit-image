@@ -267,6 +267,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         scalespace = []
         dtype = image.dtype
         if self.upsampling > 1:
+            image = np.ascontiguousarray(image)        
             image = _oversample_bilin(image, self.deltas[0])
 
         # smooth to sigma_min, assuming sigma_in
