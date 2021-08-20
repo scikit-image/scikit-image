@@ -248,11 +248,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.octaves = None
         self.descriptors = None
 
-    def _number_of_octaves(self, n, image_shape):
+    def _set_number_of_octaves(self, image_shape):
         size_min = 12  # minimum size of last octave
         s0 = min(image_shape) * self.upsampling
         max_octaves = int(math.log2(s0 / size_min) + 1)
-        return max_octaves
+        if max_octaves < self.n_octaves:
+            self.n_octaves = max_octaves
+
 
     def _deltas(self, dtype=float):
         deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
@@ -654,7 +656,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
 
-        self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self._set_number_of_octaves(image.shape)
         self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
@@ -684,7 +686,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
 
-        self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self._set_number_of_octaves(image.shape)
         self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
@@ -708,7 +710,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
 
-        self.n_octaves = self._number_of_octaves(self.n_octaves, image.shape)
+        self._set_number_of_octaves(image.shape)
         self.deltas = self._deltas(float_dtype)
 
         gaussian_scalespace = self._create_scalespace(image)
