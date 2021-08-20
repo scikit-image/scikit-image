@@ -435,7 +435,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         keypoint_indices = []
         keypoint_angles = []
         keypoint_octave = []
-        keypoints_valid = np.ones_like(sigmas_oct, dtype=bool)
         float_dtype = gaussian_scalespace[0].dtype
         orientations = np.zeros_like(sigmas_oct, dtype=float_dtype)
         key_count = 0
@@ -522,15 +521,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                         keypoint_octave.append(o)
                 key_count += 1
         self.positions = np.concatenate(
-            (positions_oct[keypoints_valid], positions_oct[keypoint_indices]))
+            (positions_oct, positions_oct[keypoint_indices]))
         self.scales = np.concatenate(
-            (scales_oct[keypoints_valid], scales_oct[keypoint_indices]))
+            (scales_oct, scales_oct[keypoint_indices]))
         self.sigmas = np.concatenate(
-            (sigmas_oct[keypoints_valid], sigmas_oct[keypoint_indices]))
+            (sigmas_oct, sigmas_oct[keypoint_indices]))
         self.orientations = np.concatenate(
-            (orientations[keypoints_valid], keypoint_angles))
+            (orientations, keypoint_angles))
         self.octaves = np.concatenate(
-            (octaves[keypoints_valid], keypoint_octave))
+            (octaves, keypoint_octave))
         # return the gradient_space to reuse it to find the descriptor
         return gradient_space
 
