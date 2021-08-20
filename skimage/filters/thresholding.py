@@ -997,24 +997,28 @@ def _only_mean(image, w):
     pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
-    # padded_sq = padded * padded
 
     integral = integral_image(padded)
-    # integral_sq = integral_image(padded_sq)
+    #padded *= padded
+    #integral_sq = integral_image(padded)
 
-    kern = np.zeros(tuple(k + 1 for k in w))
-    for indices in itertools.product(*([[0, -1]] * image.ndim)):
-        kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+    # Create lists of non-zero kernel indices and values
+    kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
+    kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
+                     for indices in kernel_indices]
 
     total_window_size = np.prod(w)
-    sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, pad_width) / total_window_size
-    # sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    # g2 = crop(sum_sq_full, pad_width) / total_window_size
+    kernel_shape = tuple(_w + 1 for _w in w)
+    m = _correlate_sparse(integral, kernel_shape, kernel_indices,
+                          kernel_values)
+    m /= total_window_size
+    #g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
+                           #kernel_values)
+    #g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
-    # s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m  # , s
+    #s = np.sqrt(np.clip(g2 - m * m, 0, None))
+    return m #,s
 
 
 def threshold_singh(image, window_size=15, k=0.2, r=None):
