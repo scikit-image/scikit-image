@@ -266,11 +266,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         if self.upsampling > 1:
             image = _oversample_bilin(image, self.deltas[0])
 
-        # all sigmas for the gaussian scalespace
-        sigmas = np.empty((self.n_octaves,
-                           self.n_scales + 3), dtype=dtype)
-        current_sigma = self.sigma_min
-
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(image,
                          (1 / self.delta_min) * math.sqrt(
@@ -285,6 +280,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         # The smoothing doubles after n_scales steps.
         tmp = np.power(2, np.arange(self.n_scales + 3) / self.n_scales)
         tmp *= self.sigma_min
+        # all sigmas for the gaussian scalespace
         sigmas = (self.deltas[:, np.newaxis]
                   / self.deltas[0] * tmp[np.newaxis, :])
         self.scalespace_sigmas = sigmas
@@ -294,8 +290,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         var_diff = np.diff(sigmas * sigmas, axis=1)
         gaussian_sigmas = np.sqrt(var_diff) / self.deltas[:, np.newaxis]
 
-        # after n_scales steps we doubled the smoothing
-        k = 2 ** (1 / self.n_scales)
         # one octave is represented by a 3D image with depth (n_scales+x)
         for o in range(self.n_octaves):
             # Temporarily put scales axis first so octave[i] is C-contiguous
@@ -629,7 +623,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 near_t, near_t_val = _ori_distances(ori_bins, theta)
 
                 # create the histogram
-                n_patch = len(magnitude)
                 _update_histogram(histograms, near_t, near_t_val, magnitude,
                                   dist_r, dist_c, rc_bin_spacing)
 
