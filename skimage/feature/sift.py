@@ -10,6 +10,7 @@ from ..util import img_as_float
 from ._sift import _oversample_bilin, _local_max, _ori_distances, \
     _update_histogram
 
+
 def _edgeness(hxx, hyy, hxy):
     """Compute edgeness (eq. 18 of Otero et. al. IPOL paper)"""
     trace = hxx + hyy
@@ -415,7 +416,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 "greater intensity contrasts between adjacent pixels.")
 
         octave_indices = np.concatenate([np.full(len(p), i)
-                                        for i, p in enumerate(extrema_pos)])
+                                         for i, p in enumerate(extrema_pos)])
         extrema_pos = np.concatenate(extrema_pos)
         extrema_scales = np.concatenate(extrema_scales)
         extrema_sigmas = np.concatenate(extrema_sigmas)
