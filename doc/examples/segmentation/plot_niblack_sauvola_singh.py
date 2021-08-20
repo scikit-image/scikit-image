@@ -20,10 +20,10 @@ window that contains the surrounding pixels.
        binarization," Pattern Recognition 33(2),
        pp. 225-236, 2000.
        :DOI:`10.1016/S0031-3203(99)00055-2`
-.. [3] T Romen Singh, Sudipta Roy, O Imocha Singh, 
+.. [3] T Romen Singh, Sudipta Roy, O Imocha Singh,
        Tejmani Sinam, Kh Manglem Singh.
-       "A New Local Adaptive Thresholding Technique in Binarization." 
-       International Journal of Computer Science Issues, 
+       "A New Local Adaptive Thresholding Technique in Binarization."
+       International Journal of Computer Science Issues,
        2011; 8(6-2): 271-276.
 """
 import matplotlib
