@@ -1061,7 +1061,7 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
 
     m = _only_mean(image, window_size)
     d = image - m
- 
+
     return m * (1 + k * ((d / 1 - d) - 1))
 
 
