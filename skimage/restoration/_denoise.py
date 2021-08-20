@@ -275,7 +275,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
     weight : float
         Denoising weight. The smaller the `weight`, the more denoising (at
         the expense of less similarity to the `input`). The regularization
-        parameter `lambda` is chosen as `2 * weight`. Default weight is 5.0.
+        parameter `lambda` is chosen as `2 * weight`.
     eps : float, optional
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when::

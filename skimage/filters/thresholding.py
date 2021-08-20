@@ -157,7 +157,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
         Grayscale input image.
     block_size : int or sequence of int
         Odd size of pixel neighborhood which is used to calculate the
-        threshold value (e.g. 3, 5, 7, ..., 21, ...). Default block_size is 3.
+        threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
