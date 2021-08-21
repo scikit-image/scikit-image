@@ -92,7 +92,10 @@ class ThresholdLi:
     """Benchmark for threshold_li in scikit-image."""
 
     def setup(self):
-        self.image = data.eagle()
+        try:
+            self.image = data.eagle()
+        except ValueError:
+            raise NotImplementedError("eagle data unavailable")
         self.image_float32 = self.image.astype(np.float32)
 
     def time_integer_image(self):
