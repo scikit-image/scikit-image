@@ -36,7 +36,7 @@ def _weight_mean_color(graph, src, dst, n):
         difference of the mean color between node `dst` and `n`.
     """
 
-    diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
+    diff = graph.nodes[dst]['mean color'] - graph.nodes[n]['mean color']
     diff = np.linalg.norm(diff)
     return {'weight': diff}
 
@@ -53,14 +53,14 @@ def merge_mean_color(graph, src, dst):
     src, dst : int
         The vertices in `graph` to be merged.
     """
-    graph.node[dst]['total color'] += graph.node[src]['total color']
-    graph.node[dst]['pixel count'] += graph.node[src]['pixel count']
-    graph.node[dst]['mean color'] = (graph.node[dst]['total color'] /
-                                     graph.node[dst]['pixel count'])
+    graph.nodes[dst]['total color'] += graph.nodes[src]['total color']
+    graph.nodes[dst]['pixel count'] += graph.nodes[src]['pixel count']
+    graph.nodes[dst]['mean color'] = (graph.nodes[dst]['total color'] /
+                                      graph.nodes[dst]['pixel count'])
 
 
 img = data.coffee()
-labels = segmentation.slic(img, compactness=30, n_segments=400)
+labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_mean_color(img, labels)
 
 labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
@@ -68,7 +68,7 @@ labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
                                    merge_func=merge_mean_color,
                                    weight_func=_weight_mean_color)
 
-out = color.label2rgb(labels2, img, kind='avg')
+out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
 io.imshow(out)
 io.show()

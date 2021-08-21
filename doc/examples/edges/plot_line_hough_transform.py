@@ -23,13 +23,14 @@ the length of that segment, :math:`r`, and the angle it makes with the x-axis,
 The Hough transform constructs a histogram array representing the parameter
 space (i.e., an :math:`M \\times N` matrix, for :math:`M` different values of
 the radius and :math:`N` different values of :math:`\\theta`).  For each
-parameter combination, :math:`r` and :math:`\\theta`, we then find the number of
-non-zero pixels in the input image that would fall close to the corresponding
-line, and increment the array at position :math:`(r, \\theta)` appropriately.
+parameter combination, :math:`r` and :math:`\\theta`, we then find the number
+of non-zero pixels in the input image that would fall close to the
+corresponding line, and increment the array at position :math:`(r, \\theta)`
+appropriately.
 
 We can think of each non-zero pixel "voting" for potential line candidates. The
 local maxima in the resulting histogram indicates the parameters of the most
-probably lines. In our example, the maxima occur at 45 and 135 degrees,
+probable lines. In our example, the maxima occur at 45 and 135 degrees,
 corresponding to the normal vector angles of each line.
 
 Another approach is the Progressive Probabilistic Hough Transform [2]_. It is
@@ -55,11 +56,16 @@ References
        Conference on Computer Vision and Pattern Recognition, 1999.
 
 """
+
+######################
+# Line Hough Transform
+# ====================
+
 import numpy as np
 
-from skimage.transform import (hough_line, hough_line_peaks,
-                               probabilistic_hough_line)
+from skimage.transform import hough_line, hough_line_peaks
 from skimage.feature import canny
+from skimage.draw import line
 from skimage import data
 
 import matplotlib.pyplot as plt
@@ -67,13 +73,16 @@ from matplotlib import cm
 
 
 # Constructing test image
-image = np.zeros((100, 100))
-idx = np.arange(25, 75)
-image[idx[::-1], idx] = 255
+image = np.zeros((200, 200))
+idx = np.arange(25, 175)
 image[idx, idx] = 255
+image[line(45, 25, 25, 175)] = 255
+image[line(25, 135, 175, 155)] = 255
 
 # Classic straight-line Hough transform
-h, theta, d = hough_line(image)
+# Set a precision of 0.5 degree.
+tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360, endpoint=False)
+h, theta, d = hough_line(image, theta=tested_angles)
 
 # Generating figure 1
 fig, axes = plt.subplots(1, 3, figsize=(15, 6))
@@ -83,26 +92,35 @@ ax[0].imshow(image, cmap=cm.gray)
 ax[0].set_title('Input image')
 ax[0].set_axis_off()
 
-ax[1].imshow(np.log(1 + h),
-             extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]), d[-1], d[0]],
-             cmap=cm.gray, aspect=1/1.5)
+angle_step = 0.5 * np.diff(theta).mean()
+d_step = 0.5 * np.diff(d).mean()
+bounds = [np.rad2deg(theta[0] - angle_step),
+          np.rad2deg(theta[-1] + angle_step),
+          d[-1] + d_step, d[0] - d_step]
+ax[1].imshow(np.log(1 + h), extent=bounds, cmap=cm.gray, aspect=1 / 1.5)
 ax[1].set_title('Hough transform')
 ax[1].set_xlabel('Angles (degrees)')
 ax[1].set_ylabel('Distance (pixels)')
 ax[1].axis('image')
 
 ax[2].imshow(image, cmap=cm.gray)
-for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
-    y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
-    y1 = (dist - image.shape[1] * np.cos(angle)) / np.sin(angle)
-    ax[2].plot((0, image.shape[1]), (y0, y1), '-r')
-ax[2].set_xlim((0, image.shape[1]))
 ax[2].set_ylim((image.shape[0], 0))
 ax[2].set_axis_off()
 ax[2].set_title('Detected lines')
 
+for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
+    (x0, y0) = dist * np.array([np.cos(angle), np.sin(angle)])
+    ax[2].axline((x0, y0), slope=np.tan(angle + np.pi/2))
+
 plt.tight_layout()
 plt.show()
+
+
+###############################
+# Probabilistic Hough Transform
+# =============================
+
+from skimage.transform import probabilistic_hough_line
 
 # Line finding using the Probabilistic Hough Transform
 image = data.camera()

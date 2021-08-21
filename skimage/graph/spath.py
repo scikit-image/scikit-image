@@ -16,7 +16,7 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
         dimension at each step.
     axis : int, optional
         The axis along which the path must always move forward (default -1)
-    output_indexlist: bool, optional
+    output_indexlist : bool, optional
         See return value `p` for explanation.
 
     Returns

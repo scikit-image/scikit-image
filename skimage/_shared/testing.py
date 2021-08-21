@@ -22,6 +22,7 @@ import warnings
 from .. import data, io
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
+from ._warnings import expected_warnings
 
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
@@ -36,6 +37,15 @@ fixture = pytest.fixture
 # Calculate the size of a void * pointer in bits
 # https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
+
+
+_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
+if _error_on_warnings.lower() == 'true':
+    _error_on_warnings = True
+elif _error_on_warnings.lower() == 'false':
+    _error_on_warnings = False
+else:
+    _error_on_warnings = bool(int(_error_on_warnings))
 
 
 def assert_less(a, b, msg=None):
@@ -127,7 +137,7 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -159,7 +169,7 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -192,13 +202,64 @@ def setup_test():
     """
     warnings.simplefilter('default')
 
-    from scipy import signal, ndimage, special, optimize, linalg
-    from scipy.io import loadmat
-    from skimage import viewer
+    if _error_on_warnings:
+        from scipy import signal, ndimage, special, optimize, linalg
+        from scipy.io import loadmat
+        from skimage import viewer
 
-    np.random.seed(0)
+        np.random.seed(0)
 
-    warnings.simplefilter('error')
+        warnings.simplefilter('error')
+
+        # do not error on specific warnings from the skimage.io module
+        # https://github.com/scikit-image/scikit-image/issues/5337
+        warnings.filterwarnings(
+            'default', message='TiffFile:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='TiffWriter:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='unclosed file', category=ResourceWarning
+        )
+
+        # ignore known FutureWarnings from viewer module
+        warnings.filterwarnings(
+            'ignore', category=FutureWarning, module='skimage.viewer'
+        )
+
+        # Ignore other warnings only seen when using older versions of
+        # dependencies.
+        warnings.filterwarnings(
+            'default',
+            message='Conversion of the second argument of issubdtype',
+            category=FutureWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='the matrix subclass is not the recommended way',
+            category=PendingDeprecationWarning, module='numpy'
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='Your installed pillow version',
+            category=UserWarning,
+            module='skimage.io'
+        )
+
+        warnings.filterwarnings(
+            'default', message='Viewer requires Qt', category=UserWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='numpy.ufunc size changed',
+            category=RuntimeWarning
+        )
 
 
 def teardown_test():
@@ -206,10 +267,21 @@ def teardown_test():
 
     Restore warnings to default behavior
     """
-    warnings.simplefilter('default')
+    if _error_on_warnings:
+        warnings.resetwarnings()
+        warnings.simplefilter('default')
 
 
-def test_parallel(num_threads=2):
+def fetch(data_filename):
+    """Attempt to fetch data, but if unavailable, skip the tests."""
+    try:
+        return data._fetch(data_filename)
+    except (ConnectionError, ModuleNotFoundError):
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
+
+
+def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -220,6 +292,12 @@ def test_parallel(num_threads=2):
     num_threads : int, optional
         The number of times the function is run in parallel.
 
+    warnings_matching: list or None
+        This parameter is passed on to `expected_warnings` so as not to have
+        race conditions with the warnings filters. A single
+        `expected_warnings` context manager is used for all threads.
+        If None, then no warnings are checked.
+
     """
 
     assert num_threads > 0
@@ -227,20 +305,21 @@ def test_parallel(num_threads=2):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            threads = []
-            for i in range(num_threads - 1):
-                thread = threading.Thread(target=func, args=args,
-                                          kwargs=kwargs)
-                threads.append(thread)
-            for thread in threads:
-                thread.start()
+            with expected_warnings(warnings_matching):
+                threads = []
+                for i in range(num_threads - 1):
+                    thread = threading.Thread(target=func, args=args,
+                                              kwargs=kwargs)
+                    threads.append(thread)
+                for thread in threads:
+                    thread.start()
 
-            result = func(*args, **kwargs)
+                result = func(*args, **kwargs)
 
-            for thread in threads:
-                thread.join()
+                for thread in threads:
+                    thread.join()
 
-            return result
+                return result
 
         return inner
 

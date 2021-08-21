@@ -46,12 +46,12 @@ sigma = 0.08
 noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
-sigma_est = np.mean(estimate_sigma(noisy, multichannel=True))
-print("estimated noise standard deviation = {}".format(sigma_est))
+sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
+print(f"estimated noise standard deviation = {sigma_est}")
 
 patch_kw = dict(patch_size=5,      # 5x5 patches
                 patch_distance=6,  # 13x13 search area
-                multichannel=True)
+                channel_axis=-1)
 
 # slow algorithm
 denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False,
@@ -80,7 +80,7 @@ ax[0, 1].axis('off')
 ax[0, 1].set_title('non-local means\n(slow)')
 ax[0, 2].imshow(denoise2)
 ax[0, 2].axis('off')
-ax[0, 2].set_title('non-local means\n(slow, using $\sigma_{est}$)')
+ax[0, 2].set_title('non-local means\n(slow, using $\\sigma_{est}$)')
 ax[1, 0].imshow(astro)
 ax[1, 0].axis('off')
 ax[1, 0].set_title('original\n(noise free)')
@@ -89,7 +89,7 @@ ax[1, 1].axis('off')
 ax[1, 1].set_title('non-local means\n(fast)')
 ax[1, 2].imshow(denoise2_fast)
 ax[1, 2].axis('off')
-ax[1, 2].set_title('non-local means\n(fast, using $\sigma_{est}$)')
+ax[1, 2].set_title('non-local means\n(fast, using $\\sigma_{est}$)')
 
 fig.tight_layout()
 
@@ -100,10 +100,10 @@ psnr2 = peak_signal_noise_ratio(astro, denoise2)
 psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
 psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
 
-print("PSNR (noisy) = {:0.2f}".format(psnr_noisy))
-print("PSNR (slow) = {:0.2f}".format(psnr))
-print("PSNR (slow, using sigma) = {:0.2f}".format(psnr2))
-print("PSNR (fast) = {:0.2f}".format(psnr_fast))
-print("PSNR (fast, using sigma) = {:0.2f}".format(psnr2_fast))
+print(f"PSNR (noisy) = {psnr_noisy:0.2f}")
+print(f"PSNR (slow) = {psnr:0.2f}")
+print(f"PSNR (slow, using sigma) = {psnr2:0.2f}")
+print(f"PSNR (fast) = {psnr_fast:0.2f}")
+print(f"PSNR (fast, using sigma) = {psnr2_fast:0.2f}")
 
 plt.show()

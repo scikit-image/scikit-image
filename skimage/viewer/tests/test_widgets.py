@@ -1,6 +1,6 @@
 import os
 
-from skimage import data, img_as_float, io, img_as_uint
+from skimage import data, img_as_float, io, img_as_ubyte
 
 from skimage.viewer import ImageViewer
 from skimage.viewer.qt import QtWidgets, QtCore, has_qt
@@ -87,7 +87,6 @@ def test_slider_float():
     assert_almost_equal(sld.val, 2.5, 2)
 
 
-@testing.skipif(True, reason="Can't automatically close window. See #3081.")
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_save_buttons():
     viewer = get_image_viewer()
@@ -109,9 +108,9 @@ def test_save_buttons():
     sv.save_to_stack()
     sv.save_to_file(filename)
 
-    img = data.imread(filename)
+    img = io.imread(filename)
 
-    assert_almost_equal(img, img_as_uint(viewer.image))
+    assert_almost_equal(img, img_as_ubyte(viewer.image))
 
     img = io.pop()
     assert_almost_equal(img, viewer.image)

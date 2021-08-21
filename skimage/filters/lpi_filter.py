@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from scipy.fftpack import ifftshift
+from .._shared.fft import fftmodule as fft
 from .._shared.utils import check_nD
 
 eps = np.finfo(float).eps
@@ -49,12 +49,12 @@ class LPIFilter2D(object):
         Parameters
         ----------
         impulse_response : callable `f(r, c, **filter_params)`
-            Function that yields the impulse response.  `r` and `c` are
+            Function that yields the impulse response.  ``r`` and ``c`` are
             1-dimensional vectors that represent row and column positions, in
             other words coordinates are (r[0],c[0]),(r[0],c[1]) etc.
             `**filter_params` are passed through.
 
-            In other words, `impulse_response` would be called like this:
+            In other words, ``impulse_response`` would be called like this:
 
             >>> def impulse_response(r, c, **filter_params):
             ...     pass
@@ -102,13 +102,13 @@ class LPIFilter2D(object):
                                       **self.filter_params).reshape(dshape)
 
             f = _pad(f, oshape)
-            F = np.dual.fftn(f)
+            F = fft.fftn(f)
             self._cache = F
         else:
             F = self._cache
 
         data = _pad(data, oshape)
-        G = np.dual.fftn(data)
+        G = fft.fftn(data)
 
         return F, G
 
@@ -122,7 +122,7 @@ class LPIFilter2D(object):
         """
         check_nD(data, 2, 'data')
         F, G = self._prepare(data)
-        out = np.dual.ifftn(F * G)
+        out = fft.ifftn(F * G)
         out = np.abs(_centre(out, data.shape))
         return out
 
@@ -201,7 +201,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     mask = np.abs(F) > max_gain
     F[mask] = np.sign(F[mask]) * max_gain
 
-    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def wiener(data, impulse_response=None, filter_params={}, K=0.25,
@@ -243,7 +243,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
-    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def constrained_least_squares(data, lam, impulse_response=None,

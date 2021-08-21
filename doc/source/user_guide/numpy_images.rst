@@ -118,7 +118,7 @@ This shows that ``cat`` is a 300-by-451 pixel image with three channels
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
 We can also use 2D boolean masks for 2D multichannel images, as we did with
-the grayscale image above::
+the grayscale image above:
 
 .. plot::
 
@@ -170,7 +170,8 @@ These conventions are summarized below:
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
-    >>> im3d = np.random.rand(100, 1000, 1000)
+    >>> rng = np.random.default_rng()
+    >>> im3d = rng.random((100, 1000, 1000))
     >>> from skimage import morphology
     >>> from scipy import ndimage as ndi
     >>> seeds = ndi.label(im3d < 0.1)[0]
@@ -214,7 +215,8 @@ is the same::
     ...         arr[:, :, plane] *= scalar
     ...
     >>> import time
-    >>> im3d = np.random.rand(100, 1024, 1024)
+    >>> rng = np.random.default_rng()
+    >>> im3d = rng.random((100, 1024, 1024))
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
     >>> print("%.2f seconds" % (t1 - t0))  # doctest: +SKIP
     0.14 seconds

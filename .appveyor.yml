@@ -1,14 +1,18 @@
 # AppVeyor.com is a Continuous Integration service to build and run tests under
 # Windows
-
 environment:
   matrix:
-    - PYTHON: C:\Python35-x64
-    - PYTHON: C:\Python36
-    - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37
     - PYTHON: C:\Python37-x64
-    - PYTHON: C:\Python37-x64
+    - PYTHON: C:\Python38
+    - PYTHON: C:\Python38-x64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: C:\Python39
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: C:\Python39-x64
+    # build pre release packages on Python 3.8 since it has been out long
+    # enough for wheels to be built for packages that need to be compiled.
+    - PYTHON: C:\Python38-x64
       PIP_FLAGS: --pre
 
 matrix:
@@ -29,27 +33,23 @@ install:
         throw "There are newer queued builds for this pull request, failing early." }
 
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python -m pip install --retries 3 -U pip"
+  - "python -m pip install -U pip"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   - "pip --version"
 
-  # Get stdint headers needed by tifffile.c.
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h"
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
-
   # Install the build and runtime dependencies of the project.
-  - pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
-  - pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
+  - pip install %PIP_FLAGS% -r requirements/default.txt
+  - pip install %PIP_FLAGS% -r requirements/build.txt
   - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
   # Install the generated wheel package to test it.
   - pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
   # Install the test dependencies
-  - pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
+  - pip install %PIP_FLAGS% -r requirements/test.txt
 
 # Not a .NET project, we build scikit-image in the install step instead
 build: false

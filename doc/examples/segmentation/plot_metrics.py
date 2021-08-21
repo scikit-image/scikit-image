@@ -77,7 +77,7 @@ image = img_as_float(image)
 gradient = inverse_gaussian_gradient(image)
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
-im_test3 = morphological_geodesic_active_contour(gradient, iterations=100,
+im_test3 = morphological_geodesic_active_contour(gradient, num_iter=100,
                                                  init_level_set=init_ls,
                                                  smoothing=1, balloon=-1,
                                                  threshold=0.69)
@@ -98,12 +98,12 @@ for name, im_test in zip(method_names, [im_test1, im_test2, im_test3]):
     merge_list.append(merges)
     precision_list.append(precision)
     recall_list.append(recall)
-    print('\n## Method: {}'.format(name))
-    print('Adapted Rand error: {}'.format(error))
-    print('Adapted Rand precision: {}'.format(precision))
-    print('Adapted Rand recall: {}'.format(recall))
-    print('False Splits: {}'.format(splits))
-    print('False Merges: {}'.format(merges))
+    print(f"\n## Method: {name}")
+    print(f"Adapted Rand error: {error}")
+    print(f"Adapted Rand precision: {precision}")
+    print(f"Adapted Rand recall: {recall}")
+    print(f"False Splits: {splits}")
+    print(f"False Merges: {merges}")
 
 fig, axes = plt.subplots(2, 3, figsize=(9, 6), constrained_layout=True)
 ax = axes.ravel()

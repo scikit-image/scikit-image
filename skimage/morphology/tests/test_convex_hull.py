@@ -39,12 +39,12 @@ def test_qhull_offset_example():
                   1371, 1371, 1371, 1371, 1371, 1372, 1372, 1372, 1372, 1372,
                   1372, 1372, 1372, 1372, 1373, 1373, 1373, 1373, 1373, 1373,
                   1373, 1373, 1373, 1374, 1374, 1374, 1374, 1374, 1374, 1374,
-                  1375, 1375, 1375, 1375, 1375, 1376, 1376, 1376, 1377]),
+                  1375, 1375, 1375, 1375, 1375, 1376, 1376, 1376, 1377, 1372]),
                 ([151, 150, 151, 152, 149, 150, 151, 152, 153, 148, 149, 150,
                  151, 152, 153, 154, 147, 148, 149, 150, 151, 152, 153, 154,
                  155, 146, 147, 148, 149, 150, 151, 152, 153, 154, 146, 147,
                  148, 149, 150, 151, 152, 153, 154, 147, 148, 149, 150, 151,
-                 152, 153, 148, 149, 150, 151, 152, 149, 150, 151, 150]))
+                  152, 153, 148, 149, 150, 151, 152, 149, 150, 151, 150, 155]))
     image = np.zeros((1392, 1040), dtype=bool)
     image[nonzeros] = True
     expected = image.copy()
@@ -59,7 +59,7 @@ def test_pathological_qhull_example():
     expected = np.array(
                 [[0, 0, 0, 1, 1, 1, 0],
                  [0, 1, 1, 1, 1, 1, 1],
-                 [1, 1, 1, 1, 0, 0, 0]], dtype=bool)
+                 [1, 1, 1, 1, 1, 0, 0]], dtype=bool)
     assert_array_equal(convex_hull_image(image), expected)
 
 
@@ -108,7 +108,7 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    expected4 = np.array(
+    expected_conn_1 = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -119,9 +119,10 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 4), expected4)
+    assert_array_equal(convex_hull_object(image, connectivity=1),
+                       expected_conn_1)
 
-    expected8 = np.array(
+    expected_conn_2 = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -132,10 +133,14 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 8), expected8)
+    assert_array_equal(convex_hull_object(image, connectivity=2),
+                       expected_conn_2)
 
     with testing.raises(ValueError):
-        convex_hull_object(image, 7)
+        convex_hull_object(image, connectivity=3)
+
+    out = convex_hull_object(image, connectivity=1)
+    assert_array_equal(out, expected_conn_1)
 
 
 def test_non_c_contiguous():

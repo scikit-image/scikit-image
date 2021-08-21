@@ -1,3 +1,5 @@
-Cython>=0.25,!=0.28.2,!=0.29.0
+Cython>=0.29.21,!=0.29.18
 wheel
-numpy>=1.13.3
+# numpy 1.18.0 breaks builds on MacOSX
+# https://github.com/numpy/numpy/pull/15194
+numpy>=1.17.0,!=1.18.0

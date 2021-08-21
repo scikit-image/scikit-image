@@ -5,6 +5,7 @@
 import numpy as np
 
 cimport numpy as cnp
+cnp.import_array()
 
 
 cdef inline float tri_max(float a, float b, float c):

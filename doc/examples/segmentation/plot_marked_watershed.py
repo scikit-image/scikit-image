@@ -21,13 +21,14 @@ See Wikipedia_ for more details on the algorithm.
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
-from skimage.morphology import watershed, disk
+from skimage.morphology import disk
+from skimage.segmentation import watershed
 from skimage import data
 from skimage.filters import rank
 from skimage.util import img_as_ubyte
 
 
-image = img_as_ubyte(data.camera())
+image = img_as_ubyte(data.eagle())
 
 # denoise image
 denoised = rank.median(image, disk(2))
@@ -59,7 +60,7 @@ ax[2].imshow(markers, cmap=plt.cm.nipy_spectral)
 ax[2].set_title("Markers")
 
 ax[3].imshow(image, cmap=plt.cm.gray)
-ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.7)
+ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.5)
 ax[3].set_title("Segmented")
 
 for a in ax:
