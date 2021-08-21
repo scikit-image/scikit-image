@@ -999,8 +999,8 @@ def _only_mean(image, w):
                     mode='reflect')
 
     integral = integral_image(padded)
-    #padded *= padded
-    #integral_sq = integral_image(padded)
+    # padded *= padded
+    # integral_sq = integral_image(padded)
 
     # Create lists of non-zero kernel indices and values
     kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
@@ -1012,13 +1012,13 @@ def _only_mean(image, w):
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)
     m /= total_window_size
-    #g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
-                           #kernel_values)
-    #g2 /= total_window_size
+    # g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
+    # kernel_values)
+    # g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
-    #s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m #,s
+    # s = np.sqrt(np.clip(g2 - m * m, 0, None))
+    return m  #,s
 
 
 def threshold_singh(image, window_size=15, k=0.2, r=None):
