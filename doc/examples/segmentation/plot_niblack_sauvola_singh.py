@@ -5,10 +5,10 @@ Niblack,Sauvola and Singh Thresholding
 
 Niblack,Sauvola and Singh thresholds are local thresholding techniques that are
 useful for images where the background is not uniform, especially for text
-recognition [1]_, [2]_, [3]_. Instead of calculating a single global threshold 
-for the entire image, several thresholds are calculated for every pixel by using
-specific formulae that take into account the mean and standard deviation of the
-local neighborhood (defined by a window centered around the pixel).
+recognition [1]_, [2]_, [3]_. Instead of calculating a single global threshold
+for the entire image, several thresholds are calculated for every pixel by
+using specific formulae that take into account the mean and standard deviation
+of the local neighborhood (defined by a window centered around the pixel).
 
 Here, we binarize an image using these algorithms compare it to a common global
 thresholding technique. Parameter `window_size` determines the size of the
