@@ -2,9 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 from scipy import ndimage
-
-from skimage.filters import median, rank
 from skimage._shared.testing import expected_warnings
+from skimage.filters import median, rank
 
 
 @pytest.fixture

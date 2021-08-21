@@ -1,8 +1,10 @@
 import functools
+
 import numpy as np
-from ..transform import warp
-from .._shared.utils import safe_as_int
 from scipy.signal import get_window
+
+from .._shared.utils import safe_as_int
+from ..transform import warp
 
 
 def window(window_type, shape, warp_kwargs=None):

@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from scipy.signal import get_window
-
 from skimage.filters import window
 
 

@@ -1,17 +1,16 @@
 import numpy as np
 import pytest
-from skimage._shared.testing import (assert_allclose,
-                                     assert_array_almost_equal,
-                                     assert_array_equal, assert_equal)
-
 from skimage import data, morphology, util
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import fetch, test_parallel
+from skimage._shared.testing import (assert_allclose,
+                                     assert_array_almost_equal,
+                                     assert_array_equal, assert_equal, fetch,
+                                     test_parallel)
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
 from skimage.morphology import ball, disk, gray
-from skimage.util import img_as_ubyte, img_as_float
+from skimage.util import img_as_float, img_as_ubyte
 
 
 def test_otsu_edge_case():

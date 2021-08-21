@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-from numpy.testing import (assert_equal, assert_allclose, assert_almost_equal,
-                           assert_array_equal)
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_equal, assert_equal)
 from scipy import ndimage as ndi
-
 from skimage import data, util
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
@@ -12,20 +11,15 @@ from skimage.draw import disk
 from skimage.exposure import histogram
 from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices,
                                         _get_multiotsu_thresh_indices_lut)
-from skimage.filters.thresholding import (threshold_local,
-                                          threshold_otsu,
-                                          threshold_li,
-                                          threshold_yen,
-                                          threshold_isodata,
-                                          threshold_niblack,
-                                          threshold_sauvola,
-                                          threshold_mean,
-                                          threshold_triangle,
+from skimage.filters.thresholding import (_cross_entropy, _mean_std,
+                                          threshold_isodata, threshold_li,
+                                          threshold_local, threshold_mean,
                                           threshold_minimum,
                                           threshold_multiotsu,
-                                          try_all_threshold,
-                                          _mean_std,
-                                          _cross_entropy)
+                                          threshold_niblack, threshold_otsu,
+                                          threshold_sauvola,
+                                          threshold_triangle, threshold_yen,
+                                          try_all_threshold)
 
 
 class TestSimpleImage():

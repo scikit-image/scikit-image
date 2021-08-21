@@ -1,6 +1,6 @@
+import inspect
 import itertools
 import math
-import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
 
@@ -15,7 +15,6 @@ from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
 from ..transform import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
-
 
 __all__ = ['try_all_threshold',
            'threshold_otsu',

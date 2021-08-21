@@ -3,7 +3,6 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type, check_nD
 
-
 __all__ = ['gabor_kernel', 'gabor']
 
 
