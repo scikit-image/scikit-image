@@ -1,7 +1,7 @@
 """
-================================
+=======================================
 Niblack,Sauvola and Singh Thresholding
-================================
+=======================================
 
 Niblack,Sauvola and Singh thresholds are local thresholding techniques that are
 useful for images where the background is not uniform, especially for text
