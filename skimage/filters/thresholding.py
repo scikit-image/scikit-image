@@ -712,13 +712,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
 
-    if image.dtype == 'uint8' or image.dtype == 'uint16':
-        nbins = 256
+    if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.ravel(),
-                                      nbins,
                                       source_range='image')
         hist = hist.astype(float)
-
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
