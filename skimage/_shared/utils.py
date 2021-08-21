@@ -1,18 +1,18 @@
 import inspect
 import functools
-import numbers
 import sys
 import warnings
 from collections.abc import Iterable
 
 import numpy as np
-from numpy.lib import NumpyVersion
 import scipy
+from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
+           'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
+           'reshape_nd', 'identity']
 
 
 class skimage_deprecation(Warning):
@@ -209,7 +209,6 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
                 kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
-
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
@@ -450,10 +449,45 @@ def slice_at_axis(sl, axis):
 
     Examples
     --------
-    >>> _slice_at_axis(slice(None, 3, -1), 1)
-    (slice(None, None, None), slice(None, 3, -1), (...,))
+    >>> slice_at_axis(slice(None, 3, -1), 1)
+    (slice(None, None, None), slice(None, 3, -1), Ellipsis)
     """
     return (slice(None),) * axis + (sl,) + (...,)
+
+
+def reshape_nd(arr, ndim, dim):
+    """Reshape a 1D array to have n dimensions, all singletons but one.
+
+    Parameters
+    ----------
+    arr : array, shape (N,)
+        Input array
+    ndim : int
+        Number of desired dimensions of reshaped array.
+    dim : int
+        Which dimension/axis will not be singleton-sized.
+
+    Returns
+    -------
+    arr_reshaped : array, shape ([1, ...], N, [1,...])
+        View of `arr` reshaped to the desired shape.
+
+    Examples
+    --------
+    >>> rng = np.random.default_rng()
+    >>> arr = rng.random(7)
+    >>> reshape_nd(arr, 2, 0).shape
+    (7, 1)
+    >>> reshape_nd(arr, 3, 1).shape
+    (1, 7, 1)
+    >>> reshape_nd(arr, 4, -1).shape
+    (1, 1, 1, 7)
+    """
+    if arr.ndim != 1:
+        raise ValueError("arr must be a 1D array")
+    new_shape = [1] * ndim
+    new_shape[dim] = -1
+    return np.reshape(arr, new_shape)
 
 
 def check_nD(array, ndim, arg_name='image'):
@@ -477,8 +511,10 @@ def check_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if array.size == 0:
         raise ValueError(msg_empty_array % (arg_name))
-    if not array.ndim in ndim:
-        raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
+    if array.ndim not in ndim:
+        raise ValueError(
+            msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim]))
+        )
 
 
 def convert_to_float(image, preserve_range):
@@ -545,11 +581,10 @@ def _validate_interpolation_order(image_dtype, order):
                          "range 0-5.")
 
     if image_dtype == bool and order != 0:
-        warn("Input image dtype is bool. Interpolation is not defined "
+        raise ValueError(
+            "Input image dtype is bool. Interpolation is not defined "
              "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type. Starting from version "
-             "0.19 a ValueError will be raised instead of this warning.",
-             FutureWarning, stacklevel=2)
+             "cast input image to another data type.")
 
     return order
 
@@ -628,3 +663,8 @@ def _supported_float_type(input_dtype, allow_complex=False):
     if not allow_complex and input_dtype.kind == 'c':
         raise ValueError("complex valued input is not supported")
     return new_float_type.get(input_dtype.char, np.float64)
+
+
+def identity(image, *args, **kwargs):
+    """Returns the first argument unmodified."""
+    return image

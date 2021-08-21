@@ -108,10 +108,11 @@ def _get_grid_centroids(image, n_centroids):
 
 @utils.channel_as_last_axis(multichannel_output=False)
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
+@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=None, mask=None, *,
+         slic_zero=False, start_label=1, mask=None, *,
          channel_axis=-1):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
@@ -131,7 +132,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         shapes of objects in the image. We recommend exploring possible
         values on a log scale, e.g., 0.01, 0.1, 1, 10, 100, before
         refining around a chosen value.
-    max_iter : int, optional
+    max_num_iter : int, optional
         Maximum number of iterations of k-means.
     sigma : float or (3,) array-like of floats, optional
         Width of Gaussian smoothing kernel for pre-processing for each
@@ -212,10 +213,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
       interpret them as 3D with the last dimension having length 3, use
       `channel_axis=-1`.
 
-    * `start_label` is introduced to handle the issue [4]_. The labels
-      indexing starting at 0 will be deprecated in future versions. If
-      `mask` is not `None` labels indexing starts at 1 and masked area
-      is set to 0.
+    * `start_label` is introduced to handle the issue [4]_. Label indexing
+      starts at 1 by default.
 
     References
     ----------
@@ -270,17 +269,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         elif image.shape[channel_axis] == 3:
             image = rgb2lab(image)
 
-    if start_label is None:
-        if use_mask:
-            start_label = 1
-        else:
-            warnings.warn("skimage.measure.label's indexing starts from 0. " +
-                          "In future version it will start from 1. " +
-                          "To disable this warning, explicitely " +
-                          "set the `start_label` parameter to 1.",
-                          FutureWarning, stacklevel=2)
-            start_label = 0
-
     if start_label not in [0, 1]:
         raise ValueError("start_label should be 0 or 1.")
 
@@ -326,11 +314,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     if update_centroids:
         # Step 2 of the algorithm [3]_
-        _slic_cython(image, mask, segments, step, max_iter, spacing,
+        _slic_cython(image, mask, segments, step, max_num_iter, spacing,
                      slic_zero, ignore_color=True,
                      start_label=start_label)
 
-    labels = _slic_cython(image, mask, segments, step, max_iter,
+    labels = _slic_cython(image, mask, segments, step, max_num_iter,
                           spacing, slic_zero, ignore_color=False,
                           start_label=start_label)
 

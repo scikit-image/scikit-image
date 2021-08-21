@@ -16,9 +16,9 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
-                   '`threshold_niblack` must not be even on any dimension. '
-                   'Got {}'.format(axis_sizes))
+            msg = (f'Window size for `threshold_sauvola` or '
+                   f'`threshold_niblack` must not be even on any dimension. '
+                   f'Got {axis_sizes}')
             raise ValueError(msg)
 
 

@@ -760,14 +760,14 @@ class ProjectiveTransform(GeometricTransform):
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
+        return f'<{classstr}({paramstr}) at {hex(id(self))}>'
 
     def __str__(self):
         """Add standard str formatting around a __nice__ string"""
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        return '<{}({})>'.format(classstr, paramstr)
+        return f'<{classstr}({paramstr})>'
 
     @property
     def dimensionality(self):

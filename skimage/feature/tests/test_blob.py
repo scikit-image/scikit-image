@@ -13,7 +13,8 @@ from skimage.feature.blob import _blob_overlap
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_dog(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog(dtype, threshold_type):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
 
@@ -26,48 +27,73 @@ def test_blob_dog(dtype):
     xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    threshold = 2.0
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 2.0
+        if img.dtype.kind != 'f':
+            # account for internal scaling to [0, 1] by img_as_float
+            threshold /= img.ptp()
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
-    blobs = blob_dog(img, min_sigma=5, max_sigma=50, threshold=threshold)
+    blobs = blob_dog(
+        img,
+        min_sigma=4,
+        max_sigma=50,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
+    )
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
+    ratio_thresh = 0.25
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
     assert abs(b[1] - 130) <= thresh
-    assert abs(radius(b) - 5) <= thresh
+    assert abs(radius(b) - 5) <= ratio_thresh * 5
 
     b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
-    assert abs(radius(b) - 25) <= thresh
+    assert abs(radius(b) - 25) <= ratio_thresh * 25
 
     b = s[2]
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
-    assert abs(radius(b) - 45) <= thresh
+    assert abs(radius(b)- 45) <= ratio_thresh * 45
 
     # Testing no peaks
     img_empty = np.zeros((100, 100), dtype=dtype)
     assert blob_dog(img_empty).size == 0
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d(dtype, threshold_type):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    threshold = 0.1
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = 0
+    elif threshold_type == 'relative':
+        threshold = 0
+        threshold_rel = 0.5
 
     blobs = blob_dog(
-        im3, min_sigma=3, max_sigma=10, sigma_ratio=1.2, threshold=threshold
+        im3,
+        min_sigma=3,
+        max_sigma=10,
+        sigma_ratio=1.2,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -75,20 +101,34 @@ def test_blob_dog(dtype):
     assert b[0] == r + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r) < 1.1
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
+
     blobs = blob_dog(
         im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=threshold
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -96,9 +136,9 @@ def test_blob_dog(dtype):
     assert b[0] == r / 2 + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
-    assert abs(math.sqrt(3) * b[3] - r / 2) < 1
-    assert abs(math.sqrt(3) * b[4] - r) < 1
-    assert abs(math.sqrt(3) * b[5] - r) < 1
+    assert abs(math.sqrt(3) * b[3] - r / 2) < 1.1
+    assert abs(math.sqrt(3) * b[4] - r) < 1.1
+    assert abs(math.sqrt(3) * b[5] - r) < 1.1
 
 
 def test_blob_dog_excl_border():

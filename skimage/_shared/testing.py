@@ -39,6 +39,15 @@ fixture = pytest.fixture
 arch32 = struct.calcsize("P") * 8 == 32
 
 
+_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
+if _error_on_warnings.lower() == 'true':
+    _error_on_warnings = True
+elif _error_on_warnings.lower() == 'false':
+    _error_on_warnings = False
+else:
+    _error_on_warnings = bool(int(_error_on_warnings))
+
+
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
@@ -193,13 +202,64 @@ def setup_test():
     """
     warnings.simplefilter('default')
 
-    from scipy import signal, ndimage, special, optimize, linalg
-    from scipy.io import loadmat
-    from skimage import viewer
+    if _error_on_warnings:
+        from scipy import signal, ndimage, special, optimize, linalg
+        from scipy.io import loadmat
+        from skimage import viewer
 
-    np.random.seed(0)
+        np.random.seed(0)
 
-    warnings.simplefilter('error')
+        warnings.simplefilter('error')
+
+        # do not error on specific warnings from the skimage.io module
+        # https://github.com/scikit-image/scikit-image/issues/5337
+        warnings.filterwarnings(
+            'default', message='TiffFile:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='TiffWriter:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='unclosed file', category=ResourceWarning
+        )
+
+        # ignore known FutureWarnings from viewer module
+        warnings.filterwarnings(
+            'ignore', category=FutureWarning, module='skimage.viewer'
+        )
+
+        # Ignore other warnings only seen when using older versions of
+        # dependencies.
+        warnings.filterwarnings(
+            'default',
+            message='Conversion of the second argument of issubdtype',
+            category=FutureWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='the matrix subclass is not the recommended way',
+            category=PendingDeprecationWarning, module='numpy'
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='Your installed pillow version',
+            category=UserWarning,
+            module='skimage.io'
+        )
+
+        warnings.filterwarnings(
+            'default', message='Viewer requires Qt', category=UserWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='numpy.ufunc size changed',
+            category=RuntimeWarning
+        )
 
 
 def teardown_test():
@@ -207,7 +267,9 @@ def teardown_test():
 
     Restore warnings to default behavior
     """
-    warnings.simplefilter('default')
+    if _error_on_warnings:
+        warnings.resetwarnings()
+        warnings.simplefilter('default')
 
 
 def fetch(data_filename):
@@ -215,7 +277,8 @@ def fetch(data_filename):
     try:
         return data._fetch(data_filename)
     except (ConnectionError, ModuleNotFoundError):
-        pytest.skip(f'Unable to download {data_filename}')
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
 
 
 def test_parallel(num_threads=2, warnings_matching=None):
