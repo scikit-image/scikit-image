@@ -52,12 +52,12 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     """
     ndim, n_coords = gridcoords.shape
     n_hull_equations = hull_equations.shape[0]
-    coords_in_hull = np.ones(n_coords, dtype=np.bool_)
+    coords_in_hull = np.ones(n_coords, dtype=bool)
 
     # Pre-allocate arrays to cache intermediate results for reducing overheads
     dot_array = np.empty(n_coords, dtype=np.float64)
     test_ineq_temp = np.empty(n_coords, dtype=np.float64)
-    coords_single_ineq = np.empty(n_coords, dtype=np.bool_)
+    coords_single_ineq = np.empty(n_coords, dtype=bool)
 
     # A point is in the hull if it satisfies all of the hull's inequalities
     for idx in range(n_hull_equations):
@@ -103,7 +103,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     if np.count_nonzero(image) == 0:
         warn("Input image is entirely zero, no valid convex hull. "
              "Returning empty image", UserWarning)
-        return np.zeros(image.shape, dtype=np.bool_)
+        return np.zeros(image.shape, dtype=bool)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.

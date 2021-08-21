@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 from . import _ncut
 from . import _ncut_cy
-from ..._shared.utils import check_random_state
 from scipy.sparse import linalg
 
 
@@ -100,11 +99,15 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
-    random_state : int, RandomState instance or None, optional
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`. The random state is used for the starting point
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        The `random_state` is used for the starting point
         of `scipy.sparse.linalg.eigsh`.
 
     Returns
@@ -128,7 +131,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    random_state = check_random_state(random_state)
+    random_state = np.random.default_rng(random_state)
     if not in_place:
         rag = rag.copy()
 
@@ -208,7 +211,7 @@ def get_min_ncut(ev, d, w, num_cuts):
     # If all values in `ev` are equal, it implies that the graph can't be
     # further sub-divided. In this case the bi-partition is the the graph
     # itself and an empty set.
-    min_mask = np.zeros_like(ev, dtype=np.bool)
+    min_mask = np.zeros_like(ev, dtype=bool)
     if np.allclose(mn, mx):
         return min_mask, mcut
 
@@ -259,7 +262,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
-    random_state: RandomState instance
+    random_state : RandomState instance
         Provides initial values for eigenvalue solver.
     """
     d, w = _ncut.DW_matrices(rag)
@@ -274,7 +277,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         # Refer Shi & Malik 2001, Equation 7, Page 891
         A = d2 * (d - w) * d2
         # Initialize the vector to ensure reproducibility.
-        v0 = random_state.rand(A.shape[0])
+        v0 = random_state.random(A.shape[0])
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
                                      k=min(100, m - 2))
 

@@ -1,5 +1,4 @@
 from random import shuffle
-from itertools import chain
 
 import pytest
 
@@ -142,7 +141,7 @@ def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
 
 
 @pytest.mark.parametrize("max_n_features,nnz_values", [(None, 46),
-                                                       (1, 8)])
+                                                       (1, 4)])
 def test_draw_haar_like_feature(max_n_features, nnz_values):
     img = np.zeros((5, 5), dtype=np.float32)
     coord, _ = haar_like_feature_coord(5, 5, 'type-4')

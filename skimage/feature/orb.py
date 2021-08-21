@@ -83,8 +83,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> from skimage.feature import ORB, match_descriptors
     >>> img1 = np.zeros((100, 100))
     >>> img2 = np.zeros_like(img1)
-    >>> np.random.seed(1)
-    >>> square = np.random.rand(20, 20)
+    >>> rng = np.random.default_rng(19481137)  # do not copy this value
+    >>> square = rng.random((20, 20))
     >>> img1[40:60, 40:60] = square
     >>> img2[53:73, 53:73] = square
     >>> detector_extractor1 = ORB(n_keypoints=5)
@@ -97,20 +97,20 @@ class ORB(FeatureDetector, DescriptorExtractor):
     array([[0, 0],
            [1, 1],
            [2, 2],
-           [3, 3],
-           [4, 4]])
+           [3, 4],
+           [4, 3]])
     >>> detector_extractor1.keypoints[matches[:, 0]]
-    array([[42., 40.],
-           [47., 58.],
-           [44., 40.],
-           [59., 42.],
-           [45., 44.]])
+    array([[59. , 59. ],
+           [40. , 40. ],
+           [57. , 40. ],
+           [46. , 58. ],
+           [58.8, 58.8]])
     >>> detector_extractor2.keypoints[matches[:, 1]]
-    array([[55., 53.],
-           [60., 71.],
-           [57., 53.],
-           [72., 55.],
-           [58., 57.]])
+    array([[72., 72.],
+           [53., 53.],
+           [70., 53.],
+           [59., 71.],
+           [72., 72.]])
 
     """
 
@@ -133,7 +133,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
     def _build_pyramid(self, image):
         image = _prepare_grayscale_input_2D(image)
         return list(pyramid_gaussian(image, self.n_scales - 1,
-                                     self.downscale, multichannel=False))
+                                     self.downscale, channel_axis=None))
 
     def _detect_octave(self, octave_image):
         dtype = octave_image.dtype
@@ -272,7 +272,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
                 descriptors_list.append(descriptors)
                 mask_list.append(mask)
 
-        self.descriptors = np.vstack(descriptors_list).view(np.bool)
+        self.descriptors = np.vstack(descriptors_list).view(bool)
         self.mask_ = np.hstack(mask_list)
 
     def detect_and_extract(self, image):
@@ -307,7 +307,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             if len(keypoints) == 0:
                 keypoints_list.append(keypoints)
                 responses_list.append(responses)
-                descriptors_list.append(np.zeros((0, 256), dtype=np.bool))
+                descriptors_list.append(np.zeros((0, 256), dtype=bool))
                 continue
 
             descriptors, mask = self._extract_octave(octave_image, keypoints,
@@ -330,7 +330,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
         responses = np.hstack(responses_list)
         scales = np.hstack(scales_list)
         orientations = np.hstack(orientations_list)
-        descriptors = np.vstack(descriptors_list).view(np.bool)
+        descriptors = np.vstack(descriptors_list).view(bool)
 
         if keypoints.shape[0] < self.n_keypoints:
             self.keypoints = keypoints

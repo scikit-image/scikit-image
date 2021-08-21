@@ -37,8 +37,8 @@ from scipy import ndimage as ndi
 image = data.camera()
 shift = (-22, 13)
 
-corrupted_pixels = np.random.choice([False, True], size=image.shape,
-                                    p=[0.25, 0.75])
+rng = np.random.default_rng()
+corrupted_pixels = rng.choice([False, True], size=image.shape, p=[0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
@@ -88,8 +88,8 @@ rr1, cc1 = draw.ellipse(259, 248, r_radius=125, c_radius=100,
 rr2, cc2 = draw.ellipse(300, 200, r_radius=110, c_radius=180,
                         shape=image.shape)
 
-mask1 = np.zeros_like(image, dtype=np.bool)
-mask2 = np.zeros_like(image, dtype=np.bool)
+mask1 = np.zeros_like(image, dtype=bool)
+mask2 = np.zeros_like(image, dtype=bool)
 mask1[rr1, cc1] = True
 mask2[rr2, cc2] = True
 

@@ -61,7 +61,7 @@ def test_unwrap_2d(check_with_mask):
     x, y = np.ogrid[:8, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1)
     if check_with_mask:
-        mask = np.zeros(image.shape, dtype=np.bool)
+        mask = np.zeros(image.shape, dtype=bool)
         mask[4:6, 4:8] = True
     check_unwrap(image, mask)
 
@@ -72,7 +72,7 @@ def test_unwrap_3d(check_with_mask):
     x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
     if check_with_mask:
-        mask = np.zeros(image.shape, dtype=np.bool)
+        mask = np.zeros(image.shape, dtype=bool)
         mask[4:6, 4:6, 1:3] = True
     check_unwrap(image, mask)
 
@@ -128,11 +128,11 @@ def test_mask():
              np.linspace(0, 8 * np.pi, length),
              np.linspace(0, 6 * np.pi, length)]
     image = np.vstack(ramps)
-    mask_1d = np.ones((length,), dtype=np.bool)
+    mask_1d = np.ones((length,), dtype=bool)
     mask_1d[0] = mask_1d[-1] = False
     for i in range(len(ramps)):
         # mask all ramps but the i'th one
-        mask = np.zeros(image.shape, dtype=np.bool)
+        mask = np.zeros(image.shape, dtype=bool)
         mask |= mask_1d.reshape(1, -1)
         mask[i, :] = False   # unmask i'th ramp
         image_wrapped = np.ma.array(np.angle(np.exp(1j * image)), mask=mask)

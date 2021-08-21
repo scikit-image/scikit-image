@@ -1,6 +1,6 @@
 .PHONY: all clean test
-PYTHON=python
-PYTESTS=pytest
+PYTHON ?= python
+PYTEST ?= $(PYTHON) -m pytest
 
 all:
 	$(PYTHON) setup.py build_ext --inplace
@@ -14,20 +14,19 @@ cleandoc:
 	rm -rf doc/build
 
 test:
-	$(PYTESTS) skimage --doctest-modules
+	$(PYTEST) skimage --doctest-modules
 
 doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
 benchmark_coverage:
-	$(PYTESTS) benchmarks --cov=skimage --cov-config=setup.cfg
+	$(PYTEST) benchmarks --cov=skimage --cov-config=setup.cfg
 
 coverage: test_coverage
 
 test_coverage:
-	$(PYTESTS) -o python_functions=test_* skimage --cov=skimage
+	$(PYTEST) -o python_functions=test_* skimage --cov=skimage
 
 html:
 	pip install -q -r requirements/docs.txt
 	export SPHINXOPTS=-W; make -C doc html
-

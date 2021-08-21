@@ -11,6 +11,7 @@ import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
+from numpy.distutils.command.build_ext import build_ext
 
 
 DISTNAME = 'scikit-image'
@@ -33,7 +34,7 @@ if sys.version_info < (3, 6):
 
     error = """Python {py} detected.
 
-scikit-image 0.16+ supports only Python 3.6 and above.
+scikit-image 0.18+ supports only Python 3.7 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
@@ -54,57 +55,69 @@ builtins.__SKIMAGE_SETUP__ = True
 
 # Support for openmp
 
-def openmp_build_ext():
-    from numpy.distutils.command.build_ext import build_ext
+class ConditionalOpenMP(build_ext):
 
-    compile_flags = ['-fopenmp']
-    link_flags = ['-fopenmp']
+    def can_compile_link(self, compile_flags, link_flags):
 
-    code = """#include <omp.h>
-    int main(int argc, char** argv) { return(0); }"""
+        if "PYODIDE_PACKAGE_ABI" in os.environ:
+            # pyodide doesn't support OpenMP
+            return False
 
-    class ConditionalOpenMP(build_ext):
+        cc = self.compiler
+        fname = 'test.c'
+        cwd = os.getcwd()
+        tmpdir = tempfile.mkdtemp()
 
-        def can_compile_link(self):
+        code = ("#include <omp.h>"
+                "int main(int argc, char** argv) { return(0); }")
 
-            cc = self.compiler
-            fname = 'test.c'
-            cwd = os.getcwd()
-            tmpdir = tempfile.mkdtemp()
+        if self.compiler.compiler_type == "msvc":
+            # make sure we build a DLL on Windows
+            local_link_flags = link_flags + ["/DLL"]
+        else:
+            local_link_flags = link_flags
 
+        try:
+            os.chdir(tmpdir)
+            with open(fname, 'wt') as fobj:
+                fobj.write(code)
             try:
-                os.chdir(tmpdir)
-                with open(fname, 'wt') as fobj:
-                    fobj.write(code)
-                try:
-                    objects = cc.compile([fname],
-                                         extra_postargs=compile_flags)
-                except CompileError:
-                    return False
-                try:
-                    # Link shared lib rather then executable to avoid
-                    # http://bugs.python.org/issue4431 with MSVC 10+
-                    cc.link_shared_lib(objects, "testlib",
-                                       extra_postargs=link_flags)
-                except (LinkError, TypeError):
-                    return False
-            finally:
-                os.chdir(cwd)
-                shutil.rmtree(tmpdir)
-            return True
+                objects = cc.compile([fname],
+                                     extra_postargs=compile_flags)
+            except CompileError:
+                return False
+            try:
+                # Link shared lib rather then executable to avoid
+                # http://bugs.python.org/issue4431 with MSVC 10+
+                cc.link_shared_lib(objects, "testlib",
+                                   extra_postargs=local_link_flags)
+            except (LinkError, TypeError):
+                return False
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(tmpdir)
+        return True
 
-        def build_extensions(self):
-            """ Hook into extension building to check compiler flags """
+    def build_extensions(self):
+        """ Hook into extension building to set compiler flags """
 
-            if self.can_compile_link():
+        compile_flags = list()
+        link_flags = list()
 
-                for ext in self.extensions:
-                    ext.extra_compile_args += compile_flags
-                    ext.extra_link_args += link_flags
+        # check which compiler is being used
+        if self.compiler.compiler_type == "msvc":
+            # '-fopenmp' is called '/openmp' in msvc
+            compile_flags += ['/openmp']
+        else:
+            compile_flags += ['-fopenmp']
+            link_flags += ['-fopenmp']
 
-            build_ext.build_extensions(self)
+        if self.can_compile_link(compile_flags, link_flags):
+            for ext in self.extensions:
+                ext.extra_compile_args += compile_flags
+                ext.extra_link_args += link_flags
 
-    return ConditionalOpenMP
+        build_ext.build_extensions(self)
 
 
 with open('skimage/__init__.py', encoding='utf-8') as fid:
@@ -116,7 +129,7 @@ with open('skimage/__init__.py', encoding='utf-8') as fid:
 
 def parse_requirements_file(filename):
     with open(filename, encoding='utf-8') as fid:
-        requires = [l.strip() for l in fid.readlines() if l]
+        requires = [line.strip() for line in fid.readlines() if line]
 
     return requires
 
@@ -127,7 +140,7 @@ INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 # for the platforms we wish to support.
 extras_require = {
     dep: parse_requirements_file('requirements/' + dep + '.txt')
-    for dep in ['docs', 'optional', 'test']
+    for dep in ['docs', 'optional', 'test', 'data']
 }
 
 # requirements for those browsing PyPI
@@ -164,7 +177,7 @@ if __name__ == "__main__":
         from numpy.distutils.core import setup
         import cython
         extra = {'configuration': configuration}
-        cmdclass['build_ext'] = openmp_build_ext()
+        cmdclass['build_ext'] = ConditionalOpenMP
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
@@ -183,13 +196,14 @@ if __name__ == "__main__":
             extra = {}
         else:
             print(textwrap.dedent("""
-                To install scikit-image from source, you will need NumPy.
-                Install NumPy with pip using:
+                To install scikit-image from source, you will need NumPy
+                and Cython.
+                Install NumPy and Cython with your python package manager.
+                If you are using pip, the commands are:
 
-                  pip install numpy
+                  pip install numpy cython
 
-                Or use your operating system package manager. For more
-                details, see:
+                For more details, see:
 
                    https://scikit-image.org/docs/stable/install.html
             """))
@@ -207,7 +221,6 @@ if __name__ == "__main__":
         download_url=DOWNLOAD_URL,
         project_urls=PROJECT_URLS,
         version=VERSION,
-
         classifiers=[
             'Development Status :: 4 - Beta',
             'Environment :: Console',
@@ -217,8 +230,9 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
@@ -229,15 +243,13 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         extras_require=extras_require,
-        python_requires='>=3.6',
+        python_requires='>=3.7',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
-
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
-
         cmdclass=cmdclass,
         **extra
     )

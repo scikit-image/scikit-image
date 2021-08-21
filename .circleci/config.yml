@@ -7,6 +7,15 @@ jobs:
     steps:
       - checkout
       - run:
+          name: concatenate requirement files
+          command: cat requirements/*.txt > requirements/all_requirements
+      - restore_cache:
+          keys:
+              - data-v1-{{ checksum "skimage/data/_registry.py" }}
+      - restore_cache:
+          keys:
+              - packages-v1-{{ checksum "requirements/all_requirements" }}
+      - run:
           name: install dependencies and package
           command: |
               python -m venv skimage_venv
@@ -17,6 +26,10 @@ jobs:
               python -m pip install -r requirements/default.txt
               python -m pip install -r requirements/docs.txt
               export
+      - save_cache:
+          key: packages-v1-{{ checksum "requirements/all_requirements" }}
+          paths:
+            - skimage_venv
       - run:
           name: build doc
           no_output_timeout: 50m
@@ -24,7 +37,11 @@ jobs:
               source skimage_venv/bin/activate
               cd doc
               make clean
-              make html
+              SPHINXOPTS="-j 1" make html
+      - save_cache:
+          key: data-v1-{{ checksum "skimage/data/_registry.py" }}
+          paths:
+            - /home/circleci/.cache/scikit-image/master
       - store_artifacts:
           path: doc/build/html
           destination: doc/build/html

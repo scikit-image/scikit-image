@@ -5,6 +5,7 @@
 
 import numpy as np
 from scipy import ndimage as ndi
+
 from ..transform import pyramid_reduce
 from ..util.dtype import _convert
 
@@ -90,7 +91,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     count = 1
 
     while (count < nlevel) and (size > downscale * min_size):
-        J = pyramid_reduce(pyramid[-1], downscale, multichannel=False)
+        J = pyramid_reduce(pyramid[-1], downscale, channel_axis=None)
         pyramid.append(J)
         size = min(J.shape)
         count += 1

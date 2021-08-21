@@ -39,6 +39,7 @@ this is the case for your image, you can directly use the filter like so:
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
+import pywt
 
 from skimage import (
     data, restoration, util
@@ -141,7 +142,7 @@ plt.show()
 # ``rolling_ball`` can handle datatypes other than `np.uint8`. You can
 # pass them into the function in the same way.
 
-image = data.coins().astype(np.uint16)
+image = data.coins()[:200, :200].astype(np.uint16)
 
 background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -153,7 +154,7 @@ plt.show()
 # be much larger than the image intensity, which can lead to
 # unexpected results.
 
-image = util.img_as_float(data.coins())
+image = util.img_as_float(data.coins()[:200, :200])
 
 background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -271,7 +272,7 @@ image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
-        (10, 21, 21),
+        (5, 21, 21),
         0.1
     )
 )
@@ -287,10 +288,30 @@ image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
     image,
     kernel=restoration.ellipsoid_kernel(
-        (120, 1, 1),
+        (100, 1, 1),
         0.1
     )
 )
 
 plot_result(image[30, ...], background[30, ...])
+plt.show()
+
+######################################################################
+# 1D Signal Filtering
+# -------------------
+#
+# As another example of the n-dimensional feature of
+# ``rolling_ball``, we show an implementation for 1D data. Here,
+# we are interested in removing the background signal of an ECG waveform
+# to detect prominent peaks (higher values than the local baseline).
+# Smoother peaks can be removed with smaller values of the radius.
+
+x = pywt.data.ecg()
+background = restoration.rolling_ball(x, radius=80)
+background2 = restoration.rolling_ball(x, radius=10)
+plt.figure()
+plt.plot(x, label='original')
+plt.plot(x - background, label='radius=80')
+plt.plot(x - background2, label='radius=10')
+plt.legend()
 plt.show()

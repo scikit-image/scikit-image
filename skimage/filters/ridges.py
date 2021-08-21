@@ -266,7 +266,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
-         mode=None, cval=0):
+         mode='reflect', cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -318,14 +318,6 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
     # Check (sigma) scales
     sigmas = _check_sigmas(sigmas)
-
-    if mode is None:
-        warn("Previously, sato implicitly used 'constant' as the "
-             "border mode when dealing with the edge of the array. The new "
-             "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitly "
-             "set the mode.", category=FutureWarning, stacklevel=2)
-        mode = 'reflect'
 
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
@@ -491,7 +483,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-            alpha=0.5, beta=0.5, gamma=15, black_ridges=True, mode=None,
+            alpha=0.5, beta=0.5, gamma=15, black_ridges=True, mode='reflect',
             cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
@@ -553,15 +545,6 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         :DOI:`10.1007/978-3-319-16811-1_40`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
-
-    if mode is None:
-        warn("Previously, hessian implicitly used 'constant' as the "
-             "border mode when dealing with the edge of the array. The new "
-             "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitly "
-             "set the mode.", category=FutureWarning, stacklevel=2)
-        mode = 'reflect'
-
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
                       scale_step=scale_step, alpha=alpha, beta=beta,
                       gamma=gamma, black_ridges=black_ridges, mode=mode,

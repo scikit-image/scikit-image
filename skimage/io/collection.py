@@ -10,14 +10,14 @@ from copy import copy
 import numpy as np
 from PIL import Image, __version__ as pil_version
 
-# Check CVE-2020-10379
+# Check CVE-2021-27921 and others
 from distutils.version import LooseVersion
-if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+if LooseVersion(pil_version) < LooseVersion('8.1.2'):
     from warnings import warn
-    warn('Your installed pillow version is < 7.1.0. '
-         'Several security issues (CVE-2020-11538, '
-         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
-         'have been fixed in pillow 7.1.0 or higher. '
+    warn('Your installed pillow version is < 8.1.2. '
+         'Several security issues (CVE-2021-27921, '
+         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
+         'and more) have been fixed in pillow 8.1.2 or higher. '
          'We recommend to upgrade this library.',
          stacklevel=2)
 
@@ -138,23 +138,24 @@ class ImageCollection(object):
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
     `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
-    ``load_func(file_pattern[5])`` to load the image.
+    ``load_func(load_pattern[5])`` to load the image.
 
-    Imagine, for example, an ImageCollection that loads every tenth
+    Imagine, for example, an ImageCollection that loads every third
     frame from a video file::
 
-      class AVILoader:
-          video_file = 'myvideo.avi'
+      video_file = 'no_time_for_that_tiny.gif'
 
-          def __call__(self, frame):
-              return video_read(self.video_file, frame)
+      def vidread_step(f, step):
+          vid = imageio.get_reader(f)
+          seq = [v for v in vid.iter_data()]
+          return seq[::step]
 
-      avi_load = AVILoader()
+      ic = ImageCollection(video_file, load_func=vidread_step, step=3)
 
-      frames = range(0, 1000, 10) # 0, 10, 20, ...
-      ic = ImageCollection(frames, load_func=avi_load)
+      ic  # is an ImageCollection object of length 1 because there is 1 file
 
-      x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
+      x = ic[0]  # calls vidread_step(video_file, step=3)
+      x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
     Another use of ``load_func`` would be to convert all images to ``uint8``::
 
@@ -162,10 +163,6 @@ class ImageCollection(object):
           return imread(f).astype(np.uint8)
 
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
-
-    For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.  In this case, ``load_func``
-    should accept the keyword argument ``img_num``.
 
     Examples
     --------
@@ -189,14 +186,21 @@ class ImageCollection(object):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         else:
             raise TypeError('Invalid pattern as input.')
+
+        self._files = sorted(self._files, key=alphanumeric_key)
+
+        if load_func is None:
+            from ._io import imread
+            self.load_func = imread
+            self._numframes = self._find_images()
+        else:
+            self.load_func = load_func
+            self._numframes = len(self._files)
+            self._frame_index = None
 
         if conserve_memory:
             memory_slots = 1
@@ -205,12 +209,6 @@ class ImageCollection(object):
 
         self._conserve_memory = conserve_memory
         self._cached = None
-
-        if load_func is None:
-            from ._io import imread
-            self.load_func = imread
-        else:
-            self.load_func = load_func
 
         self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
@@ -391,7 +389,7 @@ def imread_collection_wrapper(imread):
         load_pattern : str or list
             Pattern glob or filenames to load. The path can be absolute or
             relative.  Multiple patterns should be separated by a colon,
-            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            e.g. ``/tmp/work/*.png:/tmp/other/*.jpg``.  Also see
             implementation notes below.
         conserve_memory : bool, optional
             If True, never keep more than one in memory at a specific
@@ -404,15 +402,22 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-    """A class containing a single multi-frame image.
+
+    """A class containing all frames from multi-frame images.
 
     Parameters
     ----------
-    filename : str
-        The complete path to the image file.
+    load_pattern : str or list of str
+        Pattern glob or filenames to load. The path can be absolute or
+        relative.
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
+
+    Other parameters
+    ----------------
+    load_func : callable
+        ``imread`` by default.  See notes below.
 
     Notes
     -----

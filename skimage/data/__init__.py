@@ -5,6 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
+from distutils.version import LooseVersion
 from warnings import warn
 import numpy as np
 import shutil
@@ -17,6 +18,7 @@ from .. import __version__
 
 import os.path as osp
 import os
+import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -52,7 +54,6 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
-           'rough_wall',
            'shepp_logan_phantom',
            'skin',
            'stereo_motorcycle']
@@ -91,8 +92,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(
-                "Algorithm '{}' not available in hashlib".format(alg))
+            raise ValueError(f"Algorithm '{alg}' not available in hashlib")
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
@@ -114,6 +114,13 @@ def _has_hash(path, expected_hash):
 def create_image_fetcher():
     try:
         import pooch
+        pooch_version = pooch.__version__.lstrip('v')
+        retry = {'retry_if_failed': 3}
+        # Keep version check in synch with
+        # scikit-image/requirements/optional.txt
+        if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+            # we need a more recent version of pooch to retry
+            retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
@@ -124,8 +131,13 @@ def create_image_fetcher():
     # remove `.dev` with a `+` if it exists.
     # This helps pooch understand that it should look in master
     # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+    skimage_version_for_pooch = __version__.replace('.dev', '+')
+    if '+' in skimage_version_for_pooch:
+        url = ("https://github.com/scikit-image/scikit-image/raw/"
+               "{version}/skimage/")
+    else:
+        url = ("https://github.com/scikit-image/scikit-image/raw/"
+               "v{version}/skimage/")
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -137,10 +149,15 @@ def create_image_fetcher():
         # With a version qualifier
         path=pooch.os_cache("scikit-image"),
         base_url=url,
-        version=pooch_version,
+        version=skimage_version_for_pooch,
+        version_dev="main",
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
+        # Note: this should read `retry_if_failed=3,`, but we generate that
+        # dynamically at import time above, in case installed pooch is a less
+        # recent version
+        **retry,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
@@ -237,8 +254,17 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
+
+    # Copy in the README.txt if it doesn't already exist.
+    # If the file was originally copied to the data cache directory read-only
+    # then we cannot overwrite it, nor do we need to copy on every init.
+    # In general, as the data cache directory contains the scikit-image version
+    # it should not be necessary to overwrite this file as it should not
+    # change.
+    dest_path = osp.join(data_dir, 'README.txt')
+    if not os.path.isfile(dest_path):
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     dest_path)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
