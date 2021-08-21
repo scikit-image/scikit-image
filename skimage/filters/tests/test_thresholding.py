@@ -3,6 +3,7 @@ import pytest
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_equal, assert_equal)
 from scipy import ndimage as ndi
+
 from skimage import data, util
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
@@ -17,9 +18,8 @@ from skimage.filters.thresholding import (_cross_entropy, _mean_std,
                                           threshold_minimum,
                                           threshold_multiotsu,
                                           threshold_niblack, threshold_otsu,
-                                          threshold_sauvola,
-                                          threshold_triangle, threshold_yen,
-                                          try_all_threshold)
+                                          threshold_sauvola, threshold_triangle,
+                                          threshold_yen, try_all_threshold)
 
 
 class TestSimpleImage():

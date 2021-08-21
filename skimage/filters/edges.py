@@ -11,11 +11,10 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from scipy import ndimage as ndi
-from scipy.ndimage import convolve, binary_erosion
+from scipy.ndimage import binary_erosion, convolve
 
 from .._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
-
 
 # n-dimensional filter weights
 SOBEL_EDGE = np.array([1, 0, -1])

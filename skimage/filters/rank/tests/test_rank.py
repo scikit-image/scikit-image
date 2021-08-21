@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
+
 from skimage import data, morphology, util
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_allclose,
-                                     assert_array_almost_equal,
+from skimage._shared.testing import (assert_allclose, assert_array_almost_equal,
                                      assert_array_equal, assert_equal, fetch,
                                      test_parallel)
 from skimage.filters import rank

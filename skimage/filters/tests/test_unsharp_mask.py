@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.filters import unsharp_mask

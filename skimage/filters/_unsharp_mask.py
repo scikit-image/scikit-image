@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
+
 from skimage import img_as_float
 
 from .._shared import utils
