@@ -680,7 +680,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # Li's algorithm requires positive image (because of log(mean))
     image_min = np.min(image)
     image -= image_min
-    tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
+    if image.dtype.kind in 'iu':
+        tolerance = tolerance or 0.5
+    else:
+        tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate for iteration. See "initial_guess" in the parameter list
     if initial_guess is None:
