@@ -149,7 +149,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
-        raise ValueError("Correlation mode '{}' is not valid.".format(mode))
+        raise ValueError(f"Correlation mode '{mode}' is not valid.")
 
     fixed_image = np.asarray(arr1)
     moving_image = np.asarray(arr2)
@@ -170,8 +170,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     for axis in (all_axes - set(axes)):
         if fixed_image.shape[axis] != moving_image.shape[axis]:
             raise ValueError(
-                "Array shapes along non-transformation axes should be "
-                "equal, but dimensions along axis {a} are not".format(a=axis))
+                f'Array shapes along non-transformation axes should be '
+                f'equal, but dimensions along axis {axis} are not.')
 
     # Determine final size along transformation axes
     # Note that it might be faster to compute Fourier transform in a slightly

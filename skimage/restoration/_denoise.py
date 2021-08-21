@@ -187,29 +187,28 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                                  "must be multiple color channels not another "
                                  "spatial dimension.")
             else:
-                raise ValueError("Bilateral filter is only implemented for "
-                                 "2D grayscale images (image.ndim == 2) and "
-                                 "2D multichannel (image.ndim == 3) images, "
-                                 "but the input image has {0} dimensions. "
-                                 "".format(image.ndim))
+                raise ValueError(f'Bilateral filter is only implemented for '
+                                 f'2D grayscale images (image.ndim == 2) and '
+                                 f'2D multichannel (image.ndim == 3) images, '
+                                 f'but the input image has {image.ndim} dimensions.')
         elif image.shape[2] not in (3, 4):
             if image.shape[2] > 4:
-                msg = ("The last axis of the input image is interpreted as "
-                       "channels. Input image with shape {0} has {1} channels "
-                       "in last axis. ``denoise_bilateral`` is implemented "
-                       "for 2D grayscale and color images only")
-                warn(msg.format(image.shape, image.shape[2]))
+                msg = f'The last axis of the input image is ' \
+                      f'interpreted as channels. Input image with '\
+                      f'shape {image.shape} has {image.shape[2]} channels '\
+                      f'in last axis. ``denoise_bilateral``is implemented ' \
+                      f'for 2D grayscale and color images only.'
+                warn(msg)
             else:
-                msg = "Input image must be grayscale, RGB, or RGBA; " \
-                      "but has shape {0}."
-                warn(msg.format(image.shape))
+                msg = f'Input image must be grayscale, RGB, or RGBA; ' \
+                      f'but has shape {image.shape}.'
+                warn(msg)
     else:
         if image.ndim > 2:
-            raise ValueError("Bilateral filter is not implemented for "
-                             "grayscale images of 3 or more dimensions, "
-                             "but input image has {0} dimension. Use "
-                             "``channel_axis=-1`` for 2-D RGB "
-                             "images.".format(image.shape))
+            raise ValueError(f'Bilateral filter is not implemented for '
+                             f'grayscale images of 3 or more dimensions, '
+                             f'but input image has {image.shape} shape. Use '
+                             f'``channel_axis=-1`` for 2D RGB images.')
 
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)
@@ -632,9 +631,10 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     """
     wavelet = pywt.Wavelet(wavelet)
     if not wavelet.orthogonal:
-        warn(("Wavelet thresholding was designed for use with orthogonal "
-              "wavelets. For nonorthogonal wavelets such as {}, results are "
-              "likely to be suboptimal.").format(wavelet.name))
+        warn(f'Wavelet thresholding was designed for '
+             f'use with orthogonal wavelets. For nonorthogonal '
+             f'wavelets such as {wavelet.name},results are '
+             f'likely to be suboptimal.')
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
@@ -658,8 +658,8 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
         sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
 
     if method is not None and threshold is not None:
-        warn(("Thresholding method {} selected.  The user-specified threshold "
-              "will be ignored.").format(method))
+        warn(f'Thresholding method {method} selected. The '
+             f'user-specified threshold will be ignored.')
 
     if threshold is None:
         var = sigma**2
@@ -674,7 +674,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
             # The VisuShrink thresholds from [2]_ in docstring
             threshold = _universal_thresh(image, sigma)
         else:
-            raise ValueError("Unrecognized method: {}".format(method))
+            raise ValueError(f'Unrecognized method: {method}')
 
     if np.isscalar(threshold):
         # A single threshold for all coefficient arrays
@@ -869,9 +869,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     """
     multichannel = channel_axis is not None
     if method not in ["BayesShrink", "VisuShrink"]:
-        raise ValueError(
-            ('Invalid method: {}. The currently supported methods are '
-             '"BayesShrink" and "VisuShrink"').format(method))
+        raise ValueError(f'Invalid method: {method}. The currently supported '
+                         f'methods are "BayesShrink" and "VisuShrink".')
 
     # floating-point inputs are not rescaled, so don't clip their output.
     clip_output = image.dtype.kind != 'f'
@@ -994,10 +993,10 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
             sigmas = np.mean(sigmas)
         return sigmas
     elif image.shape[-1] <= 4:
-        msg = ("image is size {0} on the last axis, but channel_axis is "
-               "None.  If this is a color image, please set channel_axis=-1 "
-               "for proper noise estimation.")
-        warn(msg.format(image.shape[-1]))
+        msg = f'image is size {image.shape[-1]} on the last axis, '\
+              f'but channel_axis is None. If this is a color image, '\
+              f'please set channel_axis=-1 for proper noise estimation.'
+        warn(msg)
     coeffs = pywt.dwtn(image, wavelet='db2')
     detail_coeffs = coeffs['d' * image.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

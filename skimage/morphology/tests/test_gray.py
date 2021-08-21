@@ -279,7 +279,7 @@ def test_1d_erosion():
 
 def test_deprecated_import():
     msg = "Importing from skimage.morphology.grey is deprecated."
-    with expected_warnings([msg]):
+    with expected_warnings([msg + r"|\A\Z"]):
         from skimage.morphology.grey import erosion
 
 

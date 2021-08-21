@@ -16,36 +16,54 @@ from functools import wraps
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
+# All values in this PROPS dict correspond to current scikit-image property
+# names. The keys in this PROPS dict correspond to older names used in prior
+# releases. For backwards compatibility, these older names will continue to
+# work, but will not be documented.
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
-    'BoundingBoxArea': 'bbox_area',
+    'BoundingBoxArea': 'area_bbox',
+    'bbox_area': 'area_bbox',
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
-    'ConvexArea': 'convex_area',
+    'ConvexArea': 'area_convex',
+    'convex_area': 'area_convex',
     # 'ConvexHull',
-    'ConvexImage': 'convex_image',
+    'ConvexImage': 'image_convex',
+    'convex_image': 'image_convex',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
-    'EquivDiameter': 'equivalent_diameter',
+    'EquivDiameter': 'equivalent_diameter_area',
+    'equivalent_diameter': 'equivalent_diameter_area',
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
+    'FeretDiameter': 'feret_diameter_max',
     'FeretDiameterMax': 'feret_diameter_max',
-    'FilledArea': 'filled_area',
-    'FilledImage': 'filled_image',
+    'FilledArea': 'area_filled',
+    'filled_area': 'area_filled',
+    'FilledImage': 'image_filled',
+    'filled_image': 'image_filled',
     'HuMoments': 'moments_hu',
     'Image': 'image',
     'InertiaTensor': 'inertia_tensor',
     'InertiaTensorEigvals': 'inertia_tensor_eigvals',
-    'IntensityImage': 'intensity_image',
+    'IntensityImage': 'image_intensity',
+    'intensity_image': 'image_intensity',
     'Label': 'label',
-    'LocalCentroid': 'local_centroid',
-    'MajorAxisLength': 'major_axis_length',
-    'MaxIntensity': 'max_intensity',
-    'MeanIntensity': 'mean_intensity',
-    'MinIntensity': 'min_intensity',
-    'MinorAxisLength': 'minor_axis_length',
+    'LocalCentroid': 'centroid_local',
+    'local_centroid': 'centroid_local',
+    'MajorAxisLength': 'axis_major_length',
+    'major_axis_length': 'axis_major_length',
+    'MaxIntensity': 'intensity_max',
+    'max_intensity': 'intensity_max',
+    'MeanIntensity': 'intensity_mean',
+    'mean_intensity': 'intensity_mean',
+    'MinIntensity': 'intensity_min',
+    'min_intensity': 'intensity_min',
+    'MinorAxisLength': 'axis_minor_length',
+    'minor_axis_length': 'axis_minor_length',
     'Moments': 'moments',
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
@@ -56,60 +74,66 @@ PROPS = {
     'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
-    'WeightedCentralMoments': 'weighted_moments_central',
-    'WeightedCentroid': 'weighted_centroid',
-    'WeightedHuMoments': 'weighted_moments_hu',
-    'WeightedLocalCentroid': 'weighted_local_centroid',
-    'WeightedMoments': 'weighted_moments',
-    'WeightedNormalizedMoments': 'weighted_moments_normalized'
+    'WeightedCentralMoments': 'moments_weighted_central',
+    'weighted_moments_central': 'moments_weighted_central',
+    'WeightedCentroid': 'centroid_weighted',
+    'weighted_centroid': 'centroid_weighted',
+    'WeightedHuMoments': 'moments_weighted_hu',
+    'weighted_moments_hu': 'moments_weighted_hu',
+    'WeightedLocalCentroid': 'centroid_weighted_local',
+    'weighted_local_centroid': 'centroid_weighted_local',
+    'WeightedMoments': 'moments_weighted',
+    'weighted_moments': 'moments_weighted',
+    'WeightedNormalizedMoments': 'moments_weighted_normalized',
+    'weighted_moments_normalized': 'moments_weighted_normalized',
 }
 
 OBJECT_COLUMNS = {
-    'image', 'coords', 'convex_image', 'slice',
-    'filled_image', 'intensity_image'
+    'image', 'coords', 'image_convex', 'slice',
+    'image_filled', 'image_intensity'
 }
 
 COL_DTYPES = {
     'area': int,
+    'area_bbox': int,
+    'area_convex': int,
+    'area_filled': int,
+    'axis_major_length': float,
+    'axis_minor_length': float,
     'bbox': int,
-    'bbox_area': int,
-    'moments_central': float,
     'centroid': float,
-    'convex_area': int,
-    'convex_image': object,
+    'centroid_local': float,
+    'centroid_weighted': float,
+    'centroid_weighted_local': float,
     'coords': object,
     'eccentricity': float,
-    'equivalent_diameter': float,
+    'equivalent_diameter_area': float,
     'euler_number': int,
     'extent': float,
     'feret_diameter_max': float,
-    'filled_area': int,
-    'filled_image': object,
-    'moments_hu': float,
     'image': object,
+    'image_convex': object,
+    'image_filled': object,
+    'image_intensity': object,
     'inertia_tensor': float,
     'inertia_tensor_eigvals': float,
-    'intensity_image': object,
+    'intensity_max': float,
+    'intensity_mean': float,
+    'intensity_min': float,
     'label': int,
-    'local_centroid': float,
-    'major_axis_length': float,
-    'max_intensity': float,
-    'mean_intensity': float,
-    'min_intensity': float,
-    'minor_axis_length': float,
     'moments': float,
+    'moments_central': float,
+    'moments_hu': float,
     'moments_normalized': float,
+    'moments_weighted': float,
+    'moments_weighted_central': float,
+    'moments_weighted_hu': float,
+    'moments_weighted_normalized': float,
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
-    'weighted_moments_central': float,
-    'weighted_centroid': float,
-    'weighted_moments_hu': float,
-    'weighted_local_centroid': float,
-    'weighted_moments': float,
-    'weighted_moments_normalized': float
 }
 
 PROP_VALS = set(PROPS.values())
@@ -260,12 +284,12 @@ class RegionProperties:
                 if self._intensity_image is not None:
                     if self._multichannel:
                         multichannel_list = [func(self.image,
-                                                  self.intensity_image[..., i])
+                                                  self.image_intensity[..., i])
                                              for i in range(
-                            self.intensity_image.shape[-1])]
+                            self.image_intensity.shape[-1])]
                         return np.stack(multichannel_list, axis=-1)
                     else:
-                        return func(self.image, self.intensity_image)
+                        return func(self.image, self.image_intensity)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"
@@ -299,7 +323,7 @@ class RegionProperties:
                      [self.slice[i].stop for i in range(self._ndim)])
 
     @property
-    def bbox_area(self):
+    def area_bbox(self):
         return self.image.size
 
     @property
@@ -308,12 +332,12 @@ class RegionProperties:
 
     @property
     @_cached
-    def convex_area(self):
-        return np.sum(self.convex_image)
+    def area_convex(self):
+        return np.sum(self.image_convex)
 
     @property
     @_cached
-    def convex_image(self):
+    def image_convex(self):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
@@ -332,7 +356,7 @@ class RegionProperties:
         return sqrt(1 - l2 / l1)
 
     @property
-    def equivalent_diameter(self):
+    def equivalent_diameter_area(self):
         return (2 * self._ndim * self.area / PI) ** (1 / self._ndim)
 
     @property
@@ -348,7 +372,7 @@ class RegionProperties:
 
     @property
     def feret_diameter_max(self):
-        identity_convex_hull = np.pad(self.convex_image,
+        identity_convex_hull = np.pad(self.image_convex,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
             coordinates = np.vstack(find_contours(identity_convex_hull, .5,
@@ -359,12 +383,12 @@ class RegionProperties:
         return sqrt(np.max(distances))
 
     @property
-    def filled_area(self):
-        return np.sum(self.filled_image)
+    def area_filled(self):
+        return np.sum(self.image_filled)
 
     @property
     @_cached
-    def filled_image(self):
+    def image_filled(self):
         structure = np.ones((3,) * self._ndim)
         return ndi.binary_fill_holes(self.image, structure)
 
@@ -387,7 +411,7 @@ class RegionProperties:
 
     @property
     @_cached
-    def intensity_image(self):
+    def image_intensity(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
         image = (
@@ -397,36 +421,36 @@ class RegionProperties:
         )
         return self._intensity_image[self.slice] * image
 
-    def _intensity_image_double(self):
-        return self.intensity_image.astype(np.double)
+    def _image_intensity_double(self):
+        return self.image_intensity.astype(np.double)
 
     @property
-    def local_centroid(self):
+    def centroid_local(self):
         M = self.moments
         return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
                      M[(0,) * self._ndim])
 
     @property
-    def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0)\
+    def intensity_max(self):
+        return np.max(self.image_intensity[self.image], axis=0)\
                  .astype(np.double)
 
     @property
-    def mean_intensity(self):
-        return np.mean(self.intensity_image[self.image], axis=0)
+    def intensity_mean(self):
+        return np.mean(self.image_intensity[self.image], axis=0)
 
     @property
-    def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0)\
+    def intensity_min(self):
+        return np.min(self.image_intensity[self.image], axis=0)\
                  .astype(np.double)
 
     @property
-    def major_axis_length(self):
+    def axis_major_length(self):
         l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
     @property
-    def minor_axis_length(self):
+    def axis_minor_length(self):
         l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
@@ -440,7 +464,7 @@ class RegionProperties:
     @_cached
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
-                                      self.local_centroid, order=3)
+                                      self.centroid_local, order=3)
         return mu
 
     @property
@@ -477,24 +501,24 @@ class RegionProperties:
 
     @property
     def solidity(self):
-        return self.area / self.convex_area
+        return self.area / self.area_convex
 
     @property
-    def weighted_centroid(self):
-        ctr = self.weighted_local_centroid
+    def centroid_weighted(self):
+        ctr = self.centroid_weighted_local
         return tuple(idx + slc.start
                      for idx, slc in zip(ctr, self.slice))
 
     @property
-    def weighted_local_centroid(self):
-        M = self.weighted_moments
+    def centroid_weighted_local(self):
+        M = self.moments_weighted
         return (M[tuple(np.eye(self._ndim, dtype=int))] /
                 M[(0,) * self._ndim])
 
     @property
     @_cached
-    def weighted_moments(self):
-        image = self._intensity_image_double()
+    def moments_weighted(self):
+        image = self._image_intensity_double()
         if self._multichannel:
             moments = np.stack(
                     [_moments.moments(image[..., i], order=3)
@@ -507,9 +531,9 @@ class RegionProperties:
 
     @property
     @_cached
-    def weighted_moments_central(self):
-        ctr = self.weighted_local_centroid
-        image = self._intensity_image_double()
+    def moments_weighted_central(self):
+        ctr = self.centroid_weighted_local
+        image = self._image_intensity_double()
         if self._multichannel:
             moments_list = [
                 _moments.moments_central(
@@ -524,8 +548,8 @@ class RegionProperties:
 
     @property
     @only2d
-    def weighted_moments_hu(self):
-        nu = self.weighted_moments_normalized
+    def moments_weighted_hu(self):
+        nu = self.moments_weighted_normalized
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
@@ -537,8 +561,8 @@ class RegionProperties:
 
     @property
     @_cached
-    def weighted_moments_normalized(self):
-        mu = self.weighted_moments_central
+    def moments_weighted_normalized(self):
+        mu = self.moments_weighted_central
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
@@ -548,22 +572,22 @@ class RegionProperties:
             )
         else:
             return _moments.moments_normalized(mu, order=3)
-        return _moments.moments_normalized(self.weighted_moments_central, 3)
+        return _moments.moments_normalized(self.moments_weighted_central, 3)
 
     def __iter__(self):
         props = PROP_VALS
 
         if self._intensity_image is None:
-            unavailable_props = ('intensity_image',
-                                 'max_intensity',
-                                 'mean_intensity',
-                                 'min_intensity',
-                                 'weighted_moments',
-                                 'weighted_moments_central',
-                                 'weighted_centroid',
-                                 'weighted_local_centroid',
-                                 'weighted_moments_hu',
-                                 'weighted_moments_normalized')
+            unavailable_props = ('image_intensity',
+                                 'intensity_max',
+                                 'intensity_mean',
+                                 'intensity_min',
+                                 'moments_weighted',
+                                 'moments_weighted_central',
+                                 'centroid_weighted',
+                                 'centroid_weighted_local',
+                                 'moments_weighted_hu',
+                                 'moments_weighted_normalized')
 
             props = props.difference(unavailable_props)
 
@@ -939,19 +963,35 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     **area** : int
         Number of pixels of the region.
+    **area_bbox** : int
+        Number of pixels of bounding box.
+    **area_convex** : int
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
+    **area_filled** : int
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the image_filled.
+    **axis_major_length** : float
+        The length of the major axis of the ellipse that has the same
+        normalized second central moments as the region.
+    **axis_minor_length** : float
+        The length of the minor axis of the ellipse that has the same
+        normalized second central moments as the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
         ``[min_row; max_row)`` and ``[min_col; max_col)``.
-    **bbox_area** : int
-        Number of pixels of bounding box.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
-    **convex_area** : int
-        Number of pixels of convex hull image, which is the smallest convex
-        polygon that encloses the region.
-    **convex_image** : (H, J) ndarray
-        Binary convex hull image which has the same size as bounding box.
+    **centroid_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box.
+    **centroid_weighted** : array
+        Centroid coordinate tuple ``(row, col)`` weighted with intensity
+        image.
+    **centroid_weighted_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box, weighted with intensity image.
     **coords** : (N, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
@@ -960,7 +1000,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         (distance between focal points) over the major axis length.
         The value is in the interval [0, 1).
         When it is 0, the ellipse becomes a circle.
-    **equivalent_diameter** : float
+    **equivalent_diameter_area** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
         Euler characteristic of the set of non-zero pixels.
@@ -974,37 +1014,27 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours``. [5]_
-    **filled_area** : int
-        Number of pixels of the region will all the holes filled in. Describes
-        the area of the filled_image.
-    **filled_image** : (H, J) ndarray
-        Binary region image with filled holes which has the same size as
-        bounding box.
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
+    **image_convex** : (H, J) ndarray
+        Binary convex hull image which has the same size as bounding box.
+    **image_filled** : (H, J) ndarray
+        Binary region image with filled holes which has the same size as
+        bounding box.
+    **image_intensity** : ndarray
+        Image inside region bounding box.
     **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The eigenvalues of the inertia tensor in decreasing order.
-    **intensity_image** : ndarray
-        Image inside region bounding box.
+    **intensity_max** : float
+        Value with the greatest intensity in the region.
+    **intensity_mean** : float
+        Value with the mean intensity in the region.
+    **intensity_min** : float
+        Value with the least intensity in the region.
     **label** : int
         The label in the labeled input image.
-    **local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box.
-    **major_axis_length** : float
-        The length of the major axis of the ellipse that has the same
-        normalized second central moments as the region.
-    **max_intensity** : float
-        Value with the greatest intensity in the region.
-    **mean_intensity** : float
-        Value with the mean intensity in the region.
-    **min_intensity** : float
-        Value with the least intensity in the region.
-    **minor_axis_length** : float
-        The length of the minor axis of the ellipse that has the same
-        normalized second central moments as the region.
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
@@ -1026,6 +1056,31 @@ def regionprops(label_image, intensity_image=None, cache=True,
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
+    **moments_weighted** : (3, 3) ndarray
+        Spatial moments of intensity image up to 3rd order::
+
+            wm_ij = sum{ array(row, col) * row^i * col^j }
+
+        where the sum is over the `row`, `col` coordinates of the region.
+    **moments_weighted_central** : (3, 3) ndarray
+        Central moments (translation invariant) of intensity image up to
+        3rd order::
+
+            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
+
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's weighted
+        centroid.
+    **moments_weighted_hu** : tuple
+        Hu moments (translation, scale and rotation invariant) of intensity
+        image.
+    **moments_weighted_normalized** : (3, 3) ndarray
+        Normalized moments (translation and scale invariant) of intensity
+        image up to 3rd order::
+
+            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
+
+        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
     **orientation** : float
         Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,
@@ -1040,37 +1095,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         A slice to extract the object from the source image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
-    **weighted_centroid** : array
-        Centroid coordinate tuple ``(row, col)`` weighted with intensity
-        image.
-    **weighted_local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box, weighted with intensity image.
-    **weighted_moments** : (3, 3) ndarray
-        Spatial moments of intensity image up to 3rd order::
-
-            wm_ij = sum{ array(row, col) * row^i * col^j }
-
-        where the sum is over the `row`, `col` coordinates of the region.
-    **weighted_moments_central** : (3, 3) ndarray
-        Central moments (translation invariant) of intensity image up to
-        3rd order::
-
-            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
-
-        where the sum is over the `row`, `col` coordinates of the region,
-        and `row_c` and `col_c` are the coordinates of the region's weighted
-        centroid.
-    **weighted_moments_hu** : tuple
-        Hu moments (translation, scale and rotation invariant) of intensity
-        image.
-    **weighted_moments_normalized** : (3, 3) ndarray
-        Normalized moments (translation and scale invariant) of intensity
-        image up to 3rd order::
-
-            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
-
-        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
 
     Each region also supports iteration, so that you can do::
 
