@@ -1018,7 +1018,7 @@ def _only_mean(image, w):
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     # s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m  #,s
+    return m  # ,s
 
 
 def threshold_singh(image, window_size=15, k=0.2, r=None):
