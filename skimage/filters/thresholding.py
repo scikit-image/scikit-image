@@ -1055,7 +1055,7 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
         Tejmani Sinam, Kh Manglem Singh.
         "A New Local Adaptive Thresholding Technique in Binarization." IJCSI
     International Journal of Computer Science Issues. 2011; 8(6-2): 271-276.
-    http://ijcsi.org/papers/IJCSI-8-6-3-275-280.pdf
+    https://arxiv.org/pdf/1201.5227.pdf
     Examples
     --------
     >>> from skimage import data
