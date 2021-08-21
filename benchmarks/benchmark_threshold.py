@@ -7,9 +7,10 @@ class ThresholdLi:
 
     def setup(self):
         self.image = eagle()
+        self.image_float32 = self.image.astype(np.float32)
 
     def time_integer_image(self):
         result1 = threshold_li(self.image)
 
-    def time_float_image(self):
-        result1 = threshold_li(self.image.astype(np.float32))
+    def time_float32_image(self):
+        result1 = threshold_li(self.image_float32)
