@@ -78,8 +78,7 @@ def _preprocess(image, mask, sigma, mode, cval):
     masked_image[mask] = image[mask]
 
     # Compute the fractional contribution of masked pixels by applying
-    # the function to the mask (which gets y
-    u the fraction of the
+    # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
     bleed_over = (
         gaussian(mask.astype(float), **gaussian_kwargs) + np.finfo(float).eps
