@@ -25,7 +25,7 @@ window that contains the surrounding pixels.
        "A New Local Adaptive Thresholding Technique in Binarization."
        International Journal of Computer Science Issues,
        2011; 8(6-2): 271-276.
-       http://ijcsi.org/papers/IJCSI-8-6-3-275-280.pdf
+       https://arxiv.org/pdf/1201.5227.pdf
 """
 import matplotlib
 import matplotlib.pyplot as plt
