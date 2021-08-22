@@ -8,7 +8,7 @@ from skimage import data
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 from skimage._shared import testing
 
-from pytest import importorskip
+from pytest import importorskip, raises
 
 importorskip('SimpleITK')
 
@@ -42,13 +42,10 @@ def test_bilevel():
     img = imread(testing.fetch('data/checker_bilevel.png'))
     np.testing.assert_array_equal(img, expected)
 
-"""
-#TODO: This test causes a Segmentation fault
+
 def test_imread_truncated_jpg():
-    assert_raises((RuntimeError, ValueError),
-                  imread,
-                  testing.fetch('data/truncated.jpg'))
-"""
+    with raises(OSError):
+        imread(testing.fetch('data/truncated.jpg'))
 
 
 def test_imread_uint16():
