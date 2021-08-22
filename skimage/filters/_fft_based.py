@@ -134,7 +134,13 @@ def butterworth(
     if is_real:
         butterfilt = fft.irfftn(wfilt * fft.rfftn(image, axes=axes),
                                 s=fft_shape, axes=axes)
+        # can remove astype call below once minimum SciPy required is 1.4+
+        # (with older SciPy, numpy.fft promotes to double precision)
+        butterfilt = butterfilt.astype(float_dtype, copy=False)
     else:
         butterfilt = fft.ifftn(wfilt * fft.fftn(image, axes=axes),
                                s=fft_shape, axes=axes)
+        # can remove astype call below once minimum SciPy required is 1.4+
+        cplx_dtype = np.promote_types(float_dtype, np.complex64)
+        butterfilt = butterfilt.astype(cplx_dtype, copy=False)
     return butterfilt

@@ -46,6 +46,8 @@ Other (2022)
 * Remove unneeded `deconv_type` and astype call in `weiner` and
   `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
   supported version of ``scipy`` reaches 1.4.
+* Remove two unneeded astype calls in `butterworth` once the minimum supported
+  version of ``scipy`` reaches 1.4.
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
