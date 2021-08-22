@@ -32,7 +32,6 @@ def _format_plugin_info_table(info_table, column_lengths):
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as
     a ReStructuredText table.
-
     """
     from textwrap import wrap
 
@@ -59,4 +58,5 @@ def _update_doc(doc):
     return doc
 
 
-__doc__ = _update_doc(__doc__)
+if __doc__ is not None:
+    __doc__ = _update_doc(__doc__)

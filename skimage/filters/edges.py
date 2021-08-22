@@ -11,31 +11,44 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from .. import img_as_float
-from .._shared.utils import assert_nD, deprecated
-from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
+from .._shared.utils import check_nD
+from scipy import ndimage as ndi
+from scipy.ndimage import convolve, binary_erosion
 
+from ..restoration.uft import laplacian
 
-EROSION_SELEM = generate_binary_structure(2, 2)
-
-HSOBEL_WEIGHTS = np.array([[ 1, 2, 1],
-                           [ 0, 0, 0],
-                           [-1,-2,-1]]) / 4.0
+# n-dimensional filter weights
+SOBEL_EDGE = np.array([1, 0, -1])
+SOBEL_SMOOTH = np.array([1, 2, 1]) / 4
+HSOBEL_WEIGHTS = SOBEL_EDGE.reshape((3, 1)) * SOBEL_SMOOTH.reshape((1, 3))
 VSOBEL_WEIGHTS = HSOBEL_WEIGHTS.T
 
-HSCHARR_WEIGHTS = np.array([[ 3,  10,  3],
-                            [ 0,   0,  0],
-                            [-3, -10, -3]]) / 16.0
+SCHARR_EDGE = np.array([1, 0, -1])
+SCHARR_SMOOTH = np.array([3, 10, 3]) / 16
+HSCHARR_WEIGHTS = SCHARR_EDGE.reshape((3, 1)) * SCHARR_SMOOTH.reshape((1, 3))
 VSCHARR_WEIGHTS = HSCHARR_WEIGHTS.T
 
-HPREWITT_WEIGHTS = np.array([[ 1, 1, 1],
-                             [ 0, 0, 0],
-                             [-1,-1,-1]]) / 3.0
+PREWITT_EDGE = np.array([1, 0, -1])
+PREWITT_SMOOTH = np.full((3,), 1/3)
+HPREWITT_WEIGHTS = (PREWITT_EDGE.reshape((3, 1))
+                    * PREWITT_SMOOTH.reshape((1, 3)))
 VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
+# 2D-only filter weights
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
                                [0, -1]], dtype=np.double)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
                                [-1, 0]], dtype=np.double)
+
+# These filter weights can be found in Farid & Simoncelli (2004),
+# Table 1 (3rd and 4th row). Additional decimal places were computed
+# using the code found at https://www.cs.dartmouth.edu/farid/
+p = np.array([[0.0376593171958126, 0.249153396177344, 0.426374573253687,
+               0.249153396177344, 0.0376593171958126]])
+d1 = np.array([[0.109603762960254, 0.276690988455557, 0, -0.276690988455557,
+                -0.109603762960254]])
+HFARID_WEIGHTS = d1.T * p
+VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
 
 def _mask_filter_result(result, mask):
@@ -44,65 +57,190 @@ def _mask_filter_result(result, mask):
     Input masks are eroded so that mask areas in the original image don't
     affect values in the result.
     """
-    if mask is None:
-        result[0, :] = 0
-        result[-1, :] = 0
-        result[:, 0] = 0
-        result[:, -1] = 0
-        return result
-    else:
-        mask = binary_erosion(mask, EROSION_SELEM, border_value=0)
-        return result * mask
+    if mask is not None:
+        erosion_footprint = ndi.generate_binary_structure(mask.ndim, mask.ndim)
+        mask = binary_erosion(mask, erosion_footprint, border_value=0)
+        result *= mask
+    return result
 
 
-def sobel(image, mask=None):
-    """Find the edge magnitude using the Sobel transform.
+def _kernel_shape(ndim, dim):
+    """Return list of `ndim` 1s except at position `dim`, where value is -1.
 
     Parameters
     ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
+    ndim : int
+        The number of dimensions of the kernel shape.
+    dim : int
+        The axis of the kernel to expand to shape -1.
 
     Returns
     -------
-    output : 2-D array
+    shape : list of int
+        The requested shape.
+
+    Examples
+    --------
+    >>> _kernel_shape(2, 0)
+    [-1, 1]
+    >>> _kernel_shape(3, 1)
+    [1, -1, 1]
+    >>> _kernel_shape(4, -1)
+    [1, 1, 1, -1]
+    """
+    shape = [1, ] * ndim
+    shape[dim] = -1
+    return shape
+
+
+def _reshape_nd(arr, ndim, dim):
+    """Reshape a 1D array to have n dimensions, all singletons but one.
+
+    Parameters
+    ----------
+    arr : array, shape (N,)
+        Input array
+    ndim : int
+        Number of desired dimensions of reshaped array.
+    dim : int
+        Which dimension/axis will not be singleton-sized.
+
+    Returns
+    -------
+    arr_reshaped : array, shape ([1, ...], N, [1,...])
+        View of `arr` reshaped to the desired shape.
+
+    Examples
+    --------
+    >>> rng = np.random.default_rng()
+    >>> arr = rng.random(7)
+    >>> _reshape_nd(arr, 2, 0).shape
+    (7, 1)
+    >>> _reshape_nd(arr, 3, 1).shape
+    (1, 7, 1)
+    >>> _reshape_nd(arr, 4, -1).shape
+    (1, 1, 1, 7)
+    """
+    kernel_shape = _kernel_shape(ndim, dim)
+    return np.reshape(arr, kernel_shape)
+
+
+def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
+                         axis=None, mode='reflect', cval=0.0, mask=None):
+    """Apply a generic, n-dimensional edge filter.
+
+    The filter is computed by applying the edge weights along one dimension
+    and the smoothing weights along all other dimensions. If no axis is given,
+    or a tuple of axes is given the filter is computed along all axes in turn,
+    and the magnitude is computed as the square root of the average square
+    magnitude of all the axes.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    smooth_weights : array of float
+        The smoothing weights for the filter. These are applied to dimensions
+        orthogonal to the edge axis.
+    edge_weights : 1D array of float, optional
+        The weights to compute the edge along the chosen axes.
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            edge_mag = np.sqrt(sum([_generic_edge_filter(image, ..., axis=i)**2
+                                    for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
+    """
+    ndim = image.ndim
+    if axis is None:
+        axes = list(range(ndim))
+    elif np.isscalar(axis):
+        axes = [axis]
+    else:
+        axes = axis
+    return_magnitude = (len(axes) > 1)
+
+    output = np.zeros(image.shape, dtype=float)
+
+    for edge_dim in axes:
+        kernel = _reshape_nd(edge_weights, ndim, edge_dim)
+        smooth_axes = list(set(range(ndim)) - {edge_dim})
+        for smooth_dim in smooth_axes:
+            kernel = kernel * _reshape_nd(smooth_weights, ndim, smooth_dim)
+        ax_output = ndi.convolve(image, kernel, mode=mode)
+        if return_magnitude:
+            ax_output *= ax_output
+        output += ax_output
+
+    if return_magnitude:
+        output = np.sqrt(output) / np.sqrt(ndim)
+    return output
+
+
+def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
+    """Find edges in an image using the Sobel filter.
+
+    Parameters
+    ----------
+    image : array
+        The input image.
+    mask : array of bool, optional
+        Clip the output image to this mask. (Values where mask=0 will be set
+        to 0.)
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            sobel_mag = np.sqrt(sum([sobel(image, axis=i)**2
+                                     for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
+
+    Returns
+    -------
+    output : array of float
         The Sobel edge map.
 
     See also
     --------
-    scharr, prewitt, roberts, feature.canny
+    sobel_h, sobel_v : horizontal and vertical edge detection.
+    scharr, prewitt, farid, skimage.feature.canny
 
-    Notes
-    -----
-    Take the square root of the sum of the squares of the horizontal and
-    vertical Sobels to get a magnitude that's somewhat insensitive to
-    direction.
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
+           Optimization of Kernel Based Image Derivatives.
 
-    The 3x3 convolution kernel used in the horizontal and vertical Sobels is
-    an approximation of the gradient of the image (with some slight blurring
-    since 9 pixels are used to compute the gradient at a given pixel). As an
-    approximation of the gradient, the Sobel operator is not completely
-    rotation-invariant. The Scharr operator should be used for a better
-    rotation invariance.
-
-    Note that ``scipy.ndimage.sobel`` returns a directional Sobel which
-    has to be further processed to perform edge detection.
+    .. [2] https://en.wikipedia.org/wiki/Sobel_operator
 
     Examples
     --------
     >>> from skimage import data
-    >>> camera = data.camera()
     >>> from skimage import filters
+    >>> camera = data.camera()
     >>> edges = filters.sobel(camera)
     """
-    assert_nD(image, 2)
-    out = np.sqrt(sobel_h(image, mask)**2 + sobel_v(image, mask)**2)
-    out /= np.sqrt(2)
-    return out
+    image = img_as_float(image)
+    output = _generic_edge_filter(image, smooth_weights=SOBEL_SMOOTH,
+                                  axis=axis, mode=mode, cval=cval)
+    output = _mask_filter_result(output, mask)
+    return output
 
 
 def sobel_h(image, mask=None):
@@ -131,10 +269,8 @@ def sobel_h(image, mask=None):
      -1  -2  -1
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, HSOBEL_WEIGHTS)
-    return _mask_filter_result(result, mask)
+    check_nD(image, 2)
+    return sobel(image, mask=mask, axis=0)
 
 
 def sobel_v(image, mask=None):
@@ -163,100 +299,49 @@ def sobel_v(image, mask=None):
       1   0  -1
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, VSOBEL_WEIGHTS)
-    return _mask_filter_result(result, mask)
+    check_nD(image, 2)
+    return sobel(image, mask=mask, axis=1)
 
 
-@deprecated("skimage.filters.sobel_h")
-def hsobel(image, mask=None):
-    """Find the horizontal edges of an image using the Sobel transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Sobel edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   2   1
-      0   0   0
-     -1  -2  -1
-
-    """
-    return np.abs(sobel_h(image, mask))
-
-
-@deprecated("skimage.filters.sobel_v")
-def vsobel(image, mask=None):
-    """Find the vertical edges of an image using the Sobel transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Sobel edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   0  -1
-      2   0  -2
-      1   0  -1
-
-    """
-    return np.abs(sobel_v(image, mask))
-
-
-def scharr(image, mask=None):
+def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Scharr transform.
 
     Parameters
     ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
+    image : array
+        The input image.
+    mask : array of bool, optional
+        Clip the output image to this mask. (Values where mask=0 will be set
+        to 0.)
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            sch_mag = np.sqrt(sum([scharr(image, axis=i)**2
+                                   for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
 
     Returns
     -------
-    output : 2-D array
+    output : array of float
         The Scharr edge map.
 
     See also
     --------
-    sobel, prewitt, canny
+    scharr_h, scharr_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
-    Take the square root of the sum of the squares of the horizontal and
-    vertical Scharrs to get a magnitude that is somewhat insensitive to
-    direction. The Scharr operator has a better rotation invariance than
+    The Scharr operator has a better rotation invariance than
     other edge filters such as the Sobel or the Prewitt operators.
 
     References
@@ -264,18 +349,20 @@ def scharr(image, mask=None):
     .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
            Optimization of Kernel Based Image Derivatives.
 
-    .. [2] http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+    .. [2] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
 
     Examples
     --------
     >>> from skimage import data
-    >>> camera = data.camera()
     >>> from skimage import filters
+    >>> camera = data.camera()
     >>> edges = filters.scharr(camera)
     """
-    out = np.sqrt(scharr_h(image, mask)**2 + scharr_v(image, mask)**2)
-    out /= np.sqrt(2)
-    return out
+    image = img_as_float(image)
+    output = _generic_edge_filter(image, smooth_weights=SCHARR_SMOOTH,
+                                  axis=axis, mode=mode, cval=cval)
+    output = _mask_filter_result(output, mask)
+    return output
 
 
 def scharr_h(image, mask=None):
@@ -309,10 +396,8 @@ def scharr_h(image, mask=None):
            Optimization of Kernel Based Image Derivatives.
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, HSCHARR_WEIGHTS)
-    return _mask_filter_result(result, mask)
+    check_nD(image, 2)
+    return scharr(image, mask=mask, axis=0)
 
 
 def scharr_v(image, mask=None):
@@ -344,128 +429,68 @@ def scharr_v(image, mask=None):
     ----------
     .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
            Optimization of Kernel Based Image Derivatives.
-
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, VSCHARR_WEIGHTS)
-    return _mask_filter_result(result, mask)
+    check_nD(image, 2)
+    return scharr(image, mask=mask, axis=1)
 
 
-@deprecated("skimage.filters.scharr_h")
-def hscharr(image, mask=None):
-    """Find the horizontal edges of an image using the Scharr transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Scharr edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      3   10   3
-      0    0   0
-     -3  -10  -3
-
-    References
-    ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
-           Optimization of Kernel Based Image Derivatives.
-
-    """
-    return np.abs(scharr_h(image, mask))
-
-
-@deprecated("skimage.filters.scharr_v")
-def vscharr(image, mask=None):
-    """Find the vertical edges of an image using the Scharr transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Scharr edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-       3   0   -3
-      10   0  -10
-       3   0   -3
-
-    References
-    ----------
-    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
-           Optimization of Kernel Based Image Derivatives.
-
-    """
-    return np.abs(scharr_v(image, mask))
-
-
-def prewitt(image, mask=None):
+def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Prewitt transform.
 
     Parameters
     ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
+    image : array
+        The input image.
+    mask : array of bool, optional
+        Clip the output image to this mask. (Values where mask=0 will be set
+        to 0.)
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            prw_mag = np.sqrt(sum([prewitt(image, axis=i)**2
+                                   for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
 
     Returns
     -------
-    output : 2-D array
+    output : array of float
         The Prewitt edge map.
 
     See also
     --------
-    sobel, scharr
+    prewitt_h, prewitt_v : horizontal and vertical edge detection.
+    sobel, scharr, farid, skimage.feature.canny
 
     Notes
     -----
-    Return the square root of the sum of squares of the horizontal
-    and vertical Prewitt transforms. The edge magnitude depends slightly
-    on edge directions, since the approximation of the gradient operator by
-    the Prewitt operator is not completely rotation invariant. For a better
-    rotation invariance, the Scharr operator should be used. The Sobel operator
-    has a better rotation invariance than the Prewitt operator, but a worse
-    rotation invariance than the Scharr operator.
+    The edge magnitude depends slightly on edge directions, since the
+    approximation of the gradient operator by the Prewitt operator is not
+    completely rotation invariant. For a better rotation invariance, the Scharr
+    operator should be used. The Sobel operator has a better rotation
+    invariance than the Prewitt operator, but a worse rotation invariance than
+    the Scharr operator.
 
     Examples
     --------
     >>> from skimage import data
-    >>> camera = data.camera()
     >>> from skimage import filters
+    >>> camera = data.camera()
     >>> edges = filters.prewitt(camera)
     """
-    assert_nD(image, 2)
-    out = np.sqrt(prewitt_h(image, mask)**2 + prewitt_v(image, mask)**2)
-    out /= np.sqrt(2)
-    return out
+    image = img_as_float(image)
+    output = _generic_edge_filter(image, smooth_weights=PREWITT_SMOOTH,
+                                  axis=axis, mode=mode, cval=cval)
+    output = _mask_filter_result(output, mask)
+    return output
 
 
 def prewitt_h(image, mask=None):
@@ -489,15 +514,13 @@ def prewitt_h(image, mask=None):
     -----
     We use the following kernel::
 
-      1   1   1
-      0   0   0
-     -1  -1  -1
+      1/3   1/3   1/3
+       0     0     0
+     -1/3  -1/3  -1/3
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, HPREWITT_WEIGHTS)
-    return _mask_filter_result(result, mask)
+    check_nD(image, 2)
+    return prewitt(image, mask=mask, axis=0)
 
 
 def prewitt_v(image, mask=None):
@@ -521,77 +544,13 @@ def prewitt_v(image, mask=None):
     -----
     We use the following kernel::
 
-      1   0  -1
-      1   0  -1
-      1   0  -1
+      1/3   0  -1/3
+      1/3   0  -1/3
+      1/3   0  -1/3
 
     """
-    assert_nD(image, 2)
-    image = img_as_float(image)
-    result = convolve(image, VPREWITT_WEIGHTS)
-    return _mask_filter_result(result, mask)
-
-
-@deprecated("skimage.filters.prewitt_h")
-def hprewitt(image, mask=None):
-    """Find the horizontal edges of an image using the Prewitt transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Prewitt edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   1   1
-      0   0   0
-     -1  -1  -1
-
-    """
-    return np.abs(prewitt_h(image, mask))
-
-
-@deprecated("skimage.filters.prewitt_v")
-def vprewitt(image, mask=None):
-    """Find the vertical edges of an image using the Prewitt transform.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
-
-    Returns
-    -------
-    output : 2-D array
-        The absolute Prewitt edge map.
-
-    Notes
-    -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
-
-      1   0  -1
-      1   0  -1
-      1   0  -1
-
-    """
-    return np.abs(prewitt_v(image, mask))
+    check_nD(image, 2)
+    return prewitt(image, mask=mask, axis=1)
 
 
 def roberts(image, mask=None):
@@ -613,7 +572,8 @@ def roberts(image, mask=None):
 
     See also
     --------
-    sobel, scharr, prewitt, feature.canny
+    roberts_pos_diag, roberts_neg_diag : diagonal edge detection.
+    sobel, scharr, prewitt, skimage.feature.canny
 
     Examples
     --------
@@ -623,9 +583,9 @@ def roberts(image, mask=None):
     >>> edges = filters.roberts(camera)
 
     """
-    assert_nD(image, 2)
-    out = np.sqrt(roberts_pos_diag(image, mask)**2 +
-                  roberts_neg_diag(image, mask)**2)
+    check_nD(image, 2)
+    out = np.sqrt(roberts_pos_diag(image, mask) ** 2 +
+                  roberts_neg_diag(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
 
@@ -658,7 +618,7 @@ def roberts_pos_diag(image, mask=None):
       0  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -692,18 +652,48 @@ def roberts_neg_diag(image, mask=None):
      -1   0
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
-@deprecated("skimage.filters.roberts_pos_diag")
-def roberts_positive_diagonal(image, mask=None):
-    """Find the cross edges of an image using Roberts' cross operator.
+def laplace(image, ksize=3, mask=None):
+    """Find the edges of an image using the Laplace operator.
 
-    The kernel is applied to the input image to produce separate measurements
-    of the gradient component one orientation.
+    Parameters
+    ----------
+    image : ndarray
+        Image to process.
+    ksize : int, optional
+        Define the size of the discrete Laplacian operator such that it
+        will have a size of (ksize,) * image.ndim.
+    mask : ndarray, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Laplace edge map.
+
+    Notes
+    -----
+    The Laplacian operator is generated using the function
+    skimage.restoration.uft.laplacian().
+
+    """
+    image = img_as_float(image)
+    # Create the discrete Laplacian operator - We keep only the real part of
+    # the filter
+    _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
+    result = convolve(image, laplace_op)
+    return _mask_filter_result(result, mask)
+
+
+def farid(image, *, mask=None):
+    """Find the edge magnitude using the Farid transform.
 
     Parameters
     ----------
@@ -717,26 +707,44 @@ def roberts_positive_diagonal(image, mask=None):
     Returns
     -------
     output : 2-D array
-        The absolute Robert's edge map.
+        The Farid edge map.
+
+    See also
+    --------
+    farid_h, farid_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    Take the square root of the sum of the squares of the horizontal and
+    vertical derivatives to get a magnitude that is somewhat insensitive to
+    direction. Similar to the Scharr operator, this operator is designed with
+    a rotation invariance constraint.
 
-      1   0
-      0  -1
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Wikipedia, "Farid and Simoncelli Derivatives." Available at:
+           <https://en.wikipedia.org/wiki/Image_derivatives#Farid_and_Simoncelli_Derivatives>
 
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.farid(camera)
     """
-    return np.abs(roberts_pos_diag(image, mask))
+    check_nD(image, 2)
+    out = np.sqrt(farid_h(image, mask=mask) ** 2
+                  + farid_v(image, mask=mask) ** 2)
+    out /= np.sqrt(2)
+    return out
 
 
-@deprecated("skimage.filters.roberts_neg_diag")
-def roberts_negative_diagonal(image, mask=None):
-    """Find the cross edges of an image using the Roberts' Cross operator.
-
-    The kernel is applied to the input image to produce separate measurements
-    of the gradient component one orientation.
+def farid_h(image, *, mask=None):
+    """Find the horizontal edges of an image using the Farid transform.
 
     Parameters
     ----------
@@ -750,15 +758,55 @@ def roberts_negative_diagonal(image, mask=None):
     Returns
     -------
     output : 2-D array
-        The absolute Robert's edge map.
+        The Farid edge map.
 
     Notes
     -----
-    We use the following kernel and return the absolute value of the
-    result at each point::
+    The kernel was constructed using the 5-tap weights from [1].
 
-      0   1
-     -1   0
-
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Farid, H. and Simoncelli, E. P. "Optimally rotation-equivariant
+           directional derivative kernels", In: 7th International Conference on
+           Computer Analysis of Images and Patterns, Kiel, Germany. Sep, 1997.
     """
-    return np.abs(roberts_neg_diag(image, mask))
+    check_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, HFARID_WEIGHTS)
+    return _mask_filter_result(result, mask)
+
+
+def farid_v(image, *, mask=None):
+    """Find the vertical edges of an image using the Farid transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Farid edge map.
+
+    Notes
+    -----
+    The kernel was constructed using the 5-tap weights from [1].
+
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    """
+    check_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, VFARID_WEIGHTS)
+    return _mask_filter_result(result, mask)

@@ -35,11 +35,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import cython
 import numpy as np
-import heap
-import warnings
+from . import heap
+from .._shared.utils import warn
 
 cimport numpy as cnp
-cimport heap
+from . cimport heap
+
+cnp.import_array()
 
 OFFSET_D = np.int8
 OFFSETS_INDEX_D = np.int16
@@ -304,7 +306,8 @@ cdef class MCP:
             self.flat_costs = costs.astype(FLOAT_D, copy=False).ravel('F')
         except TypeError:
             self.flat_costs = costs.astype(FLOAT_D).flatten('F')
-            warnings.warn('Upgrading NumPy should decrease memory usage and increase speed.', Warning)
+            warn('Upgrading NumPy should decrease memory usage and increase'
+                 ' speed.')
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
         self.dim = len(costs.shape)
@@ -601,7 +604,7 @@ cdef class MCP:
                 # If we have already found the best path here then
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
-                    # Give subclass the oportunity to examine these two nodes
+                    # Give subclass the opportunity to examine these two nodes
                     # Note that only when both nodes are "frozen" their
                     # cumulative cost is set. By doing the check here, each
                     # pair of nodes is checked exactly once.

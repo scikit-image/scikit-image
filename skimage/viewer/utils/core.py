@@ -1,15 +1,14 @@
-import warnings
-
 import numpy as np
 from ..qt import QtWidgets, has_qt, FigureManagerQT, FigureCanvasQTAgg
+from ..._shared.utils import warn
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib import _pylab_helpers
 from matplotlib.colors import LinearSegmentedColormap
 
 if has_qt and 'agg' not in mpl.get_backend().lower():
-    warnings.warn("Recommended matplotlib backend is `Agg` for full "
-                  "skimage.viewer functionality.")
+    warn("Recommended matplotlib backend is `Agg` for full "
+         "skimage.viewer functionality.")
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
@@ -92,8 +91,8 @@ class LinearColormap(LinearSegmentedColormap):
 
     """
     def __init__(self, name, segmented_data, **kwargs):
-        segmented_data = dict((key, [(x, y, y) for x, y in value])
-                              for key, value in segmented_data.items())
+        segmented_data = {key: [(x, y, y) for x, y in value]
+                          for key, value in segmented_data.items()}
         LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
 
 

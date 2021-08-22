@@ -1,52 +1,48 @@
+import numpy as np
 from skimage.io._plugins.util import prepare_for_display, WindowManager
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, TestCase
 from skimage._shared._warnings import expected_warnings
 
-from numpy.testing import *
-import numpy as np
 
 np.random.seed(0)
 
 
-class TestPrepareForDisplay:
+class TestPrepareForDisplay(TestCase):
     def test_basic(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10))
+        prepare_for_display(np.random.rand(10, 10))
 
     def test_dtype(self):
-        with expected_warnings(['precision loss']):
-            x = prepare_for_display(np.random.rand(10, 15))
+        x = prepare_for_display(np.random.rand(10, 15))
         assert x.dtype == np.dtype(np.uint8)
 
-    def test_grey(self):
-        with expected_warnings(['precision loss']):
-            tmp = np.arange(12, dtype=float).reshape((4, 3)) / 11
-            x = prepare_for_display(tmp)
+    def test_gray(self):
+        tmp = np.arange(12, dtype=float).reshape((4, 3)) / 11
+        x = prepare_for_display(tmp)
         assert_array_equal(x[..., 0], x[..., 2])
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255
 
-    def test_colour(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 3))
+    def test_color(self):
+        prepare_for_display(np.random.rand(10, 10, 3))
 
     def test_alpha(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 4))
+        prepare_for_display(np.random.rand(10, 10, 4))
 
-    @raises(ValueError)
     def test_wrong_dimensionality(self):
-        with expected_warnings(['precision loss']):
+        with testing.raises(ValueError):
             prepare_for_display(np.random.rand(10, 10, 1, 1))
 
-    @raises(ValueError)
     def test_wrong_depth(self):
-        with expected_warnings(['precision loss']):
+        with testing.raises(ValueError):
             prepare_for_display(np.random.rand(10, 10, 5))
 
 
-class TestWindowManager:
+class TestWindowManager(TestCase):
     callback_called = False
 
+    @testing.fixture(autouse=True)
     def setup(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
@@ -71,6 +67,3 @@ class TestWindowManager:
 
     def teardown(self):
         self.wm._release('test')
-
-if __name__ == "__main__":
-    run_module_suite()

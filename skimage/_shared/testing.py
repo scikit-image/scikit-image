@@ -1,46 +1,65 @@
-"""Testing utilities."""
-
+"""
+Testing utilities.
+"""
 
 import os
 import re
+import struct
 import threading
 import functools
 from tempfile import NamedTemporaryFile
 
-from numpy import testing
 import numpy as np
-from ._warnings import expected_warnings
+from numpy import testing
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_array_less, assert_array_almost_equal_nulp,
+                           assert_equal, TestCase, assert_allclose,
+                           assert_almost_equal, assert_, assert_warns,
+                           assert_no_warnings)
+
 import warnings
 
-from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+from .. import data, io
+from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
+import pytest
+from ._warnings import expected_warnings
 
 
-SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+
+skipif = pytest.mark.skipif
+xfail = pytest.mark.xfail
+parametrize = pytest.mark.parametrize
+raises = pytest.raises
+fixture = pytest.fixture
+
+# true if python is running in 32bit mode
+# Calculate the size of a void * pointer in bits
+# https://docs.python.org/3/library/struct.html
+arch32 = struct.calcsize("P") * 8 == 32
 
 
-def _assert_less(a, b, msg=None):
+_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
+if _error_on_warnings.lower() == 'true':
+    _error_on_warnings = True
+elif _error_on_warnings.lower() == 'false':
+    _error_on_warnings = False
+else:
+    _error_on_warnings = bool(int(_error_on_warnings))
+
+
+def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
-def _assert_greater(a, b, msg=None):
+def assert_greater(a, b, msg=None):
     message = "%r is not greater than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a > b, message
-
-
-try:
-    from nose.tools import assert_less
-except ImportError:
-    assert_less = _assert_less
-
-try:
-    from nose.tools import assert_greater
-except ImportError:
-    assert_greater = _assert_greater
 
 
 def doctest_skip_parser(func):
@@ -48,12 +67,14 @@ def doctest_skip_parser(func):
 
     Say a function has a docstring::
 
+        >>> something, HAVE_AMODULE, HAVE_BMODULE = 0, False, False
         >>> something # skip if not HAVE_AMODULE
-        >>> something + else
+        0
         >>> something # skip if HAVE_BMODULE
+        0
 
     This decorator will evaluate the expression after ``skip if``.  If this
-    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``.  If
+    evaluates to True, then the comment is replaced by ``# doctest: +SKIP``. If
     False, then the comment is just removed. The expression is evaluated in the
     ``globals`` scope of `func`.
 
@@ -61,8 +82,8 @@ def doctest_skip_parser(func):
     global ``HAVE_BMODULE`` is False, the returned function will have docstring::
 
         >>> something # doctest: +SKIP
-        >>> something + else
-        >>> something
+        >>> something + else # doctest: +SKIP
+        >>> something # doctest: +SKIP
 
     """
     lines = func.__doc__.split('\n')
@@ -88,14 +109,14 @@ def doctest_skip_parser(func):
     return func
 
 
-def roundtrip(img, plugin, suffix):
+def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
-    if not '.' in suffix:
+    if '.' not in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
     fname = temp_file.name
     temp_file.close()
-    io.imsave(fname, img, plugin=plugin)
+    io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
         os.remove(fname)
@@ -116,28 +137,23 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision loss']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['sign loss|precision loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_ubyte(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    with expected_warnings(['precision loss']):
-        r5 = roundtrip(img5, plugin, fmt)
+    r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
 
@@ -153,27 +169,23 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|\A\Z']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss|\A\Z']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['precision loss|sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_uint(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_uint(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
@@ -190,13 +202,64 @@ def setup_test():
     """
     warnings.simplefilter('default')
 
-    from scipy import signal, ndimage, special, optimize, linalg
-    from scipy.io import loadmat
-    from skimage import viewer, filter
+    if _error_on_warnings:
+        from scipy import signal, ndimage, special, optimize, linalg
+        from scipy.io import loadmat
+        from skimage import viewer
 
-    np.random.seed(0)
+        np.random.seed(0)
 
-    warnings.simplefilter('error')
+        warnings.simplefilter('error')
+
+        # do not error on specific warnings from the skimage.io module
+        # https://github.com/scikit-image/scikit-image/issues/5337
+        warnings.filterwarnings(
+            'default', message='TiffFile:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='TiffWriter:', category=DeprecationWarning
+        )
+
+        warnings.filterwarnings(
+            'default', message='unclosed file', category=ResourceWarning
+        )
+
+        # ignore known FutureWarnings from viewer module
+        warnings.filterwarnings(
+            'ignore', category=FutureWarning, module='skimage.viewer'
+        )
+
+        # Ignore other warnings only seen when using older versions of
+        # dependencies.
+        warnings.filterwarnings(
+            'default',
+            message='Conversion of the second argument of issubdtype',
+            category=FutureWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='the matrix subclass is not the recommended way',
+            category=PendingDeprecationWarning, module='numpy'
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='Your installed pillow version',
+            category=UserWarning,
+            module='skimage.io'
+        )
+
+        warnings.filterwarnings(
+            'default', message='Viewer requires Qt', category=UserWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='numpy.ufunc size changed',
+            category=RuntimeWarning
+        )
 
 
 def teardown_test():
@@ -204,20 +267,36 @@ def teardown_test():
 
     Restore warnings to default behavior
     """
-    warnings.simplefilter('default')
+    if _error_on_warnings:
+        warnings.resetwarnings()
+        warnings.simplefilter('default')
 
 
-def test_parallel(num_threads=2):
+def fetch(data_filename):
+    """Attempt to fetch data, but if unavailable, skip the tests."""
+    try:
+        return data._fetch(data_filename)
+    except (ConnectionError, ModuleNotFoundError):
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
+
+
+def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
+
+    This decorator is useful to ensure that separate threads execute
+    concurrently and correctly while releasing the GIL.
 
     Parameters
     ----------
     num_threads : int, optional
         The number of times the function is run in parallel.
 
-    Notes
-    -----
-    This decorator does not pass the return value of the decorated function.
+    warnings_matching: list or None
+        This parameter is passed on to `expected_warnings` so as not to have
+        race conditions with the warnings filters. A single
+        `expected_warnings` context manager is used for all threads.
+        If None, then no warnings are checked.
 
     """
 
@@ -226,15 +305,24 @@ def test_parallel(num_threads=2):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            threads = []
-            for i in range(num_threads):
-                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-                threads.append(thread)
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join()
+            with expected_warnings(warnings_matching):
+                threads = []
+                for i in range(num_threads - 1):
+                    thread = threading.Thread(target=func, args=args,
+                                              kwargs=kwargs)
+                    threads.append(thread)
+                for thread in threads:
+                    thread.start()
+
+                result = func(*args, **kwargs)
+
+                for thread in threads:
+                    thread.join()
+
+                return result
+
         return inner
+
     return wrapper
 
 

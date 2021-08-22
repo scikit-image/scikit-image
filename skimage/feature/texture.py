@@ -3,7 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
@@ -11,27 +11,30 @@ from ._texture import (_glcm_loop,
                        _multiblock_lbp)
 
 
-def greycomatrix(image, distances, angles, levels=256, symmetric=False,
+def graycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
-    """Calculate the grey-level co-occurrence matrix.
+    """Calculate the gray-level co-occurrence matrix.
 
-    A grey level co-occurrence matrix is a histogram of co-occurring
-    greyscale values at a given offset over an image.
+    A gray level co-occurrence matrix is a histogram of co-occurring
+    grayscale values at a given offset over an image.
 
     Parameters
     ----------
-    image : array_like of uint8
-        Integer typed input image. The image will be cast to uint8, so
-        the maximum value must be less than 256.
+    image : array_like
+        Integer typed input image. Only positive valued images are supported.
+        If type is other than uint8, the argument `levels` needs to be set.
     distances : array_like
         List of pixel pair distance offsets.
     angles : array_like
         List of pixel pair angles in radians.
     levels : int, optional
-        The input image should contain integers in [0, levels-1],
-        where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). The maximum value is
-        256.
+        The input image should contain integers in [0, `levels`-1],
+        where levels indicate the number of gray-levels counted
+        (typically 256 for an 8-bit image). This argument is required for
+        16-bit images or higher and is typically the maximum of the image.
+        As the output matrix is at least `levels` x `levels`, it might
+        be preferable to use binning of the input image rather than
+        large values for `levels`.
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This
         is accomplished by ignoring the order of value pairs, so both
@@ -46,19 +49,24 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     Returns
     -------
     P : 4-D ndarray
-        The grey-level co-occurrence histogram. The value
-        `P[i,j,d,theta]` is the number of times that grey-level `j`
+        The gray-level co-occurrence histogram. The value
+        `P[i,j,d,theta]` is the number of times that gray-level `j`
         occurs at a distance `d` and at an angle `theta` from
-        grey-level `i`. If `normed` is `False`, the output is of
-        type uint32, otherwise it is float64.
+        gray-level `i`. If `normed` is `False`, the output is of
+        type uint32, otherwise it is float64. The dimensions are:
+        levels x levels x number of distances x number of angles.
 
     References
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
+    .. [2] Haralick, RM.; Shanmugam, K.,
+           "Textural features for image classification"
+           IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+           :DOI:`10.1109/TSMC.1973.4309314`
+    .. [3] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [4] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
@@ -70,7 +78,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> result = greycomatrix(image, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels=4)
+    >>> result = graycomatrix(image, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4],
+    ...                       levels=4)
     >>> result[:, :, 0, 0]
     array([[2, 2, 1, 0],
            [0, 2, 0, 0],
@@ -93,15 +102,34 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    assert_nD(image, 2)
-    assert_nD(distances, 1, 'distances')
-    assert_nD(angles, 1, 'angles')
+    check_nD(image, 2)
+    check_nD(distances, 1, 'distances')
+    check_nD(angles, 1, 'angles')
 
-    assert levels <= 256
     image = np.ascontiguousarray(image)
-    assert image.min() >= 0
-    assert image.max() < levels
-    image = image.astype(np.uint8)
+
+    image_max = image.max()
+
+    if np.issubdtype(image.dtype, np.floating):
+        raise ValueError("Float images are not supported by graycomatrix. "
+                         "Convert the image to an unsigned integer type.")
+
+    # for image type > 8bit, levels must be set.
+    if image.dtype not in (np.uint8, np.int8) and levels is None:
+        raise ValueError("The levels argument is required for data types "
+                         "other than uint8. The resulting matrix will be at "
+                         "least levels ** 2 in size.")
+
+    if np.issubdtype(image.dtype, np.signedinteger) and np.any(image < 0):
+        raise ValueError("Negative-valued images are not supported.")
+
+    if levels is None:
+        levels = 256
+
+    if image_max >= levels:
+        raise ValueError("The maximum grayscale value in the image should be "
+                         "smaller than the number of levels.")
+
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
@@ -116,7 +144,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
 
-    # normalize each GLMC
+    # normalize each GLCM
     if normed:
         P = P.astype(np.float64)
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
@@ -126,10 +154,10 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     return P
 
 
-def greycoprops(P, prop='contrast'):
+def graycoprops(P, prop='contrast'):
     """Calculate texture properties of a GLCM.
 
-    Compute a feature of a grey level co-occurrence matrix to serve as
+    Compute a feature of a gray level co-occurrence matrix to serve as
     a compact summary of the matrix. The properties are computed as
     follows:
 
@@ -142,15 +170,17 @@ def greycoprops(P, prop='contrast'):
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
+    Each GLCM is normalized to have a sum of 1 before the computation of texture
+    properties.
 
     Parameters
     ----------
     P : ndarray
-        Input array. `P` is the grey-level co-occurrence histogram
+        Input array. `P` is the gray-level co-occurrence histogram
         for which to compute the specified property. The value
-        `P[i,j,d,theta]` is the number of times that grey-level j
+        `P[i,j,d,theta]` is the number of times that gray-level j
         occurs at a distance d and at an angle theta from
-        grey-level i.
+        gray-level i.
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
@@ -175,20 +205,29 @@ def greycoprops(P, prop='contrast'):
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
+    >>> g = graycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
     ...                  normed=True, symmetric=True)
-    >>> contrast = greycoprops(g, 'contrast')
+    >>> contrast = graycoprops(g, 'contrast')
     >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
-    assert_nD(P, 4, 'P')
+    check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
-    assert num_level == num_level2
-    assert num_dist > 0
-    assert num_angle > 0
+    if num_level != num_level2:
+        raise ValueError('num_level and num_level2 must be equal.')
+    if num_dist <= 0:
+        raise ValueError('num_dist must be positive.')
+    if num_angle <= 0:
+        raise ValueError('num_angle must be positive.')
+
+    # normalize each GLCM
+    P = P.astype(np.float64)
+    glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+    glcm_sums[glcm_sums == 0] = 1
+    P /= glcm_sums
 
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
@@ -277,13 +316,13 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/Articoliriferimento/LBP.pdf, 2002.
+           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     methods = {
         'default': ord('D'),
@@ -298,7 +337,7 @@ def local_binary_pattern(image, P, R, method='default'):
 
 
 def multiblock_lbp(int_image, r, c, width, height):
-    """Multi-block local binary pattern (MB-LBP) [1]_.
+    """Multi-block local binary pattern (MB-LBP).
 
     The features are calculated similarly to local binary patterns (LBPs),
     (See :py:meth:`local_binary_pattern`) except that summed blocks are
@@ -343,10 +382,10 @@ def multiblock_lbp(int_image, r, c, width, height):
     return lbp_code
 
 
-def draw_multiblock_lbp(img, r, c, width, height,
+def draw_multiblock_lbp(image, r, c, width, height,
                         lbp_code=0,
-                        color_greater_block=[1, 1, 1],
-                        color_less_block=[0, 0.69, 0.96],
+                        color_greater_block=(1, 1, 1),
+                        color_less_block=(0, 0.69, 0.96),
                         alpha=0.5
                         ):
     """Multi-block local binary pattern visualization.
@@ -357,7 +396,7 @@ def draw_multiblock_lbp(img, r, c, width, height,
 
     Parameters
     ----------
-    img : ndarray of float or uint
+    image : ndarray of float or uint
         Image on which to visualize the pattern.
     r : int
         Row-coordinate of top left corner of a rectangle containing feature.
@@ -372,15 +411,15 @@ def draw_multiblock_lbp(img, r, c, width, height,
     lbp_code : int
         The descriptor of feature to visualize. If not provided, the
         descriptor with 0 value will be used.
-    color_greater_block : list of 3 floats
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater
         intensity value. They should be in the range [0, 1].
         Corresponding values define (R, G, B) values. Default value
-        is white [1, 1, 1].
-    color_greater_block : list of 3 floats
+        is white (1, 1, 1).
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater intensity
         value. They should be in the range [0, 1]. Corresponding values define
-        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+        (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization.
         1 - fully transparent, 0 - opaque.
@@ -405,11 +444,11 @@ def draw_multiblock_lbp(img, r, c, width, height,
     color_less_block = np.asarray(color_less_block, dtype=np.float64)
 
     # Copy array to avoid the changes to the original one.
-    output = np.copy(img)
+    output = np.copy(image)
 
     # As the visualization uses RGB color we need 3 bands.
-    if len(img.shape) < 3:
-        output = gray2rgb(img)
+    if len(image.shape) < 3:
+        output = gray2rgb(image)
 
     # Colors are specified in floats.
     output = img_as_float(output)
@@ -440,12 +479,14 @@ def draw_multiblock_lbp(img, r, c, width, height,
 
         # Mix-in the visualization colors.
         if has_greater_value:
-            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
-                         + alpha * color_greater_block)
+            new_value = ((1-alpha) *
+                         output[curr_r:curr_r+height, curr_c:curr_c+width] +
+                         alpha * color_greater_block)
             output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
         else:
-            new_value = ((1-alpha) * output[curr_r:curr_r+height, curr_c:curr_c+width]
-                         + alpha * color_less_block)
+            new_value = ((1-alpha) *
+                         output[curr_r:curr_r+height, curr_c:curr_c+width] +
+                         alpha * color_less_block)
             output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
 
     return output

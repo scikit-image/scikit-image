@@ -1,3 +1,29 @@
+﻿# Acknowledgements
+
+scikit-image is a joint effort, created by a large community of contributors.
+For a full list of contributors, please visit
+[our GitHub repo](https://github.com/scikit-image/scikit-image/graphs/contributors)
+or use `git` in the source repository as follows:
+
+```
+git shortlog --summary --numbered
+
+```
+
+Previously, we asked authors to add their names to this file whenever
+they made a contribution.  Because these additions were not made
+consistently, we now refer to the git commit log as the ultimate
+record of code contribution.
+
+Please note that, on a project as large as this, there are *many*
+different ways to contribute, of which code is only one.  Other
+contributions include community & project management, code review,
+answering questions on forums, and web design.  We are grateful for
+each and every contributor, regardless of their role.
+
+
+## Historical credits list
+
 - Stefan van der Walt
   Project coordination
 
@@ -35,7 +61,8 @@
   and more.
 
 - Almar Klein
-  Binary heap class for graph algorithms
+  Binary heap class and other improvements for graph algorithms
+  Lewiner variant of marching cubes algorithm
 
 - Lee Kamentsky and Thouis Jones of the CellProfiler team, Broad Institute, MIT
   Constant time per pixel median filter, edge detectors, and more.
@@ -132,9 +159,10 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing,
+  Drawing: Andres Method for circle perimeter, ellipse perimeter,
   Bezier curve, anti-aliasing.
   Circular and elliptical Hough Transforms
+  Thresholding
   Various fixes
 
 - Thouis Jones
@@ -215,3 +243,67 @@
 
 - Jim Fienup, Alexander Iacchetta
   In-depth review of sub-pixel shift registration
+
+- Damian Eads
+  Structuring elements in morphology module.
+
+- Egor Panfilov
+  Inpainting with biharmonic equation
+
+- Evgeni Burovski
+  Adaptation of ImageJ 3D skeletonization algorithm.
+
+- Alex Izvorski
+  Color spaces for YUV and related spaces
+
+- Thomas Lewiner
+  Design and original implementation of the Lewiner marching cubes algorithm
+
+- Jeff Hemmelgarn
+  Minimum threshold
+
+- Kirill Malev
+  Frangi and Hessian filters implementation
+
+- Abdeali Kothari
+  Alpha blending to convert from rgba to rgb
+
+- Jeyson Molina
+  Niblack and Sauvola Local thresholding
+
+- Scott Sievert
+  Wavelet denoising
+
+- Gleb Goussarov
+  Chan-Vese Segmentation
+
+- Kevin Mader
+  Montage improvements
+
+- Matti Eskelinen
+  ImageCollection improvements
+
+- David Volgyes
+  Unsharp masking
+
+- Lars Grüter
+  Flood-fill based local maxima detection
+
+- Solutus Immensus
+  Histogram matching
+
+- Laurent P. René de Cotret
+  Implementation of masked image translation registration
+
+- Mark Harfouche
+  Enabled GIL free operation of many algorithms implemented in Cython.
+  Maintenance of the build and test infrastructure.
+
+- Taylor D. Scott
+  Simplified _upsampled_dft and extended register_translation to nD images.
+
+- David J. Mellert
+  Polar and log-polar warping, nD windows
+
+- Sebastian Wallkötter
+  morphology.rolling_ball and morphology.rolling_ellipsoid

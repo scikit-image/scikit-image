@@ -3,16 +3,18 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?=
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXOPTS    ?= -j auto
+SPHINXBUILD   ?= $(PYTHON) -m sphinx
+SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
-DEST = build
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes random_gallery
+ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
+DEST            = build
+
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes
 
 all: html
 
@@ -31,27 +33,33 @@ help:
 	@echo "  linkcheck to check all external links for integrity"
 	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
 	@echo "  gitwash   to update the gitwash documentation"
+
 clean:
-	-rm -rf $(DEST)/*
+	-rm -rf $(DEST)
+	-rm -rf api
 	-rm -rf source/api
-	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
+	-find ./source/auto_examples/* -type f | grep -v blank | xargs -r rm -f
+
 api:
 	@mkdir -p source/api
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
-random_gallery:
-	@cd source && $(PYTHON) random_gallery.py
-
 release_notes:
 	@echo "Copying release notes"
-	@tail -n +4 `ls release/*.txt | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.txt
+	@tail -n +4 release/release_$$(\
+		ls release/release_*.*.* \
+			| sed s:release/release_:: \
+			| sort -nrt. -k1,1 -k2,2 \
+			| head -n 1) \
+		> release/_release_notes_for_docs.rst
 
-html: api release_notes random_gallery
+html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	cp -r source/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
+	$(PYTHON) source/random_gallery.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(DEST)/dirhtml
@@ -126,8 +134,8 @@ gh-pages:
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
-	--project-url=http://scikit-image.org \
-	--project-ml-url=http://groups.google.com/group/scikit-image \
+	--project-url=https://scikit-image.org \
+	--project-ml-url=https://mail.python.org/mailman3/lists/scikit-image.python.org/ \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \
-	--source-suffix=.txt
+	--source-suffix=.rst

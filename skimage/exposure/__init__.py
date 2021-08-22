@@ -4,6 +4,7 @@ from .exposure import histogram, equalize_hist, \
                       is_low_contrast
 
 from ._adapthist import equalize_adapthist
+from .histogram_matching import match_histograms
 
 
 __all__ = ['histogram',
@@ -14,4 +15,5 @@ __all__ = ['histogram',
            'adjust_gamma',
            'adjust_sigmoid',
            'adjust_log',
-           'is_low_contrast']
+           'is_low_contrast',
+           'match_histograms']

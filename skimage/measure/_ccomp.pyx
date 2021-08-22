@@ -4,35 +4,18 @@
 #cython: wraparound=False
 
 import numpy as np
-import warnings
+from warnings import warn
 
 cimport numpy as cnp
-
-"""
-See also:
-
-  Christophe Fiorio and Jens Gustedt,
-  "Two linear time Union-Find strategies for image processing",
-  Theoretical Computer Science 154 (1996), pp. 165-181.
-
-  Kensheng Wu, Ekow Otoo and Arie Shoshani,
-  "Optimizing connected component labeling algorithms",
-  Paper LBNL-56864, 2005,
-  Lawrence Berkeley National Laboratory
-  (University of California),
-  http://repositories.cdlib.org/lbnl/LBNL-56864
-
-"""
+cnp.import_array()
 
 DTYPE = np.intp
-
-# Short int - could be more graceful to the CPU cache
-ctypedef cnp.int32_t INTS_t
+cdef DTYPE_t BG_NODE_NULL = -999
 
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef int (* fun_ravel)(int, int, int, shape_info *)
+ctypedef size_t (* fun_ravel)(size_t, size_t, size_t, shape_info *) nogil
 
 
 # For having stuff concerning background in one place
@@ -47,17 +30,14 @@ ctypedef struct bginfo:
 
 cdef void get_bginfo(background_val, bginfo *ret) except *:
     if background_val is None:
-        warnings.warn(DeprecationWarning(
-                'The default value for `background` will change to 0 in v0.12'
-            ))
-        ret.background_val = -1
+        ret.background_val = 0
     else:
         ret.background_val = background_val
 
     # The node -999 doesn't exist, it will get subsituted by a meaningful value
-    # upon the first background pixel occurence
-    ret.background_node = -999
-    ret.background_label = -1
+    # upon the first background pixel occurrence
+    ret.background_node = BG_NODE_NULL
+    ret.background_label = 0
 
 
 # A pixel has neighbors that have already been scanned.
@@ -85,24 +65,24 @@ cdef enum:
     D_COUNT
 
 
-# Structure for centralised access to shape data
+# Structure for centralized access to shape data
 # Contains information related to the shape of the input array
 cdef struct s_shpinfo:
-    INTS_t x
-    INTS_t y
-    INTS_t z
+    DTYPE_t x
+    DTYPE_t y
+    DTYPE_t z
 
     # Number of elements
     DTYPE_t numels
-    # Number of of the input array
-    INTS_t ndim
+    # Dimensions of of the input array
+    DTYPE_t ndim
 
     # Offsets between elements recalculated to linear index increments
     # DEX[D_ea] is offset between E and A (i.e. to the point to upper left)
     # The name DEX is supposed to evoke DE., where . = A, B, C, D, F etc.
-    INTS_t DEX[D_COUNT]
+    DTYPE_t DEX[D_COUNT]
 
-    # Function pointer to a function that recalculates multiindex to linear
+    # Function pointer to a function that recalculates multi-index to linear
     # index. Heavily depends on dimensions of the input array.
     fun_ravel ravel_index
 
@@ -182,31 +162,34 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
 
 
 cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
-                                    DTYPE_t rindex, INTS_t idxdiff):
+                                    DTYPE_t rindex, DTYPE_t idxdiff) nogil:
     if data_p[rindex] == data_p[rindex + idxdiff]:
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef int ravel_index1D(int x, int y, int z, shape_info *shapeinfo):
+cdef size_t ravel_index1D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef int ravel_index2D(int x, int y, int z, shape_info *shapeinfo):
+cdef size_t ravel_index2D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 2D array. z is ignored
     """
-    cdef int ret = x + y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x
     return ret
 
 
-cdef int ravel_index3D(int x, int y, int z, shape_info *shapeinfo):
+cdef size_t ravel_index3D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 3D array
     """
-    cdef int ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
     return ret
 
 
@@ -360,186 +343,107 @@ def undo_reshape_array(arr, swaps):
     return reshaped
 
 
-# Connected components search as described in Fiorio et al.
-def label(input, neighbors=None, background=None, return_num=False,
-          connectivity=None):
-    r"""Label connected regions of an integer array.
-
-    Two pixels are connected when they are neighbors and have the same value.
-    In 2D, they can be neighbors either in a 1- or 2-connected sense.
-    The value refers to the maximum number of orthogonal hops to consider a
-    pixel/voxel a neighbor::
-
-      1-connectivity      2-connectivity     diagonal connection close-up
-
-           [ ]           [ ]  [ ]  [ ]         [ ]
-            |               \  |  /             |  <- hop 2
-      [ ]--[x]--[ ]      [ ]--[x]--[ ]    [x]--[ ]
-            |               /  |  \         hop 1
-           [ ]           [ ]  [ ]  [ ]
-
-    Parameters
-    ----------
-    input : ndarray of dtype int
-        Image to label.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-"connectivity".
-        In 3D, 4-"connectivity" means connected pixels have to share face,
-        whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use ``connectivity`` instead.**
-    background : int, optional
-        Consider all pixels with this value as background pixels, and label
-        them as -1. (Note: background pixels will be labeled as 0 starting with
-        version 0.12).
-    return_num : bool, optional
-        Whether to return the number of assigned labels.
-    connectivity : int, optional
-        Maximum number of orthogonal hops to consider a pixel/voxel
-        as a neighbor.
-        Accepted values are ranging from  1 to input.ndim.
-
-    Returns
-    -------
-    labels : ndarray of dtype int
-        Labeled array, where all connected regions are assigned the
-        same integer value.
-    num : int, optional
-        Number of labels, which equals the maximum label index and is only
-        returned if return_num is `True`.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> x = np.eye(3).astype(int)
-    >>> print(x)
-    [[1 0 0]
-     [0 1 0]
-     [0 0 1]]
-    >>> from skimage.measure import label
-    >>> print(label(x, connectivity=1))
-    [[0 1 1]
-     [2 3 1]
-     [2 2 4]]
-
-    >>> print(label(x, connectivity=2))
-    [[0 1 1]
-     [1 0 1]
-     [1 1 0]]
-
-    >>> x = np.array([[1, 0, 0],
-    ...               [1, 1, 5],
-    ...               [0, 0, 0]])
-
-    >>> print(label(x, background=0))
-    [[ 0 -1 -1]
-     [ 0  0  1]
-     [-1 -1 -1]]
-
-    """
+def label_cython(input_, background=None, return_num=False,
+                 connectivity=None):
+    # Connected components search as described in Fiorio et al.
     # We have to ensure that the shape of the input can be handled by the
-    # algorithm the input if it is the case
-    input_corrected, swaps = reshape_array(input)
+    # algorithm.  The input is reshaped as needed for compatibility.
+    input_, swaps = reshape_array(input_)
+    shape = input_.shape
+    ndim = input_.ndim
 
-    # Do the labelling
-    res, ctr = _label(input_corrected, neighbors, background, connectivity)
-
-    res_orig = undo_reshape_array(res, swaps)
-
-    if return_num:
-        return res_orig, ctr
-    else:
-        return res_orig
-
-
-# Connected components search as described in Fiorio et al.
-def _label(input, neighbors=None, background=None, connectivity=None):
-    cdef cnp.ndarray[DTYPE_t, ndim=1] data
     cdef cnp.ndarray[DTYPE_t, ndim=1] forest
 
     # Having data a 2D array slows down access considerably using linear
     # indices even when using the data_p pointer :-(
-    data = np.copy(input.flatten().astype(DTYPE))
+
+    # np.array makes a copy so it is safe to modify data in-place
+    data = np.array(input_, order='C', dtype=DTYPE)
     forest = np.arange(data.size, dtype=DTYPE)
 
     cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
-    cdef DTYPE_t *data_p = <DTYPE_t*>data.data
+    cdef DTYPE_t *data_p = <DTYPE_t*>cnp.PyArray_DATA(data)
 
     cdef shape_info shapeinfo
     cdef bginfo bg
 
-    get_shape_info(input.shape, &shapeinfo)
+    get_shape_info(shape, &shapeinfo)
     get_bginfo(background, &bg)
 
-    if neighbors is None and connectivity is None:
+    if connectivity is None:
         # use the full connectivity by default
-        connectivity = input.ndim
-    elif neighbors is not None:
-        DeprecationWarning("The argument 'neighbors' is deprecated, use "
-                           "'connectivity' instead")
-        # backwards-compatible neighbors recalc to connectivity,
-        if neighbors == 4:
-            connectivity = 1
-        elif neighbors == 8:
-            connectivity = input.ndim
-        else:
-            raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
-                             % neighbors)
+        connectivity = ndim
 
-    if not 1 <= connectivity <= input.ndim:
+    if not 1 <= connectivity <= ndim:
         raise ValueError(
-            "Connectivity below 1 or above %d is illegal."
-            % input.ndim)
+            f'Connectivity for {input_.ndim}D image should '
+            f'be in [1, ..., {input_.ndim}]. Got {connectivity}.'
+        )
 
-    scanBG(data_p, forest_p, &shapeinfo, &bg)
-    # the data are treated as degenerated 3D arrays if needed
-    # witout any performance sacrifice
-    scan3D(data_p, forest_p, &shapeinfo, &bg, connectivity)
-
+    cdef DTYPE_t conn = connectivity
     # Label output
     cdef DTYPE_t ctr
-    ctr = resolve_labels(data_p, forest_p, &shapeinfo, &bg)
+    with nogil:
+        scanBG(data_p, forest_p, &shapeinfo, &bg)
+        # the data are treated as degenerated 3D arrays if needed
+        # without any performance sacrifice
+        scan3D(data_p, forest_p, &shapeinfo, &bg, conn)
+        ctr = resolve_labels(data_p, forest_p, &shapeinfo, &bg)
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
     if data.dtype == np.int32:
         data = data.view(np.int32)
 
-    res = data.reshape(input.shape)
+    if swaps:
+        data = undo_reshape_array(data, swaps)
 
-    return res, ctr
+    if return_num:
+        return data, ctr
+    else:
+        return data
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
-                            shape_info *shapeinfo, bginfo *bg):
+                            shape_info *shapeinfo, bginfo *bg) nogil:
     """
     We iterate through the provisional labels and assign final labels based on
     our knowledge of prov. labels relationship.
     We also track how many distinct final labels we have.
     """
-    cdef DTYPE_t counter = bg.background_label + 1, i
+    cdef DTYPE_t counter = 1, i
 
     for i in range(shapeinfo.numels):
-        if i == bg.background_node:
-            data_p[i] = bg.background_label
-        elif i == forest_p[i]:
+        if i == forest_p[i]:
             # We have stumbled across a root which is something new to us (root
             # is the LOWEST of all prov. labels that are equivalent to it)
-            data_p[i] = counter
-            counter += 1
+
+            # If the root happens to be the background,
+            # assign the background label instead of a
+            # new label from the counter
+            if i == bg.background_node:
+                # Also, if there is no background in the image,
+                # bg.background_node == BG_NODE_NULL < 0 and this never occurs.
+                data_p[i] = bg.background_label
+            else:
+                data_p[i] = counter
+                # The background label is basically hardcoded to 0, so no need
+                # to check that the new counter != bg.background_label
+                counter += 1
         else:
             data_p[i] = data_p[forest_p[i]]
-    return counter
+    return counter - 1
 
 
 cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg):
+                 bginfo *bg) nogil:
     """
     Settle all background pixels now and don't bother with them later.
     Since this only requires one linar sweep through the array, it is fast
     and it makes sense to do it separately.
 
-    The result of this function is update of forest_p and bg parameter.
+    The purpose of this function is update of forest_p and bg parameter inplace.
     """
-    cdef DTYPE_t i, bgval = bg.background_val, firstbg
+    cdef DTYPE_t i, bgval = bg.background_val, firstbg = shapeinfo.numels
     # We find the provisional label of the background, which is the index of
     # the first background pixel
     for i in range(shapeinfo.numels):
@@ -547,6 +451,13 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             firstbg = i
             bg.background_node = firstbg
             break
+
+    # There is no background, therefore the first background element
+    # is not defined.
+    # Since BG_NODE_NULL < 0, this is enough to ensure
+    # that resolve_labels doesn't worry about background.
+    if bg.background_node == BG_NODE_NULL:
+        return
 
     # And then we apply this provisional label to the whole background
     for i in range(firstbg, shapeinfo.numels):
@@ -568,13 +479,15 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z) nogil:
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
+    if shapeinfo.numels == 0:
+        return
     # Initialize the first row
     cdef DTYPE_t x, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
 
     for x in range(1, shapeinfo.x):
@@ -588,12 +501,14 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z) nogil:
     """
     Perform forward scan on a 2D array.
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
     for y in range(1, shapeinfo.y):
         # BEGINNING of x = 0
@@ -639,13 +554,15 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity):
+                 bginfo *bg, DTYPE_t connectivity) nogil:
     """
-    Perform forward scan on a 2D array.
+    Perform forward scan on a 3D array.
 
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     # Handle first plane
     scan2D(data_p, forest_p, shapeinfo, bg, connectivity, 0)
     for z in range(1, shapeinfo.z):

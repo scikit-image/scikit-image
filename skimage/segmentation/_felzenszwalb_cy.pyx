@@ -5,67 +5,78 @@
 import numpy as np
 from scipy import ndimage as ndi
 
-cimport cython
 cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
-from ..util import img_as_float
+from ..util import img_as_float64
+from .._shared.utils import warn
+
+cnp.import_array()
 
 
-def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
-                       Py_ssize_t min_size=20):
-    """Felzenszwalb's efficient graph based segmentation for a single channel.
+def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
+                         Py_ssize_t min_size=20):
+    """Felzenszwalb's efficient graph based segmentation for
+    single or multiple channels.
 
-    Produces an oversegmentation of a 2d image using a fast, minimum spanning
-    tree based clustering on the image grid.
+    Produces an oversegmentation of a single or multi-channel image
+    using a fast, minimum spanning tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
     vary greatly depending on local contrast.
 
     Parameters
     ----------
-    image: ndarray
+    image : (N, M, C) ndarray
         Input image.
-    scale: float, optional (default 1)
+    scale : float, optional (default 1)
         Sets the obervation level. Higher means larger clusters.
-    sigma: float, optional (default 0.8)
+    sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
-    min_size: int, optional (default 20)
+    min_size : int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
-    segment_mask: (height, width) ndarray
+    segment_mask : (N, M) ndarray
         Integer mask indicating segment labels.
     """
-    if image.ndim != 2:
-        raise ValueError("This algorithm works only on single-channel 2d"
-                "images. Got image of shape %s" % str(image.shape))
 
-    image = img_as_float(image)
+    if image.shape[2] > 3:
+        warn(RuntimeWarning(
+            "Got image with third dimension of %s. This image "
+            "will be interpreted as a multichannel 2d image, "
+            "which may not be intended." % str(image.shape[2])),
+            stacklevel=3)
+
+    image = img_as_float64(image)
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = ndi.gaussian_filter(image, sigma=sigma)
+    image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
+    height, width = image.shape[:2]
 
     # compute edge weights in 8 connectivity:
-    right_cost = np.abs((image[1:, :] - image[:-1, :]))
-    down_cost = np.abs((image[:, 1:] - image[:, :-1]))
-    dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
-    uright_cost = np.abs((image[1:, :-1] - image[:-1, 1:]))
-    cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
-        down_cost.ravel(), dright_cost.ravel(),
-        uright_cost.ravel()]).astype(np.float)
+    down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:height-1, :, :]) *
+    	                         (image[1:, :, :] - image[:height-1, :, :]), axis=-1))
+    right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :width-1, :]) *
+    	                          (image[:, 1:, :] - image[:, :width-1, :]), axis=-1))
+    dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:height-1, :width-1, :]) *
+	                               (image[1:, 1:, :] - image[:height-1, :width-1, :]), axis=-1))
+    uright_cost = np.sqrt(np.sum((image[1:, :width-1, :] - image[:height-1, 1:, :]) *
+    	                           (image[1:, :width-1, :] - image[:height-1, 1:, :]), axis=-1))
+    cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([
+    	right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
+        uright_cost.ravel()]).astype(float)
 
     # compute edges between pixels:
-    height, width = image.shape[:2]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
             = np.arange(width * height, dtype=np.intp).reshape(height, width)
-    right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
-    down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
-    dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
-    uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
+    down_edges  = np.c_[segments[1:, :].ravel(), segments[:height-1, :].ravel()]
+    right_edges = np.c_[segments[:, 1:].ravel(), segments[:, :width-1].ravel()]
+    dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:height-1, :width-1].ravel()]
+    uright_edges = np.c_[segments[:height-1, 1:].ravel(), segments[1:, :width-1].ravel()]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] edges \
             = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
 
@@ -116,6 +127,8 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
                 continue
             if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
                 join_trees(segments_p, seg0, seg1)
+                seg_new = find_root(segments_p, seg0)
+                segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
 
     # unravel the union find tree
     flat = segments.ravel()

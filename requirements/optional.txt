@@ -1,0 +1,10 @@
+SimpleITK
+astropy>=3.1.2
+qtpy
+pyamg
+dask[array]>=1.0.0,!=2.17.0
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1
+# Keep pooch version in synch with the one hard coded in
+# skimage/data/__init__.py
+pooch>=1.3.0

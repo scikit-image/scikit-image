@@ -18,8 +18,10 @@ class PaintTool(CanvasToolBase):
         Skimage viewer or plot plugin object.
     overlay_shape : shape tuple
         2D shape tuple used to initialize overlay image.
+    radius : int
+        The size of the paint cursor.
     alpha : float (between [0, 1])
-        Opacity of overlay
+        Opacity of overlay.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -37,6 +39,24 @@ class PaintTool(CanvasToolBase):
         Overlay of painted labels displayed on top of image.
     label : int
         Current paint color.
+
+    Examples
+    ----------
+    >>> from skimage.data import camera
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.viewer.canvastools import PaintTool
+    >>> import numpy as np
+
+    >>> img = camera() #doctest: +SKIP
+
+    >>> ax = plt.subplot(111) #doctest: +SKIP 
+    >>> plt.imshow(img, cmap=plt.cm.gray) #doctest: +SKIP
+    >>> p = PaintTool(ax,np.shape(img[:-1]),10,0.2) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
+
+    >>> mask = p.overlay #doctest: +SKIP
+    >>> plt.imshow(mask,cmap=plt.cm.gray) #doctest: +SKIP
+    >>> plt.show() #doctest: +SKIP
     """
     def __init__(self, manager, overlay_shape, radius=5, alpha=0.3,
                  on_move=None, on_release=None, on_enter=None,
@@ -51,7 +71,7 @@ class PaintTool(CanvasToolBase):
         self.alpha = alpha
         self.cmap = LABELS_CMAP
         self._overlay_plot = None
-        self.shape = overlay_shape
+        self.shape = overlay_shape[:2]
 
         self._cursor = plt.Rectangle((0, 0), 0, 0, **props)
         self._cursor.set_visible(False)
@@ -100,7 +120,8 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.NoNorm(), animated=True)
+                         norm=mcolors.NoNorm(vmin=0, vmax=self.cmap.N),
+                         animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)
@@ -188,12 +209,21 @@ class CenteredWindow(object):
 
     def at(self, row, col):
         h, w = self.array_shape
-        r = self.radius
+        r = round(self.radius)
+        # Note: the int() cast is necessary because row and col are np.float64,
+        # which does not get cast by round(), unlike a normal Python float:
+        # >>> round(4.5)
+        # 4
+        # >>> round(np.float64(4.5))
+        # 4.0
+        # >>> int(round(np.float64(4.5)))
+        # 4
+        row, col = int(round(row)), int(round(col))
         xmin = max(0, col - r)
         xmax = min(w, col + r + 1)
         ymin = max(0, row - r)
         ymax = min(h, row + r + 1)
-        return [slice(ymin, ymax), slice(xmin, xmax)]
+        return (slice(ymin, ymax), slice(xmin, xmax))
 
 
 if __name__ == '__main__':  # pragma: no cover

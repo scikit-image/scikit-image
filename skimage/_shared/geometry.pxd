@@ -1,6 +1,16 @@
-cdef unsigned char point_in_polygon(Py_ssize_t nr_verts, double *xp, double *yp,
-                                    double x, double y) nogil
+from .fused_numerics cimport np_floats
 
-cdef void points_in_polygon(Py_ssize_t nr_verts, double *xp, double *yp,
-                            Py_ssize_t nr_points, double *x, double *y,
-                            unsigned char *result) nogil
+
+cdef enum:
+    OUTSIDE = 0
+    INSIDE  = 1
+    VERTEX  = 2
+    EDGE    = 3
+
+
+cdef unsigned char point_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
+                                    np_floats x, np_floats y) nogil
+
+cdef void points_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
+                            np_floats[::1] x, np_floats[::1] y,
+                            unsigned char[::1] result) nogil

@@ -5,6 +5,37 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
+def _bernoulli(p, shape, *, random_state):
+    """
+    Bernoulli trials at a given probability of a given size.
+
+    This function is meant as a lower-memory alternative to calls such as
+    `np.random.choice([True, False], size=image.shape, p=[p, 1-p])`.
+    While `np.random.choice` can handle many classes, for the 2-class case
+    (Bernoulli trials), this function is much more efficient.
+
+    Parameters
+    ----------
+    p : float
+        The probability that any given trial returns `True`.
+    shape : int or tuple of ints
+        The shape of the ndarray to return.
+    seed : `numpy.random.Generator`
+        ``Generator`` instance.
+
+    Returns
+    -------
+    out : ndarray[bool]
+        The results of Bernoulli trials in the given `size` where success
+        occurs with probability `p`.
+    """
+    if p == 0:
+        return np.zeros(shape, dtype=bool)
+    if p == 1:
+        return np.ones(shape, dtype=bool)
+    return random_state.random(shape) <= p
+
+
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
@@ -13,39 +44,49 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     ----------
     image : ndarray
         Input image data. Will be converted to float.
-    mode : str
+    mode : str, optional
         One of the following strings, selecting the type of noise to add:
 
         - 'gaussian'  Gaussian-distributed additive noise.
         - 'localvar'  Gaussian-distributed additive noise, with specified
-                      local variance at each point of `image`
+                      local variance at each point of `image`.
         - 'poisson'   Poisson-distributed noise generated from the data.
         - 'salt'      Replaces random pixels with 1.
-        - 'pepper'    Replaces random pixels with 0.
-        - 's&p'       Replaces random pixels with 0 or 1.
+        - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
+                      -1 (for signed images).
+        - 's&p'       Replaces random pixels with either 1 or `low_val`, where
+                      `low_val` is 0 for unsigned images or -1 for signed
+                      images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
-                      n is uniform noise with specified mean & variance.
-    seed : int
-        If provided, this will set the random seed before generating noise,
+                      n is Gaussian noise with specified mean & variance.
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is
+        used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that
+        instance is used.
+
+        This will set the random seed before generating noise,
         for valid pseudo-random comparisons.
-    clip : bool
+    clip : bool, optional
         If True (default), the output will be clipped after noise applied
         for modes `'speckle'`, `'poisson'`, and `'gaussian'`. This is
         needed to maintain the proper image data range. If False, clipping
         is not applied, and the output may extend beyond the range [-1, 1].
-    mean : float
+    mean : float, optional
         Mean of random distribution. Used in 'gaussian' and 'speckle'.
         Default : 0.
-    var : float
+    var : float, optional
         Variance of random distribution. Used in 'gaussian' and 'speckle'.
         Note: variance = (standard deviation) ** 2. Default : 0.01
-    local_vars : ndarray
+    local_vars : ndarray, optional
         Array of positive floats, same shape as `image`, defining the local
         variance at every image point. Used in 'localvar'.
-    amount : float
+    amount : float, optional
         Proportion of image pixels to replace with noise on range [0, 1].
         Used in 'salt', 'pepper', and 'salt & pepper'. Default : 0.05
-    salt_vs_pepper : float
+    salt_vs_pepper : float, optional
         Proportion of salt vs. pepper noise for 's&p' on range [0, 1].
         Higher values represent more salt. Default : 0.5 (equal amounts)
 
@@ -65,7 +106,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     Because of the prevalence of exclusively positive floating-point images in
     intermediate calculations, it is not possible to intuit if an input is
-    signed based on dtype alone. Instead, negative values are explicity
+    signed based on dtype alone. Instead, negative values are explicitly
     searched for. Only if found does this function assume signed input.
     Unexpected results only occur in rare, poorly exposes cases (e.g. if all
     values are above 50 percent gray in a signed `image`). In this event,
@@ -90,8 +131,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         low_clip = 0.
 
     image = img_as_float(image)
-    if seed is not None:
-        np.random.seed(seed=seed)
+
+    rng = np.random.default_rng(seed)
 
     allowedtypes = {
         'gaussian': 'gaussian_values',
@@ -126,8 +167,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         kwargs.setdefault(kw, kwdefaults[kw])
 
     if mode == 'gaussian':
-        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
-                                 image.shape)
+        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5, image.shape)
         out = image + noise
 
     elif mode == 'localvar':
@@ -136,7 +176,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             raise ValueError('All values of `local_vars` must be > 0.')
 
         # Safe shortcut usage broadcasts kwargs['local_vars'] as a ufunc
-        out = image + np.random.normal(0, kwargs['local_vars'] ** 0.5)
+        out = image + rng.normal(0, kwargs['local_vars'] ** 0.5)
 
     elif mode == 'poisson':
         # Determine unique values in image & calculate the next power of two
@@ -149,7 +189,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             image = (image + 1.) / (old_max + 1.)
 
         # Generating noise for each unique value in image.
-        out = np.random.poisson(image * vals) / float(vals)
+        out = rng.poisson(image * vals) / float(vals)
 
         # Return image to original range if input was signed
         if low_clip == -1.:
@@ -157,36 +197,26 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
-        out = random_noise(image, mode='s&p', seed=seed,
+        out = random_noise(image, mode='s&p', seed=rng,
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
-        # This mode makes no effort to avoid repeat sampling. Thus, the
-        # exact number of replaced pixels is only approximate.
         out = image.copy()
-
-        # Salt mode
-        num_salt = np.ceil(
-            kwargs['amount'] * image.size * kwargs['salt_vs_pepper'])
-        coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in image.shape]
-        out[coords] = 1
-
-        # Pepper mode
-        num_pepper = np.ceil(
-            kwargs['amount'] * image.size * (1. - kwargs['salt_vs_pepper']))
-        coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in image.shape]
-        out[coords] = low_clip
+        p = kwargs['amount']
+        q = kwargs['salt_vs_pepper']
+        flipped = _bernoulli(p, image.shape, random_state=rng)
+        salted = _bernoulli(q, image.shape, random_state=rng)
+        peppered = ~salted
+        out[flipped & salted] = 1
+        out[flipped & peppered] = low_clip
 
     elif mode == 'speckle':
-        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
-                                 image.shape)
+        noise = rng.normal(kwargs['mean'], kwargs['var'] ** 0.5, image.shape)
         out = image + image * noise
 
     # Clip back to original range, if necessary

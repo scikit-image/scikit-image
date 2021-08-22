@@ -1,8 +1,4 @@
-try:
-    import networkx as nx
-except ImportError:
-    import warnings
-    warnings.warn('RAGs require networkx')
+import networkx as nx
 import numpy as np
 from scipy import sparse
 from . import _ncut_cy

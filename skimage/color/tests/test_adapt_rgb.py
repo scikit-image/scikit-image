@@ -5,14 +5,13 @@ import numpy as np
 from skimage import img_as_float, img_as_uint
 from skimage import color, data, filters
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
-from skimage._shared._warnings import expected_warnings
 
 # Down-sample image for quicker testing.
-COLOR_IMAGE = data.astronaut()[::5, ::5]
+COLOR_IMAGE = data.astronaut()[::5, ::6]
 GRAY_IMAGE = data.camera()[::5, ::5]
 
 SIGMA = 3
-smooth = partial(filters.gaussian_filter, sigma=SIGMA)
+smooth = partial(filters.gaussian, sigma=SIGMA)
 assert_allclose = partial(np.testing.assert_allclose, atol=1e-8)
 
 
@@ -23,7 +22,14 @@ def edges_each(image):
 
 @adapt_rgb(each_channel)
 def smooth_each(image, sigma):
-    return filters.gaussian_filter(image, sigma)
+    return filters.gaussian(image, sigma)
+
+
+@adapt_rgb(each_channel)
+def mask_each(image, mask):
+    result = image.copy()
+    result[mask] = 0
+    return result
 
 
 @adapt_rgb(hsv_value)
@@ -33,13 +39,12 @@ def edges_hsv(image):
 
 @adapt_rgb(hsv_value)
 def smooth_hsv(image, sigma):
-    return filters.gaussian_filter(image, sigma)
+    return filters.gaussian(image, sigma)
 
 
 @adapt_rgb(hsv_value)
 def edges_hsv_uint(image):
-    with expected_warnings(['precision loss']):
-        return img_as_uint(filters.sobel(image))
+    return img_as_uint(filters.sobel(image))
 
 
 def test_gray_scale_image():
@@ -59,6 +64,11 @@ def test_each_channel_with_filter_argument():
     filtered = smooth_each(COLOR_IMAGE, SIGMA)
     for i, channel in enumerate(np.rollaxis(filtered, axis=-1)):
         assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
+
+
+def test_each_channel_with_asymmetric_kernel():
+    mask = np.triu(np.ones(COLOR_IMAGE.shape[:2], dtype=bool))
+    mask_each(COLOR_IMAGE, mask)
 
 
 def test_hsv_value():

@@ -1,22 +1,27 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal, assert_raises
+from skimage._shared.testing import assert_almost_equal, assert_equal
 
+from skimage import data, img_as_float
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
+from skimage._shared import testing
 
 
-def test_template():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_template(dtype):
     size = 100
     # Float prefactors ensure that image range is between 0 and 1
-    image = 0.5 * np.ones((400, 400))
+    image = np.full((400, 400), 0.5, dtype=dtype)
     target = 0.1 * (np.tri(size) + np.tri(size)[::-1])
+    target = target.astype(dtype, copy=False)
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
         image[x:x + size, y:y + size] = target
     np.random.seed(1)
-    image += 0.1 * np.random.uniform(size=(400, 400))
+    image += 0.1 * np.random.uniform(size=(400, 400)).astype(dtype, copy=False)
 
     result = match_template(image, target)
+    assert result.dtype == dtype
     delta = 5
 
     positions = peak_local_max(result, min_distance=delta)
@@ -31,7 +36,7 @@ def test_template():
     positions = positions[np.argsort(positions[:, 0])]
 
     for xy_target, xy in zip(target_positions, positions):
-        yield assert_almost_equal, xy, xy_target
+        assert_almost_equal(xy, xy_target)
 
 
 def test_normalization():
@@ -45,7 +50,7 @@ def test_normalization():
     N = 20
     ipos, jpos = (2, 3)
     ineg, jneg = (12, 11)
-    image = 0.5 * np.ones((N, N))
+    image = np.full((N, N), 0.5)
     image[ipos:ipos + n, jpos:jpos + n] = 1
     image[ineg:ineg + n, jneg:jneg + n] = 0
 
@@ -88,7 +93,8 @@ def test_no_nans():
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
 
 def test_pad_input():
@@ -159,17 +165,25 @@ def test_padding_reflect():
 def test_wrong_input():
     image = np.ones((5, 5, 1))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5, 3, 3))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
 
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
+def test_bounding_values():
+    image = img_as_float(data.page())
+    template = np.zeros((3, 3))
+    template[1, 1] = 1
+    result = match_template(img_as_float(data.page()), template)
+    print(result.max())
+    assert result.max() < 1 + 1e-7
+    assert result.min() > -1 - 1e-7

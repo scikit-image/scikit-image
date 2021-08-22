@@ -1,10 +1,8 @@
-from warnings import warn
 
 from ...util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
 
-import six
 from ..._shared.version_requirements import is_installed
 
 
@@ -33,9 +31,6 @@ class OverlayPlugin(Plugin):
               'cyan': (0, 1, 1)}
 
     def __init__(self, **kwargs):
-        if not is_installed('matplotlib', '>=1.2'):
-            msg = "Matplotlib >= 1.2 required for OverlayPlugin."
-            warn(RuntimeWarning(msg))
         super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None
@@ -77,7 +72,7 @@ class OverlayPlugin(Plugin):
     @color.setter
     def color(self, index):
         # Update colormap whenever color is changed.
-        if isinstance(index, six.string_types) and \
+        if isinstance(index, str) and \
            index not in self.color_names:
             raise ValueError("%s not defined in OverlayPlugin.colors" % index)
         else:

@@ -6,11 +6,8 @@ from ...util import img_as_ubyte
 
 # utilities to make life easier for plugin writers.
 
-try:
-    import multiprocessing
-    CPU_COUNT = multiprocessing.cpu_count()
-except:
-    CPU_COUNT = 2
+import multiprocessing
+CPU_COUNT = multiprocessing.cpu_count()
 
 
 class GuiLockError(Exception):
@@ -46,7 +43,7 @@ class WindowManager(object):
         if self._gui_lock:
             raise GuiLockError(\
             'The gui lock can only be acquired by one toolkit per session. \
-            The lock is already aquired by %s' % self._guikit)
+            The lock is already acquired by %s' % self._guikit)
         else:
             self._gui_lock = True
             self._guikit = str(kit)
@@ -157,12 +154,13 @@ def prepare_for_display(npy_img):
     return out
 
 
-def histograms(img, nbins):
+def histograms(image, nbins):
     '''Calculate the channel histograms of the current image.
 
     Parameters
     ----------
-    img : ndarray, ndim=3, dtype=np.uint8
+    image : ndarray, ndim=3, dtype=np.uint8
+        Input image.
     nbins : int
         The number of bins.
 
@@ -170,12 +168,11 @@ def histograms(img, nbins):
     -------
     out : (rcounts, gcounts, bcounts, vcounts)
         The binned histograms of the RGB channels and intensity values.
-
     This is a NAIVE histogram routine, meant primarily for fast display.
 
     '''
 
-    return _histograms.histograms(img, nbins)
+    return _histograms.histograms(image, nbins)
 
 
 class ImgThread(threading.Thread):
@@ -200,21 +197,22 @@ class ThreadDispatch(object):
             self.chunks.append((img, stateimg))
 
         elif self.cores >= 4:
-            self.chunks.append((img[:(height / 4), :, :],
-                                stateimg[:(height / 4), :, :]))
-            self.chunks.append((img[(height / 4):(height / 2), :, :],
-                                stateimg[(height / 4):(height / 2), :, :]))
-            self.chunks.append((img[(height / 2):(3 * height / 4), :, :],
-                                stateimg[(height / 2):(3 * height / 4), :, :]))
-            self.chunks.append((img[(3 * height / 4):, :, :],
-                                stateimg[(3 * height / 4):, :, :]))
+            self.chunks.append((img[:(height // 4), :, :],
+                                stateimg[:(height // 4), :, :]))
+            self.chunks.append((img[(height // 4):(height // 2), :, :],
+                                stateimg[(height // 4):(height // 2), :, :]))
+            self.chunks.append((img[(height // 2):(3 * height // 4), :, :],
+                                stateimg[(height // 2):(3 * height // 4), :, :]
+                                ))
+            self.chunks.append((img[(3 * height // 4):, :, :],
+                                stateimg[(3 * height // 4):, :, :]))
 
-        # if they dont have 1, or 4 or more, 2 is good.
+        # if they don't have 1, or 4 or more, 2 is good.
         else:
-            self.chunks.append((img[:(height / 2), :, :],
-                                stateimg[:(height / 2), :, :]))
-            self.chunks.append((img[(height / 2):, :, :],
-                               stateimg[(height / 2):, :, :]))
+            self.chunks.append((img[:(height // 2), :, :],
+                                stateimg[:(height // 2), :, :]))
+            self.chunks.append((img[(height // 2):, :, :],
+                               stateimg[(height // 2):, :, :]))
 
         for i in range(len(self.chunks)):
             self.threads.append(ImgThread(func, self.chunks[i][0],
@@ -297,7 +295,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.add, channel, ammount)
         pool.run()
@@ -305,7 +304,7 @@ class ColorMixer(object):
     def multiply(self, channel, ammount):
         '''Mutliply the indicated channel by the specified value.
 
-         Parameters
+        Parameters
         ----------
         channel : flag
             the color channel to operate on
@@ -315,7 +314,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.multiply, channel, ammount)
         pool.run()
@@ -329,7 +329,6 @@ class ColorMixer(object):
             The ammount to add to each channel.
         factor : float
             The factor to multiply each channel by.
-
         result = clip((pixel + offset)*factor)
 
         '''

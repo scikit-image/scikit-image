@@ -3,20 +3,20 @@ import functools
 import numpy as np
 
 from .. import color
-from ..util.dtype import convert
+from ..util.dtype import _convert
 
 
 __all__ = ['adapt_rgb', 'hsv_value', 'each_channel']
 
 
-def is_rgb_like(image):
+def is_rgb_like(image, channel_axis=-1):
     """Return True if the image *looks* like it's RGB.
 
     This function should not be public because it is only intended to be used
     for functions that don't accept volumes as input, since checking an image's
     shape is fragile.
     """
-    return (image.ndim == 3) and (image.shape[2] in (3, 4))
+    return (image.ndim == 3) and (image.shape[channel_axis] in (3, 4))
 
 
 def adapt_rgb(apply_to_rgb):
@@ -58,7 +58,7 @@ def hsv_value(image_filter, image, *args, **kwargs):
     hsv = color.rgb2hsv(image[:, :, :3])
     value = hsv[:, :, 2].copy()
     value = image_filter(value, *args, **kwargs)
-    hsv[:, :, 2] = convert(value, hsv.dtype)
+    hsv[:, :, 2] = _convert(value, hsv.dtype)
     return color.hsv2rgb(hsv)
 
 
@@ -74,5 +74,6 @@ def each_channel(image_filter, image, *args, **kwargs):
     image : array
         Input image.
     """
-    c_new = [image_filter(c, *args, **kwargs) for c in image.T]
-    return np.array(c_new).T
+    c_new = [image_filter(c, *args, **kwargs)
+             for c in np.moveaxis(image, -1, 0)]
+    return np.stack(c_new, axis=-1)

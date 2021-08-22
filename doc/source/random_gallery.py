@@ -3,9 +3,9 @@
 import os
 import glob
 
-base = os.path.abspath(os.path.dirname(__file__))
-example_dir = os.path.join(base, 'auto_examples')
-js_fn = os.path.join(base, '_static/random.js')
+base_dir = os.path.abspath(os.path.dirname(__file__))
+example_dir = os.path.join(base_dir, 'auto_examples')
+js_fn = os.path.join(base_dir, '_static/random.js')
 
 javascript = '''\
 
@@ -29,18 +29,21 @@ gallery_div = '''\
 </div>\
 '''
 
-examples = glob.glob(os.path.join(example_dir, 'plot_*.py'))
+examples = glob.glob(os.path.join(example_dir, '**/plot_*.py'), recursive=True)
 
 images, links = [], []
-image_url = 'http://scikit-image.org/docs/dev/_images/%s.png'
-link_url = 'http://scikit-image.org/docs/dev/auto_examples/%s.html'
+image_url = 'https://scikit-image.org/docs/dev/_images/'
+link_url = 'https://scikit-image.org/docs/dev/auto_examples/'
 
-for e in examples:
-    e = os.path.basename(e)
-    e = e[:-len('.py')]
+for example_path in examples:
+    example_path = os.path.relpath(example_path, example_dir)
 
-    images.append(image_url % e)
-    links.append(link_url % e)
+    example_temp, ext = os.path.splitext(example_path)
+    image_path, image_file = os.path.split(example_temp)
+    image_file = 'sphx_glr_' + image_file + '_001.png'
+
+    images.append(image_url + image_file)
+    links.append(link_url + example_temp + '.html')
 
 javascript = javascript.replace('{{IMAGES}}', str(images))
 javascript = javascript.replace('{{LINKS}}', str(links))

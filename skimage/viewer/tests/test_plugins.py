@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 import numpy as np
-import skimage
+from skimage import util
 import skimage.data as data
 from skimage.filters.rank import median
 from skimage.morphology import disk
@@ -10,19 +9,20 @@ from skimage.viewer.widgets import Slider
 from skimage.viewer.plugins import (
     LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
     PlotPlugin)
-from numpy.testing import assert_equal, assert_allclose, assert_almost_equal
-from numpy.testing.decorators import skipif
-from skimage._shared._warnings import expected_warnings
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_allclose,
+                                     assert_almost_equal)
 
 
 def setup_line_profile(image, limits='image'):
-    viewer = ImageViewer(skimage.img_as_float(image))
+    viewer = ImageViewer(util.img_as_float(image))
     plugin = LineProfile(limits=limits)
     viewer += plugin
     return plugin
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_line_profile():
     """ Test a line profile using an ndim=2 image"""
     plugin = setup_line_profile(data.camera())
@@ -32,18 +32,18 @@ def test_line_profile():
                 scan_data.size]:
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
-    assert_allclose(scan_data.max(), 0.9176, rtol=1e-3)
-    assert_allclose(scan_data.mean(), 0.2812, rtol=1e-3)
+    assert_allclose(scan_data.max(), 0.886275, rtol=1e-3)
+    assert_allclose(scan_data.mean(), 0.247834, rtol=1e-3)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_line_profile_rgb():
     """ Test a line profile using an ndim=3 image"""
     plugin = setup_line_profile(data.chelsea(), limits=None)
     for i in range(6):
         plugin.line_tool._thicken_scan_line()
     line_image, scan_data = plugin.output()
-    assert_equal(line_image[line_image == 128].size, 750)
+    assert_equal(line_image[line_image == 128].size, 906)
     assert_equal(line_image[line_image == 255].size, 151)
     assert_equal(line_image.shape, (300, 451))
     assert_equal(scan_data.shape, (151, 3))
@@ -51,11 +51,11 @@ def test_line_profile_rgb():
     assert_allclose(scan_data.mean(), 0.4359, rtol=1e-3)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_line_profile_dynamic():
     """Test a line profile updating after an image transform"""
     image = data.coins()[:-50, :]  # shave some off to make the line lower
-    image = skimage.img_as_float(image)
+    image = util.img_as_float(image)
     viewer = ImageViewer(image)
 
     lp = LineProfile(limits='dtype')
@@ -67,9 +67,8 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.std(line), 0.229, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    with expected_warnings(['precision loss']):
-        viewer.image = skimage.img_as_float(median(image,
-                                                   selem=disk(radius=3)))
+    viewer.image = util.img_as_float(
+        median(util.img_as_ubyte(image), footprint=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
     assert_almost_equal(np.std(viewer.image), 0.198, 3)
@@ -77,7 +76,7 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.max(line) - np.min(line), 0.639, 1)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_measure():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -89,7 +88,7 @@ def test_measure():
     assert_equal(str(m._angle.text[:5]), '135.0')
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_canny():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -99,10 +98,10 @@ def test_canny():
     canny_edges = viewer.show(False)
     viewer.close()
     edges = canny_edges[0][0]
-    assert edges.sum() == 2852
+    assert edges.sum() == 1958
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_label_painter():
     image = data.camera()
     moon = data.moon()
@@ -120,7 +119,7 @@ def test_label_painter():
     assert_equal(lp.paint_tool.shape, moon.shape)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_crop():
     image = data.camera()
     viewer = ImageViewer(image)
@@ -131,9 +130,9 @@ def test_crop():
     assert_equal(viewer.image.shape, (101, 101))
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_color_histogram():
-    image = skimage.img_as_float(data.load('color.png'))
+    image = util.img_as_float(data.colorwheel())
     viewer = ImageViewer(image)
     ch = ColorHistogram(dock='right')
     viewer += ch
@@ -143,7 +142,7 @@ def test_color_histogram():
     assert_almost_equal(viewer.image.std(), 0.325, 3)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_plot_plugin():
     viewer = ImageViewer(data.moon())
     plugin = PlotPlugin(image_filter=lambda x: x)
@@ -155,14 +154,14 @@ def test_plot_plugin():
     viewer.close()
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_plugin():
-    img = skimage.img_as_float(data.moon())
+    img = util.img_as_float(data.moon())
     viewer = ImageViewer(img)
 
     def median_filter(img, radius=3):
-        with expected_warnings(['precision loss']):
-            return median(img, selem=disk(radius=radius))
+        return median(
+            util.img_as_ubyte(img), footprint=disk(radius=radius))
 
     plugin = Plugin(image_filter=median_filter)
     viewer += plugin

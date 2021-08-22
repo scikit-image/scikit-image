@@ -1,10 +1,10 @@
-from numpy.testing import *
 import numpy as np
-
 from skimage.io._plugins._histograms import histograms
 
+from skimage._shared.testing import assert_array_equal, assert_equal, TestCase
 
-class TestHistogram:
+
+class TestHistogram(TestCase):
     def test_basic(self):
         img = np.ones((50, 50, 3), dtype=np.uint8)
         r, g, b, v = histograms(img, 255)
@@ -23,6 +23,3 @@ class TestHistogram:
         assert_array_equal(r, b)
         assert_array_equal(r, v)
         assert_array_equal(r, np.ones(255))
-
-if __name__ == "__main__":
-    run_module_suite()

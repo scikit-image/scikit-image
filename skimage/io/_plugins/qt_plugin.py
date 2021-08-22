@@ -1,30 +1,15 @@
-from .util import prepare_for_display, window_manager
 import numpy as np
+from .util import prepare_for_display, window_manager
+from ..._shared.utils import warn
 
-# We try to aquire the gui lock first or else the gui import might
+from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
+                            QGridLayout)
+from qtpy.QtGui import QImage, QPixmap
+from qtpy import QtCore
+
+# We try to acquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
 window_manager.acquire('qt')
-
-try:
-    from PyQt4.QtGui import (QApplication, QImage,
-                             QLabel, QMainWindow, QPixmap, QWidget)
-    from PyQt4 import QtCore, QtGui
-    import sip
-    import warnings
-
-except ImportError:
-    window_manager._release('qt')
-
-    raise ImportError("""\
-    PyQt4 libraries not installed. Please refer to
-
-    http://www.riverbankcomputing.co.uk/software/pyqt/intro
-
-    for more information.  PyQt4 is GPL licensed.  For an
-    LGPL equivalent, see
-
-    http://www.pyside.org
-    """)
 
 app = None
 
@@ -43,7 +28,7 @@ class ImageLabel(QLabel):
         # the constructor, because we can't guarantee
         # that every row of the numpy data is
         # 4-byte aligned. Which Qt would require
-        # if we didnt pass the stride.
+        # if we didn't pass the stride.
         self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                           arr.strides[0], QImage.Format_RGB888)
         self.pm = QPixmap.fromImage(self.img)
@@ -64,7 +49,7 @@ class ImageWindow(QMainWindow):
         self.setWindowTitle('skimage')
         self.mgr = mgr
         self.main_widget = QWidget()
-        self.layout = QtGui.QGridLayout(self.main_widget)
+        self.layout = QGridLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
         self.label = ImageLabel(self, arr)
@@ -79,10 +64,14 @@ class ImageWindow(QMainWindow):
         self.mgr.remove_window(self)
 
 
-def imread_qt(filename):
+def imread(filename):
     """
     Read an image using QT's QImage.load
     """
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     qtimg = QImage()
     if not qtimg.load(filename):
         # QImage.load() returns false on failure, so raise an exception
@@ -114,16 +103,11 @@ def imread_qt(filename):
         img[:, :, 0:3] = img[:, :, 2::-1]
     return img
 
-if sip.SIP_VERSION >= 0x040c00:
-    # sip.voidptr only acquired a buffer view in 4.12.0, so our imread
-    # doesn't work with earlier versions
-    imread = imread_qt
-else:
-    warnings.warn(RuntimeWarning(
-        "sip version too old. QT imread disabled"))
-
-
 def imshow(arr, fancy=False):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     global app
     if not app:
         app = QApplication([])
@@ -148,6 +132,10 @@ def _app_show():
 
 
 def imsave(filename, img, format_str=None):
+    warn('`qt` plugin is deprecated and will be removed in 0.20. '
+         'For alternatives, refer to '
+         'https://scikit-image.org/docs/stable/user_guide/visualization.html',
+         FutureWarning, stacklevel=2)
     # we can add support for other than 3D uint8 here...
     img = prepare_for_display(img)
     qimg = QImage(img.data, img.shape[1], img.shape[0],

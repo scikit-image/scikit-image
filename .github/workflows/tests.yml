@@ -1,0 +1,198 @@
+# Workflow to build and test wheels
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+
+  test_skimage_linux:
+    name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
+    runs-on: ubuntu-20.04
+    env:
+        BUILD_DOCS: 1
+        TEST_EXAMPLES: 0
+        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+        PIP_FLAGS: [""]
+        MINIMUM_REQUIREMENTS: [0]
+        QT: ["PyQt5"]
+        WITH_PYSIDE: [0]
+        BUILD_DOCS: [1]
+        PYTHONOPTIMIZE: [0]
+        TEST_EXAMPLES: [0]
+        OPTIONAL_DEPS: [0]
+        OPTIONS_NAME: ["default"]
+        INSTALL_FROM_SDIST: [0]
+        include:
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            MINIMUM_REQUIREMENTS: 1
+            BUILD_DOCS: 0
+            OPTIONAL_DEPS: 0
+            # Test miminum requirements (don't build docs there is a problem
+            # with dask and astropy)
+            OPTIONS_NAME: "mini-req"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 1
+            BUILD_DOCS: 0
+            OPTIONS_NAME: "mini-req-optional-deps"
+          - platform_id: manylinux_x86_64
+            python-version: 3.8
+            PIP_FLAGS: "--pre"
+            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
+            # test pre-releases
+            OPTIONS_NAME: "pre"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            BUILD_DOCS: 1
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "optional-deps"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            PYTHONOPTIMIZE: 2
+            BUILD_DOCS: 0
+            OPTIONS_NAME: "optimize"
+          - platform_id: manylinux_x86_64
+            python-version: 3.7
+            INSTALL_FROM_SDIST: 1
+            OPTIONS_NAME: "install-from-sdist"
+
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v1
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version}}
+
+      - name: Build package
+        env:
+            VERSION: ${{ matrix.python-version }}
+            PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+            INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+        run: |
+            set -ex
+            source tools/github/before_install.sh
+            set -ex
+            python setup.py sdist
+            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
+                pip uninstall cython -y;
+                pip install dist/scikit-image-*.tar.gz;
+            else
+                pip install -vv -e .;
+            fi
+
+      - name: Run tests
+        env:
+            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+            QT: ${{ matrix.QT }}
+            WITH_PYSIDE: ${{ matrix.WITH_PYSIDE }}
+            BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
+            TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
+            OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+        run: |
+            echo $PIP_FLAGS
+            pip install $PIP_FLAGS -r requirements/test.txt
+            export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+            mkdir -p ${MPL_DIR}
+            touch ${MPL_DIR}/matplotlibrc
+            if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+                pip install -r ./requirements/optional.txt
+                if [[ "${EXTRA_DEPS}" != "0" ]]; then
+                # Extra deps need compilation, and it may not always be possible to
+                # compile them easily on all platforms
+                    pip install -r ./requirements/extras.txt
+                fi
+            fi
+            source tools/github/script.sh
+
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
+
+
+  test_skimage_macos:
+    name: macos-cp${{ matrix.python-version }}
+    runs-on: macos-latest
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+        QT: ["PyQt5"]
+        BUILD_DOCS: [1]
+        TEST_EXAMPLES: [0]
+        OPTIONAL_DEPS: [1]
+        OPTIONS_NAME: ["default"]
+        include:
+          - python-version: 3.7
+            OPTIONAL_DEPS: 0
+          - python-version: 3.9
+            OPTIONAL_DEPS: 0
+        exclude:
+          - python-version: 3.7
+            OPTIONAL_DEPS: 1
+          # Problem with SimpleITK and py 3.9
+          - python-version: 3.9
+            OPTIONAL_DEPS: 1
+
+    env:
+        BUILD_DOCS: 1
+        TEST_EXAMPLES: 0
+        CC: /usr/bin/clang
+        CXX: /usr/bin/clang++
+        CPPFLAGS: "-Xpreprocessor -fopenmp"
+        CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
+        CXXFLAGS: "-I/usr/local/opt/libomp/include"
+        LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v1
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version}}
+
+      - name: OSX configuration
+        run: |
+            # OpenMP is not present on macOS by default
+            set -ex
+            brew install libomp
+
+      - name: Build package
+        run: |
+            set -ex
+            source tools/github/before_install.sh
+            python setup.py sdist
+            pip install -vv --no-build-isolation -e .;
+
+      - name: Run tests
+        run: |
+            pip install $PIP_FLAGS -r requirements/test.txt
+            export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+            mkdir -p ${MPL_DIR}
+            touch ${MPL_DIR}/matplotlibrc
+            if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+                pip install -r ./requirements/optional.txt
+                pip install -r ./requirements/extras.txt
+            fi
+            source tools/github/script.sh
+
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing

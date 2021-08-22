@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import ndimage as ndi
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
-__all__ = ['gabor_kernel', 'gabor_filter']
+__all__ = ['gabor_kernel', 'gabor']
 
 
 def _sigma_prefactor(bandwidth):
@@ -31,13 +31,14 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
+        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
+        and ``sigma_y`` will decrease with increasing frequency. This value is
+        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
+        direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations
@@ -51,12 +52,12 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [1] https://en.wikipedia.org/wiki/Gabor_filter
+    .. [2] https://web.archive.org/web/20180127125930/http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     Examples
     --------
-    >>> from skimage.filter import gabor_kernel
+    >>> from skimage.filters import gabor_kernel
     >>> from skimage import io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
@@ -86,7 +87,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     rotx = x * np.cos(theta) + y * np.sin(theta)
     roty = -x * np.sin(theta) + y * np.cos(theta)
 
-    g = np.zeros(y.shape, dtype=np.complex)
+    g = np.zeros(y.shape, dtype=complex)
     g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
     g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
@@ -94,8 +95,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     return g
 
 
-def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-                 sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
+def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
+          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -117,13 +118,14 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
+        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
+        and ``sigma_y`` will decrease with increasing frequency. This value is
+        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
+        direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations.
@@ -132,7 +134,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Mode used to convolve image with a kernel, passed to `ndi.convolve`
     cval : scalar, optional
-        Value to fill past edges of input if `mode` of convolution is
+        Value to fill past edges of input if ``mode`` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.
 
     Returns
@@ -143,29 +145,29 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [1] https://en.wikipedia.org/wiki/Gabor_filter
+    .. [2] https://web.archive.org/web/20180127125930/http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     Examples
     --------
-    >>> from skimage.filter import gabor_filter
+    >>> from skimage.filters import gabor
     >>> from skimage import data, io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> image = data.coins()
     >>> # detecting edges in a coin image
-    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.6)
+    >>> filt_real, filt_imag = gabor(image, frequency=0.6)
     >>> plt.figure()            # doctest: +SKIP
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
 
     >>> # less sensitivity to finer details with the lower frequency kernel
-    >>> filt_real, filt_imag = gabor_filter(image, frequency=0.1)
+    >>> filt_real, filt_imag = gabor(image, frequency=0.1)
     >>> plt.figure()            # doctest: +SKIP
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset)
 

@@ -11,13 +11,17 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('segmentation', parent_package, top_path)
 
-    cython(['_felzenszwalb_cy.pyx'], working_path=base_path)
+    cython(['_watershed_cy.pyx',
+            '_felzenszwalb_cy.pyx',
+            '_quickshift_cy.pyx',
+            '_slic.pyx',
+            ], working_path=base_path)
+    config.add_extension('_watershed_cy', sources=['_watershed_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    cython(['_quickshift.pyx'], working_path=base_path)
-    config.add_extension('_quickshift', sources=['_quickshift.c'],
+    config.add_extension('_quickshift_cy', sources=['_quickshift_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
@@ -26,7 +30,7 @@ def configuration(parent_package='', top_path=None):
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Segmentation Algorithms',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

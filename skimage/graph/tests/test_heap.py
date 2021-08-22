@@ -1,6 +1,7 @@
 import time
 import random
 import skimage.graph.heap as heap
+
 from skimage._shared.testing import test_parallel
 
 
@@ -16,7 +17,7 @@ def _test_heap(n, fast_update):
     a = [random.uniform(1.0, 100.0) for i in range(n // 2)]
     a = a + a
 
-    t0 = time.clock()
+    t0 = time.perf_counter()
 
     # insert in heap with random removals
     if fast_update:
@@ -40,14 +41,10 @@ def _test_heap(n, fast_update):
         except IndexError:
             break
 
-    t1 = time.clock()
+    t1 = time.perf_counter()
 
     # verify
     for i in range(1, len(b)):
         assert(b[i] >= b[i - 1])
 
     return t1 - t0
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

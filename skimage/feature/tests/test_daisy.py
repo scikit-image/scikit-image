@@ -1,6 +1,7 @@
 import numpy as np
-from numpy.testing import assert_raises, assert_almost_equal
+import pytest
 from numpy import sqrt, ceil
+from numpy.testing import assert_almost_equal
 
 from skimage import data
 from skimage import img_as_float
@@ -9,7 +10,8 @@ from skimage.feature import daisy
 
 def test_daisy_color_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, daisy, img)
+    with pytest.raises(ValueError):
+        daisy(img)
 
 
 def test_daisy_desc_dims():
@@ -45,18 +47,21 @@ def test_descs_shape():
     assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
 
 
-def test_daisy_sigmas_and_radii():
-    img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_daisy_sigmas_and_radii(dtype):
+    img = data.astronaut()[:64, :64].mean(axis=2).astype(dtype, copy=False)
     sigmas = [1, 2, 3]
     radii = [1, 2]
-    daisy(img, sigmas=sigmas, ring_radii=radii)
+    descs = daisy(img, sigmas=sigmas, ring_radii=radii)
+    assert descs.dtype == img.dtype
 
 
 def test_daisy_incompatible_sigmas_and_radii():
     img = img_as_float(data.astronaut()[:64, :64].mean(axis=2))
     sigmas = [1, 2]
     radii = [1, 2]
-    assert_raises(ValueError, daisy, img, sigmas=sigmas, ring_radii=radii)
+    with pytest.raises(ValueError):
+        daisy(img, sigmas=sigmas, ring_radii=radii)
 
 
 def test_daisy_normalization():
@@ -89,15 +94,11 @@ def test_daisy_normalization():
         for j in range(descs.shape[1]):
             assert_almost_equal(np.sum(descs[i, j, :]), 0)
 
-    assert_raises(ValueError, daisy, img, normalization='does_not_exist')
+    with pytest.raises(ValueError):
+        daisy(img, normalization='does_not_exist')
 
 
 def test_daisy_visualization():
     img = img_as_float(data.astronaut()[:32, :32].mean(axis=2))
     descs, descs_img = daisy(img, visualize=True)
     assert(descs_img.shape == (32, 32, 3))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

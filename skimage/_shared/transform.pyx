@@ -2,11 +2,11 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-cimport numpy as cnp
 
 
-cdef float integrate(float[:, ::1] sat, Py_ssize_t r0, Py_ssize_t c0,
-                     Py_ssize_t r1, Py_ssize_t c1) nogil:
+cdef np_real_numeric integrate(np_real_numeric[:, ::1] sat,
+                               Py_ssize_t r0, Py_ssize_t c0,
+                               Py_ssize_t r1, Py_ssize_t c1) nogil:
     """
     Using a summed area table / integral image, calculate the sum
     over a given window.
@@ -17,7 +17,7 @@ cdef float integrate(float[:, ::1] sat, Py_ssize_t r0, Py_ssize_t c0,
 
     Parameters
     ----------
-    sat : ndarray of float
+    sat : ndarray of np_real_numeric
         Summed area table / integral image.
     r0, c0 : int
         Top-left corner of block to be summed.
@@ -26,10 +26,10 @@ cdef float integrate(float[:, ::1] sat, Py_ssize_t r0, Py_ssize_t c0,
 
     Returns
     -------
-    S : int
+    S : np_real_numeric
         Sum over the given window.
     """
-    cdef float S = 0
+    cdef np_real_numeric S = 0
 
     S += sat[r1, c1]
 

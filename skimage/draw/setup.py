@@ -10,7 +10,6 @@ def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
     config = Configuration('draw', parent_package, top_path)
-    config.add_data_dir('tests')
 
     cython(['_draw.pyx'], working_path=base_path)
 
@@ -19,11 +18,12 @@ def configuration(parent_package='', top_path=None):
 
     return config
 
+
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image developers',
           author='scikit-image developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Drawing',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

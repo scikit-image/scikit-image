@@ -1,37 +1,45 @@
 import numpy as np
-from skimage.morphology import skeletonize, medial_axis
-import numpy.testing
-from skimage import draw
+import pytest
+from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
+
+from skimage import data, draw
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
 from skimage.io import imread
-from skimage import data_dir
-import os.path
+from skimage.morphology import medial_axis, skeletonize, thin
+from skimage.morphology._skeletonize import (_generate_thin_luts,
+                                             G123_LUT, G123P_LUT)
 
 
 class TestSkeletonize():
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5, 5))
         result = skeletonize(im)
-        numpy.testing.assert_array_equal(result, np.zeros((5, 5)))
+        assert_array_equal(result, np.zeros((5, 5)))
 
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im, method='zhang')
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
         im[0, 0] = 1
         im[0, 1] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_unexpected_value(self):
         im = np.zeros((5, 5))
         im[0, 0] = 2
-        numpy.testing.assert_raises(ValueError, skeletonize, im)
+        with pytest.raises(ValueError):
+            skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
@@ -41,7 +49,7 @@ class TestSkeletonize():
         im = np.zeros((5, 5), np.uint8)
         im[3, 3] = 1
         result = skeletonize(im)
-        numpy.testing.assert_array_equal(result, im)
+        assert_array_equal(result, im)
 
     def test_skeletonize_already_thinned(self):
         im = np.zeros((5, 5), np.uint8)
@@ -49,17 +57,17 @@ class TestSkeletonize():
         im[2, -1] = 1
         im[4, 0] = 1
         result = skeletonize(im)
-        numpy.testing.assert_array_equal(result, im)
+        assert_array_equal(result, im)
 
     def test_skeletonize_output(self):
-        im = imread(os.path.join(data_dir, "bw_text.png"), as_grey=True)
+        im = imread(fetch("data/bw_text.png"), as_gray=True)
 
         # make black the foreground
         im = (im == 0)
         result = skeletonize(im)
 
-        expected = np.load(os.path.join(data_dir, "bw_text_skeleton.npy"))
-        numpy.testing.assert_array_equal(result, expected)
+        expected = np.load(fetch("data/bw_text_skeleton.npy"))
+        assert_array_equal(result, expected)
 
     def test_skeletonize_num_neighbours(self):
         # an empty image
@@ -90,7 +98,7 @@ class TestSkeletonize():
         mask = np.array([[1,  1],
                          [1,  1]], np.uint8)
         blocks = correlate(result, mask, mode='constant')
-        assert not numpy.any(blocks == 4)
+        assert not np.any(blocks == 4)
 
     def test_lut_fix(self):
         im = np.zeros((6, 6), np.uint8)
@@ -111,6 +119,62 @@ class TestSkeletonize():
         assert np.all(result == expected)
 
 
+class TestThin():
+    @property
+    def input_image(self):
+        """image to test thinning with"""
+        ii = np.array([[0, 0, 0, 0, 0, 0, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        return ii
+
+    def test_zeros(self):
+        assert np.all(thin(np.zeros((10, 10))) == False)
+
+    def test_iter_1(self):
+        result = thin(self.input_image, 1).astype(np.uint8)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 1, 0, 1, 1, 0, 0],
+                             [0, 0, 1, 1, 1, 0, 0],
+                             [0, 0, 1, 1, 1, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        assert_array_equal(result, expected)
+
+    def test_max_iter_kwarg_deprecation(self):
+        result1 = thin(self.input_image, max_num_iter=1).astype(np.uint8)
+        with expected_warnings(["`max_iter` is a deprecated argument name"]):
+            result2 = thin(self.input_image, max_iter=1).astype(np.uint8)
+        assert_array_equal(result1, result2)
+
+    def test_noiter(self):
+        result = thin(self.input_image).astype(np.uint8)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 1, 0, 1, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0],
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        assert_array_equal(result, expected)
+
+    def test_baddim(self):
+        for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
+            with pytest.raises(ValueError):
+                thin(ii)
+
+    def test_lut_generation(self):
+        g123, g123p = _generate_thin_luts()
+
+        assert_array_equal(g123, G123_LUT)
+        assert_array_equal(g123p, G123P_LUT)
+
+
 class TestMedialAxis():
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
@@ -120,8 +184,21 @@ class TestMedialAxis():
     def test_00_01_zeros_masked(self):
         '''Test skeletonize on an array that is completely masked'''
         result = medial_axis(np.zeros((10, 10), bool),
-                                   np.zeros((10, 10), bool))
+                             np.zeros((10, 10), bool))
         assert np.all(result == False)
+
+    def test_vertical_line(self):
+        '''Test a thick vertical line, issue #3861'''
+        img = np.zeros((9, 9))
+        img[:, 2] = 1
+        img[:, 3] = 1
+        img[:, 4] = 1
+
+        expected = np.full(img.shape, False)
+        expected[:, 3] = True
+
+        result = medial_axis(img)
+        assert_array_equal(result, expected)
 
     def test_01_01_rectangle(self):
         '''Test skeletonize on a rectangle'''
@@ -140,7 +217,7 @@ class TestMedialAxis():
                              [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                             bool)
+                            dtype=bool)
         result = medial_axis(image)
         assert np.all(result == expected)
         result, distance = medial_axis(image, return_distance=True)
@@ -160,7 +237,7 @@ class TestMedialAxis():
                              [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                             bool)
+                            dtype=bool)
         result = medial_axis(image)
         assert np.all(result == expected)
 
@@ -170,7 +247,3 @@ class TestMedialAxis():
         image[:, 1:-1] = True
         result = medial_axis(image)
         assert np.all(result == image)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

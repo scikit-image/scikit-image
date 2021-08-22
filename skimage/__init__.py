@@ -1,4 +1,4 @@
-"""Image Processing SciKit (Toolbox for SciPy)
+"""Image Processing for Python
 
 ``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
@@ -26,11 +26,11 @@ graph
 io
     Reading, saving, and displaying images and video.
 measure
-    Measurement of image properties, e.g., similarity and contours.
+    Measurement of image properties, e.g., region properties and contours.
+metrics
+    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
 morphology
     Morphological operations, e.g., opening or skeletonization.
-novice
-    Simplified interface for teaching purposes.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
@@ -47,68 +47,34 @@ Utility Functions
 -----------------
 img_as_float
     Convert an image to floating point format, with values in [0, 1].
+    Is similar to `img_as_float64`, but will not convert lower-precision
+    floating point arrays to `float64`.
+img_as_float32
+    Convert an image to single-precision (32-bit) floating point format,
+    with values in [0, 1].
+img_as_float64
+    Convert an image to double-precision (64-bit) floating point format,
+    with values in [0, 1].
 img_as_uint
     Convert an image to unsigned integer format, with values in [0, 65535].
 img_as_int
     Convert an image to signed integer format, with values in [-32768, 32767].
 img_as_ubyte
     Convert an image to unsigned byte format, with values in [0, 255].
+img_as_bool
+    Convert an image to boolean format, with values either True or False.
+dtype_limits
+    Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
 """
 
-import os.path as osp
-import imp
-import functools
-import warnings
 import sys
 
-pkg_dir = osp.abspath(osp.dirname(__file__))
-data_dir = osp.join(pkg_dir, 'data')
 
-__version__ = '0.12dev'
+__version__ = '0.19.0.dev0'
 
-try:
-    imp.find_module('nose')
-except ImportError:
-    def _test(doctest=False, verbose=False):
-        """This would run all unit tests, but nose couldn't be
-        imported so the test suite can not run.
-        """
-        raise ImportError("Could not load nose. Unit tests not available.")
-
-else:
-    def _test(doctest=False, verbose=False):
-        """Run all unit tests."""
-        import nose
-        args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
-        if verbose:
-            args.extend(['-v', '-s'])
-        if doctest:
-            args.extend(['--with-doctest', '--ignore-files=^\.',
-                         '--ignore-files=^setup\.py$$', '--ignore-files=test'])
-            # Make sure warnings do not break the doc tests
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                success = nose.run('skimage', argv=args)
-        else:
-            success = nose.run('skimage', argv=args)
-        # Return sys.exit code
-        if success:
-            return 0
-        else:
-            return 1
-
-
-# do not use `test` as function name as this leads to a recursion problem with
-# the nose test suite
-test = _test
-test_verbose = functools.partial(test, verbose=True)
-test_verbose.__doc__ = test.__doc__
-doctest = functools.partial(test, doctest=True)
-doctest.__doc__ = doctest.__doc__
-doctest_verbose = functools.partial(test, doctest=True, verbose=True)
-doctest_verbose.__doc__ = doctest.__doc__
-
+from ._shared.version_requirements import ensure_python_version
+ensure_python_version((3, 5))
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
@@ -121,11 +87,12 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-http://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
     # Raise a comprehensible error
+    import os.path as osp
     local_dir = osp.split(__file__)[0]
     msg = _STANDARD_MSG
     if local_dir == "skimage":
@@ -135,6 +102,7 @@ def _raise_build_error(e):
     raise ImportError("""%s
 It seems that scikit-image has not been built correctly.
 %s""" % (e, msg))
+
 
 try:
     # This variable is injected in the __builtins__ by the build
@@ -154,6 +122,17 @@ else:
         del geometry
     except ImportError as e:
         _raise_build_error(e)
-    from .util.dtype import *
 
-del warnings, functools, osp, imp, sys
+    # All skimage root imports go here
+    from .util.dtype import (img_as_float32,
+                             img_as_float64,
+                             img_as_float,
+                             img_as_int,
+                             img_as_uint,
+                             img_as_ubyte,
+                             img_as_bool,
+                             dtype_limits)
+    from .data import data_dir
+    from .util.lookfor import lookfor
+
+del sys

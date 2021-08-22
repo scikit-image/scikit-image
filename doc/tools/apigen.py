@@ -21,7 +21,7 @@ is an MIT-licensed project.
 import os
 import re
 
-from types import BuiltinFunctionType, FunctionType
+from types import BuiltinFunctionType, FunctionType, ModuleType
 
 # suppress print statements (warnings for empty files)
 DEBUG = True
@@ -36,11 +36,11 @@ class ApiDocWriter(object):
 
     def __init__(self,
                  package_name,
-                 rst_extension='.txt',
+                 rst_extension='.rst',
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  ):
-        ''' Initialize package for parsing
+        r''' Initialize package for parsing
 
         Parameters
         ----------
@@ -199,12 +199,16 @@ class ApiDocWriter(object):
             A list of (public) function names in the module.
         classes : list of str
             A list of (public) class names in the module.
+        submodules : list of str
+            A list of (public) submodule names in the module.
         """
         mod = __import__(uri, fromlist=[uri.split('.')[-1]])
         # find all public objects in the module.
-        obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
+        obj_strs = getattr(mod, '__all__',
+                           [obj for obj in dir(mod) if not obj.startswith('_')])
         functions = []
         classes = []
+        submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
             if obj_str not in mod.__dict__:
@@ -214,6 +218,8 @@ class ApiDocWriter(object):
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
+            elif isinstance(obj, ModuleType) and 'skimage' in mod.__name__:
+                submodules.append(obj_str)
             else:
                 try:
                     issubclass(obj, object)
@@ -221,7 +227,7 @@ class ApiDocWriter(object):
                 except TypeError:
                     # not a function or class
                     pass
-        return functions, classes
+        return functions, classes, submodules
 
     def _parse_lines(self, linesource):
         ''' Parse lines of text for functions and classes '''
@@ -258,10 +264,13 @@ class ApiDocWriter(object):
             Contents of API doc
         '''
         # get the names of all classes and functions
-        functions, classes = self._parse_module_with_import(uri)
-        if not len(functions) and not len(classes) and DEBUG:
-            print('WARNING: Empty -', uri)  # dbg
+        functions, classes, submodules = self._parse_module_with_import(uri)
+        if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
+            print('WARNING: Empty -', uri)
             return ''
+        functions = sorted(functions)
+        classes = sorted(classes)
+        submodules = sorted(submodules)
 
         # Make a shorter version of the uri that omits the package name for
         # titles
@@ -286,6 +295,9 @@ class ApiDocWriter(object):
         for c in classes:
             ad += '   ' + uri + '.' + c + '\n'
         ad += '\n'
+        for m in submodules:
+            ad += '    ' + uri + '.' + m + '\n'
+        ad += '\n'
 
         for f in functions:
             # must NOT exclude from index to keep cross-refs working
@@ -293,6 +305,7 @@ class ApiDocWriter(object):
             ad += f + '\n'
             ad += self.rst_section_levels[2] * len(f) + '\n'
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
+            ad += '\n.. include:: ' + full_f + '.examples\n\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[2] * \
@@ -304,6 +317,8 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
+            full_c = uri + '.' + c
+            ad += '\n.. include:: ' + full_c + '.examples\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -348,7 +363,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        r''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -389,7 +404,9 @@ class ApiDocWriter(object):
     def write_modules_api(self, modules, outdir):
         # write the list
         written_modules = []
-        for m in modules:
+        public_modules = [m for m in modules
+                          if not m.split('.')[-1].startswith('_')]
+        for m in public_modules:
             api_str = self.generate_api_doc(m)
             if not api_str:
                 continue
@@ -423,15 +440,13 @@ class ApiDocWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
-        self.write_modules_api(modules,outdir)
+        self.write_modules_api(modules, outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files
 
         Parameters
         ----------
-        path : string
-            Filename to write index to
         outdir : string
             Directory to which to write generated index file
         froot : string, optional
@@ -457,10 +472,36 @@ class ApiDocWriter(object):
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        title = "API Reference"
+        # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
+        # if it is `skimage.submodule.subsubmodule`, ignore.
+
+        title = "API Reference for skimage |version|"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
-        w('.. toctree::\n\n')
+
+        subtitle = "Submodules"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+
+        for f in self.written_modules:
+            module_name = f.split('.')
+            if len(module_name) > 2:
+                continue
+            elif len(module_name) == 1:
+                module_name = module_name[0]
+                prefix = "-"
+            elif len(module_name) == 2:
+                module_name = module_name[1]
+                prefix = "\n  -"
+            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
+        w('\n')
+
+        subtitle = "Submodule Contents"
+        w(subtitle + "\n")
+        w("-" * len(subtitle) + "\n\n")
+
+        w('.. toctree::\n')
+        w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
         idx.close()

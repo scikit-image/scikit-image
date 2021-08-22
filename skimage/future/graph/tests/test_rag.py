@@ -1,19 +1,18 @@
+from numpy.testing import assert_array_equal
 import numpy as np
 from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
-from numpy.testing.decorators import skipif
-from skimage import segmentation
-from numpy import testing
+from skimage import segmentation, data
+from skimage._shared import testing
 
 
 def max_edge(g, src, dst, n):
     default = {'weight': -np.inf}
     w1 = g[n].get(src, default)['weight']
     w2 = g[n].get(dst, default)['weight']
-    return max(w1, w2)
+    return {'weight': max(w1, w2)}
 
 
-@skipif(not is_installed('networkx'))
 def test_rag_merge():
     g = graph.rag.RAG()
 
@@ -32,23 +31,22 @@ def test_rag_merge():
     # We merge nodes and ensure that the minimum weight is chosen
     # when there is a conflict.
     g.merge_nodes(0, 2)
-    assert g.edge[1][2]['weight'] == 10
-    assert g.edge[2][3]['weight'] == 30
+    assert g.adj[1][2]['weight'] == 10
+    assert g.adj[2][3]['weight'] == 30
 
     # We specify `max_edge` as `weight_func` as ensure that maximum
     # weight is chosen in case on conflict
     gc.merge_nodes(0, 2, weight_func=max_edge)
-    assert gc.edge[1][2]['weight'] == 20
-    assert gc.edge[2][3]['weight'] == 40
+    assert gc.adj[1][2]['weight'] == 20
+    assert gc.adj[2][3]['weight'] == 40
 
     g.merge_nodes(1, 4)
     g.merge_nodes(2, 3)
     n = g.merge_nodes(3, 4, in_place=False)
-    assert sorted(g.node[n]['labels']) == list(range(5))
-    assert g.edges() == []
+    assert sorted(g.nodes[n]['labels']) == list(range(5))
+    assert list(g.edges()) == []
 
 
-@skipif(not is_installed('networkx'))
 def test_threshold_cut():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -73,7 +71,6 @@ def test_threshold_cut():
     assert new_labels.max() == 1
 
 
-@skipif(not is_installed('networkx'))
 def test_cut_normalized():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
@@ -100,27 +97,27 @@ def test_cut_normalized():
     assert new_labels.max() == 1
 
 
-@skipif(not is_installed('networkx'))
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
     labels[:5, :] = 0
     labels[5:, :] = 1
-    testing.assert_raises(ValueError, graph.rag_mean_color, img, labels,
-                          2, 'non existant mode')
+    with testing.raises(ValueError):
+        graph.rag_mean_color(img, labels,
+                             2, 'non existent mode')
 
 
 def _weight_mean_color(graph, src, dst, n):
-    diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
+    diff = graph.nodes[dst]['mean color'] - graph.nodes[n]['mean color']
     diff = np.linalg.norm(diff)
-    return diff
+    return {'weight': diff}
 
 
 def _pre_merge_mean_color(graph, src, dst):
-    graph.node[dst]['total color'] += graph.node[src]['total color']
-    graph.node[dst]['pixel count'] += graph.node[src]['pixel count']
-    graph.node[dst]['mean color'] = (graph.node[dst]['total color'] /
-                                     graph.node[dst]['pixel count'])
+    graph.nodes[dst]['total color'] += graph.nodes[src]['total color']
+    graph.nodes[dst]['pixel count'] += graph.nodes[src]['pixel count']
+    graph.nodes[dst]['mean color'] = (graph.nodes[dst]['total color'] /
+                                      graph.nodes[dst]['pixel count'])
 
 
 def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
@@ -130,7 +127,6 @@ def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
                                     _weight_mean_color)
 
 
-@skipif(not is_installed('networkx'))
 def test_rag_hierarchical():
     img = np.zeros((8, 8, 3), dtype='uint8')
     labels = np.zeros((8, 8), dtype='uint8')
@@ -161,20 +157,72 @@ def test_rag_hierarchical():
     assert np.all(result == result[0, 0])
 
 
-@skipif(not is_installed('networkx'))
 def test_ncut_stable_subgraph():
     """ Test to catch an error thrown when subgraph has all equal edges. """
 
     img = np.zeros((100, 100, 3), dtype='uint8')
 
     labels = np.zeros((100, 100), dtype='uint8')
-    labels[...] = 0
     labels[:50, :50] = 1
     labels[:50, 50:] = 2
 
     rag = graph.rag_mean_color(img, labels, mode='similarity')
-
     new_labels = graph.cut_normalized(labels, rag, in_place=False)
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 
     assert new_labels.max() == 0
+
+
+def test_reproducibility():
+    """ensure cut_normalized returns the same output for the same input,
+    when specifying random_state
+    """
+    img = data.coffee()
+    labels1 = segmentation.slic(
+        img, compactness=30, n_segments=400, start_label=0)
+    g = graph.rag_mean_color(img, labels1, mode='similarity')
+    results = [None] * 4
+    for i in range(len(results)):
+        results[i] = graph.cut_normalized(
+            labels1, g, in_place=False, thresh=1e-3, random_state=1234)
+
+    for i in range(len(results) - 1):
+        assert_array_equal(results[i], results[i + 1])
+
+
+def test_generic_rag_2d():
+    labels = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+    g = graph.RAG(labels)
+    assert g.has_edge(1, 2) and g.has_edge(2, 4) and not g.has_edge(1, 4)
+    h = graph.RAG(labels, connectivity=2)
+    assert h.has_edge(1, 2) and h.has_edge(1, 4) and h.has_edge(2, 3)
+
+
+def test_generic_rag_3d():
+    labels = np.arange(8, dtype=np.uint8).reshape((2, 2, 2))
+    g = graph.RAG(labels)
+    assert g.has_edge(0, 1) and g.has_edge(1, 3) and not g.has_edge(0, 3)
+    h = graph.RAG(labels, connectivity=2)
+    assert h.has_edge(0, 1) and h.has_edge(0, 3) and not h.has_edge(0, 7)
+    k = graph.RAG(labels, connectivity=3)
+    assert k.has_edge(0, 1) and k.has_edge(1, 2) and k.has_edge(2, 5)
+
+
+def test_rag_boundary():
+    labels = np.zeros((16, 16), dtype='uint8')
+    edge_map = np.zeros_like(labels, dtype=float)
+
+    edge_map[8, :] = 0.5
+    edge_map[:, 8] = 1.0
+
+    labels[:8, :8] = 1
+    labels[:8, 8:] = 2
+    labels[8:, :8] = 3
+    labels[8:, 8:] = 4
+
+    g = graph.rag_boundary(labels, edge_map, connectivity=1)
+    assert set(g.nodes()) == {1, 2, 3, 4}
+    assert set(g.edges()) == {(1, 2), (1, 3), (2, 4), (3, 4)}
+    assert g[1][3]['weight'] == 0.25
+    assert g[2][4]['weight'] == 0.34375
+    assert g[1][3]['count'] == 16
