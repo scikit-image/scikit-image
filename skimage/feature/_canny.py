@@ -15,9 +15,9 @@ Original author: Lee Kamentsky
 import numpy as np
 import scipy.ndimage as ndi
 
-from ..filters import gaussian
 from .. import dtype_limits
 from .._shared.utils import check_nD
+from ..filters._gaussian import gaussian
 
 
 def _preprocess(image, mask, sigma, mode, cval):
