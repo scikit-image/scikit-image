@@ -12,7 +12,7 @@ This is a small bugfix release for compatibility with Pooch 1.5 and SciPy 1.7.
 Bug fixes
 ---------
 - Only import from Pooch's public API. This resolves an import failure with
-  Pooch 1.5.0. (#5531, backport of #5437)
+  Pooch 1.5.0. (#5531, backport of #5529)
 - Do not use deprecated ``scipy.linalg.pinv2`` in ``random_walker`` when
   using the multigrid solver. (#5531, backport of #5437)
 
