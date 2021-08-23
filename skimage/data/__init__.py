@@ -62,7 +62,12 @@ legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
-    from pooch.utils import file_hash
+    try:
+        # Pooch < 1.5.0
+        from pooch.utils import file_hash
+    except ImportError:
+        # Pooch >= 1.5.0
+        from pooch.hashes import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
