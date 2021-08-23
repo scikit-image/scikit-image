@@ -63,11 +63,11 @@ skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
     try:
-        # Pooch < 1.5.0
-        from pooch.utils import file_hash
-    except ImportError:
         # Pooch >= 1.5.0
         from pooch.hashes import file_hash
+    except ImportError:
+        # Pooch < 1.5.0
+        from pooch.utils import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
@@ -281,7 +281,8 @@ def _init_pooch():
 # downstream users, see
 # https://github.com/scikit-image/scikit-image/issues/4660
 # https://github.com/scikit-image/scikit-image/issues/4664
-if has_pooch:
+if has_
+:
     _init_pooch()
 
 
