@@ -223,8 +223,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
 
-    if max_value == 0.0:
-        raise ValueError("The maximum value found in the image was 0.")
 
     image = np.atleast_3d(img_as_float(image))
     image = np.ascontiguousarray(image)
