@@ -61,7 +61,7 @@ legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
-    from pooch.utils import file_hash
+    from pooch import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
@@ -138,7 +138,6 @@ def create_image_fetcher():
     else:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
                "v{version}/skimage/")
-
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
         # Pooch uses appdirs to select an appropriate directory for the cache
