@@ -138,7 +138,6 @@ def create_image_fetcher():
     else:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
                "v{version}/skimage/")
-
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
         # Pooch uses appdirs to select an appropriate directory for the cache

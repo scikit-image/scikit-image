@@ -1,3 +1,34 @@
+scikit-image 0.18.3
+===================
+
+We're happy to announce the release of scikit-image v0.18.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+This is a small bugfix release for compatibility with Pooch 1.5 and SciPy 1.7.
+
+Bug fixes
+---------
+- Only import from Pooch's public API. This resolves an import failure with
+  Pooch 1.5.0. (#5531, backport of #5437)
+- Do not use deprecated ``scipy.linalg.pinv2`` in ``random_walker`` when
+  using the multigrid solver. (#5531, backport of #5437)
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+David Manthey
+Gregory Lee
+Mark Harfouche
+
+3 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+Gregory Lee
+Juan Nunez-Iglesias
+Mark Harfouche
+
+
 scikit-image 0.18.2
 ===================
 
