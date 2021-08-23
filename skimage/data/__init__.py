@@ -281,8 +281,7 @@ def _init_pooch():
 # downstream users, see
 # https://github.com/scikit-image/scikit-image/issues/4660
 # https://github.com/scikit-image/scikit-image/issues/4664
-if has_
-:
+if has_pooch:
     _init_pooch()
 
 
