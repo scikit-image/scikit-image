@@ -22,7 +22,7 @@ New Features
 - Added a new perimeter function - ``measure.perimeter_crofton``.
 - Added 3D support for many filters in skimage.filters.rank.
 - New images have been added in the ``data`` subpackage: ``data.eagle``
-  (#4922), TODO for other images 
+  (#4922), TODO for other images
   Also note that the image for ``data.camera`` has been changed due to
   copyright issues (#4913).
 
@@ -53,7 +53,7 @@ Documentation
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_ 
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_
   has been expanded (#4905).
 
 
@@ -86,7 +86,7 @@ API Changes
   when the input is single-precision. Prior to this release, double-precision
   was always used.
 - The default value of ``threshold_rel`` in ``skimage.feature.corner`` has
-  changed from 0.1 to None, which corresponds to letting 
+  changed from 0.1 to None, which corresponds to letting
   ``skimage.feature.peak_local_max`` decide on the default. This is currently
   equivalent to ``threshold_rel=0``.
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
@@ -100,12 +100,12 @@ API Changes
 Bugfixes
 --------
 
-- For the RANSAC algorithm, improved the case where all data points are 
-  outliers, which was previously raising an error 
+- For the RANSAC algorithm, improved the case where all data points are
+  outliers, which was previously raising an error
   (#4844)
 - An error-causing bug has been corrected for the ``bg_color`` parameter in
   ``label2rgb`` when its value is a string (#4840)
-- A normalization bug was fixed in ``metrics.variation_of_information`` 
+- A normalization bug was fixed in ``metrics.variation_of_information``
   (#4875)
 - Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
   dimensions or more (#4823)
@@ -130,6 +130,7 @@ Bugfixes
   (#4756).
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
+- Work with pooch 1.5.0 for fetching data (#5529).
 
 
 Deprecations
@@ -145,7 +146,7 @@ Deprecations
   we recommend using dedicated tools such as napari or plotly. In a similar
   vein, the ``qt`` and ``skivi`` plugins of ``skimage.io`` have been deprecated
   and will be removed in version 0.20.
-- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and
   ``height`` have been deprecated. Use ``nrow`` and ``ncol`` instead.
 - The explicit setting ``threshold_rel=0` was removed from the Examples of the
   following docstrings: ``skimage.feature.BRIEF``,
