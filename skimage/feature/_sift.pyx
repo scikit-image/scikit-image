@@ -110,7 +110,7 @@ cpdef _update_histogram(np_floats[:, :, ::1] histograms,
                       * magnitude[p])
                 t_val = near_t_val[p]
                 w1 = w0 * val_norm1 * t_val
-                w2 = w0 * (1 - val_norm1 * t_val)
+                w2 = w0 - w1
                 k_index = near_t[p]
                 if k_index == n_ori - 1:
                     k_index2 = 0
