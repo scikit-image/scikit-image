@@ -400,7 +400,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             keys = keys[contrast_filter][edge_filter]
             off = off[contrast_filter][edge_filter]
-            yx = ((keys[:, 0:2] + off[:, 0:2]) * delta).astype(dtype)
+            yx = ((keys[:, :2] + off[:, :2]) * delta).astype(dtype)
 
             sigmas = self.scalespace_sigmas[o, keys[:, 2]] * np.power(
                 sigmaratio, off[:, 2])
@@ -450,7 +450,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             gradient_space.append(np.gradient(octave))
             delta = self.deltas[o]
-            oshape = octave.shape[0:2]
+            oshape = octave.shape[:2]
             # convert to octave's dimensions
             yx = positions / delta
             sigma = sigmas / delta
@@ -570,7 +570,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             gradient = gradient_space[o]
 
             delta = self.deltas[o]
-            dim = gradient[0].shape[0:2]
+            dim = gradient[0].shape[:2]
             center_pos = positions / delta
             sigma = sigmas / delta
 
