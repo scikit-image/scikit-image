@@ -256,8 +256,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             self.n_octaves = max_octaves
 
     def _deltas(self, dtype=float):
-        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves))
-        return deltas.astype(dtype, copy=False)
+        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves),
+                                           dtype=dtype)
+        return deltas
 
     def _create_scalespace(self, image):
         """Source: "Anatomy of the SIFT Method" Alg. 1
