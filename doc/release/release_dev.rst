@@ -53,14 +53,14 @@ Documentation
 - A new doc tutorial presenting a 3D biomedical imaging example has been added
   to the gallery (#4946). The technical content benefited from conversations
   with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
-- New gallery example for 3D structure tensor
-- New gallery example displaying a 3D dataset
-- Extended rolling ball example with ECG data (1D)
+- New gallery example for 3D structure tensor.
+- New gallery example displaying a 3D dataset.
+- Extended rolling ball example with ECG data (1D).
 - The stain unmixing gallery example was fixed and now displays proper
   separation of the stains.
 - Documentation has been added to the contributing notes about how to submit a
-  gallery example 
-- Autoformat docstrings in morphology/*
+  gallery example.
+- Autoformat docstrings in morphology.
 - Display plotly figures from gallery example even when running script at CLI.
 - Single out docs-only PRs in review process.
 - Use matplotlib's infinite axline to demonstrate hough transform.
@@ -79,21 +79,21 @@ Documentation
 - Fix dtype info in documentation for watershed.
 - Proofread gallery example for Radon transform.
 - Use internal function for noise + clarify code in Canny example.
-- Make more comprehensive 'see also' sections in filters
-- Specify the release note version instead of the misleading `latest`
+- Make more comprehensive 'see also' sections in filters.
+- Specify the release note version instead of the misleading `latest`.
 - Remove misleading comment in ``plot_thresholding.py`` example.
-- Fix sphinx layout to make the search engine work with recent sphinx versions
-- Draw node IDs in RAG example
-- Update sigma_color description in denoise_bilateral
-- Update intersphinx fallback inventories + add matplotlib fallback inventory
-- Fix numpy deprecation in ``plot_local_equalize.py``
+- Fix sphinx layout to make the search engine work with recent sphinx versions.
+- Draw node IDs in RAG example.
+- Update sigma_color description in denoise_bilateral.
+- Update intersphinx fallback inventories + add matplotlib fallback inventory.
+- Fix numpy deprecation in ``plot_local_equalize.py``.
 - Rename ``label`` variable in ``plot_regionprops.py`` to circumvent link issue
   in docs.
-- Avoid duplicate API documentation for ImageViewer, CollectionViewer
-- Fix 'blog_dog' typo in ``gaussian`` docs
+- Avoid duplicate API documentation for ImageViewer, CollectionViewer.
+- Fix 'blog_dog' typo in ``gaussian`` docs.
 - Update reference link documentation in the ``adjust_sigmoid`` function.
-- Fix reference to multiscale_basic_features in TrainableSegmenter
-- Slight ``shape_index`` docstring modification to specify 2D array
+- Fix reference to multiscale_basic_features in TrainableSegmenter.
+- Slight ``shape_index`` docstring modification to specify 2D array.
 
 
 Improvements
@@ -115,7 +115,7 @@ Improvements
   ``scipy.ndimage``'s implementation for this case (#4945).
 - ``util.apply_parallel`` now works with multichannel data (#4927).
 - ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
-- Fast, non-Cython implementation for ``skimage.filters.correlate_sparse``
+- Fast, non-Cython implementation for ``skimage.filters.correlate_sparse``.
 - For efficiency, the histogram is now precomputed within
   ``skimage.filters.try_all_threshold``.
 - Faster ``skimage.filters.find_local_max`` when given a finite ``num_peaks``.
@@ -124,7 +124,7 @@ Improvements
 - ``skimage.restoration.denoise_tv_bregman`` and
   ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
   multithreaded use.
-- A ``skimage.color.label2rgb`` performance regression was addressed
+- A ``skimage.color.label2rgb`` performance regression was addressed.
 
 
 API Changes
@@ -139,7 +139,7 @@ API Changes
 - Most functions now return float32 images when the input has float32 dtype.
 - A default value has been added to ``measure.find_contours``, corresponding to
   the half distance between the min and max values of the image
-  #4862
+  (#4862).
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
   descriptive name.
 - The ``level`` parameter of ``measure.find_contours`` is now a keyword
@@ -159,7 +159,7 @@ Bugfixes
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
 - Nonzero values at the image edge are no longer incorrectly marked as a
-  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447).
 - Fix return dtype of ``_label2rgb_avg`` function.
 - Ensure ``skimage.color.separate_stains`` does not return negative values.
 - Prevent integer overflow in ``EllipseModel``.
@@ -223,9 +223,7 @@ Completed deprecations from prior releases
 - The deprecated ``skimage.util.pad`` function has been removed (use
   ``numpy.pad`` instead).
   been removed (use ``in_place`` instead).
-- The default 
-
-``mode`` in ``skimage.filters.hessian`` is now
+- The default ``mode`` in ``skimage.filters.hessian`` is now
   ``'reflect'``.
 - The default boundary ``mode`` in ``skimage.filters.sato`` is now
   ``'reflect'``.
@@ -329,27 +327,27 @@ Development process
 - Ensure that README.txt has write permissions for subsequent imports.
 - Run face classification gallery example with a single thread
 - Enable pip and skimage.data caching on Azure
-- Fix CircleCI caching
-- Fix Azure CI caching
-- Fix Cython warnings
-- disable calls to plotly.io.show when running on Azure
+- Fix CircleCI and Azure CI caching.
+- Address Cython warnings.
+- Disable calls to plotly.io.show when running on Azure.
 - Remove legacy Travis-CI scripts and update contributor documentation
-  accordingly
-- Increase cibuildwheel verbosity
-- Update pip during dev environment installation
-- Add benchmark checks to CI
-- Resolve stochastic rank filter test failures on CI
+  accordingly.
+- Increase cibuildwheel verbosity.
+- Update pip during dev environment installation.
+- Add benchmark checks to CI.
+- Resolve stochastic rank filter test failures on CI.
 - Ensure that README.txt has write permissions for subsequent imports.
-- Decorators for helping with the multichannel->channel_axis transition
+- Decorators for helping with the transition between the keyword argument
+  multichannel and channel_axis.
 
 
 Other Updates
 -------------
-- refactor np.random.x to use np.random.Generator
-- avoid warnings about use of deprecated `scipy.linalg.pinv2`
-- Simplify resize implementation using new SciPy 1.6 zoom option
-- Fix duplicate test function names in ``test_unsharp_mask.py``
-- Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature
+- Refactor np.random.x to use np.random.Generator.
+- Avoid warnings about use of deprecated ``scipy.linalg.pinv2``.
+- Simplify resize implementation using new SciPy 1.6 zoom option.
+- Fix duplicate test function names in ``test_unsharp_mask.py``.
+- Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature.
 
 
 Contributors to this release
