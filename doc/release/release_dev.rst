@@ -82,6 +82,7 @@ Bugfixes
   is avoided (#5047).
 - Nonzero values at the image edge are no longer incorrectly marked as a
   boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
+- Work with pooch 1.5.0 for fetching data (#5529).
 
 
 Deprecations
