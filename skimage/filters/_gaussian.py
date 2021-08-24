@@ -33,8 +33,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
-        'constant'. Default is 'nearest'. This argument is deprecated:
-        specify `channel_axis` instead.
+        'constant'. Default is 'nearest'.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
