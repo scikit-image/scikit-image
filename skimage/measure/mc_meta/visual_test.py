@@ -97,7 +97,7 @@ def timer(message):
     print(message, end=' ')
     start = time.time()
     yield
-    print('took {:1.0f} ms'.format(1000 * (time.time() - start)))
+    print(f"took {1000 * (time.time() - start):1.0f} ms")
 
 
 if __name__ == '__main__':
