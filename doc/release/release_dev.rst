@@ -159,7 +159,7 @@ Bugfixes
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (#5047).
 - Nonzero values at the image edge are no longer incorrectly marked as a
-  boundary when using ``find_bounaries`` with mode='subpixel' (#5447).
+  boundary when using ``find_bounaries`` with mode='subpixel' (#5447)
 - Fix return dtype of ``_label2rgb_avg`` function.
 - Ensure ``skimage.color.separate_stains`` does not return negative values.
 - Prevent integer overflow in ``EllipseModel``.
@@ -184,6 +184,7 @@ Bugfixes
 - Fixed NaN issue in ``skimage.filters.threshold_otsu``.
 - Fix ``skimage.feature.blob_dog`` docstring example and normalization.
 - Fix uint8 overflow in ``skimage.exposure.adjust_gamma``.
+- Work with pooch 1.5.0 for fetching data (#5529).
 
 
 Deprecations
@@ -222,7 +223,9 @@ Completed deprecations from prior releases
 - The deprecated ``skimage.util.pad`` function has been removed (use
   ``numpy.pad`` instead).
   been removed (use ``in_place`` instead).
-- The default boundary ``mode`` in ``skimage.filters.hessian`` is now
+- The default 
+
+``mode`` in ``skimage.filters.hessian`` is now
   ``'reflect'``.
 - The default boundary ``mode`` in ``skimage.filters.sato`` is now
   ``'reflect'``.

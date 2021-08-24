@@ -62,7 +62,7 @@ legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
-    from pooch.utils import file_hash
+    from pooch import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
@@ -92,8 +92,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(
-                "Algorithm '{}' not available in hashlib".format(alg))
+            raise ValueError(f"Algorithm '{alg}' not available in hashlib")
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
