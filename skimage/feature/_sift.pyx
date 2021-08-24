@@ -147,8 +147,8 @@ cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
                 if abs(center_val) < thresh:
                     continue
                 is_local_min = True
-                for n in range(26):
-                    val = center_ptr[neighbor_offsets[n]]
+                for offset in neighbor_offsets:
+                    val = center_ptr[offset]
                     if val <= center_val:
                         is_local_min = False
                         break
@@ -157,8 +157,8 @@ cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
                     is_local_max = False
                 else:
                     is_local_max = True
-                    for n in range(26):
-                        val = center_ptr[neighbor_offsets[n]]
+                    for offset in neighbor_offsets:
+                        val = center_ptr[offset]
                         if val >= center_val:
                             is_local_max = False
                             break
