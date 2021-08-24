@@ -239,7 +239,8 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     """
     if image0.ndim != image1.ndim:
         raise ValueError(f"NMI requires images of same number of dimensions. "
-                         f"Got {image0.ndim}D for `image0` and {image1.ndim}D for `image1`.")
+                         f"Got {image0.ndim}D for `image0` and "
+                         f"{image1.ndim}D for `image1`.")
     if image0.shape != image1.shape:
         max_shape = np.maximum(image0.shape, image1.shape)
         padded0 = _pad_to(image0, max_shape)
