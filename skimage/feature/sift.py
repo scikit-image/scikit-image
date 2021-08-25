@@ -642,6 +642,16 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 descriptor = np.minimum(np.floor(descriptor), 255)
                 self.descriptors[numbers[k], :] = descriptor
 
+    def _preprocess(self, image):
+        check_nD(image, 2)
+        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+
+        self._set_number_of_octaves(image.shape)
+        self.deltas = self._deltas(float_dtype)
+        return image
+
     def detect(self, image):
         """Detect the keypoints.
 
@@ -651,13 +661,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        check_nD(image, 2)
-        image = img_as_float(image)
-        float_dtype = _supported_float_type(image.dtype)
-        image = image.astype(float_dtype, copy=False)
-
-        self._set_number_of_octaves(image.shape)
-        self.deltas = self._deltas(float_dtype)
+        image = self._preprocess(image)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -681,13 +685,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        check_nD(image, 2)
-        image = img_as_float(image)
-        float_dtype = _supported_float_type(image.dtype)
-        image = image.astype(float_dtype, copy=False)
-
-        self._set_number_of_octaves(image.shape)
-        self.deltas = self._deltas(float_dtype)
+        image = self._preprocess(image)
 
         gaussian_scalespace = self._create_scalespace(image)
 
@@ -705,13 +703,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        check_nD(image, 2)
-        image = img_as_float(image)
-        float_dtype = _supported_float_type(image.dtype)
-        image = image.astype(float_dtype, copy=False)
-
-        self._set_number_of_octaves(image.shape)
-        self.deltas = self._deltas(float_dtype)
+        image = self._preprocess(image)
 
         gaussian_scalespace = self._create_scalespace(image)
 
