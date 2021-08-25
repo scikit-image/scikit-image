@@ -632,7 +632,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                   dist_r, dist_c, rc_bin_spacing)
 
                 # convert the histograms to a 1d descriptor
-                histograms = histograms.flatten()
+                histograms = histograms.reshape(-1)
                 # saturate the descriptor
                 histograms = np.minimum(histograms,
                                         0.2 * np.linalg.norm(histograms))
