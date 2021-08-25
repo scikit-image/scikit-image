@@ -54,7 +54,9 @@ holes_nb_4 = object_nb_4 - e4
 e8 = euler_number(SAMPLE, connectivity=2)
 object_nb_8 = label(SAMPLE, connectivity=2).max()
 holes_nb_8 = object_nb_8 - e8
-ax.set_title(f"Euler number for N4: {e4} ({object_nb_4} objects, {holes_nb_4} holes), \n for N8: {e8} ({object_nb_8} objects, {holes_nb_8} holes)")
+ax.set_title(f"Euler number for N4: {e4} ({object_nb_4} objects, {holes_nb_4} "
+             f"holes), \n for N8: {e8} ({object_nb_8} objects, "
+             f"{holes_nb_8} holes)")
 plt.show()
 
 ######################################################################
