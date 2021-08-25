@@ -272,7 +272,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(image,
-                         (1 / self.delta_min) * math.sqrt(
+                         self.upsampling * math.sqrt(
                              self.sigma_min ** 2 - self.sigma_in ** 2),
                          mode='reflect')
 
