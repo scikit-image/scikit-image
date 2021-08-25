@@ -54,7 +54,7 @@ holes_nb_4 = object_nb_4 - e4
 e8 = euler_number(SAMPLE, connectivity=2)
 object_nb_8 = label(SAMPLE, connectivity=2).max()
 holes_nb_8 = object_nb_8 - e8
-ax.set_title('Euler number for N4: {} ({} objects, {} holes), \n for N8: {} ({} objects, {} holes)'.format(e4, object_nb_4, holes_nb_4, e8, object_nb_8, holes_nb_8))
+ax.set_title(f"Euler number for N4: {e4} ({object_nb_4} objects, {holes_nb_4} holes), \n for N8: {e8} ({object_nb_8} objects, {holes_nb_8} holes)")
 plt.show()
 
 ######################################################################
@@ -130,7 +130,7 @@ def display_voxels(volume):
     # correspond to 1 and 3 connectivity, respectively
     e26 = euler_number(volume, connectivity=3)
     e6 = euler_number(volume, connectivity=1)
-    plt.title('Euler number for N26: {}, for N6: {}'.format(e26, e6))
+    plt.title(f"Euler number for N26: {e26}, for N6: {e6}")
     plt.show()
 
 

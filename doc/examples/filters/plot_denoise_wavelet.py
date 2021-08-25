@@ -77,11 +77,11 @@ psnr_visushrink4 = peak_signal_noise_ratio(original, im_visushrink4)
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')
-ax[0, 0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
+ax[0, 0].set_title(f"Noisy\nPSNR={psnr_noisy:0.4g}")
 ax[0, 1].imshow(im_bayes)
 ax[0, 1].axis('off')
 ax[0, 1].set_title(
-    'Wavelet denoising\n(BayesShrink)\nPSNR={:0.4g}'.format(psnr_bayes))
+    f"Wavelet denoising\n(BayesShrink)\nPSNR={psnr_bayes:0.4g}")
 ax[0, 2].imshow(im_visushrink)
 ax[0, 2].axis('off')
 ax[0, 2].set_title(

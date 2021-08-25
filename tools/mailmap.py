@@ -25,7 +25,7 @@ def _clean_email(email):
     name, domain = email.split('@')
     name = name.split('+', 1)[0]
 
-    return '{}@{}'.format(name, domain).lower()
+    return f"{name.lower()}@{domain.lower()}"
 
 
 call("rm -f .mailmap")

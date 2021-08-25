@@ -138,8 +138,7 @@ class deprecate_kwarg:
             self.warning_msg = ("`{old_arg}` is a deprecated argument name "
                                 "for `{func_name}`. ")
             if removed_version is not None:
-                self.warning_msg += ("It will be removed in version {}. "
-                                     .format(removed_version))
+                self.warning_msg += (f"It will be removed in version {removed_version}.")
             self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
@@ -418,8 +417,8 @@ def safe_as_int(val, atol=1e-3):
     try:
         np.testing.assert_allclose(mod, 0, atol=atol)
     except AssertionError:
-        raise ValueError("Integer argument required but received "
-                         "{0}, check inputs.".format(val))
+        raise ValueError(f"Integer argument required but received "
+                         f"{val}, check inputs.")
 
     return np.round(val).astype(np.int64)
 
@@ -605,10 +604,10 @@ def _to_ndimage_mode(mode):
                                  wrap='wrap')
     if mode not in mode_translation_dict:
         raise ValueError(
-            ("Unknown mode: '{}', or cannot translate mode. The "
+            (f"Unknown mode: '{mode}', or cannot translate mode. The "
              "mode should be one of 'constant', 'edge', 'symmetric', "
              "'reflect', or 'wrap'. See the documentation of numpy.pad for"
-             "more info.").format(mode))
+             "more info."))
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 
