@@ -274,6 +274,8 @@ class CircleModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
+        # Adapted from a spherical estimator covered in a blog post by Charles Jeckel:
+        # https://jekel.me/2015/Least-Squares-Sphere-Fit/
         A = np.append(data * 2, np.ones((data.shape[0], 1), dtype=float_type), axis=1)
         f = np.sum(data ** 2, axis=1)
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
