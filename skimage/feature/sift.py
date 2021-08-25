@@ -440,15 +440,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         keypoint_octave = []
         orientations = np.zeros_like(sigmas_oct, dtype=self.float_dtype)
         key_count = 0
-        for o in range(self.n_octaves):
+        for o, (octave, delta) in enumerate(zip(gaussian_scalespace,
+                                                self.deltas)):
             in_oct = octaves == o
             positions = positions_oct[in_oct]
             scales = scales_oct[in_oct]
             sigmas = sigmas_oct[in_oct]
-            octave = gaussian_scalespace[o]
 
             gradient_space.append(np.gradient(octave))
-            delta = self.deltas[o]
             oshape = octave.shape[:2]
             # convert to octave's dimensions
             yx = positions / delta
@@ -557,7 +556,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         bins = np.arange(1, self.n_ori + 1, dtype=self.float_dtype)
 
         key_numbers = np.arange(n_key)
-        for o in range(self.n_octaves):
+        for o, (gradient, delta) in enumerate(zip(gradient_space, self.deltas)):
             in_oct = self.octaves == o
             if not np.any(in_oct):
                 continue
@@ -566,9 +565,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             sigmas = self.sigmas[in_oct]
             orientations = self.orientations[in_oct]
             numbers = key_numbers[in_oct]
-            gradient = gradient_space[o]
 
-            delta = self.deltas[o]
             dim = gradient[0].shape[:2]
             center_pos = positions / delta
             sigma = sigmas / delta
