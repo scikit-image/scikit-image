@@ -92,7 +92,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(f'Algorithm '{alg}' not available in hashlib')
+            raise ValueError(f'Algorithm \'{alg}\' not available in hashlib')
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
