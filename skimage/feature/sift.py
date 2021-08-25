@@ -141,8 +141,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         delta_min : float
             The sampling distance of the first octave. It's final value is
             1/upsampling.
-        deltas : (n_octaves, ) array
-            The sampling distances of all octaves.
+        float_dtype : type
+            The datatype of the image.
         scalespace_sigmas : (n_octaves, n_scales + 3) array
             The sigma value of all scales in all octaves.
         keypoints : (N, 2) array
@@ -238,7 +238,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.n_hist = n_hist
         self.n_ori = n_ori
         self.delta_min = 1 / upsampling
-        self.deltas = self._deltas()
+        self.float_dtype = None
         self.scalespace_sigmas = None
         self.keypoints = None
         self.positions = None
@@ -248,6 +248,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.octaves = None
         self.descriptors = None
 
+    @property
+    def deltas(self):
+        """The sampling distances of all octaves"""
+        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves),
+                                           dtype=self.float_dtype)
+        return deltas
+
     def _set_number_of_octaves(self, image_shape):
         size_min = 12  # minimum size of last octave
         s0 = min(image_shape) * self.upsampling
@@ -255,18 +262,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         if max_octaves < self.n_octaves:
             self.n_octaves = max_octaves
 
-    def _deltas(self, dtype=float):
-        deltas = self.delta_min * np.power(2, np.arange(self.n_octaves),
-                                           dtype=dtype)
-        return deltas
-
     def _create_scalespace(self, image):
         """Source: "Anatomy of the SIFT Method" Alg. 1
         Construction of the scalespace by gradually blurring (scales) and
         downscaling (octaves) the image.
         """
         scalespace = []
-        dtype = image.dtype
         if self.upsampling > 1:
             image = rescale(image, self.upsampling, order=1)
 
@@ -298,8 +299,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         for o in range(self.n_octaves):
             # Temporarily put scales axis first so octave[i] is C-contiguous
             # (this makes Gaussian filtering faster).
-            octave = np.empty((self.n_scales + 3,) + image.shape, dtype=dtype,
-                              order='C')
+            octave = np.empty((self.n_scales + 3,) + image.shape,
+                              dtype=self.float_dtype, order='C')
             octave[0] = image
             for s in range(1, self.n_scales + 3):
                 # blur new scale assuming sigma of the last one
@@ -329,7 +330,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         extrema_scales = []
         extrema_sigmas = []
         threshold = self.c_dog * 0.8
-        dtype = dogspace[0].dtype
         for o, (octave, delta) in enumerate(zip(dogspace, self.deltas)):
             # find extrema
             keys = _local_max(np.ascontiguousarray(octave), threshold)
@@ -400,7 +400,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             keys = keys[contrast_filter][edge_filter]
             off = off[contrast_filter][edge_filter]
-            yx = ((keys[:, :2] + off[:, :2]) * delta).astype(dtype)
+            yx = ((keys[:, :2] + off[:, :2]) * delta).astype(self.float_dtype)
 
             sigmas = self.scalespace_sigmas[o, keys[:, 2]] * np.power(
                 sigmaratio, off[:, 2])
@@ -438,8 +438,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         keypoint_indices = []
         keypoint_angles = []
         keypoint_octave = []
-        float_dtype = gaussian_scalespace[0].dtype
-        orientations = np.zeros_like(sigmas_oct, dtype=float_dtype)
+        orientations = np.zeros_like(sigmas_oct, dtype=self.float_dtype)
         key_count = 0
         for o in range(self.n_octaves):
             in_oct = octaves == o
@@ -457,12 +456,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
             # dimensions of the patch
             radius = 3 * self.lambda_ori * sigma
-            p_min = np.maximum(0, yx - radius[:, np.newaxis] + 0.5).astype(int)
+            p_min = np.maximum(0,
+                               yx - radius[:, np.newaxis] + 0.5).astype(np.int)
             p_max = np.minimum(yx + radius[:, np.newaxis] + 0.5,
-                               (oshape[0] - 1, oshape[1] - 1)).astype(int)
+                               (oshape[0] - 1, oshape[1] - 1)).astype(np.int)
             # orientation histogram
-            hist = np.empty(self.n_bins, dtype=float_dtype)
-            avg_kernel = np.full((3,), 1 / 3, dtype=float_dtype)
+            hist = np.empty(self.n_bins, dtype=self.float_dtype)
+            avg_kernel = np.full((3,), 1 / 3, dtype=self.float_dtype)
             for k in range(len(yx)):
                 hist[:] = 0
 
@@ -473,8 +473,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                                    indexing='ij', sparse=True)
                 gradient_row = gradient_space[o][0][r, c, scales[k]]
                 gradient_col = gradient_space[o][1][r, c, scales[k]]
-                r = r.astype(float_dtype, copy=False)
-                c = c.astype(float_dtype, copy=False)
+                r = r.astype(self.float_dtype, copy=False)
+                c = c.astype(self.float_dtype, copy=False)
                 r -= yx[k, 0]
                 c -= yx[k, 1]
 
@@ -551,11 +551,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.descriptors = np.empty((n_key, self.n_hist ** 2 * self.n_ori),
                                     dtype=np.uint8)
 
-        float_dtype = gradient_space[0][0].dtype
         # indices of the histograms
-        hists = np.arange(1, self.n_hist + 1, dtype=float_dtype)
+        hists = np.arange(1, self.n_hist + 1, dtype=self.float_dtype)
         # indices of the bins
-        bins = np.arange(1, self.n_ori + 1, dtype=float_dtype)
+        bins = np.arange(1, self.n_ori + 1, dtype=self.float_dtype)
 
         key_numbers = np.arange(n_key)
         for o in range(self.n_octaves):
@@ -579,23 +578,25 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             radius_patch = math.sqrt(2) * radius
             p_min = np.asarray(
                 np.maximum(0, center_pos - radius_patch[:, np.newaxis] + 0.5),
-                dtype=int)
+                dtype=np.int)
             p_max = np.asarray(
                 np.minimum(center_pos + radius_patch[:, np.newaxis] + 0.5,
-                           (dim[0] - 1, dim[1] - 1)), dtype=int)
+                           (dim[0] - 1, dim[1] - 1)), dtype=np.int)
 
             for k in range(len(p_max)):
                 rad_k = radius[k]
                 ori = orientations[k]
                 histograms = np.zeros((self.n_hist, self.n_hist, self.n_ori),
-                                      dtype=float_dtype)
+                                      dtype=self.float_dtype)
                 # the patch
                 r, c = np.meshgrid(np.arange(p_min[k, 0], p_max[k, 0]),
                                    np.arange(p_min[k, 1], p_max[k, 1]),
                                    indexing='ij', sparse=True)
                 # normalized coordinates
-                r_norm = np.subtract(r, center_pos[k, 0], dtype=float_dtype)
-                c_norm = np.subtract(c, center_pos[k, 1], dtype=float_dtype)
+                r_norm = np.subtract(r, center_pos[k, 0],
+                                     dtype=self.float_dtype)
+                c_norm = np.subtract(c, center_pos[k, 1],
+                                     dtype=self.float_dtype)
                 r_norm, c_norm = self._rotate(r_norm, c_norm, ori)
 
                 # select coordinates and gradient values within the patch
@@ -645,11 +646,10 @@ class SIFT(FeatureDetector, DescriptorExtractor):
     def _preprocess(self, image):
         check_nD(image, 2)
         image = img_as_float(image)
-        float_dtype = _supported_float_type(image.dtype)
-        image = image.astype(float_dtype, copy=False)
+        self.float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(self.float_dtype, copy=False)
 
         self._set_number_of_octaves(image.shape)
-        self.deltas = self._deltas(float_dtype)
         return image
 
     def detect(self, image):
