@@ -162,11 +162,13 @@ time_subs_train = time() - t_start
 
 auc_subs_features = roc_auc_score(y_test, clf.predict_proba(X_test)[:, 1])
 
-summary=((f"Computing the full feature set took {time_full_feature_comp:.3f}s,"
-          f" plus {time_full_train:.3f}s training, for an AUC of "
-          f"{auc_full_features:.2f}. Computing the restricted feature set took"
-          f" {time_subs_feature_comp:.3f}s, plus {time_subs_train:.3f}s "
-          f"training, for an AUC of {auc_subs_features:.2f}."))
+summary = ((f"Computing the full feature set took "
+            f"{time_full_feature_comp:.3f}s, "
+            f"plus {time_full_train:.3f}s training, "
+            f"for an AUC of {auc_full_features:.2f}. "
+            f"Computing the restricted feature set took "
+            f"{time_subs_feature_comp:.3f}s, plus {time_subs_train:.3f}s "
+            f"training, for an AUC of {auc_subs_features:.2f}."))
 
 print(summary)
 plt.show()
