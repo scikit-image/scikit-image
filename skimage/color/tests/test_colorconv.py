@@ -392,13 +392,13 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = f"color/tests/data/lab_array_{I}_{obs}.npy"
+                fname = f'color/tests/data/lab_array_{I}_{obs}.npy'
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab_array_I_obs,
                                           xyz2lab(self.xyz_array, I, obs),
                                           decimal=2)
         for I in ["d75", "e"]:
-            fname = f"color/tests/data/lab_array_{I}_2.npy"
+            fname = f'color/tests/data/lab_array_{I}_2.npy'
             lab_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(lab_array_I_obs,
                                       xyz2lab(self.xyz_array, I, "2"),
@@ -428,12 +428,12 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = f"color/tests/data/lab_array_{I}_{obs}.npy"
+                fname = f'color/tests/data/lab_array_{I}_{obs}.npy'
                 lab_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["d75", "e"]:
-            fname = f"color/tests/data/lab_array_{I}_2.npy"
+            fname = f'color/tests/data/lab_array_{I}_2.npy'
             lab_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(lab2xyz(lab_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
@@ -519,13 +519,13 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = f"color/tests/data/luv_array_{I}_{obs}.npy"
+                fname = f'color/tests/data/luv_array_{I}_{obs}.npy'
                 luv_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(luv_array_I_obs,
                                           xyz2luv(self.xyz_array, I, obs),
                                           decimal=2)
         for I in ["d75", "e"]:
-            fname = f"color/tests/data/luv_array_{I}_2.npy"
+            fname = f'color/tests/data/luv_array_{I}_2.npy'
             luv_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(luv_array_I_obs,
                                       xyz2luv(self.xyz_array, I, "2"),
@@ -555,12 +555,12 @@ class TestColorconv():
             I = I.lower()
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
-                fname = f"color/tests/data/luv_array_{I}_{obs}.npy"
+                fname = f'color/tests/data/luv_array_{I}_{obs}.npy'
                 luv_array_I_obs = np.load(fetch(fname))
                 assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, obs),
                                           self.xyz_array, decimal=3)
         for I in ["d75", "e"]:
-            fname = f"color/tests/data/luv_array_{I}_2.npy"
+            fname = f'color/tests/data/luv_array_{I}_2.npy'
             luv_array_I_obs = np.load(fetch(fname))
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)

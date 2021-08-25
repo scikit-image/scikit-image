@@ -493,7 +493,7 @@ class ApiDocWriter(object):
             elif len(module_name) == 2:
                 module_name = module_name[1]
                 prefix = "\n  -"
-            w(f"{prefix} `{module_name} <{os.path.join(f)}.html>`__\n")
+            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
         w('\n')
 
         subtitle = "Submodule Contents"

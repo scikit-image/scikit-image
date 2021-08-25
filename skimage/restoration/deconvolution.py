@@ -255,9 +255,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         for s in ('max', 'min'):
             if (s + '_iter') in user_params:
                 warning_msg = (
-                    f"`{s}_iter` is a deprecated key for `user_params`."
-                    "It will be removed in version 1.0. "
-                    f"Use `{s}_num_iter` instead."
+                    f'`{s}_iter` is a deprecated key for `user_params`.'
+                    f'It will be removed in version 1.0. '
+                    f'Use `{s}_num_iter` instead.'
                 )
                 warnings.warn(warning_msg, FutureWarning)
                 user_params[s + '_num_iter'] = user_params.pop(s + '_iter')

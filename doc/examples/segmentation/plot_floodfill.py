@@ -98,7 +98,7 @@ ax[0, 0].axis('off')
 for i in range(8):
     m, n = np.unravel_index(i + 1, (3, 3))
     ax[m, n].imshow(output[i], cmap=plt.cm.gray)
-    ax[m, n].set_title(f"Tolerance {str(5 + 20 * i)}")
+    ax[m, n].set_title(f'Tolerance {5 + 20 * i}')
     ax[m, n].axis('off')
     ax[m, n].plot(0, 0, 'bo')  # seed point
 

@@ -393,7 +393,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     # Add sphinx roles to the examples, otherwise docutils
     # cannot compile the ReST for the notebook
     sphinx_roles = PythonDomain.roles.keys()
-    preamble = '\n'.join(f".. role:: py:{role}(literal)\n"
+    preamble = '\n'.join(f'.. role:: py:{role}(literal)\n'
                          for role in sphinx_roles)
 
     # Grab all references to inject them in cells where needed
@@ -437,7 +437,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
             # Remove reference links until we can figure out a better way to
             # preserve them
             for (reference, ref_id) in references:
-                ref_tag = f"[{ref_id}]_"
+                ref_tag = f'[{ref_id}]_'
                 if ref_tag in content:
                     content = content.replace(ref_tag, ref_tag[:-1])
 

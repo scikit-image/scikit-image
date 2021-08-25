@@ -62,7 +62,7 @@ ax[0].set_title("Original Image", fontsize=12)
 
 ax[1].imshow(cv[0], cmap="gray")
 ax[1].set_axis_off()
-title = f"Chan-Vese segmentation - {len(cv[2])} iterations"
+title = f'Chan-Vese segmentation - {len(cv[2])} iterations'
 ax[1].set_title(title, fontsize=12)
 
 ax[2].imshow(cv[1], cmap="gray")

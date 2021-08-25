@@ -267,8 +267,8 @@ class RegionProperties:
             name = func.__name__
             if hasattr(self, name):
                 msg = (
-                    f"Extra property '{name}' is shadowed by existing "
-                    "property and will be inaccessible. Consider renaming it."
+                    f'Extra property \'{name}\' is shadowed by existing '
+                    f'property and will be inaccessible. Consider renaming it.'
                 )
                 warn(msg)
         self._extra_properties = {
@@ -292,18 +292,18 @@ class RegionProperties:
                         return func(self.image, self.image_intensity)
                 else:
                     raise AttributeError(
-                        f"intensity image required to calculate {attr}"
+                        f'intensity image required to calculate {attr}'
                     )
             elif n_args == 1:
                 return func(self.image)
             else:
                 raise AttributeError(
-                    "Custom regionprop function's number of arguments must be 1 or 2"
-                    f"but {attr} takes {n_args} arguments."
+                    f'Custom regionprop function\'s number of arguments must be 1 or 2'
+                    f'but {attr} takes {n_args} arguments.'
                 )
         else:
             raise AttributeError(
-                f"'{type(self)}' object has no attribute '{attr}'"
+                f'\'{type(self)}\' object has no attribute \'{attr}\''
             )
 
     @property

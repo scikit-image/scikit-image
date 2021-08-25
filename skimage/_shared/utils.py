@@ -55,12 +55,12 @@ class change_default_value:
 
         if self.warning_msg is None:
             self.warning_msg = (
-                f"The new recommended value for {self.arg_name} is "
-                f"{self.new_value}. Until version {self.changed_version}, "
-                f"the default {self.arg_name} value is {old_value}. "
-                f"From version {self.changed_version}, the {self.arg_name} "
-                f"default value will be {self.new_value}. To avoid "
-                f"this warning, please explicitly set {self.arg_name} value.")
+                f'The new recommended value for {self.arg_name} is '
+                f'{self.new_value}. Until version {self.changed_version}, '
+                f'the default {self.arg_name} value is {old_value}. '
+                f'From version {self.changed_version}, the {self.arg_name} '
+                f'default value will be {self.new_value}. To avoid '
+                f'this warning, please explicitly set {self.arg_name} value.')
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -96,13 +96,13 @@ class remove_arg:
         parameters = inspect.signature(func).parameters
         arg_idx = list(parameters.keys()).index(self.arg_name)
         warning_msg = (
-            f"{self.arg_name} argument is deprecated and will be removed "
-            f"in version {self.changed_version}. To avoid this warning, "
-            f"please do not use the {self.arg_name} argument. Please "
-            f"see {func.__name__} documentation for more details.")
+            f'{self.arg_name} argument is deprecated and will be removed '
+            f'in version {self.changed_version}. To avoid this warning, '
+            f'please do not use the {self.arg_name} argument. Please '
+            f'see {func.__name__} documentation for more details.')
 
         if self.help_msg is not None:
-            warning_msg += f" {self.help_msg}"
+            warning_msg += f' {self.help_msg}'
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -138,8 +138,8 @@ class deprecate_kwarg:
             self.warning_msg = ("`{old_arg}` is a deprecated argument name "
                                 "for `{func_name}`. ")
             if removed_version is not None:
-                self.warning_msg += (f"It will be removed in "
-                                     f"version {removed_version}.")
+                self.warning_msg += (f'It will be removed in '
+                                     f'version {removed_version}.')
             self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
@@ -418,8 +418,8 @@ def safe_as_int(val, atol=1e-3):
     try:
         np.testing.assert_allclose(mod, 0, atol=atol)
     except AssertionError:
-        raise ValueError(f"Integer argument required but received "
-                         f"{val}, check inputs.")
+        raise ValueError(f'Integer argument required but received '
+                         f'{val}, check inputs.')
 
     return np.round(val).astype(np.int64)
 
@@ -605,10 +605,10 @@ def _to_ndimage_mode(mode):
                                  wrap='wrap')
     if mode not in mode_translation_dict:
         raise ValueError(
-            (f"Unknown mode: '{mode}', or cannot translate mode. The "
-             "mode should be one of 'constant', 'edge', 'symmetric', "
-             "'reflect', or 'wrap'. See the documentation of numpy.pad for"
-             "more info."))
+            (f'Unknown mode: \'{mode}\', or cannot translate mode. The '
+             f'mode should be one of \'constant\', \'edge\', \'symmetric\', '
+             f'\'reflect\', or \'wrap\'. See the documentation of numpy.pad for'
+             f'more info.'))
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 

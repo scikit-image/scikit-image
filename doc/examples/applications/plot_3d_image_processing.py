@@ -53,9 +53,9 @@ from skimage.data import cells3d
 
 data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
-print(f"shape: {data.shape}")
-print(f"dtype: {data.dtype}")
-print(f"range: ({data.min()}, {data.max()})")
+print(f'shape: {data.shape}')
+print(f'dtype: {data.dtype}')
+print(f'range: ({data.min()}, {data.max()})')
 
 # Report spacing from microscope
 original_spacing = np.array([0.2900000, 0.0650000, 0.0650000])
@@ -66,9 +66,9 @@ rescaled_spacing = original_spacing * [1, 4, 4]
 # Normalize spacing so that pixels are a distance of 1 apart
 spacing = rescaled_spacing / rescaled_spacing[2]
 
-print(f"microscope spacing: {original_spacing}\n")
-print(f"rescaled spacing: {rescaled_spacing} (after downsampling)\n")
-print(f"normalized spacing: {spacing}\n")
+print(f'microscope spacing: {original_spacing}\n')
+print(f'rescaled spacing: {rescaled_spacing} (after downsampling)\n')
+print(f'normalized spacing: {spacing}\n')
 
 #####################################################################
 # Let us try and visualize the (3D) image with `io.imshow`.
@@ -204,7 +204,7 @@ def explore_slices(data, cmap="gray"):
 
         ax_3D = fig.add_subplot(133, projection="3d")
 
-        show_plane(ax, data[plane], title=f"Plane {plane}", cmap=cmap)
+        show_plane(ax, data[plane], title=f'Plane {plane}', cmap=cmap)
         slice_in_3D(ax_3D, plane)
 
         plt.show()

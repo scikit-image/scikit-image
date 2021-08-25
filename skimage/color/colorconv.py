@@ -136,8 +136,8 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     arr = np.asanyarray(arr)
 
     if arr.shape[channel_axis] != 3:
-        msg = (f"the input array must have size 3 along `channel_axis`, "
-               f"got {arr.shape}")
+        msg = (f'the input array must have size 3 along `channel_axis`, '
+               f'got {arr.shape}')
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -199,8 +199,8 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     channel_axis = channel_axis % arr.ndim
 
     if arr.shape[channel_axis] != 4:
-        msg = (f"the input array must have size 4 along `channel_axis`, "
-               f"got {arr.shape}")
+        msg = (f'the input array must have size 4 along `channel_axis`, '
+               f'got {arr.shape}')
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -535,8 +535,8 @@ def get_xyz_coords(illuminant, observer, dtype=float):
     try:
         return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
-        raise ValueError(f"Unknown illuminant/observer combination"
-                         f"('{illuminant}', '{observer}')")
+        raise ValueError(f'Unknown illuminant/observer combination'
+                         f'(`{illuminant}`, `{observer}`)')
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -911,7 +911,7 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         alpha = alpha_max
 
     if not np.can_cast(alpha, arr.dtype):
-        warn(f"alpha can't be safely cast to image dtype {arr.dtype.name}",
+        warn(f'alpha can\'t be safely cast to image dtype {arr.dtype.name}',
              stacklevel=2)
     if np.isscalar(alpha):
         alpha = np.full(arr.shape, alpha, dtype=arr.dtype)

@@ -134,8 +134,8 @@ def _scale(a, n, m, copy=True):
         else:
             dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
-        warn(f"Downcasting {a.dtype} to {dtype} without scaling because max "
-             f"value {a.max()} fits in {dtype}",
+        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
+             f'value {a.max()} fits in {dtype}',
              stacklevel=3)
         return a.astype(_dtype_bits(kind, m))
     elif n == m:

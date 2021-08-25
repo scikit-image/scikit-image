@@ -184,8 +184,8 @@ def _pad_to(arr, shape):
     array([[1, 0, 0]])
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
-        raise ValueError(f"Target shape {shape} cannot be smaller than input"
-                         f"shape {arr.shape} along any axis.")
+        raise ValueError(f'Target shape {shape} cannot be smaller than input'
+                         f'shape {arr.shape} along any axis.')
     padding = [(0, s-i) for s, i in zip(shape, arr.shape)]
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
@@ -238,9 +238,9 @@ def normalized_mutual_information(image0, image1, *, bins=100):
            :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     if image0.ndim != image1.ndim:
-        raise ValueError(f"NMI requires images of same number of dimensions. "
-                         f"Got {image0.ndim}D for `image0` and "
-                         f"{image1.ndim}D for `image1`.")
+        raise ValueError(f'NMI requires images of same number of dimensions. '
+                         f'Got {image0.ndim}D for `image0` and '
+                         f'{image1.ndim}D for `image1`.')
     if image0.shape != image1.shape:
         max_shape = np.maximum(image0.shape, image1.shape)
         padded0 = _pad_to(image0, max_shape)

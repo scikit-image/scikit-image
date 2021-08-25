@@ -141,14 +141,14 @@ from packaging.version import parse
 v = parse(release)
 if v.release is None:
     raise ValueError(
-        f"Ill-formed version: {version!r}. Version should follow "
-        f"PEP440")
+        f'Ill-formed version: {version!r}. Version should follow '
+        f'PEP440')
 
 if v.is_devrelease:
     binder_branch = 'main'
 else:
     major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
+    binder_branch = f'v{major}.{minor}.x'
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 import plotly.io as pio
@@ -381,7 +381,7 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
+_python_version_str = f'{sys.version_info.major}.{sys.version_info.minor}'
 _python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
@@ -441,7 +441,7 @@ def linkcode_resolve(domain, info):
         linespec = ""
     else:
         stop_line = start_line + len(source) - 1
-        linespec = f"#L{start_line}-L{stop_line}"
+        linespec = f'#L{start_line}-L{stop_line}'
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
