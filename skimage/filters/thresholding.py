@@ -1181,6 +1181,10 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
         Histogram from which to determine the threshold, and optionally a
         corresponding array of bin center intensities.
         An alternative use of this function is to pass it only hist.
+        Note that if no hist is given, this function will make use of
+        `skimage.exposure.histogram`, which behaves differently than
+        `np.histogram`. While both allowed, use the former for consistent
+        behaviour.
 
     Returns
     -------
@@ -1222,21 +1226,13 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
     """
-
     if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
+        raise ValueError("Either image or hist must be provided.")
 
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
             "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
-
-    # Check if the image has more than one intensity value; if not, return that
-    # value
-    if image is not None:
-        first_pixel = image.ravel()[0]
-        if np.all(image == first_pixel):
-            return first_pixel
 
     # calculating the histogram and the probability of each gray level.
     if hist is not None:
@@ -1250,6 +1246,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
             image.ravel(), nbins, source_range='image', normalize=True)
     prob = prob.astype('float32')
     nvalues = np.count_nonzero(prob)
+
     if nvalues < classes:
         msg = ("The input image has only {} different values. "
                "It can not be thresholded in {} classes")

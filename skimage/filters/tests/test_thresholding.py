@@ -730,3 +730,22 @@ def test_multiotsu_lut():
             result = _get_multiotsu_thresh_indices(prob, classes - 1)
 
             assert np.array_equal(result_lut, result)
+
+
+def test_multiotsu_missing_img_and_hist():
+    with pytest.raises(ValueError):
+        threshold_multiotsu()
+
+
+def test_multiotsu_hist_parameter():
+    for classes in [2, 3, 4]:
+        for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+            img = getattr(data, name)()
+            sk_hist = histogram(img, nbins=256)
+            np_hist = np.histogram(img, bins=256)
+            #
+            thresh_img = threshold_multiotsu(img, classes)
+            thresh_sk_hist = threshold_multiotsu(classes=classes, hist=sk_hist)
+            thresh_np_hist = threshold_multiotsu(classes=classes, hist=np_hist)
+            assert np.allclose(thresh_img, thresh_sk_hist)
+            assert not np.allclose(thresh_img, thresh_np_hist)
