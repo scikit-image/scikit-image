@@ -240,7 +240,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
-    threshold : float or None, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
         intensities. If `threshold_rel` is also specified, whichever threshold
@@ -363,7 +363,6 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
         (gaussian_images[i] - gaussian_images[i + 1]) * sf for i in range(k)
     ]
 
-
     image_cube = np.stack(dog_images, axis=-1)
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
@@ -399,7 +398,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
 
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
-             overlap=.5, log_scale=False, *, exclude_border=False):
+             overlap=.5, log_scale=False, *, threshold_rel=None,
+             exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
@@ -424,10 +424,11 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     num_sigma : int, optional
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
-    threshold : float, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
-        than thresh are ignored. Reduce this to detect blobs with less
-        intensities.
+        than `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities. If `threshold_rel` is also specified, whichever threshold
+        is larger will be used. If None, `threshold_rel` is used instead.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -435,6 +436,12 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
+        stack of Laplacian of Gaussian (LoG) images computed internally. This
+        should have a value between 0 and 1. If None, `threshold` is used
+        instead.
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -528,9 +535,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     local_maxima = peak_local_max(
         image_cube,
         threshold_abs=threshold,
-        footprint=np.ones((3,) * (image.ndim + 1)),
-        threshold_rel=0.0,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
+        footprint=np.ones((3,) * (image.ndim + 1)),
     )
 
     # Catch no peaks
@@ -557,7 +564,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
 
 def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
-             overlap=.5, log_scale=False):
+             overlap=.5, log_scale=False, *, threshold_rel=None):
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Determinant of Hessian method [1]_. For each blob
@@ -578,9 +585,11 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     num_sigma : int, optional
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
-    threshold : float, optional.
+    threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
-        than thresh are ignored. Reduce this to detect less prominent blobs.
+        than `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities. If `threshold_rel` is also specified, whichever threshold
+        is larger will be used. If None, `threshold_rel` is used instead.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -588,6 +597,12 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
+        stack of determinant-of-hessian (DoH) images computed internally. This
+        should have a value between 0 and 1. If None, `threshold` is used
+        instead.
 
     Returns
     -------
@@ -655,10 +670,11 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
     image_cube = np.dstack(hessian_images)
 
-    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3,) * image_cube.ndim),
-                                  threshold_rel=0.0,
-                                  exclude_border=False)
+    local_maxima = peak_local_max(image_cube,
+                                  threshold_abs=threshold,
+                                  threshold_rel=threshold_rel,
+                                  exclude_border=False,
+                                  footprint=np.ones((3,) * image_cube.ndim))
 
     # Catch no peaks
     if local_maxima.size == 0:
