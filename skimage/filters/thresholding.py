@@ -1266,4 +1266,3 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     thresh = bin_centers[thresh_idx]
 
     return thresh
-
