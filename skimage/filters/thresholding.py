@@ -1159,8 +1159,9 @@ def apply_hysteresis_threshold(image, low, high):
     return thresholded
 
 
-def threshold_multiotsu(image, classes=3, nbins=256):
-    r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
+def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
+    r"""Generate `classes`-1 threshold values to divide gray levels in `image`,
+    following Otsu's method for multiple classes.
 
     The threshold values are chosen to maximize the total sum of pairwise
     variances between the thresholded graylevel classes. See Notes and [1]_
@@ -1176,6 +1177,10 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     nbins : int, optional
         Number of bins used to calculate the histogram. This value is ignored
         for integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
 
     Returns
     -------
@@ -1216,26 +1221,39 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> thresholds = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
-
     """
 
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
-        warn(f'threshold_multiotsu is expected to work correctly only for '
-             f'grayscale images; image shape {image.shape} looks like '
-             f'that of an RGB image.')
+    if image is None and hist is None:
+        raise Exception("Either image or hist must be provided.")
+
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+            "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
+
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
 
     # calculating the histogram and the probability of each gray level.
-    prob, bin_centers = histogram(image.ravel(),
-                                  nbins=nbins,
-                                  source_range='image',
-                                  normalize=True)
+    if hist is not None:
+        if isinstance(hist, (tuple, list)):
+            prob, bin_centers = hist
+        else:
+            prob = hist
+            bin_centers = np.arange(prob.size)
+    else:
+        prob, bin_centers = histogram(
+            image.ravel(), nbins, source_range='image', normalize=True)
     prob = prob.astype('float32')
-
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = (f'The input image has only {nvalues} different values. '
-               f'It cannot be thresholded in {classes} classes.')
-        raise ValueError(msg)
+        msg = ("The input image has only {} different values. "
+               "It can not be thresholded in {} classes")
+        raise ValueError(msg.format(nvalues, classes))
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:
@@ -1251,3 +1269,4 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
