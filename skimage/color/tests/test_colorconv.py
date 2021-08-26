@@ -872,7 +872,7 @@ def test_gray2rgba_alpha():
 
     # Warning about alpha cast
     alpha = 0.5
-    with expected_warnings(["alpha can't be safely cast to image dtype"]):
+    with expected_warnings(["alpha cannot be safely cast to image dtype"]):
         rgba = gray2rgba(img_u8, alpha)
         assert_equal(rgba[..., :3], gray2rgb(img_u8))
 
