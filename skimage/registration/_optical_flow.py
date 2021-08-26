@@ -222,7 +222,7 @@ def optical_flow_tvl1(reference_image, moving_image,
                      tol=tol, prefilter=prefilter)
 
     if np.dtype(dtype) != _supported_float_type(dtype):
-        msg = f'dtype={dtype} is not supported. Try \'float32\' or \'float64.\''
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
@@ -378,7 +378,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
                      prefilter=prefilter)
 
     if np.dtype(dtype) != _supported_float_type(dtype):
-        msg = f'dtype={dtype} is not supported. Try \'float32\' or \'float64.\''
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)

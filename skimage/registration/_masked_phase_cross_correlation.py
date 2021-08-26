@@ -149,7 +149,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
-        raise ValueError(f'Correlation mode \'{mode}\' is not valid.')
+        raise ValueError(f"Correlation mode '{mode}' is not valid.")
 
     fixed_image = np.asarray(arr1)
     moving_image = np.asarray(arr2)

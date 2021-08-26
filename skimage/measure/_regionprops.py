@@ -267,8 +267,8 @@ class RegionProperties:
             name = func.__name__
             if hasattr(self, name):
                 msg = (
-                    f'Extra property \'{name}\' is shadowed by existing '
-                    f'property and will be inaccessible. Consider renaming it.'
+                    f"Extra property '{name}' is shadowed by existing "
+                    f"property and will be inaccessible. Consider renaming it."
                 )
                 warn(msg)
         self._extra_properties = {
@@ -303,7 +303,7 @@ class RegionProperties:
                 )
         else:
             raise AttributeError(
-                f'\'{type(self)}\' object has no attribute \'{attr}\''
+                f"'{type(self)}' object has no attribute '{attr}'"
             )
 
     @property
