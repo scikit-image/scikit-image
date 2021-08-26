@@ -10,13 +10,7 @@ the hypothesis of rigid body motions.
 
 from matplotlib import pyplot as plt
 import numpy as np
-from skimage.data import moon
-from skimage.util import random_noise, img_as_float
-from skimage.transform import warp, EuclideanTransform, rotate
-from skimage.feature import corner_harris, corner_peaks
-from skimage.measure import ransac
-from skimage.filters import gaussian
-from skimage.metrics import peak_signal_noise_ratio
+from skimage import data, util, transform, feature, measure, filters, metrics
 
 
 def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
@@ -66,25 +60,25 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 ############################################################################
 # For this example, we generate a set of slightly tilted noisy images.
 
-img = moon()
+img = data.moon()
 
 angle_list = [0, 5, 6, -2, 3, -4]
 center_list = [(0, 0), (10, 10), (5, 12), (11, 21), (21, 17), (43, 15)]
 
-img_list = [rotate(img, angle=a, center=c)[40:240, 50:350]
+img_list = [transform.rotate(img, angle=a, center=c)[40:240, 50:350]
             for a, c in zip(angle_list, center_list)]
 ref_img = img_list[0].copy()
 
-img_list = [random_noise(gaussian(im, 1.1), var=5e-4, seed=seed)
+img_list = [util.random_noise(filters.gaussian(im, 1.1), var=5e-4, seed=seed)
             for seed, im in enumerate(img_list)]
 
-psnr_ref = peak_signal_noise_ratio(ref_img, img_list[0])
+psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
 # Reference points are detected over all images in the set.
 min_dist = 5
-corner_list = [corner_peaks(corner_harris(img), threshold_rel=0.001,
-                            min_distance=min_dist)
+corner_list = [feature.corner_peaks(
+    feature.corner_harris(img), threshold_rel=0.001, min_distance=min_dist)
                for img in img_list]
 
 ############################################################################
@@ -101,14 +95,15 @@ matching_corners = [match_locations(img0, img1, coords0, coords1, min_dist)
 # Once all the points are registred to the reference points, robust
 # relative affine transformations can be estimated using the RANSAC method.
 src = np.array(coords0)
-trfm_list = [ransac((dst, src), EuclideanTransform, min_samples=3,
-                    residual_threshold=2, max_trials=100)[0].params
+trfm_list = [measure.ransac((dst, src),
+                            transform.EuclideanTransform, min_samples=3,
+                            residual_threshold=2, max_trials=100)[0].params
              for dst in matching_corners]
 
 fig, ax_list = plt.subplots(6, 2, figsize=(4, 6), sharex=True, sharey=True)
 for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
     ax0.imshow(im, cmap="gray", vmin=0, vmax=1)
-    ax1.imshow(warp(im, trfm), cmap="gray", vmin=0, vmax=1)
+    ax1.imshow(transform.warp(im, trfm), cmap="gray", vmin=0, vmax=1)
 
     if idx == 0:
         ax0.set_title(f"Input (PSNR={psnr_ref:.2f})")
@@ -137,17 +132,19 @@ glob_trfm[:2, 2] = -margin, -margin
 # Now, the relative position of the other images in the global domain
 # are obtained by composing the global transformation with the
 # relative transformations:
-global_img_list = [warp(img, trfm.dot(glob_trfm), output_shape=out_shape,
-                        mode="constant", cval=np.nan)
+global_img_list = [transform.warp(img, trfm.dot(glob_trfm),
+                                  output_shape=out_shape,
+                                  mode="constant", cval=np.nan)
                    for img, trfm in zip(img_list, trfm_list)]
 
 all_nan_mask = np.all([np.isnan(img) for img in global_img_list], axis=0)
 global_img_list[0][all_nan_mask] = 1.
 
 composit_img = np.nanmean(global_img_list, 0)
-psnr_composit = peak_signal_noise_ratio(ref_img,
-                                        composit_img[margin:margin + height,
-                                                     margin:margin + width])
+psnr_composit = metrics.peak_signal_noise_ratio(
+    ref_img,
+    composit_img[margin:margin + height,
+                 margin:margin + width])
 
 fig, ax = plt.subplots(1, 1)
 
