@@ -298,7 +298,7 @@ class RegionProperties:
                 return func(self.image)
             else:
                 raise AttributeError(
-                    f'Custom regionprop function\'s number of arguments must be 1 or 2'
+                    f'Custom regionprop function\'s number of arguments must be 1 or 2, '
                     f'but {attr} takes {n_args} arguments.'
                 )
         else:
