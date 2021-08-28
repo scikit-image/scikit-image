@@ -251,7 +251,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
         ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
-        stack of difference-of-Gaussian (DoG) images computed internally. This
+        stack of Difference-of-Gaussian (DoG) images computed internally. This
         should have a value between 0 and 1. If None, `threshold` is used
         instead.
     exclude_border : tuple of ints, int, or False, optional
@@ -439,7 +439,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
         ``max(log_space) * threshold_rel``, where ``log_space`` refers to the
-        stack of Laplacian of Gaussian (LoG) images computed internally. This
+        stack of Laplacian-of-Gaussian (LoG) images computed internally. This
         should have a value between 0 and 1. If None, `threshold` is used
         instead.
     exclude_border : tuple of ints, int, or False, optional
@@ -600,7 +600,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
         ``max(doh_space) * threshold_rel``, where ``doh_space`` refers to the
-        stack of determinant-of-hessian (DoH) images computed internally. This
+        stack of Determinant-of-Hessian (DoH) images computed internally. This
         should have a value between 0 and 1. If None, `threshold` is used
         instead.
 
