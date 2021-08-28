@@ -250,9 +250,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
         fraction greater than `threshold`, the smaller blob is eliminated.
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
-        ``max(dog_space) * threshold_rel``. Where ``dog_space`` refers to the
+        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
         stack of difference-of-Gaussian (DoG) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold_abs` is used
+        should have a value between 0 and 1. If None, `threshold` is used
         instead.
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
