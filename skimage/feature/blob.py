@@ -438,7 +438,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         interpolation is used.
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
-        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
+        ``max(log_space) * threshold_rel``, where ``log_space`` refers to the
         stack of Laplacian of Gaussian (LoG) images computed internally. This
         should have a value between 0 and 1. If None, `threshold` is used
         instead.
@@ -599,7 +599,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
         interpolation is used.
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
-        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
+        ``max(doh_space) * threshold_rel``, where ``doh_space`` refers to the
         stack of determinant-of-hessian (DoH) images computed internally. This
         should have a value between 0 and 1. If None, `threshold` is used
         instead.
