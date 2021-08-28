@@ -92,7 +92,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(f"Algorithm '{alg}' not available in hashlib")
+            raise ValueError(f'Algorithm \'{alg}\' not available in hashlib')
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
@@ -457,9 +457,9 @@ def brick():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -524,9 +524,9 @@ def grass():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -572,9 +572,9 @@ def gravel():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid

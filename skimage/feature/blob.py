@@ -210,7 +210,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         return (0,) * (img_ndim + 1)
     else:
         raise ValueError(
-            f"Unsupported value ({exclude_border}) for exclude_border"
+            f'Unsupported value ({exclude_border}) for exclude_border'
         )
 
 
