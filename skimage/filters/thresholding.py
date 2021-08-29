@@ -248,7 +248,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     return thresh_image - offset
 
 
-def _validate_image_histogram(image, hist, nbins=None):
+def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     """Ensure that either image or hist were given, return valid histogram.
 
     If hist is given, image is ignored.
@@ -263,13 +263,18 @@ def _validate_image_histogram(image, hist, nbins=None):
     nbins : int, optional
         The number of bins with which to compute the histogram, if `hist` is
         None.
+    normalize : bool
+        If hist is not given, it will be computed by this function. This
+        parameter determines whether the computed histogram is normalized
+        (i.e. entries sum up to 1) or not.
 
     Returns
     -------
     counts : 1D array of float
         Each element is the number of pixels falling in each intensity bin.
     bin_centers : 1D array
-        Each element is the value corresponding to the center of each intensity bin.
+        Each element is the value corresponding to the center of each intensity
+        bin.
 
     Raises
     ------
@@ -284,7 +289,7 @@ def _validate_image_histogram(image, hist, nbins=None):
         else:
             counts = hist
             bin_centers = np.arange(counts.size)
-        
+
         if counts[0] == 0 or counts[-1] == 0:
             # Trim histogram from both ends by removing starting and
             # ending zeroes as in histogram(..., source_range="image")
@@ -294,7 +299,7 @@ def _validate_image_histogram(image, hist, nbins=None):
             counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
-                image.ravel(), nbins, source_range='image'
+                image.ravel(), nbins, source_range='image', normalize=normalize
             )
     return counts.astype(float), bin_centers
 
@@ -307,15 +312,16 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (N, M[, ..., P]) ndarray, optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     hist : array, or 2-tuple of arrays, optional
         Histogram from which to determine the threshold, and optionally a
-        corresponding array of bin center intensities.
-        An alternative use of this function is to pass it only hist.
+        corresponding array of bin center intensities. If no hist provided,
+        this function will compute it from the image.
+
 
     Returns
     -------
@@ -1167,9 +1173,12 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     variances between the thresholded graylevel classes. See Notes and [1]_
     for more details.
 
+    Either image or hist must be provided. If hist is provided, the actual
+    histogram of the image is ignored.
+
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (N, M[, ..., P]) ndarray, optional
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
@@ -1179,12 +1188,8 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
         for integer arrays.
     hist : array, or 2-tuple of arrays, optional
         Histogram from which to determine the threshold, and optionally a
-        corresponding array of bin center intensities.
-        An alternative use of this function is to pass it only hist.
-        Note that if no hist is given, this function will make use of
-        `skimage.exposure.histogram`, which behaves differently than
-        `np.histogram`. While both allowed, use the former for consistent
-        behaviour.
+        corresponding array of bin center intensities. If no hist provided,
+        this function will compute it from the image (see notes).
 
     Returns
     -------
@@ -1203,6 +1208,11 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     is :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
+
+    If no hist is given, this function will make use of
+    `skimage.exposure.histogram`, which behaves differently than
+    `np.histogram`. While both allowed, use the former for consistent
+    behaviour.
 
     The input image must be grayscale.
 
@@ -1226,30 +1236,20 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
     """
-    if image is None and hist is None:
-        raise ValueError("Either image or hist must be provided.")
-
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-        msg = "threshold_otsu is expected to work correctly only for " \
-            "grayscale images; image shape {0} looks like an RGB image"
+        msg = 'threshold_otsu is expected to work correctly only for ' \
+            'grayscale images; image shape {0} looks like an RGB image'
         warn(msg.format(image.shape))
 
     # calculating the histogram and the probability of each gray level.
-    if hist is not None:
-        if isinstance(hist, (tuple, list)):
-            prob, bin_centers = hist
-        else:
-            prob = hist
-            bin_centers = np.arange(prob.size)
-    else:
-        prob, bin_centers = histogram(
-            image.ravel(), nbins, source_range='image', normalize=True)
+    prob, bin_centers = _validate_image_histogram(image, hist, nbins,
+                                                  normalize=True)
     prob = prob.astype('float32')
+    
     nvalues = np.count_nonzero(prob)
-
     if nvalues < classes:
-        msg = ("The input image has only {} different values. "
-               "It can not be thresholded in {} classes")
+        msg = ('The input image has only {} different values. '
+               'It can not be thresholded in {} classes')
         raise ValueError(msg.format(nvalues, classes))
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
