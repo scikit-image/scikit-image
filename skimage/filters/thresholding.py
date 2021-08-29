@@ -911,7 +911,7 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def _mean_std(image, w):
+def _mean_std(image, w, *, mean_only=False):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation. This is
@@ -925,13 +925,16 @@ def _mean_std(image, w):
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
         integers (e.g. ``(1, 5, 5)``).
+    mean_only : bool, optional
+        Compute only the local mean.
 
     Returns
     -------
     m : ndarray of float, same shape as ``image``
         Local mean of the image.
-    s : ndarray of float, same shape as ``image``
-        Local standard deviation of the image.
+    s : ndarray of float or None, same shape as ``image``
+        Local standard deviation of the image. If `mean_only` is True, this
+        output will be None.
 
     References
     ----------
@@ -950,8 +953,6 @@ def _mean_std(image, w):
                     mode='reflect')
 
     integral = integral_image(padded)
-    padded *= padded
-    integral_sq = integral_image(padded)
 
     # Create lists of non-zero kernel indices and values
     kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
@@ -963,6 +964,11 @@ def _mean_std(image, w):
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)
     m /= total_window_size
+    if mean_only:
+        return m, None
+
+    padded *= padded
+    integral_sq = integral_image(padded)
     g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
                            kernel_values)
     g2 /= total_window_size
@@ -970,55 +976,6 @@ def _mean_std(image, w):
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
     return m, s
-
-
-def _only_mean(image, w):
-    """Return local mean of each pixel using a
-    neighborhood defined by a rectangular window size ``w``.
-    The algorithm uses integral images to speedup computation.
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    w : int, or iterable of int
-        Window size specified as a single odd integer (3, 5, 7, …),
-        or an iterable of length ``image.ndim`` containing only odd
-        integers (e.g. ``(1, 5, 5)``).
-    Returns
-    -------
-    m : ndarray of float, same shape as ``image``
-        Local mean of the image.
-    """
-
-    if not isinstance(w, Iterable):
-        w = (w,) * image.ndim
-    _validate_window_size(w)
-
-    pad_width = tuple((k // 2 + 1, k // 2) for k in w)
-    padded = np.pad(image.astype('float'), pad_width,
-                    mode='reflect')
-
-    integral = integral_image(padded)
-    # padded *= padded
-    # integral_sq = integral_image(padded)
-
-    # Create lists of non-zero kernel indices and values
-    kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
-    kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
-                     for indices in kernel_indices]
-
-    total_window_size = np.prod(w)
-    kernel_shape = tuple(_w + 1 for _w in w)
-    m = _correlate_sparse(integral, kernel_shape, kernel_indices,
-                          kernel_values)
-    m /= total_window_size
-    # g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
-    # kernel_values)
-    # g2 /= total_window_size
-    # Note: we use np.clip because g2 is not guaranteed to be greater than
-    # m*m when floating point error is considered
-    # s = np.sqrt(np.clip(g2 - m * m, 0, None))
-    return m  # ,s
 
 
 def threshold_singh(image, window_size=15, k=0.2, r=None):
@@ -1064,7 +1021,7 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
     >>> binary_image = image > t_singh
     """
 
-    m = _only_mean(image, window_size)
+    m, _ = _mean_std(image, window_size, mean_only=True)
     d = image - m
 
     return m * (1 + k * ((d / 1 - d) - 1))
