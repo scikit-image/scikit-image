@@ -1245,7 +1245,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     prob, bin_centers = _validate_image_histogram(image, hist, nbins,
                                                   normalize=True)
     prob = prob.astype('float32')
-    
+
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
         msg = ('The input image has only {} different values. '
