@@ -1248,9 +1248,9 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = ('The input image has only {} different values. '
-               'It can not be thresholded in {} classes')
-        raise ValueError(msg.format(nvalues, classes))
+        msg = (f'The input image has only {nvalues} different values. '
+               f'It cannot be thresholded in {classes} classes.')
+        raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:
