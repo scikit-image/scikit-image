@@ -1237,9 +1237,9 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     >>> regions_colorized = label2rgb(regions)
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
-             f'threshold_multiotsu is expected to work correctly only for '
-             f'grayscale images; image shape {image.shape} looks like '
-             f'that of an RGB image.')
+        warn(f'threshold_multiotsu is expected to work correctly only for '
+             f'grayscale images; image shape {image.shape} looks like that'
+             f'of an RGB image.')
 
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = _validate_image_histogram(image, hist, nbins,
