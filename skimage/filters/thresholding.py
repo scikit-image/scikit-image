@@ -979,19 +979,19 @@ def _mean_std(image, w, *, mean_only=False):
 
 
 def threshold_singh(image, window_size=15, k=0.2, r=None):
-  """Applies Singh local threshold to an array.
-  The threshold T is calculated for every pixel in the image using
-  the following formula:
-  T = m(x,y) * (1 + k * ((d(x,y) / 1 - d(x,y)) - 1))
-  where m(x,y) and d(x,y) are the local mean and the local deviation of
-  pixel (x,y) neighborhood defined by a rectangular window with size wxw
-  centered around the pixel. k is a configurable parameter
-  that weights the effect of standard deviation.
+    """Applies Singh local threshold to an array.
+    The threshold T is calculated for every pixel in the image using
+    the following formula:
+    T = m(x,y) * (1 + k * ((d(x,y) / 1 - d(x,y)) - 1))
+    where m(x,y) and d(x,y) are the local mean and the local deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size wxw
+    centered around the pixel. k is a configurable parameter
+    that weights the effect of standard deviation.
 
-  Parameters
-  ----------
-   image : ndarray
-        Input image.
+    Parameters
+    ----------
+    image : ndarray
+            Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
