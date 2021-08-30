@@ -222,11 +222,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
-    if min_value < 0.0:
-        raise ValueError("Image must contain only positive values")
 
-    if max_value == 0.0:
-        raise ValueError("The maximum value found in the image was 0.")
 
     image = np.atleast_3d(img_as_float(image))
     image = np.ascontiguousarray(image)
@@ -249,9 +245,16 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     # where needed within Cython.
     empty_dims = np.empty(dims, dtype=image.dtype)
 
-    return _denoise_bilateral(image, image.max(), win_size, sigma_color,
-                              sigma_spatial, bins, mode, cval, color_lut,
-                              range_lut, empty_dims, out)
+    if min_value < 0:
+        image = image - min_value
+        max_value -= min_value
+    _denoise_bilateral(image, max_value, win_size, sigma_color, sigma_spatial,
+                       bins, mode, cval, color_lut, range_lut, empty_dims, out)
+    # need to drop the added channels axis for grayscale images
+    out = np.squeeze(out)
+    if min_value < 0:
+        out += min_value
+    return out
 
 
 @utils.channel_as_last_axis()
