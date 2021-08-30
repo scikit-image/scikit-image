@@ -183,7 +183,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         alpha = 1
     else:
         if label.ndim > 2:
-            raise ValueError("label2rgb only supports 2D inputs : label and image shape (M,N) and (M,N,3)")
+            raise ValueError("label2rgb only supports 2D inputs :"
+                             " label and image shape (M,N) and (M,N,3)")
 
         if not image.shape[:2] == label.shape:
             raise ValueError("`image` and `label` must be the same shape")
