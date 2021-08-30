@@ -230,13 +230,13 @@ def structural_similarity(im1, im2,
     
     S1 = A1 / B1
     S2 = A2 / B2
-
+    
     # When K1 = 0 and/or K2 = 0, set NaN elements of S1 and S2 to 1
-    S1[B1==0.0] = 1.0
-    S2[B2==0.0] = 1.0
-
+    S1[B1 == 0.0] = 1.0
+    S2[B2 == 0.0] = 1.0
+    
     S = S1 * S2
-
+    
     # to avoid edge effects will ignore filter radius strip around edges
     pad = (win_size - 1) // 2
 
