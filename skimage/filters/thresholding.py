@@ -1021,10 +1021,10 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
     >>> binary_image = image > t_singh
     """
 
-   m, _ = _mean_std(image, window_size, mean_only=True)
-   d = image - m
+    m, _ = _mean_std(image, window_size, mean_only=True)
+    d = image - m
 
-   return m * (1 + k * ((d / 1 - d) - 1))
+    return m * (1 + k * ((d / 1 - d) - 1))
 
 
  def threshold_niblack(image, window_size=15, k=0.2):
