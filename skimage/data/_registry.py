@@ -101,7 +101,7 @@ registry = {
     "data/grass.png": "d6fbd3f7c094262295a651c8b1aa193b6248bba0a3c5347b935c13e16fe8097f",
     "data/hubble_deep_field.jpg": "3a19c5dd8a927a9334bb1229a6d63711b1c0c767fb27e2286e7c84a3e2c2f5f4",
     "data/ihc.png": "0c2324ab4adf58710c608a18f3ef8e687a4e2955de44a2e88295c0d099e6fba2",
-    "data/logo.png": "ee790cc1d9c6528f14c307feabb9417f0c39ba3ce815c3c2c65b6cb0c8a6e794",
+    "data/logo.png": "f2c57fe8af089f08b5ba523d95573c26e62904ac5967f4c8851b27d033690168",
     "data/lfw_subset.npy": "9560ec2f5edfac01973f63a8a99d00053fecd11e21877e18038fbe500f8e872c",
     "data/microaneurysms.png": "d4f8809a453b4470167f98703d5daad37a5b994123b6bc6759e0c48ee253d14b",
     "data/moon.png": "a5fcc42fc4a34f0f2e5c87fdfdc10a5966f3df1bfefbbba7489d9c4bab13a504",
