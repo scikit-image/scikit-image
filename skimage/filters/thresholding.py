@@ -1027,7 +1027,7 @@ def threshold_singh(image, window_size=15, k=0.2, r=None):
     return m * (1 + k * ((d / 1 - d) - 1))
 
 
- def threshold_niblack(image, window_size=15, k=0.2):
+def threshold_niblack(image, window_size=15, k=0.2):
     """Applies Niblack local threshold to an array.
 
     A threshold T is calculated for every pixel in the image using the
