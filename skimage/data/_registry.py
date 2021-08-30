@@ -5,7 +5,7 @@
 # further notice.
 # Testing data and additional datasets should only
 # be made available by pooch
-#sha256 updated
+# sha256 hashes have been updated
 legacy_datasets = [
     'astronaut.png',
     'brick.png',
@@ -42,10 +42,10 @@ legacy_datasets = [
 # To generate the SHA256 hash, use the command
 # openssl sha256 filename
 registry = {
-    "color/tests/data/lab_array_a_10.npy": "a3ef76f1530e374f9121020f1f220bc89767dc866f4bbd1b1f47e5b84891a38c",
+    "color/tests/data/lab_array_a_10.npy":"a3ef76f1530e374f9121020f1f220bc89767dc866f4bbd1b1f47e5b84891a38c",
     "color/tests/data/lab_array_a_2.npy": "793d5981cbffceb14b5fb589f998a2b1acdb5ff9c14d364c8e9e8bd45a80b275",
-    "color/tests/data/lab_array_a_r.npy": "3d3613da109d0c87827525fc49b58111aefc12438fa6426654979f66807b9227",
-    "color/tests/data/lab_array_b_10.npy": "e8d648b28077c1bfcef55ec6dc8679819612b56a01647f8c0a78625bb06f99b6",
+    "color/tests/data/lab_array_a_r.npy":"3d3613da109d0c87827525fc49b58111aefc12438fa6426654979f66807b9227",
+    "color/tests/data/lab_array_b_10.npy":"e8d648b28077c1bfcef55ec6dc8679819612b56a01647f8c0a78625bb06f99b6",
     "color/tests/data/lab_array_b_2.npy": "da9c6aa99e4ab3af8ec3107bbf11647cc483a0760285dd5c9fb66988be393ca1",
     "color/tests/data/lab_array_b_r.npy": "d9eee96f4d65a2fbba82039508aac8c18304752ee8e33233e2a013e65bb91464",
     "color/tests/data/lab_array_c_10.npy": "88b4ff2a2d2c4f48e7bb265609221d4b9ef439a4e2d8a86989696bfdb47790e6",
