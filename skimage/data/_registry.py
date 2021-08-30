@@ -126,7 +126,7 @@ registry = {
     "data/multi.fits": "5c71a83436762a52b1925f2f0d83881af7765ed50aede155af2800e54bbd5040",
     "data/simple.fits": "cd36087fdbb909b6ba506bbff6bcd4c5f4da3a41862608fbac5e8555ef53d40f",
     "data/palette_color.png": "60f1cf3990989782fc26cd4de7f5d91504dd057280464b744be7d618ffd6f7f5",
-    "data/palette_gray.png": "101f460e14b13715a32e78f339dd2189a47d8fd8805824ffdccd9bd219c1664a",
+    "data/palette_gray.png": "bace7f73783bf3ab3b7fdaf701707e4fa09f0dbd0ea72cf5b12ddc73d50b02a9",
     "data/green_palette.png": "343f4aaed9658dac0aa6c9c65820643b772c44080c7f4bd799a5552c13273535",
     "data/truncated.jpg": "4c226038acc78012d335efba29c6119a24444a886842182b7e18db378f4a557d",
     "data/multipage.tif": "4da0ad0d3df4807a9847247d1b5e565b50d46481f643afb5c37c14802c78130f",
