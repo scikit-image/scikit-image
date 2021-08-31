@@ -151,7 +151,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
                     methods=methods, verbose=verbose)
 
 
-def threshold_local(image, block_size, method='gaussian', offset=0,
+def threshold_local(image, block_size=3, method='gaussian', offset=0,
                     mode='reflect', param=None, cval=0):
     """Compute a threshold mask image based on local pixel neighborhood.
 
