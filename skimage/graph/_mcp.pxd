@@ -27,12 +27,12 @@ cdef class MCP:
     # the cost of the path. Set to true by default in the base class...
 
     # Arrays used during front propagation
+    cdef public OFFSET_T [:,:] offsets
     cdef FLOAT_T [:] flat_costs
     cdef FLOAT_T [:] flat_cumulative_costs
     cdef OFFSETS_INDEX_T [:] traceback_offsets
     cdef EDGE_T [:,:] flat_pos_edge_map
     cdef EDGE_T [:,:] flat_neg_edge_map
-    cdef OFFSET_T [:,:] offsets
     cdef INDEX_T [:] flat_offsets
     cdef FLOAT_T [:] offset_lengths
 
