@@ -78,9 +78,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
     Parameters
     ----------
-    label : array, shape (M, N)
+    label : array, shape (M, N) or (M, N, ...)
         Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N) or (..., 3, ...), optional
+    image : array, shape (M, N) or (M, N, ...., 3), optional
         Image used as underlay for labels. If the input is an RGB image, it's
         converted to grayscale before coloring.
     colors : list, optional
@@ -140,9 +140,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     Parameters
     ----------
-    label : array, shape (M, N)
+    label : array, shape (M, N) or (M, N, ...)
         Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N, 3), optional
+    image : array, shape (M, N, 3) or (M, N, ..., 3), optional
         Image used as underlay for labels. If the input is an RGB image, it's
         converted to grayscale before coloring, unless the `saturation` is
         greater than 0.
@@ -182,12 +182,13 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
-        if label.ndim > 2:
-            raise ValueError("label2rgb only supports 2D inputs :"
-                             " label and image shape (M,N) and (M,N,3)")
-
-        if not image.shape[:2] == label.shape:
+        if not image.shape[:label.ndim] == label.shape:
             raise ValueError("`image` and `label` must be the same shape")
+
+        if not image.shape[-1] == 3:
+            raise ValueError(
+                "`image` must be RGB (image.shape[-1] must be 3)."
+            )
 
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
