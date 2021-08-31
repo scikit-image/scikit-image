@@ -716,7 +716,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # new and old threshold values is less than the tolerance
 
     if image.dtype.kind in 'iu':
-        hist, bin_centers = histogram(image.ravel(),
+        hist, bin_centers = histogram(image.reshape(-1),
                                       source_range='image')
         hist = hist.astype(float)
         while abs(t_next - t_curr) > tolerance:
@@ -735,9 +735,6 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
 
-        threshold = t_next + image_min
-        return threshold
-
     else:
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
@@ -751,8 +748,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
 
-        threshold = t_next + image_min
-        return threshold
+    threshold = t_next + image_min
+    return threshold
 
 
 @deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
