@@ -1119,12 +1119,12 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     """
     multichannel = channel_axis is not None
     if image.ndim != 2 and not multichannel:
-        raise ValueError("Input array must be 2-dimensional when "
-                         f"`channel_axis=None`, got {image.ndim}")
+        raise ValueError(f'Input array must be 2-dimensional when '
+                         f'`channel_axis=None`, got {image.ndim}')
 
     if image.ndim != 3 and multichannel:
-        raise ValueError("Input array must be 3-dimensional when "
-                         f"`channel_axis` is specified, got {image.ndim}")
+        raise ValueError(f'Input array must be 3-dimensional when '
+                         f'`channel_axis` is specified, got {image.ndim}')
 
     if center is None:
         center = (np.array(image.shape)[:2] / 2) - 0.5

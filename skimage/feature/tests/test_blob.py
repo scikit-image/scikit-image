@@ -6,14 +6,15 @@ from numpy.testing import assert_almost_equal
 
 from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
-from skimage.feature import blob_dog, blob_log, blob_doh
+from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
 
 
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_dog(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog(dtype, threshold_type):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
 
@@ -26,12 +27,23 @@ def test_blob_dog(dtype):
     xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    threshold = 2.0
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 2.0
+        if img.dtype.kind != 'f':
+            # account for internal scaling to [0, 1] by img_as_float
+            threshold /= img.ptp()
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
-    blobs = blob_dog(img, min_sigma=4, max_sigma=50, threshold=threshold)
+    blobs = blob_dog(
+        img,
+        min_sigma=4,
+        max_sigma=50,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
+    )
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
@@ -50,25 +62,38 @@ def test_blob_dog(dtype):
     b = s[2]
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
-    assert abs(radius(b)- 45) <= ratio_thresh * 45
+    assert abs(radius(b) - 45) <= ratio_thresh * 45
 
     # Testing no peaks
     img_empty = np.zeros((100, 100), dtype=dtype)
     assert blob_dog(img_empty).size == 0
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d(dtype, threshold_type):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    threshold = 0.1
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = 0
+    elif threshold_type == 'relative':
+        threshold = 0
+        threshold_rel = 0.5
 
     blobs = blob_dog(
-        im3, min_sigma=3, max_sigma=10, sigma_ratio=1.2, threshold=threshold
+        im3,
+        min_sigma=3,
+        max_sigma=10,
+        sigma_ratio=1.2,
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -78,18 +103,32 @@ def test_blob_dog(dtype):
     assert b[2] == r + pad + 1
     assert abs(math.sqrt(3) * b[3] - r) < 1.1
 
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
+    if threshold_type == 'absolute':
+        threshold = 0.001
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
+
     blobs = blob_dog(
         im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=threshold
+        threshold=threshold,
+        threshold_rel=threshold_rel,
     )
     b = blobs[0]
 
@@ -133,7 +172,8 @@ def test_blob_dog_excl_border():
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.float16, np.float32, np.float64]
 )
-def test_blob_log(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_log(dtype, threshold_type):
     r2 = math.sqrt(2)
     img = np.ones((256, 256), dtype=dtype)
 
@@ -149,12 +189,18 @@ def test_blob_log(dtype):
     xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
-    threshold = 1
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
-        threshold /= img.ptp()
+    if threshold_type == 'absolute':
+        threshold = 1
+        if img.dtype.kind != 'f':
+            # account for internal scaling to [0, 1] by img_as_float
+            threshold /= img.ptp()
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
-    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=threshold)
+    blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=threshold,
+                     threshold_rel=threshold_rel)
 
     radius = lambda x: r2 * x[2]
     s = sorted(blobs, key=radius)
@@ -186,6 +232,7 @@ def test_blob_log(dtype):
         min_sigma=5,
         max_sigma=20,
         threshold=threshold,
+        threshold_rel=threshold_rel,
         log_scale=True)
 
     b = s[0]
@@ -293,7 +340,8 @@ def test_blob_log_exclude_border():
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
-def test_blob_doh(dtype):
+@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
+def test_blob_doh(dtype, threshold_type):
     img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 20)
@@ -308,20 +356,26 @@ def test_blob_doh(dtype):
     xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
-    # Note: have to either scale up threshold or rescale the image to the range
-    #       [0, 1] internally.
-    threshold = 0.05
-    if img.dtype.kind == 'f':
-        # account for lack of internal scaling to [0, 1] by img_as_float
-        ptp = img.ptp()
-        threshold *= ptp ** 2
+    if threshold_type == 'absolute':
+        # Note: have to either scale up threshold or rescale the image to the
+        #       range [0, 1] internally.
+        threshold = 0.05
+        if img.dtype.kind == 'f':
+            # account for lack of internal scaling to [0, 1] by img_as_float
+            ptp = img.ptp()
+            threshold *= ptp ** 2
+        threshold_rel = None
+    elif threshold_type == 'relative':
+        threshold = None
+        threshold_rel = 0.5
 
     blobs = blob_doh(
         img,
         min_sigma=1,
         max_sigma=60,
         num_sigma=10,
-        threshold=threshold)
+        threshold=threshold,
+        threshold_rel=threshold_rel)
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)

@@ -164,7 +164,7 @@ def _guess_spatial_dimensions(image):
         return 3
     else:
         raise ValueError(
-            f"Expected 1D, 2D, 3D, or 4D array, got {image.ndim}D."
+            f'Expected 1D, 2D, 3D, or 4D array, got {image.ndim}D.'
         )
 
 

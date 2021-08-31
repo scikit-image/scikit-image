@@ -246,6 +246,34 @@ def test_denoise_tv_bregman_multichannel():
     assert_array_equal(out1, out2)
 
 
+def test_denoise_bilateral_null():
+    img = np.zeros((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image full of zeros should return identity
+    assert_array_equal(out, img)
+
+
+def test_denoise_bilateral_negative():
+    img = -np.ones((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image with only negative values should be ok
+    assert_array_equal(out, img)
+
+
+def test_denoise_bilateral_negative2():
+    img = np.ones((50, 50))
+    img[2, 2] = 2
+
+    out1 = restoration.denoise_bilateral(img)
+    out2 = restoration.denoise_bilateral(img - 10)  # contains negative values
+
+    # 2 images with a given offset should give the same result (with the same
+    # offset)
+    assert_array_equal(out1, out2 + 10)
+
+
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
@@ -608,7 +636,7 @@ def test_denoise_nl_means_wrong_dimension():
 def test_no_denoising_for_small_h(fast_mode, dtype):
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
-    img += 0.3*np.random.standard_normal(img.shape)
+    img += 0.3 * np.random.standard_normal(img.shape)
     img = img.astype(dtype)
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,

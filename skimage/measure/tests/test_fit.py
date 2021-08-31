@@ -294,8 +294,9 @@ def test_ransac_geometric():
 def test_ransac_is_data_valid():
     def is_data_valid(data):
         return data.shape[0] > 2
-    model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_data_valid=is_data_valid, random_state=1)
+    with expected_warnings(["No inliers found"]):
+        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
+                                is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -303,8 +304,9 @@ def test_ransac_is_data_valid():
 def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
-    model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_model_valid=is_model_valid, random_state=1)
+    with expected_warnings(["No inliers found"]):
+        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
+                                is_model_valid=is_model_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -388,8 +390,9 @@ def test_ransac_sample_duplicates():
     # Create dataset with four unique points. Force 10 iterations
     # and check that there are no duplicated data points.
     data = np.arange(4)
-    ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
-           max_trials=10)
+    with expected_warnings(["No inliers found"]):
+        ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
+               max_trials=10)
 
 
 def test_ransac_with_no_final_inliers():
