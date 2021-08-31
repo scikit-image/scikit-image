@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
+from skimage import data, img_as_float
 from skimage._shared.testing import test_parallel, expected_warnings
 from skimage.segmentation import slic
 
@@ -99,6 +100,24 @@ def test_gray_2d_deprecated_multichannel():
     with expected_warnings(["Providing the `multichannel` argument"]):
         seg = slic(img, 4, 1, 10, 0, None, False, convert2lab=False,
                    start_label=0)
+
+
+def test_slic_consistency_across_image_magnitude():
+    # verify that that images of various scales across integer and float dtypes
+    # give the same segmentation result
+    img_uint8 = data.cat()[:256, :128]
+    img_uint16 = 256 * img_uint8.astype(np.uint16)
+    img_float32 = img_as_float(img_uint8)
+    img_float32_norm = img_float32 / img_float32.max()
+
+    seg1 = slic(img_uint8)
+    seg2 = slic(img_uint16)
+    seg3 = slic(img_float32)
+    seg4 = slic(img_float32_norm)
+
+    np.testing.assert_array_equal(seg1, seg2)
+    np.testing.assert_array_equal(seg1, seg3)
+    np.testing.assert_array_equal(seg1, seg4)
 
 
 def test_color_3d():
