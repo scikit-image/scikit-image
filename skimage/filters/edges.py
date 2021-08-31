@@ -14,7 +14,7 @@ from .. import img_as_float
 from .._shared.utils import check_nD
 from scipy import ndimage as ndi
 from scipy.ndimage import convolve, binary_erosion
-
+from scipy.ndimage import generic_laplace,correlate1d
 from ..restoration.uft import laplacian
 
 # n-dimensional filter weights
@@ -684,11 +684,30 @@ def laplace(image, ksize=3, mask=None):
     skimage.restoration.uft.laplacian().
 
     """
+    def k_size(ksize):
+        if ksize>31:
+            return "Kernel_size Must be less then 31"
+        if ksize%2==0:
+            return "Please use Odd  Kernel_Size"
+        if ksize==3:
+            param=[1,-2,1]
+            return param
+        else:
+            return np.convolve(k_size(ksize-2),[1,-2,1])
+    """
+    D2 Function Genrating Second Derivative 
+    """
+    def d2(input, axis, output, mode, cval ,*extra_arguments):
+        return correlate1d(input, k_size(ksize), axis, output, mode, cval,)
+
+    a = np.zeros((ksize, ksize))
+    a[int(ksize/2), int(ksize/2)] = 1
+    
     image = img_as_float(image)
-    # Create the discrete Laplacian operator - We keep only the real part of
-    # the filter
-    _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
-    result = convolve(image, laplace_op)
+    x=[generic_laplace(a, d2, extra_arguments = (k_size(ksize),))]
+    x=np.repeat(x,3,0)
+   
+    result = convolve(image, x)
     return _mask_filter_result(result, mask)
 
 
