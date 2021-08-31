@@ -238,6 +238,18 @@ class CircleModel(BaseModel):
     params : tuple
         Circle model parameters in the following order `xc`, `yc`, `r`.
 
+    Notes
+    -----
+    The estimation is carried out using a 2D version of the spherical
+    estimation given in [1]_.
+
+    References
+    ----------
+    ..[1] Jekel, Charles F. Obtaining non-linear orthotropic material models
+          for pvc-coated polyester via inverse bubble inflation. Thesis (MEng),
+          Stellenbosch University, 2016. Appendix A, pp. 83-87.
+          https://hdl.handle.net/10019.1/98627
+
     Examples
     --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
@@ -274,14 +286,19 @@ class CircleModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
-        # Adapted from a spherical estimator covered in a blog post by Charles Jeckel:
+        # Adapted from a spherical estimator covered in a blog post by Charles
+        # Jeckel (see also reference 1 above):
         # https://jekel.me/2015/Least-Squares-Sphere-Fit/
-        A = np.append(data * 2, np.ones((data.shape[0], 1), dtype=float_type), axis=1)
+        A = np.append(data * 2,
+                      np.ones((data.shape[0], 1), dtype=float_type),
+                      axis=1)
         f = np.sum(data ** 2, axis=1)
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            raise ValueError("Input data does not contain enough significant data points")
+            raise ValueError(
+                "Input data does not contain enough significant data points"
+            )
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
