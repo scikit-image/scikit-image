@@ -1,8 +1,10 @@
 import math
-import numpy as np
-from numpy.linalg import inv, pinv
-from scipy import optimize, spatial
 from warnings import warn
+
+import numpy as np
+from numpy.linalg import inv
+from scipy import optimize, spatial
+
 from .._shared.utils import check_random_state
 
 
