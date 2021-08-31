@@ -16,8 +16,9 @@ def configuration(parent_package='', top_path=None):
             '_unwrap_2d.pyx',
             '_unwrap_3d.pyx',
             '_denoise_cy.pyx',
-            '_nl_means_denoising.pyx'], working_path=base_path)
-    cython(['_rolling_ball_cy.pyx'], working_path=base_path)
+            '_nl_means_denoising.pyx',
+            '_rolling_ball_cy.pyx',
+            '_inpaint.pyx'], working_path=base_path)
 
     config.add_extension('_unwrap_1d', sources=['_unwrap_1d.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -34,6 +35,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs(),
                                        '../_shared'])
     config.add_extension('_rolling_ball_cy', sources=['_rolling_ball_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_inpaint', sources=['_inpaint.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

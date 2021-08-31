@@ -447,8 +447,6 @@ class ApiDocWriter(object):
 
         Parameters
         ----------
-        path : string
-            Filename to write index to
         outdir : string
             Directory to which to write generated index file
         froot : string, optional
@@ -495,7 +493,7 @@ class ApiDocWriter(object):
             elif len(module_name) == 2:
                 module_name = module_name[1]
                 prefix = "\n  -"
-            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
+            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
         w('\n')
 
         subtitle = "Submodule Contents"

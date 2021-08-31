@@ -2,9 +2,9 @@ import numpy as np
 
 import scipy.ndimage as ndi
 
+from .._shared.utils import _supported_float_type
 from ..util import img_as_float
 from ..color import rgb2lab
-
 from ._quickshift_cy import _quickshift_cython
 
 
@@ -57,6 +57,9 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     """
 
     image = img_as_float(np.atleast_3d(image))
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     if convert2lab:
         if image.shape[2] != 3:
             ValueError("Only RGB images can be converted to Lab space.")

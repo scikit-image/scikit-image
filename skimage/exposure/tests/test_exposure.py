@@ -116,6 +116,37 @@ def test_normalize():
     assert_equal(frequencies, expected)
 
 
+# Test multichannel histograms
+# ============================
+
+@pytest.mark.parametrize('source_range', ['dtype', 'image'])
+@pytest.mark.parametrize('dtype', [np.uint8, np.int16, np.float64])
+@pytest.mark.parametrize('channel_axis', [0, 1, -1])
+def test_multichannel_hist_common_bins_uint8(dtype, source_range, channel_axis):
+    """Check that all channels use the same binning."""
+    # Construct multichannel image with uniform values within each channel,
+    # but the full range of values across channels.
+    shape = (5, 5)
+    channel_size = shape[0] * shape[1]
+    imin, imax = dtype_range[dtype]
+    im = np.stack(
+        (
+            np.full(shape, imin, dtype=dtype),
+            np.full(shape, imax, dtype=dtype),
+        ),
+        axis=channel_axis
+    )
+    frequencies, bin_centers = exposure.histogram(
+        im, source_range=source_range, channel_axis=channel_axis
+    )
+    if np.issubdtype(dtype, np.integer):
+        assert_array_equal(bin_centers, np.arange(imin, imax + 1))
+    assert frequencies[0][0] == channel_size
+    assert frequencies[0][-1] == 0
+    assert frequencies[1][0] == 0
+    assert frequencies[1][-1] == channel_size
+
+
 # Test histogram equalization
 # ===========================
 
@@ -310,13 +341,15 @@ def test_rescale_nan_warning(in_range, out_range):
     # versions above 1.17
     # TODO: Remove once NumPy removes this DeprecationWarning
     numpy_warning_1_17_plus = (
-        r"Passing `np.nan` to mean no clipping in np.clip "
-        r"has always been unreliable|\A\Z"
+        "Passing `np.nan` to mean no clipping in np.clip"
     )
 
-    with expected_warnings(
-            [msg, numpy_warning_1_17_plus]
-    ):
+    if in_range == "image":
+        exp_warn = [msg, numpy_warning_1_17_plus]
+    else:
+        exp_warn = [msg]
+
+    with expected_warnings(exp_warn):
         exposure.rescale_intensity(image, in_range, out_range)
 
 
@@ -590,10 +623,16 @@ def test_adjust_gamma_greater_one():
     assert_array_equal(result, expected)
 
 
-def test_adjust_gamma_neggative():
+def test_adjust_gamma_negative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
     with testing.raises(ValueError):
         exposure.adjust_gamma(image, -1)
+
+
+def test_adjust_gamma_u8_overflow():
+    img = 255 * np.ones((2, 2), dtype=np.uint8)
+
+    assert np.all(exposure.adjust_gamma(img, gamma=1, gain=1.1) == 255)
 
 
 # Test Logarithmic Correction
@@ -724,12 +763,6 @@ def test_adjust_inv_sigmoid_cutoff_half():
     assert_array_equal(result, expected)
 
 
-def test_negative():
-    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with testing.raises(ValueError):
-        exposure.adjust_gamma(image)
-
-
 def test_is_low_contrast():
     image = np.linspace(0, 0.04, 100)
     assert exposure.is_low_contrast(image)
@@ -744,6 +777,26 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+def test_is_low_contrast_boolean():
+    image = np.zeros((8, 8), dtype=bool)
+    assert exposure.is_low_contrast(image)
+
+    image[:5] = 1
+    assert not exposure.is_low_contrast(image)
+
+
+# Test negative input
+#####################
+
+@pytest.mark.parametrize("exposure_func", [exposure.adjust_gamma,
+                                           exposure.adjust_log,
+                                           exposure.adjust_sigmoid])
+def test_negative_input(exposure_func):
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
+    with testing.raises(ValueError):
+        exposure_func(image)
 
 
 # Test Dask Compatibility

@@ -104,14 +104,13 @@ ax[1].set_ylabel('Distance (pixels)')
 ax[1].axis('image')
 
 ax[2].imshow(image, cmap=cm.gray)
-origin = np.array((0, image.shape[1]))
-for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
-    y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)
-    ax[2].plot(origin, (y0, y1), '-r')
-ax[2].set_xlim(origin)
 ax[2].set_ylim((image.shape[0], 0))
 ax[2].set_axis_off()
 ax[2].set_title('Detected lines')
+
+for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
+    (x0, y0) = dist * np.array([np.cos(angle), np.sin(angle)])
+    ax[2].axline((x0, y0), slope=np.tan(angle + np.pi/2))
 
 plt.tight_layout()
 plt.show()

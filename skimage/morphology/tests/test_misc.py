@@ -1,4 +1,7 @@
+import warnings
+
 import numpy as np
+import pytest
 from skimage.morphology import remove_small_objects, remove_small_holes
 
 from skimage._shared import testing
@@ -29,9 +32,28 @@ def test_two_connectivity():
 
 def test_in_place():
     image = test_image.copy()
-    observed = remove_small_objects(image, min_size=6, in_place=True)
+    with expected_warnings(["in_place argument is deprecated"]):
+        observed = remove_small_objects(image, min_size=6, in_place=True)
     assert_equal(observed is image, True,
                  "remove_small_objects in_place argument failed.")
+
+
+@pytest.mark.parametrize("in_dtype", [bool, int, np.int32])
+@pytest.mark.parametrize("out_dtype", [bool, int, np.int32])
+def test_out(in_dtype, out_dtype):
+    image = test_image.astype(in_dtype, copy=True)
+    expected_out = np.empty_like(test_image, dtype=out_dtype)
+
+    if out_dtype != bool:
+        # object with only 1 label will warn on non-bool output dtype
+        exp_warn = ["Only one label was provided"]
+    else:
+        exp_warn = []
+
+    with expected_warnings(exp_warn):
+        out = remove_small_objects(image, min_size=6, out=expected_out)
+
+    assert out is expected_out
 
 
 def test_labeled_image():
@@ -119,9 +141,25 @@ def test_two_connectivity_holes():
 
 def test_in_place_holes():
     image = test_holes_image.copy()
-    observed = remove_small_holes(image, area_threshold=3, in_place=True)
+    with expected_warnings(["in_place argument is deprecated"]):
+        observed = remove_small_holes(image, area_threshold=3, in_place=True)
     assert_equal(observed is image, True,
                  "remove_small_holes in_place argument failed.")
+
+
+def test_out_remove_small_holes():
+    image = test_holes_image.copy()
+    expected_out = np.empty_like(image)
+    out = remove_small_holes(image, area_threshold=3, out=expected_out)
+
+    assert out is expected_out
+
+
+def test_non_bool_out():
+    image = test_holes_image.copy()
+    expected_out = np.empty_like(image, dtype=int)
+    with testing.raises(TypeError):
+        remove_small_holes(image, area_threshold=3, out=expected_out)
 
 
 def test_labeled_image_holes():

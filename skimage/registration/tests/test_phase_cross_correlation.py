@@ -1,13 +1,15 @@
 import numpy as np
-from skimage._shared.testing import assert_allclose
-
-from skimage.registration._phase_cross_correlation import (
-    phase_cross_correlation, _upsampled_dft)
-from skimage.data import camera, binary_blobs
+import pytest
+from numpy.testing import assert_allclose
 from scipy.ndimage import fourier_shift
-from skimage.util.dtype import img_as_float
-from skimage._shared import testing
+
+from skimage import img_as_float
 from skimage._shared.fft import fftmodule as fft
+from skimage._shared.utils import _supported_float_type
+from skimage.data import camera, binary_blobs
+from skimage.registration._phase_cross_correlation import (
+    phase_cross_correlation, _upsampled_dft
+)
 
 
 def test_correlation():
@@ -35,16 +37,18 @@ def test_subpixel_precision():
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
-def test_real_input():
-    reference_image = camera()
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_real_input(dtype):
+    reference_image = camera().astype(dtype, copy=False)
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
-    shifted_image = fft.ifftn(shifted_image)
+    shifted_image = fft.ifftn(shifted_image).real.astype(dtype, copy=False)
 
     # subpixel precision
     result, error, diffphase = phase_cross_correlation(reference_image,
                                                        shifted_image,
                                                        upsample_factor=100)
+    assert result.dtype == _supported_float_type(dtype)
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
@@ -86,7 +90,7 @@ def test_3d_input():
 
 def test_unknown_space_input():
     image = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(
             image, image,
             space="frank")
@@ -96,20 +100,20 @@ def test_wrong_input():
     # Dimensionality mismatch
     image = np.ones((5, 5, 1))
     template = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image)
 
     # Size mismatch
     image = np.ones((5, 5))
     template = np.ones((4, 4))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image)
 
     # NaN values in data
     image = np.ones((5, 5))
     image[0][0] = np.nan
     template = np.ones((5, 5))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         phase_cross_correlation(template, image, return_error=True)
 
 
@@ -137,13 +141,13 @@ def test_4d_input_subpixel():
 
 
 def test_mismatch_upsampled_region_size():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _upsampled_dft(
             np.ones((4, 4)),
             upsampled_region_size=[3, 2, 1, 4])
 
 
 def test_mismatch_offsets_size():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _upsampled_dft(np.ones((4, 4)), 3,
                        axis_offsets=[3, 2, 1, 4])

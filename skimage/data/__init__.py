@@ -18,6 +18,7 @@ from .. import __version__
 
 import os.path as osp
 import os
+import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -61,7 +62,7 @@ legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
-    from pooch.utils import file_hash
+    from pooch import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
@@ -91,8 +92,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(
-                "Algorithm '{}' not available in hashlib".format(alg))
+            raise ValueError(f'Algorithm \'{alg}\' not available in hashlib')
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
@@ -150,6 +150,7 @@ def create_image_fetcher():
         path=pooch.os_cache("scikit-image"),
         base_url=url,
         version=skimage_version_for_pooch,
+        version_dev="main",
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
@@ -253,8 +254,17 @@ def _fetch(data_filename):
 
 def _init_pooch():
     os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
+
+    # Copy in the README.txt if it doesn't already exist.
+    # If the file was originally copied to the data cache directory read-only
+    # then we cannot overwrite it, nor do we need to copy on every init.
+    # In general, as the data cache directory contains the scikit-image version
+    # it should not be necessary to overwrite this file as it should not
+    # change.
+    dest_path = osp.join(data_dir, 'README.txt')
+    if not os.path.isfile(dest_path):
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     dest_path)
 
     data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
@@ -447,9 +457,9 @@ def brick():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -514,9 +524,9 @@ def grass():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -562,9 +572,9 @@ def gravel():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid

@@ -7,10 +7,11 @@ jobs:
 
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
+        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
@@ -45,6 +46,7 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.8
             PIP_FLAGS: "--pre"
+            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test pre-releases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
@@ -61,8 +63,6 @@ jobs:
             python-version: 3.7
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
-
-
 
 
     steps:
@@ -84,8 +84,9 @@ jobs:
         run: |
             set -ex
             source tools/github/before_install.sh
+            set -ex
             python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST ]]; then
+            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
                 pip uninstall cython -y;
                 pip install dist/scikit-image-*.tar.gz;
             else
@@ -117,6 +118,9 @@ jobs:
             fi
             source tools/github/script.sh
 
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
 
 
   test_skimage_macos:
@@ -144,7 +148,7 @@ jobs:
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-    
+
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
@@ -189,4 +193,6 @@ jobs:
             fi
             source tools/github/script.sh
 
-
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing

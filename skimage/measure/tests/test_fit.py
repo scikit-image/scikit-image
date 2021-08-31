@@ -293,10 +293,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    random_state = np.random.RandomState(1)
+    random_state = np.random.RandomState(12373240)
 
     # generate original data without noise
-    src = 100 * random_state.random_sample((50, 2))
+    src = 100 * random_state.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -308,8 +308,7 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                random_state=random_state)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -319,8 +318,9 @@ def test_ransac_geometric():
 def test_ransac_is_data_valid():
     def is_data_valid(data):
         return data.shape[0] > 2
-    model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_data_valid=is_data_valid, random_state=1)
+    with expected_warnings(["No inliers found"]):
+        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
+                                is_data_valid=is_data_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -328,8 +328,9 @@ def test_ransac_is_data_valid():
 def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
-    model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                            is_model_valid=is_model_valid, random_state=1)
+    with expected_warnings(["No inliers found"]):
+        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
+                                is_model_valid=is_model_valid, random_state=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -413,8 +414,9 @@ def test_ransac_sample_duplicates():
     # Create dataset with four unique points. Force 10 iterations
     # and check that there are no duplicated data points.
     data = np.arange(4)
-    ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
-           max_trials=10)
+    with expected_warnings(["No inliers found"]):
+        ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
+               max_trials=10)
 
 
 def test_ransac_with_no_final_inliers():
