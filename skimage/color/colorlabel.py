@@ -182,7 +182,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
-        if not image.shape[:label.ndim] == label.shape:
+        if (image.shape[:label.ndim] != label.shape
+                or image.ndim > label.ndim + 1):
             raise ValueError("`image` and `label` must be the same shape")
 
         if not image.shape[-1] == 3:
