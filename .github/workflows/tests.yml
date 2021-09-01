@@ -122,16 +122,16 @@ jobs:
         run: |
           asv check -v -E existing
 
-    - name: Generate Report
-      run: |
-        pip install coverage
-        pip install -r ./requirements/test.txt
-        coverage run -m pytest
-        coverage report -m  # showing coverage output
-        coverage xml  # generates file needed for CodeCov
+      - name: Generate Report
+        run: |
+          pip install coverage
+          pip install -r ./requirements/test.txt
+          coverage run -m pytest
+          coverage report -m  # showing coverage output
+          coverage xml  # generates file needed for CodeCov
 
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v2
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
 
 
   test_skimage_macos:
