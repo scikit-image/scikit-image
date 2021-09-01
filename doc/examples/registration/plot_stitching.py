@@ -1,7 +1,7 @@
 """
-======================
-Simple image stitching
-======================
+===========================================
+Assemble images with simple image stitching
+===========================================
 
 This example demonstrates how a set of images can be assembled under
 the hypothesis of rigid body motions.
@@ -75,6 +75,7 @@ psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
 # Reference points are detected over all images in the list.
+
 min_dist = 5
 corner_list = [feature.corner_peaks(
     feature.corner_harris(img), threshold_rel=0.001, min_distance=min_dist)
@@ -99,14 +100,15 @@ trfm_list = [measure.ransac((dst, src),
                             residual_threshold=2, max_trials=100)[0].params
              for dst in matching_corners]
 
-fig, ax_list = plt.subplots(6, 2, figsize=(4, 6), sharex=True, sharey=True)
-for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list, ax_list)):
+fig, ax_list = plt.subplots(6, 2, figsize=(6, 9), sharex=True, sharey=True)
+for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list,
+                                                 ax_list)):
     ax0.imshow(im, cmap="gray", vmin=0, vmax=1)
     ax1.imshow(transform.warp(im, trfm), cmap="gray", vmin=0, vmax=1)
 
     if idx == 0:
-        ax0.set_title(f"Input (PSNR={psnr_ref:.2f})")
-        ax1.set_title(f"Registered")
+        ax0.set_title(f"Tilted images (PSNR={psnr_ref:.2f})")
+        ax1.set_title(f"Registered images")
 
     ax0.set_axis_off()
     ax1.set_axis_off()
