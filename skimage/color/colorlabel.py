@@ -186,7 +186,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
                 or image.ndim > label.ndim + 1):
             raise ValueError("`image` and `label` must be the same shape")
 
-        if not image.shape[-1] == 3:
+        if image.ndim == label.ndim + 1 and image.shape[-1] != 3:
             raise ValueError(
                 "`image` must be RGB (image.shape[-1] must be 3)."
             )
