@@ -107,19 +107,20 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list,
     ax1.imshow(transform.warp(im, trfm), cmap="gray", vmin=0, vmax=1)
 
     if idx == 0:
-        ax0.set_title(f"Tilted images (PSNR={psnr_ref:.2f})")
+        ax0.set_title(f"Tilted images")
+        ax0.set_ylabel(f"Reference Image\n(PSNR={psnr_ref:.2f})")
         ax1.set_title(f"Registered images")
 
-    ax0.set_axis_off()
+    ax0.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     ax1.set_axis_off()
 
 fig.tight_layout()
 
 ############################################################################
-# A composite image can be obtained using the relative positions of
-# the registered images to the reference one. To do so, we can define a
-# global domain around the reference image and position the other
-# images in this domain.
+# A composite image can be obtained using the positions of the
+# registered images relative to the reference one. To do so, we can
+# define a global domain around the reference image and position the
+# other images in this domain.
 #
 # A global transformation is defined to move the reference image in the
 # global domain image via a simple translation:
