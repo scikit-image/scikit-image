@@ -294,7 +294,7 @@ def _validate_image_histogram(image, hist, nbins=None):
             counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
-                image.ravel(), nbins, source_range='image'
+            image.ravel(), nbins, source_range='image'
             )
     return counts.astype(float), bin_centers
 
@@ -1251,3 +1251,189 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
+
+def _csum(z):
+    return np.cumsum(z)[:-1]
+
+
+def _dsum(z):
+    return np.cumsum(z[::-1])[-2::-1]
+
+
+def _argmax(x, f):
+    return np.mean(x[:-1][f == np.max(f)])  # Use the mean for ties.
+
+
+def _clip(z):
+    return np.maximum(1e-30, z)
+
+
+def _preliminaries(n, x=None):
+    """calculate preliminary values to be utlized in the core GHT/TGH algorithm
+
+    Parameters
+    ----------------------------
+    n : ndarray
+      Each element is the number of pixels falling in each intensity bin.
+    x : ndaarray, optional
+      Each element is the value corresponding to the center of each
+      intensity bin.
+
+    Returns
+    ----------------------------
+    x  : ndarray
+        value corresponding the center of each intensity bin
+    w0 : ndarray
+        sums of histogram count in n below each split  , size =len(x) -1
+    w1 : ndarray
+        sums of histogram count in n above each split, size = len(x) -1
+    p0 : ndarray
+        weighted mean of all elemnts of x below each split, size = len(x) -1
+    p1 : ndarray
+        weighted mean of all elemnts of x above each split, size = len(x) -1
+    mu0: ndarray
+        weighted distrotion  of all elemnts of x below each split,
+        size = len(x) -1
+    mu1: ndarray
+        weighted distrotion of all elemnts of x above each split,
+        size = len(x) -1
+    d0 : ndarray
+        complex definition
+    d1 : ndarray
+        complex definition
+
+    References
+    -------------------
+    .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
+            Jonathan T. Barron, ECCV, 2020
+
+    """
+    if not np.all(n >= 0):
+        raise ValueError("number of pixels in the histogram can't be negative")
+    x = np.arange(len(n), dtype=n.dtype) if x is None else x
+
+    if not np.all(x[1:] >= x[:-1]):
+        raise ValueError("consecutive bin intensity should be in increasing order")
+
+
+    w0 = _clip(_csum(n))
+    w1 = _clip(_dsum(n))
+    p0 = w0 / (w0 + w1)
+    p1 = w1 / (w0 + w1)
+    mu0 = _csum(n * x) / w0
+    mu1 = _dsum(n * x) / w1
+    d0 = _csum(n * x**2) - w0 * mu0**2
+    d1 = _dsum(n * x**2) - w1 * mu1**2
+    return x, w0, w1, p0, p1, mu0, mu1, d0, d1
+
+
+def theshold_generalized_histogram(image=None, nbins=256, hist=None, nu=1e50,
+                                   tau=0.01, kappa=0, omega=0.5):
+    """Compute the generalized histogram threshold for a histogram
+     based on nu, tau, kappa, omega hyperparameters, defaults to Otsu's
+
+    Either image or hist must be provided. If hist is provided, the actual
+    histogram of the image is ignored.
+
+    1) GHT doesn't require the histogram to be normalized.
+    2) tau, τ  hypterparameter serves a similar purpose as
+        coarsing, blurring the input histogram.
+
+    Special Case : Minimum Error Thresholding
+        set nu and kappa  as zero
+        tau and omega doesn't matter
+
+    Special Case :  Otsu's method
+        set nu as approaching infinity.
+        tau as approaching zero.
+        Kappa is zero
+
+    Special Case : Weighted percentile
+        set kappa as a large value
+        set nu as approaching zero.
+
+    Parameters
+    ----------------------------
+    image : (N, M[, ..., P]) ndarray
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities.
+        An alternative use of this function is to pass it only hist.
+    nu : Float
+        Degree of freedom , positive integer, scaled inverse chi-squared
+         distribution parameter
+    tau : Float
+        scaling parameter, positve integer, scaled inverse
+         chi-squared distribution
+    kappa : Float
+        concentration, positive integer, beta distribution
+    omega : Float
+        mode   , beta distribution ,  0 <= omega <= 1
+
+    Returns
+    ----------------------------
+    t  : float
+        Threshold bin value, corresponding to maximum score
+    score : ndarray
+        all possible values of score for each possible threshold value
+
+
+    References
+    -------------------
+    .. [1] A Generalization of Otsu's Method and Minimum Error Thresholding
+         Jonathan T. Barron, ECCV, 2020
+
+
+    Examples
+    ----------------
+
+    >>> from skimage.data import camera
+    >>> from skimage.exposure import histogram
+    >>> from skimage.filters import theshold_generalized_histogram
+    >>>
+    >>> data = camera()
+    >>>
+    >>> #defaults to Otsu's
+    >>> t, score = theshold_generalized_histogram(image=image)
+    >>> binary = data<=t
+    """
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
+        msg = "threshold_otsu is expected to work correctly only for " \
+              "grayscale images; image shape {0} looks like an RGB image"
+        warn(msg.format(image.shape))
+
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
+        first_pixel = image.ravel()[0]
+        if np.all(image == first_pixel):
+            return first_pixel
+
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
+    n = counts
+    x = bin_centers
+
+
+
+
+    if nu < 0:
+        raise ValueError("nu needs to be a postive number or zero")
+    if tau < 0:
+        raise ValueError("tau needs to be a postive number or zero")
+    if kappa < 0:
+        raise ValueError("kappa needs to be a postive number or zero")
+    if omega < 0 or omega > 1:
+        raise ValueError("""omega needs to be a postive number between
+                zero and one included""")
+
+    x, w0, w1, p0, p1, _, _, d0, d1 = _preliminaries(n, x)
+    v0 = _clip((p0 * nu * tau**2 + d0) / (p0 * nu + w0))
+    v1 = _clip((p1 * nu * tau**2 + d1) / (p1 * nu + w1))
+    f0 = -d0 / v0 - w0 * np.log(v0) + 2 * (w0 + kappa * omega) * np.log(w0)
+    f1 = -d1 / v1 - w1 * np.log(v1) + 2 * (w1 + kappa * (1 - omega)) * np.log(w1)
+    return _argmax(x, f0 + f1), f0 + f1

@@ -22,6 +22,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_minimum,
                                           threshold_multiotsu,
                                           try_all_threshold,
+                                          theshold_generalized_histogram,
                                           _mean_std,
                                           _cross_entropy)
 
@@ -730,3 +731,36 @@ def test_multiotsu_lut():
             result = _get_multiotsu_thresh_indices(prob, classes - 1)
 
             assert np.array_equal(result_lut, result)
+
+
+@pytest.mark.parametrize("nu, tau, kappa, omega, threshold", [
+        (262144, 0.288675, 262144, 0.5, 71),
+        (262144, 1, 262144, 0.5, 70),
+        (0.0001, 1, 262144, 0.5, 71),
+        (0.0001, 1, 0.1, 0.5, 65),
+        (0.0001, 1, 0.1, 0.5, 65),
+        (1e50, 0.01, 0, 0.5, 102),  # otsu
+        (1e-30, 1.0, 1e-30, 0.5, 65),   # met
+        (1e-30, 1.0, 1e30, 0.5, 152),    # percentile
+])
+def test_threshold_generalized_histogram(nu, tau, kappa, omega, threshold):
+    """
+    tests for generalized histogram thresholding algorithm
+    """
+
+    image = data.camera()
+    counts, bin_centers = histogram(image.ravel(), 256, source_range="image")
+
+    t, _ = theshold_generalized_histogram(image=image,
+                                          nu=nu,
+                                          tau=tau,
+                                          kappa=kappa,
+                                          omega=omega)
+    assert np.array_equal(t, threshold)
+
+    t, _ = theshold_generalized_histogram(hist=(counts, bin_centers),
+                                          nu=nu,
+                                          tau=tau,
+                                          kappa=kappa,
+                                          omega=omega)
+    assert np.array_equal(t, threshold)
