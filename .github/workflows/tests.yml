@@ -122,17 +122,6 @@ jobs:
         run: |
           asv check -v -E existing
 
-      - name: Generate Report
-        run: |
-          pip install coverage
-          pip install -r ./requirements/test.txt
-          coverage run -m pytest
-          coverage report -m  # showing coverage output
-          coverage xml  # generates file needed for CodeCov
-
-      - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
-
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -208,13 +197,3 @@ jobs:
         run: |
           asv check -v -E existing
 
-      - name: Generate coverage report
-        run: |
-          pip install coverage
-          pip install -r ./requirements/test.txt
-          coverage run -m pytest
-          coverage report -m  # showing coverage output
-          coverage xml  # generates file needed for CodeCov
-
-      - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
