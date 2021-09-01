@@ -250,6 +250,11 @@ class CircleModel(BaseModel):
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    Notes
+    -----
+    Implementation based on
+    https://scipy-cookbook.readthedocs.io/items/Least_Squares_Circle.html
     """
 
     def estimate(self, data):
@@ -276,25 +281,37 @@ class CircleModel(BaseModel):
         x = data[:, 0]
         y = data[:, 1]
 
-        # http://www.had2know.com/academics/best-fit-circle-least-squares.html
-        x2y2 = (x ** 2 + y ** 2)
-        sum_x = np.sum(x)
-        sum_y = np.sum(y)
-        sum_xy = np.sum(x * y)
-        m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
-                       [sum_xy, np.sum(y ** 2), sum_y],
-                       [sum_x, sum_y, len(x)]])
-        m2 = np.stack([[np.sum(x * x2y2),
-                        np.sum(y * x2y2),
-                        np.sum(x2y2)]], axis=-1)
-        a, b, c = pinv(m1) @ m2
-        a, b, c = a[0], b[0], c[0]
-        xc = a / 2
-        yc = b / 2
-        r = np.sqrt(4 * c + a ** 2 + b ** 2) / 2
+        def _f_2b(c):
+            """Calculate the algebraic distance between points and
+            the mean circle centered at c=(xc, yc)."""
+            xc, yc = c
+            Ri = np.sqrt((x-xc)**2 + (y-yc)**2)
+            return Ri - Ri.mean()
 
-        self.params = (xc, yc, r)
+        def _Df_2b(c):
+            """Jacobian of f_2b
+            The axis corresponding to derivatives must be coherent
+            with the col_deriv option of leastsq."""
+            xc, yc = c
+            df2b_dc = np.empty((len(c), x.size))
 
+            Ri = np.sqrt((x-xc)**2 + (y-yc)**2)
+            df2b_dc[0] = (xc - x)/Ri  # dR/dxc
+            df2b_dc[1] = (yc - y)/Ri  # dR/dyc
+            df2b_dc = df2b_dc - df2b_dc.mean(axis=1)[:, np.newaxis]
+
+            return df2b_dc
+
+        center_estimate = np.mean(x), np.mean(y)
+        (xc_2b, yc_2b), _ = optimize.leastsq(_f_2b, center_estimate,
+                                             Dfun=_Df_2b,
+                                             col_deriv=True)
+
+        Ri_2b = np.sqrt((x-xc_2b)**2 + (y-yc_2b)**2)
+        R_2b = Ri_2b.mean()
+
+        self.params = (xc_2b, yc_2b, R_2b)
+        self.Ri_2b = Ri_2b
         return True
 
     def residuals(self, data):
