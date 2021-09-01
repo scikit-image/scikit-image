@@ -36,10 +36,9 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
     Returns:
     --------
     match_coords: (2, m) array
-        The points in `coords1` that are the closest corresponding match to
+        The points in `coords1` that are the closest corresponding matches to
         those in `coords0` as determined by the (Gaussian weighted) sum of
         squared differences between patches surrounding each point.
-
     """
     y, x = np.mgrid[-radius:radius + 1, -radius:radius + 1]
     weights = np.exp(-0.5 * (x ** 2 + y ** 2) / sigma ** 2)
@@ -58,7 +57,7 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 
 
 ############################################################################
-# For this example, we generate a set of slightly tilted noisy images.
+# For this example, we generate a list of slightly tilted noisy images.
 
 img = data.moon()
 
@@ -75,14 +74,14 @@ img_list = [util.random_noise(filters.gaussian(im, 1.1), var=5e-4, seed=seed)
 psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
-# Reference points are detected over all images in the set.
+# Reference points are detected over all images in the list.
 min_dist = 5
 corner_list = [feature.corner_peaks(
     feature.corner_harris(img), threshold_rel=0.001, min_distance=min_dist)
                for img in img_list]
 
 ############################################################################
-# The Harris corner detected in the first image are choosen as
+# The Harris corners detected in the first image are chosen as
 # references. Then the detected points on the other images are
 # matched to the reference points.
 
@@ -92,7 +91,7 @@ matching_corners = [match_locations(img0, img1, coords0, coords1, min_dist)
                     for img1, coords1 in zip(img_list, corner_list)]
 
 ############################################################################
-# Once all the points are registred to the reference points, robust
+# Once all the points are registered to the reference points, robust
 # relative affine transformations can be estimated using the RANSAC method.
 src = np.array(coords0)
 trfm_list = [measure.ransac((dst, src),
