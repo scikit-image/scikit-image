@@ -32,7 +32,7 @@ cdef class MCP:
     cdef OFFSETS_INDEX_T [:] traceback_offsets
     cdef EDGE_T [:,:] flat_pos_edge_map
     cdef EDGE_T [:,:] flat_neg_edge_map
-    # offsets is part of public API. Used to interpret traceback result of finde_costs()
+    # offsets is part of public API. Used to interpret traceback result of find_costs()
     cdef public OFFSET_T [:,:] offsets
     cdef INDEX_T [:] flat_offsets
     cdef FLOAT_T [:] offset_lengths
