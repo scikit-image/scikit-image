@@ -1,12 +1,13 @@
 import numpy as np
-from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
-from skimage.transform import AffineTransform
-from skimage.measure.fit import _dynamic_max_trials
+import pytest
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_less, xfail, arch32)
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (arch32, assert_almost_equal,
+                                     assert_array_less, assert_equal, xfail)
+from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
+from skimage.measure.fit import _dynamic_max_trials
+from skimage.transform import AffineTransform
 
 
 def test_line_model_invalid_input():
@@ -141,6 +142,16 @@ def test_circle_model_estimate():
     assert_almost_equal(model0.params, model_est.params, 0)
 
 
+def test_circle_model_int_overflow():
+    xy = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]], dtype=np.int32)
+    xy += 500
+
+    model = CircleModel()
+    model.estimate(xy)
+
+    assert_almost_equal(model.params, [500, 500, 1])
+
+
 def test_circle_model_residuals():
     model = CircleModel()
     model.params = (0, 0, 5)
@@ -148,6 +159,19 @@ def test_circle_model_residuals():
     assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
                         np.sqrt(2 * 6**2) - 5)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
+
+
+def test_circle_model_insufficient_data():
+    model = CircleModel()
+
+    with expected_warnings(["Input data does not contain enough significant"]):
+        model.estimate(np.array([[1, 2], [3, 4]]))
+
+    with expected_warnings(["Input data does not contain enough significant"]):
+        model.estimate(np.ones((6, 2)))
+
+    with expected_warnings(["Input data does not contain enough significant"]):
+        model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
 
 
 def test_ellipse_model_invalid_input():
