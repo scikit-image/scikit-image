@@ -245,10 +245,10 @@ class CircleModel(BaseModel):
 
     References
     ----------
-    ..[1] Jekel, Charles F. Obtaining non-linear orthotropic material models
-          for pvc-coated polyester via inverse bubble inflation. Thesis (MEng),
-          Stellenbosch University, 2016. Appendix A, pp. 83-87.
-          https://hdl.handle.net/10019.1/98627
+    .. [1] Jekel, Charles F. Obtaining non-linear orthotropic material models
+           for pvc-coated polyester via inverse bubble inflation.
+           Thesis (MEng), Stellenbosch University, 2016. Appendix A, pp. 83-87.
+           https://hdl.handle.net/10019.1/98627
 
     Examples
     --------
