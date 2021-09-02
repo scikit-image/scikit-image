@@ -130,6 +130,11 @@ the grayscale image above:
     >>> cat[reddish] = [0, 255, 0]
     >>> plt.imshow(cat)
 
+The example color images included in ``skimage.data`` have channels stored
+along the last axis, although other software may follow different conventions.
+The scikit-image library functions supporting color images have a
+``channel_axis`` argument that can be used to specify which axis of an array
+corresponds to channels.
 
 .. _numpy-images-coordinate-conventions:
 
@@ -147,8 +152,13 @@ denote standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
 ``y`` - the vertical one, and the origin is at the bottom left
 (Matplotlib axes, for example, use this convention).
 
-In the case of multichannel images, the last dimension is used for color channels
-and is denoted by ``channel`` or ``ch``.
+In the case of multichannel images, any dimension can be used for color
+channels, and is denoted by ``channel`` or ``ch``. Prior to scikit-image 0.19,
+the channels axis was always last, but in the current release the channel
+position can be specified by a ``channel_axis`` argument. Functions that
+require multichannel data default to ``channel_axis = -1``. Otherwise,
+functions default to ``channel_axis = None``, indicating that no axis is
+assumed to correspond to channels.
 
 Finally, for volumetric (3D) images, such as videos, magnetic resonance imaging
 (MRI) scans, confocal microscopy, etc. we refer to the leading dimension
@@ -156,7 +166,7 @@ as ``plane``, abbreviated as ``pln`` or ``p``.
 
 These conventions are summarized below:
 
-.. table:: Dimension name and order conventions in scikit-image
+.. table:: Dimension name and order conventions in scikit-image*
 
   =========================   ========================================
   Image type                  Coordinates
@@ -167,6 +177,8 @@ These conventions are summarized below:
   3D multichannel             (pln, row, col, ch)
   =========================   ========================================
 
+  * note that the position of ``ch`` is controlled by the ``channel_axis``
+  argument.
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
@@ -182,7 +194,7 @@ than the other two. Some ``scikit-image`` functions provide a ``spacing``
 keyword argument to help handle this kind of data::
 
     >>> from skimage import segmentation
-    >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], multichannel=False)
+    >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], channel_axis=None)
 
 Other times, the processing must be done plane-wise. When planes are stacked
 along the leading dimension (in agreement with our convention), the following

@@ -17,7 +17,7 @@ loops. Here is an example of such repetitive tasks:
         """
         Apply some functions and return an image.
         """
-        image = denoise_tv_chambolle(image[0][0], weight=0.1, multichannel=True)
+        image = denoise_tv_chambolle(image[0][0], weight=0.1, channel_axis=None)
         fd, hog_image = hog(color.rgb2gray(image), orientations=8,
                             pixels_per_cell=(16, 16), cells_per_block=(1, 1),
                             visualize=True)
