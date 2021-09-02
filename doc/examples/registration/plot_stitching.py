@@ -57,6 +57,9 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 
 
 ############################################################################
+# Data generation
+# ---------------
+#
 # For this example, we generate a list of slightly tilted noisy images.
 
 img = data.moon()
@@ -74,6 +77,9 @@ img_list = [util.random_noise(filters.gaussian(im, 1.1), var=5e-4, seed=seed)
 psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 
 ############################################################################
+# Image registration
+# ------------------
+#
 # Reference points are detected over all images in the list.
 
 min_dist = 5
@@ -117,10 +123,13 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list,
 fig.tight_layout()
 
 ############################################################################
+# Image assembling
+# ----------------
+#
 # A composite image can be obtained using the positions of the
-# registered images relative to the reference one. To do so, we can
-# define a global domain around the reference image and position the
-# other images in this domain.
+# registered images relative to the reference one. To do so, we define
+# a global domain around the reference image and position the other
+# images in this domain.
 #
 # A global transformation is defined to move the reference image in the
 # global domain image via a simple translation:
@@ -131,8 +140,8 @@ glob_trfm = np.eye(3)
 glob_trfm[:2, 2] = -margin, -margin
 
 ############################################################################
-# Now, the relative position of the other images in the global domain
-# are obtained by composing the global transformation with the
+# Finally, the relative position of the other images in the global
+# domain are obtained by composing the global transformation with the
 # relative transformations:
 global_img_list = [transform.warp(img, trfm.dot(glob_trfm),
                                   output_shape=out_shape,
