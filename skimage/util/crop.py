@@ -5,26 +5,25 @@ __all__ = ['bounding_box_crop']
 
 def bounding_box_crop(image, bounding_box, axes=None, copy=False):
     """Crop an image from a bounding box.
-        Bounding_box (which is a 2-tuple (min_val, max_val) for each axis)
-        and (optional) axis for corresponding axis order to bounding_box.
 
     Parameters
     ----------
     image : ndarray
-        Input array.
+        Input image to crop.
     bounding_box : list of 2-tuple (x, y) where x < y.
-        Bounding box.
-    axis : tuple, optional
-        Axis order for cropping.
-        if provided, needs to be same legth as bounding_box.
-        else, sequential cropping on axis starting from 0th axis to nth axis.
+        The bounding box to use during cropping. Contains a 2-tuple of
+        (min_val, max_val) for each axis in `axes` (as with Python slices,
+        max_val is non-inclusive).
+    axes : tuple, optional
+        Axes corresponding to the limits defined in `bounding_box`. If None,
+        all axes are included (in ascending order).
     copy : bool, optional
-        If True, ensure output is not a view of input.
+        If True, ensure that the output is not a view of `image`.
 
     Returns
     ----------
     out : ndarray
-        Cropped array.
+        The region of `image` corresponding to the bounding box.
 
     Examples
     --------
