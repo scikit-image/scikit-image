@@ -233,8 +233,10 @@ def test_label2rgb_nd(image_type):
 
     # add a couple of rectangular labels
     labels = np.zeros(shape, dtype=np.int64)
-    labels[1:3, 1:3] = 1
-    labels[5:9, 5:9] = 2
+    # Note: Have to choose labels here so that the 1D slice below also contains
+    #       both label values. Otherwise the labeled colors will not match.
+    labels[2:-2, 1:3] = 1
+    labels[3:-3, 6:9] = 2
 
     # label in the 2D case (correct 2D output is tested in other funcitons)
     labeled_2d = label2rgb(labels, image=img, bg_label=0)
