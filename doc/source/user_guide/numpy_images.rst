@@ -166,19 +166,21 @@ as ``plane``, abbreviated as ``pln`` or ``p``.
 
 These conventions are summarized below:
 
-.. table:: Dimension name and order conventions in scikit-image*
+.. table:: *Dimension name and order conventions in scikit-image*
 
-  =========================   ========================================
+  =========================   =============================
   Image type                  Coordinates
-  =========================   ========================================
+  =========================   =============================
   2D grayscale                (row, col)
   2D multichannel (eg. RGB)   (row, col, ch)
   3D grayscale                (pln, row, col)
   3D multichannel             (pln, row, col, ch)
-  =========================   ========================================
+  =========================   =============================
 
-  * note that the position of ``ch`` is controlled by the ``channel_axis``
-  argument.
+Note that the position of ``ch`` is controlled by the ``channel_axis``
+argument.
+
+|
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
@@ -262,11 +264,11 @@ shape (t, pln, row, col, ch)::
 
 We can then supplement the above table as follows:
 
-.. table:: Addendum to dimension names and orders in scikit-image
+.. table:: *Addendum to dimension names and orders in scikit-image*
 
-  ========================   ========================================
+  ========================   =========================================
   Image type                 coordinates
-  ========================   ========================================
+  ========================   =========================================
   2D color video             (t, row, col, ch)
   3D multichannel video      (t, pln, row, col, ch)
-  ========================   ========================================
+  ========================   =========================================
