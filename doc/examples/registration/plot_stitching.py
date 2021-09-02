@@ -82,8 +82,9 @@ psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 #
 # .. hint::
 #   This step is performed using the approach described in the
-#   **Robust matching using Ransac** gallery example, but any method
-#   from the **Image registration** section can be applied.
+#   **Robust matching using Ransac** gallery example, but any other
+#   method from the **Image registration** section can be applied,
+#   depending on your problem.
 #
 # Reference points are detected over all images in the list.
 
