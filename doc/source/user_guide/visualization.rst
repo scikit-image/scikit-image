@@ -2,7 +2,7 @@ Data visualization
 ------------------
 
 Data visualization takes an important place in image processing. Data can be
-a simple unique 2D image or a more complex with multidimensional aspects: 3D
+a single 2D grayscale image or a more complex one with multidimensional aspects: 3D
 in space, timelapse, multiple channels.
 
 Therefore, the visualization strategy will depend on the data complexity and

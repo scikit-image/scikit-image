@@ -17,7 +17,7 @@ channel
     ``channel_axis`` argument to specify which axis of an array corresponds
     to channels. Images without channels are indicated via
     ``channel_axis=None``. Aside from the functions in ``skimage.color``, most
-    functions with a channel_axis argument just apply the same operation
+    functions with a ``channel_axis`` argument just apply the same operation
     across each channel. In this case, the "channels" do not strictly need to
     represent color or alpha information, but may be any generic batch
     dimension over which to operate.
