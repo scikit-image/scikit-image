@@ -686,7 +686,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     # Li's algorithm requires positive image (because of log(mean))
     image_min = np.min(image)
     image -= image_min
-    tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
+    if image.dtype.kind in 'iu':
+        tolerance = tolerance or 0.5
+    else:
+        tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate for iteration. See "initial_guess" in the parameter list
     if initial_guess is None:
@@ -717,17 +720,39 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
-    while abs(t_next - t_curr) > tolerance:
-        t_curr = t_next
-        foreground = (image > t_curr)
-        mean_fore = np.mean(image[foreground])
-        mean_back = np.mean(image[~foreground])
 
-        t_next = ((mean_back - mean_fore) /
-                  (np.log(mean_back) - np.log(mean_fore)))
+    if image.dtype.kind in 'iu':
+        hist, bin_centers = histogram(image.reshape(-1),
+                                      source_range='image')
+        hist = hist.astype(float)
+        while abs(t_next - t_curr) > tolerance:
+            t_curr = t_next
+            foreground = bin_centers > t_curr
+            background = ~foreground
 
-        if iter_callback is not None:
-            iter_callback(t_next + image_min)
+            mean_fore = np.average(bin_centers[foreground],
+                                   weights=hist[foreground])
+            mean_back = np.average(bin_centers[background],
+                                   weights=hist[background])
+
+            t_next = ((mean_back - mean_fore)
+                      / (np.log(mean_back) - np.log(mean_fore)))
+
+            if iter_callback is not None:
+                iter_callback(t_next + image_min)
+
+    else:
+        while abs(t_next - t_curr) > tolerance:
+            t_curr = t_next
+            foreground = (image > t_curr)
+            mean_fore = np.mean(image[foreground])
+            mean_back = np.mean(image[~foreground])
+
+            t_next = ((mean_back - mean_fore) 
+                      / (np.log(mean_back) - np.log(mean_fore)))
+
+            if iter_callback is not None:
+                iter_callback(t_next + image_min)
 
     threshold = t_next + image_min
     return threshold
