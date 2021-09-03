@@ -243,7 +243,15 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     image = img_as_float(image)
     float_dtype = utils._supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    # copy=True so subsequent in-place operations do not modify the function input
+    image = image.astype(float_dtype, copy=True)
+
+    # Rescale image to [0, 1] to make choice of compactness insensitive to
+    # input image scale.
+    image -= image.min()
+    imax = image.max()
+    if imax != 0:
+        image /= imax
 
     use_mask = mask is not None
     dtype = image.dtype

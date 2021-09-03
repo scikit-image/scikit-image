@@ -37,6 +37,8 @@ Version 1.0
   clear_border(), and update the tests.
 * Remove the deprecation warning for `input` kwarg of the `label`
   function in `skimage/measure/_label.py`
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
 
 Other (2022)
 ------------

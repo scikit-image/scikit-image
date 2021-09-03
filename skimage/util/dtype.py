@@ -134,8 +134,8 @@ def _scale(a, n, m, copy=True):
         else:
             dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
-        warn(f"Downcasting {a.dtype} to {dtype} without scaling because max "
-             f"value {a.max()} fits in {dtype}",
+        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
+             f'value {a.max()} fits in {dtype}',
              stacklevel=3)
         return a.astype(_dtype_bits(kind, m))
     elif n == m:
@@ -367,7 +367,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
 
 def convert(image, dtype, force_copy=False, uniform=False):
     warn("The use of this function is discouraged as its behavior may change "
-         "dramatically in scikit-image 1.0. This function will be removed"
+         "dramatically in scikit-image 1.0. This function will be removed "
          "in scikit-image 1.0.", FutureWarning, stacklevel=2)
     return _convert(image=image, dtype=dtype,
                     force_copy=force_copy, uniform=uniform)

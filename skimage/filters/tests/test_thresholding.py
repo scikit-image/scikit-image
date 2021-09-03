@@ -268,11 +268,11 @@ def test_otsu_camera_image_counts():
     camera = util.img_as_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=counts) < 103
-    
-    
+
+
 def test_otsu_zero_count_histogram():
     """Issue #5497.
-    
+
     As the histogram returned by np.bincount starts with zero,
     it resulted in NaN-related issues.
     """
@@ -730,3 +730,19 @@ def test_multiotsu_lut():
             result = _get_multiotsu_thresh_indices(prob, classes - 1)
 
             assert np.array_equal(result_lut, result)
+
+
+def test_multiotsu_missing_img_and_hist():
+    with pytest.raises(Exception):
+        threshold_multiotsu()
+
+
+def test_multiotsu_hist_parameter():
+    for classes in [2, 3, 4]:
+        for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
+            img = getattr(data, name)()
+            sk_hist = histogram(img, nbins=256)
+            #
+            thresh_img = threshold_multiotsu(img, classes)
+            thresh_sk_hist = threshold_multiotsu(classes=classes, hist=sk_hist)
+            assert np.allclose(thresh_img, thresh_sk_hist)

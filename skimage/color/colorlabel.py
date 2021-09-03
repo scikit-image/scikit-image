@@ -171,7 +171,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         value in `label` with the image, at a certain alpha value.
     """
     if not 0 <= saturation <= 1:
-        warn(f"saturation must be in range [0, 1], got {saturation}")
+        warn(f'saturation must be in range [0, 1], got {saturation}')
 
     if colors is None:
         colors = DEFAULT_COLORS
