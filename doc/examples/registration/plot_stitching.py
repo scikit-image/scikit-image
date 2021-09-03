@@ -157,17 +157,17 @@ global_img_list = [transform.warp(img, trfm.dot(glob_trfm),
 all_nan_mask = np.all([np.isnan(img) for img in global_img_list], axis=0)
 global_img_list[0][all_nan_mask] = 1.
 
-composit_img = np.nanmean(global_img_list, 0)
-psnr_composit = metrics.peak_signal_noise_ratio(
+composite_img = np.nanmean(global_img_list, 0)
+psnr_composite = metrics.peak_signal_noise_ratio(
     ref_img,
-    composit_img[margin:margin + height,
-                 margin:margin + width])
+    composite_img[margin:margin + height,
+                  margin:margin + width])
 
 fig, ax = plt.subplots(1, 1)
 
-ax.imshow(composit_img, cmap="gray", vmin=0, vmax=1)
+ax.imshow(composite_img, cmap="gray", vmin=0, vmax=1)
 ax.set_axis_off()
-ax.set_title(f"Reconstructed image (PSNR={psnr_composit:.2f})")
+ax.set_title(f"Reconstructed image (PSNR={psnr_composite:.2f})")
 
 fig.tight_layout()
 
