@@ -45,6 +45,13 @@ New Features
   were added to ``skimage.color.lab2rgb``, ``skimage.color.rgb2lab``,
   ``skimage.color.xyz2lab``, ``skimage.color.lab2xyz``,
   ``skimage.color.xyz2luv`` and ``skimage.color.luv2xyz``.
+- ``skimage.filters.threshold_multiotsu`` has a new ``hist`` keyword argument
+  to allow use with a user-supplied histogram. (#5543)
+- ``skimage.restoration.denoise_bilateral`` added support for images containing
+  negative values. (#5527)
+- The ``skimage.feature`` functions ``blob_dog``, ``blob_doh`` and ``blob_log``
+  now support a ``threshold_rel`` keyword argument that can be used to specify
+  a relative threshold (in range [0, 1]) rather than an absolute one. (#5517)
 
 
 Documentation
@@ -94,6 +101,9 @@ Documentation
 - Update reference link documentation in the ``adjust_sigmoid`` function.
 - Fix reference to multiscale_basic_features in TrainableSegmenter.
 - Slight ``shape_index`` docstring modification to specify 2D array.
+- Fix and standardize docstrings for blob detection functions (#5547)
+- Updated the User Guide to reflect usage of ``channel_axis`` rather than
+  ``multichannel``. (#5554)
 
 
 Improvements
@@ -125,6 +135,10 @@ Improvements
   ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
   multithreaded use.
 - A ``skimage.color.label2rgb`` performance regression was addressed.
+- Improved numerical precision in ``CircleModel.estimate``. (#5190)
+- Added default keyword argument values to
+  ``skimage.restoration.denoise_tv_bregman``, ``skimage.measure.block_reduce``,
+  and ``skimage.filters.threshold_local``. (#5454)
 
 
 API Changes
@@ -151,6 +165,16 @@ API Changes
   can be used to override this behavior when desired.
 - Color conversion functions now have a new ``channel_axis`` keyword argument
   (see **New Features** section).
+- SLIC superpixel segmentation outputs may differ from previous versions for
+  data that was not already scaled to [0, 1] range. There is now an automatic
+  internal rescaling of the input to [0, 1] so that the ``compactness``
+  parameter has an effect that is independent of the input image's scaling.
+- A bug fix to the phase nomalization applied within
+  ``skimage.register.phase_cross_correlation`` may result in a different result
+  as compared to prior releases. The prior behavior of "unnormalized" cross
+  correlation is still available by explicitly setting ``normalization=None``.
+  There is no change to the masked cross-correlation case, which uses a
+  different algorithm.
 
 
 Bugfixes
@@ -185,6 +209,15 @@ Bugfixes
 - Fix ``skimage.feature.blob_dog`` docstring example and normalization.
 - Fix uint8 overflow in ``skimage.exposure.adjust_gamma``.
 - Work with pooch 1.5.0 for fetching data (#5529).
+- The ``offsets`` attribute of ``skimage.graph.MCP`` is now public. (#5547)
+- Fix io.imread behavior with pathlib.Path inputs (#5543)
+- Make scikit-image imports from Pooch, compatible with pooch >= 1.5.0. (#5529)
+- Fix several broken doctests and restore doctesting on GitHub Actions. (#5505)
+- Fix broken doctests in ``skimage.exposure.histogram`` and
+  ``skimage.measure.regionprops_table``. (#5522)
+- Rescale image consistently during SLIC superpixel segmentation. (#5518)
+- Corrected phase correlation in ``skimage.register.phase_cross_correlation``.
+  (#5461)
 
 
 Deprecations
