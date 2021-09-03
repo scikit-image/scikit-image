@@ -154,10 +154,10 @@ denote standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
 
 In the case of multichannel images, any dimension (array axis) can be used for
 color channels, and is denoted by ``channel`` or ``ch``. Prior to scikit-image
-0.19, this channels dimension was always last, but in the current release the
+0.19, this channel dimension was always last, but in the current release the
 channel dimension can be specified by a ``channel_axis`` argument. Functions
-that require multichannel data default to ``channel_axis = -1``. Otherwise,
-functions default to ``channel_axis = None``, indicating that no axis is
+that require multichannel data default to ``channel_axis=-1``. Otherwise,
+functions default to ``channel_axis=None``, indicating that no axis is
 assumed to correspond to channels.
 
 Finally, for volumetric (3D) images, such as videos, magnetic resonance imaging
