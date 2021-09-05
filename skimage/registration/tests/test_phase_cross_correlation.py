@@ -12,28 +12,46 @@ from skimage.registration._phase_cross_correlation import (
 )
 
 
-def test_correlation():
+@pytest.mark.parametrize('normalization', [None, 'phase'])
+def test_correlation(normalization):
     reference_image = fft.fftn(camera())
     shift = (-7, 12)
     shifted_image = fourier_shift(reference_image, shift)
 
     # pixel precision
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       space="fourier")
+    result, _, _ = phase_cross_correlation(reference_image,
+                                           shifted_image,
+                                           space="fourier",
+                                           normalization=normalization)
     assert_allclose(result[:2], -np.array(shift))
 
 
-def test_subpixel_precision():
+@pytest.mark.parametrize('normalization', ['nonexisting'])
+def test_correlation_invalid_normalization(normalization):
+    reference_image = fft.fftn(camera())
+    shift = (-7, 12)
+    shifted_image = fourier_shift(reference_image, shift)
+
+    # pixel precision
+    with pytest.raises(ValueError):
+        phase_cross_correlation(reference_image,
+                                shifted_image,
+                                space="fourier",
+                                normalization=normalization)
+
+
+@pytest.mark.parametrize('normalization', [None, 'phase'])
+def test_subpixel_precision(normalization):
     reference_image = fft.fftn(camera())
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
     # subpixel precision
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       upsample_factor=100,
-                                                       space="fourier")
+    result, _, _ = phase_cross_correlation(reference_image,
+                                           shifted_image,
+                                           upsample_factor=100,
+                                           space="fourier",
+                                           normalization=normalization)
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 

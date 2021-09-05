@@ -113,7 +113,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                          "Should be one of: "+", ".join(valid_bcs)+'.')
 
     img = img_as_float(image)
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     img = img.astype(float_dtype, copy=False)
 
     RGB = img.ndim == 3

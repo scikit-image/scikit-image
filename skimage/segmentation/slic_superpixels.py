@@ -112,7 +112,7 @@ def _get_grid_centroids(image, n_centroids):
 def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=None, mask=None, *,
+         slic_zero=False, start_label=1, mask=None, *,
          channel_axis=-1):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
@@ -213,10 +213,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
       interpret them as 3D with the last dimension having length 3, use
       `channel_axis=-1`.
 
-    * `start_label` is introduced to handle the issue [4]_. The labels
-      indexing starting at 0 will be deprecated in future versions. If
-      `mask` is not `None` labels indexing starts at 1 and masked area
-      is set to 0.
+    * `start_label` is introduced to handle the issue [4]_. Label indexing
+      starts at 1 by default.
 
     References
     ----------
@@ -245,7 +243,15 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     image = img_as_float(image)
     float_dtype = utils._supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    # copy=True so subsequent in-place operations do not modify the function input
+    image = image.astype(float_dtype, copy=True)
+
+    # Rescale image to [0, 1] to make choice of compactness insensitive to
+    # input image scale.
+    image -= image.min()
+    imax = image.max()
+    if imax != 0:
+        image /= imax
 
     use_mask = mask is not None
     dtype = image.dtype
@@ -270,17 +276,6 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
             raise ValueError("Lab colorspace conversion requires a RGB image.")
         elif image.shape[channel_axis] == 3:
             image = rgb2lab(image)
-
-    if start_label is None:
-        if use_mask:
-            start_label = 1
-        else:
-            warnings.warn("skimage.measure.label's indexing starts from 0. " +
-                          "In future version it will start from 1. " +
-                          "To disable this warning, explicitely " +
-                          "set the `start_label` parameter to 1.",
-                          FutureWarning, stacklevel=2)
-            start_label = 0
 
     if start_label not in [0, 1]:
         raise ValueError("start_label should be 0 or 1.")

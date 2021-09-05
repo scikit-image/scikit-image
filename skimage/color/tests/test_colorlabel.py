@@ -6,21 +6,9 @@ from numpy.testing import (assert_array_almost_equal,
                            assert_array_equal, assert_no_warnings,
                            assert_warns)
 
+from skimage._shared.testing import expected_warnings
 from skimage.color.colorconv import hsv2rgb, rgb2hsv
 from skimage.color.colorlabel import label2rgb
-
-
-def test_deprecation_warning():
-
-    image = np.ones((3, 3))
-    label = np.ones((3, 3))
-
-    with pytest.warns(FutureWarning) as record:
-        label2rgb(image, label)
-
-    expected_msg = "The new recommended value"
-
-    assert str(record[0].message).startswith(expected_msg)
 
 
 def test_shape_mismatch():
@@ -39,15 +27,21 @@ def test_wrong_kind():
         label2rgb(label, kind='foo', bg_label=-1)
 
 
-def test_uint_image():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_uint_image(channel_axis):
     img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
-    output = label2rgb(labels, image=img, bg_label=0)
+    output = label2rgb(labels, image=img, bg_label=0,
+                       channel_axis=channel_axis)
     # Make sure that the output is made of floats and in the correct range
     assert np.issubdtype(output.dtype, np.floating)
     assert output.max() <= 1
+
+    # size 3 (RGB) along the specified channel_axis
+    new_axis = channel_axis % output.ndim
+    assert output.shape[new_axis] == 3
 
 
 def test_rgb():
@@ -149,7 +143,8 @@ def test_leave_labels_alone():
     assert_array_equal(labels, labels_saved)
 
 
-def test_avg():
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
+def test_avg(channel_axis):
     # label image
     label_field = np.array([[1, 1, 1, 2],
                             [1, 2, 2, 2],
@@ -180,18 +175,24 @@ def test_avg():
     expected_out = np.dstack((rout, gout, bout))
 
     # test standard averaging
-    out = label2rgb(label_field, image, kind='avg', bg_label=-1)
+    _image = np.moveaxis(image, source=-1, destination=channel_axis)
+    out = label2rgb(label_field, _image, kind='avg', bg_label=-1,
+                    channel_axis=channel_axis)
+    out = np.moveaxis(out, source=channel_axis, destination=-1)
     assert_array_equal(out, expected_out)
 
     # test averaging with custom background value
-    out_bg = label2rgb(label_field, image, bg_label=2, bg_color=(0, 0, 0),
-                       kind='avg')
+    out_bg = label2rgb(label_field, _image, bg_label=2, bg_color=(0, 0, 0),
+                       kind='avg', channel_axis=channel_axis)
+    out_bg = np.moveaxis(out_bg, source=channel_axis, destination=-1)
     expected_out_bg = expected_out.copy()
     expected_out_bg[label_field == 2] = 0
     assert_array_equal(out_bg, expected_out_bg)
 
     # test default background color
-    out_bg = label2rgb(label_field, image, bg_label=2, kind='avg')
+    out_bg = label2rgb(label_field, _image, bg_label=2, kind='avg',
+                       channel_axis=channel_axis)
+    out_bg = np.moveaxis(out_bg, source=channel_axis, destination=-1)
     assert_array_equal(out_bg, expected_out_bg)
 
 
@@ -249,12 +250,12 @@ def test_overlay_custom_saturation():
     assert_array_almost_equal(saturaded_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
 
-@pytest.mark.filterwarnings("error")
 def test_saturation_warning():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
-    with pytest.raises(UserWarning):
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=2)
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=-1)
