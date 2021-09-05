@@ -18,6 +18,7 @@
     "pythons": ["3.7"],
     "matrix": {
          "cython": [],
+         "pythran": [],
          "numpy": ["1.17"],
          "scipy": [],
          "pooch": []

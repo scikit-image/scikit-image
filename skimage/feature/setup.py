@@ -37,8 +37,18 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
-    config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+    if int(os.environ.get('SKIMAGE_USE_PYTHRAN', 1)):
+        import pythran, logging
+        pythran.config.logger.setLevel(logging.INFO)
+        ext = pythran.dist.PythranExtension(
+            'skimage.feature._hessian_det_appx',
+            sources=["skimage/feature/_hessian_det_appx.py"],
+            config=['compiler.blas=none',
+                   ])
+        config.ext_modules.append(ext)
+    else:
+        config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
+                             include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_haar', sources=['_haar.cpp'],
