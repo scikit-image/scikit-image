@@ -42,7 +42,7 @@ def configuration(parent_package='', top_path=None):
         pythran.config.logger.setLevel(logging.INFO)
         ext = pythran.dist.PythranExtension(
             'skimage.feature._hessian_det_appx',
-            sources=["skimage/feature/_hessian_det_appx.py"],
+            sources=["skimage/feature/_hessian_det_appx_pythran.py"],
             config=['compiler.blas=none',
                    ])
         config.ext_modules.append(ext)
