@@ -77,7 +77,7 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
                 "Image sizes must match their respective mask sizes.")
 
     xcorr = cross_correlate_masked(moving_image, reference_image, moving_mask,
-                                   reference_mask, axes=(0, 1), mode='full',
+                                   reference_mask, axes=tuple(range(moving_image.ndim)), mode='full',
                                    overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
