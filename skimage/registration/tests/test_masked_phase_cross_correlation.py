@@ -66,7 +66,7 @@ def test_masked_registration_3d_contiguous_mask():
 
     offset = (2, -9, 20)
 
-    # create square mask
+    # create square mask    
     ref_mask = np.zeros_like(ref_vol, dtype=bool)
     ref_mask[:-2, 150:200, 150:200] = True
     ref_shifted = real_shift(ref_vol, offset)
