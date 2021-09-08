@@ -11,6 +11,17 @@ array
     correspond to spatial dimensions of the image, and color channels for
     color images. See {ref}`numpy`. 
 
+channel
+    Typically used to refer to a single color channel in a color image. RGBA
+    images have an additional alpha (transparency) channel. Functions use a
+    ``channel_axis`` argument to specify which axis of an array corresponds
+    to channels. Images without channels are indicated via
+    ``channel_axis=None``. Aside from the functions in ``skimage.color``, most
+    functions with a ``channel_axis`` argument just apply the same operation
+    across each channel. In this case, the "channels" do not strictly need to
+    represent color or alpha information, but may be any generic batch
+    dimension over which to operate.
+
 contour
 iso-valued contour
     Curve along which a 2-D image has a constant value. The interior

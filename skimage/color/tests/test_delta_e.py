@@ -10,8 +10,9 @@ from skimage.color.delta_e import (deltaE_cie76, deltaE_ciede94,
                                    deltaE_ciede2000, deltaE_cmc)
 
 
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_ciede2000_dE(dtype):
+def test_ciede2000_dE(dtype, channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
@@ -24,7 +25,9 @@ def test_ciede2000_dE(dtype):
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_ciede2000(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_ciede2000(lab1, lab2, channel_axis=channel_axis)
     assert dE2.dtype == _supported_float_type(dtype)
 
     rtol = 1e-2 if dtype == np.float32 else 1e-4
@@ -62,8 +65,9 @@ def load_ciede2000_data():
     return np.loadtxt(path, dtype=dtype)
 
 
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_cie76(dtype):
+def test_cie76(dtype, channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
@@ -76,7 +80,9 @@ def test_cie76(dtype):
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_cie76(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_cie76(lab1, lab2, channel_axis=channel_axis)
     assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         4.00106328, 6.31415011, 9.1776999, 2.06270077, 2.36957073,
@@ -91,8 +97,9 @@ def test_cie76(dtype):
     assert_allclose(dE2, oracle, rtol=rtol)
 
 
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_ciede94(dtype):
+def test_ciede94(dtype, channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
@@ -105,7 +112,9 @@ def test_ciede94(dtype):
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_ciede94(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_ciede94(lab1, lab2, channel_axis=channel_axis)
     assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.39503887, 1.93410055, 2.45433566, 0.68449187, 0.6695627,
@@ -120,8 +129,9 @@ def test_ciede94(dtype):
     assert_allclose(dE2, oracle, rtol=rtol)
 
 
+@pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_cmc(dtype):
+def test_cmc(dtype, channel_axis):
     data = load_ciede2000_data()
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
@@ -134,7 +144,9 @@ def test_cmc(dtype):
     lab2[:, 1] = data['a2']
     lab2[:, 2] = data['b2']
 
-    dE2 = deltaE_cmc(lab1, lab2)
+    lab1 = np.moveaxis(lab1, source=-1, destination=channel_axis)
+    lab2 = np.moveaxis(lab2, source=-1, destination=channel_axis)
+    dE2 = deltaE_cmc(lab1, lab2, channel_axis=channel_axis)
     assert dE2.dtype == _supported_float_type(dtype)
     oracle = np.array([
         1.73873611, 2.49660844, 3.30494501, 0.85735576, 0.88332927,
@@ -153,11 +165,17 @@ def test_cmc(dtype):
     # issue on Github):
     lab1 = lab2
     expected = np.zeros_like(oracle)
-    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+    assert_almost_equal(
+        deltaE_cmc(lab1, lab2, channel_axis=channel_axis), expected, decimal=6
+    )
 
     lab2[0, 0] += np.finfo(float).eps
-    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
+    assert_almost_equal(
+        deltaE_cmc(lab1, lab2, channel_axis=channel_axis), expected, decimal=6
+    )
 
+
+def test_cmc_single_item():
     # Single item case:
     lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
     assert_equal(deltaE_cmc(lab1, lab2), 0)

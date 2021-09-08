@@ -212,11 +212,11 @@ def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
     mask[365:368, 60:130] = 1
 
     # add randomly positioned small point-like defects
-    rstate = np.random.RandomState(0)
+    rstate = np.random.default_rng(0)
     for radius in [0, 2, 4]:
         # larger defects are less common
         thresh = 3.25 + 0.25 * radius  # larger defects less commmon
-        tmp_mask = rstate.randn(*image_orig.shape[:-1]) > thresh
+        tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
         if radius > 0:
             tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
         mask[tmp_mask] = 1

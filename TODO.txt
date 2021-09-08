@@ -8,44 +8,6 @@ Version 0.17
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.18
-------------
-
-
-Version 0.19
-------------
-
-* Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
-* In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
-  * Also make sure to look in the function ``_init_level_set``
-* In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
-  in flood_fill() ``inplace`` with ``in_place`` and update the tests.
-* In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
-* Remove the definition of `skimage.util.pad` and
-  skimage/util/tests/test_arraypad.py.
-* Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
-  functions.
-* In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-* In ``skimage/color/colorconv.py``, remove the deprecation warnings
-  from `rgb2gray`.
-* In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
-  decoration from ``iradon``.
-* In ``skimage/_shared/utils.py``, raise a ValueError instead of the
-  warning when order > 0 and input array is bool in _set_order.
-* In ``skimage/transform/_warps.py``, raise a ValueError instead of the
-  warning when anti_aliasing is True and input array is bool in resize.
-* In ``skimage/feature/__init__.py``, remove `register_translation`.
-* In ``skimage.measure._marching_cube_lewiner.py``, remove
-  ``marching_cube_lewiner``.
-* In ``skimage.measure._marching_cube_classic.py``, remove
-  ``marching_cube_classic``.
-* In ``skimage/color/colorconv.py``, remove the `alpha`and `is_rgb`
-  arguments and the associated deprecation warnings from `gray2rgb`.
-* In ``skimage/color/colorlabel.py``, remove the `change_default_value`
-  decorator from `label2rgb` and set `bg_label` default value to 0.
-* In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
-
 Version 0.20
 ------------
 
@@ -75,11 +37,8 @@ Version 1.0
   clear_border(), and update the tests.
 * Remove the deprecation warning for `input` kwarg of the `label`
   function in `skimage/measure/_label.py`
-
-Other (2021)
-------------
-* When ``numpy`` is set to > 1.16, one may simplify the implementation of
-  of `feature.blob_log` using the vectorized version of ``np.logspace``.
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
 
 Other (2022)
 ------------
@@ -89,6 +48,8 @@ Other (2022)
 * Remove unneeded `deconv_type` and astype call in `weiner` and
   `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
   supported version of ``scipy`` reaches 1.4.
+* Remove two unneeded astype calls in `butterworth` once the minimum supported
+  version of ``scipy`` reaches 1.4.
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 

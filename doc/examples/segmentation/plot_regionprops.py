@@ -41,10 +41,10 @@ ax.imshow(image, cmap=plt.cm.gray)
 for props in regions:
     y0, x0 = props.centroid
     orientation = props.orientation
-    x1 = x0 + math.cos(orientation) * 0.5 * props.minor_axis_length
-    y1 = y0 - math.sin(orientation) * 0.5 * props.minor_axis_length
-    x2 = x0 - math.sin(orientation) * 0.5 * props.major_axis_length
-    y2 = y0 - math.cos(orientation) * 0.5 * props.major_axis_length
+    x1 = x0 + math.cos(orientation) * 0.5 * props.axis_minor_length
+    y1 = y0 - math.sin(orientation) * 0.5 * props.axis_minor_length
+    x2 = x0 - math.sin(orientation) * 0.5 * props.axis_major_length
+    y2 = y0 - math.cos(orientation) * 0.5 * props.axis_major_length
 
     ax.plot((x0, x1), (y0, y1), '-r', linewidth=2.5)
     ax.plot((x0, x2), (y0, y2), '-r', linewidth=2.5)
@@ -67,8 +67,8 @@ plt.show()
 
 props = regionprops_table(label_img, properties=('centroid',
                                                  'orientation',
-                                                 'major_axis_length',
-                                                 'minor_axis_length'))
+                                                 'axis_major_length',
+                                                 'axis_minor_length'))
 
 #####################################################################
 # We now display a table of these selected properties (one region per row),
@@ -100,7 +100,7 @@ fig = px.imshow(img, binary_string=True)
 fig.update_traces(hoverinfo='skip') # hover is only for label info
 
 props = measure.regionprops(labels, img)
-properties = ['area', 'eccentricity', 'perimeter', 'mean_intensity']
+properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
 
 # For each label, add a filled scatter trace for its contour,
 # and display the properties of the label in the hover of this trace.

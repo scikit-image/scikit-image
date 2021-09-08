@@ -303,7 +303,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
     if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
 
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     phi = _cv_init_level_set(init_level_set, image.shape, dtype=float_dtype)
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
