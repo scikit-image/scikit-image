@@ -67,7 +67,7 @@ Here's the long and short of it:
 
    * Commit locally as you progress (with ``git add`` and ``git commit``).
      Please write `good commit messages
-     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_:
+     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
 3. To submit your contribution:
 
