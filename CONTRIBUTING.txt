@@ -66,7 +66,7 @@ Here's the long and short of it:
       git checkout -b transform-speedups
 
    * Commit locally as you progress (with ``git add`` and ``git commit``).
-     Please write standard, `good commit messages
+     Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_):
      Capitalize the message, limit it to 50 characters, write it in the
      imperative mood, etc.
