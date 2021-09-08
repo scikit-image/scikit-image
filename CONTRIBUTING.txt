@@ -68,8 +68,6 @@ Here's the long and short of it:
    * Commit locally as you progress (with ``git add`` and ``git commit``).
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_:
-     Capitalize the message, limit it to 50 characters, write it in the
-     imperative mood, etc.
 
 3. To submit your contribution:
 
