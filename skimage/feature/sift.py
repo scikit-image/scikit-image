@@ -90,132 +90,133 @@ def _offsets(grad, hess):
 class SIFT(FeatureDetector, DescriptorExtractor):
     """SIFT feature detection and descriptor extraction.
 
-        Parameters
-        ----------
-        upsampling : int, optional
-            Prior to the feature detection the image is upscaled by a factor
-            of 1 (no upscaling), 2 or 4. Method: Bi-cubic interpolation.
-        n_octaves : int, optional
-            Maximum number of octaves. With every octave the image size is
-            halved and the sigma doubled. The number of octaves will be
-            reduced as needed to keep at least 12 pixels along each dimension
-            at the smallest scale.
-        n_scales : int, optional
-            Maximum number of scales in every octave.
-        sigma_min : float, optional
-            The blur level of the seed image. If upsampling is enabled
-            sigma_min is scaled by factor 1/upsampling
-        sigma_in : float, optional
-            The assumed blur level of the input image.
-        c_dog : float, optional
-            Threshold to discard low contrast extrema in the DoG. It's final
-            value is dependent on n_scales by the relation:
-            final_c_dog = (2^(1/n_scales)-1) / (2^(1/3)-1) * c_dog
-        c_edge : float, optional
-            Threshold to discard extrema that lie in edges. If H is the
-            Hessian of an extremum, its "edgeness" is described by
-            tr(H)²/det(H). If the edgeness is higher than
-            (c_edge + 1)²/c_edge, the extremum is discarded.
-        n_bins : int, optional
-            Number of bins in the histogram that describes the gradient
-            orientations around keypoint.
-        lambda_ori : float, optional
-            The window used to find the reference orientation of a keypoint
-            has a width of 6 * lambda_ori * sigma and is weighted by a
-            standard deviation of 2 * lambda_ori * sigma.
-        c_max : float, optional
-            The threshold at which a secondary peak in the orientation
-            histogram is accepted as orientation
-        lambda_descr : float, optional
-            The window used to define the descriptor of a keypoint has a width
-            of 2 * lambda_descr * sigma * (n_hist+1)/n_hist and is weighted by
-            a standard deviation of lambda_descr * sigma.
-        n_hist : int, optional
-            The window used to define the descriptor of a keypoint consists of
-            n_hist * n_hist histograms.
-        n_ori : int, optional
-            The number of bins in the histograms of the descriptor patch.
+    Parameters
+    ----------
+    upsampling : int, optional
+        Prior to the feature detection the image is upscaled by a factor
+        of 1 (no upscaling), 2 or 4. Method: Bi-cubic interpolation.
+    n_octaves : int, optional
+        Maximum number of octaves. With every octave the image size is
+        halved and the sigma doubled. The number of octaves will be
+        reduced as needed to keep at least 12 pixels along each dimension
+        at the smallest scale.
+    n_scales : int, optional
+        Maximum number of scales in every octave.
+    sigma_min : float, optional
+        The blur level of the seed image. If upsampling is enabled
+        sigma_min is scaled by factor 1/upsampling
+    sigma_in : float, optional
+        The assumed blur level of the input image.
+    c_dog : float, optional
+        Threshold to discard low contrast extrema in the DoG. It's final
+        value is dependent on n_scales by the relation:
+        final_c_dog = (2^(1/n_scales)-1) / (2^(1/3)-1) * c_dog
+    c_edge : float, optional
+        Threshold to discard extrema that lie in edges. If H is the
+        Hessian of an extremum, its "edgeness" is described by
+        tr(H)²/det(H). If the edgeness is higher than
+        (c_edge + 1)²/c_edge, the extremum is discarded.
+    n_bins : int, optional
+        Number of bins in the histogram that describes the gradient
+        orientations around keypoint.
+    lambda_ori : float, optional
+        The window used to find the reference orientation of a keypoint
+        has a width of 6 * lambda_ori * sigma and is weighted by a
+        standard deviation of 2 * lambda_ori * sigma.
+    c_max : float, optional
+        The threshold at which a secondary peak in the orientation
+        histogram is accepted as orientation
+    lambda_descr : float, optional
+        The window used to define the descriptor of a keypoint has a width
+        of 2 * lambda_descr * sigma * (n_hist+1)/n_hist and is weighted by
+        a standard deviation of lambda_descr * sigma.
+    n_hist : int, optional
+        The window used to define the descriptor of a keypoint consists of
+        n_hist * n_hist histograms.
+    n_ori : int, optional
+        The number of bins in the histograms of the descriptor patch.
 
-        Attributes
-        ----------
-        delta_min : float
-            The sampling distance of the first octave. It's final value is
-            1/upsampling.
-        float_dtype : type
-            The datatype of the image.
-        scalespace_sigmas : (n_octaves, n_scales + 3) array
-            The sigma value of all scales in all octaves.
-        keypoints : (N, 2) array
-            Keypoint coordinates as ``(row, col)``.
-        positions : (N, 2) array
-            Subpixel-precision keypoint coordinates as ``(row, col)``.
-        sigmas : (N, ) array
-            The corresponding sigma (blur) value of a keypoint.
-        sigmas : (N, ) array
-            The corresponding scale of a keypoint.
-        orientations : (N, ) array
-            The orientations of the gradient around every keypoint.
-        octaves : (N, ) array
-            The corresponding octave of a keypoint.
-        descriptors : (N, n_hist*n_hist*n_ori) array
-            The descriptors of a keypoint.
+    Attributes
+    ----------
+    delta_min : float
+        The sampling distance of the first octave. It's final value is
+        1/upsampling.
+    float_dtype : type
+        The datatype of the image.
+    scalespace_sigmas : (n_octaves, n_scales + 3) array
+        The sigma value of all scales in all octaves.
+    keypoints : (N, 2) array
+        Keypoint coordinates as ``(row, col)``.
+    positions : (N, 2) array
+        Subpixel-precision keypoint coordinates as ``(row, col)``.
+    sigmas : (N, ) array
+        The corresponding sigma (blur) value of a keypoint.
+    sigmas : (N, ) array
+        The corresponding scale of a keypoint.
+    orientations : (N, ) array
+        The orientations of the gradient around every keypoint.
+    octaves : (N, ) array
+        The corresponding octave of a keypoint.
+    descriptors : (N, n_hist*n_hist*n_ori) array
+        The descriptors of a keypoint.
 
-        Notes
-        -----
-        The SIFT algorithm was developed by David Lowe [1]_, [2]_. The
-        implementation here closely follows the detailed description in [3]_,
-        including use of the same default parameters.
+    Notes
+    -----
+    The SIFT algorithm was developed by David Lowe [1]_, [2]_ and later
+    patented by the University of British Columbia. Since the patent expired in
+    2020 it's free to use. The implementation here closely follows the
+    detailed description in [3]_, including use of the same default parameters.
 
-        References
-        ----------
-        .. [1] D.G. Lowe. "Object recognition from local scale-invariant
-               features", Proceedings of the Seventh IEEE International
-               Conference on Computer Vision, 1999, vol.2, pp. 1150-1157.
-               :DOI:`10.1109/ICCV.1999.790410`
+    References
+    ----------
+    .. [1] D.G. Lowe. "Object recognition from local scale-invariant
+           features", Proceedings of the Seventh IEEE International
+           Conference on Computer Vision, 1999, vol.2, pp. 1150-1157.
+           :DOI:`10.1109/ICCV.1999.790410`
 
-        .. [2] D.G. Lowe. "Distinctive Image Features from Scale-Invariant
-               Keypoints", International Journal of Computer Vision, 2004,
-               vol. 60, pp. 91–110.
-               :DOI:`10.1023/B:VISI.0000029664.99615.94`
+    .. [2] D.G. Lowe. "Distinctive Image Features from Scale-Invariant
+           Keypoints", International Journal of Computer Vision, 2004,
+           vol. 60, pp. 91–110.
+           :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
-        .. [3] I. R. Otero and M. Delbracio. "Anatomy of the SIFT Method",
-               Image Processing On Line, 4 (2014), pp. 370–396.
-               :DOI:`10.5201/ipol.2014.82`
+    .. [3] I. R. Otero and M. Delbracio. "Anatomy of the SIFT Method",
+           Image Processing On Line, 4 (2014), pp. 370–396.
+           :DOI:`10.5201/ipol.2014.82`
 
-        Examples
-        --------
-        >>> from skimage.feature import SIFT, match_descriptors
-        >>> from skimage.data import camera
-        >>> from skimage.transform import rotate
-        >>> img1 = camera()
-        >>> img2 = rotate(camera(), 90)
-        >>> detector_extractor1 = SIFT()
-        >>> detector_extractor2 = SIFT()
-        >>> detector_extractor1.detect_and_extract(img1)
-        >>> detector_extractor2.detect_and_extract(img2)
-        >>> matches = match_descriptors(detector_extractor1.descriptors,
-        ...                             detector_extractor2.descriptors,
-        ...                             max_ratio=0.6)
-        >>> matches[10:15]
-        array([[ 10, 412],
-               [ 11, 417],
-               [ 12, 407],
-               [ 13, 411],
-               [ 14, 406]])
-        >>> detector_extractor1.keypoints[matches[10:15, 0]]
-        array([[ 95, 214],
-               [ 97, 211],
-               [ 97, 218],
-               [102, 215],
-               [104, 218]])
-        >>> detector_extractor2.keypoints[matches[10:15, 1]]
-        array([[297,  95],
-               [301,  97],
-               [294,  97],
-               [297, 102],
-               [293, 104]])
+    Examples
+    --------
+    >>> from skimage.feature import SIFT, match_descriptors
+    >>> from skimage.data import camera
+    >>> from skimage.transform import rotate
+    >>> img1 = camera()
+    >>> img2 = rotate(camera(), 90)
+    >>> detector_extractor1 = SIFT()
+    >>> detector_extractor2 = SIFT()
+    >>> detector_extractor1.detect_and_extract(img1)
+    >>> detector_extractor2.detect_and_extract(img2)
+    >>> matches = match_descriptors(detector_extractor1.descriptors,
+    ...                             detector_extractor2.descriptors,
+    ...                             max_ratio=0.6)
+    >>> matches[10:15]
+    array([[ 10, 412],
+           [ 11, 417],
+           [ 12, 407],
+           [ 13, 411],
+           [ 14, 406]])
+    >>> detector_extractor1.keypoints[matches[10:15, 0]]
+    array([[ 95, 214],
+           [ 97, 211],
+           [ 97, 218],
+           [102, 215],
+           [104, 218]])
+    >>> detector_extractor2.keypoints[matches[10:15, 1]]
+    array([[297,  95],
+           [301,  97],
+           [294,  97],
+           [297, 102],
+           [293, 104]])
 
-        """
+    """
 
     def __init__(self, upsampling=2, n_octaves=8, n_scales=3, sigma_min=1.6,
                  sigma_in=0.5,
