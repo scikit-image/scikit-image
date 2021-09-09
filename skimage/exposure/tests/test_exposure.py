@@ -88,17 +88,21 @@ def test_flat_int_range_dtype():
     assert_equal(frequencies.shape, (256,))
 
 
-def test_peak_float_out_of_range_image():
-    im = np.array([10, 100], dtype=np.float16)
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+def test_peak_float_out_of_range_image(dtype):
+    im = np.array([10, 100], dtype=dtype)
     frequencies, bin_centers = exposure.histogram(im, nbins=90)
+    assert bin_centers.dtype == dtype
     # offset values by 0.5 for float...
     assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
 
 
-def test_peak_float_out_of_range_dtype():
-    im = np.array([10, 100], dtype=np.float16)
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+def test_peak_float_out_of_range_dtype(dtype):
+    im = np.array([10, 100], dtype=dtype)
     nbins = 10
     frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
+    assert bin_centers.dtype == dtype
     assert_almost_equal(np.min(bin_centers), -0.9, 3)
     assert_almost_equal(np.max(bin_centers), 0.9, 3)
     assert_equal(len(bin_centers), 10)
