@@ -428,7 +428,7 @@ def intensity_range(image, range_values='image', clip_negative=False):
     return i_min, i_max
 
 
-def _output_dtype(dtype_or_range):
+def _output_dtype(dtype_or_range, image_dtype):
     """Determine the output dtype for rescale_intensity.
 
     The dtype is determined according to the following rules:
@@ -438,7 +438,8 @@ def _output_dtype(dtype_or_range):
       in which case the data type that can contain it will be used
       (e.g. uint16 in this case).
     - if ``dtype_or_range`` is a pair of values, the output data type will be
-      float.
+      ``_supported_float_type(image_dtype)``. This preserves float32 output for
+      float32 inputs.
 
     Parameters
     ----------
@@ -453,7 +454,7 @@ def _output_dtype(dtype_or_range):
     """
     if type(dtype_or_range) in [list, tuple, np.ndarray]:
         # pair of values: always return float.
-        return float
+        return utils._supported_float_type(image_dtype)
     if type(dtype_or_range) == type:
         # already a type: return it
         return dtype_or_range
@@ -565,9 +566,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     array([127, 127, 127], dtype=int32)
     """
     if out_range in ['dtype', 'image']:
-        out_dtype = _output_dtype(image.dtype.type)
+        out_dtype = _output_dtype(image.dtype.type, image.dtype)
     else:
-        out_dtype = _output_dtype(out_range)
+        out_dtype = _output_dtype(out_range, image.dtype)
 
     imin, imax = map(float, intensity_range(image, in_range))
     omin, omax = map(float, intensity_range(image, out_range,
