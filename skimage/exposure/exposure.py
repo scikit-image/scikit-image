@@ -343,6 +343,11 @@ def cumulative_distribution(image, nbins=256):
     hist, bin_centers = histogram(image, nbins)
     img_cdf = hist.cumsum()
     img_cdf = img_cdf / float(img_cdf[-1])
+
+    # cast img_cdf to single precision for float32 or float16 inputs
+    cdf_dtype = utils._supported_float_type(image.dtype)
+    img_cdf = img_cdf.astype(cdf_dtype, copy=False)
+
     return img_cdf, bin_centers
 
 
@@ -382,7 +387,10 @@ def equalize_hist(image, nbins=256, mask=None):
     else:
         cdf, bin_centers = cumulative_distribution(image, nbins)
     out = np.interp(image.flat, bin_centers, cdf)
-    return out.reshape(image.shape)
+    out = out.reshape(image.shape)
+    # Unfortunately, np.interp currently always promotes to float64, so we
+    # have to cast back to single precision when float32 output is desired
+    return out.astype(utils._supported_float_type(image.dtype), copy=False)
 
 
 def intensity_range(image, range_values='image', clip_negative=False):

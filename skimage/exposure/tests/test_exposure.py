@@ -179,12 +179,15 @@ def test_equalize_ubyte():
     check_cdf_slope(cdf)
 
 
-def test_equalize_float():
-    img = util.img_as_float(test_img)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_equalize_float(dtype):
+    img = util.img_as_float(test_img).astype(dtype, copy=False)
     img_eq = exposure.equalize_hist(img)
+    assert img_eq.dtype == _supported_float_type(dtype)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
+    assert bin_edges.dtype == _supported_float_type(dtype)
 
 
 def test_equalize_masked():
