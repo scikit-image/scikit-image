@@ -146,21 +146,18 @@ cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
                 if abs(center_val) < thresh:
                     continue
                 is_local_min = True
+                is_local_max = False
                 for offset in neighbor_offsets:
                     val = center_ptr[offset]
                     if val <= center_val:
+                        is_local_max = True
                         is_local_min = False
+                        for offset in neighbor_offsets:
+                            val = center_ptr[offset]
+                            if val >= center_val:
+                                is_local_max = False
+                                break
                         break
-
-                if is_local_min:
-                    is_local_max = False
-                else:
-                    is_local_max = True
-                    for offset in neighbor_offsets:
-                        val = center_ptr[offset]
-                        if val >= center_val:
-                            is_local_max = False
-                            break
                 if is_local_min or is_local_max:
                     maxima_coords.append((r, c, s))
     return np.asarray(maxima_coords, dtype=np.intp)
