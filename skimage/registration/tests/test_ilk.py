@@ -11,7 +11,7 @@ from test_tvl1 import _sin_flow_gen
 @pytest.mark.parametrize('prefilter', [True, False])
 def test_2d_motion(dtype, gaussian, prefilter):
     # Generate synthetic data
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     image0 = rnd.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     image1 = image1.astype(dtype, copy=False)
@@ -33,7 +33,7 @@ def test_2d_motion(dtype, gaussian, prefilter):
 @pytest.mark.parametrize('prefilter', [True, False])
 def test_3d_motion(gaussian, prefilter):
     # Generate synthetic data
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(123)
     image0 = rnd.normal(size=(50, 55, 60))
     gt_flow, image1 = _sin_flow_gen(image0, npics=3)
     # Estimate the flow
@@ -45,7 +45,7 @@ def test_3d_motion(gaussian, prefilter):
 
 
 def test_no_motion_2d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = rnd.normal(size=(256, 256))
 
     flow = optical_flow_ilk(img, img)
@@ -54,7 +54,7 @@ def test_no_motion_2d():
 
 
 def test_no_motion_3d():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = rnd.normal(size=(64, 64, 64))
 
     flow = optical_flow_ilk(img, img)
@@ -64,7 +64,7 @@ def test_no_motion_3d():
 
 def test_optical_flow_dtype():
     # Generate synthetic data
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     image0 = rnd.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow at double precision
@@ -84,7 +84,7 @@ def test_optical_flow_dtype():
 
 
 def test_incompatible_shapes():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     I0 = rnd.normal(size=(256, 256))
     I1 = rnd.normal(size=(255, 256))
     with pytest.raises(ValueError):
@@ -92,7 +92,7 @@ def test_incompatible_shapes():
 
 
 def test_wrong_dtype():
-    rnd = np.random.RandomState(0)
+    rnd = np.random.default_rng(0)
     img = rnd.normal(size=(256, 256))
     with pytest.raises(ValueError):
         u, v = optical_flow_ilk(img, img, dtype='int')

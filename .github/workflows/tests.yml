@@ -11,6 +11,7 @@ jobs:
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
+        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
@@ -45,6 +46,7 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.8
             PIP_FLAGS: "--pre"
+            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test pre-releases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64

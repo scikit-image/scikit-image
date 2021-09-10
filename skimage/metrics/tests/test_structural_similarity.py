@@ -1,13 +1,11 @@
-import os
 import numpy as np
+import pytest
+from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
-from skimage.metrics import structural_similarity
-
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_almost_equal, fetch)
+from skimage._shared.utils import _supported_float_type
+from skimage.metrics import structural_similarity
 
 np.random.seed(5)
 cam = data.camera()
@@ -52,20 +50,19 @@ def test_structural_similarity_image():
 
 # Because we are forcing a random seed state, it is probably good to test
 # against a few seeds in case on seed gives a particularly bad example
-@testing.parametrize('seed', [1, 2, 3, 5, 8, 13])
-def test_structural_similarity_grad(seed):
-    N = 30
+@pytest.mark.parametrize('seed', [1, 2, 3, 5, 8, 13])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_structural_similarity_grad(seed, dtype):
+    N = 60
     # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
     #       And when testing tests in parallel. Therefore, we choose a few
     #       seeds that are known to work.
     #       The likely cause of this failure is that we are setting a hard
     #       threshold on the value of the gradient. Often the computed gradient
     #       is only slightly larger than what was measured.
-    # X = np.random.rand(N, N) * 255
-    # Y = np.random.rand(N, N) * 255
-    rnd = np.random.RandomState(seed)
-    X = rnd.rand(N, N) * 255
-    Y = rnd.rand(N, N) * 255
+    rnd = np.random.default_rng(seed)
+    X = rnd.random((N, N)).astype(dtype, copy=False) * 255
+    Y = rnd.random((N, N)).astype(dtype, copy=False) * 255
 
     f = structural_similarity(X, Y, data_range=255)
     g = structural_similarity(X, Y, data_range=255, gradient=True)
@@ -77,26 +74,32 @@ def test_structural_similarity_grad(seed):
 
     mssim, grad, s = structural_similarity(
         X, Y, data_range=255, gradient=True, full=True)
+    assert s.dtype == _supported_float_type(dtype)
+    assert grad.dtype == _supported_float_type(dtype)
     assert np.all(grad < 0.05)
 
 
-def test_structural_similarity_dtype():
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_structural_similarity_dtype(dtype):
     N = 30
     X = np.random.rand(N, N)
     Y = np.random.rand(N, N)
+    if np.dtype(dtype).kind in 'iub':
+        X = (X * 255).astype(np.uint8)
+        Y = (X * 255).astype(np.uint8)
+    else:
+        X = X.astype(dtype, copy=False)
+        Y = Y.astype(dtype, copy=False)
 
     S1 = structural_similarity(X, Y)
-
-    X = (X * 255).astype(np.uint8)
-    Y = (X * 255).astype(np.uint8)
-
-    S2 = structural_similarity(X, Y)
+    assert S1.dtype == np.float64
 
     assert S1 < 0.1
-    assert S2 < 0.1
 
 
-@testing.parametrize('channel_axis', [0, 1, 2, -1])
+@pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_structural_similarity_multichannel(channel_axis):
     N = 100
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
@@ -132,7 +135,7 @@ def test_structural_similarity_multichannel(channel_axis):
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(Xc, Yc, win_size=7, channel_axis=None)
 
 
@@ -151,15 +154,17 @@ def test_structural_similarity_multichannel_deprecated():
     assert_almost_equal(S1, S2)
 
 
-def test_structural_similarity_nD():
+@pytest.mark.parametrize('dtype', [np.uint8, np.float32, np.float64])
+def test_structural_similarity_nD(dtype):
     # test 1D through 4D on small random arrays
     N = 10
     for ndim in range(1, 5):
         xsize = [N, ] * 5
-        X = (np.random.rand(*xsize) * 255).astype(np.uint8)
-        Y = (np.random.rand(*xsize) * 255).astype(np.uint8)
+        X = (np.random.rand(*xsize) * 255).astype(dtype)
+        Y = (np.random.rand(*xsize) * 255).astype(dtype)
 
         mssim = structural_similarity(X, Y, win_size=3)
+        assert mssim.dtype == np.float64
         assert mssim < 0.05
 
 
@@ -223,19 +228,32 @@ def test_mssim_mixed_dtype():
     assert_almost_equal(mssim, mssim_mixed)
 
 
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_structural_similarity_small_image(dtype):
+    X = np.zeros((5, 5), dtype=dtype)
+    # structural_similarity can be computed for small images if win_size is
+    # a) odd and b) less than or equal to the images' smaller side
+    assert_equal(structural_similarity(X, X, win_size=3), 1.0)
+    assert_equal(structural_similarity(X, X, win_size=5), 1.0)
+    # structural_similarity errors for small images if user doesn't specify
+    # win_size
+    with pytest.raises(ValueError):
+        structural_similarity(X, X)
+
+
 def test_invalid_input():
     # size mismatch
     X = np.zeros((9, 9), dtype=np.double)
     Y = np.zeros((8, 8), dtype=np.double)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, X, win_size=X.shape[0] + 1)
     # some kwarg inputs must be non-negative
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, X, K1=-0.1)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, X, K2=-0.1)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         structural_similarity(X, X, sigma=-1.0)
