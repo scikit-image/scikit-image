@@ -62,6 +62,7 @@ def match_histograms(image, reference, *, channel_axis=None,
     if image.ndim != reference.ndim:
         raise ValueError('Image and reference must have the same number '
                          'of channels.')
+    out_dtype = utils._supported_float_type(image.dtype)
 
     if channel_axis is not None:
         if image.shape[-1] != reference.shape[-1]:
@@ -74,6 +75,7 @@ def match_histograms(image, reference, *, channel_axis=None,
                                                     reference[..., channel])
             matched[..., channel] = matched_channel
     else:
+        # _match_cumulative_cdf will always return float64 due to np.interp
         matched = _match_cumulative_cdf(image, reference)
 
-    return matched
+    return matched.astype(out_dtype, copy=False)
