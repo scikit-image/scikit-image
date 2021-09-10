@@ -60,13 +60,14 @@ Here's the long and short of it:
       git checkout main
       git pull upstream main
 
-   * Create a branch for the feature you want to work on. Since the
-     branch name will appear in the merge message, use a sensible name
+   * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
       git checkout -b transform-speedups
 
-   * Commit locally as you progress (``git add`` and ``git commit``)
+   * Commit locally as you progress (with ``git add`` and ``git commit``).
+     Please write `good commit messages
+     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
 3. To submit your contribution:
 
