@@ -597,12 +597,14 @@ def test_adjust_gamma_one():
     assert_array_equal(result, image)
 
 
-def test_adjust_gamma_zero():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_gamma_zero(dtype):
     """White image should be returned for gamma equal to zero"""
-    image = np.random.uniform(0, 255, (8, 8))
+    image = np.random.uniform(0, 255, (8, 8)).astype(dtype, copy=False)
     result = exposure.adjust_gamma(image, 0)
     dtype = image.dtype.type
     assert_array_equal(result, dtype_range[dtype][1])
+    assert result.dtype == image.dtype
 
 
 def test_adjust_gamma_less_one():
@@ -656,11 +658,13 @@ def test_adjust_gamma_u8_overflow():
 # Test Logarithmic Correction
 # ===========================
 
-def test_adjust_log_1x1_shape():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_log_1x1_shape(dtype):
     """Check that the shape is maintained"""
-    img = np.ones([1, 1])
+    img = np.ones([1, 1], dtype=dtype)
     result = exposure.adjust_log(img, 1)
     assert img.shape == result.shape
+    assert result.dtype == dtype
 
 
 def test_adjust_log():
@@ -702,11 +706,13 @@ def test_adjust_inv_log():
 # Test Sigmoid Correction
 # =======================
 
-def test_adjust_sigmoid_1x1_shape():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_sigmoid_1x1_shape(dtype):
     """Check that the shape is maintained"""
-    img = np.ones([1, 1])
+    img = np.ones([1, 1], dtype=dtype)
     result = exposure.adjust_sigmoid(img, 1, 5)
     assert img.shape == result.shape
+    assert result.dtype == dtype
 
 
 def test_adjust_sigmoid_cutoff_one():
