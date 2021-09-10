@@ -408,16 +408,19 @@ def test_rescale_raises_on_incorrect_out_range():
 # Test adaptive histogram equalization
 # ====================================
 
-def test_adapthist_grayscale():
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+def test_adapthist_grayscale(dtype):
     """Test a grayscale float image
     """
-    img = util.img_as_float(data.astronaut())
+    img = util.img_as_float(data.astronaut()).astype(dtype, copy=False)
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                           clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 100.140, 3)
+    assert adapted.dtype == _supported_float_type(dtype)
+    snr_decimal = 3 if dtype != np.float16 else 2
+    assert_almost_equal(peak_snr(img, adapted), 100.140, snr_decimal)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
