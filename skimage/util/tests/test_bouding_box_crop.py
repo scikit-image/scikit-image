@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from skimage import data
-from skimage.util.crop import bounding_box_crop
+from skimage.util import bounding_box_crop
 
 rng = np.random.default_rng()
 
