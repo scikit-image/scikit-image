@@ -81,7 +81,7 @@ def equalize_adapthist(image, kernel_size=None,
     image = img_as_uint(image)
     image = np.round(
         rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
-    ).astype(np.uint16)
+    ).astype(np.min_scalar_type(NR_OF_GRAY))
 
     if kernel_size is None:
         kernel_size = tuple([image.shape[dim] // 8
@@ -140,7 +140,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
     # determine gray value bins
     bin_size = 1 + NR_OF_GRAY // nbins
-    lut = np.arange(NR_OF_GRAY)
+    lut = np.arange(NR_OF_GRAY, dtype=np.min_scalar_type(NR_OF_GRAY))
     lut //= bin_size
 
     image = lut[image]
