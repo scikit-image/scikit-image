@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared import utils
 
+
 def _match_cumulative_cdf(source, template):
     """
     Return modified source array so that the cumulative density function of
