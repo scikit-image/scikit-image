@@ -53,6 +53,11 @@ access), specifically to:
   8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
      to ``release_dev.txt``.
 
+  9. Update the file ``skimage/data/__init__.py`` to point the pooch
+     repository to the new branch instead of main during testing.
+     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
+     change it to newly created branch name.
+
 - Submit the release notes for review by other project maintainers:
 
   - Create a PR from v<major>.<minor>.x branch to `main` (at this point,
