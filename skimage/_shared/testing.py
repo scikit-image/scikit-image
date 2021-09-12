@@ -215,7 +215,8 @@ def fetch(data_filename):
     try:
         return data._fetch(data_filename)
     except (ConnectionError, ModuleNotFoundError):
-        pytest.skip(f'Unable to download {data_filename}')
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
 
 
 def test_parallel(num_threads=2, warnings_matching=None):
