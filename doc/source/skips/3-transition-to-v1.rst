@@ -215,6 +215,65 @@ Ongoing discussion will happen on the image.sc forum [10]_, the scikit-image
 mailing list [11]_, and GitHub meta-issue [7]_. Specific links to relevant
 posts will be added to this document before acceptance.
 
+Resolution
+----------
+
+This SKIP was discussed most extensively in a thread on the mailing list in
+July 2021 [12]_. In the end, many and core developers felt that this plan
+posed too big a risk of either changing code behavior silently or eroding
+goodwill in the community, or both. Matthew Brett wrote [13]_:
+
+    I'm afraid I wasn't completely sure whether the 1.0 option would
+    result in breaking what I call the Konrad Hinsen rule for scientific
+    software:
+
+    """
+    Under (virtually) no circumstances should new versions of a scientific
+    package silently give substantially different results for the same
+    function / method call from a previous version of the package.
+    """
+
+Matthew further wrote [14]_ that if we *don't* break the Hinsen rule, but
+instead break users' unpinned scripts, we will lose a lot of goodwill from the
+community:
+
+    If you make all these break (if they are lucky) or give completely
+    wrong results, it's hard to imagine you aren't going to cause
+    significant damage to the rest-of-iceberg body of users who are not on
+    the mailing list.
+
+Riadh Fezzani, one of our core developers, felt strongly that SemVer [6]_ was
+sufficient to protect users [15]_:
+
+    In scikit-image, we adopted the semantic versioning as it
+    is largely adopted in the engineering community. This convention manages
+    API breaking and that's what we are doing by releasing v1.0
+
+Even taking this view, though, it cannot address the issue of external
+scikit-image "documentation", such as a decade's worth of accumulated
+StackOverflow answers, that would be made obsolete by a breaking 1.0 release,
+as pointed out by Josh Warner [16]_:
+
+    It's also worth considering that there is a substantial corpus of
+    scikit-image teaching material out there. The majority we do not control,
+    so cannot be updated or edited. The first hits on YouTube for tutorials
+    are not the most recent, but older ones with lots of views.
+
+Nor can it address the issue of *gradually* migrating a code base from the old
+API to the new API, as pointed out by Tom Caswell [17]_:
+
+    Put another way, you do not want to put a graduate student in the position
+    of saying "I _want_ to use the new API, but I have 10k LoC of inherited
+    code using the old API .....".
+
+Ultimately, all these concerns add up to a compelling case to rejecting the
+SKIP. Juan Nunez-Iglesias wrote on the mailing list [18]_:
+
+    My proposal going forward is to reject SKIP-3 and create a SKIP-4 proposing
+    the skimage2 package.
+
+The SKIP is therefore rejected.
+
 References and Footnotes
 ------------------------
 
@@ -234,6 +293,13 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 .. [9] https://github.com/scikit-image/meeting-notes/blob/main/2021/july-api-meetings.md
 .. [10] https://forum.image.sc/tag/scikit-image
 .. [11] https://mail.python.org/mailman3/lists/scikit-image.python.org/
+.. [12] https://mail.python.org/archives/list/scikit-image@python.org/thread/DSV6PEYVJ4RZRUWWV5SBNF7FFRERTSCF/
+.. [13] https://mail.python.org/archives/list/scikit-image@python.org/message/UYARUQM5LBWXIAWBAPNHIQIDRKUUDTEK/
+.. [14] https://mail.python.org/archives/list/scikit-image@python.org/message/63ZGG7DY5SWVM62XASHMCPFAG6KPJCMT/
+.. [15] https://mail.python.org/archives/list/scikit-image@python.org/message/HXI7YVCN6IFF5TL54JBP5QRUDHKTTYRR/
+.. [16] https://mail.python.org/archives/list/scikit-image@python.org/message/HRZGMOJLD2WDIO3JXQV3PRWKIUOVOF7P/
+.. [17] https://mail.python.org/archives/list/scikit-image@python.org/message/GFXBQYKDACDCH7BGNEGOU7LKHR2LPFX6/
+.. [18] https://mail.python.org/archives/list/scikit-image@python.org/message/5J4W63BXFQTT4GHPTZFH3AM4QHAXOW5R/
 
 Copyright
 ---------
