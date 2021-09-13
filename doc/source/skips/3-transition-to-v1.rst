@@ -5,12 +5,12 @@ SKIP 3 — Transitioning to scikit-image 1.0
 ==========================================
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
-:Status: Draft
+:Status: Final
 :Type: Standards Track
 :Created: 2021-07-15
-:Resolved:
-:Resolution:
-:Version effective: 0.20
+:Resolved: 2021-09-13
+:Resolution: Rejected
+:Version effective: None
 
 Abstract
 --------
