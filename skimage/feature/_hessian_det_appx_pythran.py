@@ -17,12 +17,14 @@ def _clip(x, low, high):
     x : int
         `x` clipped between `high` and `low`.
     """
+    assert 0 <= low <= high
 
     if x > high:
         return high
-    if x < low:
+    elif x < low:
         return low
-    return x
+    else:
+        return x
 
 
 def _integ(img, r, c, rl, cl):
@@ -54,7 +56,7 @@ def _integ(img, r, c, rl, cl):
     c2 = _clip(c + cl, 0, img.shape[1] - 1)
 
     ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
-    return max(0, ans)
+    return max(0., ans)
 
 
 #pythran export _hessian_matrix_det(float64[:,:], float or int)
@@ -94,7 +96,7 @@ def _hessian_matrix_det(img, sigma):
     l = size // 3
     w = size
     b = (size - 1) // 2
-    out = np.zeros_like(img, dtype=np.double)
+    out = np.empty_like(img, dtype=np.double)
     w_i = 1.0 / size / size
 
     if size % 2 == 0:
