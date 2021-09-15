@@ -376,10 +376,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        if scalar_sigma:
-            return np.empty((0, image.ndim + 1))
-        else:
-            return np.empty((0, 2 * image.ndim))
+        return np.empty((0, image.ndim + (1 if scalar_sigma else image.ndim)))
 
     # Convert local_maxima to float64
     lm = local_maxima.astype(float_dtype)
