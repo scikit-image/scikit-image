@@ -545,10 +545,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        if scalar_sigma:
-            return np.empty((0, image.ndim + 1))
-        else:
-            return np.empty((0, 2 * image.ndim))
+        return np.empty((0, image.ndim + (1 if scalar_sigma else image.ndim)))
 
     # Convert local_maxima to float64
     lm = local_maxima.astype(float_dtype)

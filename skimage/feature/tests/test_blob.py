@@ -182,12 +182,9 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
         max_sigma = 8
     blob_func = getattr(feature, function_name)
     blobs = blob_func(z, max_sigma=max_sigma)
-    if anisotropic:
-        # z.ndim coordinates and z.ndim sigmas
-        assert blobs.shape == (0, 2 * z.ndim)
-    else:
-        # z.ndim coordinates and 1 sigma
-        assert blobs.shape == (0, z.ndim + 1)
+    # z.ndim +  (z.ndim sigmas if anisotropic, only one sigma otherwise)
+    expected_shape = 2 * z.ndim if anisotropic else z.ndim + 1
+    assert blobs.shape == (0, expected_shape)
 
 
 @pytest.mark.parametrize(
