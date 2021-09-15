@@ -12,6 +12,8 @@ perpendicular but not along the structure.
 from warnings import warn
 
 import numpy as np
+import itertools
+from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
@@ -105,8 +107,8 @@ def _check_sigmas(sigmas):
                          'than zero.')
     return sigmas
 
-def hessian_matrix_with_Gaussian(image, sigma=1, mode='constant', cval=0, order='rc'):
-    """Compute Hessian matrix using actual Gaussian kernel derivatives.
+def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='rc'):
+    """Compute Hessian matrix using convolutions with Gaussian derivatives.
     The Hessian matrix is defined as::
         H = [Hrr Hrc]
             [Hrc Hcc]
@@ -155,9 +157,24 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='constant', cval=0, order=
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     
-    H_elems = [ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[2, 0]),
-               ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[0, 2]),
-               ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[1, 1])]
+    H_elems = []
+    idx = np.arange(image.ndim)
+    print('this is erroneous, as it also smoothens in other directions!')
+    for derivative_directions in itertools.combinations_with_replacement(idx, 2):
+        # firstderivative = 1*(idx[::-1]==derivative_directions[0])
+        # secondderivative = 1*(idx[::-1]==derivative_directions[1])
+        print(image.ndim-1-derivative_directions[0], image.ndim-1-derivative_directions[1])
+        H_elems.append(
+            ndi.gaussian_filter1d(
+                ndi.gaussian_filter1d(image, sigma=sigma,
+                                      axis=image.ndim-1-derivative_directions[0],
+                                      mode=mode, cval=cval,
+                                      order=1),
+                                  sigma=sigma, mode=mode, cval=0,
+                                  axis=image.ndim-1-derivative_directions[1],
+                                  order=1
+            )
+        )
     return H_elems
 
 
@@ -304,7 +321,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
         # Calculate (sorted) eigenvalues
         eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
-                                                  mode=mode, cval=cval)
+                                                  mode=mode, cval=cval,
+                                                  use_Gaussian_derivatives=False)
 
         if ndim > 1:
 
