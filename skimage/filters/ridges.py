@@ -105,9 +105,65 @@ def _check_sigmas(sigmas):
                          'than zero.')
     return sigmas
 
+def hessian_matrix_with_Gaussian(image, sigma=1, mode='constant', cval=0, order='rc'):
+    """Compute Hessian matrix using actual Gaussian kernel derivatives.
+    The Hessian matrix is defined as::
+        H = [Hrr Hrc]
+            [Hrc Hcc]
+    which is computed by convolving the image with the second derivatives
+    of the Gaussian kernel in the respective r- and c-directions.
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    order : {'rc', 'xy'}, optional
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'rc' indicates the use of
+        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
+        usage of the last axis initially (Hxx, Hxy, Hyy)
+    Returns
+    -------
+    Hrr : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hrc : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hcc : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Examples
+    --------
+    >>> from skimage.feature import hessian_matrix
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 4
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> Hrc
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  1.,  0., -1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0., -1.,  0.,  1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+    """
+
+    image = img_as_float(image)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+    
+    H_elems = [ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[2, 0]),
+               ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[0, 2]),
+               ndi.gaussian_filter(image, sigma=sigma, mode=mode, cval=cval, order=[1, 1])]
+    return H_elems
+
 
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
-                                mode='constant', cval=0):
+                                mode='constant', cval=0,
+                                use_Gaussian_derivatives=False):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -129,6 +185,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    use_Gaussian_derivatives : boolean, optional
+        Indicates whether the Hessian is computed by convolving with Gaussian
+        derivatives.
 
     Returns
     -------
@@ -145,11 +204,12 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
-    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
-                                      mode=mode, cval=cval)
-
-    # Correct for scale
-    hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
+    if use_Gaussian_derivatives:
+        hessian_elements = hessian_matrix_with_Gaussian(image, sigma=sigma, order='rc',
+                                                        mode=mode, cval=cval)
+    else:
+        hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
+                                          mode=mode, cval=cval)
 
     # Compute Hessian eigenvalues
     hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
