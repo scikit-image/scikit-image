@@ -178,17 +178,17 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
             H = ndi.gaussian_filter1d(im, sigma=sigma,
                                   axis=image.ndim - 1 - derivative_directions[0],
                                   mode=mode, cval=cval,
-                                  order=2, truncate=160)
+                                  order=2, truncate=4000)
         else:
             # Case 2:
             H = ndi.gaussian_filter1d(
                     ndi.gaussian_filter1d(im, sigma=sigma,
                                           axis=image.ndim - 1 - derivative_directions[0],
                                           mode=mode, cval=cval,
-                                          order=1, truncate=160),
+                                          order=1, truncate=4000),
                                       sigma=sigma, mode=mode, cval=0,
                                       axis=image.ndim - 1 - derivative_directions[1],
-                                      order=1, truncate=40
+                                      order=1, truncate=4000
                 )
         H_elems.append(H)
 
