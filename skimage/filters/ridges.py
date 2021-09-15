@@ -141,10 +141,10 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
         Element of the Hessian matrix for each pixel in the input image.
     Examples
     --------
-    >>> from skimage.feature import hessian_matrix
+    >>> from skimage.filters import hessian_matrix_with_Gaussian
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=0.1, order='rc')
     >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
@@ -159,35 +159,36 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     
     H_elems = []
     idx = np.arange(image.ndim)
-    print('I cant see whats erroneous about this, but defaults are /not/ pretty!')
-
+    print('Running my Gaussian derivative of the Hessian function...')
     # There are two cases: (1) repeated differentiation in a direction (d^2/dx^2, ...)
     #                      (2) multivariate differentiation (d^2/(dx*dy), ...)
     for derivative_directions in itertools.combinations_with_replacement(idx, 2):
-        # Recursively filter image along directions not differentiated...
+        # First filter along not-dealt-with-directions, using cval if needed
+        # (this must be done before derivatives are computed)
         im = image
         for i in idx:
             if i not in derivative_directions:
                 im = ndi.gaussian_filter1d(im, sigma=sigma,
-                                          axis = image.ndim - 1 - i,
-                                          mode=mode, cval=cval)
-        # Then compute the derivatives in the other directions
+                                           axis = image.ndim - 1 - i,
+                                           mode=mode, cval=cval,
+                                           order=0)
+
         if derivative_directions[0]==derivative_directions[1]:
             # Case 1:
-            H = ndi.gaussian_filter1d(image, sigma=sigma,
+            H = ndi.gaussian_filter1d(im, sigma=sigma,
                                   axis=image.ndim - 1 - derivative_directions[0],
                                   mode=mode, cval=cval,
-                                  order=2)
+                                  order=2, truncate=160)
         else:
             # Case 2:
             H = ndi.gaussian_filter1d(
-                    ndi.gaussian_filter1d(image, sigma=sigma,
-                                          axis=image.ndim-1-derivative_directions[0],
+                    ndi.gaussian_filter1d(im, sigma=sigma,
+                                          axis=image.ndim - 1 - derivative_directions[0],
                                           mode=mode, cval=cval,
-                                          order=1),
+                                          order=1, truncate=160),
                                       sigma=sigma, mode=mode, cval=0,
-                                      axis=image.ndim-1-derivative_directions[1],
-                                      order=1
+                                      axis=image.ndim - 1 - derivative_directions[1],
+                                      order=1, truncate=40
                 )
         H_elems.append(H)
 
