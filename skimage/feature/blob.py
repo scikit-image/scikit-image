@@ -224,7 +224,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
 
     Parameters
     ----------
-    image : 2D or 3D ndarray
+    image : ndarray
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
@@ -268,7 +268,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     -------
     A : (n, image.ndim + sigma) ndarray
         A 2d array with each row representing 2 coordinate values for a 2D
-        image, and 3 coordinate values for a 3D image, plus the sigma(s) used.
+        image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
         When a single sigma is passed, outputs are:
         ``(r, c, sigma)`` or ``(p, r, c, sigma)`` where ``(r, c)`` or
         ``(p, r, c)`` are coordinates of the blob and ``sigma`` is the standard
@@ -376,7 +376,10 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0, 3))
+        if scalar_sigma:
+            return np.empty((0, image.ndim + 1))
+        else:
+            return np.empty((0, 2 * image.ndim))
 
     # Convert local_maxima to float64
     lm = local_maxima.astype(float_dtype)
@@ -408,7 +411,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     Parameters
     ----------
-    image : 2D or 3D ndarray
+    image : ndarray
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
@@ -456,7 +459,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     -------
     A : (n, image.ndim + sigma) ndarray
         A 2d array with each row representing 2 coordinate values for a 2D
-        image, and 3 coordinate values for a 3D image, plus the sigma(s) used.
+        image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
         When a single sigma is passed, outputs are:
         ``(r, c, sigma)`` or ``(p, r, c, sigma)`` where ``(r, c)`` or
         ``(p, r, c)`` are coordinates of the blob and ``sigma`` is the standard
@@ -542,7 +545,10 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0, 3))
+        if scalar_sigma:
+            return np.empty((0, image.ndim + 1))
+        else:
+            return np.empty((0, 2 * image.ndim))
 
     # Convert local_maxima to float64
     lm = local_maxima.astype(float_dtype)
