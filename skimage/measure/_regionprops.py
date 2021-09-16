@@ -261,19 +261,18 @@ class RegionProperties:
         self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
-        if extra_properties is None:
-            extra_properties = []
-        for func in extra_properties:
-            name = func.__name__
-            if hasattr(self, name):
-                msg = (
-                    f"Extra property '{name}' is shadowed by existing "
-                    f"property and will be inaccessible. Consider renaming it."
-                )
-                warn(msg)
-        self._extra_properties = {
-            func.__name__: func for func in extra_properties
-        }
+        if extra_properties is not None:
+            for func in extra_properties:
+                name = func.__name__
+                if hasattr(self, name):
+                    msg = (
+                        f"Extra property '{name}' is shadowed by existing "
+                        f"property and will be inaccessible. Consider renaming it."
+                    )
+                    warn(msg)
+            self._extra_properties = {
+                func.__name__: func for func in extra_properties
+            }
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
