@@ -713,12 +713,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 intensity=r._intensity_image is not None,
                 ndim=r.image.ndim,
             )
-        column_buffer = np.zeros(n, dtype=dtype)
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+            column_buffer = np.zeros(n, dtype=dtype)
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
@@ -728,12 +728,24 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             else:
                 shape = (len(rp),)
 
+            # precompute property column names and locations
+            modified_props = []
+            locs = []
             for ind in np.ndindex(shape):
-                for k in range(n):
-                    loc = ind if len(ind) > 1 else ind[0]
-                    column_buffer[k] = regions[k][prop][loc]
-                modified_prop = separator.join(map(str, (prop,) + ind))
-                out[modified_prop] = np.copy(column_buffer)
+                modified_props.append(separator.join(map(str, (prop,) + ind)))
+                locs.append(ind if len(ind) > 1 else ind[0])
+
+            # fill temporary column data_array
+            n_columns = len(locs)
+            column_data = np.empty((n, n_columns), dtype=dtype)
+            for k in range(n):
+                rp = regions[k][prop]
+                for i, loc in enumerate(locs):
+                    column_data[k, i] = rp[loc]
+
+            # add the columns to the output dictionary
+            for i, modified_prop in enumerate(modified_props):
+                out[modified_prop] = column_data[:, i]
     return out
 
 
