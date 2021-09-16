@@ -421,7 +421,7 @@ class RegionProperties:
         return self._intensity_image[self.slice] * image
 
     def _image_intensity_double(self):
-        return self.image_intensity.astype(np.double)
+        return self.image_intensity.astype(np.double, copy=False)
 
     @property
     def centroid_local(self):
@@ -431,8 +431,8 @@ class RegionProperties:
 
     @property
     def intensity_max(self):
-        return np.max(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.max(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def intensity_mean(self):
@@ -440,8 +440,8 @@ class RegionProperties:
 
     @property
     def intensity_min(self):
-        return np.min(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.min(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def axis_major_length(self):
@@ -718,7 +718,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
-            column_buffer = np.zeros(n, dtype=dtype)
+            column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
