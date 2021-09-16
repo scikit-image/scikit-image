@@ -1,6 +1,8 @@
 import inspect
+from functools import wraps
+from math import atan2, pi as PI, sqrt
 from warnings import warn
-from math import sqrt, atan2, pi as PI
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
@@ -9,8 +11,6 @@ from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
-
-from functools import wraps
 
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
