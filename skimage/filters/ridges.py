@@ -119,8 +119,10 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     image : ndarray
         Input image.
     sigma : float
-        Standard deviation used for the Gaussian kernel, which is used as
-        weighting function for the auto-correlation matrix.
+        Standard deviation used for the Gaussian kernel, which sets the
+        amount of smoothing in terms of pixel-distances. It is
+        advised to not choose a sigma smaller than 1.0, otherwise
+        aliasing may occur.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
     cval : float, optional
@@ -141,16 +143,16 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
         Element of the Hessian matrix for each pixel in the input image.
     Examples
     --------
-    >>> from skimage.ridges import hessian_matrix_with_Gaussian
+    >>> from skimage.filters.ridges import hessian_matrix_with_Gaussian
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=1, order='rc')
     >>> Hrc
-    [[ 0.03586226  0.09144313  0.         -0.09144313 -0.03586226]
-     [ 0.09144313  0.23316561  0.         -0.23316561 -0.09144313]
-     [ 0.          0.          0.          0.          0.        ]
-     [-0.09144313 -0.23316561 -0.          0.23316561  0.09144313]
-     [-0.03586226 -0.09144313 -0.          0.09144313  0.03586226]]
+    array([[ 0.04703673,  0.09209239,  0.        , -0.09209239, -0.04703673],
+           [ 0.11606524,  0.22724212,  0.        , -0.22724212, -0.11606524],
+           [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+           [-0.11606524, -0.22724212,  0.        ,  0.22724212,  0.11606524],
+           [-0.04703673, -0.09209239,  0.        ,  0.09209239,  0.04703673]])
     """
 
     image = img_as_float(image)
@@ -180,13 +182,18 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     for deriv_dirs in itertools.combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        deriv_order = 1*(idx==deriv_dirs[0]) + 1*(idx==deriv_dirs[1])
-        # E.g., for deriv_dirs=[0, 0] we get deriv_order=[2, 0]
-        #       for deriv_dirs=[1, 0] we get deriv_order=[1, 1]
-        #       for deriv_dirs=[1, 1] we get deriv_order=[0, 2]
+        deriv_step1 = 1*(idx==deriv_dirs[0])
+        deriv_step2 = 1*(idx==deriv_dirs[1])
+        # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
+        #                                and deriv_step2=[1, 0]
+        #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
+        #                                and deriv_step2=[0, 1]
+        #       etc., expressing the two successive derivative
+        #             operations in the Hessian
 
         if order == 'rc':
-            deriv_order = deriv_order[::-1]
+            deriv_step1 = deriv_step1[::-1]
+            deriv_step2 = deriv_step2[::-1]
             # For, e.g., deriv_order=[2, 0], we want the second
             # derivative in the "horizontal"/"row" direction, and
             # just Gaussian smoothing in the "vertical"/"column"
@@ -195,9 +202,15 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
             # is the vertical direction, and the second the horizontal
             # direction. Hence, we reverse the list order.
 
+        # Apply two successive Gaussian filter operations, as per detailed in https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
         H_elems.append(
-            ndi.gaussian_filter(image, sigma=sigma, mode=mode,
-                                cval=cval, order=deriv_order)
+            ndi.gaussian_filter(
+                ndi.gaussian_filter(image, sigma=np.sqrt(1/2)*sigma, mode=mode,
+                                    cval=cval, order=deriv_step1,
+                                    truncate=4),
+                sigma=np.sqrt(1/2)*sigma, mode=mode,
+                cval=cval, order=deriv_step2,
+                truncate=4)
         )
 
     return H_elems
