@@ -107,6 +107,7 @@ def _check_sigmas(sigmas):
                          'than zero.')
     return sigmas
 
+
 def gaussian_filter_with_FFT_kernel(input, sigma, order=0, output=None,
                                     mode="reflect", cval=0.0,
                                     truncate=4.0):
@@ -188,8 +189,10 @@ def gaussian_filter_with_FFT_kernel(input, sigma, order=0, output=None,
         output[...] = input[...]
     return output
 
-def gaussian_filter_with_fft_kernel(input, sigma, axis=-1, order=0, output=None,
-                                    mode="reflect", cval=0.0, truncate=4.0):
+
+def gaussian_filter_with_fft_kernel(input, sigma, axis=-1, order=0,
+                                    output=None, mode="reflect", cval=0.0,
+                                    truncate=4.0):
     """1-D Gaussian filter using a kernel computed in the freq. domain
     Parameters
     ----------
@@ -232,10 +235,11 @@ def gaussian_filter_with_fft_kernel(input, sigma, axis=-1, order=0, output=None,
     """
     sd = float(sigma)
     # make the radius of the filter equal to truncate standard deviations
-    lw = int( truncate * sd + 0.5)
+    lw = int(truncate * sd + 0.5)
     # Wavenumber domain Gaussian
-    kx = 2 * np.pi * np.fft.fftfreq(2*lw+1)
-    gauss_wavenumber_domain = np.exp(-kx ** 2 * sd ** 2 / 2) * np.exp(-1j * lw * kx)
+    kx = 2 * np.pi * np.fft.fftfreq(2 * lw + 1)
+    gauss_wavenumber_domain = np.exp(-kx ** 2 * sd ** 2 / 2) \
+                              * np.exp(-1j * lw * kx)
     # Differentiate in the frequency domain (=multiplication with i*k)
     gauss_wavenumber_domain = gauss_wavenumber_domain * (1j * kx)**order
     # Transform to spatial domain
@@ -245,7 +249,8 @@ def gaussian_filter_with_fft_kernel(input, sigma, axis=-1, order=0, output=None,
     return ndi.correlate1d(input, weights, axis, output, mode, cval, 0)
 
 
-def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='rc'):
+def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0,
+                                 order='rc'):
     """Compute Hessian matrix using convolutions with Gaussian derivatives.
     The Hessian matrix is defined as::
         H = [Hrr Hrc]
@@ -284,7 +289,7 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     >>> from skimage.filters.ridges import hessian_matrix_with_Gaussian
     >>> square = np.zeros((30, 30))
     >>> square[15, 15] = 1
-    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=1, order='rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=1)
     >>> import matplotlib.pyplot as plt
     >>> plt.imshow(Hcc)
     >>> plt.colorbar()
@@ -293,7 +298,7 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
-    
+
     H_elems = []
     idx = np.arange(image.ndim)
     # The derivative of an image I convolved with a Gaussian G is
@@ -317,8 +322,8 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     for deriv_dirs in itertools.combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        deriv_step1 = 1*(idx==deriv_dirs[0])
-        deriv_step2 = 1*(idx==deriv_dirs[1])
+        deriv_step1 = 1 * (idx == deriv_dirs[0])
+        deriv_step2 = 1 * (idx == deriv_dirs[1])
         # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
         #                                and deriv_step2=[1, 0]
         #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
@@ -337,13 +342,14 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
             # is the vertical direction, and the second the horizontal
             # direction. Hence, we reverse the list order.
 
-        # Apply two successive Gaussian filter operations, as per detailed in https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
-        if np.all( np.array(sigma)>0.9 ):
+        # Apply two successive Gaussian filter operations, as per detailed in
+        # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
+        if np.all(np.array(sigma)>0.9):
             H_elems.append(
                 ndi.gaussian_filter(
-                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                                        cval=cval, order=deriv_step1,
-                                        truncate=4),
+                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma,
+                                        mode=mode, cval=cval,
+                                        order=deriv_step1, truncate=4),
                     sigma=np.sqrt(1 / 2) * sigma, mode=mode,
                     cval=cval, order=deriv_step2,
                     truncate=4)
@@ -355,9 +361,11 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
             # an FFT to get the FIR response.
             H_elems.append(
                 gaussian_filter_with_FFT_kernel(
-                    gaussian_filter_with_FFT_kernel(image, sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                                                    cval=cval, order=deriv_step1,
-                                                    truncate=100),
+                    gaussian_filter_with_FFT_kernel(image,
+                                                sigma=np.sqrt(1/2) * sigma,
+                                                mode=mode, cval=cval,
+                                                order=deriv_step1,
+                                                truncate=100),
                     sigma=np.sqrt(1 / 2) * sigma, mode=mode,
                     cval=cval, order=deriv_step2,
                     truncate=100)
@@ -413,8 +421,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
 
     # Make nD hessian
     if use_Gaussian_derivatives:
-        hessian_elements = hessian_matrix_with_Gaussian(image, sigma=sigma, order='rc',
-                                                        mode=mode, cval=cval)
+        hessian_elements = hessian_matrix_with_Gaussian(image, sigma=sigma,
+                                                        order='rc', mode=mode,
+                                                        cval=cval)
     else:
         # Kept as a legacy function
         hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
@@ -511,8 +520,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1/3,
 
         # Calculate (sorted) eigenvalues
         eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
-                                                  mode=mode, cval=cval,
-                                                  use_Gaussian_derivatives=use_Gaussian_derivatives)
+                            mode=mode, cval=cval,
+                            use_Gaussian_derivatives=use_Gaussian_derivatives)
 
         if ndim > 1:
 
