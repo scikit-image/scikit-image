@@ -141,16 +141,16 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
         Element of the Hessian matrix for each pixel in the input image.
     Examples
     --------
-    >>> from skimage.filters import hessian_matrix_with_Gaussian
+    >>> from skimage.ridges import hessian_matrix_with_Gaussian
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=0.1, order='rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=1, order='rc')
     >>> Hrc
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0., -1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0., -1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    [[ 0.03586226  0.09144313  0.         -0.09144313 -0.03586226]
+     [ 0.09144313  0.23316561  0.         -0.23316561 -0.09144313]
+     [ 0.          0.          0.          0.          0.        ]
+     [-0.09144313 -0.23316561 -0.          0.23316561  0.09144313]
+     [-0.03586226 -0.09144313 -0.          0.09144313  0.03586226]]
     """
 
     image = img_as_float(image)
@@ -159,38 +159,46 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0, order='
     
     H_elems = []
     idx = np.arange(image.ndim)
-    print('Running my Gaussian derivative of the Hessian function...')
-    # There are two cases: (1) repeated differentiation in a direction (d^2/dx^2, ...)
-    #                      (2) multivariate differentiation (d^2/(dx*dy), ...)
-    for derivative_directions in itertools.combinations_with_replacement(idx, 2):
-        # First filter along not-dealt-with-directions, using cval if needed
-        # (this must be done before derivatives are computed)
-        im = image
-        for i in idx:
-            if i not in derivative_directions:
-                im = ndi.gaussian_filter1d(im, sigma=sigma,
-                                           axis = image.ndim - 1 - i,
-                                           mode=mode, cval=cval,
-                                           order=0)
+    # The derivative of an image I convolved with a Gaussian G is
+    #       (d/dx_i)[I*G]
+    # where * indicates a convolution. The distributive property
+    # of derivatives and convolutions allows us to restate this as
+    #        I * dG/dx_i
+    # that is, the convolution of I with the derivative of a Gaussian.
+    # We need to call scipy.ndimage.gaussian_filter with the argument
+    # "order" which indicates the derivative order in the respective
+    # directions, where 0 = just Gaussian smoothing
+    #                   1 = convolve with first derivative of Gaussian
+    #                   etc.
+    # so supplying order=[2, 0] computes the 2nd Gaussian derivative in
+    # the first direction, and just smoothes the field in the second
+    # direction. That corresponds to the lower-right element of the
+    # Hessian matrix, Hcc. This is why below we will call the array
+    # deriv_order[::-1] thus in reverse order, because the image array
+    # will be in coordinates [(z,)y,x], but we need the Hessian in
+    # order [d^2/dx^2, d^2/(dx*dy), ...], so in reverse order.
+    for deriv_dirs in itertools.combinations_with_replacement(idx, 2):
+        # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        if derivative_directions[0]==derivative_directions[1]:
-            # Case 1:
-            H = ndi.gaussian_filter1d(im, sigma=sigma,
-                                  axis=image.ndim - 1 - derivative_directions[0],
-                                  mode=mode, cval=cval,
-                                  order=2, truncate=4000)
-        else:
-            # Case 2:
-            H = ndi.gaussian_filter1d(
-                    ndi.gaussian_filter1d(im, sigma=sigma,
-                                          axis=image.ndim - 1 - derivative_directions[0],
-                                          mode=mode, cval=cval,
-                                          order=1, truncate=4000),
-                                      sigma=sigma, mode=mode, cval=0,
-                                      axis=image.ndim - 1 - derivative_directions[1],
-                                      order=1, truncate=4000
-                )
-        H_elems.append(H)
+        deriv_order = 1*(idx==deriv_dirs[0]) + 1*(idx==deriv_dirs[1])
+        # E.g., for deriv_dirs=[0, 0] we get deriv_order=[2, 0]
+        #       for deriv_dirs=[1, 0] we get deriv_order=[1, 1]
+        #       for deriv_dirs=[1, 1] we get deriv_order=[0, 2]
+
+        if order == 'rc':
+            deriv_order = deriv_order[::-1]
+            # For, e.g., deriv_order=[2, 0], we want the second
+            # derivative in the "horizontal"/"row" direction, and
+            # just Gaussian smoothing in the "vertical"/"column"
+            # direction. To do that on an array, we need to
+            # differentiate as [0, 2], because the first direction
+            # is the vertical direction, and the second the horizontal
+            # direction. Hence, we reverse the list order.
+
+        H_elems.append(
+            ndi.gaussian_filter(image, sigma=sigma, mode=mode,
+                                cval=cval, order=deriv_order)
+        )
 
     return H_elems
 
@@ -242,8 +250,10 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
         hessian_elements = hessian_matrix_with_Gaussian(image, sigma=sigma, order='rc',
                                                         mode=mode, cval=cval)
     else:
+        # Kept as a legacy function
         hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
                                           mode=mode, cval=cval)
+        hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     # Compute Hessian eigenvalues
     hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
@@ -264,7 +274,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
 
 def meijering(image, sigmas=range(1, 10, 2), alpha=None,
               black_ridges=True, mode='reflect', cval=0,
-              use_Gaussian_derivatives=True):
+              use_Gaussian_derivatives=False):
     """
     Filter an image with the Meijering neuriteness filter.
 
