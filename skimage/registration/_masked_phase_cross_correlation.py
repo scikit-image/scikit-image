@@ -131,8 +131,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         robustness against spurious matches due to small overlap between
         masked images.
     wrap_axes: tuple of ints, optional
-        Axes along which to not zero-pad `arr1` and `arr2` causing the correlation
-        to wrap.
+        Axes along which to not zero-pad `arr1` and `arr2` causing the
+        correlation to wrap.
 
     Returns
     -------
@@ -192,7 +192,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
 
     # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or
     # 7)
-    fast_shape = tuple(final_shape[ax] if wrap_axes is not None and ax in wrap_axes
+    fast_shape = tuple(final_shape[ax]
+                       if wrap_axes is not None and ax in wrap_axes
                        else next_fast_len(final_shape[ax]) for ax in axes)
 
     # We use numpy.fft or the new scipy.fft because they allow leaving the
