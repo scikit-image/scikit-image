@@ -96,7 +96,7 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
 
 
 def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
-                           overlap_ratio=0.3):
+                           overlap_ratio=0.3, wrap_axes=None):
     """
     Masked normalized cross-correlation between arrays.
 
@@ -130,6 +130,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         maximum translation, while a higher `overlap_ratio` leads to greater
         robustness against spurious matches due to small overlap between
         masked images.
+    wrap_axes: tuple of ints, optional
+        Axes along which to not zero-pad `arr1` and `arr2` causing the correlation
+        to wrap.
 
     Returns
     -------
@@ -181,14 +184,16 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     # we slice back to`final_shape` using `final_slice`.
     final_shape = list(arr1.shape)
     for axis in axes:
-        final_shape[axis] = fixed_image.shape[axis] + \
-            moving_image.shape[axis] - 1
+        if wrap_axes is None or axis not in wrap_axes:
+            final_shape[axis] = fixed_image.shape[axis] + \
+                moving_image.shape[axis] - 1
     final_shape = tuple(final_shape)
     final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
 
     # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or
     # 7)
-    fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axes])
+    fast_shape = tuple(final_shape[ax] if wrap_axes is not None and ax in wrap_axes
+                       else next_fast_len(final_shape[ax]) for ax in axes)
 
     # We use numpy.fft or the new scipy.fft because they allow leaving the
     # transform axes unchanged which was not possible with scipy.fftpack's

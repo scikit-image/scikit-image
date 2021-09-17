@@ -277,3 +277,24 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     # uint8 inputs will be processed in float32, so reduce decimal to 5
     assert_almost_equal(xcorr.max(), 1, decimal=5)
     assert_array_equal(max_index, np.array(arr1.shape) / 2)
+
+def test_cross_correlate_masked_wrapped_axes():
+    """Masked normalized cross-correlation between identical arrays
+    should reduce to an autocorrelation even with random masks."""
+    # See random number generator for reproducible results
+    np.random.seed(23)
+
+    arr1 = camera()
+
+    # Random masks with 75% of pixels being valid
+    m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
+    m2 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
+
+    xcorr = cross_correlate_masked(arr1, arr1, m1, m2, axes=(0, 1),
+                                   mode='same', overlap_ratio=0, wrap_axes=(0, 1)).real
+    max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
+
+    # Autocorrelation should have maximum in the self correlation
+    # uint8 inputs will be processed in float32, so reduce decimal to 5
+    assert_almost_equal(xcorr.max(), 1, decimal=5)
+    assert_array_equal(max_index, np.array(arr1.shape)-1)
