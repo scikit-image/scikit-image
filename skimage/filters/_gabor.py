@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
-from .._shared.utils import check_nD
 
+from .._shared.utils import _supported_float_type, check_nD
 
 __all__ = ['gabor_kernel', 'gabor']
 
@@ -14,7 +14,7 @@ def _sigma_prefactor(bandwidth):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0):
+                 n_stds=3, offset=0, dtype=np.complex128):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -44,6 +44,8 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
         deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
+    dtype : {np.complex64, np.complex128}
+        Specifies if the filter is single or double precision complex.
 
     Returns
     -------
@@ -78,6 +80,9 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     if sigma_y is None:
         sigma_y = _sigma_prefactor(bandwidth) / frequency
 
+    if np.dtype(dtype).kind != 'c':
+        raise ValueError("dtype must be complex")
+
     x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
                      np.abs(n_stds * sigma_y * np.sin(theta)), 1))
     y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
@@ -87,7 +92,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     rotx = x * np.cos(theta) + y * np.sin(theta)
     roty = -x * np.sin(theta) + y * np.cos(theta)
 
-    g = np.zeros(y.shape, dtype=complex)
+    g = np.zeros(y.shape, dtype=dtype)
     g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
     g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
@@ -168,8 +173,12 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.show()               # doctest: +SKIP
     """
     check_nD(image, 2)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
+    kernel_dtype = np.promote_types(image.dtype, np.complex64)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
-                     offset)
+                     offset, dtype=kernel_dtype)
 
     filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)

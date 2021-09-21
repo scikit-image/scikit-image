@@ -86,7 +86,7 @@ def equalize_adapthist(image, kernel_size=None,
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
-        ValueError('Incorrect value of `kernel_size`: {}'.format(kernel_size))
+        ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
 
     kernel_size = [int(k) for k in kernel_size]
 

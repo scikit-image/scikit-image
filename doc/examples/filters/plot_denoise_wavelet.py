@@ -49,7 +49,7 @@ plt.gray()
 sigma_est = estimate_sigma(noisy, channel_axis=-1, average_sigmas=True)
 # Due to clipping in random_noise, the estimate will be a bit smaller than the
 # specified sigma.
-print(f"Estimated Gaussian noise standard deviation = {sigma_est}")
+print(f'Estimated Gaussian noise standard deviation = {sigma_est}')
 
 im_bayes = denoise_wavelet(noisy, channel_axis=-1, convert2ycbcr=True,
                            method='BayesShrink', mode='soft',
@@ -77,11 +77,11 @@ psnr_visushrink4 = peak_signal_noise_ratio(original, im_visushrink4)
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')
-ax[0, 0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
+ax[0, 0].set_title(f'Noisy\nPSNR={psnr_noisy:0.4g}')
 ax[0, 1].imshow(im_bayes)
 ax[0, 1].axis('off')
 ax[0, 1].set_title(
-    'Wavelet denoising\n(BayesShrink)\nPSNR={:0.4g}'.format(psnr_bayes))
+    f'Wavelet denoising\n(BayesShrink)\nPSNR={psnr_bayes:0.4g}')
 ax[0, 2].imshow(im_visushrink)
 ax[0, 2].axis('off')
 ax[0, 2].set_title(

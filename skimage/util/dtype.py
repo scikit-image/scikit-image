@@ -130,12 +130,12 @@ def _scale(a, n, m, copy=True):
     if n > m and a.max() < 2 ** m:
         mnew = int(np.ceil(m / 2) * 2)
         if mnew > m:
-            dtype = "int{}".format(mnew)
+            dtype = f'int{mnew}'
         else:
-            dtype = "uint{}".format(mnew)
+            dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
-        warn("Downcasting {} to {} without scaling because max "
-             "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
+        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
+             f'value {a.max()} fits in {dtype}',
              stacklevel=3)
         return a.astype(_dtype_bits(kind, m))
     elif n == m:
@@ -252,8 +252,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError("Can not convert from {} to {}."
-                         .format(dtypeobj_in, dtypeobj_out))
+        raise ValueError(f'Cannot convert from {dtypeobj_in} to '
+                         f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min
@@ -367,7 +367,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
 
 def convert(image, dtype, force_copy=False, uniform=False):
     warn("The use of this function is discouraged as its behavior may change "
-         "dramatically in scikit-image 1.0. This function will be removed"
+         "dramatically in scikit-image 1.0. This function will be removed "
          "in scikit-image 1.0.", FutureWarning, stacklevel=2)
     return _convert(image=image, dtype=dtype,
                     force_copy=force_copy, uniform=uniform)

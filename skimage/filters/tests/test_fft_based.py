@@ -3,6 +3,7 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
 from skimage._shared.fft import fftmodule
+from skimage._shared.utils import _supported_float_type
 from skimage.data import astronaut, coins
 from skimage.filters import butterworth
 
@@ -11,10 +12,13 @@ def _fft_centered(x):
     return fftmodule.fftshift(fftmodule.fftn(fftmodule.fftshift(x)))
 
 
-def test_butterworth_2D_zeros():
-    im = np.zeros((4, 4))
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64,
+                                   np.uint8, np.int32])
+def test_butterworth_2D_zeros_dtypes(dtype):
+    im = np.zeros((4, 4), dtype=dtype)
     filtered = butterworth(im)
     assert filtered.shape == im.shape
+    assert filtered.dtype == _supported_float_type(dtype)
     assert_array_equal(im, filtered)
 
 
@@ -53,18 +57,30 @@ def test_butterworth_2D(high_pass):
 
 
 @pytest.mark.parametrize("high_pass", [True, False])
-def test_butterworth_2D_realfft(high_pass):
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_butterworth_2D_realfft(high_pass, dtype):
     """Filtering a real-valued array is equivalent to filtering a
        complex-valued array where the imaginary part is zero.
     """
-    im = np.random.randn(32, 64)
+    im = np.random.randn(32, 64).astype(dtype)
     kwargs = dict(
         cutoff_frequency_ratio=0.20,
         high_pass=high_pass
     )
+
+    expected_dtype = _supported_float_type(im.dtype)
     filtered_real = butterworth(im, **kwargs)
-    filtered_cplx = butterworth(im.astype(np.complex128), **kwargs)
-    assert_allclose(filtered_real, filtered_cplx.real)
+    assert filtered_real.dtype == expected_dtype
+
+    cplx_dtype = np.promote_types(im.dtype, np.complex64)
+    filtered_cplx = butterworth(im.astype(cplx_dtype), **kwargs)
+    assert filtered_cplx.real.dtype == expected_dtype
+
+    if expected_dtype == np.float64:
+        rtol = atol = 1e-13
+    else:
+        rtol = atol = 1e-5
+    assert_allclose(filtered_real, filtered_cplx.real, rtol=rtol, atol=atol)
 
 
 def test_butterworth_3D_zeros():

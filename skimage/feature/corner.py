@@ -140,15 +140,17 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
-    """Compute Hessian matrix.
+    """Compute the Hessian matrix.
 
-    The Hessian matrix is defined as::
+    In 2D, the Hessian matrix is defined as::
 
         H = [Hrr Hrc]
             [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
     of the Gaussian kernel in the respective r- and c-directions.
+
+    The implementation here also supports n-dimensional data.
 
     Parameters
     ----------
@@ -170,12 +172,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     Returns
     -------
-    Hrr : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hrc : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hcc : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
+    H_elems : list of ndarray
+        Upper-diagonal elements of the hessian matrix for each pixel in the
+        input image. In 2D, this will be a three element list containing [Hrr,
+        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
 
     Examples
     --------
@@ -213,14 +213,14 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     """Compute the approximate Hessian Determinant over an image.
 
     The 2D approximate method uses box filters over integral images to
-    compute the approximate Hessian Determinant, as described in [1]_.
+    compute the approximate Hessian Determinant.
 
     Parameters
     ----------
-    image : array
-        The image over which to compute Hessian Determinant.
+    image : ndarray
+        The image over which to compute the Hessian Determinant.
     sigma : float, optional
-        Standard deviation used for the Gaussian kernel, used for the Hessian
+        Standard deviation of the Gaussian kernel used for the Hessian
         matrix.
     approximate : bool, optional
         If ``True`` and the image is 2D, use a much faster approximate
@@ -378,7 +378,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]
+    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]  # doctest: +SKIP
     array([[0., 0., 0., 0., 0.],
            [0., 2., 4., 2., 0.],
            [0., 4., 0., 4., 0.],
@@ -433,7 +433,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     single valued measure of local curvature, assuming the image as a 3D plane
     with intensities representing heights.
 
-    It is derived from the eigen values of the Hessian, and its
+    It is derived from the eigenvalues of the Hessian, and its
     value ranges from -1 to 1 (and is undefined (=NaN) in *flat* regions),
     with following ranges representing following shapes:
 
@@ -455,7 +455,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used for
@@ -495,7 +495,9 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
     l1, l2 = hessian_matrix_eigvals(H)
 
-    return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
+    # don't warn on divide by 0 as occurs in the docstring example
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
@@ -511,7 +513,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
@@ -568,7 +570,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     method : {'k', 'eps'}, optional
         Method to compute the response image from the auto-correlation matrix.
@@ -644,7 +646,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -707,7 +709,7 @@ def corner_foerstner(image, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -780,7 +782,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Parameters
     ----------
-    image : 2D ndarray
+    image : (M, N) ndarray
         Input image.
     n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
@@ -852,9 +854,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
-    corners : (N, 2) ndarray
+    corners : (K, 2) ndarray
         Corner coordinates `(row, col)`.
     window_size : int, optional
         Search window size for subpixel estimation.
@@ -863,7 +865,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Returns
     -------
-    positions : (N, 2) ndarray
+    positions : (K, 2) ndarray
         Subpixel corner positions. NaN for "not classified" corners.
 
     References
@@ -1031,7 +1033,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     min_distance : int, optional
         The minimal allowed distance separating peaks.
@@ -1131,7 +1133,7 @@ def corner_moravec(image, window_size=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     window_size : int, optional
         Window size.
@@ -1184,9 +1186,9 @@ def corner_orientations(image, corners, mask):
 
     Parameters
     ----------
-    image : 2D array
+    image : (M, N) array
         Input grayscale image.
-    corners : (N, 2) array
+    corners : (K, 2) array
         Corner coordinates as ``(row, col)``.
     mask : 2D array
         Mask defining the local neighborhood of the corner used for the
@@ -1194,7 +1196,7 @@ def corner_orientations(image, corners, mask):
 
     Returns
     -------
-    orientations : (N, 1) array
+    orientations : (K, 1) array
         Orientations of corners in the range [-pi, pi].
 
     References

@@ -151,11 +151,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         anti_aliasing = not image.dtype == bool
 
     if image.dtype == bool and anti_aliasing:
-        warn("Input image dtype is bool. Gaussian convolution is not defined "
-             "with bool data type. Please set anti_aliasing to False or "
-             "explicitely cast input image to another data type. Starting "
-             "from version 0.19 a ValueError will be raised instead of this "
-             "warning.", FutureWarning, stacklevel=2)
+        raise ValueError("anti_aliasing must be False for boolean images")
 
     factors = (np.asarray(input_shape, dtype=float) /
                np.asarray(output_shape, dtype=float))
@@ -1123,12 +1119,12 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     """
     multichannel = channel_axis is not None
     if image.ndim != 2 and not multichannel:
-        raise ValueError("Input array must be 2-dimensional when "
-                         f"`channel_axis=None`, got {image.ndim}")
+        raise ValueError(f'Input array must be 2-dimensional when '
+                         f'`channel_axis=None`, got {image.ndim}')
 
     if image.ndim != 3 and multichannel:
-        raise ValueError("Input array must be 3-dimensional when "
-                         f"`channel_axis` is specified, got {image.ndim}")
+        raise ValueError(f'Input array must be 3-dimensional when '
+                         f'`channel_axis` is specified, got {image.ndim}')
 
     if center is None:
         center = (np.array(image.shape)[:2] / 2) - 0.5
