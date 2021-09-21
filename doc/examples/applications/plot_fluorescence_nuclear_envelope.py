@@ -43,15 +43,15 @@ from skimage import (
 #####################################################################
 # We start with a single cell/nucleus to construct the workflow.
 
-dat = imageio.volread('http://cmci.embl.de/sampleimages/NPCsingleNucleus.tif')
+image_sequence = imageio.volread('http://cmci.embl.de/sampleimages/NPCsingleNucleus.tif')
 
-print(f'shape: {dat.shape}')
+print(f'shape: {image_sequence.shape}')
 
 #####################################################################
 # The dataset is a 2D image stack with 15 frames (time points) and 2 channels.
 
 fig = px.imshow(
-    dat,
+    image_sequence,
     facet_col=1,
     animation_frame=0,
     binary_string=True,
@@ -62,7 +62,7 @@ plotly.io.show(fig)
 #####################################################################
 # To begin with, let us consider the first channel of the first image.
 
-ch0t0 = dat[0, 0, :, :]
+ch0t0 = image_sequence[0, 0, :, :]
 
 #####################################################################
 # Segment the nucleus rim
@@ -124,7 +124,7 @@ for a in ax.ravel():
 # Now that we have segmented the nuclear membrane in the first channel, we use
 # it as a mask to measure the intensity in the second channel.
 
-ch1t0 = dat[0, 1, :, :]
+ch1t0 = image_sequence[0, 1, :, :]
 selection = np.where(mask, ch1t0, 0)
 
 _, ax = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
@@ -186,11 +186,11 @@ def get_mask(im, sigma=2, thresh=0.1, thickness=4):
 
 fluorescence_change = []
 
-for i in range(dat.shape[0]):
-    mask = get_mask(dat[i, 0, :, :])
+for i in range(image_sequence.shape[0]):
+    mask = get_mask(image_sequence[i, 0, :, :])
     props = measure.regionprops_table(
         mask,
-        intensity_image=dat[i, 1, :, :],
+        intensity_image=image_sequence[i, 1, :, :],
         properties=('label', 'area', 'intensity_mean')
     )
     assert props['label'] == 1
