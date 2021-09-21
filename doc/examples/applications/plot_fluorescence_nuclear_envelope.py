@@ -73,7 +73,9 @@ expand = segmentation.expand_labels(label, distance=4)
 
 erode = morphology.erosion(label)
 
-fig, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
+mask = expand - erode
+
+_, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
 
 ax[0, 0].imshow(ch0t0, cmap=plt.cm.gray)
 ax[0, 0].set_title('a) Raw')
@@ -96,10 +98,47 @@ ax[1, 1].set_title('d) Expand')
 ax[1, 2].imshow(erode, cmap=plt.cm.gray)
 ax[1, 2].set_title('e) Erode')
 
-ax[1, 3].imshow(expand - erode, cmap=plt.cm.gray)
+ax[1, 3].imshow(mask, cmap=plt.cm.gray)
 ax[1, 3].set_title('f) Nucleus Rim')
 
 for a in ax.ravel():
     a.axis('off')
+
+#####################################################################
+# Apply the segmented rim as a mask
+# =================================
+# Now that we have segmented the nuclear membrane in the first channel, we use
+# it as a mask to measure the intensity in the second channel.
+
+ch1t0 = dat[0, 1, :, :]
+selection = np.where(mask, ch1t0, 0)
+
+_, ax = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+
+ax[0].imshow(ch1t0)
+ax[0].set_title('Second channel (raw)')
+ax[0].axis('off')
+
+ax[1].imshow(selection)
+ax[1].set_title('Selection')
+ax[1].axis('off')
+
+#####################################################################
+# Iterate the measurement for each time point
+# ===========================================
+
+def get_mask(im, sigma=2, thresh=0.1, thickness=4):
+    im = filters.gaussian(im, sigma=sigma)
+    im = im > thresh
+    im = ndi.binary_fill_holes(im)
+    # Keep larger region
+    label = measure.label(im)
+    regions = measure.regionprops_table(label, properties=('label', 'area'))
+    label_small = regions['label'][np.argmin(regions['area'])]
+    label[label == label_small] = 0  # background value
+    expand = segmentation.expand_labels(label, distance=thickness)
+    erode = morphology.erosion(label)
+    mask = expand - erode
+    return mask
 
 plt.show()
