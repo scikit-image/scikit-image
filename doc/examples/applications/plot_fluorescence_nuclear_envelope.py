@@ -29,15 +29,15 @@ from skimage import (
 #####################################################################
 # We start with a single cell/nucleus to construct the workflow.
 
-one = imageio.volread('http://cmci.embl.de/sampleimages/NPCsingleNucleus.tif')
+dat = imageio.volread('http://cmci.embl.de/sampleimages/NPCsingleNucleus.tif')
 
-print(f'shape: {one.shape}')
+print(f'shape: {dat.shape}')
 
 #####################################################################
 # The dataset is a 2D image stack with 15 frames (time points) and 2 channels.
 
 fig = px.imshow(
-    one,
+    dat,
     facet_col=1,
     animation_frame=0,
     binary_string=True,
@@ -48,7 +48,7 @@ plotly.io.show(fig)
 #####################################################################
 # To begin with, let us consider the first channel of the first image.
 
-ch0t0 = one[0, 0, :, :]
+ch0t0 = dat[0, 0, :, :]
 
 #####################################################################
 # Segment the nucleus rim
