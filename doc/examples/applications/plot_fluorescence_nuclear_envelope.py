@@ -127,6 +127,7 @@ ax[1].axis('off')
 # Iterate the measurement for each time point
 # ===========================================
 
+
 def get_mask(im, sigma=2, thresh=0.1, thickness=4):
     im = filters.gaussian(im, sigma=sigma)
     im = im > thresh
@@ -140,5 +141,6 @@ def get_mask(im, sigma=2, thresh=0.1, thickness=4):
     erode = morphology.erosion(label)
     mask = expand - erode
     return mask
+
 
 plt.show()
