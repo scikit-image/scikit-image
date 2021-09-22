@@ -62,13 +62,13 @@ plotly.io.show(fig)
 #####################################################################
 # To begin with, let us consider the first channel of the first image.
 
-ch0t0 = image_sequence[0, 0, :, :]
+image_t_0_channel_0 = image_sequence[0, 0, :, :]
 
 #####################################################################
 # Segment the nucleus rim
 # =======================
 
-smooth = filters.gaussian(ch0t0, sigma=2)
+smooth = filters.gaussian(image_t_0_channel_0, sigma=2)
 
 thresh = smooth > 0.1
 
@@ -91,7 +91,7 @@ mask = expand - erode
 
 _, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
 
-ax[0, 0].imshow(ch0t0, cmap=plt.cm.gray)
+ax[0, 0].imshow(image_t_0_channel_0, cmap=plt.cm.gray)
 ax[0, 0].set_title('a) Raw')
 
 ax[0, 1].imshow(smooth, cmap=plt.cm.gray)
@@ -124,12 +124,12 @@ for a in ax.ravel():
 # Now that we have segmented the nuclear membrane in the first channel, we use
 # it as a mask to measure the intensity in the second channel.
 
-ch1t0 = image_sequence[0, 1, :, :]
-selection = np.where(mask, ch1t0, 0)
+image_t_0_channel_1 = image_sequence[0, 1, :, :]
+selection = np.where(mask, image_t_0_channel_1, 0)
 
 _, ax = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 
-ax[0].imshow(ch1t0)
+ax[0].imshow(image_t_0_channel_1)
 ax[0].set_title('Second channel (raw)')
 ax[0].axis('off')
 
@@ -145,7 +145,7 @@ ax[1].axis('off')
 
 props = measure.regionprops_table(
     mask,
-    intensity_image=ch1t0,
+    intensity_image=image_t_0_channel_1,
     properties=('label', 'area', 'intensity_mean')
 )
 
