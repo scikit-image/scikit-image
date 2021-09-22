@@ -75,13 +75,12 @@ thresh = smooth > 0.1
 fill = ndi.binary_fill_holes(thresh)
 
 #####################################################################
-# Although it is not strictly necessary, let us discard the other nucleus part
-# visible in the bottom right-hand corner.
+# Following the original workflow, let us remove objects which touch the image
+# border. Here, we can see part of another nucleus in the bottom right-hand
+# corner.
 
-label = measure.label(fill)
-regions = measure.regionprops_table(label, properties=('label', 'area'))
-label_small = regions['label'][np.argmin(regions['area'])]
-label[label == label_small] = 0  # background value
+clear = segmentation.clear_border(fill)
+label = measure.label(clear)
 
 expand = segmentation.expand_labels(label, distance=4)
 
@@ -170,11 +169,9 @@ def get_mask(im, sigma=2, thresh=0.1, thickness=4):
     im = filters.gaussian(im, sigma=sigma)
     im = im > thresh
     im = ndi.binary_fill_holes(im)
-    # Keep larger region
+    # Clear objects touching image border
+    im = segmentation.clear_border(im)
     label = measure.label(im)
-    regions = measure.regionprops_table(label, properties=('label', 'area'))
-    label_small = regions['label'][np.argmin(regions['area'])]
-    label[label == label_small] = 0  # background value
     expand = segmentation.expand_labels(label, distance=thickness)
     erode = morphology.erosion(label)
     mask = expand - erode
