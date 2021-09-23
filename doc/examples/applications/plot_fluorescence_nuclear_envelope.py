@@ -10,7 +10,8 @@ dimensions) which shows a process of protein re-localization from the
 cytoplasmic area to the nuclear envelope. This biological application was
 first presented by Andrea Boni and collaborators in [1]_; it was used in a
 textbook by Kota Miura [2]_ as well as in other works ([3]_, [4]_).
-In other words, we port this workflow from ImageJ Macro to scikit-image.
+In other words, we port this workflow from ImageJ Macro to Python with
+scikit-image.
 
 .. [1] Boni A, Politi AZ, Strnad P, Xiang W, Hossain MJ, Ellenberg J (2015)
        "Live imaging and modeling of inner nuclear membrane targeting reveals
@@ -67,10 +68,14 @@ image_t_0_channel_0 = image_sequence[0, 0, :, :]
 #####################################################################
 # Segment the nucleus rim
 # =======================
+# Let us apply a Gaussian low-pass filter to this image in order to smooth it.
+# Next, we segment the nuclei, finding the threshold between the background
+# and foreground with Otsu's method: We get a binary image.
 
-smooth = filters.gaussian(image_t_0_channel_0, sigma=2)
+smooth = filters.gaussian(image_t_0_channel_0, sigma=1.5)
 
-thresh = smooth > 0.1
+thresh_value = filters.threshold_otsu(smooth)
+thresh = smooth > thresh_value
 
 fill = ndi.binary_fill_holes(thresh)
 
@@ -82,7 +87,7 @@ fill = ndi.binary_fill_holes(thresh)
 clear = segmentation.clear_border(fill)
 label = measure.label(clear)
 
-expand = segmentation.expand_labels(label, distance=4)
+expand = segmentation.expand_labels(label, distance=1)
 
 erode = morphology.erosion(label)
 
@@ -165,14 +170,15 @@ props['area'] * props['intensity_mean']
 # nucleus rim).
 
 
-def get_mask(im, sigma=2, thresh=0.1, thickness=4):
+def get_mask(im, sigma=1.5, radius=1):
     im = filters.gaussian(im, sigma=sigma)
-    im = im > thresh
+    thresh_value = filters.threshold_otsu(im)
+    im = im > thresh_value
     im = ndi.binary_fill_holes(im)
     # Clear objects touching image border
     im = segmentation.clear_border(im)
     label = measure.label(im)
-    expand = segmentation.expand_labels(label, distance=thickness)
+    expand = segmentation.expand_labels(label, distance=radius)
     erode = morphology.erosion(label)
     mask = expand - erode
     return mask
