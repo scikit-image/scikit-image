@@ -193,6 +193,7 @@ def _assemble_contours(segments):
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
                     # Remove head from the detected contours
+                    starts.pop(head[0])
                     contours.pop(head_num, None)
                     # Update contour starts end ends
                     starts[tail[0]] = (tail, tail_num)
