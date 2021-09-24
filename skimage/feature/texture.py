@@ -58,14 +58,15 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     References
     ----------
-    .. [1] The GLCM Tutorial Home Page,
-           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Haralick, RM.; Shanmugam, K.,
-           "Textural features for image classification"
-           IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+    .. [1] M. Hall-Beyer, 2007. GLCM Texture: A Tutorial
+           https://prism.ucalgary.ca/handle/1880/51900
+           DOI:`10.11575/PRISM/33280`
+    .. [2] R.M. Haralick, K. Shanmugam, and I. Dinstein, "Textural features for
+           image classification", IEEE Transactions on Systems, Man, and
+           Cybernetics, vol. SMC-3, no. 6, pp. 610-621, Nov. 1973.
            :DOI:`10.1109/TSMC.1973.4309314`
-    .. [3] Pattern Recognition Engineering, Morton Nadler & Eric P.
-           Smith
+    .. [3] M. Nadler and E.P. Smith, Pattern Recognition Engineering,
+           Wiley-Interscience, 1993.
     .. [4] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
@@ -193,8 +194,10 @@ def graycoprops(P, prop='contrast'):
 
     References
     ----------
-    .. [1] The GLCM Tutorial Home Page,
-           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
+    .. [1] M. Hall-Beyer, 2007. GLCM Texture: A Tutorial v. 1.0 through 3.0.
+           The GLCM Tutorial Home Page,
+           https://prism.ucalgary.ca/handle/1880/51900
+           DOI:`10.11575/PRISM/33280`
 
     Examples
     --------
@@ -302,7 +305,7 @@ def local_binary_pattern(image, P, R, method='default'):
             finer quantization of the angular space which is gray scale and
             rotation invariant.
         * 'nri_uniform': non rotation-invariant uniform patterns variant
-            which is only gray scale invariant [2]_.
+            which is only gray scale invariant [2]_, [3]_.
         * 'var': rotation invariant variance measures of the contrast of local
             image texture which is rotation but not gray scale invariant.
 
@@ -313,14 +316,21 @@ def local_binary_pattern(image, P, R, method='default'):
 
     References
     ----------
-    .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
-           Classification with Local Binary Patterns.
-           Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
-    .. [2] Face recognition with local binary patterns.
-           Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
-           2004.
+    .. [1] T. Ojala, M. Pietikainen, T. Maenpaa, "Multiresolution gray-scale
+           and rotation invariant texture classification with local binary
+           patterns", IEEE Transactions on Pattern Analysis and Machine
+           Intelligence, vol. 24, no. 7, pp. 971-987, July 2002
+           :DOI:`10.1109/TPAMI.2002.1017623`
+    .. [2] T. Ahonen, A. Hadid and M. Pietikainen. "Face recognition with
+           local binary patterns", in Proc. Eighth European Conf. Computer
+           Vision, Prague, Czech Republic, May 11-14, 2004, pp. 469-481, 2004.
+           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851
+           :DOI:`10.1007/978-3-540-24670-1_36`
+    .. [3] T. Ahonen, A. Hadid and M. Pietikainen, "Face Description with
+           Local Binary Patterns: Application to Face Recognition",
+           IEEE Transactions on Pattern Analysis and Machine Intelligence,
+           vol. 28, no. 12, pp. 2037-2041, Dec. 2006
+           :DOI:`10.1109/TPAMI.2006.244.`
     """
     check_nD(image, 2)
 
@@ -371,10 +381,11 @@ def multiblock_lbp(int_image, r, c, width, height):
 
     References
     ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
+    .. [1] L. Zhang, R. Chu, S. Xiang, S. Liao, S.Z. Li. "Face Detection Based
+           on Multi-Block LBP Representation", In Proceedings: Advances in
+           Biometrics, International Conference, ICB 2007, Seoul, Korea.
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+           :DOI:`10.1007/978-3-540-74549-5_2`
     """
 
     int_image = np.ascontiguousarray(int_image, dtype=np.float32)
@@ -431,10 +442,11 @@ def draw_multiblock_lbp(image, r, c, width, height,
 
     References
     ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
+    .. [1] L. Zhang, R. Chu, S. Xiang, S. Liao, S.Z. Li. "Face Detection Based
+           on Multi-Block LBP Representation", In Proceedings: Advances in
+           Biometrics, International Conference, ICB 2007, Seoul, Korea.
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+           :DOI:`10.1007/978-3-540-74549-5_2`
     """
 
     # Default colors for regions.
