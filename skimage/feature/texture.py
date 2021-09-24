@@ -147,7 +147,7 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
     # normalize each GLCM
     if normed:
         P = P.astype(np.float64)
-        glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+        glcm_sums = np.sum(P, axis=(0, 1), keepdims=True)
         glcm_sums[glcm_sums == 0] = 1
         P /= glcm_sums
 
@@ -225,7 +225,7 @@ def graycoprops(P, prop='contrast'):
 
     # normalize each GLCM
     P = P.astype(np.float64)
-    glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+    glcm_sums = np.sum(P, axis=(0, 1), keepdims=True)
     glcm_sums[glcm_sums == 0] = 1
     P /= glcm_sums
 
@@ -244,23 +244,20 @@ def graycoprops(P, prop='contrast'):
 
     # compute property for each GLCM
     if prop == 'energy':
-        asm = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+        asm = np.sum(P ** 2, axis=(0, 1))
         results = np.sqrt(asm)
     elif prop == 'ASM':
-        results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+        results = np.sum(P ** 2, axis=(0, 1))
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
         J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
-        diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
-        diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+        diff_i = I - np.sum(I * P, axis=(0, 1))
+        diff_j = J - np.sum(J * P, axis=(0, 1))
 
-        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
-                                           axes=(0, 1))[0, 0])
-        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
-                                           axes=(0, 1))[0, 0])
-        cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
-                                 axes=(0, 1))[0, 0]
+        std_i = np.sqrt(np.sum(P * (diff_i) ** 2, axis=(0, 1)))
+        std_j = np.sqrt(np.sum(P * (diff_j) ** 2, axis=(0, 1)))
+        cov = np.sum(P * (diff_i * diff_j), axis=(0, 1))
 
         # handle the special case of standard deviations near zero
         mask_0 = std_i < 1e-15
@@ -272,7 +269,7 @@ def graycoprops(P, prop='contrast'):
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
     elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
         weights = weights.reshape((num_level, num_level, 1, 1))
-        results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
+        results = np.sum(P * weights, axis=(0, 1))
 
     return results
 
