@@ -3,9 +3,10 @@ Methods to characterize image textures.
 """
 
 import numpy as np
+
 from .._shared.utils import check_nD
-from ..util import img_as_float
 from ..color import gray2rgb
+from ..util import img_as_float
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
                        _multiblock_lbp)
@@ -170,8 +171,8 @@ def graycoprops(P, prop='contrast'):
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
-    Each GLCM is normalized to have a sum of 1 before the computation of texture
-    properties.
+    Each GLCM is normalized to have a sum of 1 before the computation of
+    texture properties.
 
     Parameters
     ----------
@@ -265,7 +266,7 @@ def graycoprops(P, prop='contrast'):
         results[mask_0] = 1
 
         # handle the standard case
-        mask_1 = mask_0 == False
+        mask_1 = ~mask_0
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
     elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
         weights = weights.reshape((num_level, num_level, 1, 1))
