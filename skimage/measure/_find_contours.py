@@ -184,8 +184,7 @@ def _assemble_contours(segments):
                 if tail_num > head_num:
                     # tail was created second. Append tail to head.
                     head.extend(tail)
-                    # remove all traces of tail:
-                    ends.pop(tail[-1])
+                    # Remove tail from the detected contours
                     contours.pop(tail_num, None)
                     # Update contour starts end ends
                     starts[head[0]] = (head, head_num)
@@ -193,8 +192,7 @@ def _assemble_contours(segments):
                 else:  # tail_num <= head_num
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
-                    # remove all traces of head:
-                    starts.pop(head[0])
+                    # Remove head from the detected contours
                     contours.pop(head_num, None)
                     # Update contour starts end ends
                     starts[tail[0]] = (tail, tail_num)
@@ -207,14 +205,16 @@ def _assemble_contours(segments):
             ends[to_point] = (new_contour, current_index)
             current_index += 1
         elif head is None:  # tail is not None
-            # We've found a single contour to which the new segment should be
+            # tail first element is to_point: the new segment should be
             # prepended.
             tail.appendleft(from_point)
+            # Update ends and starts
             starts[from_point] = (tail, tail_num)
         else:  # tail is None and head is not None:
-            # We've found a single contour to which the new segment should be
+            # head last element is from_point: the new segment should be
             # appended
             head.append(to_point)
+            # Update ends and starts
             ends[to_point] = (head, head_num)
 
     return [np.array(contour) for _, contour in sorted(contours.items())]
