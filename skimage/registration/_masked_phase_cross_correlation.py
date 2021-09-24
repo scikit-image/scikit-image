@@ -132,7 +132,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         masked images.
     wrap_axes: tuple of ints, optional
         Axes along which to not zero-pad `arr1` and `arr2` causing the
-        correlation to wrap.
+        correlation to wrap. The shape of the output will match the shape of
+        `arr1` along any axis included in `wrap_axes`.
 
     Returns
     -------
