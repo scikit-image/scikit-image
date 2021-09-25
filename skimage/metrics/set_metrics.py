@@ -110,7 +110,62 @@ def hausdorff_pair(image0, image1):
 
     if max_dist_from_b > max_dist_from_a:
         return a_points[max_index_from_b], \
-            b_points[nearest_b_point_indices_from_a[max_index_from_b]]
+               b_points[nearest_b_point_indices_from_a[max_index_from_b]]
     else:
         return a_points[nearest_a_point_indices_from_b[max_index_from_a]], \
-            b_points[max_index_from_a]
+               b_points[max_index_from_a]
+
+
+def modified_hausdorff_distance(image0, image1):
+    """Calculates the Modified Hausdorff distance between nonzero elements of
+    given images.
+
+    The Modified Hausdorff Distance (MHD) has been shown to perform better
+    than the directed Hausdorff Distance (HD) in the following work by
+    Dubuisson et al. [1]_. The function calculates forward and backward
+    mean distances and returns the largest of the two.
+
+    Parameters
+    ----------
+    image0, image1 : ndarray
+        Arrays where ``True`` represents a point that is included in a
+        set of points. Both arrays must have the same shape.
+
+    Returns
+    -------
+    distance : float
+        The Modified Hausdorff distance between coordinates of nonzero pixels in
+        ``image0`` and ``image1``, using the Euclidian distance.
+
+    References
+    ----------
+    .. [1] M. P. Dubuisson and A. K. Jain. A Modified Hausdorff distance for object
+       matching. In ICPR94, pages A:566-568, Jerusalem, Israel, 1994.
+       http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=576361
+
+    Examples
+    --------
+    >>> points_a = (3, 0)
+    >>> points_b = (6, 0)
+    >>> shape = (7, 1)
+    >>> image_a = np.zeros(shape, dtype=bool)
+    >>> image_b = np.zeros(shape, dtype=bool)
+    >>> image_a[points_a] = True
+    >>> image_b[points_b] = True
+    >>> modified_hausdorff_distance(image_a, image_b)
+    1.5
+
+    """
+    a_points = np.transpose(np.nonzero(image0))
+    b_points = np.transpose(np.nonzero(image1))
+
+    # Handle empty sets properly:
+    # - if both sets are empty, return zero
+    # - if only one set is empty, return infinity
+    if len(a_points) == 0:
+        return 0 if len(b_points) == 0 else np.inf
+    elif len(b_points) == 0:
+        return np.inf
+
+    return max(np.mean(cKDTree(a_points).query(b_points, k=1)),
+               np.mean(cKDTree(b_points).query(a_points, k=1)))
