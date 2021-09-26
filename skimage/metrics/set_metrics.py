@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree, cKDTree
 
 
 def hausdorff_distance(image0, image1):
@@ -167,5 +167,5 @@ def modified_hausdorff_distance(image0, image1):
     elif len(b_points) == 0:
         return np.inf
 
-    return max(np.mean(cKDTree(a_points).query(b_points, k=1)),
-               np.mean(cKDTree(b_points).query(a_points, k=1)))
+    return max(np.mean(cKDTree(a_points).query(b_points, k=1)[0]),
+               np.mean(cKDTree(b_points).query(a_points, k=1)[0]))
