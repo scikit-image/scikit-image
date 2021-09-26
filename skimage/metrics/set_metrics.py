@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from scipy.spatial import KDTree, cKDTree
+from scipy.spatial import cKDTree
 
 
 def hausdorff_distance(image0, image1):
