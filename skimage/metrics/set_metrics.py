@@ -153,7 +153,7 @@ def modified_hausdorff_distance(image0, image1):
     >>> image_a[points_a] = True
     >>> image_b[points_b] = True
     >>> modified_hausdorff_distance(image_a, image_b)
-    1.5
+    3.0
 
     """
     a_points = np.transpose(np.nonzero(image0))
