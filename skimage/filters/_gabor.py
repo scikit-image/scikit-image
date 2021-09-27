@@ -93,12 +93,14 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     y0 = math.ceil(
         max(abs(n_stds * sigma_y * ct), abs(n_stds * sigma_x * st), 1)
     )
-    y, x = np.mgrid[-y0:y0 + 1, -x0:x0 + 1]
-
+    y, x = np.meshgrid(np.arange(-y0, y0 + 1),
+                       np.arange(-x0, x0 + 1),
+                       indexing='ij',
+                       sparse=True)
     rotx = x * ct + y * st
     roty = -x * st + y * ct
 
-    g = np.empty(y.shape, dtype=dtype)
+    g = np.empty(roty.shape, dtype=dtype)
     g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
     g /= 2 * np.pi * sigma_x * sigma_y
     g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
