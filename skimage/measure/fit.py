@@ -16,11 +16,6 @@ def _check_data_atleast_2D(data):
         raise ValueError('Input data must be at least 2D.')
 
 
-def _norm_along_axis(x, axis):
-    """NumPy < 1.8 does not support the `axis` argument for `np.linalg.norm`."""
-    return np.sqrt(np.einsum('ij,ij->i', x, x))
-
-
 class BaseModel(object):
 
     def __init__(self):
@@ -129,7 +124,7 @@ class LineModelND(BaseModel):
         origin, direction = params
         res = (data - origin) - \
               ((data - origin) @ direction)[..., np.newaxis] * direction
-        return _norm_along_axis(res, axis=1)
+        return np.linalg.norm(res, axis=1)
 
     def predict(self, x, axis=0, params=None):
         """Predict intersection of the estimated line model with a hyperplane
