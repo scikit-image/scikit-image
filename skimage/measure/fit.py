@@ -841,6 +841,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         # do sample selection according data pairs
         samples = [d[spl_idxs] for d in data]
 
+        # for next iteration choose random sample set and be sure that
+        # no samples repeat
+        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
+
         # optional check if random sample set is valid
         if validate_data and not is_data_valid(*samples):
             continue
@@ -856,20 +860,20 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         residuals = np.abs(model.residuals(*data))
         # consensus set / inliers
-        sample_model_inliers = residuals < residual_threshold
+        inliers = residuals < residual_threshold
         residuals_sum = residuals.dot(residuals)
 
         # choose as new best model if number of inliers is maximal
-        sample_inlier_num = np.count_nonzero(sample_model_inliers)
+        inliers_count = np.count_nonzero(inliers)
         if (
             # more inliers
-            sample_inlier_num > best_inlier_num
+            inliers_count > best_inlier_num
             # same number of inliers but less "error" in terms of residuals
-            or (sample_inlier_num == best_inlier_num
+            or (inliers_count == best_inlier_num
                 and residuals_sum < best_inlier_residuals_sum)):
-            best_inlier_num = sample_inlier_num
+            best_inlier_num = inliers_count
             best_inlier_residuals_sum = residuals_sum
-            best_inliers = sample_model_inliers
+            best_inliers = inliers
             dynamic_max_trials = _dynamic_max_trials(best_inlier_num,
                                                      num_samples,
                                                      min_samples,
@@ -878,10 +882,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
                     or best_inlier_residuals_sum <= stop_residuals_sum
                     or num_trials >= dynamic_max_trials):
                 break
-
-        # for next iteration choose random sample set and be sure that
-        # no samples repeat
-        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
 
     # estimate final model using all inliers
     if any(best_inliers):
