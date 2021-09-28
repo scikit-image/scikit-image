@@ -178,19 +178,12 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
 
-
     if mode == 'wrap':
         mode = 'periodic'
     elif mode == 'symmetric':
         mode = 'reflect'
     elif mode == 'edge':
         mode = 'nearest'
-    elif mode == 'constant':
-        mode = extra_keywords.get('cval', 0)
-    elif mode in [None, 'nearest', 'reflect', 'periodic']:
-        pass
-    else:
-        raise ValueError(f"mode={mode} is not supported by apply_parallel")
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
