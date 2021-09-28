@@ -613,21 +613,14 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     if n_inliers == 0:
         return np.inf
 
-    nom = 1 - probability
-    if nom == 0:
+    if probability == 1:
         return np.inf
 
-    inlier_ratio = n_inliers / float(n_samples)
-    denom = 1 - inlier_ratio ** min_samples
-    if denom == 0:
+    if n_inliers == n_samples:
         return 1
-    elif denom == 1:
-        return np.inf
 
-    nom = np.log(nom)
-    denom = np.log(denom)
-    if denom == 0:
-        return 0
+    nom = np.log(1 - probability)
+    denom = np.log(1 - (n_inliers / n_samples) ** min_samples)
 
     return int(np.ceil(nom / denom))
 
@@ -774,8 +767,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> sum(inliers) > 40
     True
 
-    RANSAC can be used to robustly estimate a geometric transformation. In this section,
-    we also show how to use a proportion of the total samples, rather than an absolute number.
+    RANSAC can be used to robustly estimate a geometric
+    transformation. In this section, we also show how to use a
+    proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
     >>> rng = np.random.default_rng()
@@ -801,10 +795,11 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     """
 
-    best_model = None
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
-    best_inliers = None
+    best_inliers = []
+    validate_model = is_model_valid is not None
+    validate_data = is_data_valid is not None
 
     random_state = np.random.default_rng(random_state)
 
@@ -814,7 +809,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     num_samples = len(data[0])
 
     if not (0 < min_samples < num_samples):
-        raise ValueError("`min_samples` must be in range (0, <number-of-samples>)")
+        raise ValueError(f"`min_samples` must be in range (0, {num_samples})")
 
     if residual_threshold < 0:
         raise ValueError("`residual_threshold` must be greater than zero")
@@ -826,74 +821,78 @@ def ransac(data, model_class, min_samples, residual_threshold,
         raise ValueError("`stop_probability` must be in range [0, 1]")
 
     if initial_inliers is not None and len(initial_inliers) != num_samples:
-        raise ValueError("RANSAC received a vector of initial inliers (length %i)"
-                         " that didn't match the number of samples (%i)."
-                         " The vector of initial inliers should have the same length"
-                         " as the number of samples and contain only True (this sample"
-                         " is an initial inlier) and False (this one isn't) values."
-                         % (len(initial_inliers), num_samples))
+        raise ValueError(
+            f"RANSAC received a vector of initial inliers (length "
+            f"{len(initial_inliers)}) that didn't match the number of "
+            f"samples ({num_samples}). The vector of initial inliers should "
+            f"have the same length as the number of samples and contain only "
+            f"True (this sample is an initial inlier) and False (this one "
+            f"isn't) values.")
 
     # for the first run use initial guess of inliers
     spl_idxs = (initial_inliers if initial_inliers is not None
-                else random_state.choice(num_samples, min_samples, replace=False))
+                else random_state.choice(num_samples, min_samples,
+                                         replace=False))
+
+    # estimate model for current random sample set
+    model = model_class()
 
     for num_trials in range(max_trials):
         # do sample selection according data pairs
         samples = [d[spl_idxs] for d in data]
-        # for next iteration choose random sample set and be sure that no samples repeat
-        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
 
         # optional check if random sample set is valid
-        if is_data_valid is not None and not is_data_valid(*samples):
+        if validate_data and not is_data_valid(*samples):
             continue
 
-        # estimate model for current random sample set
-        sample_model = model_class()
-
-        success = sample_model.estimate(*samples)
+        success = model.estimate(*samples)
         # backwards compatibility
         if success is not None and not success:
             continue
 
         # optional check if estimated model is valid
-        if is_model_valid is not None and not is_model_valid(sample_model, *samples):
+        if validate_model and not is_model_valid(model, *samples):
             continue
 
-        sample_model_residuals = np.abs(sample_model.residuals(*data))
+        residuals = np.abs(model.residuals(*data))
         # consensus set / inliers
-        sample_model_inliers = sample_model_residuals < residual_threshold
-        sample_model_residuals_sum = np.sum(sample_model_residuals ** 2)
+        sample_model_inliers = residuals < residual_threshold
+        residuals_sum = residuals.dot(residuals)
 
         # choose as new best model if number of inliers is maximal
-        sample_inlier_num = np.sum(sample_model_inliers)
+        sample_inlier_num = np.count_nonzero(sample_model_inliers)
         if (
             # more inliers
             sample_inlier_num > best_inlier_num
             # same number of inliers but less "error" in terms of residuals
             or (sample_inlier_num == best_inlier_num
-                and sample_model_residuals_sum < best_inlier_residuals_sum)
-        ):
-            best_model = sample_model
+                and residuals_sum < best_inlier_residuals_sum)):
             best_inlier_num = sample_inlier_num
-            best_inlier_residuals_sum = sample_model_residuals_sum
+            best_inlier_residuals_sum = residuals_sum
             best_inliers = sample_model_inliers
             dynamic_max_trials = _dynamic_max_trials(best_inlier_num,
                                                      num_samples,
                                                      min_samples,
                                                      stop_probability)
             if (best_inlier_num >= stop_sample_num
-                or best_inlier_residuals_sum <= stop_residuals_sum
-                or num_trials >= dynamic_max_trials):
+                    or best_inlier_residuals_sum <= stop_residuals_sum
+                    or num_trials >= dynamic_max_trials):
                 break
 
+        # for next iteration choose random sample set and be sure that
+        # no samples repeat
+        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
+
     # estimate final model using all inliers
-    if best_inliers is not None and any(best_inliers):
+    if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        best_model.estimate(*data_inliers)
+        model.estimate(*data_inliers)
+        if validate_model and not is_model_valid(model, *data_inliers):
+            warn("Estimated model is not valid. Try increase max_trials.")
     else:
-        best_model = None
+        model = None
         best_inliers = None
         warn("No inliers found. Model not fitted")
 
-    return best_model, best_inliers
+    return model, best_inliers
