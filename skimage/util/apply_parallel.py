@@ -188,7 +188,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     if channel_axis is not None:
         if numpy.isscalar(depth):
             # depth is zero along channel_axis
-            depth = [depth,] * (array.ndim - 1)
+            depth = [depth] * (array.ndim - 1)
         depth = list(depth)
         if len(depth) == array.ndim - 1:
             depth.insert(channel_axis, 0)
