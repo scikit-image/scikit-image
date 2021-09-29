@@ -89,8 +89,13 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         different depth per array axis. Defaults to zero. When `channel_axis`
         is not None, and a tuple of length ``ndim - 1`` is provided, a depth of
         0 will be used along the channel axis.
-    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
-        Type of external boundary padding.
+    mode : str, optional
+        If mode is set to 'wrap' or 'periodic', the array will be extended by
+        an outer boundary of size `depth` using periodic padding. This
+        temporary boundary is used during computation, but is not retained in
+        the final output. For all other modes, no explicit boundary padding is
+        needed (scikit-image functions can handle the boundary condition on a
+        chunk-wise basis).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
@@ -178,12 +183,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
 
-    if mode == 'wrap':
-        mode = 'periodic'
-    elif mode == 'symmetric':
-        mode = 'reflect'
-    elif mode == 'edge':
-        mode = 'nearest'
+    if mode in ['wrap', 'periodic']:
+        boundary = 'periodic'
+    else:
+        boundary = 'none'
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
@@ -199,7 +202,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
+    res = darr.map_overlap(wrapped_func, depth, boundary=boundary, dtype=dtype)
     if compute:
         res = res.compute()
 
