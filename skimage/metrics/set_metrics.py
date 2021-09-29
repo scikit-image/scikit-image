@@ -50,8 +50,10 @@ def hausdorff_distance(image0, image1):
     elif len(b_points) == 0:
         return np.inf
 
-    return max(max(cKDTree(a_points).query(b_points, k=1)[0]),
-               max(cKDTree(b_points).query(a_points, k=1)[0]))
+    return max(
+        max(cKDTree(a_points).query(b_points, k=1)[0]),
+        max(cKDTree(b_points).query(a_points, k=1)[0]),
+    )
 
 
 def hausdorff_pair(image0, image1):
@@ -97,10 +99,12 @@ def hausdorff_pair(image0, image1):
         warnings.warn("One or both of the images is empty.", stacklevel=2)
         return (), ()
 
-    nearest_dists_from_b, nearest_a_point_indices_from_b = cKDTree(a_points) \
-        .query(b_points)
-    nearest_dists_from_a, nearest_b_point_indices_from_a = cKDTree(b_points) \
-        .query(a_points)
+    nearest_dists_from_b, nearest_a_point_indices_from_b = cKDTree(a_points).query(
+        b_points
+    )
+    nearest_dists_from_a, nearest_b_point_indices_from_a = cKDTree(b_points).query(
+        a_points
+    )
 
     max_index_from_a = nearest_dists_from_b.argmax()
     max_index_from_b = nearest_dists_from_a.argmax()
@@ -109,11 +113,15 @@ def hausdorff_pair(image0, image1):
     max_dist_from_b = nearest_dists_from_a[max_index_from_b]
 
     if max_dist_from_b > max_dist_from_a:
-        return a_points[max_index_from_b], \
-               b_points[nearest_b_point_indices_from_a[max_index_from_b]]
+        return (
+            a_points[max_index_from_b],
+            b_points[nearest_b_point_indices_from_a[max_index_from_b]],
+        )
     else:
-        return a_points[nearest_a_point_indices_from_b[max_index_from_a]], \
-               b_points[max_index_from_a]
+        return (
+            a_points[nearest_a_point_indices_from_b[max_index_from_a]],
+            b_points[max_index_from_a],
+        )
 
 
 def modified_hausdorff_distance(image0, image1):
@@ -167,5 +175,7 @@ def modified_hausdorff_distance(image0, image1):
     elif len(b_points) == 0:
         return np.inf
 
-    return max(np.mean(cKDTree(a_points).query(b_points, k=1)[0]),
-               np.mean(cKDTree(b_points).query(a_points, k=1)[0]))
+    return max(
+        np.mean(cKDTree(a_points).query(b_points, k=1)[0]),
+        np.mean(cKDTree(b_points).query(a_points, k=1)[0]),
+    )

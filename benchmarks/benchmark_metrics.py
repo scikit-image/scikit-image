@@ -14,7 +14,8 @@ class SetMetricsSuite(object):
 
     def setup(self):
         try:
-            from skimage.metrics import hausdorff_distance, hausdorff_pair, modified_hausdorff_distance
+            from skimage.metrics import hausdorff_distance, hausdorff_pair, \
+                modified_hausdorff_distance
         except ImportError:
             raise NotImplementedError("Hausdorff metrics unavailable")
         points_a = (1, 0)

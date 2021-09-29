@@ -40,7 +40,11 @@ def test_hausdorff_simple():
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
     assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
                                                             points_b))
-    assert_almost_equal(modified_hausdorff_distance(coords_a, coords_b), dist_modified)
+    assert_almost_equal(
+        modified_hausdorff_distance(
+            coords_a,
+            coords_b),
+        dist_modified)
 
 
 @pytest.mark.parametrize(
@@ -61,7 +65,11 @@ def test_hausdorff_region_single(points_a, points_b):
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
     assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
                                                             points_b))
-    assert_almost_equal(modified_hausdorff_distance(coords_a, coords_b), dist_modified)
+    assert_almost_equal(
+        modified_hausdorff_distance(
+            coords_a,
+            coords_b),
+        dist_modified)
 
 
 @pytest.mark.parametrize(
@@ -83,7 +91,11 @@ def test_hausdorff_region_different_points(points_a, points_b):
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
     assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
                                                             points_b))
-    assert_almost_equal(modified_hausdorff_distance(coords_a, coords_b), dist_modified)
+    assert_almost_equal(
+        modified_hausdorff_distance(
+            coords_a,
+            coords_b),
+        dist_modified)
 
 
 def test_gallery():
@@ -131,7 +143,7 @@ def test_gallery():
     # that are Hausdorff distance apart. This tests for either of them.
     hd_points = hausdorff_pair(coords_a, coords_b)
     assert np.equal(hd_points, ((30, 20), (30, 10))).all() or \
-           np.equal(hd_points, ((30, 40), (30, 50))).all()
+        np.equal(hd_points, ((30, 40), (30, 50))).all()
 
     # Test the Modified Hausdorff function on the coordinates
     # Should return 7.5.
@@ -157,7 +169,11 @@ def test_3d_hausdorff_region(points_a, points_b):
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
     assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
                                                             points_b))
-    assert_almost_equal(modified_hausdorff_distance(coords_a, coords_b), dist_modified)
+    assert_almost_equal(
+        modified_hausdorff_distance(
+            coords_a,
+            coords_b),
+        dist_modified)
 
 
 def test_hausdorff_metrics_match():
