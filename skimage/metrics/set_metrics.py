@@ -149,7 +149,8 @@ def modified_hausdorff_distance(image0, image1):
     ----------
     .. [1] M. P. Dubuisson and A. K. Jain. A Modified Hausdorff distance for object
        matching. In ICPR94, pages A:566-568, Jerusalem, Israel, 1994.
-       http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=576361
+       :DOI:`10.1109/ICPR.1994.576361`
+       http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.1.8155
 
     Examples
     --------
