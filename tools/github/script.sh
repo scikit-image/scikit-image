@@ -9,6 +9,8 @@ touch $MPL_DIR/matplotlibrc
 python -m pip list
 tools/build_versions.py
 
+TEST_ARGS="--doctest-modules --cov=skimage"
+
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
 # in there. pytest will crawl that instead of the module we installed and want to test

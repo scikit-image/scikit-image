@@ -45,8 +45,7 @@ class TestMorphology():
         for n in range(1, 4):
             for strel in footprints_2D:
                 for func in funcs:
-                    key = '{0}_{1}_{2}'.format(
-                        strel.__name__, n, func.__name__)
+                    key = f'{strel.__name__}_{n}_{func.__name__}'
                     output[key] = func(image, strel(n))
 
         return output
@@ -291,7 +290,7 @@ def test_1d_erosion():
 
 def test_deprecated_import():
     msg = "Importing from skimage.morphology.grey is deprecated."
-    with expected_warnings([msg]):
+    with expected_warnings([msg + r"|\A\Z"]):
         from skimage.morphology.grey import erosion  # noqa
 
 

@@ -8,22 +8,24 @@ from skimage import data
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 from skimage._shared import testing
 
-from pytest import importorskip
+from pytest import importorskip, raises, fixture
 
 importorskip('SimpleITK')
 
 np.random.seed(0)
 
+
 def teardown():
     reset_plugins()
 
 
-def setup_module(self):
-    """The effect of the `plugin.use` call may be overridden by later imports.
-    Call `use_plugin` directly before the tests to ensure that SimpleITK is
-    used.
+@fixture(autouse=True)
+def setup_plugin():
+    """This ensures that `use_plugin` is directly called before all tests to
+    ensure that SimpleITK is used.
     """
     use_plugin('simpleitk')
+    yield
 
 
 def test_imread_as_gray():
@@ -42,13 +44,10 @@ def test_bilevel():
     img = imread(testing.fetch('data/checker_bilevel.png'))
     np.testing.assert_array_equal(img, expected)
 
-"""
-#TODO: This test causes a Segmentation fault
+
 def test_imread_truncated_jpg():
-    assert_raises((RuntimeError, ValueError),
-                  imread,
-                  testing.fetch('data/truncated.jpg'))
-"""
+    with raises(RuntimeError):
+        imread(testing.fetch('data/truncated.jpg'))
 
 
 def test_imread_uint16():

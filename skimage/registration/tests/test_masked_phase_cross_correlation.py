@@ -2,28 +2,20 @@ import numpy as np
 import pytest
 from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_array_equal, assert_array_less, assert_equal)
-from scipy.ndimage import fourier_shift
+from scipy.ndimage import fourier_shift, shift as real_shift
 
 from skimage._shared.fft import fftmodule as fft
 from skimage._shared.testing import fetch, expected_warnings
 from skimage._shared.utils import _supported_float_type
-from skimage.data import camera, stereo_motorcycle
-from skimage.feature import masked_register_translation as _deprecated
+from skimage.data import camera, stereo_motorcycle, brain
+
+
 from skimage.io import imread
 from skimage.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
     cross_correlate_masked)
 from skimage.registration import phase_cross_correlation
 
-
-def test_detrecated_masked_register_translation():
-    reference_image, moving_image, _ = stereo_motorcycle()
-    ref_mask = np.random.choice(
-        [True, False], reference_image.shape, p=[3 / 4, 1 / 4])
-    with expected_warnings(["Function ``masked_register_translation``"]):
-        assert_equal(_deprecated(reference_image, moving_image, ref_mask),
-                     phase_cross_correlation(reference_image, moving_image,
-                                             reference_mask=ref_mask))
 
 def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as
@@ -67,6 +59,25 @@ def test_masked_registration_random_masks():
     assert_equal(measured_shift, -np.array(shift))
 
 
+def test_masked_registration_3d_contiguous_mask():
+    """masked_register_translation should be able to register translations
+    between volumes with contiguous masks."""
+    ref_vol = brain()
+
+    offset = (2, -9, 20)
+
+    # create square mask
+    ref_mask = np.zeros_like(ref_vol, dtype=bool)
+    ref_mask[:-2, 150:200, 150:200] = True
+    ref_shifted = real_shift(ref_vol, offset)
+
+    measured_offset = masked_register_translation(
+        ref_vol, ref_shifted, reference_mask=ref_mask, moving_mask=ref_mask
+    )
+
+    assert_equal(offset, -np.array(measured_offset))
+
+
 def test_masked_registration_random_masks_non_equal_sizes():
     """masked_register_translation should be able to register
     translations between images that are not the same size even
@@ -107,11 +118,9 @@ def test_masked_registration_padfield_data():
     for xi, yi in shifts:
 
         fixed_image = imread(
-            fetch('registration/tests/data/OriginalX{:d}Y{:d}.png'
-                  ''.format(xi, yi)))
+            fetch(f'registration/tests/data/OriginalX{xi}Y{yi}.png'))
         moving_image = imread(
-            fetch('registration/tests/data/TransformedX{:d}Y{:d}.png'
-                  ''.format(xi, yi)))
+            fetch(f'registration/tests/data/TransformedX{xi}Y{yi}.png'))
 
         # Valid pixels are 1
         fixed_mask = (fixed_image != 0)

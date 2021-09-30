@@ -119,50 +119,6 @@ def test_inplace_noncontiguous():
     np.testing.assert_allclose(image, expected)
 
 
-def test_inplace_int_deprecated():
-    """This test is deprecated and will be removed in
-    version 0.19.0. See #4248.
-    """
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]])
-
-    with expected_warnings(['The `inplace`']):
-        flood_fill(image, (0, 0), 5, inplace=True)
-
-    expected = np.array([[5, 5, 5, 5, 5, 5, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [1, 5, 5, 5, 5, 5, 3],
-                         [5, 1, 1, 1, 3, 3, 4]])
-
-    np.testing.assert_array_equal(image, expected)
-
-
-def test_inplace_float_deprecated():
-    """This test is deprecated and will be removed in
-    version 0.19.0. See #4248.
-    """
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
-
-    with expected_warnings(['The `inplace`']):
-        flood_fill(image, (0, 0), 5, inplace=True)
-
-    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [1., 5., 5., 5., 5., 5., 3.],
-                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
-
-    np.testing.assert_allclose(image, expected)
-
-
 def test_1d():
     image = np.arange(11)
     expected = np.array([0, 1, -20, -20, -20, -20, -20, -20, -20, 9, 10])
