@@ -174,8 +174,7 @@ def _assemble_contours(segments):
         if tail is not None and head is not None:
             # We need to connect these two contours.
             if tail is head:
-                # We need to closed a contour.
-                # Add the end point
+                # We need to closed a contour: add the end point
                 head.append(to_point)
             else:  # tail is not head
                 # We need to join two distinct contours.
@@ -186,7 +185,7 @@ def _assemble_contours(segments):
                     head.extend(tail)
                     # Remove tail from the detected contours
                     contours.pop(tail_num, None)
-                    # Update contour starts end ends
+                    # Update starts end ends
                     starts[head[0]] = (head, head_num)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
@@ -195,11 +194,11 @@ def _assemble_contours(segments):
                     # Remove head from the detected contours
                     starts.pop(head[0], None)  # head[0] can be == to_point!
                     contours.pop(head_num, None)
-                    # Update contour starts end ends
+                    # Update starts end ends
                     starts[tail[0]] = (tail, tail_num)
                     ends[tail[-1]] = (tail, tail_num)
         elif tail is None and head is None:
-            # we need to add a new contour
+            # We need to add a new contour
             new_contour = deque((from_point, to_point))
             contours[current_index] = new_contour
             starts[from_point] = (new_contour, current_index)
@@ -209,13 +208,13 @@ def _assemble_contours(segments):
             # tail first element is to_point: the new segment should be
             # prepended.
             tail.appendleft(from_point)
-            # Update ends and starts
+            # Update starts
             starts[from_point] = (tail, tail_num)
         else:  # tail is None and head is not None:
             # head last element is from_point: the new segment should be
             # appended
             head.append(to_point)
-            # Update ends and starts
+            # Update ends
             ends[to_point] = (head, head_num)
 
     return [np.array(contour) for _, contour in sorted(contours.items())]
