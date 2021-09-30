@@ -619,8 +619,8 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     if n_inliers == n_samples:
         return 1
 
-    nom = np.log(1 - probability)
-    denom = np.log(1 - (n_inliers / n_samples) ** min_samples)
+    nom = math.log(1 - probability)
+    denom = math.log(1 - (n_inliers / n_samples) ** min_samples)
 
     return int(np.ceil(nom / denom))
 
@@ -889,7 +889,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         data_inliers = [d[best_inliers] for d in data]
         model.estimate(*data_inliers)
         if validate_model and not is_model_valid(model, *data_inliers):
-            warn("Estimated model is not valid. Try increase max_trials.")
+            warn("Estimated model is not valid. Try increasing max_trials.")
     else:
         model = None
         best_inliers = None
