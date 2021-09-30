@@ -4,7 +4,7 @@ from skimage import data, filters, measure
 try:
     from skimage.measure._regionprops import PROP_VALS
 except ImportError:
-    PROP_VALS=[]
+    PROP_VALS = []
 
 
 def init_regionprops_data():
