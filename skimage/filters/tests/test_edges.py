@@ -28,6 +28,22 @@ def test_roberts_diagonal1(dtype):
     assert_array_almost_equal(result.astype(bool), expected)
 
 
+@pytest.mark.parametrize(
+    'function_name',
+    ['farid', 'laplace', 'prewitt', 'roberts', 'scharr', 'sobel']
+)
+def test_int_rescaling(function_name):
+    """Basic test that uint8 inputs get rescaled from [0, 255] to [0, 1.]
+
+    The output of any of these filters should be not much more than 1.0 if
+    this is true.
+    """
+    img = data.coins()[:128, :128]
+    func = getattr(filters, function_name)
+    filtered = func(img)
+    assert filtered.max() <= 2.0
+
+
 def test_roberts_diagonal2():
     """Roberts' filter on a diagonal edge should be a diagonal line."""
     image = np.rot90(np.tri(10, 10, 0), 3)
