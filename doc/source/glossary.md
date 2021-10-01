@@ -22,6 +22,9 @@ channel
     represent color or alpha information, but may be any generic batch
     dimension over which to operate.
 
+circle
+    The perimeter of a {term}`disk`.
+
 contour
 iso-valued contour
     Curve along which a 2-D image has a constant value. The interior
@@ -32,6 +35,9 @@ contrast
     Differences of intensity or color in an image, which make objects
     distinguishable. Several functions to manipulate the contrast of an
     image are available in {mod}`skimage.exposure`. See {ref}`exposure`.
+
+disk
+    A filled-in {term}`circle`.
 
 float
 float values
