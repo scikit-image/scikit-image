@@ -185,7 +185,7 @@ def _assemble_contours(segments):
                     head.extend(tail)
                     # Remove tail from the detected contours
                     contours.pop(tail_num, None)
-                    # Update starts end ends
+                    # Update starts and ends
                     starts[head[0]] = (head, head_num)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
@@ -194,7 +194,7 @@ def _assemble_contours(segments):
                     # Remove head from the detected contours
                     starts.pop(head[0], None)  # head[0] can be == to_point!
                     contours.pop(head_num, None)
-                    # Update starts end ends
+                    # Update starts and ends
                     starts[tail[0]] = (tail, tail_num)
                     ends[tail[-1]] = (tail, tail_num)
         elif tail is None and head is None:
