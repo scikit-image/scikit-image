@@ -4,8 +4,6 @@ This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
 """
 
-from warnings import warn
-
 import numpy as np
 
 from .._shared.utils import deprecate_kwarg

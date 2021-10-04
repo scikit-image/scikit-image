@@ -1,10 +1,8 @@
-import os.path
 import numpy as np
 import unittest
 
 from tempfile import NamedTemporaryFile
 
-from skimage import data
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 from skimage._shared import testing
 

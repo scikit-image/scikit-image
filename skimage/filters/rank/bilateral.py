@@ -23,8 +23,6 @@ References
 
 """
 
-import numpy as np
-
 from ..._shared.utils import check_nD, deprecate_kwarg
 from . import bilateral_cy
 from .generic import _preprocess_input

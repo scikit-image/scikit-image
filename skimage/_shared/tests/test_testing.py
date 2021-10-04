@@ -5,7 +5,6 @@ import numpy as np
 from numpy.testing import assert_equal
 from skimage._shared.testing import doctest_skip_parser, test_parallel
 from skimage._shared import testing
-import pytest
 
 from skimage._shared._warnings import expected_warnings
 from warnings import warn

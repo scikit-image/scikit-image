@@ -1,4 +1,4 @@
-from ..qt import QtWidgets, QtCore, Qt, QtGui
+from ..qt import QtWidgets, QtCore, Qt
 from ..utils import RequiredAttr
 
 

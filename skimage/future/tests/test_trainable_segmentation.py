@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 from scipy import spatial
 
-from skimage._shared._warnings import expected_warnings
 from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
 
