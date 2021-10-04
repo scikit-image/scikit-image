@@ -19,7 +19,8 @@ def pixel_graph(image=None, *, mask=None, edge_function=None):
         If image is None and mask is not None, the mask is used as the image.
     edge_function : callable
         A function taking an array of pixel values, and an array of neighbor
-        pixel values, and returning a value for the edge.
+        pixel values, and returning a value for the edge. If no function is
+        given, the value of an edge is 1.
 
     Returns
     -------
@@ -72,7 +73,30 @@ def pixel_graph(image=None, *, mask=None, edge_function=None):
     return graph, nodes
 
 
-def central_pixel(graph, nodes=None):
+def central_pixel(graph, nodes=None, shape=None):
+    """Find the pixel with the highest closeness centrality.
+
+    Closeness centrality is the inverse of the total sum of shortest distances
+    from a node to every other node.
+
+    Parameters
+    ----------
+    graph : scipy.sparse.csr_matrix
+        The sparse matrix representation of the graph.
+    nodes : array of int
+        The raveled index of each node in graph in the image.
+    shape : tuple of int
+        The shape of the image in which the nodes are embedded.
+
+    Returns
+    -------
+    position : int or tuple of int
+        If shape is given, the coordinate of the central pixel in the image.
+        Otherwise, the raveled index of that pixel.
+    distances : array of float
+        The total sum of distances from each node to each other reachable
+        node.
+    """
     if nodes is None:
         nodes = np.arange(graph.shape[0])
     all_shortest_paths = csgraph.shortest_path(graph, directed=False)
@@ -80,4 +104,9 @@ def central_pixel(graph, nodes=None):
     total_shortest_path_len = np.sum(all_shortest_paths_no_inf, axis=1)
     nonzero = np.flatnonzero(total_shortest_path_len)
     min_sp = np.argmin(total_shortest_path_len[nonzero])
-    return nodes[nonzero[min_sp]], total_shortest_path_len
+    raveled_index = nodes[nonzero[min_sp]]
+    if shape is not None:
+        central = np.unravel_index(raveled_index, shape)
+    else:
+        central = raveled_index
+    return raveled_index, total_shortest_path_len
