@@ -30,6 +30,7 @@ def image3d():
                      [1, 2, 1, 2, 3]]],
                     dtype=np.uint8)
 
+
 @pytest.mark.parametrize(
     "mode, cval, behavior, n_warning, warning_type",
     [('nearest', 0.0, 'ndimage', 0, []),
@@ -85,11 +86,13 @@ def test_median_error_ndim():
 def test_median(img, behavior):
     median(img, behavior=behavior)
 
+
 def test_median_int_footprint_2d(image):
     from skimage.morphology import disk
     result1 = median(image, disk(5))
     result2 = median(image, 5)
     assert np.array_equal(result1, result2)
+
 
 def test_median_int_footprint_3d(image3d):
     from skimage.morphology import ball
