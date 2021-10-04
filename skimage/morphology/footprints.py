@@ -122,12 +122,17 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
     footprint array and the number of iterations it is to be applied.
 
-    For binary morphology, using ``decomposition='sequence'``
-    was observed to give better performance, with the magnitude of the
-    performance increase rapidly increasing with footprint size. For grayscale
-    morphology with square footprints, it is recommended to use
-    ``decomposition=None`` since the internal SciPy functions that are called
-    already have a fast implementation based on separable 1D sliding windows.
+    For binary morphology, using ``decomposition='sequence'`` or
+    ``decomposition='separable'`` were observed to give better performance than
+    ``decomposition=None``, with the magnitude of the performance increase
+    rapidly increasing with footprint size. For grayscale morphology with
+    square footprints, it is recommended to use ``decomposition=None`` since
+    the internal SciPy functions that are called already have a fast
+    implementation based on separable 1D sliding windows.
+
+    The 'sequence' decomposition mode only supports odd valued `width`. If
+    `width` is even, the sequence used will be identical to the 'separable'
+    mode.
     """
     if decomposition is None:
         return np.ones((width, width), dtype=dtype)
@@ -205,6 +210,10 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     morphology with rectangular footprints, it is recommended to use
     ``decomposition=None`` since the internal SciPy functions that are called
     already have a fast implementation based on separable 1D sliding windows.
+
+    The `sequence` decomposition mode only supports odd valued `nrows` and
+    `ncols`. If either `nrows` or `ncols` is even, the sequence used will be
+    identical to ``decomposition='separable'``.
 
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
@@ -403,6 +412,10 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     morphology with square footprints, it is recommended to use
     ``decomposition=None`` since the internal SciPy functions that are called
     already have a fast implementation based on separable 1D sliding windows.
+
+    The 'sequence' decomposition mode only supports odd valued `width`. If
+    `width` is even, the sequence used will be identical to the 'separable'
+    mode.
     """
     if decomposition is None:
         return np.ones((width, width, width), dtype=dtype)
