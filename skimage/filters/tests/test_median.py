@@ -16,6 +16,7 @@ def image():
                      [1, 2, 1, 2, 3]],
                     dtype=np.uint8)
 
+
 @pytest.fixture
 def image3d():
     return np.array([[[1, 2, 3, 2, 1],
