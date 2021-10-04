@@ -6,6 +6,7 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import deprecate_kwarg
 from .rank import generic
+from ..morphology import disk, ball
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
@@ -17,10 +18,12 @@ def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
     ----------
     image : array-like
         Input image.
-    footprint : ndarray, optional
+    footprint : int, ndarray, optional
         If ``behavior=='rank'``, ``footprint`` is a 2-D array of 1's and 0's.
         If ``behavior=='ndimage'``, ``footprint`` is a N-D array of 1's and 0's
         with the same number of dimension than ``image``.
+        If int, ``footprint`` will be a disk or ball structuring element with
+        radius = given footprint
         If None, ``footprint`` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.)
     out : ndarray, (same dtype as image), optional
@@ -68,6 +71,12 @@ def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
     >>> med = median(img, disk(5))
 
     """
+    if footprint is not None and isinstance(footprint, int):
+        if image.ndim == 2:
+            footprint = disk(footprint)
+        elif image.ndim == 3:
+            footprint = ball(footprint)
+
     if behavior == 'rank':
         if mode != 'nearest' or not np.isclose(cval, 0.0):
             warn("Change 'behavior' to 'ndimage' if you want to use the "
