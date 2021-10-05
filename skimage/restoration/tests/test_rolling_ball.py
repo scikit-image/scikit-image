@@ -93,9 +93,8 @@ def test_threads(num_threads):
     # not testing if we use multiple threads
     # just checking if the API throws an exception
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    background = rolling_ball(img, radius=10, num_threads=num_threads)
-    background = rolling_ball(img, radius=10,
-                              nansafe=True, num_threads=num_threads)
+    rolling_ball(img, radius=10, num_threads=num_threads)
+    rolling_ball(img, radius=10, nansafe=True, num_threads=num_threads)
 
 
 def test_ndim():

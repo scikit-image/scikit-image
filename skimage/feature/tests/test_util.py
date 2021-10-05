@@ -30,9 +30,9 @@ def test_prepare_grayscale_input_2D():
         _prepare_grayscale_input_2D(np.zeros((3, 1)))
     with testing.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 1, 1)))
-    img = _prepare_grayscale_input_2D(np.zeros((3, 3)))
-    img = _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
-    img = _prepare_grayscale_input_2D(np.zeros((1, 3, 3)))
+    _prepare_grayscale_input_2D(np.zeros((3, 3)))
+    _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
+    _prepare_grayscale_input_2D(np.zeros((1, 3, 3)))
 
 
 def test_mask_border_keypoints():
