@@ -33,6 +33,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
     rtol = 1e-7 if dtype == np.float64 else 1e-6
     assert_allclose(ref, out, rtol=rtol)
 
+
 @testing.parametrize('dtype', [bool, np.bool])
 @testing.parametrize('channel_axis', [0, 1, -1])
 def test_inpaint_biharmonic_2d_color(channel_axis, dtype):
