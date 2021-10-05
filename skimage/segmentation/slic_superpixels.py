@@ -1,4 +1,3 @@
-import warnings
 from collections.abc import Iterable
 
 import numpy as np
@@ -10,7 +9,7 @@ from scipy.spatial.distance import pdist, squareform
 from .._shared import utils
 from ..color import rgb2lab
 from ..util import img_as_float, regular_grid
-from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
+from ._slic import _slic_cython, _enforce_label_connectivity_cython
 
 
 def _get_mask_centroids(mask, n_centroids, multichannel):

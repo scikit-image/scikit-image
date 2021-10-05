@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings

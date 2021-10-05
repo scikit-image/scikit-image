@@ -5,7 +5,6 @@ import numpy.testing as npt
 import pytest
 
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,

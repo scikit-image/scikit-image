@@ -6,7 +6,7 @@ Tests for Rolling Ball Filter
 import numpy as np
 import pytest
 
-from skimage import data, io
+from skimage import data
 from skimage.restoration import rolling_ball
 from skimage.restoration.rolling_ball import ellipsoid_kernel
 

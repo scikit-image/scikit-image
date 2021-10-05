@@ -6,7 +6,6 @@ For more images, see
 
 """
 from distutils.version import LooseVersion
-from warnings import warn
 import numpy as np
 import shutil
 
