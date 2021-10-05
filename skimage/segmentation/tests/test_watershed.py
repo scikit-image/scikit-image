@@ -466,17 +466,17 @@ def test_numeric_seed_watershed():
 
 
 def test_incorrect_markers_shape():
+    image = np.ones((5, 6))
+    markers = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        markers = np.ones((5, 7))
-        output = watershed(image, markers)
+        watershed(image, markers)
 
 
 def test_incorrect_mask_shape():
+    image = np.ones((5, 6))
+    mask = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        mask = np.ones((5, 7))
-        output = watershed(image, markers=4, mask=mask)
+        watershed(image, markers=4, mask=mask)
 
 
 def test_markers_in_mask():
