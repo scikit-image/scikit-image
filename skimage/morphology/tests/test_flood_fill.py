@@ -42,7 +42,6 @@ def test_overrange_tolerance_int():
 
 def test_overrange_tolerance_float():
     max_value = np.finfo(np.float32).max
-    min_value = np.finfo(np.float32).min
 
     image = np.random.uniform(size=(64, 64), low=-1., high=1.).astype(
         np.float32)
