@@ -7,7 +7,7 @@ def test_frt():
     SIZE = 59
     try:
         import sympy.ntheory as sn
-        assert sn.isprime(SIZE) == True
+        assert sn.isprime(SIZE)
     except ImportError:
         pass
 
