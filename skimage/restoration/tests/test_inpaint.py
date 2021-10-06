@@ -35,7 +35,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
 
 
 @testing.parametrize('channel_axis', [0, 1, -1])
-def test_inpaint_biharmonic_2d_color(channel_axis, dtype):
+def test_inpaint_biharmonic_2d_color(channel_axis):
     img = img_as_float(data.astronaut()[:64, :64])
 
     mask = np.zeros(img.shape[:2], dtype=bool)
@@ -73,7 +73,7 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
     assert_allclose(ref, out, rtol=1e-5)
 
 
-def test_inpaint_biharmonic_2d_color_deprecated(dtype):
+def test_inpaint_biharmonic_2d_color_deprecated():
     img = img_as_float(data.astronaut()[:64, :64])
 
     mask = np.zeros(img.shape[:2], dtype=bool)
