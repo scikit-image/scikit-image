@@ -34,12 +34,11 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
     assert_allclose(ref, out, rtol=rtol)
 
 
-@testing.parametrize('dtype', [bool, np.bool])
 @testing.parametrize('channel_axis', [0, 1, -1])
 def test_inpaint_biharmonic_2d_color(channel_axis, dtype):
     img = img_as_float(data.astronaut()[:64, :64])
 
-    mask = np.zeros(img.shape[:2], dtype=dtype)
+    mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
     img_defect = img * ~mask[..., np.newaxis]
     mse_defect = mean_squared_error(img, img_defect)
@@ -74,11 +73,10 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
     assert_allclose(ref, out, rtol=1e-5)
 
 
-@testing.parametrize('dtype', [bool, np.bool])
 def test_inpaint_biharmonic_2d_color_deprecated(dtype):
     img = img_as_float(data.astronaut()[:64, :64])
 
-    mask = np.zeros(img.shape[:2], dtype=dtype)
+    mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
     img_defect = img * ~mask[..., np.newaxis]
     mse_defect = mean_squared_error(img, img_defect)
