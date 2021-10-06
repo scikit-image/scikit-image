@@ -184,7 +184,3 @@ def test_binary_output_3d():
 
     assert_equal(int_opened.dtype, np.uint8)
     assert_equal(int_closed.dtype, np.uint8)
-
-if __name__ == '__main__':
-    from skimage._shared import testing
-    testing.run_module_suite()

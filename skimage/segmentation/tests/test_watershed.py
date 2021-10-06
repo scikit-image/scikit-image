@@ -535,7 +535,3 @@ def test_connectivity():
 
     for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
         assert np.sum(labels_c2 == lab) == area
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

@@ -647,7 +647,3 @@ def test_selem_kwarg_deprecation(function):
     args = (20,) if function.startswith('h_') else ()
     with expected_warnings(["`selem` is a deprecated argument name"]):
         getattr(extrema, function)(img, *args, selem=np.ones((3, 3)))
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

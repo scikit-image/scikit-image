@@ -120,7 +120,3 @@ def test_notebook_add():
     assert cells[1]['cell_type'] == 'markdown'
     assert cells[2]['cell_type'] == 'code'
 
-
-if __name__ == "__main__":
-    import numpy.testing as npt
-    npt.run_module_suite()

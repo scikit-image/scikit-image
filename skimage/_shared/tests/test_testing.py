@@ -1,7 +1,6 @@
 """ Testing decorators module
 """
 
-import numpy as np
 from numpy.testing import assert_equal
 from skimage._shared.testing import doctest_skip_parser, test_parallel
 from skimage._shared import testing
@@ -123,6 +122,3 @@ def test_expected_warnings_noop():
         with expected_warnings(None):
             warn('Expected warnings test')
 
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

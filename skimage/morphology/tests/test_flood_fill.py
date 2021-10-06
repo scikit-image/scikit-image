@@ -251,7 +251,3 @@ def test_negative_indexing_seed_point():
     image = flood_fill(image, (0, -1), 5)
 
     np.testing.assert_allclose(image, expected)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

@@ -97,7 +97,3 @@ def test_gabor_dtype(dtype):
     image = np.ones((16, 16), dtype=dtype)
     y = gabor(image, 0.3)
     assert all(arr.dtype == _supported_float_type(image.dtype) for arr in y)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
