@@ -136,13 +136,13 @@ def test_coord_raises():
     # coordinates='xy' is not valid
     with pytest.raises(ValueError):
         active_contour(gaussian(img, 3), init,
-                        boundary_condition='periodic', alpha=0.015,
-                        beta=10, w_line=0, w_edge=1, gamma=0.001,
-                        max_num_iter=100, coordinates='xy')
+                       boundary_condition='periodic', alpha=0.015,
+                       beta=10, w_line=0, w_edge=1, gamma=0.001,
+                       max_num_iter=100, coordinates='xy')
 
     # coordinates=None is not valid
     with pytest.raises(ValueError):
         active_contour(gaussian(img, 3), init,
-                        boundary_condition='periodic', alpha=0.015,
-                        beta=10, w_line=0, w_edge=1, gamma=0.001,
-                        max_num_iter=100, coordinates=None)
+                       boundary_condition='periodic', alpha=0.015,
+                       beta=10, w_line=0, w_edge=1, gamma=0.001,
+                       max_num_iter=100, coordinates=None)
