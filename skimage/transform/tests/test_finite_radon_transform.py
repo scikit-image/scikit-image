@@ -4,7 +4,7 @@ from skimage.transform import frt2, ifrt2
 
 
 def test_frt():
-    SIZE = 59 # must be prime to ensure that its inverse is unique
+    SIZE = 59  # must be prime to ensure that its inverse is unique
 
     # Generate a test image
     L = np.tri(SIZE, dtype=np.int32) + np.tri(SIZE, dtype=np.int32)[::-1]

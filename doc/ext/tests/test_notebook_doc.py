@@ -2,6 +2,7 @@ import json
 
 from ..notebook_doc import Notebook, skeleton_nb
 
+
 def test_notebook_basic():
     nb = Notebook()
     assert json.loads(nb.json()) == json.loads(skeleton_nb)
