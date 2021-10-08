@@ -211,7 +211,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
         polygons_drawn.append(polygon_object)
         plt.draw()
 
-    lasso = matplotlib.widgets.LassoSelector(ax, _on_lasso_selection)
+    matplotlib.widgets.LassoSelector(ax, _on_lasso_selection)
 
     plt.show(block=True)
 

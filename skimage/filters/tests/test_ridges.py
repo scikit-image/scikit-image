@@ -243,7 +243,3 @@ def test_border_management(func, tol):
     assert abs(full_mean - inside_mean) < tol
     assert abs(full_mean - border_mean) < tol
     assert abs(inside_mean - border_mean) < tol
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

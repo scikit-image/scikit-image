@@ -87,13 +87,11 @@ class Slider(BaseWidget):
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if orientation == 'vertical':
             self.slider = QtWidgets.QSlider(Qt.Vertical)
-            alignment = QtCore.Qt.AlignHCenter
             align_text = QtCore.Qt.AlignHCenter
             align_value = QtCore.Qt.AlignHCenter
             self.layout = QtWidgets.QVBoxLayout(self)
         elif orientation == 'horizontal':
             self.slider = QtWidgets.QSlider(Qt.Horizontal)
-            alignment = QtCore.Qt.AlignVCenter
             align_text = QtCore.Qt.AlignLeft
             align_value = QtCore.Qt.AlignRight
             self.layout = QtWidgets.QHBoxLayout(self)

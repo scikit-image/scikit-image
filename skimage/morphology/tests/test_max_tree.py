@@ -451,6 +451,3 @@ class TestMaxtree(TestCase):
         out_bin = out > 0
         assert_array_equal(local_maxima, out_bin)
         assert np.max(out) == 5
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
