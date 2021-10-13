@@ -44,7 +44,7 @@ mapping for the swirl transformation first computes, relative to a center
 
     \theta = \arctan((y-y0)/(x-x0))
 
-    \\rho = \sqrt{(x - x_0)^2 + (y - y_0)^2},
+    \rho = \sqrt{(x - x_0)^2 + (y - y_0)^2},
 
 and then transforms them according to
 
