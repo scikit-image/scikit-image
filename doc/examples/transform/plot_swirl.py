@@ -58,8 +58,8 @@ and then transforms them according to
 
     \theta' = \phi + s \, e^{-\rho / r} + \theta
 
-where ``strength`` is a parameter for the amount of swirl, ``radius`` indicates
-the swirl extent in pixels, and ``rotation`` adds a rotation angle.  The
+where ``radius`` indicates the swirl extent in pixels, ``rotation`` adds a
+rotation angle, and ``strength`` is a parameter for the amount of swirl. The
 transformation of ``radius`` into :math:`r` is to ensure that the
 transformation decays to :math:`\\approx 1/1000^{\mathsf{th}}` within the
 specified radius.
