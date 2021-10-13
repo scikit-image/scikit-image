@@ -56,7 +56,7 @@ and then transforms them according to
 
     s = \mathtt{strength}
 
-    \\theta' = \phi + s \, e^{-\\rho / r} + \\theta
+    \theta' = \phi + s \, e^{-\rho / r} + \theta
 
 where ``strength`` is a parameter for the amount of swirl, ``radius`` indicates
 the swirl extent in pixels, and ``rotation`` adds a rotation angle.  The
