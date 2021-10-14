@@ -696,6 +696,7 @@ class ProjectiveTransform(GeometricTransform):
             True, if model estimation succeeds.
 
         """
+        
         n, d = src.shape
 
         src_matrix, src = _center_and_normalize_points(src)
@@ -724,7 +725,7 @@ class ProjectiveTransform(GeometricTransform):
         if weights is None:
             _, _, V = np.linalg.svd(A)
         else:
-            W = np.diag(np.tile(np.sqrt(weights.flatten()/np.max(weights)), d))
+            W = np.diag(np.tile(np.sqrt(weights/np.max(weights)), d))
             _, _, V = np.linalg.svd(W @ A)
         
         # if the last element of the vector corresponding to the smallest
@@ -742,7 +743,11 @@ class ProjectiveTransform(GeometricTransform):
 
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
-
+        
+        # Small errors can creep in if points are not exact, causing the last
+        # element of H to deviate from unity. Correct for that here.
+        H /= H[-1, -1]
+        
         self.params = H
 
         return True
@@ -1477,7 +1482,7 @@ class PolynomialTransform(GeometricTransform):
         if weights is None:
             _, _, V = np.linalg.svd(A)
         else:
-            W = np.diag(np.tile(np.sqrt(weights.flatten()/np.max(weights)), 2))
+            W = np.diag(np.tile(np.sqrt(weights/np.max(weights)), 2))
             _, _, V = np.linalg.svd(W @ A)
 
         # solution is right singular vector that corresponds to smallest
@@ -1538,7 +1543,7 @@ TRANSFORMS = {
 }
 
 
-def estimate_transform(ttype, src, dst, **kwargs):
+def estimate_transform(ttype, src, dst, *args, **kwargs):
     """Estimate 2D geometric transformation parameters.
 
     You can determine the over-, well- and under-determined parameters
@@ -1607,7 +1612,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
                          'implemented' % ttype)
 
     tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
-    tform.estimate(src, dst, **kwargs)
+    tform.estimate(src, dst, *args, **kwargs)
 
     return tform
 

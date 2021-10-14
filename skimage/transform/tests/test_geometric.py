@@ -11,10 +11,10 @@ from skimage.transform._geometric import (_affine_matrix_from_vector,
                                           _euler_rotation_matrix,
                                           GeometricTransform)
 from skimage.transform import (estimate_transform, matrix_transform,
-                               EuclideanTransform, SimilarityTransform,
-                               AffineTransform, FundamentalMatrixTransform,
-                               EssentialMatrixTransform, ProjectiveTransform,
-                               PolynomialTransform, PiecewiseAffineTransform)
+                                EuclideanTransform, SimilarityTransform,
+                                AffineTransform, FundamentalMatrixTransform,
+                                EssentialMatrixTransform, ProjectiveTransform,
+                                PolynomialTransform, PiecewiseAffineTransform)
 
 
 SRC = np.array([
@@ -328,6 +328,32 @@ def test_projective_estimation():
     assert_almost_equal(tform3.params, tform2.params)
 
 
+def test_projective_weighted_estimation():
+    
+    # Exact solution with same points, and unity weights
+    tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
+    tform_w = estimate_transform('projective', 
+                                 SRC[:4, :], DST[:4, :], np.ones(4))
+    assert_almost_equal(tform.params, tform_w.params)
+    
+    # Over-determined solution with same points, and unity weights
+    tform = estimate_transform('projective', SRC, DST)
+    tform_w = estimate_transform('projective',
+                               SRC, DST, np.ones(SRC.shape[0]))
+    assert_almost_equal(tform.params, tform_w.params)
+    
+    # Repeating a point, but setting its weight small, should give nearly
+    # the same result.
+    point_weights = np.ones(SRC.shape[0]+1)
+    point_weights[0] = 1.0e-15
+    tform1 = estimate_transform('projective', SRC, DST)
+    tform2 = estimate_transform('projective',
+                               SRC[np.arange(-1, SRC.shape[0]), :],
+                               DST[np.arange(-1, SRC.shape[0]), :],
+                               point_weights)
+    assert_almost_equal(tform1.params, tform2.params, decimal=3)
+    
+
 def test_projective_init():
     tform = estimate_transform('projective', SRC, DST)
     # init with transformation matrix
@@ -344,6 +370,26 @@ def test_polynomial_estimation():
     tform2 = PolynomialTransform()
     tform2.estimate(SRC, DST, order=10)
     assert_almost_equal(tform2.params, tform.params)
+
+
+def test_polynomial_weighted_estimation():
+    # Over-determined solution with same points, and unity weights
+    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    tform_w = estimate_transform('polynomial',
+                               SRC, DST, order=10, weights=np.ones(SRC.shape[0]))
+    assert_almost_equal(tform.params, tform_w.params)
+    
+    # Repeating a point, but setting its weight small, should give nearly
+    # the same result.
+    point_weights = np.ones(SRC.shape[0]+1)
+    point_weights[0] = 1.0e-15
+    tform1 = estimate_transform('polynomial', SRC, DST, order=10)
+    tform2 = estimate_transform('polynomial',
+                               SRC[np.arange(-1, SRC.shape[0]), :],
+                               DST[np.arange(-1, SRC.shape[0]), :],
+                               order=10,
+                               weights=point_weights)
+    assert_almost_equal(tform1.params, tform2.params, decimal=4)
 
 
 def test_polynomial_init():
