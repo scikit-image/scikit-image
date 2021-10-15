@@ -111,3 +111,7 @@ def test_trainable_segmentation_oo():
     out = segmenter.predict(img)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
+
+    # test wrong number of dimensions:
+    with pytest.raises(ValueError):
+        segmenter.predict(img[:, :, np.newaxis])
