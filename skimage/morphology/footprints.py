@@ -530,8 +530,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
     and a given (n) height or width of slanted sides octagon is generated.
     The slanted sides are 45 or 135 degrees to the horizontal axis
     and hence the widths and heights are equal. The overall size of the
-    footprint will be ``m + 2 * n`` (note that `m` must be odd to get an
-    odd-sized footprint).
+    footprint along a single axis will be ``m + 2 * n``.
 
     Parameters
     ----------
