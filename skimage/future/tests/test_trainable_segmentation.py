@@ -112,6 +112,26 @@ def test_trainable_segmentation_oo():
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
-    # test wrong number of dimensions:
+    # test multichannel model
+    features_func = partial(
+        multiscale_basic_features,
+        channel_axis=-1,
+    )
+    segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
+    img_with_channels = np.stack((img, img.T), axis=-1)
+    segmenter.fit(img_with_channels, labels)
+
+    # model has been fitted
+    np.testing.assert_array_almost_equal(clf.labels, labels[labels > 0])
+
+    out = segmenter.predict(img_with_channels)
+    assert np.all(out[:10] == 1)
+    assert np.all(out[10:] == 2)
+
+    # test wrong number of dimensions
     with pytest.raises(ValueError):
-        segmenter.predict(img[:, :, np.newaxis])
+        segmenter.predict(np.expand_dims(img_with_channels, axis=-1))
+
+    # test wrong number of channels
+    with pytest.raises(ValueError):
+        segmenter.predict(np.concatenate([img_with_channels] * 2, axis=-1))
