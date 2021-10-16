@@ -18,7 +18,6 @@ from .. import __version__
 
 import os.path as osp
 import os
-import stat
 
 __all__ = ['data_dir',
            'download_all',
