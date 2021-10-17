@@ -1,17 +1,15 @@
 import numpy as np
-from scipy.ndimage import gaussian_filter
 
 from skimage import img_as_float
 
 from .._shared import utils
+from ..filters import gaussian
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):
     """Single channel implementation of the unsharp masking filter."""
 
-    blurred = gaussian_filter(image,
-                              sigma=radius,
-                              mode='reflect')
+    blurred = gaussian(image, sigma=radius, mode='reflect')
 
     result = image + (image - blurred) * amount
     if vrange is not None:

@@ -1,19 +1,18 @@
 from itertools import combinations_with_replacement
+from warnings import warn
 
 import numpy as np
 from scipy import ndimage as ndi
-from scipy import stats
-from scipy import spatial
+from scipy import spatial, stats
 
+from .._shared.utils import _supported_float_type, safe_as_int
+from ..filters import gaussian
+from ..transform import integral_image
 from ..util import img_as_float
+from ._hessian_det_appx import _hessian_matrix_det
+from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
-from .corner_cy import _corner_fast
-from ._hessian_det_appx import _hessian_matrix_det
-from ..transform import integral_image
-from .._shared.utils import _supported_float_type, safe_as_int
-from .corner_cy import _corner_moravec, _corner_orientations
-from warnings import warn
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -133,7 +132,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
         derivatives = reversed(derivatives)
 
     # structure tensor
-    A_elems = [ndi.gaussian_filter(der0 * der1, sigma, mode=mode, cval=cval)
+    A_elems = [gaussian(der0 * der1, sigma, mode=mode, cval=cval)
                for der0, der1 in combinations_with_replacement(derivatives, 2)]
 
     return A_elems
@@ -195,8 +194,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
-    gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
-                                            mode=mode, cval=cval)
+    gaussian_filtered = gaussian(image, sigma=sigma, mode=mode, cval=cval)
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)

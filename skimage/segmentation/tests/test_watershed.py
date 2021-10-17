@@ -44,12 +44,15 @@ Original author: Lee Kamentsky
 
 import math
 import unittest
-import pytest
+
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
 
-from .._watershed import watershed
+from skimage.feature import gaussian
 from skimage.measure import label
+
+from .._watershed import watershed
 
 eps = 1e-12
 blob = np.array([[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
@@ -360,7 +363,7 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = ndi.gaussian_filter(image, 4)
+        image = gaussian(image, 4)
         watershed(image, markers, self.eight)
         ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 

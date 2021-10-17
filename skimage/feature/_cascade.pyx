@@ -17,7 +17,6 @@ from skimage._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
 from ..color import rgb2gray
-from ..transform import integral_image
 import xml.etree.ElementTree as ET
 from ._texture cimport _multiblock_lbp
 import math
@@ -640,6 +639,9 @@ cdef class Cascade:
         int_img : 2-D floats ndarray
             C-contiguous integral image of the input image.
         """
+        from ..transform import integral_image  # avoid circular import
+
+
         if len(img.shape) > 2:
             img = rgb2gray(img)
         int_img = integral_image(img)
