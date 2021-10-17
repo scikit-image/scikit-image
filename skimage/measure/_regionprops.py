@@ -426,8 +426,13 @@ class RegionProperties:
     @property
     def centroid_local(self):
         M = self.moments
-        return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
-                     M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     def intensity_max(self):
@@ -511,8 +516,13 @@ class RegionProperties:
     @property
     def centroid_weighted_local(self):
         M = self.moments_weighted
-        return (M[tuple(np.eye(self._ndim, dtype=int))] /
-                M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     @_cached
