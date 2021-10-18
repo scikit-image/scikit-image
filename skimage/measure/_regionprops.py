@@ -704,6 +704,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     n = len(regions)
     for prop in properties:
         r = regions[0]
+        if prop in PROPS:
+            # convert from deprecated name to the current name
+            legacy_prop = prop
+            prop = PROPS[prop]
         rp = getattr(r, prop)
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
@@ -722,7 +726,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
-            out[prop] = np.copy(column_buffer)
+            out[legacy_prop] = np.copy(column_buffer)
         else:
             if isinstance(rp, np.ndarray):
                 shape = rp.shape
@@ -733,7 +737,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 for k in range(n):
                     loc = ind if len(ind) > 1 else ind[0]
                     column_buffer[k] = regions[k][prop][loc]
-                modified_prop = separator.join(map(str, (prop,) + ind))
+                modified_prop = separator.join(map(str, (legacy_prop,) + ind))
                 out[modified_prop] = np.copy(column_buffer)
     return out
 
