@@ -1,7 +1,6 @@
 from textwrap import dedent
 
-from ..qt import QtGui, QtCore, QtWidgets
-import numpy as np
+from ..qt import QtCore, QtWidgets
 
 from ... import io
 from ...util import img_as_ubyte
@@ -86,7 +85,7 @@ class SaveButtons(BaseWidget):
         if not filename:
             return
         image = self.plugin.filtered_image
-        if image.dtype == np.bool:
+        if image.dtype == bool:
             # TODO: This check/conversion should probably be in `imsave`.
             image = img_as_ubyte(image)
         io.imsave(filename, image)

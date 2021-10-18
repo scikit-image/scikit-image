@@ -1,5 +1,4 @@
 from random import shuffle
-from itertools import chain
 
 import pytest
 
@@ -34,8 +33,8 @@ def test_haar_like_feature_error():
 @pytest.mark.parametrize("feature_type,shape_feature,expected_feature_value",
                          [('type-2-x', (84,), [0.]),
                           ('type-2-y', (84,), [0.]),
-                          ('type-3-x', (42,), [-4., -3., -2., -1.]),
-                          ('type-3-y', (42,), [-4., -3., -2., -1.]),
+                          ('type-3-x', (42,), [-5, -4., -3., -2., -1.]),
+                          ('type-3-y', (42,), [-5, -4., -3., -2., -1.]),
                           ('type-4', (36,), [0.])])
 def test_haar_like_feature(feature_type, shape_feature,
                            expected_feature_value, dtype):
@@ -103,15 +102,19 @@ def test_haar_like_feature_precomputed(feature_type):
 @pytest.mark.parametrize("feature_type,height,width,expected_coord",
                          [('type-2-x', 2, 2,
                            [[[(0, 0), (0, 0)], [(0, 1), (0, 1)]],
+                            [[(0, 0), (1, 0)], [(0, 1), (1, 1)]],
                             [[(1, 0), (1, 0)], [(1, 1), (1, 1)]]]),
                           ('type-2-y', 2, 2,
                            [[[(0, 0), (0, 0)], [(1, 0), (1, 0)]],
+                            [[(0, 0), (0, 1)], [(1, 0), (1, 1)]],
                             [[(0, 1), (0, 1)], [(1, 1), (1, 1)]]]),
                           ('type-3-x', 3, 3,
                            [[[(0, 0), (0, 0)], [(0, 1), (0, 1)],
                              [(0, 2), (0, 2)]],
                             [[(0, 0), (1, 0)], [(0, 1), (1, 1)],
                              [(0, 2), (1, 2)]],
+                            [[(0, 0), (2, 0)], [(0, 1), (2, 1)],
+                             [(0, 2), (2, 2)]],
                             [[(1, 0), (1, 0)], [(1, 1), (1, 1)],
                              [(1, 2), (1, 2)]],
                             [[(1, 0), (2, 0)], [(1, 1), (2, 1)],
@@ -123,6 +126,8 @@ def test_haar_like_feature_precomputed(feature_type):
                              [(2, 0), (2, 0)]],
                             [[(0, 0), (0, 1)], [(1, 0), (1, 1)],
                              [(2, 0), (2, 1)]],
+                            [[(0, 0), (0, 2)], [(1, 0), (1, 2)],
+                             [(2, 0), (2, 2)]],
                             [[(0, 1), (0, 1)], [(1, 1), (1, 1)],
                              [(2, 1), (2, 1)]],
                             [[(0, 1), (0, 2)], [(1, 1), (1, 2)],
@@ -142,7 +147,7 @@ def test_haar_like_feature_coord(feature_type, height, width, expected_coord):
 
 
 @pytest.mark.parametrize("max_n_features,nnz_values", [(None, 46),
-                                                       (1, 8)])
+                                                       (1, 4)])
 def test_draw_haar_like_feature(max_n_features, nnz_values):
     img = np.zeros((5, 5), dtype=np.float32)
     coord, _ = haar_like_feature_coord(5, 5, 'type-4')

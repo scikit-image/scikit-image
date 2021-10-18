@@ -1,11 +1,20 @@
 __all__ = ['imread', 'imsave']
 
 from distutils.version import LooseVersion
-import warnings
 import numpy as np
 from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
+
+# Check CVE-2021-27921 and others
+if LooseVersion(pil_version) < LooseVersion('8.1.2'):
+    from warnings import warn
+    warn('Your installed pillow version is < 8.1.2. '
+         'Several security issues (CVE-2021-27921, '
+         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
+         'and more) have been fixed in pillow 8.1.2 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -14,12 +23,12 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
+        Specifies data type of array elements.
     img_num : int, optional
-       Specifies which image to read in a file with multiple images
-       (zero-indexed).
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through.
 
@@ -38,11 +47,6 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
         im = Image.open(fname)
-        if im.format == 'MPO' and LooseVersion(pil_version) < '6.0.0':
-            warnings.warn("You are trying to read a MPO image. "
-                          "To ensure a good support of this format, "
-                          "please upgrade pillow to 6.0.0 version or later.",
-                          stacklevel=2)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 

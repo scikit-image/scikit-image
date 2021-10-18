@@ -125,11 +125,12 @@ ax.axis('off')
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
+from skimage import segmentation
 
-segmentation = morphology.watershed(elevation_map, markers)
+segmentation_coins = segmentation.watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
-ax.imshow(segmentation, cmap=plt.cm.gray)
+ax.imshow(segmentation_coins, cmap=plt.cm.gray)
 ax.set_title('segmentation')
 ax.axis('off')
 
@@ -139,13 +140,13 @@ ax.axis('off')
 
 from skimage.color import label2rgb
 
-segmentation = ndi.binary_fill_holes(segmentation - 1)
-labeled_coins, _ = ndi.label(segmentation)
-image_label_overlay = label2rgb(labeled_coins, image=coins)
+segmentation_coins = ndi.binary_fill_holes(segmentation_coins - 1)
+labeled_coins, _ = ndi.label(segmentation_coins)
+image_label_overlay = label2rgb(labeled_coins, image=coins, bg_label=0)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
 axes[0].imshow(coins, cmap=plt.cm.gray)
-axes[0].contour(segmentation, [0.5], linewidths=1.2, colors='y')
+axes[0].contour(segmentation_coins, [0.5], linewidths=1.2, colors='y')
 axes[1].imshow(image_label_overlay)
 
 for a in axes:

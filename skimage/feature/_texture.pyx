@@ -30,6 +30,8 @@ ctypedef fused any_int_or_float:
     cnp.float32_t
     cnp.float64_t
 
+cnp.import_array()
+
 
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
@@ -322,11 +324,13 @@ def _local_binary_pattern(double[:, ::1] image,
 # Values represent offsets of neighbour rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
-    Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0], dtype=np.intp)
-    Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1], dtype=np.intp)
+    Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0],
+                                                dtype=np.intp)
+    Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1],
+                                                dtype=np.intp)
 
 
-cpdef int _multiblock_lbp(float[:, ::1] int_image,
+cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
                           Py_ssize_t r,
                           Py_ssize_t c,
                           Py_ssize_t width,
@@ -355,10 +359,11 @@ cpdef int _multiblock_lbp(float[:, ::1] int_image,
 
     References
     ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
+    .. [1] L. Zhang, R. Chu, S. Xiang, S. Liao, S.Z. Li. "Face Detection Based
+           on Multi-Block LBP Representation", In Proceedings: Advances in
+           Biometrics, International Conference, ICB 2007, Seoul, Korea.
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+           :DOI:`10.1007/978-3-540-74549-5_2`
     """
 
     cdef:
@@ -371,12 +376,13 @@ cpdef int _multiblock_lbp(float[:, ::1] int_image,
 
         Py_ssize_t current_rect_r, current_rect_c
         Py_ssize_t element_num, i
-        double current_rect_val
+        np_floats current_rect_val
         int has_greater_value
         int lbp_code = 0
 
     # Sum of intensity values of central rectangle.
-    cdef float central_rect_val = integrate(int_image, central_rect_r, central_rect_c,
+    cdef float central_rect_val = integrate(int_image, central_rect_r,
+                                            central_rect_c,
                                             central_rect_r + r_shift,
                                             central_rect_c + c_shift)
 

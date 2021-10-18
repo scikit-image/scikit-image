@@ -1,4 +1,3 @@
-import warnings
 import numpy as np
 
 from .._shared._geometry import polygon_clip
@@ -143,44 +142,6 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     return rr, cc
 
 
-def circle(r, c, radius, shape=None):
-    """Generate coordinates of pixels within circle.
-
-    Parameters
-    ----------
-    r, c : double
-        Center coordinate of disk.
-    radius : double
-        Radius of disk.
-    shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for disks that exceed the image
-        size. If None, the full extent of the disk is used.  Must be at least
-        length 2. Only the first two values are used to determine the extent of
-        the input image.
-
-    Returns
-    -------
-    rr, cc : ndarray of int
-        Pixel coordinates of disk.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
-
-    Warns
-    -----
-    Deprecated:
-        .. versionadded:: 0.17
-
-            This function is deprecated and will be removed in scikit-image 0.19.
-            Please use the function named ``disk`` instead.
-    """
-    warnings.warn("circle is deprecated in favor of "
-                  "disk."
-                  "circle will be removed in version 0.19",
-                  FutureWarning, stacklevel=2)
-    return disk((r, c), radius, shape=shape)
-
-
 def disk(center, radius, *, shape=None):
     """Generate coordinates of pixels within circle.
 
@@ -191,11 +152,11 @@ def disk(center, radius, *, shape=None):
     radius : double
         Radius of disk.
     shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for disks that exceed the image
-        size. If None, the full extent of the disk is used.  Must be at least
-        length 2. Only the first two values are used to determine the extent of
-        the input image.
+        Image shape as a tuple of size 2. Determines the maximum
+        extent of output pixel coordinates. This is useful for disks that
+        exceed the image size. If None, the full extent of the disk is used.
+        The  shape might result in negative coordinates and wraparound
+        behaviour.
 
     Returns
     -------
@@ -206,7 +167,26 @@ def disk(center, radius, *, shape=None):
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.draw import disk
+    >>> shape = (4, 4)
+    >>> img = np.zeros(shape, dtype=np.uint8)
+    >>> rr, cc = disk((0, 0), 2, shape=shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 0, 0],
+           [1, 1, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0]], dtype=uint8)
+    >>> img = np.zeros(shape, dtype=np.uint8)
+    >>> # Negative coordinates in rr and cc perform a wraparound
+    >>> rr, cc = disk((0, 0), 2, shape=None)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 0, 1],
+           [1, 1, 0, 1],
+           [0, 0, 0, 0],
+           [1, 1, 0, 1]], dtype=uint8)
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = disk((4, 4), 5)
     >>> img[rr, cc] = 1
@@ -350,9 +330,8 @@ def set_color(image, coords, color, alpha=1):
     color = np.array(color, ndmin=1, copy=False)
 
     if image.shape[-1] != color.shape[-1]:
-        raise ValueError('Color shape ({}) must match last '
-                         'image dimension ({}).'.format(color.shape[0],
-                                                        image.shape[-1]))
+        raise ValueError(f'Color shape ({color.shape[0]}) must match last '
+                          'image dimension ({image.shape[-1]}).')
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
@@ -486,14 +465,14 @@ def polygon(r, c, shape=None):
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
@@ -769,7 +748,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         ``([num_planes,] num_rows, num_cols)``.
         Either `end` or `extent` must be specified.
         A negative extent is valid, and will result in a rectangle
-        going along the oposite direction. If extent is negative, the
+        going along the opposite direction. If extent is negative, the
         `start` point is not included.
     shape : tuple, optional
         Image shape used to determine the maximum bounds of the output

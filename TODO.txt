@@ -7,91 +7,62 @@ Version 0.17
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
-* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
-* Remove ``rough_wall`` from ``skimage.data.__init__``.
-* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
 
-Version 0.18
+Version 0.20
 ------------
 
-* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
-  deprecation warning.
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
-* In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage.features.corner_peaks``, remove the warning.
-* In ``skimage/transform`` remove histogram_matching.py.
-* In ``skimage/restoration/_denoise.py`` remove warning regarding
-  ``rescale_sigma``.
-    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
-      now that the denoise warning is gone.
+* In ``skimage/feature/peak.py``, remove the `indices` argument and
+  the decorator `remove_arg`.
+* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
+  decorator from `find_contours`.
+* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
+  `structure_tensor`.
+* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
+  function.
+* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
+  `skivi.py` in `skimage/io/_plugins`.
+* Remove enrirely the folder skimage/scripts containing skivi app.
+  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
+  setup.py
+* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
+  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
-Version 0.19
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+* In ``skimage/morphology/misc.py`` remove the deprecated parameter
+  ``in_place`` in remove_small_holes(), remove_small_objects() and
+  clear_border(), and update the tests.
+* Remove the deprecation warning for `input` kwarg of the `label`
+  function in `skimage/measure/_label.py`
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+
+Other (2022)
 ------------
+* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and
+  `skimage.registration._phase_cross_correlation.py` once the minimum supported
+  version of ``scipy`` reaches 1.4.
+* Remove unneeded `deconv_type` and astype call in `weiner` and
+  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
+  supported version of ``scipy`` reaches 1.4.
+* Remove two unneeded astype calls in `butterworth` once the minimum supported
+  version of ``scipy`` reaches 1.4.
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
-* In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove
-  ``circle_level_set'' and related tests.
-* In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
-  in flood_fill() ``inplace`` with ``in_place`` and update the tests.
-* In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
-* Remove the definition of `skimage.util.pad` and
-  skimage/util/tests/test_arraypad.py.
-* Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
-  functions.
-* In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-* In ``skimage/color/colorconv.py``, remove the deprecation warning
-  from `rgb2gray`.
-* In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
-  decoration from ``iradon``.
-* In ``skimage/measure/profile.py``, raise a ValueError instead of the
-  warning when order > 0 and input array is bool in profile_line.
+Other (2023)
+------------
+* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
+  ``skimage.transform.resize``.
+* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
+  ``skimage._shared.utils._fix_ndimage_mode``
 
 Other
 -----
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
-  ``test_denoise.py`` regarding multidimensional indexing.
-* Remove the conditional import and function call when ``numpy`` is set
-  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
-* Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
-  #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
-* When ``numpy`` is set to > 1.16, one may simplify the implementation of
-  of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
-  the minimum supported version of ``scipy`` reaches 1.4.
-* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
-  vectorized version of ``np.linspace``.
-* Monitor when multibuild devel gets merged into master for python 3.8
-  compatibility https://github.com/matthew-brett/multibuild/issues/284
-  and update osx_install to point to the correct branch
-* Remove pillow version related warning for MPO file format in
-  `io._plugins.pil_plugin.imread` when upgrading pillow min version to
-  6.0.0
-* When ``numpy`` is set to >= 1.16, remove the warning assertion in
-  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
-  regarding ``invalid value encountered in reduce``.
-* When ``numpy`` is set to >= 1.17, revisit the warning assertion in
-  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
-  regarding ``Passing `np.nan` to mean no clipping in np.clip``.
-* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1.
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).

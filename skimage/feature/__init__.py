@@ -1,8 +1,10 @@
+from .._shared.utils import deprecated
+
 from ._canny import canny
 from ._cascade import Cascade
 from ._daisy import daisy
 from ._hog import hog
-from .texture import (greycomatrix, greycoprops,
+from .texture import (graycomatrix, graycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
                       draw_multiblock_lbp)
@@ -11,13 +13,12 @@ from .peak import peak_local_max
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
+                     structure_tensor_eigenvalues,
                      structure_tensor_eigvals, hessian_matrix,
                      hessian_matrix_eigvals, hessian_matrix_det,
                      corner_moravec, corner_orientations,
                      shape_index)
 from .template import match_template
-from .register_translation import register_translation
-from .masked_register_translation import masked_register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -26,12 +27,28 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
+from ._basic_features import multiscale_basic_features
+
+
+@deprecated(alt_func='skimage.feature.graycomatrix',
+            removed_version='1.0')
+def greycomatrix(image, distances, angles, levels=None, symmetric=False,
+                 normed=False):
+    return graycomatrix(image, distances, angles, levels, symmetric, normed)
+
+
+@deprecated(alt_func='skimage.feature.graycoprops',
+            removed_version='1.0')
+def greycoprops(P, prop='contrast'):
+    return graycoprops(P, prop)
 
 
 __all__ = ['canny',
            'Cascade',
            'daisy',
            'hog',
+           'graycomatrix',
+           'graycoprops',
            'greycomatrix',
            'greycoprops',
            'local_binary_pattern',
@@ -39,6 +56,7 @@ __all__ = ['canny',
            'draw_multiblock_lbp',
            'peak_local_max',
            'structure_tensor',
+           'structure_tensor_eigenvalues',
            'structure_tensor_eigvals',
            'hessian_matrix',
            'hessian_matrix_det',
@@ -54,8 +72,6 @@ __all__ = ['canny',
            'corner_fast',
            'corner_orientations',
            'match_template',
-           'register_translation',
-           'masked_register_translation',
            'BRIEF',
            'CENSURE',
            'ORB',
@@ -66,4 +82,6 @@ __all__ = ['canny',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'draw_haar_like_feature']
+           'draw_haar_like_feature',
+           'multiscale_basic_features',
+           ]

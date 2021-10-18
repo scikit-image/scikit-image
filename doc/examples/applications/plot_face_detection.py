@@ -11,7 +11,7 @@ framework works with files, trained using Multi-block Local Binary Patterns
 Features (See `MB-LBP <plot_multiblock_local_binary_pattern.html>`_) and Gentle
 Adaboost with attentional cascade. So, the detection framework will also work
 with `xml files from OpenCV
-<https://github.com/Itseez/opencv/tree/master/data/lbpcascades>`_.  There you
+<https://github.com/opencv/opencv/tree/master/data/lbpcascades>`_.  There you
 can find files that were trained to detect cat faces, profile faces and other
 things.  But if you want to detect frontal faces, the respective file is
 already included in scikit-image.
@@ -59,7 +59,7 @@ leaves the clusters that have a same or bigger number of detections in them.
 You should also take into account that false detections are inevitable and if
 you want to have a really precise detector, you will have to train it yourself
 using `OpenCV train cascade utility
-<https://docs.opencv.org/doc/user_guide/ug_traincascade.html>`_.
+<https://docs.opencv.org/2.4/doc/user_guide/ug_traincascade.html>`_.
 """
 
 from skimage import data

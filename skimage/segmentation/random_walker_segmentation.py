@@ -11,6 +11,7 @@ significantly the performance.
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
+from .._shared import utils
 from .._shared.utils import warn
 
 # executive summary for next code block: try to import umfpack from
@@ -20,7 +21,7 @@ from .._shared.utils import warn
 # https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
 # https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
-    from scipy.sparse.linalg.dsolve import umfpack
+    from scipy.sparse.linalg.dsolve.linsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
 
     def new_del(self):
@@ -42,12 +43,6 @@ except ImportError:
 from ..util import img_as_float
 
 from scipy.sparse.linalg import cg, spsolve
-import scipy
-from distutils.version import LooseVersion as Version
-import functools
-
-if Version(scipy.__version__) >= Version('1.1'):
-    cg = functools.partial(cg, atol=0)
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
@@ -55,11 +50,11 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 
     Parameters
     ----------
-    n_x: integer
+    n_x : integer
         The size of the grid in the x direction.
-    n_y: integer
+    n_y : integer
         The size of the grid in the y direction
-    n_z: integer
+    n_z : integer
         The size of the grid in the z direction
 
     Returns
@@ -125,7 +120,7 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
         edges = inv_idx.reshape(edges.shape)
 
     # Build the sparse linear system
-    pixel_nb = edges.shape[1]
+    pixel_nb = l_x * l_y * l_z
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
@@ -183,7 +178,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn('"cg" mode may be slow because UMFPACK is not availabel. '
+                warn('"cg" mode may be slow because UMFPACK is not available. '
                      'Consider building Scipy with UMFPACK or use a '
                      'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
                      stacklevel=2)
@@ -191,12 +186,14 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
         else:
+            # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
-            ml = ruge_stuben_solver(lap_sparse)
+            ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, i].toarray(),
+               tol=tol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])]
         if np.any([info > 0 for _, info in cg_out]):
             warn("Conjugate gradient convergence to tolerance not achieved. "
@@ -262,8 +259,11 @@ def _preprocess(labels):
     return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None):
+                  multichannel=False, return_full_prob=False, spacing=None,
+                  *, prob_tol=1e-3, channel_axis=None):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -274,7 +274,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     data : array_like
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
-        dimensional (multichannel=True) with the highest dimension denoting
+        dimensional with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
@@ -307,9 +307,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
           requires that the pyamg module is installed.
-
     tol : float, optional
-        tolerance to achieve when solving the linear system using
+        Tolerance to achieve when solving the linear system using
         the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
     copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
@@ -317,7 +316,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         save on memory.
     multichannel : bool, optional
         If True, input data is parsed as multichannel data (see 'data' above
-        for proper input format in this case).
+        for proper input format in this case). This argument is deprecated:
+        specify `channel_axis` instead.
     return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the
         labels will be returned, instead of only the most likely
@@ -325,6 +325,16 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
+    prob_tol : float, optional
+        Tolerance on the resulting probability to be in the interval [0, 1].
+        If the tolerance is not satisfied, a warning is displayed.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -338,9 +348,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           probability that label `label_nb` reaches the pixel `(i, j)`
           first.
 
-    See also
+    See Also
     --------
-    skimage.morphology.watershed: watershed segmentation
+    skimage.morphology.watershed : watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 
@@ -396,13 +406,13 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> np.random.seed(0)
-    >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
+    >>> rng = np.random.default_rng()
+    >>> a = np.zeros((10, 10)) + 0.2 * rng.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a, dtype=np.int32)
     >>> b[3, 3] = 1  # Marker for first phase
     >>> b[6, 6] = 2  # Marker for second phase
-    >>> random_walker(a, b)
+    >>> random_walker(a, b)  # doctest: +SKIP
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -416,10 +426,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', 'cg_j', None):
+    if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
-            "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bicgstab', 'bf' and None".format(mode=mode))
+            f"{mode} is not a valid mode. Valid modes are 'cg_mg', "
+            f"'cg', 'cg_j', 'bf', and None")
 
     # Spacing kwarg checks
     if spacing is None:
@@ -439,6 +449,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # and single channel images likewise have a singleton added for channels.
     # The following block ensures valid input and coerces it to the correct
     # form.
+    multichannel = channel_axis is not None
     if not multichannel:
         if data.ndim not in (2, 3):
             raise ValueError('For non-multichannel input, data must be of '
@@ -484,14 +495,20 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # first at pixel j by anisotropic diffusion.
     X = _solve_linear_system(lap_sparse, B, tol, mode)
 
+    if X.min() < -prob_tol or X.max() > 1 + prob_tol:
+        warn('The probability range is outside [0, 1] given the tolerance '
+             '`prob_tol`. Consider decreasing `beta` and/or decreasing '
+             '`tol`.')
+
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds
     labels[inds_isolated_seeds] = isolated_values
     labels = labels.reshape(labels_shape)
 
-    if return_full_prob:
-        mask = labels == 0
+    mask = labels == 0
+    mask[inds_isolated_seeds] = False
 
+    if return_full_prob:
         out = np.zeros((nlabels,) + labels_shape)
         for lab, (label_prob, prob) in enumerate(zip(out, X), start=1):
             label_prob[mask] = prob
@@ -499,6 +516,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     else:
         X = np.argmax(X, axis=0) + 1
         out = labels.astype(labels_dtype)
-        out[labels == 0] = X
+        out[mask] = X
 
     return out

@@ -49,10 +49,12 @@ if __name__ == '__main__':
 
     outdir = 'source/api'
     docwriter = ApiDocWriter(package)
-    docwriter.package_skip_patterns += [r'\.fixes$',
-                                        r'\.externals$',
-                                        r'filter$',
-                                        ]
+    docwriter.package_skip_patterns += [
+        r'\.fixes$',
+        r'\.externals$',
+        r'filter$',
+        r'viewer.viewers$',  # all functions already imported to viewer
+    ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
     print('%d files written' % len(docwriter.written_modules))

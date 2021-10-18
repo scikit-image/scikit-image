@@ -114,8 +114,8 @@ image_rotinv = np.sin(x ** 2 + y ** 2)
 image_x = 2 * x * np.cos(x ** 2 + y ** 2)
 image_y = 2 * y * np.cos(x ** 2 + y ** 2)
 
-# Calculating the angles between horizontal and vertical operators.
 def angle(dx, dy):
+    """Calculate the angles between horizontal and vertical operators."""
     return np.mod(np.arctan2(dy, dx), np.pi)
 
 
@@ -130,8 +130,8 @@ angle_scharr = angle(filters.scharr_h(image_rotinv),
 angle_prewitt = angle(filters.prewitt_h(image_rotinv),
                       filters.prewitt_v(image_rotinv))
 
-# Calculating the differences between two angles.
 def diff_angle(angle_1, angle_2):
+    """Calculate the differences between two angles."""
     return np.minimum(np.pi - np.abs(angle_1 - angle_2),
                       np.abs(angle_1 - angle_2))
 

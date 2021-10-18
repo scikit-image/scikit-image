@@ -46,7 +46,6 @@ preferred_plugins = {
 
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
-
     """
     global plugin_store
     plugin_store = {'imread': [],
@@ -104,7 +103,6 @@ def _parse_config_file(filename):
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
     to gather plugin meta-data.
-
     """
     pd = os.path.dirname(__file__)
     config_files = glob(os.path.join(pd, '_plugins', '*.ini'))
@@ -227,7 +225,6 @@ def use_plugin(name, kind=None):
 
     Examples
     --------
-
     To use Matplotlib as the default image reader, you would write:
 
     >>> from skimage import io

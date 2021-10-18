@@ -5,6 +5,7 @@
 import numpy as np
 
 cimport numpy as cnp
+cnp.import_array()
 
 
 def possible_hull(cnp.uint8_t[:, ::1] img):

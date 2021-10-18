@@ -13,9 +13,9 @@ from warnings import warn
 
 import numpy as np
 
-from ..util import img_as_float, invert
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+from ..util import img_as_float, invert
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -138,7 +138,11 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     """
 
     # Convert image to float
+    float_dtype = _supported_float_type(image.dtype)
+    # rescales integer images to [-1, 1]
     image = img_as_float(image)
+    # make sure float16 gets promoted to float32
+    image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
     hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
@@ -224,13 +228,16 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     if alpha is None:
         alpha = 1.0 / ndim
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     # Invert image to detect dark ridges on bright background
     if black_ridges:
         image = invert(image)
 
     # Generate empty (n+1)D arrays for storing auxiliary images filtered at
     # different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
+    filtered_array = np.zeros(sigmas.shape + image.shape, float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -266,7 +273,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
-         mode=None, cval=0):
+         mode='reflect', cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -319,21 +326,15 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     # Check (sigma) scales
     sigmas = _check_sigmas(sigmas)
 
-    if mode is None:
-        warn("Previously, sato implicitly used 'constant' as the "
-             "border mode when dealing with the edge of the array. The new "
-             "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitly "
-             "set the mode.", category=FutureWarning, stacklevel=2)
-        mode = 'reflect'
-
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
         image = invert(image)
 
+    float_dtype = _supported_float_type(image.dtype)
+
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
+    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -355,9 +356,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
 
 def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
-           scale_step=None, beta1=None, beta2=None, alpha=0.5,
-           beta=0.5, gamma=15, black_ridges=True, mode='reflect',
-           cval=0):
+           scale_step=None, alpha=0.5, beta=0.5, gamma=15,
+           black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -383,10 +383,10 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     alpha : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a plate-like structure.
-    beta = beta1 : float, optional
+    beta : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
-    gamma = beta2 : float, optional
+    gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
     black_ridges : boolean, optional
@@ -425,18 +425,6 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
-
-    # Check deprecated keyword parameters
-    if beta1 is not None:
-        warn('Use keyword parameter `beta` instead of `beta1` which '
-             'will be removed in version 0.17.', stacklevel=2)
-        beta = beta1
-
-    if beta2 is not None:
-        warn('Use keyword parameter `gamma` instead of `beta2` which '
-             'will be removed in version 0.17.', stacklevel=2)
-        gamma = beta2
-
     if scale_range is not None and scale_step is not None:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
              '`scale_range` which will be removed in version 0.17.',
@@ -461,10 +449,12 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     if black_ridges:
         image = invert(image)
 
+    float_dtype = _supported_float_type(image.dtype)
+
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
-    lambdas_array = np.zeros_like(filtered_array)
+    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
+    lambdas_array = np.zeros_like(filtered_array, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -504,8 +494,8 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-            beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-            black_ridges=True, mode=None, cval=0):
+            alpha=0.5, beta=0.5, gamma=15, black_ridges=True, mode='reflect',
+            cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -527,10 +517,10 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
-    beta = beta1 : float, optional
+    beta : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
-    gamma = beta2 : float, optional
+    gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
     black_ridges : boolean, optional
@@ -566,19 +556,10 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         :DOI:`10.1007/978-3-319-16811-1_40`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
-
-    if mode is None:
-        warn("Previously, hessian implicitly used 'constant' as the "
-             "border mode when dealing with the edge of the array. The new "
-             "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitly "
-             "set the mode.", category=FutureWarning, stacklevel=2)
-        mode = 'reflect'
-
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
-                      scale_step=scale_step, beta1=beta1, beta2=beta2,
-                      alpha=alpha, beta=beta, gamma=gamma,
-                      black_ridges=black_ridges, mode=mode, cval=cval)
+                      scale_step=scale_step, alpha=alpha, beta=beta,
+                      gamma=gamma, black_ridges=black_ridges, mode=mode,
+                      cval=cval)
 
     filtered[filtered <= 0] = 1
     return filtered

@@ -14,7 +14,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_watershed_cy.pyx',
             '_felzenszwalb_cy.pyx',
             '_quickshift_cy.pyx',
-            '_slic.pyx'], working_path=base_path)
+            '_slic.pyx',
+            ], working_path=base_path)
     config.add_extension('_watershed_cy', sources=['_watershed_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],

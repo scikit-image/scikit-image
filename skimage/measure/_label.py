@@ -1,8 +1,37 @@
+from scipy import ndimage
 from ._ccomp import label_cython as clabel
+from .._shared.utils import deprecate_kwarg
 
 
-def label(input, neighbors=None, background=None, return_num=False,
-          connectivity=None):
+def _label_bool(image, background=None, return_num=False, connectivity=None):
+    """Faster implementation of clabel for boolean input.
+
+    See context: https://github.com/scikit-image/scikit-image/issues/4833
+    """
+    from ..morphology._util import _resolve_neighborhood
+    if background == 1:
+        image = ~image
+
+    if connectivity is None:
+        connectivity = image.ndim
+
+    if not 1 <= connectivity <= image.ndim:
+        raise ValueError(
+            f'Connectivity for {image.ndim}D image should '
+            f'be in [1, ..., {image.ndim}]. Got {connectivity}.'
+        )
+
+    footprint = _resolve_neighborhood(None, connectivity, image.ndim)
+    result = ndimage.label(image, structure=footprint)
+
+    if return_num:
+        return result
+    else:
+        return result[0]
+
+
+@deprecate_kwarg({"input": "label_image"}, removed_version="1.0")
+def label(label_image, background=None, return_num=False, connectivity=None):
     r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -20,13 +49,8 @@ def label(input, neighbors=None, background=None, return_num=False,
 
     Parameters
     ----------
-    input : ndarray of dtype int
+    label_image : ndarray of dtype int
         Image to label.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-"connectivity".
-        In 3D, 4-"connectivity" means connected pixels have to share face,
-        whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use** ``connectivity`` **instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as 0. By default, 0-valued pixels are considered as background
@@ -51,6 +75,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     See Also
     --------
     regionprops
+    regionprops_table
 
     References
     ----------
@@ -90,4 +115,8 @@ def label(input, neighbors=None, background=None, return_num=False,
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, neighbors, background, return_num, connectivity)
+    if label_image.dtype == bool:
+        return _label_bool(label_image, background=background,
+                           return_num=return_num, connectivity=connectivity)
+    else:
+        return clabel(label_image, background, return_num, connectivity)

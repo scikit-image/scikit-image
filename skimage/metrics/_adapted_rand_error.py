@@ -24,8 +24,8 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     Returns
     -------
     are : float
-        The adapted Rand error; equal to $1 - \frac{2pr}{p + r}$,
-        where $p$ and $r$ are the precision and recall described below.
+        The adapted Rand error; equal to :math:`1 - \frac{2pr}{p + r}`,
+        where ``p`` and ``r`` are the precision and recall described below.
     prec : float
         The adapted Rand precision: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,

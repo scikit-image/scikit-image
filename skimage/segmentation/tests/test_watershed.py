@@ -466,17 +466,17 @@ def test_numeric_seed_watershed():
 
 
 def test_incorrect_markers_shape():
+    image = np.ones((5, 6))
+    markers = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        markers = np.ones((5, 7))
-        output = watershed(image, markers)
+        watershed(image, markers)
 
 
 def test_incorrect_mask_shape():
+    image = np.ones((5, 6))
+    mask = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        mask = np.ones((5, 7))
-        output = watershed(image, markers=4, mask=mask)
+        watershed(image, markers=4, mask=mask)
 
 
 def test_markers_in_mask():
@@ -494,5 +494,44 @@ def test_no_markers():
     assert np.max(out) == 2
 
 
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+def test_connectivity():
+    """
+    Watershed segmentation should output different result for 
+    different connectivity
+    when markers are calculated where None is supplied.
+    Issue = 5084
+    """
+    # Generate a dummy BrightnessTemperature image
+    x, y = np.indices((406, 270))
+    x1, y1, x2, y2, x3, y3, x4, y4 = 200, 208, 300, 120, 100, 100, 340, 208
+    r1, r2, r3, r4 = 100, 50, 40, 80
+    mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
+    mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+    mask_circle3 = (x - x3)**2 + (y - y3)**2 < r3**2
+    mask_circle4 = (x - x4)**2 + (y - y4)**2 < r4**2
+    image = np.logical_or(mask_circle1, mask_circle2)
+    image = np.logical_or(image, mask_circle3)
+    image = np.logical_or(image, mask_circle4)
+
+    # calcuate distance in discrete increase
+    DummyBT = ndi.distance_transform_edt(image)
+    DummyBT_dis = np.around(DummyBT / 12, decimals = 0)*12
+    # calculate the mask
+    Img_mask = np.where(DummyBT_dis == 0, 0, 1)
+
+    # segments for connectivity 1 and 2
+    labels_c1 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=1,
+                          compactness=0.01)
+    labels_c2 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=2,
+                          compactness=0.01)
+
+    # assertions
+    assert np.unique(labels_c1).shape[0] == 6
+    assert np.unique(labels_c2).shape[0] == 5
+
+    # checking via area of each individual segment.
+    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1301, 11278]):
+        assert np.sum(labels_c1 == lab) == area
+
+    for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
+        assert np.sum(labels_c2 == lab) == area

@@ -1,13 +1,11 @@
 """Implementations restoration functions"""
-
+import warnings
 
 import numpy as np
-import numpy.random as npr
 from scipy.signal import convolve
 
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from . import uft
-
-__keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
@@ -60,7 +58,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.wiener(img, psf, 1100)
 
     Notes
@@ -116,6 +115,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
+    float_type = _supported_float_type(image.dtype)
+    image = image.astype(float_type, copy=False)
+    psf = psf.real.astype(float_type, copy=False)
+    reg = reg.real.astype(float_type, copy=False)
 
     if psf.shape != reg.shape:
         trans_func = uft.ir2tf(psf, image.shape, is_real=is_real)
@@ -130,6 +133,13 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
 
+    # TODO: can remove astype call below once minimum SciPy >= 1.4
+    if deconv.dtype.kind == 'c':
+        deconv_type = np.promote_types(float_type, np.complex64)
+    else:
+        deconv_type = float_type
+    deconv = deconv.astype(deconv_type, copy=False)
+
     if clip:
         deconv[deconv > 1] = 1
         deconv[deconv < -1] = -1
@@ -138,7 +148,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
 
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
-                        clip=True):
+                        clip=True, *, random_state=None):
     """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -163,6 +173,15 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        .. versionadded:: 0.19
 
     Returns
     -------
@@ -183,9 +202,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     burnin : int
        The number of sample to ignore to start computation of the
        mean. 15 by default.
-    min_iter : int
+    min_num_iter : int
        The minimum number of iterations. 30 by default.
-    max_iter : int
+    max_num_iter : int
        The maximum number of iterations if ``threshold`` is not
        satisfied. 200 by default.
     callback : callable (None by default)
@@ -202,7 +221,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> rng = np.random.default_rng()
+    >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.unsupervised_wiener(img, psf)
 
     Notes
@@ -230,24 +250,40 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
     """
-    params = {'threshold': 1e-4, 'max_iter': 200,
-              'min_iter': 30, 'burnin': 15, 'callback': None}
+
+    if user_params is not None:
+        for s in ('max', 'min'):
+            if (s + '_iter') in user_params:
+                warning_msg = (
+                    f'`{s}_iter` is a deprecated key for `user_params`. '
+                    f'It will be removed in version 1.0. '
+                    f'Use `{s}_num_iter` instead.'
+                )
+                warnings.warn(warning_msg, FutureWarning)
+                user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
+
+    params = {'threshold': 1e-4, 'max_num_iter': 200,
+              'min_num_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
 
     if reg is None:
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape, is_real=is_real)
+    float_type = _supported_float_type(image.dtype)
+    image = image.astype(float_type, copy=False)
+    psf = psf.real.astype(float_type, copy=False)
+    reg = reg.real.astype(float_type, copy=False)
 
     if psf.shape != reg.shape:
-        trans_fct = uft.ir2tf(psf, image.shape,  is_real=is_real)
+        trans_fct = uft.ir2tf(psf, image.shape, is_real=is_real)
     else:
         trans_fct = psf
 
     # The mean of the object
-    x_postmean = np.zeros(trans_fct.shape)
+    x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
     # The previous computed mean in the iterative loop
-    prev_x_postmean = np.zeros(trans_fct.shape)
+    prev_x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
 
     # Difference between two successive mean
     delta = np.NAN
@@ -263,19 +299,26 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     # The Fourier transform may change the image.size attribute, so we
     # store it.
     if is_real:
-        data_spectrum = uft.urfft2(image.astype(np.float))
+        data_spectrum = uft.urfft2(image)
     else:
-        data_spectrum = uft.ufft2(image.astype(np.float))
+        data_spectrum = uft.ufft2(image)
+
+    rng = np.random.default_rng(random_state)
 
     # Gibbs sampling
-    for iteration in range(params['max_iter']):
+    for iteration in range(params['max_num_iter']):
         # Sample of Eq. 27 p(circX^k | gn^k-1, gx^k-1, y).
 
         # weighting (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
-        excursion = np.sqrt(0.5) / np.sqrt(precision) * (
-            np.random.standard_normal(data_spectrum.shape) +
-            1j * np.random.standard_normal(data_spectrum.shape))
+        # Note: Use astype instead of dtype argument to standard_normal to get
+        #       similar random values across precisions, as needed for
+        #       reference data used by test_unsupervised_wiener.
+        _rand1 = rng.standard_normal(data_spectrum.shape)
+        _rand1 = _rand1.astype(float_type, copy=False)
+        _rand2 = rng.standard_normal(data_spectrum.shape)
+        _rand2 = _rand2.astype(float_type, copy=False)
+        excursion = np.sqrt(0.5 / precision) * (_rand1 + 1j * _rand2)
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
@@ -286,13 +329,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(npr.gamma(image.size / 2,
-                                  2 / uft.image_quad_norm(data_spectrum -
-                                                          x_sample *
-                                                          trans_fct)))
+        gn_chain.append(rng.gamma(image.size / 2,
+                                  2 / uft.image_quad_norm(data_spectrum
+                                                          - x_sample
+                                                          * trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(npr.gamma((image.size - 1) / 2,
+        gx_chain.append(rng.gamma((image.size - 1) / 2,
                                   2 / uft.image_quad_norm(x_sample * reg)))
 
         # current empirical average
@@ -303,13 +346,17 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             current = x_postmean / (iteration - params['burnin'])
             previous = prev_x_postmean / (iteration - params['burnin'] - 1)
 
-            delta = np.sum(np.abs(current - previous)) / \
-                np.sum(np.abs(x_postmean)) / (iteration - params['burnin'])
+            delta = (np.sum(np.abs(current - previous))
+                     / np.sum(np.abs(x_postmean))
+                     / (iteration - params['burnin']))
 
         prev_x_postmean = x_postmean
 
         # stop of the algorithm
-        if (iteration > params['min_iter']) and (delta < params['threshold']):
+        if (
+            (iteration > params['min_num_iter'])
+            and (delta < params['threshold'])
+        ):
             break
 
     # Empirical average \approx POSTMEAN Eq. 44
@@ -319,6 +366,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         x_postmean = uft.uifft2(x_postmean)
 
+    # TODO: remove astype call below once minimum SciPy >= 1.4
+    if x_postmean.dtype.kind == 'c':
+        deconv_type = np.promote_types(float_type, np.complex64)
+    else:
+        deconv_type = float_type
+    x_postmean = x_postmean.astype(deconv_type, copy=False)
+
     if clip:
         x_postmean[x_postmean > 1] = 1
         x_postmean[x_postmean < -1] = -1
@@ -326,7 +380,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def richardson_lucy(image, psf, iterations=50, clip=True):
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -335,12 +390,15 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
        Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
-    iterations : int, optional
+    num_iter : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
+    filter_epsilon: float, optional
+       Value below which intermediate results become 0 to avoid division
+       by small numbers.
 
     Returns
     -------
@@ -349,25 +407,33 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     Examples
     --------
-    >>> from skimage import color, data, restoration
-    >>> camera = color.rgb2gray(data.camera())
+    >>> from skimage import img_as_float, data, restoration
+    >>> camera = img_as_float(data.camera())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
-    >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
+    >>> rng = np.random.default_rng()
+    >>> camera += 0.1 * camera.std() * rng.standard_normal(camera.shape)
     >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
 
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    image = image.astype(np.float)
-    psf = psf.astype(np.float)
-    im_deconv = np.full(image.shape, 0.5)
-    psf_mirror = psf[::-1, ::-1]
+    float_type = _supported_float_type(image.dtype)
+    image = image.astype(float_type, copy=False)
+    psf = psf.astype(float_type, copy=False)
+    im_deconv = np.full(image.shape, 0.5, dtype=float_type)
+    psf_mirror = np.flip(psf)
 
-    for _ in range(iterations):
-        relative_blur = image / convolve(im_deconv, psf, mode='same')
+    for _ in range(num_iter):
+        conv = convolve(im_deconv, psf, mode='same')
+        if filter_epsilon:
+            with np.errstate(invalid='ignore'):
+                relative_blur = np.where(conv < filter_epsilon, 0,
+                                         image / conv)
+        else:
+            relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')
 
     if clip:

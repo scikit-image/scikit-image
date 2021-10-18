@@ -22,7 +22,7 @@ For a one-off solution, the simplest, surest route is to convert the video to a
 collection of sequentially-numbered image files, often called an image
 sequence. Then the images files can be read into an `ImageCollection` by
 `skimage.io.imread_collection`. Converting the video to frames can be done
-easily in `ImageJ <http://imagej.nih.gov/ij/>`__, a cross-platform, GUI-based
+easily in `ImageJ <https://imagej.nih.gov/ij/>`__, a cross-platform, GUI-based
 program from the bio-imaging community, or `FFmpeg <https://www.ffmpeg.org/>`__, a
 powerful command-line utility for manipulating video files.
 
@@ -34,7 +34,7 @@ video. The files are numbered with five digits, padded on the left with zeros.
    ffmpeg -i "video.mov" -f image2 "video-frame%05d.png"
 
 More information is available in an `FFmpeg tutorial on image sequences 
-<http://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
+<https://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
 
 Generating an image sequence has disadvantages: they can be large and unwieldy,
 and generating them can take some time. It is generally preferable to work
@@ -49,7 +49,7 @@ has some disadvantages.
 PyAV
 ^^^^
 
-`PyAV <http://mikeboers.github.io/PyAV/>`__ uses FFmpeg's (or LibAV's) libraries
+`PyAV <http://docs.mikeboers.com/pyav/develop/>`__ uses FFmpeg's (or LibAV's) libraries
 to read image data directly from the video file. It invokes them using Cython
 bindings, so it is very fast.
 
@@ -91,7 +91,7 @@ frame.
 MoviePy
 ^^^^^^^
 
-`Moviepy <http://zulko.github.io/moviepy>`__ invokes FFmpeg through a
+`Moviepy <https://zulko.github.io/moviepy>`__ invokes FFmpeg through a
 subprocess, pipes the decoded video from FFmpeg
 into RAM, and reads it out. This approach is straightforward, but it can be
 brittle, and it's not workable for large videos that exceed available RAM.
@@ -126,6 +126,6 @@ OpenCV
 ^^^^^^
 
 Finally, another solution is the `VideoReader
-<https://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
+<https://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
 class in OpenCV, which has bindings to FFmpeg. If you need OpenCV for other reasons,
 then this may be the best approach.

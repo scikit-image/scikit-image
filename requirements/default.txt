@@ -1,8 +1,8 @@
-numpy>=1.15.1
-scipy>=1.0.1
-matplotlib>=2.0.0,!=3.0.0
-networkx>=2.0
-pillow>=4.3.0
-imageio>=2.3.0
+numpy>=1.17.0
+scipy>=1.2.3
+matplotlib>=3.0.3
+networkx>=2.2
+pillow>=6.1.0,!=7.1.0,!=7.1.1,!=8.3.0
+imageio>=2.4.1
 tifffile>=2019.7.26
-PyWavelets>=0.5.2
+PyWavelets>=1.1.1

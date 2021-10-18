@@ -1,24 +1,26 @@
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
+
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=None, mode='constant', cval=0.0,
+                 order=None, mode='reflect', cval=0.0,
                  *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    image : numeric array, shape (M, N[, C])
+    image : ndarray, shape (M, N[, C])
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
-    src : 2-tuple of numeric scalar (float or int)
-        The start point of the scan line.
-    dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line. The destination point is *included*
-        in the profile, in contrast to standard numpy indexing.
+    src : array_like, shape (2, )
+        The coordinates of the start point of the scan line.
+    dst : array_like, shape (2, )
+        The coordinates of the end point of the scan
+        line. The destination point is *included* in the profile, in
+        contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -53,14 +55,14 @@ def profile_line(image, src, dst, linewidth=1,
     >>> profile_line(img, (2, 1), (2, 4))
     array([1., 1., 2., 2.])
     >>> profile_line(img, (1, 0), (1, 6), cval=4)
-    array([1., 1., 1., 2., 2., 2., 4.])
+    array([1., 1., 1., 2., 2., 2., 2.])
 
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     For example:
 
     >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
-    array([1., 1., 1., 2., 2., 2., 0.])
+    array([1., 1., 1., 2., 2., 2., 2.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
     array([1., 1., 1., 2., 2., 2.])
 
@@ -88,15 +90,9 @@ def profile_line(image, src, dst, linewidth=1,
            [1.        , 1.        , 0.        ],
            [1.41421356, 1.41421356, 0.        ]])
     """
-    if order is None:
-        order = 0 if image.dtype == bool else 1
 
-    if image.dtype == bool and order != 0:
-        warn("Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type. Starting from version "
-             "0.19 a ValueError will be raised instead of this warning.",
-             FutureWarning, stacklevel=2)
+    order = _validate_interpolation_order(image.dtype, order)
+    mode = _fix_ndimage_mode(mode)
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
@@ -164,8 +160,8 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     # distance between pixel centers)
     col_width = (linewidth - 1) * np.sin(-theta) / 2
     row_width = (linewidth - 1) * np.cos(theta) / 2
-    perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
+    perp_rows = np.stack([np.linspace(row_i - row_width, row_i + row_width,
                                       linewidth) for row_i in line_row])
-    perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
+    perp_cols = np.stack([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
-    return np.array([perp_rows, perp_cols])
+    return np.stack([perp_rows, perp_cols])

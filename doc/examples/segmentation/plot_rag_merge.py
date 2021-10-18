@@ -60,7 +60,7 @@ def merge_mean_color(graph, src, dst):
 
 
 img = data.coffee()
-labels = segmentation.slic(img, compactness=30, n_segments=400)
+labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_mean_color(img, labels)
 
 labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
@@ -68,7 +68,7 @@ labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
                                    merge_func=merge_mean_color,
                                    weight_func=_weight_mean_color)
 
-out = color.label2rgb(labels2, img, kind='avg')
+out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
 io.imshow(out)
 io.show()

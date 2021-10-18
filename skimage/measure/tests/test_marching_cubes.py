@@ -1,7 +1,9 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_allclose
+
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import marching_cubes, mesh_surface_area
-from skimage._shared import testing
 
 
 def test_marching_cubes_isotropic():
@@ -42,6 +44,12 @@ def test_marching_cubes_anisotropic():
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
 
+    # Test marching cube with mask
+    with pytest.raises(ValueError):
+        verts, faces = marching_cubes(
+            ellipsoid_anisotropic, 0., spacing=spacing,
+            mask=np.array([]))[:2]
+
     # Test spacing together with allow_degenerate=False
     marching_cubes(ellipsoid_anisotropic, 0, spacing=spacing,
                    allow_degenerate=False)
@@ -49,23 +57,23 @@ def test_marching_cubes_anisotropic():
 
 def test_invalid_input():
     # Classic
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 0, method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 1, method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2), method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((20, 20)), 0, method='_lorensen')
 
     # Lewiner
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 0)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 1)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((20, 20)), 0)
 
 
@@ -135,3 +143,38 @@ def test_both_algs_same_result_donut():
     assert not _same_mesh(vertices2, faces2, vertices3, faces3)
     # Would have been nice if old and new classic would have been the same
     # assert _same_mesh(vertices1, faces1, vertices3, faces3, 5)
+
+
+def test_masked_marching_cubes():
+
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.ones_like(ellipsoid_scalar, dtype=bool)
+    mask[:10, :, :] = False
+    mask[:, :, 20:] = False
+    ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
+    area = mesh_surface_area(ver, faces)
+
+    assert_allclose(area, 299.56878662109375, rtol=.01)
+
+
+def test_masked_marching_cubes_empty():
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.array([])
+    with pytest.raises(ValueError):
+        _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
+
+
+def test_masked_marching_cubes_old_lewiner():
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.array([])
+    with pytest.raises(NotImplementedError):
+        _ = marching_cubes(ellipsoid_scalar, 0, mask=mask, method='_lorensen')
+
+
+def test_masked_marching_cubes_all_true():
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.ones_like(ellipsoid_scalar, dtype=bool)
+    ver_m, faces_m, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
+    ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
+    assert_allclose(ver_m, ver, rtol=.00001)
+    assert_allclose(faces_m, faces, rtol=.00001)

@@ -11,7 +11,6 @@ def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
     config = Configuration('_shared', parent_package, top_path)
-    config.add_data_dir('tests')
 
     cython(['geometry.pyx',
             'transform.pyx',
