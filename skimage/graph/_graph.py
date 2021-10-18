@@ -6,7 +6,7 @@ from ..morphology._util import _offsets_to_raveled_neighbors
 from ..util._map_array import map_array
 
 
-def pixel_graph(image=None, *, mask=None, edge_function=None):
+def pixel_graph(image=None, *, mask=None, edge_function=None, connectivity=1):
     """Create an adjacency graph of pixels in an image.
 
     Parameters
@@ -39,7 +39,9 @@ def pixel_graph(image=None, *, mask=None, edge_function=None):
         mask = np.ones_like(image, dtype=bool)
         edge_function = np.subtract
 
-    footprint = ndi.generate_binary_structure(mask.ndim, 1)
+    footprint = ndi.generate_binary_structure(
+            rank=mask.ndim, connectivity=connectivity
+            )
     padded = np.pad(mask, 1, mode='constant', constant_values=False)
     nodes_padded = np.arange(padded.size).reshape(padded.shape)[padded]
     neighbor_offsets_padded = _offsets_to_raveled_neighbors(
@@ -73,7 +75,7 @@ def pixel_graph(image=None, *, mask=None, edge_function=None):
     return graph, nodes
 
 
-def central_pixel(graph, nodes=None, shape=None):
+def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     """Find the pixel with the highest closeness centrality.
 
     Closeness centrality is the inverse of the total sum of shortest distances
@@ -84,9 +86,19 @@ def central_pixel(graph, nodes=None, shape=None):
     graph : scipy.sparse.csr_matrix
         The sparse matrix representation of the graph.
     nodes : array of int
-        The raveled index of each node in graph in the image.
+        The raveled index of each node in graph in the image. If not provided,
+        the returned value will be the index in the input graph.
     shape : tuple of int
-        The shape of the image in which the nodes are embedded.
+        The shape of the image in which the nodes are embedded. If provided,
+        the returned coordinates are a NumPy multi-index of the same
+        dimensionality as the input shape. Otherwise, the returned coordinate
+        is the raveled index provided in `nodes`.
+    partition_size : int
+        This function computes the shortest path distance between every pair
+        of nodes in the graph. This can result in a very large (N*N) matrix.
+        As a simple performance tweak, the distance values are computed in
+        lots of `partition_size`, resulting in a memory requirement of only
+        partition_size*N.
 
     Returns
     -------
@@ -99,9 +111,23 @@ def central_pixel(graph, nodes=None, shape=None):
     """
     if nodes is None:
         nodes = np.arange(graph.shape[0])
-    all_shortest_paths = csgraph.shortest_path(graph, directed=False)
-    all_shortest_paths_no_inf = np.nan_to_num(all_shortest_paths, posinf=0)
-    total_shortest_path_len = np.sum(all_shortest_paths_no_inf, axis=1)
+    if partition_size is None:
+        all_shortest_paths = csgraph.shortest_path(graph, directed=False)
+        all_shortest_paths_no_inf = np.nan_to_num(all_shortest_paths, posinf=0)
+        total_shortest_path_len = np.sum(all_shortest_paths_no_inf, axis=1)
+    else:
+        idxs = np.arange(graph.shape[0])
+        total_shortest_path_len_list = []
+        for start in range(0, graph.shape[0], partition_size):
+            end = start + partition_size
+            shortest_paths = csgraph.shortest_path(
+                    graph, directed=False, indices=idxs[start:end]
+                    )
+            shortest_paths_no_inf = np.nan_to_num(shortest_paths)
+            total_shortest_path_len_list.append(
+                    np.sum(shortest_paths_no_inf, axis=1)
+                    )
+        total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
     nonzero = np.flatnonzero(total_shortest_path_len)
     min_sp = np.argmin(total_shortest_path_len[nonzero])
     raveled_index = nodes[nonzero[min_sp]]
@@ -109,4 +135,4 @@ def central_pixel(graph, nodes=None, shape=None):
         central = np.unravel_index(raveled_index, shape)
     else:
         central = raveled_index
-    return raveled_index, total_shortest_path_len
+    return central, total_shortest_path_len
