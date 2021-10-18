@@ -557,7 +557,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         bins = np.arange(1, self.n_ori + 1, dtype=self.float_dtype)
 
         key_numbers = np.arange(n_key)
-        for o, (gradient, delta) in enumerate(zip(gradient_space, self.deltas)):
+        for o, (gradient, delta) in enumerate(zip(gradient_space,
+                                                  self.deltas)):
             in_oct = self.octaves == o
             if not np.any(in_oct):
                 continue

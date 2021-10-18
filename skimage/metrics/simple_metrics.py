@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import entropy
 
 from ..util.dtype import dtype_range
-from .._shared.utils import warn, check_shape_equality
+from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
@@ -15,7 +15,7 @@ def _as_floats(image0, image1):
     """
     Promote im1, im2 to nearest appropriate floating point precision.
     """
-    float_type = np.result_type(image0.dtype, image1.dtype, np.float32)
+    float_type = _supported_float_type([image0.dtype, image1.dtype])
     image0 = np.asarray(image0, dtype=float_type)
     image1 = np.asarray(image1, dtype=float_type)
     return image0, image1
@@ -184,8 +184,8 @@ def _pad_to(arr, shape):
     array([[1, 0, 0]])
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
-        raise ValueError(f"Target shape {shape} cannot be smaller than input"
-                         f"shape {arr.shape} along any axis.")
+        raise ValueError(f'Target shape {shape} cannot be smaller than input'
+                         f'shape {arr.shape} along any axis.')
     padding = [(0, s-i) for s, i in zip(shape, arr.shape)]
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
@@ -238,9 +238,9 @@ def normalized_mutual_information(image0, image1, *, bins=100):
            :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     if image0.ndim != image1.ndim:
-        raise ValueError('NMI requires images of same number of dimensions. '
-                         'Got {}D for `image0` and {}D for `image1`.'
-                         .format(image0.ndim, image1.ndim))
+        raise ValueError(f'NMI requires images of same number of dimensions. '
+                         f'Got {image0.ndim}D for `image0` and '
+                         f'{image1.ndim}D for `image1`.')
     if image0.shape != image1.shape:
         max_shape = np.maximum(image0.shape, image1.shape)
         padded0 = _pad_to(image0, max_shape)

@@ -68,8 +68,8 @@ def _validate_inputs(image, markers, mask, connectivity):
         mask = np.asanyarray(mask, dtype=bool)
         n_pixels = np.sum(mask)
         if mask.shape != image.shape:
-            message = ("`mask` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(mask.shape, image.shape))
+            message = (f'`mask` (shape {mask.shape}) must have same shape '
+                       f'as `image` (shape {image.shape})')
             raise ValueError(message)
     if markers is None:
         markers_bool = local_minima(image, connectivity=connectivity) * mask
@@ -84,8 +84,8 @@ def _validate_inputs(image, markers, mask, connectivity):
     else:
         markers = np.asanyarray(markers) * mask
         if markers.shape != image.shape:
-            message = ("`markers` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(markers.shape, image.shape))
+            message = (f'`markers` (shape {markers.shape}) must have same '
+                       f'shape as `image` (shape {image.shape})')
             raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
@@ -189,10 +189,11 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     >>> from scipy import ndimage as ndi
     >>> distance = ndi.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
-    >>> local_maxi = peak_local_max(distance, labels=image,
-    ...                             footprint=np.ones((3, 3)),
-    ...                             indices=False)
-    >>> markers = ndi.label(local_maxi)[0]
+    >>> max_coords = peak_local_max(distance, labels=image,
+    ...                             footprint=np.ones((3, 3)))
+    >>> local_maxima = np.zeros_like(image, dtype=bool)
+    >>> local_maxima[tuple(max_coords.T)] = True
+    >>> markers = ndi.label(local_maxima)[0]
 
     Finally, we run the watershed on the image and markers:
 

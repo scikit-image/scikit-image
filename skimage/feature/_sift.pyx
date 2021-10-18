@@ -32,8 +32,8 @@ cpdef _ori_distances(np_floats[::1] ori_bins,
         Py_ssize_t n_theta = theta.size
         Py_ssize_t n_ori = ori_bins.size
         Py_ssize_t i, j, idx_min
-        double th, dist, dist_min
-        double two_pi = 2 * M_PI
+        np_floats th, dist, dist_min
+        np_floats two_pi = 2 * M_PI
         Py_ssize_t[::1] near_t = np.empty((n_theta, ), dtype=np.intp)
 
     if np_floats == cnp.float32_t:
