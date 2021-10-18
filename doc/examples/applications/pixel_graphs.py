@@ -1,0 +1,80 @@
+"""
+============
+Pixel graphs
+============
+
+In various image analysis contexts, it is useful to think of the pixels of an
+image as a network, in which each pixel is connected to its neighbors (with or
+without diagonals). In this example, we use this approach to find the pixel of
+a skeleton with maximal *closeness centrality* [1]_, that is, the pixel from
+which travelling to every other pixel is fastest. This can be useful to define
+the center of a complex, non-convex object, in which the centroid may actually
+fall outside the object.
+
+References
+----------
+.. [1] Linton C. Freeman: Centrality in networks: I.
+       Conceptual clarification. Social Networks 1:215-239, 1979.
+       https://doi.org/10.1016/0378-8733(78)90021-7
+"""
+import numpy as np
+from scipy import ndimage as ndi
+from skimage import color, data, filters, graph, measure, morphology
+import matplotlib.pyplot as plt
+
+###############################################################################
+# We start by loading the data: an image of a human retina.
+
+retina_source = data.retina()
+
+_, ax = plt.subplots()
+ax.imshow(retina_source)
+
+###############################################################################
+# We convert the image to grayscale, then use the
+# `Sato vesselness filter <skimage.filters.sato>` to better distinguish the
+# main vessels in the image.
+
+retina = color.rgb2gray(retina_source)
+t0, t1 = filters.threshold_multiotsu(retina, classes=3)
+mask = (retina > t0)
+vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
+
+_, axes = plt.subplots(nrows=1, ncols=2)
+axes[0].imshow(retina, cmap='gray')
+axes[1].imshow(vessels, cmap='magma')
+
+###############################################################################
+# Based on the observed vesselness values, we use
+# `hysteresis thresholding <skimage.filters.apply_hysteresis_threshold>` to
+# define the main vessels.
+
+thresholded = filters.apply_hysteresis_threshold(vessels, 0.01, 0.03)
+labeled = ndi.label(thresholded)[0]
+
+_, ax = plt.subplots()
+ax.imshow(color.label2rgb(labeled, retina))
+
+###############################################################################
+# Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
+# image and use that as the basis to find the
+# `central pixel <skimage.graph.central_pixel>` in that skeleton. Compare that
+# to the position of the centroid!
+
+largest_nonzero_label = np.argmax(np.bincount(labeled[labeled > 0]))
+binary = labeled == largest_nonzero_label
+skeleton = morphology.skeletonize(binary)
+g, nodes = graph.pixel_graph(skeleton, connectivity=2)
+px, distances = graph.central_pixel(
+        g, nodes=nodes, shape=skeleton.shape, partition_size=100
+        )
+
+centroid = measure.centroid(labeled > 0)
+
+_, ax = plt.subplots()
+ax.imshow(color.label2rgb(skeleton, retina))
+ax.scatter(px[1], px[0], label='graph center')
+ax.scatter(centroid[1], centroid[0], label='centroid')
+ax.legend()
+
+plt.show()
