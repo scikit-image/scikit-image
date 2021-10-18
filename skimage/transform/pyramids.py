@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 
 from .._shared import utils
 from .._shared.utils import convert_to_float
-from ..filters import pyramids
+from ..filters import gaussian
 from ..transform import resize
 
 
