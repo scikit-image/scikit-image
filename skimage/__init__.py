@@ -136,3 +136,7 @@ else:
     from .util.lookfor import lookfor
 
 del sys
+
+from skimage._shared.testing import PytestTester
+test = PytestTester(__name__)
+del PytestTester
