@@ -137,6 +137,6 @@ else:
 
 del sys
 
-from skimage._shared.testing import PytestTester  # noqa
+from skimage._shared.testing import PytestTester
 test = PytestTester(__name__)
 del PytestTester
