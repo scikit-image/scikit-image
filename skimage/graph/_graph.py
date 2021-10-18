@@ -2,11 +2,18 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import sparse
 from scipy.sparse import csgraph
-from ..morphology._util import _offsets_to_raveled_neighbors
+from ..morphology._util import _raveled_offsets_and_distances
 from ..util._map_array import map_array
 
 
-def pixel_graph(image=None, *, mask=None, edge_function=None, connectivity=1):
+def pixel_graph(
+        image=None,
+        *,
+        mask=None,
+        edge_function=None,
+        connectivity=1,
+        spacing=None
+        ):
     """Create an adjacency graph of pixels in an image.
 
     Parameters
@@ -19,8 +26,15 @@ def pixel_graph(image=None, *, mask=None, edge_function=None, connectivity=1):
         If image is None and mask is not None, the mask is used as the image.
     edge_function : callable
         A function taking an array of pixel values, and an array of neighbor
-        pixel values, and returning a value for the edge. If no function is
-        given, the value of an edge is 1.
+        pixel values, and an array of distances, and returning a value for the
+        edge. If no function is given, the value of an edge is just the
+        distance.
+    connectivity : int
+        The square connectivity of the pixel neighborhood: the number of
+        orthogonal steps allowed to consider a pixel a neigbor. See
+        `scipy.ndimage.generate_binary_structure` for details.
+    spacing : tuple of float
+        The spacing between pixels along each axis.
 
     Returns
     -------
@@ -39,30 +53,31 @@ def pixel_graph(image=None, *, mask=None, edge_function=None, connectivity=1):
         mask = np.ones_like(image, dtype=bool)
         edge_function = np.subtract
 
-    footprint = ndi.generate_binary_structure(
-            rank=mask.ndim, connectivity=connectivity
-            )
     padded = np.pad(mask, 1, mode='constant', constant_values=False)
     nodes_padded = np.arange(padded.size).reshape(padded.shape)[padded]
-    neighbor_offsets_padded = _offsets_to_raveled_neighbors(
-            padded.shape, footprint, (1,) * padded.ndim
+    neighbor_offsets_padded, distances_padded = _raveled_offsets_and_distances(
+            padded.shape, connectivity=connectivity, spacing=spacing
             )
     neighbors_padded = nodes_padded[:, np.newaxis] + neighbor_offsets_padded
+    neighbor_distances_full = np.broadcast_to(
+            distances_padded, neighbors_padded.shape
+            )
     nodes = np.arange(mask.size).reshape(mask.shape)[mask]
     nodes_sequential = np.arange(nodes.size)
     # neighbors outside the mask get mapped to 0, which is a valid index,
     # BUT, they will be masked out in the next step.
     neighbors = map_array(neighbors_padded, nodes_padded, nodes)
-    neighbors_mask = mask.ravel()[neighbors]
+    neighbors_mask = padded.ravel()[neighbors_padded]
     num_neighbors = np.sum(neighbors_mask, axis=1)
     indices = np.repeat(nodes, num_neighbors)
     indices_sequential = np.repeat(nodes_sequential, num_neighbors)
     neighbor_indices = neighbors[neighbors_mask]
+    neighbor_distances = neighbor_distances_full[neighbors_mask]
     neighbor_indices_sequential = map_array(
             neighbor_indices, nodes, nodes_sequential
             )
     if edge_function is None:
-        data = np.broadcast_to(1, indices_sequential.shape)
+        data = neighbor_distances
     else:
         image_r = image.ravel()
         data = edge_function(image_r[indices], image_r[neighbor_indices])
