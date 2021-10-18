@@ -425,7 +425,7 @@ class PytestTester(object):
             pytest_args += list(extra_argv)
 
         if verbose > 1:
-            pytest_args += ["-" + "v"*(verbose - 1)]
+            pytest_args += ["-" + "v" * (verbose - 1)]
 
         if coverage:
             pytest_args += ["--cov=" + module_path]

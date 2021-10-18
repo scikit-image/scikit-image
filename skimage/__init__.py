@@ -70,6 +70,8 @@ dtype_limits
 
 import sys
 
+from skimage._shared.testing import PytestTester
+
 
 __version__ = '0.19.0.dev0'
 
@@ -137,6 +139,5 @@ else:
 
 del sys
 
-from skimage._shared.testing import PytestTester
 test = PytestTester(__name__)
 del PytestTester
