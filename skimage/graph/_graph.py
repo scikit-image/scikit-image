@@ -80,7 +80,9 @@ def pixel_graph(
         data = neighbor_distances
     else:
         image_r = image.ravel()
-        data = edge_function(image_r[indices], image_r[neighbor_indices])
+        data = edge_function(
+                image_r[indices], image_r[neighbor_indices], neighbor_distances
+                )
     m = nodes_sequential.size
     mat = sparse.coo_matrix(
             (data, (indices_sequential, neighbor_indices_sequential)),
