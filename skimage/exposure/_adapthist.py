@@ -81,7 +81,7 @@ def equalize_adapthist(image, kernel_size=None,
     ).astype(np.uint16)
 
     if kernel_size is None:
-        kernel_size = tuple([image.shape[dim] // 8
+        kernel_size = tuple([max(image.shape[dim] // 8, 1)
                              for dim in range(image.ndim)])
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
