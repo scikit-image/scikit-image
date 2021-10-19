@@ -156,6 +156,7 @@ def _raveled_offsets_and_distances(
         # np.unique reorders, which we don't want
         _, indices = np.unique(sorted_raveled_offsets, return_index=True)
         sorted_raveled_offsets = sorted_raveled_offsets[np.sort(indices)]
+        sorted_distances = sorted_distances[np.sort(indices)]
 
     # Remove "offset to center"
     sorted_raveled_offsets = sorted_raveled_offsets[1:]
