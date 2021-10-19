@@ -211,8 +211,8 @@ In early July 2021, the core team held a series of meetings to discuss this
 approach. The minutes of this meeting are in the scikit-image meeting notes
 repository [9]_.
 
-Ongoing discussion will happen on the image.sc forum [10]_, the scikit-image
-mailing list [11]_, and GitHub meta-issue [7]_. Specific links to relevant
+Ongoing discussion will happen on the user forum [10]_, the
+developer forum [11]_, and GitHub meta-issue [7]_. Specific links to relevant
 posts will be added to this document before acceptance.
 
 Resolution
@@ -292,7 +292,7 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 .. [8] https://github.com/scikit-image/scikit-image/milestones/1.0
 .. [9] https://github.com/scikit-image/meeting-notes/blob/main/2021/july-api-meetings.md
 .. [10] https://forum.image.sc/tag/scikit-image
-.. [11] https://mail.python.org/mailman3/lists/scikit-image.python.org/
+.. [11] https://discuss.scientific-python.org/c/contributor/skimage
 .. [12] https://mail.python.org/archives/list/scikit-image@python.org/thread/DSV6PEYVJ4RZRUWWV5SBNF7FFRERTSCF/
 .. [13] https://mail.python.org/archives/list/scikit-image@python.org/message/UYARUQM5LBWXIAWBAPNHIQIDRKUUDTEK/
 .. [14] https://mail.python.org/archives/list/scikit-image@python.org/message/63ZGG7DY5SWVM62XASHMCPFAG6KPJCMT/

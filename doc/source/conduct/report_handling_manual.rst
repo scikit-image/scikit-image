@@ -182,7 +182,7 @@ Possible responses may include:
   email, cc'ing the group.
 * A public reprimand. In this case, the committee chair will deliver that
   reprimand in the same venue that the violation occurred, within the limits of
-  practicality. E.g., the original mailing list for an email violation, but
+  practicality. E.g., on the original forum for a discussion violation, but
   for a chat room discussion where the person/context may be gone, they can be
   reached by other means. The group may choose to publish this message
   elsewhere for documentation purposes.
@@ -190,12 +190,12 @@ Possible responses may include:
   this idea: they may at their discretion refuse further contact with the
   violator. The chair will deliver this request. The committee may, if it
   chooses, attach "strings" to this request: for example, the group may ask a
-  violator to apologize in order to retain one’s membership on a mailing list.
+  violator to apologize in order to retain their membership on the forum.
 * A "mutually agreed upon hiatus" where the committee asks the individual to
   temporarily refrain from community participation. If the individual chooses
   not to take a temporary break voluntarily, the committee may issue a
   "mandatory cooling off period".
-* A permanent or temporary ban from some or all scikit-image spaces (mailing lists,
+* A permanent or temporary ban from some or all scikit-image spaces (forums,
   gitter.im, etc.). The group will maintain records of all such bans so that
   they may be reviewed in the future or otherwise maintained.
 

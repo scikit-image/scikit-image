@@ -77,7 +77,7 @@ This section may just be a bullet list including links to any discussions
 regarding the SKIP, but could also contain additional comments about that
 discussion:
 
-- This includes links to mailing list threads or relevant GitHub issues.
+- This includes links to discussion forum threads or relevant GitHub issues.
 
 
 References and Footnotes

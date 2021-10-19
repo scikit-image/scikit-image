@@ -220,8 +220,8 @@ Additional help
 
 If you still have questions, reach out through
 
-- our `forum on image.sc <https://forum.image.sc/tags/scikit-image>`_
-- our `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_
+- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 - our `chat channel <https://skimage.zulipchat.com/>`_
 - `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
 

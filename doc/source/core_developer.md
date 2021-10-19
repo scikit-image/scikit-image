@@ -200,12 +200,12 @@ resources such as:
    should read both.)
 -  The scikit-image [tag on StackOverflow][so_tag]
 -  The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
--  Our [mailing list][ml]
+-  Our [developer forum][ml]
 -  Our [chat room](https://skimage.zulipchat.com/)
 
 [numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
-[ml]: https://mail.python.org/mailman3/lists/scikit-image.python.org/
+[ml]: https://discuss.scientific-python.org/c/contributor/skimage
 
 You are not required to monitor all of the social resources.
 

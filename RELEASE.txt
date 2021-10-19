@@ -144,9 +144,10 @@ the appropriate point in main and the following instructions are still apt.
     in `robots.txt`
   - Commit and push (this will also build and update the website).
 
-- Post release notes on mailing lists, blog, Twitter, etc.
+- Post release notes on user & dev forums, blog, Twitter, etc.
 
-  - scikit-image@python.org
+  - https://discuss.scientific-python.org/c/contributor/skimage
+  - https://forum.image.sc/tag/scikit-image
   - scipy-user@python.org
   - scikit-learn@python.org
 
