@@ -77,6 +77,27 @@ def pixel_graph(
         mask = np.ones_like(image, dtype=bool)
         edge_function = _weighted_abs_diff
 
+    # Strategy: we are going to build the (i, j, data) arrays of a scipy
+    # sparse COO matrix, then convert to CSR (which is fast).
+    # - grab the raveled IDs of the foreground (mask == True) parts of the
+    #   image **in the padded space**.
+    # - broadcast them together with the raveled offsets to their neighbors.
+    #   This gives us for each foreground pixel a list of neighbors (that
+    #   may or may not be masked.) (We also track the *distance* to each
+    #   neighbor.)
+    # - mask the neighbors and distance arrays by indexing into the mask,
+    #   which we can do since these are raveled indices.
+    # - use np.repeat() to repeat the source indices according to the number
+    #   of non-masked neighbors it has. **This is the i array.**
+    # - use the mask as a boolean index to get a 1D view of the non-masked
+    #   neighbors. **This is the j array.**
+    # - by default, the same boolean indexing can be applied to the distances
+    #   to each neighbor, to give the **data array.** Optionally, a
+    #   provided edge function can be computed on the pixel values and the
+    #   distances to give a different value for the edges.
+    # Note, we use map_array to map the raveled coordinates in the padded
+    # image to the ones in the original image, and those are the returned
+    # nodes.
     padded = np.pad(mask, 1, mode='constant', constant_values=False)
     nodes_padded = np.arange(padded.size).reshape(padded.shape)[padded]
     neighbor_offsets_padded, distances_padded = _raveled_offsets_and_distances(
