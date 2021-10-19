@@ -16,7 +16,9 @@ class DummyNNClassifier(object):
 
     def predict(self, X):
         if X.shape[1] != self.X.shape[1]:
-            raise ValueError(f"Expected {self.X.shape[1]} features but got {X.shape[1]}.")
+            raise ValueError(
+                f"Expected {self.X.shape[1]} features but got {X.shape[1]}."
+            )
         nearest_neighbors = self.tree.query(X)[1]
         return self.labels[nearest_neighbors]
 
