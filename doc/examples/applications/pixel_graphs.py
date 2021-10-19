@@ -17,10 +17,10 @@ References
        Conceptual clarification. Social Networks 1:215-239, 1979.
        :DOI:`10.1016/0378-8733(78)90021-7`
 """
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import color, data, filters, graph, measure, morphology
-import matplotlib.pyplot as plt
 
 ###############################################################################
 # We start by loading the data: an image of a human retina.
