@@ -15,7 +15,7 @@ References
 ----------
 .. [1] Linton C. Freeman: Centrality in networks: I.
        Conceptual clarification. Social Networks 1:215-239, 1979.
-       https://doi.org/10.1016/0378-8733(78)90021-7
+       :DOI:`10.1016/0378-8733(78)90021-7`
 """
 import numpy as np
 from scipy import ndimage as ndi
