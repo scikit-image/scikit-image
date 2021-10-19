@@ -7,7 +7,7 @@ In various image analysis contexts, it is useful to think of the pixels of an
 image as a network, in which each pixel is connected to its neighbors (with or
 without diagonals). In this example, we use this approach to find the pixel of
 a skeleton with maximal *closeness centrality* [1]_, that is, the pixel from
-which travelling to every other pixel is fastest. This can be useful to define
+which traveling to every other pixel is fastest. This can be useful to define
 the center of a complex, non-convex object, in which the centroid may actually
 fall outside the object.
 
@@ -29,6 +29,8 @@ retina_source = data.retina()
 
 _, ax = plt.subplots()
 ax.imshow(retina_source)
+ax.set_axis_off()
+ax.set_title('Human retina')
 
 ###############################################################################
 # We convert the image to grayscale, then use the
@@ -42,7 +44,11 @@ vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
 
 _, axes = plt.subplots(nrows=1, ncols=2)
 axes[0].imshow(retina, cmap='gray')
+axes[0].set_axis_off()
+axes[0].set_title('grayscale')
 axes[1].imshow(vessels, cmap='magma')
+axes[1].set_axis_off()
+axes[1].set_title('Sato vesselness')
 
 ###############################################################################
 # Based on the observed vesselness values, we use
@@ -54,6 +60,8 @@ labeled = ndi.label(thresholded)[0]
 
 _, ax = plt.subplots()
 ax.imshow(color.label2rgb(labeled, retina))
+ax.set_axis_off()
+ax.set_title('thresholded vesselness')
 
 ###############################################################################
 # Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
@@ -76,5 +84,7 @@ ax.imshow(color.label2rgb(skeleton, retina))
 ax.scatter(px[1], px[0], label='graph center')
 ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
+ax.set_axis_off()
+ax.set_title('vessel graph center vs centroid')
 
 plt.show()
