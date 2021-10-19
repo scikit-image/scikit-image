@@ -49,7 +49,7 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
-from skimage.feature import gaussian
+from skimage.filters import gaussian
 from skimage.measure import label
 
 from .._watershed import watershed
