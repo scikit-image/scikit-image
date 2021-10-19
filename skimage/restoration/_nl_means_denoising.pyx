@@ -741,16 +741,14 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
         # With t2 >= 0, reference patch is always on the left of test patch
         # Iterate over shifts along the row axis
         for t_row in range(-d, d + 1):
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t_row != 0:
-                alpha = 0.5
-            else:
-                alpha = 1.0
             row_start = max(offset, offset - t_row)
             row_end = min(n_row - offset, n_row - offset - t_row)
             # Iterate over shifts along the column axis
             for t_col in range(0, d + 1):
+                # alpha is to account for patches on the same column
+                # distance is computed twice in this case
+                alpha = 0.5 if t_col == 0 else 1
+
                 # Compute integral image of the squared difference between
                 # padded and the same image shifted by (t_row, t_col)
                 _integral_image_2d(padded, integral, t_row, t_col,
@@ -779,7 +777,6 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                                 padded[row_shift, col_shift, channel]
                             result[row_shift, col_shift, channel] += \
                                 weight * padded[row, col, channel]
-                alpha = 1
 
         # Normalize pixel values using sum of weights of contributing patches
         for row in range(pad_size, n_row - pad_size):
@@ -874,22 +871,16 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
         for t_pln in range(-d, d + 1):
             pln_dist_min = max(offset, offset - t_pln)
             pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
-                    # alpha is to account for patches on the same column
-                    # distance is computed twice in this case
-            if t_pln == 0:
-                alpha = 1.0
-            else:
-                alpha = 0.5
             # Iterate over shifts along the row axis
             for t_row in range(-d, d + 1):
                 row_dist_min = max(offset, offset - t_row)
                 row_dist_max = min(n_row - offset, n_row - offset - t_row)
-                if t_row == 0:
-                    alpha = 1.0
-                else:
-                    alpha = 0.5
                 # Iterate over shifts along the column axis
                 for t_col in range(0, d + 1):
+                    # alpha is to account for patches on the same column
+                    # distance is computed twice in this case
+                    alpha = 0.5 if t_col == 0 else 1
+
                     col_dist_min = offset
                     col_dist_max = n_col - offset - t_col
 
@@ -927,7 +918,6 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
                                     result[pln + t_pln, row + t_row,
                                            col + t_col, channel] += weight * \
                                                                     padded[pln, row, col, channel]
-                    alpha = 1.0
 
         # Normalize pixel values using sum of weights of contributing patches
         for pln in range(offset, n_pln - offset):
@@ -1026,29 +1016,19 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
         for t_time in range(-d, d + 1):
             time_dist_min = max(offset, offset - t_time)
             time_dist_max = min(n_time - offset, n_time - offset - t_time)
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t_time == 0:
-                alpha = 1.0
-            else:
-                alpha = 0.5
             for t_pln in range(-d, d + 1):
                 pln_dist_min = max(offset, offset - t_pln)
                 pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
-                if t_pln == 0:
-                    alpha = 1.0
-                else:
-                    alpha = 0.5
                 # Iterate over shifts along the row axis
                 for t_row in range(-d, d + 1):
                     row_dist_min = max(offset, offset - t_row)
                     row_dist_max = min(n_row - offset, n_row - offset - t_row)
-                    if t_row == 0:
-                        alpha = 1.0
-                    else:
-                        alpha = 0.5
                     # Iterate over shifts along the column axis
                     for t_col in range(0, d + 1):
+                        # alpha is to account for patches on the same column
+                        # distance is computed twice in this case
+                        alpha = 0.5 if t_col == 0 else 1
+
                         col_dist_min = offset
                         col_dist_max = n_col - offset - t_col
 
@@ -1093,7 +1073,6 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
                                                    channel] += weight * \
                                                        padded[time, pln, row,
                                                               col, channel]
-                        alpha = 1.0
 
         # Normalize pixel values using sum of weights of contributing patches
         for time in range(offset, n_time - offset):
