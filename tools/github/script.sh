@@ -14,7 +14,11 @@ TEST_ARGS="--doctest-modules --cov=skimage"
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
 # in there. pytest will crawl that instead of the module we installed and want to test
-(cd .. && pytest $TEST_ARGS --pyargs skimage)
+if [[ ${INSTALL_FROM_SDIST} != "0" ]]; then
+  (cd .. && python -c "import skimage; skimage.test()")
+else
+  (cd .. && pytest $TEST_ARGS --pyargs skimage)
+fi
 
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
 

@@ -23,8 +23,6 @@ References
 
 """
 
-import numpy as np
-
 from ..._shared.utils import check_nD, deprecate_kwarg
 from . import bilateral_cy
 from .generic import _preprocess_input
@@ -91,6 +89,7 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import mean_bilateral
@@ -139,6 +138,7 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
@@ -208,6 +208,7 @@ def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import sum_bilateral

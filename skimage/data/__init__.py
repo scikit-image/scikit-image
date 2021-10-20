@@ -6,7 +6,6 @@ For more images, see
 
 """
 from distutils.version import LooseVersion
-from warnings import warn
 import numpy as np
 import shutil
 
@@ -265,7 +264,6 @@ def _init_pooch():
         shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                      dest_path)
 
-    data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
     for filename in legacy_registry:
         _fetch(filename)

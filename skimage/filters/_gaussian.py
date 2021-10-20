@@ -4,8 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared import utils
-from .._shared.utils import (_supported_float_type, change_default_value,
-                             convert_to_float, warn)
+from .._shared.utils import _supported_float_type, convert_to_float, warn
 from ..util import img_as_float
 
 __all__ = ['gaussian', 'difference_of_gaussians']
