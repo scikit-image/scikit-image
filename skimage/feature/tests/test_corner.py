@@ -101,15 +101,15 @@ def test_structure_tensor_orders():
 def test_structure_tensor_sigma(ndim):
     img = np.zeros((5,) * ndim)
     img[[2] * ndim] = 1
-    A_default = structure_tensor(img, sigma=0.1)
-    A_tuple = structure_tensor(img, sigma=(0.1,) * ndim)
-    A_list = structure_tensor(img, sigma=[0.1] * ndim)
+    A_default = structure_tensor(img, sigma=0.1, order='rc')
+    A_tuple = structure_tensor(img, sigma=(0.1,) * ndim, order='rc')
+    A_list = structure_tensor(img, sigma=[0.1] * ndim, order='rc')
     assert_array_equal(A_tuple, A_default)
     assert_array_equal(A_list, A_default)
     with pytest.raises(ValueError):
-        structure_tensor(img, sigma=(0.1,) * (ndim - 1))
+        structure_tensor(img, sigma=(0.1,) * (ndim - 1), order='rc')
     with pytest.raises(ValueError):
-        structure_tensor(img, sigma=[0.1] * (ndim + 1))
+        structure_tensor(img, sigma=[0.1] * (ndim + 1), order='rc')
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

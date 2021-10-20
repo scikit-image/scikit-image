@@ -57,6 +57,8 @@ def test_unsupervised_wiener(dtype):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     seed = 16829302
+    # keep old-style RandomState here for compatibility with previously stored
+    # reference data in camera_unsup.npy and camera_unsup2.npy
     rng = np.random.RandomState(seed)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
@@ -164,8 +166,3 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf):
     path = fetch('restoration/tests/astronaut_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
                                atol=atol)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

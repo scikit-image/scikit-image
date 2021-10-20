@@ -70,10 +70,11 @@ dtype_limits
 
 import sys
 
+from ._shared.version_requirements import ensure_python_version
+
 
 __version__ = '0.19.0.dev0'
 
-from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
 
 # Logic for checking for improper install and importing while in the source
@@ -136,3 +137,40 @@ else:
     from .util.lookfor import lookfor
 
 del sys
+
+if 'dev' in __version__:
+    # Append last commit date and hash to dev version information, if available
+
+    import subprocess
+    import os.path
+
+    try:
+        p = subprocess.Popen(
+            ['git', 'log', '-1', '--format="%h %aI"'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=os.path.dirname(__file__),
+        )
+    except FileNotFoundError:
+        pass
+    else:
+        out, err = p.communicate()
+        if p.returncode == 0:
+            git_hash, git_date = (
+                out.decode('utf-8')
+                .strip()
+                .replace('"', '')
+                .split('T')[0]
+                .replace('-', '')
+                .split()
+            )
+
+            __version__ = '+'.join(
+                [tag for tag in __version__.split('+')
+                 if not tag.startswith('git')]
+            )
+            __version__ += f'+git{git_date}.{git_hash}'
+
+from skimage._shared.tester import PytestTester  # noqa
+test = PytestTester(__name__)
+del PytestTester

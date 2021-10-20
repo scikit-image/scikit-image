@@ -1,7 +1,9 @@
 # See "Writing benchmarks" in the asv docs for more information.
 # https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
+
 from skimage import data, filters
+from skimage.filters.thresholding import threshold_li
 
 
 class FiltersSuite:
@@ -61,6 +63,7 @@ class MultiOtsu(object):
     def peakmem_threshold_multiotsu(self, classes):
         filters.threshold_multiotsu(self.image, classes=classes)
 
+
 class ThresholdSauvolaSuite:
     """Benchmark for transform routines in scikit-image."""
 
@@ -83,3 +86,20 @@ class ThresholdSauvolaSuite:
 
     def time_sauvola_3d(self):
         result = filters.threshold_sauvola(self.image3D, window_size=51)
+
+
+class ThresholdLi:
+    """Benchmark for threshold_li in scikit-image."""
+
+    def setup(self):
+        try:
+            self.image = data.eagle()
+        except ValueError:
+            raise NotImplementedError("eagle data unavailable")
+        self.image_float32 = self.image.astype(np.float32)
+
+    def time_integer_image(self):
+        result1 = threshold_li(self.image)
+
+    def time_float32_image(self):
+        result1 = threshold_li(self.image_float32)

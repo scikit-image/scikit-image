@@ -262,7 +262,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
-    random_state : RandomState instance
+    random_state : `numpy.random.Generator`
         Provides initial values for eigenvalue solver.
     """
     d, w = _ncut.DW_matrices(rag)

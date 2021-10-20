@@ -3,8 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from skimage._shared._warnings import expected_warnings
-from skimage.segmentation import (circle_level_set,
-                                  disk_level_set,
+from skimage.segmentation import (disk_level_set,
                                   inverse_gaussian_gradient,
                                   morphological_chan_vese,
                                   morphological_geodesic_active_contour)
@@ -66,7 +65,6 @@ def test_morphsnakes_iterations_kwarg_deprecation():
     ls = disk_level_set(img.shape, center=(5, 5), radius=3)
 
     ref_zeros = np.zeros(img.shape, dtype=np.int8)
-    ref_ones = np.ones(img.shape, dtype=np.int8)
 
     with expected_warnings(["`iterations` is a deprecated argument"]):
         acwe_ls = morphological_chan_vese(img, iterations=6, init_level_set=ls)
@@ -114,12 +112,6 @@ def test_morphsnakes_simple_shape_geodesic_active_contour():
                                                    balloon=-1)
     assert_array_equal(gac_ls, ref)
     assert gac_ls.dtype == np.int8
-
-
-def test_deprecated_circle_level_set():
-    img = gaussian_blob()
-    with expected_warnings(['circle_level_set is deprecated']):
-        ls1 = circle_level_set(img.shape, (5, 5), 3)
 
 
 def test_init_level_sets():

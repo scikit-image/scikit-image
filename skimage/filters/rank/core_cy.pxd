@@ -1,4 +1,4 @@
-from numpy cimport uint8_t, uint16_t, double_t
+from numpy cimport uint8_t, uint16_t, float32_t, double_t
 
 
 ctypedef fused dtype_t:
@@ -8,6 +8,7 @@ ctypedef fused dtype_t:
 ctypedef fused dtype_t_out:
     uint8_t
     uint16_t
+    float32_t
     double_t
 
 

@@ -3,7 +3,6 @@ import numpy as np
 from skimage.restoration import unwrap_phase
 import sys
 
-import warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal_nulp,
                                      assert_almost_equal, assert_array_equal,

@@ -6,7 +6,6 @@ For more images, see
 
 """
 from distutils.version import LooseVersion
-from warnings import warn
 import numpy as np
 import shutil
 
@@ -18,7 +17,6 @@ from .. import __version__
 
 import os.path as osp
 import os
-import stat
 
 __all__ = ['data_dir',
            'download_all',
@@ -62,7 +60,7 @@ legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
 try:
-    from pooch.utils import file_hash
+    from pooch import file_hash
 except ModuleNotFoundError:
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
@@ -92,8 +90,7 @@ except ModuleNotFoundError:
         """
         import hashlib
         if alg not in hashlib.algorithms_available:
-            raise ValueError(
-                "Algorithm '{}' not available in hashlib".format(alg))
+            raise ValueError(f'Algorithm \'{alg}\' not available in hashlib')
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.new(alg)
@@ -267,7 +264,6 @@ def _init_pooch():
         shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                      dest_path)
 
-    data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
     for filename in legacy_registry:
         _fetch(filename)
@@ -458,9 +454,9 @@ def brick():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -525,9 +521,9 @@ def grass():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -573,9 +569,9 @@ def gravel():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >>> import numpy; print(f"numpy version: {numpy.__version__}")
-    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import numpy; print(f'numpy version: {numpy.__version__}')
+    >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid

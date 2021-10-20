@@ -6,8 +6,6 @@ import numpy as np
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal,
                                      parametrize, fetch)
-from skimage._shared import testing
-
 
 def setup():
     use_plugin('tifffile')

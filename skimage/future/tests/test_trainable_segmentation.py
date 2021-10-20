@@ -1,9 +1,11 @@
-import pytest
 from functools import partial
+
 import numpy as np
+import pytest
+from scipy import spatial
+
 from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
-from scipy import spatial
 
 
 class DummyNNClassifier(object):
@@ -47,15 +49,14 @@ def test_trainable_segmentation_multichannel():
     labels[:2] = 1
     labels[-2:] = 2
     clf = DummyNNClassifier()
-    features_func = partial(
-        multiscale_basic_features,
+    features = multiscale_basic_features(
+        img,
         edges=False,
         texture=False,
         sigma_min=0.5,
         sigma_max=2,
         channel_axis=-1,
     )
-    features = features_func(img)
     clf = fit_segmenter(labels, features, clf)
     out = predict_segmenter(features, clf)
     assert np.all(out[:10] == 1)
@@ -103,6 +104,10 @@ def test_trainable_segmentation_oo():
     )
     segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
     segmenter.fit(img, labels)
+
+    # model has been fitted
+    np.testing.assert_array_almost_equal(clf.labels, labels[labels > 0])
+
     out = segmenter.predict(img)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)

@@ -13,7 +13,7 @@ def lookfor(what):
     Examples
     --------
     >>> import skimage
-    >>> skimage.lookfor('regular_grid')
+    >>> skimage.lookfor('regular_grid')  # doctest: +SKIP
     Search results for 'regular_grid'
     ---------------------------------
     skimage.lookfor
