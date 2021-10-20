@@ -201,7 +201,7 @@ def test_disk_crosses_approximation(radius, strict_radius):
     expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
     footprint_sequence = fp_func(radius, strict_radius=strict_radius,
                                  decomposition="crosses")
-    approximate = _composite_footprint_from_sequence(footprint_sequence)
+    approximate = footprints.footprint_from_sequence(footprint_sequence)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
@@ -216,7 +216,7 @@ def test_ellipse_crosses_approximation(width, height):
     fp_func = footprints.ellipse
     expected = fp_func(width, height, decomposition=None)
     footprint_sequence = fp_func(width, height, decomposition="crosses")
-    approximate = _composite_footprint_from_sequence(footprint_sequence)
+    approximate = footprints.footprint_from_sequence(footprint_sequence)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
