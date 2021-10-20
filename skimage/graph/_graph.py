@@ -174,22 +174,20 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     if nodes is None:
         nodes = np.arange(graph.shape[0])
     if partition_size is None:
-        all_shortest_paths = csgraph.shortest_path(graph, directed=False)
-        all_shortest_paths_no_inf = np.nan_to_num(all_shortest_paths, posinf=0)
-        total_shortest_path_len = np.sum(all_shortest_paths_no_inf, axis=1)
+        num_splits = 1
     else:
-        idxs = np.arange(graph.shape[0])
-        total_shortest_path_len_list = []
-        for start in range(0, graph.shape[0], partition_size):
-            end = start + partition_size
-            shortest_paths = csgraph.shortest_path(
-                    graph, directed=False, indices=idxs[start:end]
-                    )
-            shortest_paths_no_inf = np.nan_to_num(shortest_paths)
-            total_shortest_path_len_list.append(
-                    np.sum(shortest_paths_no_inf, axis=1)
-                    )
-        total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
+        num_splits = max(2, graph.shape[0] // partition_size)
+    idxs = np.arange(graph.shape[0])
+    total_shortest_path_len_list = []
+    for partition in np.array_split(idxs, num_splits):
+        shortest_paths = csgraph.shortest_path(
+                graph, directed=False, indices=partition
+                )
+        shortest_paths_no_inf = np.nan_to_num(shortest_paths)
+        total_shortest_path_len_list.append(
+                np.sum(shortest_paths_no_inf, axis=1)
+                )
+    total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
     nonzero = np.flatnonzero(total_shortest_path_len)
     min_sp = np.argmin(total_shortest_path_len[nonzero])
     raveled_index = nodes[nonzero[min_sp]]
