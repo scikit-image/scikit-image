@@ -102,7 +102,7 @@ def pixel_graph(
     # image to the ones in the original image, and those are the returned
     # nodes.
     padded = np.pad(mask, 1, mode='constant', constant_values=False)
-    nodes_padded = np.arange(padded.size).reshape(padded.shape)[padded]
+    nodes_padded = np.flatnonzero(padded)
     neighbor_offsets_padded, distances_padded = _raveled_offsets_and_distances(
             padded.shape, connectivity=connectivity, spacing=spacing
             )
@@ -110,12 +110,12 @@ def pixel_graph(
     neighbor_distances_full = np.broadcast_to(
             distances_padded, neighbors_padded.shape
             )
-    nodes = np.arange(mask.size).reshape(mask.shape)[mask]
+    nodes = np.flatnonzero(mask)
     nodes_sequential = np.arange(nodes.size)
     # neighbors outside the mask get mapped to 0, which is a valid index,
     # BUT, they will be masked out in the next step.
     neighbors = map_array(neighbors_padded, nodes_padded, nodes)
-    neighbors_mask = padded.ravel()[neighbors_padded]
+    neighbors_mask = padded.reshape(-1)[neighbors_padded]
     num_neighbors = np.sum(neighbors_mask, axis=1)
     indices = np.repeat(nodes, num_neighbors)
     indices_sequential = np.repeat(nodes_sequential, num_neighbors)
@@ -127,7 +127,7 @@ def pixel_graph(
     if edge_function is None:
         data = neighbor_distances
     else:
-        image_r = image.ravel()
+        image_r = image.reshape(-1)
         data = edge_function(
                 image_r[indices], image_r[neighbor_indices], neighbor_distances
                 )
@@ -177,22 +177,20 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     if nodes is None:
         nodes = np.arange(graph.shape[0])
     if partition_size is None:
-        all_shortest_paths = csgraph.shortest_path(graph, directed=False)
-        all_shortest_paths_no_inf = np.nan_to_num(all_shortest_paths, posinf=0)
-        total_shortest_path_len = np.sum(all_shortest_paths_no_inf, axis=1)
+        num_splits = 1
     else:
-        idxs = np.arange(graph.shape[0])
-        total_shortest_path_len_list = []
-        for start in range(0, graph.shape[0], partition_size):
-            end = start + partition_size
-            shortest_paths = csgraph.shortest_path(
-                    graph, directed=False, indices=idxs[start:end]
-                    )
-            shortest_paths_no_inf = np.nan_to_num(shortest_paths)
-            total_shortest_path_len_list.append(
-                    np.sum(shortest_paths_no_inf, axis=1)
-                    )
-        total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
+        num_splits = max(2, graph.shape[0] // partition_size)
+    idxs = np.arange(graph.shape[0])
+    total_shortest_path_len_list = []
+    for partition in np.array_split(idxs, num_splits):
+        shortest_paths = csgraph.shortest_path(
+                graph, directed=False, indices=partition
+                )
+        shortest_paths_no_inf = np.nan_to_num(shortest_paths)
+        total_shortest_path_len_list.append(
+                np.sum(shortest_paths_no_inf, axis=1)
+                )
+    total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
     nonzero = np.flatnonzero(total_shortest_path_len)
     min_sp = np.argmin(total_shortest_path_len[nonzero])
     raveled_index = nodes[nonzero[min_sp]]
