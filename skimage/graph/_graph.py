@@ -31,12 +31,7 @@ def _weighted_abs_diff(values0, values1, distances):
 
 
 def pixel_graph(
-        image=None,
-        *,
-        mask=None,
-        edge_function=None,
-        connectivity=1,
-        spacing=None
+        image, *, mask=None, edge_function=None, connectivity=1, spacing=None
         ):
     """Create an adjacency graph of pixels in an image.
 
@@ -47,7 +42,6 @@ def pixel_graph(
         mask as well.
     mask : array of bool
         Which pixels to use. If None, the graph for the whole image is used.
-        If image is None and mask is not None, the mask is used as the image.
     edge_function : callable
         A function taking an array of pixel values, and an array of neighbor
         pixel values, and an array of distances, and returning a value for the
@@ -69,8 +63,6 @@ def pixel_graph(
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
     """
-    if mask is not None and image is None:
-        image = mask
     if image.dtype == bool and mask is None:
         mask = image
     if mask is None and edge_function is None:

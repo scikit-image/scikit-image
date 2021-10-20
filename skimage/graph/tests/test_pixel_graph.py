@@ -12,11 +12,6 @@ def test_small_graph():
     np.testing.assert_allclose(np.unique(g.data), [1, np.sqrt(2)])
     np.testing.assert_array_equal(n, [0, 4, 5, 7])
 
-    # check that using mask=image kwarg gives same result
-    gm, nm = pixel_graph(mask=mask, connectivity=2)
-    np.testing.assert_array_equal(g.todense(), gm.todense())
-    np.testing.assert_array_equal(n, nm)
-
 
 def test_central_pixel():
     g, n = pixel_graph(mask, connectivity=2)
