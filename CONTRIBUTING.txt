@@ -3,7 +3,7 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun!  Join us on the `scikit-image
+Developing Open Source is great fun! Join us on the `scikit-image
 developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
 which of the following challenges you'd like to solve.
 

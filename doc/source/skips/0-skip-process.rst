@@ -99,7 +99,7 @@ repo, as long as it is properly marked as WIP (work in progress).
 Review and Resolution
 ^^^^^^^^^^^^^^^^^^^^^
 
-SKIPs are discussed on the developer forum.  The possible paths of the
+SKIPs are discussed on the developer forum. The possible paths of the
 status of SKIPs are as follows:
 
 .. image:: _static/skip-flowchart.png

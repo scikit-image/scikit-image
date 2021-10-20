@@ -146,8 +146,8 @@ the appropriate point in main and the following instructions are still apt.
 
 - Post release notes on user & dev forums, blog, Twitter, etc.
 
-  - https://discuss.scientific-python.org/c/contributor/skimage
   - https://forum.image.sc/tag/scikit-image
+  - https://discuss.scientific-python.org/c/contributor/skimage
   - scipy-user@python.org
   - scikit-learn@python.org
 

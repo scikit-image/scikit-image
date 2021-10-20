@@ -212,7 +212,7 @@ approach. The minutes of this meeting are in the scikit-image meeting notes
 repository [9]_.
 
 Ongoing discussion will happen on the user forum [10]_, the
-developer forum [11]_, and GitHub meta-issue [7]_. Specific links to relevant
+developer forum [11]_, and GitHub discussion [7]_. Specific links to relevant
 posts will be added to this document before acceptance.
 
 Resolution
@@ -288,7 +288,7 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 .. [4] https://docs.scipy.org/doc/scipy/reference/release.1.0.0.html
 .. [5] https://github.com/scipy/scipy/pull/12862
 .. [6] https://semver.org/
-.. [7] https://github.com/scikit-image/scikit-image/issues/5439
+.. [7] https://github.com/scikit-image/scikit-image/discussions/5651
 .. [8] https://github.com/scikit-image/scikit-image/milestones/1.0
 .. [9] https://github.com/scikit-image/meeting-notes/blob/main/2021/july-api-meetings.md
 .. [10] https://forum.image.sc/tag/scikit-image

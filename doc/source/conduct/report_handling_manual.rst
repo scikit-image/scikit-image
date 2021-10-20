@@ -182,10 +182,10 @@ Possible responses may include:
   email, cc'ing the group.
 * A public reprimand. In this case, the committee chair will deliver that
   reprimand in the same venue that the violation occurred, within the limits of
-  practicality. E.g., on the original forum for a discussion violation, but
-  for a chat room discussion where the person/context may be gone, they can be
-  reached by other means. The group may choose to publish this message
-  elsewhere for documentation purposes.
+  practicality. E.g., for a discussion violation it will be on the
+  originating forum, but for a chat room discussion where the
+  person/context may be gone, another means may be better suited.
+  The group may also publish the message elsewhere for documentation purposes.
 * A request for a public or private apology, assuming the reporter agrees to
   this idea: they may at their discretion refuse further contact with the
   violator. The chair will deliver this request. The committee may, if it
