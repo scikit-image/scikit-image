@@ -35,6 +35,15 @@ def pixel_graph(
         ):
     """Create an adjacency graph of pixels in an image.
 
+    Pixels where the mask is True are nodes in the returned graph, and they are
+    connected by edges to their neighbors according to the connectivity
+    parameter. By default, the *value* of an edge when a mask is given, or when
+    the image is itself the mask, is the euclidean distance betwene the pixels.
+
+    However, if an int- or float-valued image is given with no mask, the value
+    of the edges is the absolute difference in intensity between adjacent
+    pixels, weighted by the euclidean distance.
+
     Parameters
     ----------
     image : array
