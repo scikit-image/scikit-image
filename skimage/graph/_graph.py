@@ -84,13 +84,15 @@ def pixel_graph(
     #   image **in the padded space**.
     # - broadcast them together with the raveled offsets to their neighbors.
     #   This gives us for each foreground pixel a list of neighbors (that
-    #   may or may not be masked.) (We also track the *distance* to each
-    #   neighbor.)
-    # - mask the neighbors and distance arrays by indexing into the mask,
-    #   which we can do since these are raveled indices.
-    # - use np.repeat() to repeat the source indices according to the number
-    #   of non-masked neighbors it has. **This is the i array.**
-    # - use the mask as a boolean index to get a 1D view of the non-masked
+    #   may or may not be selected by the mask.) (We also track the *distance*
+    #   to each neighbor.)
+    # - select "valid" entries in the neighbors and distance arrays by indexing
+    #   into the mask, which we can do since these are raveled indices.
+    # - use np.repeat() to repeat each source index according to the number
+    #   of neighbors selected by the mask it has. Each of these repeated
+    #   indices will be lined up with its neighbor, i.e. **this is the i
+    #   array** of the COO format matrix.
+    # - use the mask as a boolean index to get a 1D view of the selected
     #   neighbors. **This is the j array.**
     # - by default, the same boolean indexing can be applied to the distances
     #   to each neighbor, to give the **data array.** Optionally, a
