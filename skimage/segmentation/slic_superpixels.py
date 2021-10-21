@@ -139,12 +139,12 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
-        Note, that `sigma` is automatically scaled if it is scalar and
-        a manual voxel spacing is provided (see Notes section). If
-        sigma is an array like, its size must match ``image`` number
+        Note that `sigma` is automatically scaled if it is scalar and
+        if a manual voxel spacing is provided (see Notes section). If
+        sigma is array-like, its size must match ``image``'s number
         of spatial dimensions.
     spacing : array-like of floats, optional
-        The voxel spacing along each image dimension. By default,
+        The voxel spacing along each spatial dimension. By default,
         `slic` assumes uniform spacing (same voxel resolution along
         each spatial dimension).
         This parameter controls the weights of the distances along the
