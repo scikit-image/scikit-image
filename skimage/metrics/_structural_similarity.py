@@ -4,8 +4,8 @@ import numpy as np
 from scipy.ndimage import uniform_filter
 
 from .._shared import utils
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
-from ..filters import gaussian
 from ..util.arraycrop import crop
 from ..util.dtype import dtype_range
 

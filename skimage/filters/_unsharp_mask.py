@@ -3,7 +3,7 @@ import numpy as np
 from skimage import img_as_float
 
 from .._shared import utils
-from ..filters import gaussian
+from .._shared.filters import gaussian
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):

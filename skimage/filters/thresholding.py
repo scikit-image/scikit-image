@@ -7,6 +7,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
@@ -214,7 +215,6 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     ...                                         param=func)
 
     """
-    from ..filters import gaussian  # avoid circular import
 
     if np.isscalar(block_size):
         block_size = (block_size,) * image.ndim

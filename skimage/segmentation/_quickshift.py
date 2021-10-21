@@ -1,8 +1,8 @@
 import numpy as np
 
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type
 from ..color import rgb2lab
-from ..filters import gaussian
 from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 

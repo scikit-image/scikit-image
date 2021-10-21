@@ -4,8 +4,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
-from ..filters import gaussian
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det

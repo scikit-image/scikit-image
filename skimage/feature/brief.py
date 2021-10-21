@@ -1,7 +1,7 @@
 import numpy as np
 
+from .._shared.filters import gaussian
 from .._shared.utils import check_nD
-from ..filters import gaussian
 from .brief_cy import _brief_loop
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
