@@ -228,7 +228,6 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     """
     _check_factor(downscale)
-    multichannel = channel_axis is not None
 
     # cast to float for consistent data type in pyramid
     image = convert_to_float(image, preserve_range)

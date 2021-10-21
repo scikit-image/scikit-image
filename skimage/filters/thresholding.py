@@ -1,13 +1,13 @@
+import inspect
 import itertools
 import math
-import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg, warn
+from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
                                   _get_multiotsu_thresh_indices_lut)
@@ -223,7 +223,9 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     if any(b % 2 == 0 for b in block_size):
         raise ValueError(f'block_size must be odd! Given block_size '
                          f'{block_size} contains even values.')
-    thresh_image = np.zeros(image.shape, 'double')
+    float_dtype = _supported_float_type(image)
+    image = image.astype(float_dtype, copy=False)
+    thresh_image = np.zeros(image.shape, dtype=float_dtype)
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
                            output=thresh_image, mode=mode, cval=cval)
@@ -993,13 +995,17 @@ def _mean_std(image, w):
         w = (w,) * image.ndim
     _validate_window_size(w)
 
+    float_dtype = _supported_float_type(image.dtype)
     pad_width = tuple((k // 2 + 1, k // 2) for k in w)
-    padded = np.pad(image.astype('float'), pad_width,
+    padded = np.pad(image.astype(float_dtype, copy=False), pad_width,
                     mode='reflect')
 
-    integral = integral_image(padded)
+    # Note: keep float64 integral images for accuracy. Outputs of
+    # _correlate_sparse can later be safely cast to float_dtype
+    integral = integral_image(padded, dtype=np.float64)
     padded *= padded
-    integral_sq = integral_image(padded)
+    integral_sq = integral_image(padded, dtype=np.float64)
+
 
     # Create lists of non-zero kernel indices and values
     kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
@@ -1010,9 +1016,11 @@ def _mean_std(image, w):
     kernel_shape = tuple(_w + 1 for _w in w)
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)
+    m = m.astype(float_dtype, copy=False)
     m /= total_window_size
     g2 = _correlate_sparse(integral_sq, kernel_shape, kernel_indices,
                            kernel_values)
+    g2 = g2.astype(float_dtype, copy=False)
     g2 /= total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered

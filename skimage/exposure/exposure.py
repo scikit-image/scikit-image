@@ -506,7 +506,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     Notes
     -----
     .. versionchanged:: 0.17
-        The dtype of the output array has changed to match the output dtype, or
+        The dtype of the output array has changed to match the input dtype, or
         float if the output range is specified by a pair of floats.
 
     See Also

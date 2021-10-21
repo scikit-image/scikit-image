@@ -1,5 +1,6 @@
 import numpy as np
-from .._shared.utils import _to_np_mode
+
+from .._shared.utils import _supported_float_type, _to_np_mode
 
 
 def _validate_window_size(axis_sizes):
@@ -104,6 +105,9 @@ def correlate_sparse(image, kernel, mode='reflect'):
     """
     kernel = np.asarray(kernel)
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     if mode == 'valid':
         padded_image = image
     else:
@@ -117,7 +121,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
 
     # extract the kernel's non-zero indices and corresponding values
     indices = np.nonzero(kernel)
-    values = list(kernel[indices].astype(float, copy=False))
+    values = list(kernel[indices].astype(float_dtype, copy=False))
     indices = list(zip(*indices))
 
     # _correlate_sparse requires an index at (0,) * kernel.ndim to be present

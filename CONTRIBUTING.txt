@@ -3,8 +3,8 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun!  Join us on the `scikit-image mailing
-list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ and tell us
+Developing Open Source is great fun! Join us on the `scikit-image
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
 which of the following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
@@ -60,13 +60,14 @@ Here's the long and short of it:
       git checkout main
       git pull upstream main
 
-   * Create a branch for the feature you want to work on. Since the
-     branch name will appear in the merge message, use a sensible name
+   * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
       git checkout -b transform-speedups
 
-   * Commit locally as you progress (``git add`` and ``git commit``)
+   * Commit locally as you progress (with ``git add`` and ``git commit``).
+     Please write `good commit messages
+     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
 3. To submit your contribution:
 
@@ -81,8 +82,8 @@ Here's the long and short of it:
    * Go to GitHub. The new branch will show up with a green "pull request"
      button -- click it.
 
-   * If you want, post on the `mailing list
-     <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ to explain your changes or
+   * If you want, post on the `developer forum
+     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
@@ -197,7 +198,7 @@ Guidelines
   likely to be controversial, two reviews should still be encouraged. The
   second case is that of minor fixes which restore CI to a working state,
   because these should be merged fairly quickly. Reach out on the
-  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
 

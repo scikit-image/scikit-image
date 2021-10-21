@@ -575,6 +575,18 @@ def test_regionprops_table():
                    'bbox+2': np.array([10]), 'bbox+3': np.array([18])}
 
 
+def test_regionprops_table_deprecated_vector_property():
+    out = regionprops_table(SAMPLE, properties=('local_centroid',))
+    for key in out.keys():
+        # key reflects the deprecated name, not its new (centroid_local) value
+        assert key.startswith('local_centroid')
+
+
+def test_regionprops_table_deprecated_scalar_property():
+    out = regionprops_table(SAMPLE, properties=('bbox_area',))
+    assert list(out.keys()) == ['bbox_area']
+
+
 def test_regionprops_table_equal_to_original():
     regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
     out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,

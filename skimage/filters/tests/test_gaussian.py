@@ -1,12 +1,11 @@
-import warnings
-
 import numpy as np
 import pytest
 from numpy.testing import assert_array_equal, assert_equal
 
 from skimage._shared._warnings import expected_warnings
-from skimage.filters._gaussian import (gaussian, _guess_spatial_dimensions,
-                                       difference_of_gaussians)
+from skimage._shared.utils import _supported_float_type
+from skimage.filters._gaussian import (_guess_spatial_dimensions,
+                                       difference_of_gaussians, gaussian)
 
 
 def test_negative_sigma():
@@ -33,6 +32,14 @@ def test_default_sigma():
         gaussian(a, preserve_range=True),
         gaussian(a, preserve_range=True, sigma=1)
     )
+
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_image_dtype(dtype):
+    a = np.zeros((3, 3), dtype=dtype)
+    assert gaussian(a).dtype == _supported_float_type(a.dtype)
 
 
 def test_energy_decrease():

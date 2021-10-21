@@ -21,12 +21,12 @@ import warnings
 
 from .. import data, io
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
-import pytest
 from ._warnings import expected_warnings
 
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
+import pytest
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
