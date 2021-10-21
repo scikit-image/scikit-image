@@ -185,20 +185,23 @@ def get_mask(im, sigma=1.5, radius=1):
 
 
 #####################################################################
-# Let us now loop through all the image frames.
+# Let us compute the mask sequence corresponding to our image sequence.
 
-fluorescence_change = []
+mask_sequence = np.zeros_like(image_sequence[:, 0, :, :])
 
 for i in range(image_sequence.shape[0]):
-    mask = get_mask(image_sequence[i, 0, :, :])
-    props = measure.regionprops_table(
-        mask,
-        intensity_image=image_sequence[i, 1, :, :],
-        properties=('label', 'area', 'intensity_mean')
-    )
-    assert props['label'] == 1
-    intensity_total = props['area'] * props['intensity_mean']
-    fluorescence_change.append(intensity_total)
+    # each mask gets a different label, running from 1 to 15
+    mask_sequence[i, :, :] = get_mask(image_sequence[i, 0, :, :]) * (i + 1)
+
+props = measure.regionprops_table(
+    mask_sequence,
+    intensity_image=image_sequence[:, 1, :, :],
+    properties=('label', 'area', 'intensity_mean')
+)
+np.testing.assert_array_equal(props['label'], np.arange(15) + 1)
+
+fluorescence_change = [props['area'][i] * props['intensity_mean'][i]
+                       for i in range(image_sequence.shape[0])]
 
 fluorescence_change /= fluorescence_change[0]  # normalization
 
