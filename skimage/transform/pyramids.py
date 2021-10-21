@@ -16,7 +16,11 @@ def _smooth(image, sigma, mode, cval, multichannel=None):
     # apply Gaussian filter to all channels independently
     if multichannel:
         sigma = (sigma, ) * (image.ndim - 1) + (0, )
-    gaussian(image, sigma, output=smoothed, mode=mode, cval=cval)
+        channel_axis = -1
+    else:
+        channel_axis = None
+    gaussian(image, sigma, output=smoothed, mode=mode, cval=cval,
+             channel_axis=channel_axis)
     return smoothed
 
 
