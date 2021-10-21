@@ -1,4 +1,3 @@
-import itertools
 import pathlib
 from tempfile import NamedTemporaryFile
 
@@ -67,7 +66,8 @@ class TestSave:
     shapes = ((10, 10), (10, 10, 3), (10, 10, 4))
     dtypes = (np.uint8, np.uint16, np.float32, np.int16, np.float64)
 
-    @pytest.mark.parametrize("shape, dtype", itertools.product(shapes, dtypes))
+    @pytest.mark.parametrize("shape", shapes)
+    @pytest.mark.parametrize("dtype", dtypes)
     @pytest.mark.parametrize("use_pathlib", [False, True])
     def test_imsave_roundtrip(self, shape, dtype, use_pathlib):
         x = np.random.rand(*shape)
