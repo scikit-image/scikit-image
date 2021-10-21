@@ -1,16 +1,18 @@
 import numpy as np
-import scipy
 from numpy.lib import NumpyVersion
+import scipy
 from scipy import ndimage as ndi
 
-from .._shared.utils import (_to_ndimage_mode, _validate_interpolation_order,
-                             channel_as_last_axis, convert_to_float,
-                             deprecate_multichannel_kwarg,
-                             get_bound_method_class, safe_as_int, warn)
-from ..measure import block_reduce
-from ._geometric import (AffineTransform, ProjectiveTransform,
-                         SimilarityTransform)
+from ._geometric import (SimilarityTransform, AffineTransform,
+                         ProjectiveTransform)
 from ._warps_cy import _warp_fast
+from ..measure import block_reduce
+
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
+                             convert_to_float, _to_ndimage_mode,
+                             _validate_interpolation_order,
+                             channel_as_last_axis,
+                             deprecate_multichannel_kwarg)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -138,7 +140,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     (100, 100)
 
     """
-    from ..filters import gaussian
 
     image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
@@ -169,7 +170,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
             elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
-        image = gaussian(image, anti_aliasing_sigma, cval=cval, mode=ndi_mode)
+        image = ndi.gaussian_filter(image, anti_aliasing_sigma,
+                                    cval=cval, mode=ndi_mode)
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
