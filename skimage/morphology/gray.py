@@ -197,9 +197,10 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
 def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological dilation of an image.
 
-    Morphological dilation sets a pixel at x to the maximum over all pixels
-    in the neighborhood centered at x. Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets the value of a pixel to the maximum over all
+    pixel values within a local neighborhood centered about it. The values
+    where the footprint is 1 define this neighborhood.
+    Dilation enlarges bright regions and shrinks dark regions.
 
     Parameters
     ----------
