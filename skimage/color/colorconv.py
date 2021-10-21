@@ -49,7 +49,6 @@ References
 .. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-import functools
 from warnings import warn
 
 import numpy as np

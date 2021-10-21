@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 from scipy import spatial
 
-from skimage._shared._warnings import expected_warnings
 from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
 
@@ -105,6 +104,10 @@ def test_trainable_segmentation_oo():
     )
     segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
     segmenter.fit(img, labels)
+
+    # model has been fitted
+    np.testing.assert_array_almost_equal(clf.labels, labels[labels > 0])
+
     out = segmenter.predict(img)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)

@@ -42,7 +42,6 @@ def test_overrange_tolerance_int():
 
 def test_overrange_tolerance_float():
     max_value = np.finfo(np.float32).max
-    min_value = np.finfo(np.float32).min
 
     image = np.random.uniform(size=(64, 64), low=-1., high=1.).astype(
         np.float32)
@@ -252,7 +251,3 @@ def test_negative_indexing_seed_point():
     image = flood_fill(image, (0, -1), 5)
 
     np.testing.assert_allclose(image, expected)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

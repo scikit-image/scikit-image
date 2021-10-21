@@ -7,8 +7,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import (_supported_float_type, check_nD, deprecate_kwarg,
-                             warn)
+from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
                                   _get_multiotsu_thresh_indices_lut)

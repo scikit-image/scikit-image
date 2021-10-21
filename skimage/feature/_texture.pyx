@@ -310,10 +310,11 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
 
     References
     ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
+    .. [1] L. Zhang, R. Chu, S. Xiang, S. Liao, S.Z. Li. "Face Detection Based
+           on Multi-Block LBP Representation", In Proceedings: Advances in
+           Biometrics, International Conference, ICB 2007, Seoul, Korea.
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+           :DOI:`10.1007/978-3-540-74549-5_2`
     """
 
     cdef:

@@ -1,11 +1,9 @@
 import sys
 
 import numpy as np
-import numpy.testing as npt
 import pytest
 
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
@@ -261,7 +259,3 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size is None
     else:
         assert size == x.shape[channel_axis]
-
-
-if __name__ == "__main__":
-    npt.run_module_suite()
