@@ -172,7 +172,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     mask : ndarray, optional
         If provided, superpixels are computed only where mask is True,
         and seed points are homogeneously distributed over the mask
-        using a K-means clustering strategy. Mask number of dimensions
+        using a k-means clustering strategy. Mask number of dimensions
         must be equal to image number of spatial dimensions.
 
         .. versionadded:: 0.17
