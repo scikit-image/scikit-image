@@ -84,7 +84,7 @@ def pixel_graph(
     #   image **in the padded space**.
     # - broadcast them together with the raveled offsets to their neighbors.
     #   This gives us for each foreground pixel a list of neighbors (that
-    #   may or may not be selected by the mask.) (We also track the *distance*
+    #   may or may not be selected by the mask). (We also track the *distance*
     #   to each neighbor.)
     # - select "valid" entries in the neighbors and distance arrays by indexing
     #   into the mask, which we can do since these are raveled indices.
