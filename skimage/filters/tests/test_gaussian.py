@@ -4,8 +4,7 @@ from numpy.testing import assert_array_equal, assert_equal
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
-from skimage.filters._gaussian import (_guess_spatial_dimensions,
-                                       difference_of_gaussians, gaussian)
+from skimage.filters import difference_of_gaussians, gaussian
 
 
 def test_negative_sigma():
@@ -126,19 +125,6 @@ def test_4d_ok():
     img[2, 2, 2, 2] = 1
     res = gaussian(img, 1, mode='reflect', preserve_range=True)
     assert np.allclose(res.sum(), 1)
-
-
-def test_guess_spatial_dimensions():
-    im1 = np.zeros((5, 5))
-    im2 = np.zeros((5, 5, 5))
-    im3 = np.zeros((5, 5, 3))
-    im4 = np.zeros((5, 5, 5, 3))
-    im5 = np.zeros((5,))
-    assert_equal(_guess_spatial_dimensions(im1), 2)
-    assert_equal(_guess_spatial_dimensions(im2), 3)
-    assert_equal(_guess_spatial_dimensions(im3), None)
-    assert_equal(_guess_spatial_dimensions(im4), 3)
-    assert_equal(_guess_spatial_dimensions(im5), 1)
 
 
 @pytest.mark.parametrize(
