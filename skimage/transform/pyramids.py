@@ -5,12 +5,12 @@ from scipy import ndimage as ndi
 
 from .._shared import utils
 from .._shared.utils import convert_to_float
-from ..filters import gaussian
 from ..transform import resize
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
     """Return image with each channel smoothed by the Gaussian filter."""
+    from ..filters import gaussian
     smoothed = np.empty_like(image)
 
     # apply Gaussian filter to all channels independently

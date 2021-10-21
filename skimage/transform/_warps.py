@@ -7,7 +7,6 @@ from .._shared.utils import (_to_ndimage_mode, _validate_interpolation_order,
                              channel_as_last_axis, convert_to_float,
                              deprecate_multichannel_kwarg,
                              get_bound_method_class, safe_as_int, warn)
-from ..filters import gaussian
 from ..measure import block_reduce
 from ._geometric import (AffineTransform, ProjectiveTransform,
                          SimilarityTransform)
@@ -139,6 +138,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     (100, 100)
 
     """
+    from ..filters import gaussian
 
     image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
