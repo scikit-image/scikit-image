@@ -110,7 +110,7 @@ def test_image_shape():
     """
     point = np.zeros((5, 5), float)
     point[2, 2] = 1.
-    psf = filters.gaussian(point, sigma=1.)
+    psf = filters.gaussian(point, sigma=1., mode='reflect')
     # image shape: (45, 45), as reported in #1172
     image = util.img_as_float(camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)

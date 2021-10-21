@@ -306,7 +306,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
-        image = gaussian(image, sigma)
+        image = gaussian(image, sigma, mode='reflect')
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(

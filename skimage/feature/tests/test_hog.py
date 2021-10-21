@@ -180,7 +180,7 @@ def test_hog_orientations_circle():
     image = np.zeros((height, width))
     rr, cc = draw.disk((int(height / 2), int(width / 2)), int(width / 3))
     image[rr, cc] = 100
-    image = filters.gaussian(image, 2)
+    image = filters.gaussian(image, 2, mode='reflect')
 
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,

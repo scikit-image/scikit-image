@@ -189,7 +189,7 @@ def structural_similarity(im1, im2,
 
     if gaussian_weights:
         filter_func = gaussian
-        filter_args = {'sigma': sigma, 'truncate': truncate}
+        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}

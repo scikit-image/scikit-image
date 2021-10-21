@@ -363,7 +363,7 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = gaussian(image, 4)
+        image = gaussian(image, 4, mode='reflect')
         watershed(image, markers, self.eight)
         ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 

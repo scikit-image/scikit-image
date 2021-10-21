@@ -67,7 +67,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     if kernel_size < 1:
         raise ValueError("`kernel_size` should be >= 1.")
 
-    image = gaussian(image, [sigma, sigma, 0])
+    image = gaussian(image, [sigma, sigma, 0], mode='reflect', channel_axis=-1)
     image = np.ascontiguousarray(image * ratio)
 
     segment_mask = _quickshift_cython(
