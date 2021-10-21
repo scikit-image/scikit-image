@@ -65,15 +65,6 @@ class PytestTester(object):
         -------
         result : bool
             Return True on success, false otherwise.
-
-        Examples
-        --------
-        >>> result = np.lib.test() #doctest: +SKIP
-        ...
-        1023 passed, 2 skipped, 6 deselected, 1 xfailed in 10.39 seconds
-        >>> result
-        True
-
         """
         import pytest
 
