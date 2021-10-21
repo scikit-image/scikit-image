@@ -1,3 +1,9 @@
+"""Filters used across multiple skimage submodules.
+
+These are defined here to avoid circular imports.
+
+The unit tests remain under skimage/filters/tests/
+"""
 from collections.abc import Iterable
 
 import numpy as np
