@@ -1,15 +1,16 @@
 """
-============
-Pixel graphs
-============
+====================================================
+Use pixel graphs to find an object's geodesic center
+====================================================
 
 In various image analysis contexts, it is useful to think of the pixels of an
-image, or each region of an image, as a network, in which each pixel is
-connected to its neighbors (with or without diagonals). In this example, we use
-this approach to find the pixel of a skeleton with maximal *closeness
-centrality* [1]_, that is, the pixel from which traveling to every other pixel
-is fastest. This can be useful to define the center of a complex, non-convex
-object, in which the centroid may actually fall outside the object.
+image, or of a region of an image, as a network or graph, in which each pixel
+is connected to its neighbors (with or without diagonals). In this example, we
+create such a *pixel graph* of a skeleton to find the point of the skeleton
+with maximal *closeness centrality* [1]_, that is, the pixel from which
+traveling to every other pixel is fastest. This can be useful to define the
+center of a complex, non-convex object, in which the centroid may actually fall
+outside the object.
 
 References
 ----------
