@@ -11,7 +11,6 @@ from ..util import img_as_float
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
-@utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
 def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                             mode='nearest', cval=0, channel_axis=None,

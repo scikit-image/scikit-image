@@ -148,12 +148,16 @@ def test_output_error():
 
 @pytest.mark.parametrize("s", [1, (2, 3)])
 @pytest.mark.parametrize("s2", [4, (5, 6)])
-def test_difference_of_gaussians(s, s2):
+@pytest.mark.parametrize("channel_axis", [None, 0, 1, -1])
+def test_difference_of_gaussians(s, s2, channel_axis):
     image = np.random.rand(10, 10)
-    im1 = gaussian(image, s, preserve_range=True)
-    im2 = gaussian(image, s2, preserve_range=True)
+    if channel_axis is not None:
+        n_channels = 5
+        image = np.stack((image,) * n_channels, channel_axis)
+    im1 = gaussian(image, s, preserve_range=True, channel_axis=channel_axis)
+    im2 = gaussian(image, s2, preserve_range=True, channel_axis=channel_axis)
     dog = im1 - im2
-    dog2 = difference_of_gaussians(image, s, s2)
+    dog2 = difference_of_gaussians(image, s, s2, channel_axis=channel_axis)
     assert np.allclose(dog, dog2)
 
 
