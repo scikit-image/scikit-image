@@ -12,6 +12,7 @@ from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
                                   _get_multiotsu_thresh_indices_lut)
+from ..transform import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 
@@ -991,7 +992,6 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    from ..transform import integral_image  # avoid circular import
 
     if not isinstance(w, Iterable):
         w = (w,) * image.ndim
