@@ -35,8 +35,9 @@ def test_roberts_diagonal1(dtype):
 def test_int_rescaling(function_name):
     """Basic test that uint8 inputs get rescaled from [0, 255] to [0, 1.]
 
-    The output of any of these filters should be not much more than 1.0 if
-    this is true.
+    The output of any of these filters should be within roughly a factor of
+    two of the input range. For integer inputs, rescaling to floats in
+    [0.0, 1.0] should occur, so just verify outputs are not > 2.0.
     """
     img = data.coins()[:128, :128]
     func = getattr(filters, function_name)
