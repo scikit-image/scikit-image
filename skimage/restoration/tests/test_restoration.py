@@ -3,7 +3,8 @@ import pytest
 from scipy import ndimage as ndi
 from scipy.signal import convolve2d
 
-from skimage import filters, restoration, util
+from skimage import restoration, util
+from skimage._shared import filters
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
