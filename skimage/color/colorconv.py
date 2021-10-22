@@ -2062,7 +2062,8 @@ def ycbcr2rgb(ycbcr, *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in RGB format. Same dimensions as input.
+        The image in (floating point) RGB format. The range of the output will
+        be approximately [0.0, 1.0].
 
     Raises
     ------
@@ -2071,17 +2072,28 @@ def ycbcr2rgb(ycbcr, *, channel_axis=-1):
 
     Notes
     -----
-    Y is between 16 and 235. This is the color space commonly used by video
-    codecs; it is sometimes incorrectly called "YUV".
+    Y is between 16 and 235. Cb and Cr are between 16 and 240. This is the
+    color space commonly used by video codecs [1]; it is sometimes incorrectly
+    called "YUV".
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/YCbCr
+    .. [1] https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
     """
-    arr = ycbcr.copy()
+    if ycbcr.dtype == np.uint8:
+        # check uint8 input range based on allowed values (see [1] above)
+        min_val = ycbcr.min()
+        if min_val < 16 or ycbcr[..., 0].max() > 235:
+            raise ValueError("Expected uint8 Y channel values in [16, 235]")
+        elif ycbcr[..., 1:].max() > 240:
+            raise ValueError("Expected uint8 Cb and Cr values in [16, 240]")
+        arr = ycbcr.astype(float)
+    elif ycbcr.dtype.kind == 'f':
+        arr = ycbcr.copy()
+    else:
+        raise ValueError("expected uint8 or floating point ycbcr")
     arr[..., 0] -= 16
-    arr[..., 1] -= 128
-    arr[..., 2] -= 128
+    arr[..., 1:] -= 128
     return _convert(rgb_from_ycbcr, arr)
 
 

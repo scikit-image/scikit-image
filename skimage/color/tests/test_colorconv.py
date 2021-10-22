@@ -614,7 +614,7 @@ class TestColorconv():
         assert luv2rgb(img).dtype == img.dtype
         assert luv2rgb(img32).dtype == img32.dtype
 
-    @pytest.mark.parametrize("channel_axis", [0, 1, -1 -2])
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_luv_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
@@ -968,3 +968,60 @@ def test_rgb2hsv_dtypes(dtype):
                   )
     decimal = 3 if float_dtype == np.float32 else 7
     assert_array_almost_equal(hsv, gt, decimal=decimal)
+
+
+def test_ycbcr2rgb_uint8_round_trip():
+    # generate uint8 data in YCbCr space
+    data_uint8 = data.colorwheel()
+    data_ycbcr_uint8 = np.round(rgb2ycbcr(data_uint8)).astype(np.uint8)
+
+    data_uint8_bgr = data_uint8[..., ::-1]
+    rgb_float = ycbcr2rgb(data_ycbcr_uint8)
+    assert rgb_float.dtype == np.float64
+
+    # verify round trip from uint8 YCbCr
+    ycbcr_float = rgb2ycbcr(rgb_float)
+    np.testing.assert_array_equal(
+        data_ycbcr_uint8,
+        np.round(ycbcr_float).astype(np.uint8),
+    )
+
+
+def test_ycbcr2rgb_invalid_uint8_range():
+    """Invalid inputs."""
+
+    # generate uint8 data in YCbCr space
+    data_uint8 = data.colorwheel()
+    data_ycbcr_uint8 = np.round(rgb2ycbcr(data_uint8)).astype(np.uint8)
+    assert data_ycbcr_uint8.min() == 16
+    assert data_ycbcr_uint8[..., 0].max() == 235
+    assert data_ycbcr_uint8[..., 1].max() == 240
+    assert data_ycbcr_uint8[..., 2].max() == 240
+
+    # invalid minimum value (must be > 16)
+    invalid = data_ycbcr_uint8.copy()
+    invalid[..., 0] -= 1
+    with pytest.raises(ValueError):
+        ycbcr2rgb(invalid)
+
+    # invalid maximum value on Y channel (must be <= 235)
+    invalid = data_ycbcr_uint8.copy()
+    invalid[..., 0] += 1
+    with pytest.raises(ValueError):
+        ycbcr2rgb(invalid)
+
+    # invalid maximum value
+    invalid = data_ycbcr_uint8.copy()
+    invalid[..., 1:] += 1
+    with pytest.raises(ValueError):
+        ycbcr2rgb(invalid)
+
+
+@pytest.mark.parametrize('dtype', [np.uint16, np.uint32, np.int8, np.int16,
+                                   np.int32, np.complex64, np.complex128,
+                                   bool])
+def test_ycbcr2rgb_unsupported_dtypes(dtype):
+    """Invalid inputs."""
+
+    with pytest.raises(ValueError):
+        ycbcr2rgb(np.full((16, 16, 3), 16, dtype=dtype))
