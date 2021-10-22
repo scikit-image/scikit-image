@@ -1,5 +1,4 @@
 import numpy as np
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_equal

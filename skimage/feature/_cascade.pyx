@@ -424,13 +424,37 @@ cdef class Cascade:
     window_height : Py_ssize_t
         The height of a detection window.
     stages : Stage*
-        A link to the c array that stores stages information using
+        A pointer to the C array that stores stages information using a
         Stage struct.
     features : MBLBP*
-        Link to the c array that stores MBLBP features using MBLBP struct.
+        A pointer to the C array that stores MBLBP features using an MBLBP
+        struct.
     LUTs : cnp.uint32_t*
-        The ling to the array with look-up tables that are used by trained
+        A pointer to the C array with look-up tables that are used by trained
         MBLBP features (MBLBPStumps) to evaluate a particular region.
+
+    Notes
+    -----
+    The cascade approach was first described by Viola and Jones [1]_, [2]_,
+    although these initial publications used a set of Haar-like features. This
+    implementation instead uses multi-scale block local binary pattern (MB-LBP)
+    features [3]_.
+
+    References
+    ----------
+    .. [1] Viola, P. and Jones, M. "Rapid object detection using a boosted
+           cascade of simple features," In: Proceedings of the 2001 IEEE
+           Computer Society Conference on Computer Vision and Pattern
+           Recognition. CVPR 2001, pp. I-I.
+           :DOI:`10.1109/CVPR.2001.990517`
+    .. [2] Viola, P. and Jones, M.J, "Robust Real-Time Face Detection",
+           International Journal of Computer Vision 57, 137–154 (2004).
+           :DOI:`10.1023/B:VISI.0000013087.49260.fb`
+    .. [3] Liao, S. et al. Learning Multi-scale Block Local Binary Patterns for
+           Face Recognition. International Conference on Biometrics (ICB),
+           2007, pp. 828-837. In: Lecture Notes in Computer Science, vol 4642.
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/978-3-540-74549-5_87`
     """
 
     cdef:

@@ -22,9 +22,9 @@ User Forum
 ----------
 <https://forum.image.sc/tags/scikit-image>
 
-Developer Mailing List
-----------------------
-<https://mail.python.org/mailman3/lists/scikit-image.python.org/>
+Developer Forum
+---------------
+<https://discuss.scientific-python.org/c/contributor/skimage>
 
 Source, bugs, and patches
 -------------------------

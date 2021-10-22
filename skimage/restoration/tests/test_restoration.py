@@ -166,8 +166,3 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf):
     path = fetch('restoration/tests/astronaut_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
                                atol=atol)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
