@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage import color, data, draw, feature, filters, img_as_float
+from skimage import color, data, draw, feature, img_as_float
+from skimage._shared import filters
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
