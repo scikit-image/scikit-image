@@ -10,7 +10,6 @@ from ..util import img_as_float
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
-@utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
              multichannel=None, preserve_range=False, truncate=4.0, *,
@@ -123,8 +122,9 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         # do not filter across channels
         if not isinstance(sigma, Iterable):
             sigma = [sigma] * (image.ndim - 1)
-        if len(sigma) != image.ndim:
-            sigma = np.concatenate((np.asarray(sigma), [0]))
+        if len(sigma) == image.ndim - 1:
+            sigma = list(sigma)
+            sigma.insert(channel_axis % image.ndim, 0)
     image = convert_to_float(image, preserve_range)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -169,7 +169,6 @@ def _guess_spatial_dimensions(image):
         )
 
 
-@utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
 def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                             mode='nearest', cval=0, channel_axis=None,
