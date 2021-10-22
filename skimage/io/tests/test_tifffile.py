@@ -1,11 +1,13 @@
-import itertools
+import pathlib
 from tempfile import NamedTemporaryFile
-from skimage.io import imread, imsave, use_plugin, reset_plugins
-import numpy as np
 
-from skimage._shared.testing import (assert_array_equal,
-                                     assert_array_almost_equal,
-                                     parametrize, fetch)
+import numpy as np
+import pytest
+from numpy.testing import assert_array_almost_equal, assert_array_equal
+
+from skimage._shared.testing import fetch
+from skimage.io import imread, imsave, reset_plugins, use_plugin
+
 
 def setup():
     use_plugin('tifffile')
@@ -51,10 +53,12 @@ def test_imread_handle():
 
 
 class TestSave:
-    def roundtrip(self, dtype, x):
+    def roundtrip(self, dtype, x, use_pathlib=False):
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
+        if use_pathlib:
+            fname = pathlib.Path(fname)
         imsave(fname, x, check_contrast=False)
         y = imread(fname)
         assert_array_equal(x, y)
@@ -62,12 +66,14 @@ class TestSave:
     shapes = ((10, 10), (10, 10, 3), (10, 10, 4))
     dtypes = (np.uint8, np.uint16, np.float32, np.int16, np.float64)
 
-    @parametrize("shape, dtype", itertools.product(shapes, dtypes))
-    def test_imsave_roundtrip(self, shape, dtype):
+    @pytest.mark.parametrize("shape", shapes)
+    @pytest.mark.parametrize("dtype", dtypes)
+    @pytest.mark.parametrize("use_pathlib", [False, True])
+    def test_imsave_roundtrip(self, shape, dtype, use_pathlib):
         x = np.random.rand(*shape)
 
         if not np.issubdtype(dtype, np.floating):
             x = (x * np.iinfo(dtype).max).astype(dtype)
         else:
             x = x.astype(dtype)
-        self.roundtrip(dtype, x)
+        self.roundtrip(dtype, x, use_pathlib)
