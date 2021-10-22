@@ -97,9 +97,3 @@ def test_input_image_not_modified():
                        denoise_parameters=parameter_ranges)
 
     assert_(np.all(noisy_img == input_image))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-
-    testing.run_module_suite()

@@ -1213,7 +1213,3 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
 
     with expected_warnings(exp_warn):
         restoration.cycle_spin(noisy, denoise_func, 1, 1, None, False)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

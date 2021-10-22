@@ -128,6 +128,8 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     and largest file size (default 75).  This is only available when using
     the PIL and imageio plugins.
     """
+    if isinstance(fname, pathlib.Path):
+        fname = str(fname.resolve())
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
