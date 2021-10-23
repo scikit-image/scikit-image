@@ -831,6 +831,8 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         return np.array(s <= radius * radius, dtype=dtype)
     elif decomposition == 'sequence':
         sequence = _nsphere_series_decomposition(radius, ndim=3, dtype=dtype)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return sequence
 
 
