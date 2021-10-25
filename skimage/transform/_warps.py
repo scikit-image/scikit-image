@@ -144,16 +144,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
     input_type = image.dtype
-    if output_ndim > image.ndim:
-        # append dimensions to input_shape
-        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
-        image = np.reshape(image, input_shape)
-    elif output_ndim == image.ndim - 1:
-        # multichannel case: append shape of last axis
-        output_shape = output_shape + (image.shape[-1], )
-    elif output_ndim < image.ndim - 1:
-        raise ValueError("len(output_shape) cannot be smaller than the image "
-                         "dimensions")
 
     if input_type == np.float16:
         image = image.astype(np.float32)
