@@ -327,13 +327,18 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         sigma = np.asarray(sigma, dtype=dtype)
         if is_2d:
             if sigma.size != 2:
-                warn("Input image is 2D: sigma number of "
-                     "elements must be 2. In version 0.21, a ValueError will "
-                     "be raised.", FutureWarning, stacklevel=2)
-            sigma = np.insert(sigma, 0, 0)
+                if spacing.size == 3:
+                    warn("Input image is 2D: sigma number of "
+                         "elements must be 2. In the future, a ValueError "
+                         "will be raised.", FutureWarning, stacklevel=2)
+                else:
+                    raise ValueError(f"Input image is 2D, but sigma has "
+                                     f"{sigma.size} elements (expected 2).")
+            else:
+                sigma = np.insert(sigma, 0, 0)
         elif sigma.size != 3:
-            raise ValueError("Input image is 3D: sigma number of "
-                             "elements must be 3.")
+            raise ValueError(f"Input image is 3D, but sigma has "
+                             f"{sigma.size} elements (must be 3).")
 
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
