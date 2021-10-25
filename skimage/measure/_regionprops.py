@@ -1,6 +1,8 @@
 import inspect
+from functools import wraps
+from math import atan2, pi as PI, sqrt
 from warnings import warn
-from math import sqrt, atan2, pi as PI
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
@@ -9,8 +11,6 @@ from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
-
-from functools import wraps
 
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
@@ -261,19 +261,18 @@ class RegionProperties:
         self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
-        if extra_properties is None:
-            extra_properties = []
-        for func in extra_properties:
-            name = func.__name__
-            if hasattr(self, name):
-                msg = (
-                    f"Extra property '{name}' is shadowed by existing "
-                    f"property and will be inaccessible. Consider renaming it."
-                )
-                warn(msg)
-        self._extra_properties = {
-            func.__name__: func for func in extra_properties
-        }
+        if extra_properties is not None:
+            for func in extra_properties:
+                name = func.__name__
+                if hasattr(self, name):
+                    msg = (
+                        f"Extra property '{name}' is shadowed by existing "
+                        f"property and will be inaccessible. Consider renaming it."
+                    )
+                    warn(msg)
+            self._extra_properties = {
+                func.__name__: func for func in extra_properties
+            }
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
@@ -422,18 +421,23 @@ class RegionProperties:
         return self._intensity_image[self.slice] * image
 
     def _image_intensity_double(self):
-        return self.image_intensity.astype(np.double)
+        return self.image_intensity.astype(np.double, copy=False)
 
     @property
     def centroid_local(self):
         M = self.moments
-        return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
-                     M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     def intensity_max(self):
-        return np.max(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.max(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def intensity_mean(self):
@@ -441,8 +445,8 @@ class RegionProperties:
 
     @property
     def intensity_min(self):
-        return np.min(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.min(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def axis_major_length(self):
@@ -512,8 +516,13 @@ class RegionProperties:
     @property
     def centroid_weighted_local(self):
         M = self.moments_weighted
-        return (M[tuple(np.eye(self._ndim, dtype=int))] /
-                M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     @_cached
@@ -704,6 +713,11 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     n = len(regions)
     for prop in properties:
         r = regions[0]
+        # Copy the original property name so the output will have the
+        # user-provided property name in the case of deprecated names.
+        orig_prop = prop
+        # determine the current property name for any deprecated property.
+        prop = PROPS.get(prop, prop)
         rp = getattr(r, prop)
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
@@ -714,27 +728,41 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 intensity=r._intensity_image is not None,
                 ndim=r.image.ndim,
             )
-        column_buffer = np.zeros(n, dtype=dtype)
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+            column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
-            out[prop] = np.copy(column_buffer)
+            out[orig_prop] = np.copy(column_buffer)
         else:
             if isinstance(rp, np.ndarray):
                 shape = rp.shape
             else:
                 shape = (len(rp),)
 
+            # precompute property column names and locations
+            modified_props = []
+            locs = []
             for ind in np.ndindex(shape):
-                for k in range(n):
-                    loc = ind if len(ind) > 1 else ind[0]
-                    column_buffer[k] = regions[k][prop][loc]
-                modified_prop = separator.join(map(str, (prop,) + ind))
-                out[modified_prop] = np.copy(column_buffer)
+                modified_props.append(
+                    separator.join(map(str, (orig_prop,) + ind))
+                )
+                locs.append(ind if len(ind) > 1 else ind[0])
+
+            # fill temporary column data_array
+            n_columns = len(locs)
+            column_data = np.empty((n, n_columns), dtype=dtype)
+            for k in range(n):
+                rp = regions[k][prop]
+                for i, loc in enumerate(locs):
+                    column_data[k, i] = rp[loc]
+
+            # add the columns to the output dictionary
+            for i, modified_prop in enumerate(modified_props):
+                out[modified_prop] = column_data[:, i]
     return out
 
 

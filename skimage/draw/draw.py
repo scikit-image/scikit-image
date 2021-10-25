@@ -1,4 +1,3 @@
-import warnings
 import numpy as np
 
 from .._shared._geometry import polygon_clip
