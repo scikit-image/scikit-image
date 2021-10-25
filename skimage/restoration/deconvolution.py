@@ -432,9 +432,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     for _ in range(num_iter):
         conv = convolve(im_deconv, psf, mode='same') + eps
         if filter_epsilon:
-            with np.errstate(invalid='ignore'):
-                relative_blur = np.where(conv < filter_epsilon, 0,
-                                         image / conv)
+            relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
         else:
             relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')
