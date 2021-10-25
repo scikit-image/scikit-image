@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 from scipy.signal import convolve2d
 
 from skimage import restoration, util
+from skimage._shared import filters
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
@@ -110,7 +111,7 @@ def test_image_shape():
     """
     point = np.zeros((5, 5), float)
     point[2, 2] = 1.
-    psf = ndi.gaussian_filter(point, sigma=1.)
+    psf = filters.gaussian(point, sigma=1., mode='reflect')
     # image shape: (45, 45), as reported in #1172
     image = util.img_as_float(camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)

@@ -1,5 +1,7 @@
 import numpy as np
 
+from .._shared.filters import gaussian
+
 
 def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
                  volume_fraction=0.5, seed=None):
@@ -48,7 +50,6 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
     """
     # filters is quite an expensive import since it imports all of scipy.signal
     # We lazy import here
-    from ..filters import gaussian
 
     rs = np.random.default_rng(seed)
     shape = tuple([length] * n_dim)

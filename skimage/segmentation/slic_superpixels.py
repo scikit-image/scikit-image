@@ -2,14 +2,14 @@ from collections.abc import Iterable
 
 import numpy as np
 from numpy import random
-from scipy import ndimage as ndi
 from scipy.cluster.vq import kmeans2
 from scipy.spatial.distance import pdist, squareform
 
 from .._shared import utils
+from .._shared.filters import gaussian
 from ..color import rgb2lab
 from ..util import img_as_float, regular_grid
-from ._slic import _slic_cython, _enforce_label_connectivity_cython
+from ._slic import _enforce_label_connectivity_cython, _slic_cython
 
 
 def _get_mask_centroids(mask, n_centroids, multichannel):
@@ -307,7 +307,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
-        image = ndi.gaussian_filter(image, sigma)
+        image = gaussian(image, sigma, mode='reflect')
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(

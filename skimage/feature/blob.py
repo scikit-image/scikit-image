@@ -4,6 +4,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
 from ..transform import integral_image
 from ..util import img_as_float
@@ -351,7 +352,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
 
-    gaussian_images = [ndi.gaussian_filter(image, s) for s in sigma_list]
+    gaussian_images = [gaussian(image, s, mode='reflect') for s in sigma_list]
 
     # normalization factor for consistency in DoG magnitude
     sf = 1 / (sigma_ratio - 1)
