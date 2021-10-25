@@ -52,10 +52,10 @@ def test_binary_descriptors_rotation_crosscheck_false():
 
     exp_matches1 = np.arange(47)
     exp_matches2 = np.array([0, 2, 1, 3, 4, 5, 7, 8, 14, 9, 11, 13,
-                             23, 15, 16, 22, 17, 19, 34, 18, 24, 27,
+                             23, 15, 16, 22, 17, 19, 37, 18, 24, 27,
                              30, 25, 26, 32, 28, 35, 37, 42, 29, 38,
-                             33, 40, 36, 3, 10, 32, 43, 15, 29, 41,
-                             1, 18, 32, 24, 11])
+                             33, 40, 36, 39, 10, 36, 43, 15, 35, 41,
+                             6, 37, 32, 24, 8])
 
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
@@ -98,12 +98,12 @@ def test_binary_descriptors_rotation_crosscheck_true():
 
     exp_matches1 = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                              13, 14, 15, 16, 17, 19, 20, 21, 22, 23,
-                             24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
-                             34, 38, 41])
+                             24, 26, 27, 28, 29, 30, 31, 32, 33,
+                             34, 38, 41, 42])
     exp_matches2 = np.array([0, 2, 1, 3, 4, 5, 7, 8, 14, 9, 11, 13,
                              23, 15, 16, 22, 17, 19, 18, 24, 27, 30,
-                             25, 26, 32, 28, 35, 37, 42, 29, 38, 33,
-                             40, 36, 43, 41])
+                             25, 26, 28, 35, 37, 42, 29, 38, 33,
+                             40, 36, 43, 41, 6])
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 

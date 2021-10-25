@@ -5,10 +5,13 @@
 
 from functools import partial
 from itertools import combinations_with_replacement
+
 import numpy as np
 from scipy import ndimage as ndi
-from skimage.transform import warp
 
+from .._shared.filters import gaussian as gaussian_filter
+from .._shared.utils import _supported_float_type
+from ..transform import warp
 from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 
@@ -219,6 +222,10 @@ def optical_flow_tvl1(reference_image, moving_image,
                      tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
+    if np.dtype(dtype) != _supported_float_type(dtype):
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
+        raise ValueError(msg)
+
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
@@ -257,7 +264,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     if gaussian:
         sigma = ndim * (size / 4, )
-        filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
+        filter_func = partial(gaussian_filter, sigma=sigma, mode='mirror')
     else:
         filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
                               mode='mirror')
@@ -370,5 +377,9 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     solver = partial(_ilk, radius=radius, num_warp=num_warp, gaussian=gaussian,
                      prefilter=prefilter)
+
+    if np.dtype(dtype) != _supported_float_type(dtype):
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
+        raise ValueError(msg)
 
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)

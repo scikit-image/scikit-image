@@ -6,16 +6,21 @@ Tests for Rolling Ball Filter
 import numpy as np
 import pytest
 
-from skimage import data, io
+from skimage import data
 from skimage.restoration import rolling_ball
 from skimage.restoration.rolling_ball import ellipsoid_kernel
 
 
-def test_ellipsoid_const():
-    img = 155 * np.ones((100, 100), dtype=np.uint8)
+@pytest.mark.parametrize(
+    'dtype',
+    [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_ellipsoid_const(dtype):
+    img = 155 * np.ones((100, 100), dtype=dtype)
     kernel = ellipsoid_kernel((25, 53), 50)
     background = rolling_ball(img, kernel=kernel)
     assert np.allclose(img - background, np.zeros_like(img))
+    assert background.dtype == img.dtype
 
 
 def test_nan_const():
@@ -88,9 +93,8 @@ def test_threads(num_threads):
     # not testing if we use multiple threads
     # just checking if the API throws an exception
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    background = rolling_ball(img, radius=10, num_threads=num_threads)
-    background = rolling_ball(img, radius=10,
-                              nansafe=True, num_threads=num_threads)
+    rolling_ball(img, radius=10, num_threads=num_threads)
+    rolling_ball(img, radius=10, nansafe=True, num_threads=num_threads)
 
 
 def test_ndim():

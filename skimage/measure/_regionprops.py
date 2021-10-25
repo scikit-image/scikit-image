@@ -1,6 +1,8 @@
 import inspect
+from functools import wraps
+from math import atan2, pi as PI, sqrt
 from warnings import warn
-from math import sqrt, atan2, pi as PI
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
@@ -10,42 +12,58 @@ from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
 
-from functools import wraps
-
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
+# All values in this PROPS dict correspond to current scikit-image property
+# names. The keys in this PROPS dict correspond to older names used in prior
+# releases. For backwards compatibility, these older names will continue to
+# work, but will not be documented.
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
-    'BoundingBoxArea': 'bbox_area',
+    'BoundingBoxArea': 'area_bbox',
+    'bbox_area': 'area_bbox',
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
-    'ConvexArea': 'convex_area',
+    'ConvexArea': 'area_convex',
+    'convex_area': 'area_convex',
     # 'ConvexHull',
-    'ConvexImage': 'convex_image',
+    'ConvexImage': 'image_convex',
+    'convex_image': 'image_convex',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
-    'EquivDiameter': 'equivalent_diameter',
+    'EquivDiameter': 'equivalent_diameter_area',
+    'equivalent_diameter': 'equivalent_diameter_area',
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
+    'FeretDiameter': 'feret_diameter_max',
     'FeretDiameterMax': 'feret_diameter_max',
-    'FilledArea': 'filled_area',
-    'FilledImage': 'filled_image',
+    'FilledArea': 'area_filled',
+    'filled_area': 'area_filled',
+    'FilledImage': 'image_filled',
+    'filled_image': 'image_filled',
     'HuMoments': 'moments_hu',
     'Image': 'image',
     'InertiaTensor': 'inertia_tensor',
     'InertiaTensorEigvals': 'inertia_tensor_eigvals',
-    'IntensityImage': 'intensity_image',
+    'IntensityImage': 'image_intensity',
+    'intensity_image': 'image_intensity',
     'Label': 'label',
-    'LocalCentroid': 'local_centroid',
-    'MajorAxisLength': 'major_axis_length',
-    'MaxIntensity': 'max_intensity',
-    'MeanIntensity': 'mean_intensity',
-    'MinIntensity': 'min_intensity',
-    'MinorAxisLength': 'minor_axis_length',
+    'LocalCentroid': 'centroid_local',
+    'local_centroid': 'centroid_local',
+    'MajorAxisLength': 'axis_major_length',
+    'major_axis_length': 'axis_major_length',
+    'MaxIntensity': 'intensity_max',
+    'max_intensity': 'intensity_max',
+    'MeanIntensity': 'intensity_mean',
+    'mean_intensity': 'intensity_mean',
+    'MinIntensity': 'intensity_min',
+    'min_intensity': 'intensity_min',
+    'MinorAxisLength': 'axis_minor_length',
+    'minor_axis_length': 'axis_minor_length',
     'Moments': 'moments',
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
@@ -56,60 +74,66 @@ PROPS = {
     'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
-    'WeightedCentralMoments': 'weighted_moments_central',
-    'WeightedCentroid': 'weighted_centroid',
-    'WeightedHuMoments': 'weighted_moments_hu',
-    'WeightedLocalCentroid': 'weighted_local_centroid',
-    'WeightedMoments': 'weighted_moments',
-    'WeightedNormalizedMoments': 'weighted_moments_normalized'
+    'WeightedCentralMoments': 'moments_weighted_central',
+    'weighted_moments_central': 'moments_weighted_central',
+    'WeightedCentroid': 'centroid_weighted',
+    'weighted_centroid': 'centroid_weighted',
+    'WeightedHuMoments': 'moments_weighted_hu',
+    'weighted_moments_hu': 'moments_weighted_hu',
+    'WeightedLocalCentroid': 'centroid_weighted_local',
+    'weighted_local_centroid': 'centroid_weighted_local',
+    'WeightedMoments': 'moments_weighted',
+    'weighted_moments': 'moments_weighted',
+    'WeightedNormalizedMoments': 'moments_weighted_normalized',
+    'weighted_moments_normalized': 'moments_weighted_normalized',
 }
 
 OBJECT_COLUMNS = {
-    'image', 'coords', 'convex_image', 'slice',
-    'filled_image', 'intensity_image'
+    'image', 'coords', 'image_convex', 'slice',
+    'image_filled', 'image_intensity'
 }
 
 COL_DTYPES = {
     'area': int,
+    'area_bbox': int,
+    'area_convex': int,
+    'area_filled': int,
+    'axis_major_length': float,
+    'axis_minor_length': float,
     'bbox': int,
-    'bbox_area': int,
-    'moments_central': float,
     'centroid': float,
-    'convex_area': int,
-    'convex_image': object,
+    'centroid_local': float,
+    'centroid_weighted': float,
+    'centroid_weighted_local': float,
     'coords': object,
     'eccentricity': float,
-    'equivalent_diameter': float,
+    'equivalent_diameter_area': float,
     'euler_number': int,
     'extent': float,
     'feret_diameter_max': float,
-    'filled_area': int,
-    'filled_image': object,
-    'moments_hu': float,
     'image': object,
+    'image_convex': object,
+    'image_filled': object,
+    'image_intensity': object,
     'inertia_tensor': float,
     'inertia_tensor_eigvals': float,
-    'intensity_image': object,
+    'intensity_max': float,
+    'intensity_mean': float,
+    'intensity_min': float,
     'label': int,
-    'local_centroid': float,
-    'major_axis_length': float,
-    'max_intensity': float,
-    'mean_intensity': float,
-    'min_intensity': float,
-    'minor_axis_length': float,
     'moments': float,
+    'moments_central': float,
+    'moments_hu': float,
     'moments_normalized': float,
+    'moments_weighted': float,
+    'moments_weighted_central': float,
+    'moments_weighted_hu': float,
+    'moments_weighted_normalized': float,
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
-    'weighted_moments_central': float,
-    'weighted_centroid': float,
-    'weighted_moments_hu': float,
-    'weighted_local_centroid': float,
-    'weighted_moments': float,
-    'weighted_moments_normalized': float
 }
 
 PROP_VALS = set(PROPS.values())
@@ -162,9 +186,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
     propmasks = [(sample == n) for n in labels]
+
+    rng = np.random.default_rng()
+
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, np.random.random(sample.shape))
+            return func(mask, rng.random(sample.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
@@ -234,19 +261,18 @@ class RegionProperties:
         self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
-        if extra_properties is None:
-            extra_properties = []
-        for func in extra_properties:
-            name = func.__name__
-            if hasattr(self, name):
-                msg = (
-                    f"Extra property '{name}' is shadowed by existing "
-                    "property and will be inaccessible. Consider renaming it."
-                )
-                warn(msg)
-        self._extra_properties = {
-            func.__name__: func for func in extra_properties
-        }
+        if extra_properties is not None:
+            for func in extra_properties:
+                name = func.__name__
+                if hasattr(self, name):
+                    msg = (
+                        f"Extra property '{name}' is shadowed by existing "
+                        f"property and will be inaccessible. Consider renaming it."
+                    )
+                    warn(msg)
+            self._extra_properties = {
+                func.__name__: func for func in extra_properties
+            }
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
@@ -257,22 +283,22 @@ class RegionProperties:
                 if self._intensity_image is not None:
                     if self._multichannel:
                         multichannel_list = [func(self.image,
-                                                  self.intensity_image[..., i])
+                                                  self.image_intensity[..., i])
                                              for i in range(
-                            self.intensity_image.shape[-1])]
+                            self.image_intensity.shape[-1])]
                         return np.stack(multichannel_list, axis=-1)
                     else:
-                        return func(self.image, self.intensity_image)
+                        return func(self.image, self.image_intensity)
                 else:
                     raise AttributeError(
-                        f"intensity image required to calculate {attr}"
+                        f'intensity image required to calculate {attr}'
                     )
             elif n_args == 1:
                 return func(self.image)
             else:
                 raise AttributeError(
-                    "Custom regionprop function's number of arguments must be 1 or 2"
-                    f"but {attr} takes {n_args} arguments."
+                    f'Custom regionprop function\'s number of arguments must be 1 or 2, '
+                    f'but {attr} takes {n_args} arguments.'
                 )
         else:
             raise AttributeError(
@@ -296,7 +322,7 @@ class RegionProperties:
                      [self.slice[i].stop for i in range(self._ndim)])
 
     @property
-    def bbox_area(self):
+    def area_bbox(self):
         return self.image.size
 
     @property
@@ -305,12 +331,12 @@ class RegionProperties:
 
     @property
     @_cached
-    def convex_area(self):
-        return np.sum(self.convex_image)
+    def area_convex(self):
+        return np.sum(self.image_convex)
 
     @property
     @_cached
-    def convex_image(self):
+    def image_convex(self):
         from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
@@ -329,7 +355,7 @@ class RegionProperties:
         return sqrt(1 - l2 / l1)
 
     @property
-    def equivalent_diameter(self):
+    def equivalent_diameter_area(self):
         return (2 * self._ndim * self.area / PI) ** (1 / self._ndim)
 
     @property
@@ -345,7 +371,7 @@ class RegionProperties:
 
     @property
     def feret_diameter_max(self):
-        identity_convex_hull = np.pad(self.convex_image,
+        identity_convex_hull = np.pad(self.image_convex,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
             coordinates = np.vstack(find_contours(identity_convex_hull, .5,
@@ -356,12 +382,12 @@ class RegionProperties:
         return sqrt(np.max(distances))
 
     @property
-    def filled_area(self):
-        return np.sum(self.filled_image)
+    def area_filled(self):
+        return np.sum(self.image_filled)
 
     @property
     @_cached
-    def filled_image(self):
+    def image_filled(self):
         structure = np.ones((3,) * self._ndim)
         return ndi.binary_fill_holes(self.image, structure)
 
@@ -384,7 +410,7 @@ class RegionProperties:
 
     @property
     @_cached
-    def intensity_image(self):
+    def image_intensity(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
         image = (
@@ -394,36 +420,41 @@ class RegionProperties:
         )
         return self._intensity_image[self.slice] * image
 
-    def _intensity_image_double(self):
-        return self.intensity_image.astype(np.double)
+    def _image_intensity_double(self):
+        return self.image_intensity.astype(np.double, copy=False)
 
     @property
-    def local_centroid(self):
+    def centroid_local(self):
         M = self.moments
-        return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
-                     M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
-    def max_intensity(self):
-        return np.max(self.intensity_image[self.image], axis=0)\
-                 .astype(np.double)
+    def intensity_max(self):
+        vals = self.image_intensity[self.image]
+        return np.max(vals, axis=0).astype(np.double, copy=False)
 
     @property
-    def mean_intensity(self):
-        return np.mean(self.intensity_image[self.image], axis=0)
+    def intensity_mean(self):
+        return np.mean(self.image_intensity[self.image], axis=0)
 
     @property
-    def min_intensity(self):
-        return np.min(self.intensity_image[self.image], axis=0)\
-                 .astype(np.double)
+    def intensity_min(self):
+        vals = self.image_intensity[self.image]
+        return np.min(vals, axis=0).astype(np.double, copy=False)
 
     @property
-    def major_axis_length(self):
+    def axis_major_length(self):
         l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
     @property
-    def minor_axis_length(self):
+    def axis_minor_length(self):
         l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
@@ -437,7 +468,7 @@ class RegionProperties:
     @_cached
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
-                                      self.local_centroid, order=3)
+                                      self.centroid_local, order=3)
         return mu
 
     @property
@@ -474,24 +505,29 @@ class RegionProperties:
 
     @property
     def solidity(self):
-        return self.area / self.convex_area
+        return self.area / self.area_convex
 
     @property
-    def weighted_centroid(self):
-        ctr = self.weighted_local_centroid
+    def centroid_weighted(self):
+        ctr = self.centroid_weighted_local
         return tuple(idx + slc.start
                      for idx, slc in zip(ctr, self.slice))
 
     @property
-    def weighted_local_centroid(self):
-        M = self.weighted_moments
-        return (M[tuple(np.eye(self._ndim, dtype=int))] /
-                M[(0,) * self._ndim])
+    def centroid_weighted_local(self):
+        M = self.moments_weighted
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     @_cached
-    def weighted_moments(self):
-        image = self._intensity_image_double()
+    def moments_weighted(self):
+        image = self._image_intensity_double()
         if self._multichannel:
             moments = np.stack(
                     [_moments.moments(image[..., i], order=3)
@@ -504,9 +540,9 @@ class RegionProperties:
 
     @property
     @_cached
-    def weighted_moments_central(self):
-        ctr = self.weighted_local_centroid
-        image = self._intensity_image_double()
+    def moments_weighted_central(self):
+        ctr = self.centroid_weighted_local
+        image = self._image_intensity_double()
         if self._multichannel:
             moments_list = [
                 _moments.moments_central(
@@ -521,8 +557,8 @@ class RegionProperties:
 
     @property
     @only2d
-    def weighted_moments_hu(self):
-        nu = self.weighted_moments_normalized
+    def moments_weighted_hu(self):
+        nu = self.moments_weighted_normalized
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
@@ -534,8 +570,8 @@ class RegionProperties:
 
     @property
     @_cached
-    def weighted_moments_normalized(self):
-        mu = self.weighted_moments_central
+    def moments_weighted_normalized(self):
+        mu = self.moments_weighted_central
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
@@ -545,22 +581,22 @@ class RegionProperties:
             )
         else:
             return _moments.moments_normalized(mu, order=3)
-        return _moments.moments_normalized(self.weighted_moments_central, 3)
+        return _moments.moments_normalized(self.moments_weighted_central, 3)
 
     def __iter__(self):
         props = PROP_VALS
 
         if self._intensity_image is None:
-            unavailable_props = ('intensity_image',
-                                 'max_intensity',
-                                 'mean_intensity',
-                                 'min_intensity',
-                                 'weighted_moments',
-                                 'weighted_moments_central',
-                                 'weighted_centroid',
-                                 'weighted_local_centroid',
-                                 'weighted_moments_hu',
-                                 'weighted_moments_normalized')
+            unavailable_props = ('image_intensity',
+                                 'intensity_max',
+                                 'intensity_mean',
+                                 'intensity_min',
+                                 'moments_weighted',
+                                 'moments_weighted_central',
+                                 'centroid_weighted',
+                                 'centroid_weighted_local',
+                                 'moments_weighted_hu',
+                                 'moments_weighted_normalized')
 
             props = props.difference(unavailable_props)
 
@@ -677,6 +713,11 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     n = len(regions)
     for prop in properties:
         r = regions[0]
+        # Copy the original property name so the output will have the
+        # user-provided property name in the case of deprecated names.
+        orig_prop = prop
+        # determine the current property name for any deprecated property.
+        prop = PROPS.get(prop, prop)
         rp = getattr(r, prop)
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
@@ -687,27 +728,41 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 intensity=r._intensity_image is not None,
                 ndim=r.image.ndim,
             )
-        column_buffer = np.zeros(n, dtype=dtype)
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+            column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
-            out[prop] = np.copy(column_buffer)
+            out[orig_prop] = np.copy(column_buffer)
         else:
             if isinstance(rp, np.ndarray):
                 shape = rp.shape
             else:
                 shape = (len(rp),)
 
+            # precompute property column names and locations
+            modified_props = []
+            locs = []
             for ind in np.ndindex(shape):
-                for k in range(n):
-                    loc = ind if len(ind) > 1 else ind[0]
-                    column_buffer[k] = regions[k][prop][loc]
-                modified_prop = separator.join(map(str, (prop,) + ind))
-                out[modified_prop] = np.copy(column_buffer)
+                modified_props.append(
+                    separator.join(map(str, (orig_prop,) + ind))
+                )
+                locs.append(ind if len(ind) > 1 else ind[0])
+
+            # fill temporary column data_array
+            n_columns = len(locs)
+            column_data = np.empty((n, n_columns), dtype=dtype)
+            for k in range(n):
+                rp = regions[k][prop]
+                for i, loc in enumerate(locs):
+                    column_data[k, i] = rp[loc]
+
+            # add the columns to the output dictionary
+            for i, modified_prop in enumerate(modified_props):
+                out[modified_prop] = column_data[:, i]
     return out
 
 
@@ -728,7 +783,8 @@ def regionprops_table(label_image, intensity_image=None,
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -890,7 +946,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data.
+        optionally an extra dimension for multichannel data. Currently,
+        this extra channel dimension, if present, must be the last axis.
         Default is None.
 
         .. versionchanged:: 0.18.0
@@ -934,19 +991,35 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     **area** : int
         Number of pixels of the region.
+    **area_bbox** : int
+        Number of pixels of bounding box.
+    **area_convex** : int
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
+    **area_filled** : int
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the image_filled.
+    **axis_major_length** : float
+        The length of the major axis of the ellipse that has the same
+        normalized second central moments as the region.
+    **axis_minor_length** : float
+        The length of the minor axis of the ellipse that has the same
+        normalized second central moments as the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
         ``[min_row; max_row)`` and ``[min_col; max_col)``.
-    **bbox_area** : int
-        Number of pixels of bounding box.
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
-    **convex_area** : int
-        Number of pixels of convex hull image, which is the smallest convex
-        polygon that encloses the region.
-    **convex_image** : (H, J) ndarray
-        Binary convex hull image which has the same size as bounding box.
+    **centroid_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box.
+    **centroid_weighted** : array
+        Centroid coordinate tuple ``(row, col)`` weighted with intensity
+        image.
+    **centroid_weighted_local** : array
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box, weighted with intensity image.
     **coords** : (N, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
@@ -955,7 +1028,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         (distance between focal points) over the major axis length.
         The value is in the interval [0, 1).
         When it is 0, the ellipse becomes a circle.
-    **equivalent_diameter** : float
+    **equivalent_diameter_area** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
         Euler characteristic of the set of non-zero pixels.
@@ -969,37 +1042,27 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours``. [5]_
-    **filled_area** : int
-        Number of pixels of the region will all the holes filled in. Describes
-        the area of the filled_image.
-    **filled_image** : (H, J) ndarray
-        Binary region image with filled holes which has the same size as
-        bounding box.
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
+    **image_convex** : (H, J) ndarray
+        Binary convex hull image which has the same size as bounding box.
+    **image_filled** : (H, J) ndarray
+        Binary region image with filled holes which has the same size as
+        bounding box.
+    **image_intensity** : ndarray
+        Image inside region bounding box.
     **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The eigenvalues of the inertia tensor in decreasing order.
-    **intensity_image** : ndarray
-        Image inside region bounding box.
+    **intensity_max** : float
+        Value with the greatest intensity in the region.
+    **intensity_mean** : float
+        Value with the mean intensity in the region.
+    **intensity_min** : float
+        Value with the least intensity in the region.
     **label** : int
         The label in the labeled input image.
-    **local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box.
-    **major_axis_length** : float
-        The length of the major axis of the ellipse that has the same
-        normalized second central moments as the region.
-    **max_intensity** : float
-        Value with the greatest intensity in the region.
-    **mean_intensity** : float
-        Value with the mean intensity in the region.
-    **min_intensity** : float
-        Value with the least intensity in the region.
-    **minor_axis_length** : float
-        The length of the minor axis of the ellipse that has the same
-        normalized second central moments as the region.
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
@@ -1021,6 +1084,31 @@ def regionprops(label_image, intensity_image=None, cache=True,
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
+    **moments_weighted** : (3, 3) ndarray
+        Spatial moments of intensity image up to 3rd order::
+
+            wm_ij = sum{ array(row, col) * row^i * col^j }
+
+        where the sum is over the `row`, `col` coordinates of the region.
+    **moments_weighted_central** : (3, 3) ndarray
+        Central moments (translation invariant) of intensity image up to
+        3rd order::
+
+            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
+
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's weighted
+        centroid.
+    **moments_weighted_hu** : tuple
+        Hu moments (translation, scale and rotation invariant) of intensity
+        image.
+    **moments_weighted_normalized** : (3, 3) ndarray
+        Normalized moments (translation and scale invariant) of intensity
+        image up to 3rd order::
+
+            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
+
+        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
     **orientation** : float
         Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,
@@ -1035,37 +1123,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         A slice to extract the object from the source image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
-    **weighted_centroid** : array
-        Centroid coordinate tuple ``(row, col)`` weighted with intensity
-        image.
-    **weighted_local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box, weighted with intensity image.
-    **weighted_moments** : (3, 3) ndarray
-        Spatial moments of intensity image up to 3rd order::
-
-            wm_ij = sum{ array(row, col) * row^i * col^j }
-
-        where the sum is over the `row`, `col` coordinates of the region.
-    **weighted_moments_central** : (3, 3) ndarray
-        Central moments (translation invariant) of intensity image up to
-        3rd order::
-
-            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
-
-        where the sum is over the `row`, `col` coordinates of the region,
-        and `row_c` and `col_c` are the coordinates of the region's weighted
-        centroid.
-    **weighted_moments_hu** : tuple
-        Hu moments (translation, scale and rotation invariant) of intensity
-        image.
-    **weighted_moments_normalized** : (3, 3) ndarray
-        Normalized moments (translation and scale invariant) of intensity
-        image up to 3rd order::
-
-            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
-
-        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
 
     Each region also supports iteration, so that you can do::
 

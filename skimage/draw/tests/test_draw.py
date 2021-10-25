@@ -1,13 +1,11 @@
 import numpy as np
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_equal
 from skimage._shared.testing import assert_almost_equal
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
-                          disk,
-                          circle, circle_perimeter, circle_perimeter_aa,
+                          disk, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
                           _bezier_segment, bezier_curve, rectangle,
                           rectangle_perimeter)
@@ -220,11 +218,6 @@ def test_polygon_0d_input():
     rr, cc = polygon(0, 1)
 
     assert rr.size == cc.size == 1
-
-
-def test_circle_deprecated():
-    with expected_warnings(['`draw.circle` is deprecated']):
-        _ = circle(7, 7, 6)
 
 
 def test_disk():

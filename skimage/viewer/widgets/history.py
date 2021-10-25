@@ -1,7 +1,6 @@
 from textwrap import dedent
 
-from ..qt import QtGui, QtCore, QtWidgets
-import numpy as np
+from ..qt import QtCore, QtWidgets
 
 from ... import io
 from ...util import img_as_ubyte

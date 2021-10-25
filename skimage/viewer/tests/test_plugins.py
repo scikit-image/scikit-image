@@ -68,7 +68,7 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
     viewer.image = util.img_as_float(
-        median(util.img_as_ubyte(image), selem=disk(radius=3)))
+        median(util.img_as_ubyte(image), footprint=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
     assert_almost_equal(np.std(viewer.image), 0.198, 3)
@@ -98,7 +98,7 @@ def test_canny():
     canny_edges = viewer.show(False)
     viewer.close()
     edges = canny_edges[0][0]
-    assert edges.sum() == 1958
+    assert edges.sum() == 3590
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
@@ -161,7 +161,7 @@ def test_plugin():
 
     def median_filter(img, radius=3):
         return median(
-            util.img_as_ubyte(img), selem=disk(radius=radius))
+            util.img_as_ubyte(img), footprint=disk(radius=radius))
 
     plugin = Plugin(image_filter=median_filter)
     viewer += plugin

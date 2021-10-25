@@ -4,6 +4,7 @@ n-dimensional array.
 """
 
 import numpy as np
+from numbers import Integral
 
 __all__ = ['crop']
 
@@ -39,18 +40,18 @@ def crop(ar, crop_width, copy=False, order='K'):
     """
     ar = np.array(ar, copy=False)
 
-    if isinstance(crop_width, int):
+    if isinstance(crop_width, Integral):
         crops = [[crop_width, crop_width]] * ar.ndim
-    elif isinstance(crop_width[0], int):
+    elif isinstance(crop_width[0], Integral):
         if len(crop_width) == 1:
             crops = [[crop_width[0], crop_width[0]]] * ar.ndim
         elif len(crop_width) == 2:
             crops = [crop_width] * ar.ndim
         else:
             raise ValueError(
-                f"crop_width has an invalid length: {len(crop_width)}\n"
-                "crop_width should be a sequence of N pairs, "
-                "a single pair, or a single integer"
+                f'crop_width has an invalid length: {len(crop_width)}\n'
+                f'crop_width should be a sequence of N pairs, '
+                f'a single pair, or a single integer'
             )
     elif len(crop_width) == 1:
         crops = [crop_width[0]] * ar.ndim
@@ -58,9 +59,9 @@ def crop(ar, crop_width, copy=False, order='K'):
         crops = crop_width
     else:
         raise ValueError(
-            f"crop_width has an invalid length: {len(crop_width)}\n"
-            "crop_width should be a sequence of N pairs, "
-            "a single pair, or a single integer"
+            f'crop_width has an invalid length: {len(crop_width)}\n'
+            f'crop_width should be a sequence of N pairs, '
+            f'a single pair, or a single integer'
         )
 
     slices = tuple(slice(a, ar.shape[i] - b)

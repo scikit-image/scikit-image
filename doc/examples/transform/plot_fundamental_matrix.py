@@ -27,8 +27,6 @@ from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
 import matplotlib.pyplot as plt
 
-np.random.seed(0)
-
 img_left, img_right, groundtruth_disp = data.stereo_motorcycle()
 img_left, img_right = map(rgb2gray, (img_left, img_right))
 
@@ -57,8 +55,8 @@ model, inliers = ransac((keypoints_left[matches[:, 0]],
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]
 inlier_keypoints_right = keypoints_right[matches[inliers, 1]]
 
-print(f"Number of matches: {matches.shape[0]}")
-print(f"Number of inliers: {inliers.sum()}")
+print(f'Number of matches: {matches.shape[0]}')
+print(f'Number of inliers: {inliers.sum()}')
 
 # Compare estimated sparse disparities to the dense ground-truth disparities.
 

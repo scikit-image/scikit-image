@@ -1,5 +1,9 @@
 # Azure Pipelines configuration file for Continuous Integration
 # for building the package and running the tests under Windows.
+variables:
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+  # data cache dir determined via: print(pooch.os_cache('scikit-image'))
+  SKIMAGE_DATA_CACHE_FOLDER: C:\Users\VssAdministrator\AppData\Local\scikit-image\scikit-image\Cache
 
 jobs:
 - job: 'Default'
@@ -25,7 +29,6 @@ jobs:
         PYTHON_VERSION: '3.8'
         ARCH: 'x64'
         PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
         BUILD_DOCS: 'true'
       # build pre release packages on Python 3.8 since it has been out long
       # enough for wheels to be built for packages that need to be compiled.
@@ -54,6 +57,23 @@ jobs:
       architecture: '$(ARCH)'
     name: python
 
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
+  - task: Cache@2
+    inputs:
+      key: '"skimage_data" | skimage/data/_registry.py'
+      path: $(SKIMAGE_DATA_CACHE_FOLDER)
+    displayName: Cache scikit-image data files
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
+  - task: Cache@2
+    inputs:
+      key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
+      restoreKeys: |
+        "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
+        "Python$(PYTHON_VERSION)-$(ARCH)"
+      path: $(PIP_CACHE_DIR)
+    displayName: Cache pip packages
+
   - bash: |
       set -ex
       PYTHON="$(python.pythonLocation)\\python.exe"
@@ -61,12 +81,16 @@ jobs:
       # Update pip
       $PYTHON -m pip install -U pip setuptools wheel
 
+      # print out the pip cache dir followed by the variable defined above
+      # to confirm that they match
+      $PYTHON -m pip cache dir
+      echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
+
       # Check that we have the expected version and architecture for Python
       $PYTHON --version
       $PYTHON -m pip --version
       $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
       $PYTHON -m pip list
-
 
       # Install the build and runtime dependencies of the project
       $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
@@ -114,6 +138,11 @@ jobs:
       # Show the info about the installed scikit-image
       $PYTHON -c "import skimage; print(skimage.__path__)"
 
+      # Show the path pooch is using for the data cache
+      # (this should match the SKIMAGE_DATA_CACHE_FOLDER variable above)
+      $PYTHON -c "import pooch; print(pooch.os_cache('scikit-image'))"
+      echo "SKIMAGE_DATA_CACHE_FOLDER: $SKIMAGE_DATA_CACHE_FOLDER"
+
       # Force matplotlib to use the prepared config
       export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
@@ -124,6 +153,12 @@ jobs:
       export TEST_ARGS="-v --cov=skimage"
       $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
     displayName: 'Package testing'
+
+  - bash: |
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
+      $PYTHON -m asv check -v -E existing
+    displayName: Check benchmarks
 
   - bash: |
       set -ex
@@ -154,7 +189,12 @@ jobs:
 
       # Run example applications
       for f in doc/examples/*/*.py; do
-        $PYTHON "${f}"
+        # Comment out any plotly.io.show() calls before running the example.
+        # Plotly opens a web browser, which often seemed to cause the CI to
+        # hang and timeout.
+        sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
+
+        $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
         if [ $? -ne 0 ]; then
           exit 1
         fi

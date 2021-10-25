@@ -220,8 +220,8 @@ Additional help
 
 If you still have questions, reach out through
 
-- our `forum on image.sc <https://forum.image.sc/tags/scikit-image>`_
-- our `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_
+- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 - our `chat channel <https://skimage.zulipchat.com/>`_
 - `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
 
@@ -298,6 +298,8 @@ When using ``venv``, you may find the following bash commands useful:
   python -m venv skimage-dev
   # Activate it. On Linux and MacOS:
   source skimage-dev/bin/activate
+  # Make sure that pip is up to date
+  pip install --upgrade pip
   # Install all development and runtime dependencies of scikit-image
   pip install -r <(cat requirements/*.txt)
   # Build and install scikit-image from source

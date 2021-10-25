@@ -1,10 +1,9 @@
 import numpy as np
 
-import scipy.ndimage as ndi
-
-from ..util import img_as_float
+from .._shared.filters import gaussian
+from .._shared.utils import _supported_float_type
 from ..color import rgb2lab
-
+from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 
 
@@ -57,6 +56,9 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     """
 
     image = img_as_float(np.atleast_3d(image))
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     if convert2lab:
         if image.shape[2] != 3:
             ValueError("Only RGB images can be converted to Lab space.")
@@ -65,7 +67,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     if kernel_size < 1:
         raise ValueError("`kernel_size` should be >= 1.")
 
-    image = ndi.gaussian_filter(image, [sigma, sigma, 0])
+    image = gaussian(image, [sigma, sigma, 0], mode='reflect', channel_axis=-1)
     image = np.ascontiguousarray(image * ratio)
 
     segment_mask = _quickshift_cython(

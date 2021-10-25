@@ -1,14 +1,11 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_almost_equal, assert_equal
 
-from skimage import transform
+from skimage._shared.testing import test_parallel
 from skimage import data
-from skimage.feature import canny
+from skimage import transform
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
-
-from skimage._shared import testing
-from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
-
 
 @test_parallel()
 def test_hough_line():
@@ -41,7 +38,7 @@ def test_hough_line_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         transform.hough_line(img, np.linspace(0, 360, 10))
 
 
@@ -78,8 +75,8 @@ def test_probabilistic_hough_seed():
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
-                                               seed=1234)
-    assert len(lines) == 64
+                                               seed=41537233)
+    assert len(lines) == 56
 
 
 def test_probabilistic_hough_bad_input():
@@ -87,7 +84,7 @@ def test_probabilistic_hough_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         transform.probabilistic_hough_line(img)
 
 
