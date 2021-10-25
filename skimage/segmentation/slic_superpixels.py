@@ -304,13 +304,18 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         spacing = np.asarray(spacing, dtype=dtype)
         if is_2d:
             if spacing.size != 2:
-                warn("Input image is 2D: spacing number of "
-                     "elements must be 2. In version 0.21, a ValueError will "
-                     "be raised.", FutureWarning, stacklevel=2)
-            spacing = np.insert(spacing, 0, 1)
+                if spacing.size == 3:
+                    warn("Input image is 2D: spacing number of "
+                         "elements must be 2. In the future, a ValueError "
+                         "will be raised.", FutureWarning, stacklevel=2)
+                else:
+                    raise ValueError(f"Input image is 2D, but spacing has "
+                                     f"{spacing.size} elements (expected 2).")
+            else:
+                spacing = np.insert(spacing, 0, 1)
         elif spacing.size != 3:
-            raise ("Input image is 3D: spacing number of "
-                   "elements must be 3.")
+            raise ValueError(f"Input image is 3D, but spacing has "
+                             f"{spacing.size} elements (must be 3).")
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
     else:
         raise TypeError("spacing must be None or iterable.")
