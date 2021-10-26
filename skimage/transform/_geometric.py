@@ -687,7 +687,7 @@ class ProjectiveTransform(GeometricTransform):
             Source coordinates.
         dst : (N, 2) array
             Destination coordinates.
-        weights : (N, 1) array, optional
+        weights : (N,) array, optional
             Relative weight values for each pair of points.
 
         Returns
@@ -1447,7 +1447,7 @@ class PolynomialTransform(GeometricTransform):
             Destination coordinates.
         order : int, optional
             Polynomial order (number of coefficients is order + 1).
-        weights : (N, 1) array, optional
+        weights : (N,) array, optional
             Relative weight values for each pair of points.
 
         Returns

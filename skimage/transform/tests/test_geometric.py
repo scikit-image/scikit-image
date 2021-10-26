@@ -11,10 +11,10 @@ from skimage.transform._geometric import (_affine_matrix_from_vector,
                                           _euler_rotation_matrix,
                                           GeometricTransform)
 from skimage.transform import (estimate_transform, matrix_transform,
-                                EuclideanTransform, SimilarityTransform,
-                                AffineTransform, FundamentalMatrixTransform,
-                                EssentialMatrixTransform, ProjectiveTransform,
-                                PolynomialTransform, PiecewiseAffineTransform)
+                               EuclideanTransform, SimilarityTransform,
+                               AffineTransform, FundamentalMatrixTransform,
+                               EssentialMatrixTransform, ProjectiveTransform,
+                               PolynomialTransform, PiecewiseAffineTransform)
 
 
 SRC = np.array([
