@@ -384,7 +384,7 @@ def test_polynomial_weighted_estimation():
 
     # Repeating a point, but setting its weight small, should give nearly
     # the same result.
-    point_weights = np.ones(SRC.shape[0]+1)
+    point_weights = np.ones(SRC.shape[0] + 1)
     point_weights[0] = 1.0e-15
     tform1 = estimate_transform('polynomial', SRC, DST, order=10)
     tform2 = estimate_transform('polynomial',
