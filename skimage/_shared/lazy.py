@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def attach(module_name, submodules=None, submod_attrs=None):
+def attach(package_name, submodules=None, submod_attrs=None):
     """Attach lazily loaded submodules, functions, or other attributes.
 
     Typically, modules import submodules and attributes as follows::
@@ -14,7 +14,7 @@ def attach(module_name, submodules=None, submod_attrs=None):
 
       from .foo import someattr
 
-    The idea is to replace a module's `__getattr__`, `__dir__`, and
+    The idea is to replace a package's `__getattr__`, `__dir__`, and
     `__all__`, such that all imports work exactly the way they did
     before, except that they are only imported when used.
 
@@ -30,8 +30,8 @@ def attach(module_name, submodules=None, submod_attrs=None):
 
     Parameters
     ----------
-    module_name : str
-        Typically use __name__.
+    package_name : str
+        Typically use ``__name__``.
     submodules : set
         List of submodules to attach.
     submod_attrs : dict
@@ -59,14 +59,14 @@ def attach(module_name, submodules=None, submod_attrs=None):
 
     def __getattr__(name):
         if name in submodules:
-            return importlib.import_module(f'{module_name}.{name}')
+            return importlib.import_module(f'{package_name}.{name}')
         elif name in attr_to_modules:
             submod = importlib.import_module(
-                f'{module_name}.{attr_to_modules[name]}'
+                f'{package_name}.{attr_to_modules[name]}'
             )
             return getattr(submod, name)
         else:
-            raise AttributeError(f'No {module_name} attribute {name}')
+            raise AttributeError(f'No {package_name} attribute {name}')
 
     def __dir__():
         return __all__
@@ -79,7 +79,7 @@ def attach(module_name, submodules=None, submod_attrs=None):
 
 
 def load(fullname):
-    """Return a lazily imported proxy for a module or library.
+    """Return a lazily imported proxy for a module.
 
     We often see the following pattern::
 
@@ -88,7 +88,7 @@ def load(fullname):
           sp.argmin(...)
           ....
 
-    This is to prevent a library, in this case `scipy`, from being
+    This is to prevent a module, in this case `scipy`, from being
     imported at function definition time, since that can be slow.
 
     This function provides a proxy module that, upon access, imports
@@ -108,7 +108,7 @@ def load(fullname):
     Parameters
     ----------
     fullname : str
-        The full name of the package or subpackage to import.  For example::
+        The full name of the module or submodule to import.  For example::
 
           sp = lazy.load('scipy')  # import scipy as sp
           spla = lazy.load('scipy.linalg')  # import scipy.linalg as spla
