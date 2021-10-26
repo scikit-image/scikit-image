@@ -10,7 +10,7 @@ from scipy import ndimage as ndi
 
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
-from .._shared.version_requirements import is_installed
+from .._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
                                   _get_multiotsu_thresh_indices_lut)
@@ -55,9 +55,6 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     fig, ax : tuple
         Matplotlib figure and axes.
     """
-    if not is_installed("matplotlib", ">=3.0.3"):
-        warn("Please install matplotlib>=3.0.3 to use try_all_thresholds")
-        return None, None
     from matplotlib import pyplot as plt
 
     # Compute the image histogram for better performances
@@ -98,6 +95,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
+@require("matplotlib", ">=3.0.3")
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
