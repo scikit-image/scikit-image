@@ -1,5 +1,5 @@
-from warnings import warn
 from collections.abc import Iterable
+from warnings import warn
 
 import numpy as np
 from numpy import random
@@ -315,7 +315,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
                 spacing = np.insert(spacing, 0, 1)
         elif spacing.size != 3:
             raise ValueError(f"Input image is 3D, but spacing has "
-                             f"{spacing.size} elements (must be 3).")
+                             f"{spacing.size} elements (expected 3).")
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
     else:
         raise TypeError("spacing must be None or iterable.")
@@ -338,10 +338,10 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
                 sigma = np.insert(sigma, 0, 0)
         elif sigma.size != 3:
             raise ValueError(f"Input image is 3D, but sigma has "
-                             f"{sigma.size} elements (must be 3).")
+                             f"{sigma.size} elements (expected 3).")
 
     if (sigma > 0).any():
-        # add zero smoothing for multichannel dimension
+        # add zero smoothing for channel dimension
         sigma = list(sigma) + [0]
         image = ndi.gaussian_filter(image, sigma)
 
