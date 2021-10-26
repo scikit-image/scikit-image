@@ -663,7 +663,7 @@ class ProjectiveTransform(GeometricTransform):
         In case of total least-squares the solution of this homogeneous system
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
-        
+
         Weights can be applied to each pair of corresponding points to
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
@@ -696,7 +696,7 @@ class ProjectiveTransform(GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        
+
         n, d = src.shape
 
         src_matrix, src = _center_and_normalize_points(src)
@@ -725,9 +725,9 @@ class ProjectiveTransform(GeometricTransform):
         if weights is None:
             _, _, V = np.linalg.svd(A)
         else:
-            W = np.diag(np.tile(np.sqrt(weights/np.max(weights)), d))
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
             _, _, V = np.linalg.svd(W @ A)
-        
+
         # if the last element of the vector corresponding to the smallest
         # singular value is close to zero, this implies a degenerate case
         # because it is a rank-defective transform, which would map points
@@ -743,11 +743,11 @@ class ProjectiveTransform(GeometricTransform):
 
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
-        
+
         # Small errors can creep in if points are not exact, causing the last
         # element of H to deviate from unity. Correct for that here.
         H /= H[-1, -1]
-        
+
         self.params = H
 
         return True
@@ -1431,7 +1431,7 @@ class PolynomialTransform(GeometricTransform):
         In case of total least-squares the solution of this homogeneous system
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
-        
+
         Weights can be applied to each pair of corresponding points to
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
@@ -1482,7 +1482,7 @@ class PolynomialTransform(GeometricTransform):
         if weights is None:
             _, _, V = np.linalg.svd(A)
         else:
-            W = np.diag(np.tile(np.sqrt(weights/np.max(weights)), 2))
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), 2))
             _, _, V = np.linalg.svd(W @ A)
 
         # solution is right singular vector that corresponds to smallest

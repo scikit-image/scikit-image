@@ -329,30 +329,30 @@ def test_projective_estimation():
 
 
 def test_projective_weighted_estimation():
-    
+
     # Exact solution with same points, and unity weights
     tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
-    tform_w = estimate_transform('projective', 
+    tform_w = estimate_transform('projective',
                                  SRC[:4, :], DST[:4, :], np.ones(4))
     assert_almost_equal(tform.params, tform_w.params)
-    
+
     # Over-determined solution with same points, and unity weights
     tform = estimate_transform('projective', SRC, DST)
     tform_w = estimate_transform('projective',
-                               SRC, DST, np.ones(SRC.shape[0]))
+                                 SRC, DST, np.ones(SRC.shape[0]))
     assert_almost_equal(tform.params, tform_w.params)
-    
+
     # Repeating a point, but setting its weight small, should give nearly
     # the same result.
-    point_weights = np.ones(SRC.shape[0]+1)
+    point_weights = np.ones(SRC.shape[0] + 1)
     point_weights[0] = 1.0e-15
     tform1 = estimate_transform('projective', SRC, DST)
     tform2 = estimate_transform('projective',
-                               SRC[np.arange(-1, SRC.shape[0]), :],
-                               DST[np.arange(-1, SRC.shape[0]), :],
-                               point_weights)
+                                SRC[np.arange(-1, SRC.shape[0]), :],
+                                DST[np.arange(-1, SRC.shape[0]), :],
+                                point_weights)
     assert_almost_equal(tform1.params, tform2.params, decimal=3)
-    
+
 
 def test_projective_init():
     tform = estimate_transform('projective', SRC, DST)
@@ -376,19 +376,22 @@ def test_polynomial_weighted_estimation():
     # Over-determined solution with same points, and unity weights
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     tform_w = estimate_transform('polynomial',
-                               SRC, DST, order=10, weights=np.ones(SRC.shape[0]))
+                                 SRC,
+                                 DST,
+                                 order=10,
+                                 weights=np.ones(SRC.shape[0]))
     assert_almost_equal(tform.params, tform_w.params)
-    
+
     # Repeating a point, but setting its weight small, should give nearly
     # the same result.
     point_weights = np.ones(SRC.shape[0]+1)
     point_weights[0] = 1.0e-15
     tform1 = estimate_transform('polynomial', SRC, DST, order=10)
     tform2 = estimate_transform('polynomial',
-                               SRC[np.arange(-1, SRC.shape[0]), :],
-                               DST[np.arange(-1, SRC.shape[0]), :],
-                               order=10,
-                               weights=point_weights)
+                                SRC[np.arange(-1, SRC.shape[0]), :],
+                                DST[np.arange(-1, SRC.shape[0]), :],
+                                order=10,
+                                weights=point_weights)
     assert_almost_equal(tform1.params, tform2.params, decimal=4)
 
 
