@@ -45,6 +45,7 @@ def test_mask_border_keypoints():
 
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 def test_plot_matches():
+    from matplotlib import pyplot as plt
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
     shapes = (((10, 10), (10, 10)),
