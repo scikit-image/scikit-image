@@ -3,7 +3,6 @@ import itertools
 import math
 from collections import OrderedDict
 from collections.abc import Iterable
-from warning import warn
 
 import numpy as np
 from scipy import ndimage as ndi
