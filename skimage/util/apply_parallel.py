@@ -56,7 +56,6 @@ def _ensure_dask_array(array, chunks=None):
     return da.from_array(array, chunks=chunks)
 
 
-@utils.channel_as_last_axis(channel_arg_positions=(1,))
 @utils.deprecate_multichannel_kwarg()
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
@@ -82,12 +81,21 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         is a sequence of chunk sizes along the corresponding dimension. If
         None, the array is broken up into chunks based on the number of
         available cpus. More information about chunks is in the documentation
-        `here <https://dask.pydata.org/en/latest/array-design.html>`_.
-    depth : int, optional
-        Integer equal to the depth of the added boundary cells. Defaults to
-        zero.
-    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
-        type of external boundary padding.
+        `here <https://dask.pydata.org/en/latest/array-design.html>`_. When
+        `channel_axis` is not None, the tuples can be length ``ndim - 1`` and
+        a single chunk will be used along the channel axis.
+    depth : int or sequence of int, optional
+        The depth of the added boundary cells. A tuple can be used to specify a
+        different depth per array axis. Defaults to zero. When `channel_axis`
+        is not None, and a tuple of length ``ndim - 1`` is provided, a depth of
+        0 will be used along the channel axis.
+    mode : str, optional
+        If mode is set to 'wrap' or 'periodic', the array will be extended by
+        an outer boundary of size `depth` using periodic padding. This
+        temporary boundary is used during computation, but is not retained in
+        the final output. For all other modes, no explicit boundary padding is
+        needed (scikit-image functions can handle the boundary condition on a
+        chunk-wise basis).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
@@ -149,6 +157,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     if compute is None:
         compute = not isinstance(array, da.Array)
 
+    if channel_axis is not None:
+        channel_axis = channel_axis % array.ndim
+
     if chunks is None:
         shape = array.shape
         try:
@@ -159,27 +170,39 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         except NotImplementedError:
             ncpu = 4
         if channel_axis is not None:
-            chunks = _get_chunks(shape[:-1], ncpu) + (shape[-1],)
+            # use a single chunk along the channels axis
+            spatial_shape = shape[:channel_axis] + shape[channel_axis + 1:]
+            chunks = list(_get_chunks(spatial_shape, ncpu))
+            chunks.insert(channel_axis, shape[channel_axis])
+            chunks = tuple(chunks)
         else:
             chunks = _get_chunks(shape, ncpu)
+    elif channel_axis is not None and len(chunks) == array.ndim - 1:
+        # insert a single chunk along the channel_axis
+        chunks = list(chunks)
+        chunks.insert(channel_axis, array.shape[channel_axis])
+        chunks = tuple(chunks)
 
-    if mode == 'wrap':
-        mode = 'periodic'
-    elif mode == 'symmetric':
-        mode = 'reflect'
-    elif mode == 'edge':
-        mode = 'nearest'
+    if mode in ['wrap', 'periodic']:
+        boundary = 'periodic'
+    else:
+        boundary = 'none'
 
-    if channel_axis is not None and numpy.isscalar(depth):
-        # depth is only used along the non-channel axes
-        depth = (depth,) * (len(array.shape) - 1) + (0,)
+    if channel_axis is not None:
+        if numpy.isscalar(depth):
+            # depth is zero along channel_axis
+            depth = [depth] * (array.ndim - 1)
+        depth = list(depth)
+        if len(depth) == array.ndim - 1:
+            depth.insert(channel_axis, 0)
+        depth = tuple(depth)
 
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
+    res = darr.map_overlap(wrapped_func, depth, boundary=boundary, dtype=dtype)
     if compute:
         res = res.compute()
 
