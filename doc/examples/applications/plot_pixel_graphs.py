@@ -91,5 +91,6 @@ ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
 ax.set_axis_off()
 ax.set_title('vessel graph center vs centroid')
+# sphinx_gallery_thumbnail_number = 4
 
 plt.show()
