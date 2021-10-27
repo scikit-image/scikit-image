@@ -6,6 +6,27 @@ SIFT feature detector and descriptor extractor
 This example demonstrates the SIFT feature detection and its description
 algorithm.
 
+The scale-invariant feature transform (SIFT) [1] was published in 1999 and is
+still one of the most popular feature detectors available, as its promises to
+be "invariant to image scaling, translation, and rotation, and partially
+in-variant to illumination changes and affine or 3D projection" [2]. Its
+biggest drawback is its runtime, that's said to be "at two orders of
+magnitude" [3] slower than ORB, which makes it unsuitable for real-time
+applications.
+
+References
+----------
+.. [1] https://en.wikipedia.org/wiki/Scale-invariant_feature_transform
+
+.. [2] D.G. Lowe. "Object recognition from local scale-invariant
+       features", Proceedings of the Seventh IEEE International
+       Conference on Computer Vision, 1999, vol.2, pp. 1150-1157.
+       :DOI:`10.1109/ICCV.1999.790410`
+
+.. [3] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+      "ORB: An efficient alternative to SIFT and SURF"
+      http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+
 """
 import matplotlib.pyplot as plt
 
