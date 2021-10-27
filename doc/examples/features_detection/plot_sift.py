@@ -6,12 +6,12 @@ SIFT feature detector and descriptor extractor
 This example demonstrates the SIFT feature detection and its description
 algorithm.
 
-The scale-invariant feature transform (SIFT) [1] was published in 1999 and is
+The scale-invariant feature transform (SIFT) [1]_ was published in 1999 and is
 still one of the most popular feature detectors available, as its promises to
 be "invariant to image scaling, translation, and rotation, and partially
-in-variant to illumination changes and affine or 3D projection" [2]. Its
+in-variant to illumination changes and affine or 3D projection" [2]_. Its
 biggest drawback is its runtime, that's said to be "at two orders of
-magnitude" [3] slower than ORB, which makes it unsuitable for real-time
+magnitude" [3]_ slower than ORB, which makes it unsuitable for real-time
 applications.
 
 References
