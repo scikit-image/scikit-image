@@ -500,9 +500,6 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
-    if not has_mpl:
-        warn("Please install matplotlib>=3.0.3 to use show_rag",
-             stacklevel=2)
     from matplotlib import colors, cm
     from matplotlib import pyplot as plt
     from matplotlib.collections import LineCollection
