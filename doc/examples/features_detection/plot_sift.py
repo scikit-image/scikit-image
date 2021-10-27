@@ -24,9 +24,8 @@ References
        :DOI:`10.1109/ICCV.1999.790410`
 
 .. [3] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
-      "ORB: An efficient alternative to SIFT and SURF"
-      http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
-
+       "ORB: An efficient alternative to SIFT and SURF"
+       http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 """
 import matplotlib.pyplot as plt
 
