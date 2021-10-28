@@ -7,7 +7,7 @@ from scipy import spatial, stats
 
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, safe_as_int
-from ..transform import integral_image
+from .._shared.transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations

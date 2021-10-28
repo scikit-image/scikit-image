@@ -4,7 +4,8 @@ from .hough_transform import (hough_line, hough_line_peaks,
 from .radon_transform import (radon, iradon, iradon_sart,
                               order_angles_golden_ratio)
 from .finite_radon_transform import frt2, ifrt2
-from .integral import integral_image, integrate
+from .integral import integrate
+from .._shared.transform import integral_image
 from ._geometric import (estimate_transform,
                          matrix_transform, EuclideanTransform,
                          SimilarityTransform, AffineTransform,

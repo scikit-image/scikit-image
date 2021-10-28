@@ -6,7 +6,7 @@ from scipy import spatial
 
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
-from ..transform import integral_image
+from .._shared.transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max

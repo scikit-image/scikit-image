@@ -12,12 +12,12 @@ from safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
+from skimage._shared.transform import integral_image
 
 from skimage._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
 from ..color import rgb2gray
-from ..transform import integral_image
 import xml.etree.ElementTree as ET
 from ._texture cimport _multiblock_lbp
 import math

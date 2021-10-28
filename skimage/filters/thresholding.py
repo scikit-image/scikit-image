@@ -12,7 +12,7 @@ from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
                                   _get_multiotsu_thresh_indices_lut)
-from ..transform import integral_image
+from .._shared.transform import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 

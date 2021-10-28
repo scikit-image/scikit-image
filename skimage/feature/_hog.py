@@ -2,6 +2,7 @@ import numpy as np
 
 from . import _hoghistogram
 from .._shared import utils
+from .. import draw
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -243,7 +244,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     hog_image = None
 
     if visualize:
-        from .. import draw
 
         radius = min(c_row, c_col) // 2 - 1
         orientations_arr = np.arange(orientations)
