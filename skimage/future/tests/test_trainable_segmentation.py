@@ -15,6 +15,7 @@ class DummyNNClassifier(object):
         self.tree = spatial.cKDTree(self.X)
 
     def predict(self, X):
+        # mimic check in scikit-learn for number of features
         if X.shape[1] != self.X.shape[1]:
             raise ValueError(
                 f"Expected {self.X.shape[1]} features but got {X.shape[1]}."
