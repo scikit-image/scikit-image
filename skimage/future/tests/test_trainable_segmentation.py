@@ -93,6 +93,8 @@ def test_trainable_segmentation_predict():
 
 
 def test_trainable_segmentation_oo():
+    """Tests the object oriented interface using the TrainableSegmenter class."""
+
     img = np.zeros((20, 20))
     img[:10] = 1
     img += 0.05 * np.random.randn(*img.shape)
@@ -118,12 +120,12 @@ def test_trainable_segmentation_oo():
     assert np.all(out[10:] == 2)
 
     # test multichannel model
+    img_with_channels = np.stack((img, img.T), axis=-1)
     features_func = partial(
         multiscale_basic_features,
         channel_axis=-1,
     )
     segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
-    img_with_channels = np.stack((img, img.T), axis=-1)
     segmenter.fit(img_with_channels, labels)
 
     # model has been fitted
