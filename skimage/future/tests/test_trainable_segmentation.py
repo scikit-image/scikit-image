@@ -93,7 +93,7 @@ def test_trainable_segmentation_predict():
 
 
 def test_trainable_segmentation_oo():
-    """Tests the object oriented interface using the TrainableSegmenter class."""
+    """Test the object-oriented interface using the TrainableSegmenter class."""
 
     img = np.zeros((20, 20))
     img[:10] = 1
