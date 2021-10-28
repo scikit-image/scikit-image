@@ -11,7 +11,7 @@ from scipy import ndimage as ndi
 
 from .._shared.filters import gaussian as gaussian_filter
 from .._shared.utils import _supported_float_type
-from .._shared._warps_cy import warp
+from .._shared.warp import warp
 from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 

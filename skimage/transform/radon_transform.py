@@ -2,7 +2,7 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 from scipy.constants import golden_ratio
-from .._shared._warps_cy import warp
+from .._shared.warp import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
 from .._shared.utils import convert_to_float

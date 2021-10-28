@@ -4,7 +4,7 @@ import scipy
 from scipy import ndimage as ndi
 
 from .._shared._geometric import (SimilarityTransform, AffineTransform)
-from .._shared._warps_cy import warp, warp_coords, _clip_warp_output
+from .._shared.warp import warp, warp_coords, _clip_warp_output
 from .._shared.block import block_reduce
 
 from .._shared.utils import (safe_as_int, warn,
