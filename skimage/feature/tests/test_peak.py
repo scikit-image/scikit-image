@@ -5,7 +5,7 @@ from numpy.testing import assert_array_almost_equal, assert_equal
 from scipy import ndimage as ndi
 
 from skimage._shared._warnings import expected_warnings
-from skimage.feature import peak
+from skimage._shared import peak
 
 
 np.random.seed(21)
