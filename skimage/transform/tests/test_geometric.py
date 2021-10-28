@@ -6,10 +6,10 @@ import pytest
 from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_equal)
 
-from skimage.transform._geometric import (_affine_matrix_from_vector,
-                                          _center_and_normalize_points,
-                                          _euler_rotation_matrix,
-                                          GeometricTransform)
+from skimage._shared._geometric import (_affine_matrix_from_vector,
+                                        _center_and_normalize_points,
+                                        _euler_rotation_matrix,
+                                        GeometricTransform)
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
