@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial import ConvexHull
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
-from ..measure._label import label
+from .._shared.label import label
 from ..util import unique_rows
 from .._shared.utils import warn
 

@@ -16,7 +16,8 @@ def configuration(parent_package='', top_path=None):
             'transform.pyx',
             'interpolation.pyx',
             'fast_exp.pyx',
-            '_warps_cy.pyx'], working_path=base_path)
+            '_warps_cy.pyx',
+            'label.pyx'], working_path=base_path)
 
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
@@ -24,6 +25,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('interpolation', sources=['interpolation.c'])
     config.add_extension('fast_exp', sources=['fast_exp.c'])
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('label', sources=['label.c'],
                          include_dirs=[get_numpy_include_dirs()])
     return config
 
