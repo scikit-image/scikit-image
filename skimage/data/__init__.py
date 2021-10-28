@@ -6,6 +6,7 @@ For more images, see
 
 """
 from distutils.version import LooseVersion
+from imageio import imread
 import numpy as np
 import shutil
 
@@ -359,9 +360,6 @@ def _load(f, as_gray=False):
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
-    # importing io is quite slow since it scans all the backends
-    # we lazy import it here
-    from ..io import imread
     return imread(_fetch(f), as_gray=as_gray)
 
 
