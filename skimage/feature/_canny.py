@@ -15,8 +15,8 @@ Original author: Lee Kamentsky
 import numpy as np
 import scipy.ndimage as ndi
 
-from ..filters import gaussian
 from .. import dtype_limits
+from .._shared.filters import gaussian
 from .._shared.utils import check_nD
 
 

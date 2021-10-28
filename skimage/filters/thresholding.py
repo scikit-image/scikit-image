@@ -7,6 +7,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
@@ -215,6 +216,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     ...                                         param=func)
 
     """
+
     if np.isscalar(block_size):
         block_size = (block_size,) * image.ndim
     elif len(block_size) != image.ndim:
@@ -235,8 +237,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
             sigma = tuple([(b - 1) / 6.0 for b in block_size])
         else:
             sigma = param
-        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
-                            cval=cval)
+        gaussian(image, sigma, output=thresh_image, mode=mode, cval=cval)
     elif method == 'mean':
         ndi.uniform_filter(image, block_size, output=thresh_image, mode=mode,
                            cval=cval)
@@ -991,6 +992,7 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
+
     if not isinstance(w, Iterable):
         w = (w,) * image.ndim
     _validate_window_size(w)

@@ -1,15 +1,16 @@
 from collections.abc import Iterable
+from warnings import warn
 
 import numpy as np
 from numpy import random
-from scipy import ndimage as ndi
 from scipy.cluster.vq import kmeans2
 from scipy.spatial.distance import pdist, squareform
 
 from .._shared import utils
+from .._shared.filters import gaussian
 from ..color import rgb2lab
 from ..util import img_as_float, regular_grid
-from ._slic import _slic_cython, _enforce_label_connectivity_cython
+from ._slic import _enforce_label_connectivity_cython, _slic_cython
 
 
 def _get_mask_centroids(mask, n_centroids, multichannel):
@@ -134,17 +135,20 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         refining around a chosen value.
     max_num_iter : int, optional
         Maximum number of iterations of k-means.
-    sigma : float or (3,) array-like of floats, optional
+    sigma : float or array-like of floats, optional
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
-        Note, that `sigma` is automatically scaled if it is scalar and a
-        manual voxel spacing is provided (see Notes section).
-    spacing : (3,) array-like of floats, optional
-        The voxel spacing along each image dimension. By default, `slic`
-        assumes uniform spacing (same voxel resolution along z, y and x).
-        This parameter controls the weights of the distances along z, y,
-        and x during k-means clustering.
+        Note that `sigma` is automatically scaled if it is scalar and
+        if a manual voxel spacing is provided (see Notes section). If
+        sigma is array-like, its size must match ``image``'s number
+        of spatial dimensions.
+    spacing : array-like of floats, optional
+        The voxel spacing along each spatial dimension. By default,
+        `slic` assumes uniform spacing (same voxel resolution along
+        each spatial dimension).
+        This parameter controls the weights of the distances along the
+        spatial dimensions during k-means clustering.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
@@ -169,10 +173,11 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
         .. versionadded:: 0.17
            ``start_label`` was introduced in 0.17
-    mask : 2D ndarray, optional
+    mask : ndarray, optional
         If provided, superpixels are computed only where mask is True,
         and seed points are homogeneously distributed over the mask
-        using a K-means clustering strategy.
+        using a k-means clustering strategy. Mask number of dimensions
+        must be equal to image number of spatial dimensions.
 
         .. versionadded:: 0.17
            ``mask`` was introduced in 0.17
@@ -211,7 +216,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
-      `channel_axis=-1`.
+      `channel_axis=None`.
 
     * `start_label` is introduced to handle the issue [4]_. Label indexing
       starts at 1 by default.
@@ -243,7 +248,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     image = img_as_float(image)
     float_dtype = utils._supported_float_type(image.dtype)
-    # copy=True so subsequent in-place operations do not modify the function input
+    # copy=True so subsequent in-place operations do not modify the
+    # function input
     image = image.astype(float_dtype, copy=True)
 
     # Rescale image to [0, 1] to make choice of compactness insensitive to
@@ -295,18 +301,50 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     if spacing is None:
         spacing = np.ones(3, dtype=dtype)
-    elif isinstance(spacing, (list, tuple)):
+    elif isinstance(spacing, Iterable):
+        spacing = np.asarray(spacing, dtype=dtype)
+        if is_2d:
+            if spacing.size != 2:
+                if spacing.size == 3:
+                    warn("Input image is 2D: spacing number of "
+                         "elements must be 2. In the future, a ValueError "
+                         "will be raised.", FutureWarning, stacklevel=2)
+                else:
+                    raise ValueError(f"Input image is 2D, but spacing has "
+                                     f"{spacing.size} elements (expected 2).")
+            else:
+                spacing = np.insert(spacing, 0, 1)
+        elif spacing.size != 3:
+            raise ValueError(f"Input image is 3D, but spacing has "
+                             f"{spacing.size} elements (expected 3).")
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
+    else:
+        raise TypeError("spacing must be None or iterable.")
 
-    if not isinstance(sigma, Iterable):
+    if np.isscalar(sigma):
         sigma = np.array([sigma, sigma, sigma], dtype=dtype)
-        sigma /= spacing.astype(dtype)
-    elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, dtype=dtype)
+        sigma /= spacing
+    elif isinstance(sigma, Iterable):
+        sigma = np.asarray(sigma, dtype=dtype)
+        if is_2d:
+            if sigma.size != 2:
+                if spacing.size == 3:
+                    warn("Input image is 2D: sigma number of "
+                         "elements must be 2. In the future, a ValueError "
+                         "will be raised.", FutureWarning, stacklevel=2)
+                else:
+                    raise ValueError(f"Input image is 2D, but sigma has "
+                                     f"{sigma.size} elements (expected 2).")
+            else:
+                sigma = np.insert(sigma, 0, 0)
+        elif sigma.size != 3:
+            raise ValueError(f"Input image is 3D, but sigma has "
+                             f"{sigma.size} elements (expected 3).")
+
     if (sigma > 0).any():
-        # add zero smoothing for multichannel dimension
+        # add zero smoothing for channel dimension
         sigma = list(sigma) + [0]
-        image = ndi.gaussian_filter(image, sigma)
+        image = gaussian(image, sigma, mode='reflect')
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(

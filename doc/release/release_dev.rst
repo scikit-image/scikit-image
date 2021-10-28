@@ -45,6 +45,10 @@ New Features
   were added to ``skimage.color.lab2rgb``, ``skimage.color.rgb2lab``,
   ``skimage.color.xyz2lab``, ``skimage.color.lab2xyz``,
   ``skimage.color.xyz2luv`` and ``skimage.color.luv2xyz``.
+- Added new pixel graph algorithms in ``skimage.graph``:
+  ``pixel_graph`` generates a graph (network) of pixels
+  according to their adjacency, and ``central_pixel`` finds
+  the geodesic center of the pixels. (gh-5602)
 
 
 Documentation
