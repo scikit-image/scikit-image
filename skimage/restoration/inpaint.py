@@ -6,7 +6,7 @@ from scipy.ndimage.filters import laplace
 
 import skimage
 from .._shared import utils
-from ..measure import label
+from .._shared.label import label
 from ._inpaint import _build_matrix_inner
 
 

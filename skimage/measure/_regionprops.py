@@ -12,6 +12,8 @@ from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
 
+from ..morphology.convex_hull import convex_hull_image
+
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -337,7 +339,6 @@ class RegionProperties:
     @property
     @_cached
     def image_convex(self):
-        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @property
