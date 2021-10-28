@@ -33,6 +33,7 @@ __all__ = ['data_dir',
            'clock',
            'coffee',
            'coins',
+           'hdr_images',
            'colorwheel',
            'eagle',
            'grass',
@@ -1118,6 +1119,38 @@ def stereo_motorcycle():
     return (_load("data/motorcycle_left.png"),
             _load("data/motorcycle_right.png"),
             disp)
+
+
+def hdr_images():
+    """
+    Bracket images useful for High Dynamic Range (HDR) imaging.
+
+    Images taken from the UNIS building on Svalbard, overlooking the
+    Hjorthfjellet mountain.
+
+    Returns
+    -------
+    ims : ImageCollection
+        Collection of images.
+    exp : list
+        List of exposure times in seconds.
+
+    Notes
+    -----
+    These images were taken by Pål Ellingsen and are released into the public
+    domain (CC-0).
+    """
+
+    files = ['UNIS_EV-2.jpg',
+             'UNIS_EV0.jpg',
+             'UNIS_EV2.jpg']
+    # Join the file names with the data dir
+    files = [_os.path.join(data_dir, f) for f in files]
+
+    exp = [1 / 1250., 1 / 320., 1 / 40.]
+
+    ims = imread_collection(files)
+    return ims, exp
 
 
 def lfw_subset():
