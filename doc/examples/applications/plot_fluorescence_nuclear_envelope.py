@@ -139,7 +139,7 @@ ax[0].axis('off')
 
 ax[1].imshow(selection)
 ax[1].set_title('Selection')
-ax[1].axis('off')
+_ = ax[1].axis('off')
 
 #####################################################################
 # Measure the total intensity
@@ -212,9 +212,9 @@ ax.set_xlabel('Time point')
 ax.set_ylabel('Normalized total intensity')
 ax.set_title('Change in fluorescence intensity at the nuclear envelope')
 
+plt.show()
+
 #####################################################################
 # Reassuringly, we find the expected result: The total fluorescence
 # intensity at the nuclear envelope increases 1.3-fold in the initial five
 # time points, and then becomes roughly constant.
-
-plt.show()
