@@ -8,13 +8,13 @@ image, or of a region of an image, as a network or graph, in which each pixel
 is connected to its neighbors (with or without diagonals). One such situation
 is finding the *geodesic center* of an object, which is the point closest to
 all other points *if you are only allowed to travel on the pixels of the
-object*, rather than in a straight line.
+object*, rather than in a straight line. This point is the one with maximal
+*closeness centrality* [1]_ in the network.
 
-In this example, we create such a *pixel graph* of a skeleton and find the
-point of the skeleton with maximal *closeness centrality* [1]_, that is, the
-pixel from which traveling to every other pixel is fastest. This can be useful
-to define the center of a complex, non-convex object, in which the centroid
-(also known as the center of mass) may actually fall outside the object.
+In this example, we create such a *pixel graph* of a skeleton and find
+the central pixel of that skeleton. This demonstrates its utility in contrast
+with the centroid (also known as the center of mass) which may actually fall
+outside the object.
 
 References
 ----------
@@ -35,7 +35,7 @@ retina_source = data.retina()
 _, ax = plt.subplots()
 ax.imshow(retina_source)
 ax.set_axis_off()
-ax.set_title('Human retina')
+_ = ax.set_title('Human retina')
 
 ###############################################################################
 # We convert the image to grayscale, then use the
@@ -53,7 +53,7 @@ axes[0].set_axis_off()
 axes[0].set_title('grayscale')
 axes[1].imshow(vessels, cmap='magma')
 axes[1].set_axis_off()
-axes[1].set_title('Sato vesselness')
+_ = axes[1].set_title('Sato vesselness')
 
 ###############################################################################
 # Based on the observed vesselness values, we use
@@ -66,7 +66,7 @@ labeled = ndi.label(thresholded)[0]
 _, ax = plt.subplots()
 ax.imshow(color.label2rgb(labeled, retina))
 ax.set_axis_off()
-ax.set_title('thresholded vesselness')
+_ = ax.set_title('thresholded vesselness')
 
 ###############################################################################
 # Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
@@ -91,5 +91,6 @@ ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
 ax.set_axis_off()
 ax.set_title('vessel graph center vs centroid')
+# sphinx_gallery_thumbnail_number = 4
 
 plt.show()
