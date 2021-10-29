@@ -19,7 +19,8 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 
 import warnings
 
-from .. import data, io
+from .. import io
+from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
 
@@ -275,7 +276,7 @@ def teardown_test():
 def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
-        return data._fetch(data_filename)
+        return _fetch(data_filename)
     except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}',
                     allow_module_level=True)
