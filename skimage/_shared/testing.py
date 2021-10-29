@@ -19,7 +19,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 
 import warnings
 
-from .. import io
+from .. import data, io
 from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
