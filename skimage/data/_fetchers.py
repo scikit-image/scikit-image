@@ -74,13 +74,17 @@ def _has_hash(path, expected_hash):
 def create_image_fetcher():
     try:
         import pooch
-        pooch_version = pooch.__version__.lstrip('v')
-        retry = {'retry_if_failed': 3}
-        # Keep version check in synch with
-        # scikit-image/requirements/optional.txt
-        if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
-            # we need a more recent version of pooch to retry
+        # older versions of Pooch don't have a __version__ attribute
+        if not hasattr(pooch, '__version__'):
             retry = {}
+        else:
+            pooch_version = pooch.__version__.lstrip('v')
+            retry = {'retry_if_failed': 3}
+            # Keep version check in synch with
+            # scikit-image/requirements/optional.txt
+            if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+                # we need a more recent version of pooch to retry
+                retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
