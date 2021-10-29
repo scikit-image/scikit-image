@@ -8,7 +8,6 @@ import numpy as np
 import scipy
 from numpy.lib import NumpyVersion
 
-from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
@@ -548,6 +547,7 @@ def convert_to_float(image, preserve_range):
         if image.dtype.char not in 'df':
             image = image.astype(float)
     else:
+        from ..util.dtype import img_as_float
         image = img_as_float(image)
     return image
 
