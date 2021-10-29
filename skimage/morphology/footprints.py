@@ -2,6 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .. import draw
+from .._shared.convex_hull import convex_hull_image
 from .._shared.utils import deprecate_kwarg
 
 
@@ -277,7 +278,6 @@ def octagon(m, n, dtype=np.uint8):
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     """
-    from . import convex_hull_image
     footprint = np.zeros((m + 2 * n, m + 2 * n))
     footprint[0, n] = 1
     footprint[n, 0] = 1
@@ -315,7 +315,6 @@ def star(a, dtype=np.uint8):
         The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
     """
-    from . import convex_hull_image
 
     if a == 1:
         bfilter = np.zeros((3, 3), dtype)
