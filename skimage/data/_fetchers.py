@@ -129,7 +129,7 @@ def create_image_fetcher():
     # remove `.dev` with a `+` if it exists.
     # This helps pooch understand that it should look in master
     # to find the required files
-    skimage_version_for_pooch = __version__.replace('.dev', '+')
+    skimage_version_for_pooch = __version__.replace('.dev0+git', '+git')
     if '+' in skimage_version_for_pooch:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
                "{version}/skimage/")
