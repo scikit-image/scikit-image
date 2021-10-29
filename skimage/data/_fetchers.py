@@ -94,7 +94,7 @@ def create_image_fetcher():
     if '+git' in __version__:
         skimage_version_for_pooch = __version__.replace('.dev0+git', '+git')
     else:
-        skimage_version_for_pooch = __version__.replace('.dev0', '+')
+        skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
         url = ("https://github.com/scikit-image/scikit-image/raw/"
