@@ -18,44 +18,6 @@ from .. import __version__
 import os.path as osp
 import os
 
-__all__ = ['data_dir',
-           'download_all',
-           'astronaut',
-           'binary_blobs',
-           'brain',
-           'brick',
-           'camera',
-           'cat',
-           'cell',
-           'cells3d',
-           'checkerboard',
-           'chelsea',
-           'clock',
-           'coffee',
-           'coins',
-           'colorwheel',
-           'eagle',
-           'grass',
-           'gravel',
-           'horse',
-           'hubble_deep_field',
-           'human_mitosis',
-           'immunohistochemistry',
-           'kidney',
-           'lbp_frontal_face_cascade_filename',
-           'lily',
-           'lfw_subset',
-           'logo',
-           'microaneurysms',
-           'moon',
-           'page',
-           'text',
-           'retina',
-           'rocket',
-           'shepp_logan_phantom',
-           'skin',
-           'stereo_motorcycle']
-
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
