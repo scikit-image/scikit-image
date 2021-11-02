@@ -156,5 +156,7 @@ def predict_segmenter(features, clf):
                 err.args[0] + '\n' +
                 "Maybe you did not use the same type of features for training the classifier."
                 )
+        else:
+            raise err
     output = predicted_labels.reshape(sh[:-1])
     return output
