@@ -18,6 +18,8 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 # All values in this PROPS dict correspond to current scikit-image property
 # names. The keys in this PROPS dict correspond to older names used in prior
+
+
 # releases. For backwards compatibility, these older names will continue to
 # work, but will not be documented.
 PROPS = {
@@ -227,7 +229,256 @@ def only2d(method):
     return func2d
 
 
-class RegionProperties:
+class DeprecatedProperties:
+    """Mixin to support deprecated property names.
+
+    Each property here just calls the corresponding current property.
+    The docstrings will be copied over via `_install_properties_docs`,
+    including a warning about switching to the new name.
+    """
+
+    @property
+    def Area(self):
+        return self.area
+
+    @property
+    def BoundingBox(self):
+        return self.bbox
+
+    @property
+    def BoundingBoxArea(self):
+        return self.area_bbox
+
+    @property
+    def bbox_area(self):
+        return self.area_bbox
+
+    @property
+    def CentralMoments(self):
+        return self.moments_central
+
+    @property
+    def Centroid(self):
+        return self.centroid
+
+    @property
+    def ConvexArea(self):
+        return self.area_convex
+
+    @property
+    def convex_area(self):
+        return self.area_convex
+
+    @property
+    def ConvexImage(self):
+        return self.image_convex
+
+    @property
+    def convex_image(self):
+        return self.image_convex
+
+    @property
+    def Coordinates(self):
+        return self.coords
+
+    @property
+    def Eccentricity(self):
+        return self.eccentricity
+
+    @property
+    def EquivDiameter(self):
+        return self.equivalent_diameter_area
+
+    @property
+    def equivalent_diameter(self):
+        return self.equivalent_diameter_area
+
+    @property
+    def EulerNumber(self):
+        return self.euler_number
+
+    @property
+    def Extent(self):
+        return self.extent
+
+    @property
+    def FeretDiameter(self):
+        return self.feret_diameter_max
+
+    @property
+    def FeretDiameterMax(self):
+        return self.feret_diameter_max
+
+    @property
+    def FilledArea(self):
+        return self.area_filled
+
+    @property
+    def filled_area(self):
+        return self.area_filled
+
+    @property
+    def FilledImage(self):
+        return self.image_filled
+
+    @property
+    def filled_image(self):
+        return self.image_filled
+
+    @property
+    def HuMoments(self):
+        return self.moments_hu
+
+    @property
+    def Image(self):
+        return self.image
+
+    @property
+    def InertiaTensor(self):
+        return self.inertia_tensor
+
+    @property
+    def InertiaTensorEigvals(self):
+        return self.inertia_tensor_eigvals
+
+    @property
+    def IntensityImage(self):
+        return self.image_intensity
+
+    @property
+    def intensity_image(self):
+        return self.image_intensity
+
+    @property
+    def Label(self):
+        return self.label
+
+    @property
+    def LocalCentroid(self):
+        return self.centroid_local
+
+    @property
+    def local_centroid(self):
+        return self.centroid_local
+
+    @property
+    def MajorAxisLength(self):
+        return self.axis_major_length
+
+    @property
+    def major_axis_length(self):
+        return self.axis_major_length
+
+    @property
+    def MaxIntensity(self):
+        return self.intensity_max
+
+    @property
+    def max_intensity(self):
+        return self.intensity_max
+
+    @property
+    def MeanIntensity(self):
+        return self.intensity_mean
+
+    @property
+    def mean_intensity(self):
+        return self.intensity_mean
+
+    @property
+    def MinIntensity(self):
+        return self.intensity_min
+
+    @property
+    def min_intensity(self):
+        return self.intensity_min
+
+    @property
+    def MinorAxisLength(self):
+        return self.axis_minor_length
+
+    @property
+    def minor_axis_length(self):
+        return self.axis_minor_length
+
+    @property
+    def Moments(self):
+        return self.moments
+
+    @property
+    def NormalizedMoments(self):
+        return self.moments_normalized
+
+    @property
+    def Orientation(self):
+        return self.orientation
+
+    @property
+    def Perimeter(self):
+        return self.perimeter
+
+    @property
+    def CroftonPerimeter(self):
+        return self.perimeter_crofton
+
+    @property
+    def Slice(self):
+        return self.slice
+
+    @property
+    def Solidity(self):
+        return self.solidity
+
+    @property
+    def WeightedCentralMoments(self):
+        return self.moments_weighted_central
+
+    @property
+    def weighted_moments_central(self):
+        return self.moments_weighted_central
+
+    @property
+    def WeightedCentroid(self):
+        return self.centroid_weighted
+
+    @property
+    def weighted_centroid(self):
+        return self.centroid_weighted
+
+    @property
+    def WeightedHuMoments(self):
+        return self.moments_weighted_hu
+
+    @property
+    def weighted_moments_hu(self):
+        return self.moments_weighted_hu
+
+    @property
+    def WeightedLocalCentroid(self):
+        return self.centroid_weighted_local
+
+    @property
+    def weighted_local_centroid(self):
+        return self.centroid_weighted_local
+
+    @property
+    def WeightedMoments(self):
+        return self.moments_weighted
+
+    @property
+    def weighted_moments(self):
+        return self.moments_weighted
+
+    @property
+    def WeightedNormalizedMoments(self):
+        return self.moments_weighted_normalized
+
+    @property
+    def weighted_moments_normalized(self):
+        return self.moments_weighted_normalized
+
+
+class RegionProperties(DeprecatedProperties):
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
@@ -603,11 +854,7 @@ class RegionProperties:
         return iter(sorted(props))
 
     def __getitem__(self, key):
-        value = getattr(self, key, None)
-        if value is not None:
-            return value
-        else:  # backwards compatibility
-            return getattr(self, PROPS[key])
+        return getattr(self, key)
 
     def __eq__(self, other):
         if not isinstance(other, RegionProperties):
@@ -1233,6 +1480,10 @@ def _parse_docs():
     matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
+
+    for k, v in PROPS.items():
+        prop_doc[k] = prop_doc[v] + (
+            f"\nThis property is deprecated, use {v} instead.")
 
     return prop_doc
 

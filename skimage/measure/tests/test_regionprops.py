@@ -45,7 +45,13 @@ def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
         try:
+            # access legacy name via dict
             assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+
+            # access legacy name via attribute
+            assert_almost_equal(getattr(region, prop),
+                                getattr(region, PROPS[prop]))
+
         except TypeError:  # the `slice` property causes this
             pass
 
@@ -55,6 +61,10 @@ def test_all_props_3d():
     for prop in PROPS:
         try:
             assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+
+            assert_almost_equal(getattr(region, prop),
+                                getattr(region, PROPS[prop]))
+
         except (NotImplementedError, TypeError):
             pass
 
@@ -621,9 +631,10 @@ def test_regionprops_table_no_regions():
 
 
 def test_props_dict_complete():
+    # Both current and legacy names should be available as properties
     region = regionprops(SAMPLE)[0]
     properties = [s for s in dir(region) if not s.startswith('_')]
-    assert set(properties) == set(PROPS.values())
+    assert set(properties) == set(PROPS.values()) | set(PROPS.keys())
 
 
 def test_column_dtypes_complete():
