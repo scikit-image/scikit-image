@@ -9,6 +9,6 @@ if has_mpl:
     from .viewers import ImageViewer, CollectionViewer
 else:
     ImageViewer, CollectionViewer = None, None
-    warn('Viewer requires matplotlib.', stacklevel=2)
+    warn('Viewer requires matplotlib', stacklevel=2)
 
 __all__ = ['ImageViewer', 'CollectionViewer']
