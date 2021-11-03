@@ -346,7 +346,49 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256, mask=None):
+def _equalize_hist_uint8(image, mask=None):
+    """Histogram equalization preserving uint8 dtype
+
+    Parameters
+    ----------
+    image : array
+        Image array.
+    mask : ndarray of bools or 0s and 1s, optional
+        Array of same shape as `image`. Only points at which mask == True
+        are used for the equalization, which is applied to the whole image.
+
+    Returns
+    -------
+    out : float array
+        Image array after histogram equalization. The output histogram will
+        cover the range [0, 255]
+
+    Notes
+    -----
+    The range and rounding behavior here, match the variant given in [1]_.
+    Empirically, this seems to also match the behavior of OpenCV.
+
+    References
+    ----------
+    ..[1] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
+
+    """
+    if mask is not None:
+        hist = np.bincount(image[mask])
+    else:
+        hist = np.bincount(image.reshape(-1))
+    cdf = hist.cumsum()
+
+    # make sure first bin corresponds to 0 in the lookup table
+    first_nonzero = np.nonzero(cdf)[0][0]
+    cdf[first_nonzero:] = cdf[first_nonzero:] - cdf[first_nonzero]
+
+    # normalize so last bin corresponds to 255
+    lookup_table = np.around(cdf * (255 / cdf[-1])).astype(np.uint8)
+    return lookup_table[image]
+
+
+def equalize_hist(image, nbins=256, mask=None, preserve_uint8_dtype=False):
     """Return image after histogram equalization.
 
     Parameters
@@ -376,6 +418,8 @@ def equalize_hist(image, nbins=256, mask=None):
     .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
 
     """
+    if preserve_uint8_dtype and image.dtype == np.uint8:
+        return _equalize_hist_uint8(image, mask)
     if mask is not None:
         mask = np.array(mask, dtype=bool)
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)

@@ -165,6 +165,36 @@ def test_equalize_uint8_approx():
     np.testing.assert_allclose(img_eq0, img_eq1)
 
 
+@pytest.mark.parametrize('image_type', ['camera', 'camera2', 'rand_uniform',
+                                        'randn'])
+def test_equalize_preserve_uint8(image_type):
+    """Check integer bins used for uint8 images."""
+    if image_type == 'camera':
+        img = test_img_int
+    elif image_type == 'camera2':
+        # camera with compressed range of uint8 values
+        img = test_img_int.astype(float) / 5. + 100
+        img = img.astype(np.uint8)
+    elif image_type == 'rand_uniform':
+        # uniformly distributed uint8 values
+        rng = np.random.default_rng(0)
+        img = rng.integers(0, 256, (256, 256), dtype=np.uint8)
+    elif image_type == 'randn':
+        # non-uniformly distributed uint8 values
+        rng = np.random.default_rng(0)
+        img = rng.standard_normal((256, 256))
+        img = img - img.min()
+        img = 255 * img / img.max()
+        img = img.astype(np.uint8)
+    img_eq = exposure.equalize_hist(img, preserve_uint8_dtype=True)
+    assert img_eq.dtype == np.uint8
+    assert img_eq.min() == 0
+    assert img_eq.max() == 255
+
+    cdf, bin_edges = exposure.cumulative_distribution(img_eq)
+    check_cdf_slope(cdf)
+
+
 def test_equalize_ubyte():
     img = util.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
