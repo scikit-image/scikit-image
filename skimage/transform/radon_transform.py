@@ -2,20 +2,12 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 from scipy.constants import golden_ratio
+from scipy.fft import fft, ifft, fftfreq, fftshift
 from ._warps import warp
 from ._radon_transform import sart_projection_update
-from .._shared.fft import fftmodule
 from .._shared.utils import convert_to_float
 from warnings import warn
 from functools import partial
-
-if fftmodule is np.fft:
-    # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
-    # (fftpack preserves single precision while numpy.fft does not)
-    from scipy.fftpack import fft, ifft
-else:
-    fft = fftmodule.fft
-    ifft = fftmodule.ifft
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
@@ -165,16 +157,16 @@ def _get_fourier_filter(size, filter_name):
         pass
     elif filter_name == "shepp-logan":
         # Start from first element to avoid divide by zero
-        omega = np.pi * fftmodule.fftfreq(size)[1:]
+        omega = np.pi * fftfreq(size)[1:]
         fourier_filter[1:] *= np.sin(omega) / omega
     elif filter_name == "cosine":
         freq = np.linspace(0, np.pi, size, endpoint=False)
-        cosine_filter = fftmodule.fftshift(np.sin(freq))
+        cosine_filter = fftshift(np.sin(freq))
         fourier_filter *= cosine_filter
     elif filter_name == "hamming":
-        fourier_filter *= fftmodule.fftshift(np.hamming(size))
+        fourier_filter *= fftshift(np.hamming(size))
     elif filter_name == "hann":
-        fourier_filter *= fftmodule.fftshift(np.hanning(size))
+        fourier_filter *= fftshift(np.hanning(size))
     elif filter_name is None:
         fourier_filter[:] = 1
 
