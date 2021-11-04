@@ -388,7 +388,7 @@ def _equalize_hist_uint8(image, mask=None):
     return lookup_table[image]
 
 
-def equalize_hist(image, nbins=256, mask=None, preserve_uint8_dtype=False):
+def equalize_hist(image, nbins=256, mask=None, method='float'):
     """Return image after histogram equalization.
 
     Parameters
@@ -402,6 +402,11 @@ def equalize_hist(image, nbins=256, mask=None, preserve_uint8_dtype=False):
     mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
+    method : {'float', 'uint8'}
+        Selects the histogram normalization method to use (see Notes). Mode
+        'uint8' uses a faster implementation that is specific to unsigned 8-bit
+        integer inputs. When mode is 'uint8', the output will be of dtype
+        np.uint8 with values in the range [0, 255].
 
     Returns
     -------
@@ -410,16 +415,24 @@ def equalize_hist(image, nbins=256, mask=None, preserve_uint8_dtype=False):
 
     Notes
     -----
-    This function is adapted from [1]_ with the author's permission.
+    The `method='float'` implementation is adapted from [1]_ with the author's
+    permission. The `method='uint8'` implementation follows a standard
+    approach as described in [2]_.
 
     References
     ----------
     .. [1] http://www.janeriksolem.net/histogram-equalization-with-python-and.html
-    .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
+    .. [2] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
 
     """
-    if preserve_uint8_dtype and image.dtype == np.uint8:
+    if method == 'uint8':
+        if image.dtype != np.uint8:
+            raise ValueError(
+                "method 'uint8' requires image to have np.uint8 dtype"
+            )
         return _equalize_hist_uint8(image, mask)
+    elif method != 'float':
+        raise ValueError("method must be 'uint8' or 'float'")
     if mask is not None:
         mask = np.array(mask, dtype=bool)
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)

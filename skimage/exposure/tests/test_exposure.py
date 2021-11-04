@@ -186,7 +186,7 @@ def test_equalize_preserve_uint8(image_type):
         img = img - img.min()
         img = 255 * img / img.max()
         img = img.astype(np.uint8)
-    img_eq = exposure.equalize_hist(img, preserve_uint8_dtype=True)
+    img_eq = exposure.equalize_hist(img, method='uint8')
     assert img_eq.dtype == np.uint8
     assert img_eq.min() == 0
     assert img_eq.max() == 255
