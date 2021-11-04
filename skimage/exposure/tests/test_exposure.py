@@ -2,28 +2,25 @@ import warnings
 
 import numpy as np
 import pytest
-from skimage import util
-from skimage import data
-from skimage import exposure
-from skimage.exposure.exposure import intensity_range
-from skimage.color import rgb2gray
-from skimage.util.dtype import dtype_range
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
+                           assert_array_equal, assert_equal)
 
-from skimage._shared._warnings import expected_warnings
+from skimage import data, exposure, util
 from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal,
-                                     assert_array_almost_equal,
-                                     assert_equal,
-                                     assert_almost_equal)
-
+from skimage._shared._warnings import expected_warnings
+from skimage.color import rgb2gray
+from skimage.exposure.exposure import intensity_range
+from skimage.util.dtype import dtype_range
 
 # Test integer histograms
 # =======================
 
+
 def test_wrong_source_range():
     im = np.array([-1, 100], dtype=np.int8)
     with testing.raises(ValueError):
-        frequencies, bin_centers = exposure.histogram(im, source_range='foobar')
+        frequencies, bin_centers = exposure.histogram(im,
+                                                      source_range='foobar')
 
 
 def test_negative_overflow():
@@ -96,7 +93,8 @@ def test_peak_float_out_of_range_image():
 def test_peak_float_out_of_range_dtype():
     im = np.array([10, 100], dtype=np.float16)
     nbins = 10
-    frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
+    frequencies, bin_centers = exposure.histogram(im, nbins=nbins,
+                                                  source_range='dtype')
     assert_almost_equal(np.min(bin_centers), -0.9, 3)
     assert_almost_equal(np.max(bin_centers), 0.9, 3)
     assert_equal(len(bin_centers), 10)
@@ -122,7 +120,7 @@ def test_normalize():
 @pytest.mark.parametrize('source_range', ['dtype', 'image'])
 @pytest.mark.parametrize('dtype', [np.uint8, np.int16, np.float64])
 @pytest.mark.parametrize('channel_axis', [0, 1, -1])
-def test_multichannel_hist_common_bins_uint8(dtype, source_range, channel_axis):
+def test_color_hist_common_bins_uint8(dtype, source_range, channel_axis):
     """Check that all channels use the same binning."""
     # Construct multichannel image with uniform values within each channel,
     # but the full range of values across channels.
@@ -167,7 +165,7 @@ def test_equalize_uint8_approx():
 
 @pytest.mark.parametrize('image_type', ['camera', 'camera2', 'rand_uniform',
                                         'randn'])
-def test_equalize_preserve_uint8(image_type):
+def test_equalize_method_uint8(image_type):
     """Check integer bins used for uint8 images."""
     if image_type == 'camera':
         img = test_img_int
@@ -193,6 +191,17 @@ def test_equalize_preserve_uint8(image_type):
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
+
+
+def test_equalize_method_uint8_errors():
+
+    # invalid dtype for uint8 mode
+    with pytest.raises(ValueError):
+        exposure.equalize_hist(test_img, method='uint8')
+
+    # invalid mode
+    with pytest.raises(ValueError):
+        exposure.equalize_hist(test_img_int, method='invalid')
 
 
 def test_equalize_ubyte():
@@ -417,6 +426,7 @@ def test_rescale_raises_on_incorrect_out_range():
     with testing.raises(ValueError):
         _ = exposure.rescale_intensity(image, out_range='flat')
 
+
 # Test adaptive histogram equalization
 # ====================================
 
@@ -597,7 +607,7 @@ def norm_brightness_err(img1, img2):
 
 def test_adjust_gamma_1x1_shape():
     """Check that the shape is maintained"""
-    img = np.ones([1,1])
+    img = np.ones([1, 1])
     result = exposure.adjust_gamma(img, 1.5)
     assert img.shape == result.shape
 
