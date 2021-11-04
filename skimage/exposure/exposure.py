@@ -387,7 +387,7 @@ def _equalize_hist_uint8(image, mask=None):
     return lookup_table[image]
 
 
-def equalize_hist(image, nbins=256, mask=None, method='float'):
+def equalize_hist(image, nbins=256, mask=None, *, method='float'):
     """Return image after histogram equalization.
 
     Parameters
