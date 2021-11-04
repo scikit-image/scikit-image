@@ -6,7 +6,6 @@ from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_array_equal, assert_equal)
 
 from skimage import data, exposure, util
-from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage.color import rgb2gray
 from skimage.exposure.exposure import intensity_range
@@ -18,7 +17,7 @@ from skimage.util.dtype import dtype_range
 
 def test_wrong_source_range():
     im = np.array([-1, 100], dtype=np.int8)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         frequencies, bin_centers = exposure.histogram(im,
                                                       source_range='foobar')
 
@@ -244,7 +243,7 @@ def check_cdf_slope(cdf):
 # ====================
 
 
-@testing.parametrize("test_input,expected", [
+@pytest.mark.parametrize("test_input,expected", [
     ('image', [0, 1]),
     ('dtype', [0, 255]),
     ((10, 20), [10, 20])
@@ -255,7 +254,7 @@ def test_intensity_range_uint8(test_input, expected):
     assert_array_equal(out, expected)
 
 
-@testing.parametrize("test_input,expected", [
+@pytest.mark.parametrize("test_input,expected", [
     ('image', [0.1, 0.2]),
     ('dtype', [-1, 1]),
     ((0.3, 0.4), [0.3, 0.4])
@@ -410,20 +409,20 @@ def test_rescale_output_dtype(out_range, out_dtype):
 def test_rescale_no_overflow():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=np.uint8)
-    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert_array_equal(output_image, [0, 128, 255])
     assert output_image.dtype == np.uint8
 
 
 def test_rescale_float_output():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=(0, 255))
-    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert_array_equal(output_image, [0, 128, 255])
     assert output_image.dtype == float
 
 
 def test_rescale_raises_on_incorrect_out_range():
     image = np.array([-128, 0, 127], dtype=np.int8)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _ = exposure.rescale_intensity(image, out_range='flat')
 
 
@@ -665,7 +664,7 @@ def test_adjust_gamma_greater_one():
 
 def test_adjust_gamma_negative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         exposure.adjust_gamma(image, -1)
 
 
@@ -835,7 +834,7 @@ def test_is_low_contrast_boolean():
                                            exposure.adjust_sigmoid])
 def test_negative_input(exposure_func):
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         exposure_func(image)
 
 
