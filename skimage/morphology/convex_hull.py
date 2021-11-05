@@ -119,9 +119,9 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
             try:
                 hull0 = ConvexHull(coords)
             except QhullError as err:
-                warn("Failed to get convext hull image"
-                     "Returning empty image, see error messege below"
-                     "%s" % str(err), UserWarning)
+                warn(f"Failed to get convex hull image"
+                     f"Returning empty image, see error message below\n"
+                     f"{err}")
                 return np.zeros(image.shape, dtype=bool)
             coords = hull0.points[hull0.vertices]
 
