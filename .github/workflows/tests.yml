@@ -121,6 +121,8 @@ jobs:
                 fi
             fi
             source tools/github/script.sh
+            echo "cwd=`pwd`"
+            ls
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
@@ -128,7 +130,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,PYTHON
           fail_ci_if_error: false
-          files: ../coverage.xml
+          files: /home/runner/work/scikit-image/coverage.xml
           verbose: true
 
       - name: Check benchmarks
