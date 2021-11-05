@@ -127,7 +127,6 @@ jobs:
           asv check -v -E existing
 
       - name: Upload coverage to Codecov
-        if: matrix.CODECOV_UPLOAD == "1"
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
