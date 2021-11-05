@@ -168,3 +168,17 @@ def test_consistent_2d_3d_hulls(images2d3d):
     chimage[8, 0] = True  # correct for single point exactly on hull edge
     chimage3d = convex_hull_image(image3d)
     assert_array_equal(chimage3d[1], chimage)
+
+
+def test_few_points():
+    image = np.array(
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 1, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 1, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+    image3d = np.stack([image, image, image])
+    with testing.assert_warns(UserWarning):
+        chimage3d = convex_hull_image(image3d)
+        assert_array_equal(chimage3d, np.zeros(image3d.shape, dtype=bool))
