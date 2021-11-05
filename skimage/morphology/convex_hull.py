@@ -119,7 +119,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
             try:
                 hull0 = ConvexHull(coords)
             except QhullError as err:
-                warn("Failed to get convext hull image" 
+                warn("Failed to get convext hull image"
                      "Returning empty image, see error messege below"
                      "%s" % str(err), UserWarning)
                 return np.zeros(image.shape, dtype=bool)
@@ -138,7 +138,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     try:
         hull = ConvexHull(coords)
     except QhullError as err:
-        warn("Failed to get convext hull image" 
+        warn("Failed to get convext hull image"
              "Returning empty image, see error messege below"
              "%s" % str(err), UserWarning)
         return np.zeros(image.shape, dtype=bool)
