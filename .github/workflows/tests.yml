@@ -28,6 +28,7 @@ jobs:
         OPTIONAL_DEPS: [0]
         OPTIONS_NAME: ["default"]
         INSTALL_FROM_SDIST: [0]
+        CODECOV_UPLOAD: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.7
@@ -55,6 +56,7 @@ jobs:
             BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
+            CODECOV_UPLOAD: 1
           - platform_id: manylinux_x86_64
             python-version: 3.7
             PYTHONOPTIMIZE: 2
@@ -123,6 +125,16 @@ jobs:
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+
+      - name: Upload coverage to Codecov
+        if: matrix.CODECOV_UPLOAD == "1"
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false
+          files: ./coverage.xml
+          verbose: true
 
 
   test_skimage_macos:
