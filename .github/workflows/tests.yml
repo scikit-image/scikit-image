@@ -122,10 +122,6 @@ jobs:
             fi
             source tools/github/script.sh
 
-      - name: Check benchmarks
-        run: |
-          asv check -v -E existing
-
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
@@ -134,6 +130,11 @@ jobs:
           fail_ci_if_error: false
           files: ./coverage.xml
           verbose: true
+
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
+
 
 
   test_skimage_macos:
