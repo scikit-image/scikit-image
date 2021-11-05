@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 import pytest
 
+from skimage._shared import has_mpl
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
 from skimage._shared.utils import _supported_float_type, convert_to_float
@@ -117,7 +118,7 @@ def check_iradon_center(size, theta, circle):
                                      circle=circle)
     print('rms deviance:',
           np.sqrt(np.mean((reconstruction_opposite - reconstruction)**2)))
-    if debug:
+    if debug and has_mpl:
         import matplotlib.pyplot as plt
         imkwargs = dict(cmap='gray', interpolation='nearest')
         plt.figure()
@@ -156,7 +157,7 @@ def check_radon_iradon(interpolation_type, filter_type):
                            interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
-    if debug:
+    if debug and has_mpl:
         _debug_plot(image, reconstructed)
     if filter_type in ('ramp', 'shepp-logan'):
         if interpolation_type == 'nearest':
@@ -219,7 +220,7 @@ def check_radon_iradon_minimal(shape, slices):
     sinogram = radon(image, theta, circle=False)
     reconstructed = iradon(sinogram, theta, circle=False)
     print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
-    if debug:
+    if debug and has_mpl:
         _debug_plot(image, reconstructed, sinogram)
     if image.sum() == 1:
         assert (np.unravel_index(np.argmax(reconstructed), image.shape)
@@ -393,7 +394,7 @@ def test_iradon_sart():
         sinogram = radon(image, theta, circle=True)
         reconstructed = iradon_sart(sinogram, theta)
 
-        if debug:
+        if debug and has_mpl:
             from matplotlib import pyplot as plt
             plt.figure()
             plt.subplot(221)
@@ -426,7 +427,7 @@ def test_iradon_sart():
                                       for i in range(sinogram.shape[1])]).T
         reconstructed = iradon_sart(sinogram_shifted, theta,
                                     projection_shifts=shifts)
-        if debug:
+        if debug and has_mpl:
             from matplotlib import pyplot as plt
             plt.figure()
             plt.subplot(221)
