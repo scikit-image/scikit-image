@@ -9,7 +9,7 @@ touch $MPL_DIR/matplotlibrc
 python -m pip list
 tools/build_versions.py
 
-TEST_ARGS="--doctest-modules --cov=skimage"
+TEST_ARGS="--doctest-modules --cov=skimage --cov-report=term --cov-report=xml"
 
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
