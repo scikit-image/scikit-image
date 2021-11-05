@@ -4,6 +4,7 @@ from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
                                _probabilistic_hough_line as _prob_hough_line)
+from .._shared.peak import _prominent_peaks
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -56,7 +57,6 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     2
 
     """
-    from ..feature.peak import _prominent_peaks
 
     min_angle = min(min_angle, hspace.shape[1])
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
@@ -329,7 +329,6 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     Otherwise, circles will be returned in the order of decreasing voting
     number.
     """
-    from ..feature.peak import _prominent_peaks
 
     r = []
     cx = []

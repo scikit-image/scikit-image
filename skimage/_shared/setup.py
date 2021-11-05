@@ -15,13 +15,25 @@ def configuration(parent_package='', top_path=None):
     cython(['geometry.pyx',
             'transform.pyx',
             'interpolation.pyx',
-            'fast_exp.pyx'], working_path=base_path)
+            'fast_exp.pyx',
+            'warp.pyx',
+            'label.pyx',
+            'convex_hull.pyx',
+            'pnpoly.pyx'], working_path=base_path)
 
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('interpolation', sources=['interpolation.c'])
     config.add_extension('fast_exp', sources=['fast_exp.c'])
+    config.add_extension('warp', sources=['warp.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('label', sources=['label.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('convex_hull', sources=['convex_hull.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('pnpoly', sources=['pnpoly.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     return config
 
 

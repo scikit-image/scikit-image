@@ -2,8 +2,9 @@ from warnings import warn
 import numpy as np
 import scipy.ndimage as ndi
 from .. import measure
-from .._shared.utils import remove_arg
-from .._shared.coord import ensure_spacing
+from .label import label
+from .utils import remove_arg
+from .coord import ensure_spacing
 
 
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
@@ -370,7 +371,7 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
     img *= mask
     img_t = img > threshold
 
-    label_img = measure.label(img_t)
+    label_img = label(img_t)
     props = measure.regionprops(label_img, img_max)
 
     # Sort the list of peaks by intensity, not left-right, so larger peaks

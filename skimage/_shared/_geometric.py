@@ -3,7 +3,7 @@ import numpy as np
 from scipy import spatial
 import textwrap
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .utils import get_bound_method_class, safe_as_int
 
 
 def _affine_matrix_from_vector(v):

@@ -29,8 +29,8 @@ from scipy import ndimage as ndi
 
 from . import _watershed_cy
 from ..morphology.extrema import local_minima
-from ..morphology._util import (_validate_connectivity,
-                                _offsets_to_raveled_neighbors)
+from .._shared.morpho_util import (_validate_connectivity,
+                                   _offsets_to_raveled_neighbors)
 from ..util import crop, regular_seeds
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..measure import label
+from .._shared.label import label
 from .._shared.utils import remove_arg
 
 

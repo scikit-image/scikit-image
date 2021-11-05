@@ -8,7 +8,7 @@ from skimage.feature import (graycomatrix,
                              greycoprops,
                              local_binary_pattern,
                              multiblock_lbp)
-from skimage.transform import integral_image
+from skimage._shared.transform import integral_image
 
 
 class TestGLCM():

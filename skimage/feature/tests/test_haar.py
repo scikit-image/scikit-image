@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from numpy.testing import assert_array_equal
 
-from skimage.transform import integral_image
+from skimage._shared.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
 from skimage.feature import draw_haar_like_feature

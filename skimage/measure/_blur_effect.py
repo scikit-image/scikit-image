@@ -2,6 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from ..color import rgb2gray
+from .._shared.filters import sobel
 from ..util import img_as_float
 
 
@@ -67,7 +68,6 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     shape = image.shape
     B = []
 
-    from ..filters import sobel
     slices = tuple([slice(2, s - 1) for s in shape])
     for ax in range(n_axes):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)

@@ -10,8 +10,8 @@ from ._moments import (moments, moments_central, moments_coords,
                        moments_hu, inertia_tensor, inertia_tensor_eigvals)
 from .profile import profile_line
 from .fit import LineModelND, CircleModel, EllipseModel, ransac
-from .block import block_reduce
-from ._label import label
+from .._shared.block import block_reduce
+from .._shared.label import label
 from .entropy import shannon_entropy
 from ._blur_effect import blur_effect
 
