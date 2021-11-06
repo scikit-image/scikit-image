@@ -174,43 +174,89 @@ selection.sum()
 props['area'] * props['intensity_mean']
 
 #####################################################################
-# Iterate the measurement for each time point
-# ===========================================
-# Let us write a function for the first processing step (segmentation of
-# nucleus rim).
+# Process the entire image sequence
+# =================================
+# Instead of iterating the workflow for each time point, we process the
+# multidimensional dataset directly (except for the thresholding step).
+# Indeed, most scikit-image functions support nD images.
 
+n_z = image_sequence.shape[0]  # number of frames
 
-def get_mask(im, sigma=1.5):
-    im = filters.gaussian(im, sigma=sigma)
-    thresh_value = filters.threshold_otsu(im)
-    im = im > thresh_value
-    im = ndi.binary_fill_holes(im)
-    # Clear objects touching image border
-    im = segmentation.clear_border(im)
-    dilate = morphology.binary_dilation(im)
-    erode = morphology.binary_erosion(im)
-    mask = dilate.astype(int) - erode.astype(int)
-    return mask
-
+smooth_seq = filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
+thresh_values = [filters.threshold_otsu(s) for s in smooth_seq[:]]
+thresh_seq = [smooth_seq[k, :, :] > thresh_values[k] for k in range(n_z)]
 
 #####################################################################
-# Let us compute the mask sequence corresponding to our image sequence.
+# We use the following flat structuring element for morphological
+# computations:
 
-mask_sequence = np.zeros_like(image_sequence[:, 0, :, :])
+footprint = np.stack((np.zeros((3, 3)), np.ones((3, 3)), np.zeros((3, 3))))
+footprint[1, 0, 0] = 0
+footprint[1, 0, -1] = 0
+footprint[1, -1, 0] = 0
+footprint[1, -1, -1] = 0
+footprint
 
-for i in range(image_sequence.shape[0]):
-    # each mask gets a different label, running from 1 to 15
-    mask_sequence[i, :, :] = get_mask(image_sequence[i, 0, :, :]) * (i + 1)
+#####################################################################
+# This way, each frame is processed independently (pixels from consecutive
+# frames are never spatial neighbors).
+
+fill_seq = ndi.binary_fill_holes(thresh_seq, structure=footprint)
+
+#####################################################################
+# When clearing objects which touch the image border, we want to make sure
+# that the bottom (first) and top (last) frames are not considered as borders.
+# In this case, the only relevant border is the edge at the greatest (x, y)
+# values. This can be seen in 3D by running the following code:
+#
+# .. code-block:: python
+#
+#     import plotly.graph_objects as go
+#
+#     sample = fill_seq
+#     (n_Z, n_Y, n_X) = sample.shape
+#     Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
+#
+#     fig = go.Figure(
+#         data=go.Volume(
+#             x=X.flatten(),
+#             y=Y.flatten(),
+#             z=Z.flatten(),
+#             value=sample.flatten(),
+#             opacity=0.5,
+#             slices_z=dict(show=True, locations=[n_z // 2])
+#         )
+#     )
+#     fig.show()
+
+border_mask = np.ones_like(fill_seq)
+border_mask[n_z // 2, -1, -1] = False
+clear_seq = segmentation.clear_border(fill_seq, mask=border_mask)
+
+dilate_seq = morphology.binary_dilation(clear_seq, footprint=footprint)
+erode_seq = morphology.binary_erosion(clear_seq, footprint=footprint)
+mask_seq = dilate_seq.astype(int) - erode_seq.astype(int)
+
+#####################################################################
+# Let us give each mask (corresponding to each time point) a different label,
+# running from 1 to 15.
+
+mask_list = [mask_seq[k] * (k + 1) for k in range(n_z)]
+mask_sequence = np.stack(mask_list)
+
+#####################################################################
+# Let us compute the region properties of interest for all these labeled
+# regions.
 
 props = measure.regionprops_table(
     mask_sequence,
     intensity_image=image_sequence[:, 1, :, :],
     properties=('label', 'area', 'intensity_mean')
 )
-np.testing.assert_array_equal(props['label'], np.arange(15) + 1)
+np.testing.assert_array_equal(props['label'], np.arange(n_z) + 1)
 
 fluorescence_change = [props['area'][i] * props['intensity_mean'][i]
-                       for i in range(image_sequence.shape[0])]
+                       for i in range(n_z)]
 
 fluorescence_change /= fluorescence_change[0]  # normalization
 
