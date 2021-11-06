@@ -55,7 +55,6 @@ fig = px.imshow(
     image_sequence,
     facet_col=1,
     animation_frame=0,
-    binary_string=True,
     labels={'animation_frame': 'time point', 'facet_col': 'channel'}
 )
 plotly.io.show(fig)
