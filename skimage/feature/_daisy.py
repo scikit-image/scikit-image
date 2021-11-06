@@ -3,7 +3,8 @@ import math
 import numpy as np
 from numpy import arctan2, exp, pi, sqrt
 
-from .. import draw, img_as_float
+from .. import draw
+from ..util.dtype import img_as_float
 from .._shared.filters import gaussian
 from .._shared.utils import check_nD
 from ..color import gray2rgb

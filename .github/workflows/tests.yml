@@ -34,7 +34,8 @@ jobs:
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
-            # Test miminum requirements (don't build docs there is a problem
+            EAGER_IMPORT: 1
+            # Test mininum requirements (don't build docs there is a problem
             # with dask and astropy)
             OPTIONS_NAME: "mini-req"
           - platform_id: manylinux_x86_64
@@ -102,6 +103,7 @@ jobs:
             BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
             TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
             OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+            EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
             echo $PIP_FLAGS
             pip install $PIP_FLAGS -r requirements/test.txt

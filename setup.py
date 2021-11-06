@@ -8,8 +8,8 @@ import builtins
 import textwrap
 
 import setuptools
-from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist
+from setuptools.command.build_py import build_py
+from setuptools.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
 from numpy.distutils.command.build_ext import build_ext
 
