@@ -85,13 +85,24 @@ fill = ndi.binary_fill_holes(thresh)
 # corner.
 
 clear = segmentation.clear_border(fill)
-label = measure.label(clear)
+clear.dtype
 
-expand = segmentation.expand_labels(label, distance=1)
+#####################################################################
+# We compute both the morphological dilation of this binary image and its
+# morphological erosion.
 
-erode = morphology.erosion(label)
+dilate = morphology.binary_dilation(clear)
 
-mask = expand - erode
+erode = morphology.binary_erosion(clear)
+
+#####################################################################
+# Finally, we subtract the eroded from the dilated to get the nucleus rim.
+
+mask = dilate.astype(int) - erode.astype(int)
+mask.dtype
+
+#####################################################################
+# Let us visualize these processing steps in a sequence of subplots.
 
 _, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
 
@@ -107,11 +118,11 @@ ax[0, 2].set_title('c) Threshold')
 ax[0, 3].imshow(fill, cmap=plt.cm.gray)
 ax[0, 3].set_title('c-1) Fill in')
 
-ax[1, 0].imshow(label, cmap=plt.cm.gray)
+ax[1, 0].imshow(clear, cmap=plt.cm.gray)
 ax[1, 0].set_title('c-2) Keep one nucleus')
 
-ax[1, 1].imshow(expand, cmap=plt.cm.gray)
-ax[1, 1].set_title('d) Expand')
+ax[1, 1].imshow(dilate, cmap=plt.cm.gray)
+ax[1, 1].set_title('d) Dilate')
 
 ax[1, 2].imshow(erode, cmap=plt.cm.gray)
 ax[1, 2].set_title('e) Erode')
@@ -170,17 +181,16 @@ props['area'] * props['intensity_mean']
 # nucleus rim).
 
 
-def get_mask(im, sigma=1.5, radius=1):
+def get_mask(im, sigma=1.5):
     im = filters.gaussian(im, sigma=sigma)
     thresh_value = filters.threshold_otsu(im)
     im = im > thresh_value
     im = ndi.binary_fill_holes(im)
     # Clear objects touching image border
     im = segmentation.clear_border(im)
-    label = measure.label(im)
-    expand = segmentation.expand_labels(label, distance=radius)
-    erode = morphology.erosion(label)
-    mask = expand - erode
+    dilate = morphology.binary_dilation(im)
+    erode = morphology.binary_erosion(im)
+    mask = dilate.astype(int) - erode.astype(int)
     return mask
 
 
