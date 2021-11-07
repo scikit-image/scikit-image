@@ -227,6 +227,49 @@ def only2d(method):
     return func2d
 
 
+def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
+    """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
+
+    Paramters
+    ---------
+    inertia_tensor_eigvals : seqeunce of float
+        A sequence of 3 floating point eigenvalues, sorted in descending order.
+
+    Returns
+    -------
+    axis_lengths : list of float
+        The ellipsoid axis lengths sorted in descending order.
+
+    Notes
+    -----
+    Let a >= b >= c be the ellipsoid semi-axes and s1 >= s2 >= s3 be the
+    inertia tensor eigenvalues.
+
+    The inertia tensor eigenvalues are given for a solid ellipsoid in [1]_.
+    s1 = 1 / 5 * (a**2 + b**2)
+    s2 = 1 / 5 * (a**2 + c**2)
+    s3 = 1 / 5 * (b**2 + c**2)
+
+    Rearranging to solve for a, b, c in terms of s1, s2, s3 gives
+    a = math.sqrt(5 / 2 * ( s1 + s2 - s3))
+    b = math.sqrt(5 / 2 * ( s1 - s2 + s3))
+    c = math.sqrt(5 / 2 * (-s1 + s2 + s3))
+
+    We can then simply replace sqrt(5/2) by sqrt(10) to get the full axes
+    lengths rather than the semi-axes lengths.
+
+    References
+    ----------
+    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
+    """
+    axis_lengths = []
+    for ax in range(2, -1, -1):
+        w = sum(v * -1 if i == ax else v
+                for i, v in enumerate(inertia_tensor_eigvals))
+        axis_lengths.append(sqrt(10 * w))
+    return axis_lengths
+
+
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
@@ -450,13 +493,27 @@ class RegionProperties:
 
     @property
     def axis_major_length(self):
-        l1 = self.inertia_tensor_eigvals[0]
-        return 4 * sqrt(l1)
+        if self._ndim == 2:
+            l1 = self.inertia_tensor_eigvals[0]
+            return 4 * sqrt(l1)
+        elif self._ndim == 3:
+            # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[0]
+            ev = self.inertia_tensor_eigvals
+            return sqrt(10 * (ev[0] + ev[1] - ev[2]))
+        else:
+            raise ValueError("axis_major_length only available in 2D and 3D")
 
     @property
     def axis_minor_length(self):
-        l2 = self.inertia_tensor_eigvals[-1]
-        return 4 * sqrt(l2)
+        if self._ndim == 2:
+            l2 = self.inertia_tensor_eigvals[-1]
+            return 4 * sqrt(l2)
+        elif self._ndim == 3:
+            # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[-1]
+            ev = self.inertia_tensor_eigvals
+            return sqrt(10 * (-ev[0] + ev[1] + ev[2]))
+        else:
+            raise ValueError("axis_minor_length only available in 2D and 3D")
 
     @property
     @_cached
