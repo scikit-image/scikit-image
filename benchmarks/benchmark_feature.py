@@ -27,3 +27,6 @@ class FeatureSuite:
     def time_brief(self):
         extractor = feature.BRIEF()
         extractor.extract(self.image, self.keypoints)
+
+    def time_hessian_matrix_det(self):
+        result = feature.hessian_matrix_det(self.image, 4)
