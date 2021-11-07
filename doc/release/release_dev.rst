@@ -52,6 +52,8 @@ New Features
 - The ``skimage.feature`` functions ``blob_dog``, ``blob_doh`` and ``blob_log``
   now support a ``threshold_rel`` keyword argument that can be used to specify
   a relative threshold (in range [0, 1]) rather than an absolute one. (#5517)
+- Implement lazy submodule importing (#5101)
+- Functions to create pixel graphs and find central pixels (#5602)
 
 
 Documentation
@@ -101,9 +103,28 @@ Documentation
 - Update reference link documentation in the ``adjust_sigmoid`` function.
 - Fix reference to multiscale_basic_features in TrainableSegmenter.
 - Slight ``shape_index`` docstring modification to specify 2D array.
+- Add stitching gallery example (#5365)
+- Add draft SKIP3: transition to scikit-image 1.0 (#5475)
+- Mention commit messages in the contribution guidelines. (#5504)
 - Fix and standardize docstrings for blob detection functions (#5547)
 - Updated the User Guide to reflect usage of ``channel_axis`` rather than
   ``multichannel``. (#5554)
+- Update the user guide to use channel_axis rather than multichannel (#5556)
+- Add hyperlinks to referenced documentation places. (#5560)
+- Update branching instructions to change the location of the pooch repo (#5565)
+- add Notes and References section to the Cascade class docstring (#5568)
+- Clarify 2D vs nD in skimage.feature.corner docstrings (#5569)
+- Fixed math formulas in plot_swirl.py example (#5574)
+- Update references in texture feature detectors docstrings (#5578)
+- Update mailing list location to discuss.scientific-python.org forum (#5951)
+- DOC: Fix docstring in rescale_intensity() (#5964)
+- Fix slic documentation (#5975)
+- Update docstring for dilation, which is now nD. (#5978)
+- Change stitching gallery example thumbnail (#5985)
+- Add circle and disk to glossary.md (#5590)
+- Update pixel graphs example (#5991)
+- Separate entries that have the same description in glossary.md (#5592)
+- Do not use space before colon in directive name (#6002)
 
 
 Improvements
@@ -139,6 +160,16 @@ Improvements
 - Added default keyword argument values to
   ``skimage.restoration.denoise_tv_bregman``, ``skimage.measure.block_reduce``,
   and ``skimage.filters.threshold_local``. (#5454)
+- Make matplotlib an optional dependency (#5990)
+- single precision support in skimage.filters (#5354)
+- Support nD images and labels in label2rgb (#5550)
+- Regionprops table performance refactor (#5576)
+- add regionprops benchmark script (#5579)
+- remove use of apply_along_axes from greycomatrix & greycoprops (#5580)
+- refactor gabor_kernel for efficiency (#5582)
+- remove need for channel_as_last_axis decorator in skimage.filters (#5584)
+- replace use of scipy.ndimage.gaussian_filter with skimage.filters.gaussian (#5872)
+- add channel_axis argument to quickshift (#5987)
 
 
 API Changes
@@ -218,6 +249,20 @@ Bugfixes
 - Rescale image consistently during SLIC superpixel segmentation. (#5518)
 - Corrected phase correlation in ``skimage.register.phase_cross_correlation``.
   (#5461)
+- Fix hidden attribute 'offsets' in skimage.graph.MCP (#5551)
+- fix phase_cross_correlation for 3D with reference masks (#5559)
+- fix return shape of blob_log and blob_dog when no peaks are found (#5567)
+- Fix find contours key error (#5577)
+- Refactor measure.ransac and add warning when the estimated model is not valid (#5583)
+- trainable_segmentation: re-raise in error case (#5600)
+- allow regionprops_table to be called with deprecated property names (#5908)
+- Fix weight calculation in fast mode of non-local means (#5923)
+- fix for #5948: lower boundary 1 for kernel_size in equalize_adapthist (#5949)
+- convert pathlib.Path to str in imsave (#5971)
+- Fix slic spacing (#5974)
+- Add small regularization to avoid zero-division in richardson_lucy (#5976)
+- Fix benchmark suite (watershed function was moved) (#5982)
+- Fix the estimation of ellipsoid axis lengths in the 3D case (#6013)
 
 
 Deprecations
@@ -372,6 +417,9 @@ Development process
 - Ensure that README.txt has write permissions for subsequent imports.
 - Decorators for helping with the transition between the keyword argument
   multichannel and channel_axis.
+- Missing import in lch2lab docstring example (#5998)
+- Prefer importing build_py and sdist from setuptools (#6007)
+- Reintroduce skimage.test utility (#5909)
 
 
 Other Updates
@@ -381,6 +429,13 @@ Other Updates
 - Simplify resize implementation using new SciPy 1.6 zoom option.
 - Fix duplicate test function names in ``test_unsharp_mask.py``.
 - Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature.
+- prefer use of new-style NumPy random API in tests (#5450)
+- Add fixture enforcing SimpleITK I/O in test_simpleitk.py (#5526)
+- MNT: Remove unused stat import from skimage data (#5566)
+- MAINT: Remove unused imports (#5595)
+- MAINT: Refactor duplicated tests, remove unnecessary assignments and variables (#5596)
+- Remove obsolete lazy import (#5992)
+- Lazily load data_dir into the top-level namespace (#5996)
 
 
 Contributors to this release
