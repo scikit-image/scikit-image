@@ -1,9 +1,12 @@
 import numpy as np
 
+
 def _clip(x, low, high):
-    """Clips coordinate between high and low.
+    """Clip coordinate between low and high values.
+
     This method was created so that `hessian_det_appx` does not have to make
     a Python call.
+
     Parameters
     ----------
     x : int
@@ -12,6 +15,7 @@ def _clip(x, low, high):
         The lower bound.
     high : int
         The higher bound.
+
     Returns
     -------
     x : int
@@ -28,9 +32,11 @@ def _clip(x, low, high):
 
 
 def _integ(img, r, c, rl, cl):
-    """Integrate over the integral image in the given window
+    """Integrate over the 2D integral image in the given window.
+
     This method was created so that `hessian_det_appx` does not have to make
     a Python call.
+
     Parameters
     ----------
     img : array
@@ -43,6 +49,7 @@ def _integ(img, r, c, rl, cl):
         The number of rows over which to integrate.
     cl : int
         The number of columns over which to integrate.
+
     Returns
     -------
     ans : int
@@ -61,9 +68,11 @@ def _integ(img, r, c, rl, cl):
 
 #pythran export _hessian_matrix_det(float64[:,:], float or int)
 def _hessian_matrix_det(img, sigma):
-    """Computes the approximate Hessian Determinant over an image.
+    """Compute the approximate Hessian Determinant over a 2D image.
+
     This method uses box filters over integral images to compute the
     approximate Hessian Determinant as described in [1]_.
+
     Parameters
     ----------
     img : array
@@ -71,21 +80,24 @@ def _hessian_matrix_det(img, sigma):
     sigma : float
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix
+
     Returns
     -------
     out : array
         The array of the Determinant of Hessians.
+
     References
     ----------
     .. [1] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
            ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+
     Notes
     -----
     The running time of this method only depends on size of the image. It is
     independent of `sigma` as one would expect. The downside is that the
     result for `sigma` less than `3` is not accurate, i.e., not similar to
-    the result obtained if someone computed the Hessian and took it's
+    the result obtained if someone computed the Hessian and took its
     determinant.
     """
 
