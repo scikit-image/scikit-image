@@ -1,6 +1,8 @@
 import inspect
 from functools import wraps
-from math import atan2, pi as PI, sqrt
+from math import atan2
+from math import pi as PI
+from math import sqrt
 from warnings import warn
 
 import numpy as np
@@ -11,7 +13,6 @@ from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
-
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -260,7 +261,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
     References
     ----------
-    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
+    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors  # noqa
     """
     axis_lengths = []
     for ax in range(2, -1, -1):
@@ -310,7 +311,8 @@ class RegionProperties:
                 if hasattr(self, name):
                     msg = (
                         f"Extra property '{name}' is shadowed by existing "
-                        f"property and will be inaccessible. Consider renaming it."
+                        f"property and will be inaccessible. Consider "
+                        f"renaming it."
                     )
                     warn(msg)
             self._extra_properties = {
@@ -340,8 +342,8 @@ class RegionProperties:
                 return func(self.image)
             else:
                 raise AttributeError(
-                    f'Custom regionprop function\'s number of arguments must be 1 or 2, '
-                    f'but {attr} takes {n_args} arguments.'
+                    f'Custom regionprop function\'s number of arguments must '
+                    f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
         else:
             raise AttributeError(
@@ -420,7 +422,8 @@ class RegionProperties:
             coordinates = np.vstack(find_contours(identity_convex_hull, .5,
                                                   fully_connected='high'))
         elif self._ndim == 3:
-            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull,
+                                                  level=.5)
         distances = pdist(coordinates, 'sqeuclidean')
         return sqrt(np.max(distances))
 

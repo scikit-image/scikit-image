@@ -779,7 +779,7 @@ def test_3d_ellipsoid_axis_lengths():
     # estimate principal axis lengths via the inertia tensor eigenvalues
     evs = rp.inertia_tensor_eigvals
     axis_lengths = _inertia_eigvals_to_axes_lengths_3D(evs)
-    expected_lengths = sorted([2*h for h in half_lengths], reverse=True)
+    expected_lengths = sorted([2 * h for h in half_lengths], reverse=True)
     for ax_len_expected, ax_len in zip(expected_lengths, axis_lengths):
         # verify accuracy to within 1%
         assert abs(ax_len - ax_len_expected) < 0.01 * ax_len_expected
