@@ -2,6 +2,7 @@
 
 import os
 from skimage._build import cython
+import pythran, logging
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -15,9 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['corner_cy.pyx',
             'censure_cy.pyx',
             'orb_cy.pyx',
-            'brief_cy.pyx',
             '_texture.pyx',
-            '_hessian_det_appx.pyx',
             '_hoghistogram.pyx',
             ], working_path=base_path)
     # _haar uses c++, so it must be cythonized separately
@@ -35,32 +34,25 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
-    if int(os.environ.get('SKIMAGE_USE_PYTHRAN', 1)):
-        import pythran, logging
-        pythran.config.logger.setLevel(logging.INFO)
-
-        ext = pythran.dist.PythranExtension(
-            'skimage.feature.brief_cy',
-            sources=["skimage/feature/brief_pythran.py"],
-            config=['compiler.blas=none'])
-        config.ext_modules.append(ext)
-
-        ext = pythran.dist.PythranExtension(
-            'skimage.feature._hessian_det_appx',
-            sources=["skimage/feature/_hessian_det_appx_pythran.py"],
-            config=['compiler.blas=none'])
-        config.ext_modules.append(ext)
-    else:
-        config.add_extension('brief_cy', sources=['brief_cy.c'],
-                             include_dirs=[get_numpy_include_dirs()])
-        config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
-                             include_dirs=[get_numpy_include_dirs()])
-
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_haar', sources=['_haar.cpp'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'],
                          language="c++")
+
+    # pythran submodules
+    pythran.config.logger.setLevel(logging.INFO)
+    ext = pythran.dist.PythranExtension(
+        'skimage.feature.brief_cy',
+        sources=["skimage/feature/brief_pythran.py"],
+        config=['compiler.blas=none'])
+    config.ext_modules.append(ext)
+
+    ext = pythran.dist.PythranExtension(
+        'skimage.feature._hessian_det_appx',
+        sources=["skimage/feature/_hessian_det_appx_pythran.py"],
+        config=['compiler.blas=none'])
+    config.ext_modules.append(ext)
 
     return config
 
