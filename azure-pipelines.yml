@@ -112,6 +112,9 @@ jobs:
   - bash: |
       set -ex
       PYTHON="$(python.pythonLocation)\\python.exe"
+      if [ "$(ARCH)" = "x86" ] ; then
+          export CXXFLAGS="-m32"
+      fi
 
       # Compile the package and build the wheel
       $PYTHON setup.py bdist_wheel
