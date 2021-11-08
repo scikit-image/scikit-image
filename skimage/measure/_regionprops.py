@@ -306,11 +306,6 @@ class RegionProperties():
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
 
-        # list of deprecated properties that are still supported by
-        # __getattr__ for now
-        #self._deprecated_properties = [key for key in PROPS.keys()
-        #                               if key.lower() == key]
-
         self._extra_properties = {}
         if extra_properties is not None:
             for func in extra_properties:
