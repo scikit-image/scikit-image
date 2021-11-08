@@ -273,92 +273,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     return axis_lengths
 
 
-class DeprecatedProperties:
-    """Mixin to support deprecated property names.
-
-    Each property here just calls the corresponding current property.
-    The docstrings will be copied over via `_install_properties_docs`,
-    including a warning about switching to the new name.
-    """
-
-    @property
-    def bbox_area(self):
-        return self.area_bbox
-
-    @property
-    def convex_area(self):
-        return self.area_convex
-
-    @property
-    def convex_image(self):
-        return self.image_convex
-
-    @property
-    def equivalent_diameter(self):
-        return self.equivalent_diameter_area
-
-    @property
-    def filled_area(self):
-        return self.area_filled
-
-    @property
-    def filled_image(self):
-        return self.image_filled
-
-    @property
-    def intensity_image(self):
-        return self.image_intensity
-
-    @property
-    def local_centroid(self):
-        return self.centroid_local
-
-    @property
-    def major_axis_length(self):
-        return self.axis_major_length
-
-    @property
-    def max_intensity(self):
-        return self.intensity_max
-
-    @property
-    def mean_intensity(self):
-        return self.intensity_mean
-
-    @property
-    def min_intensity(self):
-        return self.intensity_min
-
-    @property
-    def minor_axis_length(self):
-        return self.axis_minor_length
-
-    @property
-    def weighted_moments_central(self):
-        return self.moments_weighted_central
-
-    @property
-    def weighted_centroid(self):
-        return self.centroid_weighted
-
-    @property
-    def weighted_moments_hu(self):
-        return self.moments_weighted_hu
-
-    @property
-    def weighted_local_centroid(self):
-        return self.centroid_weighted_local
-
-    @property
-    def weighted_moments(self):
-        return self.moments_weighted
-
-    @property
-    def weighted_moments_normalized(self):
-        return self.moments_weighted_normalized
-
-
-class RegionProperties(DeprecatedProperties):
+class RegionProperties():
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
@@ -391,6 +306,11 @@ class RegionProperties(DeprecatedProperties):
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
 
+        # list of deprecated properties that are still supported by
+        # __getattr__ for now
+        #self._deprecated_properties = [key for key in PROPS.keys()
+        #                               if key.lower() == key]
+
         self._extra_properties = {}
         if extra_properties is not None:
             for func in extra_properties:
@@ -407,6 +327,7 @@ class RegionProperties(DeprecatedProperties):
             }
 
     def __getattr__(self, attr):
+
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
             n_args = _infer_number_of_required_args(func)
@@ -432,10 +353,19 @@ class RegionProperties(DeprecatedProperties):
                     f'Custom regionprop function\'s number of arguments must '
                     f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
+        elif attr in PROPS and attr.lower() == attr:
+            # retrieve deprecated property (excluding ancient CamelCase ones)
+            return getattr(self, PROPS[attr])
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
             )
+
+    def __setattr__(self, name, value):
+        if name in PROPS:
+            super().__setattr__(PROPS[name], value)
+        else:
+            super().__setattr__(name, value)
 
     @property
     @_cached
@@ -1380,13 +1310,6 @@ def _parse_docs():
     matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
-
-    for k, v in PROPS.items():
-        if k.lower() != k:
-            # skip adding docs for really old CamelCase property names
-            continue
-        prop_doc[k] = prop_doc[v] + (
-            f"\nThis property name is deprecated, use {v} instead.")
 
     return prop_doc
 
