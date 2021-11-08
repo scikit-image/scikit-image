@@ -346,7 +346,7 @@ class RegionProperties:
                     f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
         elif attr in PROPS and attr.lower() == attr:
-            # retrieve deprecated property (excluding ancient CamelCase ones)
+            # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
         else:
             raise AttributeError(
