@@ -1326,7 +1326,7 @@ def _parse_docs():
             # skip adding docs for really old CamelCase property names
             continue
         prop_doc[k] = prop_doc[v] + (
-            f"\nThis property is deprecated, use {v} instead.")
+            f"\nThis property name is deprecated, use {v} instead.")
 
     return prop_doc
 
