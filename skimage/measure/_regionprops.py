@@ -19,8 +19,6 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 # All values in this PROPS dict correspond to current scikit-image property
 # names. The keys in this PROPS dict correspond to older names used in prior
-
-
 # releases. For backwards compatibility, these older names will continue to
 # work, but will not be documented.
 PROPS = {
@@ -273,7 +271,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     return axis_lengths
 
 
-class RegionProperties():
+class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
@@ -322,7 +320,6 @@ class RegionProperties():
             }
 
     def __getattr__(self, attr):
-
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
             n_args = _infer_number_of_required_args(func)
