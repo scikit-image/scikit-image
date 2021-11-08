@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -69,7 +68,7 @@ def test_line_model_nd_estimate():
              10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
-    random_state = np.random.RandomState(1234)
+    random_state = np.random.default_rng(1234)
     data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
@@ -131,7 +130,7 @@ def test_circle_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    random_state = np.random.RandomState(1234)
+    random_state = np.random.default_rng(1234)
     data = data0 + random_state.normal(size=data0.shape)
 
     # estimate parameters of noisy data
@@ -198,7 +197,7 @@ def test_ellipse_model_estimate():
         data0 = model0.predict_xy(t)
 
         # add gaussian noise to data
-        random_state = np.random.RandomState(1234)
+        random_state = np.random.default_rng(1234)
         data = data0 + random_state.normal(size=data0.shape)
 
         # estimate parameters of noisy data
@@ -293,7 +292,7 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    random_state = np.random.RandomState(12373240)
+    random_state = np.random.default_rng(12373240)
 
     # generate original data without noise
     src = 100 * random_state.random((50, 2))
@@ -426,3 +425,20 @@ def test_ransac_with_no_final_inliers():
                                 residual_threshold=0, random_state=1523427)
     assert inliers is None
     assert model is None
+
+
+def test_ransac_non_valid_best_model():
+    """Example from GH issue #5572"""
+    def is_model_valid(model, *random_data) -> bool:
+        """Allow models with a maximum of 10 degree tilt from the vertical
+
+        """
+        tilt = abs(np.arccos(np.dot(model.params[1], [0, 0, 1])))
+        return tilt <= (10 / 180 * np.pi)
+
+    rnd = np.random.RandomState(1)
+    data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rnd.rand(1000, 3) - 0.5
+    with expected_warnings(["Estimated model is not valid"]):
+        ransac(data, LineModelND, min_samples=2,
+               residual_threshold=0.3, max_trials=50, random_state=0,
+               is_model_valid=is_model_valid)

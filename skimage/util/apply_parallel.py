@@ -1,6 +1,6 @@
 import numpy
 
-from .._shared import utils
+from .._shared.utils import channel_as_last_axis, deprecate_multichannel_kwarg
 
 __all__ = ['apply_parallel']
 
@@ -56,8 +56,8 @@ def _ensure_dask_array(array, chunks=None):
     return da.from_array(array, chunks=chunks)
 
 
-@utils.channel_as_last_axis(channel_arg_positions=(1,))
-@utils.deprecate_multichannel_kwarg()
+@channel_as_last_axis(channel_arg_positions=(1,))
+@deprecate_multichannel_kwarg()
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
                    compute=None, channel_axis=None,

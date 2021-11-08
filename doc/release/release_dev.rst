@@ -53,7 +53,10 @@ New Features
   now support a ``threshold_rel`` keyword argument that can be used to specify
   a relative threshold (in range [0, 1]) rather than an absolute one. (#5517)
 - Implement lazy submodule importing (#5101)
-- Functions to create pixel graphs and find central pixels (#5602)
+- Added new pixel graph algorithms in ``skimage.graph``:
+  ``pixel_graph`` generates a graph (network) of pixels
+  according to their adjacency, and ``central_pixel`` finds
+  the geodesic center of the pixels. (gh-5602)
 
 
 Documentation

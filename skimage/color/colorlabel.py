@@ -78,11 +78,12 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
     Parameters
     ----------
-    label : array, shape (M, N)
+    label : ndarray
         Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N) or (..., 3, ...), optional
-        Image used as underlay for labels. If the input is an RGB image, it's
-        converted to grayscale before coloring.
+    image : ndarray, optional
+        Image used as underlay for labels. It should have the same shape as
+        `labels`, optionally with an additional RGB (channels) axis. If `image`
+        is an RGB image, it is converted to grayscale before coloring.
     colors : list, optional
         List of colors. If the number of labels exceeds the number of colors,
         then the colors are cycled.
@@ -117,7 +118,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
 
     Returns
     -------
-    result : array of float, shape (..., 3, ...)
+    result : ndarray of float, same shape as `image`
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
@@ -125,7 +126,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         image = np.moveaxis(image, source=channel_axis, destination=-1)
     if kind == 'overlay':
         rgb = _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                  bg_color, image_alpha, saturation)
+                                 bg_color, image_alpha, saturation)
     elif kind == 'avg':
         rgb = _label2rgb_avg(label, image, bg_label, bg_color)
     else:
@@ -140,12 +141,12 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     Parameters
     ----------
-    label : array, shape (M, N)
+    label : ndarray
         Integer array of labels with the same shape as `image`.
-    image : array, shape (M, N, 3), optional
-        Image used as underlay for labels. If the input is an RGB image, it's
-        converted to grayscale before coloring, unless the `saturation` is
-        greater than 0.
+    image : ndarray, optional
+        Image used as underlay for labels. It should have the same shape as
+        `labels`, optionally with an additional RGB (channels) axis. If `image`
+        is an RGB image, it is converted to grayscale before coloring.
     colors : list, optional
         List of colors. If the number of labels exceeds the number of colors,
         then the colors are cycled.
@@ -166,7 +167,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     Returns
     -------
-    result : array of float, shape (M, N, 3)
+    result : ndarray of float, same shape as `image`
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
@@ -182,8 +183,14 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
-        if not image.shape[:2] == label.shape:
+        if (image.shape[:label.ndim] != label.shape
+                or image.ndim > label.ndim + 1):
             raise ValueError("`image` and `label` must be the same shape")
+
+        if image.ndim == label.ndim + 1 and image.shape[-1] != 3:
+            raise ValueError(
+                "`image` must be RGB (image.shape[-1] must be 3)."
+            )
 
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
@@ -238,7 +245,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
 
     Parameters
     ----------
-    label_field : array of int
+    label_field : ndarray of int
         A segmentation of an image.
     image : array, shape ``label_field.shape + (3,)``
         A color image of the same spatial shape as `label_field`.
@@ -249,7 +256,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
 
     Returns
     -------
-    out : array, same shape and type as `image`
+    out : ndarray, same shape and type as `image`
         The output visualization.
     """
     out = np.zeros(label_field.shape + (3,), dtype=image.dtype)

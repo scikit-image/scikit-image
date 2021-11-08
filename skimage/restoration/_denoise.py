@@ -6,7 +6,7 @@ import scipy.stats
 import numpy as np
 import pywt
 
-from .. import img_as_float
+from ..util.dtype import img_as_float
 from .._shared import utils
 from .._shared.utils import _supported_float_type, warn
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman

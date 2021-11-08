@@ -1,11 +1,10 @@
 import numpy as np
-from scipy.ndimage import gaussian_filter
 
+from .._shared.filters import gaussian
+from .._shared.utils import check_nD
+from .brief_cy import _brief_loop
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
-
-from .brief_cy import _brief_loop
-from .._shared.utils import check_nD
 
 
 class BRIEF(DescriptorExtractor):
@@ -155,7 +154,9 @@ class BRIEF(DescriptorExtractor):
         image = _prepare_grayscale_input_2D(image)
 
         # Gaussian low-pass filtering to alleviate noise sensitivity
-        image = np.ascontiguousarray(gaussian_filter(image, self.sigma))
+        image = np.ascontiguousarray(
+            gaussian(image, self.sigma, mode='reflect')
+        )
 
         # Sampling pairs of decision pixels in patch_size x patch_size window
         desc_size = self.descriptor_size
