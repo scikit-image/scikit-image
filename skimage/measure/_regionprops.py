@@ -345,10 +345,19 @@ class RegionProperties:
                     f'Custom regionprop function\'s number of arguments must '
                     f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
+        elif attr in PROPS and attr.lower() == attr:
+            # retrieve deprecated property (excluding old CamelCase ones)
+            return getattr(self, PROPS[attr])
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
             )
+
+    def __setattr__(self, name, value):
+        if name in PROPS:
+            super().__setattr__(PROPS[name], value)
+        else:
+            super().__setattr__(name, value)
 
     @property
     @_cached
