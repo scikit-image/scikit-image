@@ -2,18 +2,19 @@ import math
 
 import numpy as np
 import pytest
-from numpy.testing import (assert_almost_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_equal)
+import scipy.ndimage as ndi
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
+                           assert_array_equal, assert_equal)
 
-from skimage import data
+from skimage import data, draw, transform
 from skimage._shared._warnings import expected_warnings
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          perimeter_crofton, euler_number,
+from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
+                                          _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
-                                          regionprops_table, OBJECT_COLUMNS,
-                                          COL_DTYPES)
+                                          euler_number, perimeter,
+                                          perimeter_crofton, regionprops,
+                                          regionprops_table)
 from skimage.segmentation import slic
-
 
 SAMPLE = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
@@ -762,3 +763,37 @@ def test_multichannel():
             # property uses multiple channels, returns props stacked along
             # final axis
             assert_array_equal(p, np.asarray(p_multi)[..., 1])
+
+
+def test_3d_ellipsoid_axis_lengths():
+    """Verify that estimated axis lengths are correct.
+
+    Uses an ellipsoid at an arbitrary position and orientation.
+    """
+    # generate a centered ellipsoid with non-uniform half-lengths (radii)
+    half_lengths = (20, 10, 50)
+    e = draw.ellipsoid(*half_lengths).astype(int)
+
+    # Pad by asymmetric amounts so the ellipse isn't centered. Also, pad enough
+    # that the rotated ellipse will still be within the original volume.
+    e = np.pad(e, pad_width=[(30, 18), (30, 12), (40, 20)], mode='constant')
+
+    # apply rotations to the ellipsoid
+    R = transform.EuclideanTransform(rotation=[0.2, 0.3, 0.4],
+                                     dimensionality=3)
+    e = ndi.affine_transform(e, R.params)
+
+    # Compute regionprops
+    rp = regionprops(e)[0]
+
+    # estimate principal axis lengths via the inertia tensor eigenvalues
+    evs = rp.inertia_tensor_eigvals
+    axis_lengths = _inertia_eigvals_to_axes_lengths_3D(evs)
+    expected_lengths = sorted([2 * h for h in half_lengths], reverse=True)
+    for ax_len_expected, ax_len in zip(expected_lengths, axis_lengths):
+        # verify accuracy to within 1%
+        assert abs(ax_len - ax_len_expected) < 0.01 * ax_len_expected
+
+    # verify that the axis length regionprops also agree
+    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-7
+    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-7
