@@ -187,6 +187,18 @@ thresh_values = [filters.threshold_otsu(s) for s in smooth_seq[:]]
 thresh_seq = [smooth_seq[k, :, :] > thresh_values[k] for k in range(n_z)]
 
 #####################################################################
+# Alternatively, we could compute ``thresh_values`` without using a list
+# comprehension, by reshaping ``smooth_seq`` to make it 2D (where the first
+# dimension still corresponds to time points, but the second and last
+# dimension now contains all pixel values), and applying the thresholding
+# function on the image sequence along its second axis:
+#
+# .. code-block:: python
+#
+#     thresh_values = np.apply_along_axis(filters.threshold_otsu,
+#                                         axis=1,
+#                                         arr=smooth_seq.reshape(n_z, -1))
+#
 # We use the following flat structuring element for morphological
 # computations:
 
