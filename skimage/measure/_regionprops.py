@@ -1322,6 +1322,9 @@ def _parse_docs():
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     for k, v in PROPS.items():
+        if k.lower() != k:
+            # skip adding docs for really old CamelCase property names
+            continue
         prop_doc[k] = prop_doc[v] + (
             f"\nThis property is deprecated, use {v} instead.")
 
