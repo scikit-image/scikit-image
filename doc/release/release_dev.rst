@@ -443,3 +443,143 @@ Other Updates
 
 Contributors to this release
 ----------------------------
+
+74 authors added to this release [alphabetical by first name or login]
+----------------------------------------------------------------------
+- Abhinavmishra8960 (Abhinavmishra8960)
+- Alessia Marcolini
+- Alex Brooks
+- Alexandre de Siqueira
+- Andres Fernandez
+- andrewnags (andrewnags)
+- Antoine Bierret
+- BMaster123 (BMaster123)
+- Carlos Andrés Álvarez Restrepo
+- Christoph Gohlke
+- Christoph Sommer
+- Clement Ng
+- cmarasinou (cmarasinou)
+- Cris Luengo
+- David Manthey
+- Devanshu Shah
+- Dhiraj Kumar Sah
+- divyank agarwal
+- Egor Panfilov
+- Emmanuelle Gouillart
+- Erik Reed
+- erykoff (erykoff)
+- Felipe Gutierrez-Barragan
+- François Boulogne
+- Fred Bunt
+- Fukai Yohsuke
+- Gregory R. Lee
+- Hari Prasad
+- Harish Venkataraman
+- Harshit Dixit
+- Ian Hunt-Isaak
+- Jaime Rodríguez-Guerra
+- Jan-Hendrik Müller
+- Janakarajan Natarajan
+- Jenny Vo
+- john lee
+- Jonathan Striebel
+- Joseph Fox-Rabinovitz
+- Juan Antonio Barragan Noguera
+- Juan Nunez-Iglesias
+- Julien Jerphanion
+- Jurneo
+- klaussfreire (klaussfreire)
+- Larkinnjm1 (Larkinnjm1)
+- Lars Grüter
+- Mads Dyrmann
+- Marianne Corvellec
+- Marios Achilias
+- Mark Boer
+- Mark Harfouche
+- Matthias Bussonnier
+- Mauro Silberberg
+- Max Frei
+- michalkrawczyk (michalkrawczyk)
+- Niels Cautaerts
+- Pamphile ROY
+- Pradyumna Rahul
+- R
+- Raphael
+- Riadh
+- Riadh Fezzani
+- Robert Haase
+- Sebastian Gonzalez Tirado
+- Stefan van der Walt
+- t.ae
+- Thomas Walter
+- Tim Gates
+- Tom Flux
+- Vinicius D. Cerutti
+- Volker Hilsenstein
+- WeiChungChang
+- Xyno18 (Xyno18)
+- yacth
+- Yash-10 (Yash-10)
+
+
+59 reviewers added to this release [alphabetical by first name or login]
+------------------------------------------------------------------------
+- Abhinavmishra8960
+- Alessia Marcolini
+- Alex Brooks
+- Alexandre de Siqueira
+- Andres Fernandez
+- andrewnags
+- BMaster123
+- Carlos Andrés Álvarez Restrepo
+- Clement Ng
+- Cris Luengo
+- Dan Schult
+- David Manthey
+- Egor Panfilov
+- Emmanuelle Gouillart
+- erykoff
+- Felipe Gutierrez-Barragan
+- François Boulogne
+- Fukai Yohsuke
+- Genevieve Buckley
+- Gregory R. Lee
+- Jan Eglinger
+- Jan-Hendrik Müller
+- Janakarajan Natarajan
+- Jarrod Millman
+- Jirka Borovec
+- Joan Massich
+- Johannes Schönberger
+- john lee
+- Jon Crall
+- Joseph Fox-Rabinovitz
+- Josh Warner
+- Juan Nunez-Iglesias
+- Julien Jerphanion
+- Kenneth Hoste
+- klaussfreire
+- Larkinnjm1
+- Lars Grüter
+- Marianne Corvellec
+- Mark Boer
+- Mark Harfouche
+- Matthias Bussonnier
+- Max Frei
+- michalkrawczyk
+- Niels Cautaerts
+- Pamphile ROY
+- Pomax
+- R
+- Raphael
+- Riadh Fezzani
+- Robert Kern
+- Ross Barnowski
+- Sebastian Berg
+- Sebastian Gonzalez Tirado
+- Sebastian Wallkötter
+- Stefan van der Walt
+- t.ae
+- Vinicius D. Cerutti
+- Volker Hilsenstein
+- Yash-10
