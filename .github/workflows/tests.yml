@@ -142,7 +142,7 @@ jobs:
         include:
           - python-version: 3.7
             OPTIONAL_DEPS: 0
-          - python-version: 3.10
+          - python-version: '3.10'
             OPTIONAL_DEPS: 0
         exclude:
           - python-version: 3.7
@@ -151,7 +151,7 @@ jobs:
           - python-version: 3.9
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.10 wheels
-          - python-version: 3.10
+          - python-version: '3.10'
             OPTIONAL_DEPS: 1
     env:
         BUILD_DOCS: 1
