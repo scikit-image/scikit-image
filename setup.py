@@ -8,8 +8,8 @@ import builtins
 import textwrap
 
 import setuptools
-from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist
+from setuptools.command.build_py import build_py
+from setuptools.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
 from numpy.distutils.command.build_ext import build_ext
 
@@ -143,11 +143,6 @@ extras_require = {
     for dep in ['docs', 'optional', 'test', 'data']
 }
 
-# requirements for those browsing PyPI
-REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
-REQUIRES = [r.replace('==', ' (== ') for r in REQUIRES]
-REQUIRES = [r.replace('[array]', '') for r in REQUIRES]
-
 
 def configuration(parent_package='', top_path=None):
     if os.path.exists('MANIFEST'):
@@ -241,7 +236,6 @@ if __name__ == "__main__":
             'Operating System :: MacOS',
         ],
         install_requires=INSTALL_REQUIRES,
-        requires=REQUIRES,
         extras_require=extras_require,
         python_requires='>=3.7',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),

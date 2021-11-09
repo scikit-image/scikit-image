@@ -1,8 +1,10 @@
-
 import numpy as np
+import pytest
+
 from skimage import io
 from skimage._shared._warnings import expected_warnings
-import matplotlib.pyplot as plt
+
+plt = pytest.importorskip("matplotlib.pyplot")
 
 
 def setup():

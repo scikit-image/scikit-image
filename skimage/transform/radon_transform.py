@@ -217,7 +217,7 @@ def iradon(radon_image, theta=None, output_size=None,
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
-    .. versionchanged :: 0.19
+    .. versionchanged:: 0.19
         In ``iradon``, ``filter`` argument is deprecated in favor of
         ``filter_name``.
 
