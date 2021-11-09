@@ -360,7 +360,7 @@ def _equalize_hist_uint(image, mask=None, lut_max=255):
     -------
     out : unsigned integer ndarray
         Image array after histogram equalization. The output histogram will
-        cover the range [0, max_uint_val]
+        cover the range [0, lut_max]
 
     Notes
     -----
