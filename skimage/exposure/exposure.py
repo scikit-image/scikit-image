@@ -350,7 +350,7 @@ def _equalize_hist_uint8(image, mask=None):
 
     Parameters
     ----------
-    image : array
+    image : uint8 ndarray
         Image array.
     mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
@@ -358,7 +358,7 @@ def _equalize_hist_uint8(image, mask=None):
 
     Returns
     -------
-    out : float array
+    out : uint8 ndarray
         Image array after histogram equalization. The output histogram will
         cover the range [0, 255]
 
