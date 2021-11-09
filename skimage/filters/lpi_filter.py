@@ -4,8 +4,8 @@
 """
 
 import numpy as np
+import scipy.fft as fft
 
-from .._shared.fft import fftmodule as fft
 from .._shared.utils import _supported_float_type, check_nD
 
 
