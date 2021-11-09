@@ -345,12 +345,12 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def _equalize_hist_uint8(image, mask=None):
-    """Histogram equalization preserving uint8 dtype
+def _equalize_hist_uint(image, mask=None, lut_max=255):
+    """Histogram equalization preserving unsigned integer dtype.
 
     Parameters
     ----------
-    image : uint8 ndarray
+    image : unsigned integer ndarray
         Image array.
     mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
@@ -358,9 +358,9 @@ def _equalize_hist_uint8(image, mask=None):
 
     Returns
     -------
-    out : uint8 ndarray
+    out : unsigned integer ndarray
         Image array after histogram equalization. The output histogram will
-        cover the range [0, 255]
+        cover the range [0, max_uint_val]
 
     Notes
     -----
@@ -372,6 +372,13 @@ def _equalize_hist_uint8(image, mask=None):
     ..[1] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
 
     """
+    if image.dtype.kind != 'u':
+        raise ValueError("image must have an unsigned integer dtype")
+    if lut_max > np.iinfo(image.dtype).max:
+        raise ValueError(
+            f'specified LUT maximum exceeds the integer range of the image '
+            f'dtype ({image.dtype})'
+        )
     if mask is not None:
         hist = np.bincount(image[mask])
     else:
@@ -382,8 +389,8 @@ def _equalize_hist_uint8(image, mask=None):
     first_nonzero = np.nonzero(cdf)[0][0]
     cdf[first_nonzero:] = cdf[first_nonzero:] - cdf[first_nonzero]
 
-    # normalize so last bin corresponds to 255
-    lookup_table = np.around(cdf * (255 / cdf[-1])).astype(np.uint8)
+    # normalize so last bin corresponds to lut_max
+    lookup_table = np.around(cdf * (lut_max / cdf[-1])).astype(np.uint8)
     return lookup_table[image]
 
 
@@ -431,7 +438,7 @@ def equalize_hist(image, nbins=256, mask=None, *, method='float'):
             raise ValueError(
                 "method 'uint8' requires image to have np.uint8 dtype"
             )
-        return _equalize_hist_uint8(image, mask)
+        return _equalize_hist_uint(image, mask)
     elif method != 'float':
         raise ValueError("method must be 'uint8' or 'float'")
     if mask is not None:
