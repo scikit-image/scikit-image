@@ -24,6 +24,9 @@ jobs:
           - os: ubuntu-18.04
             cibw_python: "cp39-*"
             cibw_manylinux: manylinux2010
+          - os: ubuntu-18.04
+            cibw_python: "cp310-*"
+            cibw_manylinux: manylinux2014
     steps:
       - uses: actions/checkout@v2
         with:
@@ -74,7 +77,7 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
-      - name: Build wheels for CPython 3.9 and Mac OS
+      - name: Build wheels for CPython 3.9 and 3.10 Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
           # supported version of the macos SDK as libomp will be vendored into the
@@ -86,7 +89,7 @@ jobs:
           brew install libomp-11.0.0.high_sierra.bottle.tar.gz
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp39-*"
+          CIBW_BUILD: "cp39-* cp310-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
@@ -151,11 +154,11 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
-      - name: Build wheels for CPython 3.9 (Linux and Windows)
+      - name: Build wheels for CPython 3.9 and 3.10 (Linux and Windows)
         run: |
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp39-*"
+          CIBW_BUILD: "cp39-* cp310-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
