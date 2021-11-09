@@ -424,6 +424,8 @@ def equalize_hist(image, nbins=256, mask=None, *, method='float'):
     .. [2] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
 
     """
+    if mask is not None:
+        mask = np.asarray(mask, dtype=bool)
     if method == 'uint8':
         if image.dtype != np.uint8:
             raise ValueError(
@@ -433,7 +435,6 @@ def equalize_hist(image, nbins=256, mask=None, *, method='float'):
     elif method != 'float':
         raise ValueError("method must be 'uint8' or 'float'")
     if mask is not None:
-        mask = np.array(mask, dtype=bool)
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)
     else:
         cdf, bin_centers = cumulative_distribution(image, nbins)
