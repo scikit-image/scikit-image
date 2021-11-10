@@ -47,7 +47,8 @@ install:
   # Install the build and runtime dependencies of the project.
   - pip install %PIP_FLAGS% -r requirements/default.txt
   - pip install %PIP_FLAGS% -r requirements/build.txt
-  - pip wheel .
+  - pip wheel --wheel-dir=dist .
+
   - ps: "ls dist"
 
   # Install the generated wheel package to test it.
