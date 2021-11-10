@@ -13,7 +13,7 @@ try:
     # see https://github.com/scipy/scipy/pull/15003
     from scipy.spatial import QhullError
 except ImportError:
-    from scipy.spatial.qhull import QhullError 
+    from scipy.spatial.qhull import QhullError
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
