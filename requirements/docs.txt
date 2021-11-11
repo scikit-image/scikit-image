@@ -1,7 +1,7 @@
 # On Nov 11, 2021, Sphinx 4.3.0 broke the documentation
 # generation. Remove the < pin when we get a better understanding
 # of why
-# https://github.com/scikit-image/scikit-image/pull/6029
+# https://github.com/scikit-image/scikit-image/issues/6030
 sphinx>=1.8,<4.3
 sphinx-gallery>=0.7.0,!=0.8.0
 numpydoc>=1.0
