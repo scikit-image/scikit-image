@@ -81,13 +81,15 @@ jobs:
       - name: Build wheels for CPython 3.9 and 3.10 Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into the
-          # scikit-learn wheels for macos. The list of bottles can be found at:
-          # https://formulae.brew.sh/api/formula/libomp.json. Currently, the oldest
-          # supported macos version is: High Sierra / 10.13. When upgrading this, be
-          # sure to update the MACOSX_DEPLOYMENT_TARGET environment variable
-          wget https://homebrew.bintray.com/bottles/libomp-11.0.0.high_sierra.bottle.tar.gz
-          brew install libomp-11.0.0.high_sierra.bottle.tar.gz
+          # supported version of the macos SDK as libomp will be vendored into
+          # the scikit-image wheels for macos. The list of binaries are in
+          # https://packages.macports.org/libomp/.  Currently, the oldest
+          # supported macos version is: High Sierra / 10.13. When upgrading
+          # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
+          # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
+          wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+          sudo tar -C / -xvjf libomp.tbz2 opt
+
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp39-* cp310-*"
