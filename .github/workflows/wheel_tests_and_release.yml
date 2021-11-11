@@ -78,7 +78,7 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
-      - name: Build wheels for CPython 3.9 and 3.10 Mac OS
+      - name: Build wheels for CPython Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
           # supported version of the macos SDK as libomp will be vendored into
@@ -89,29 +89,13 @@ jobs:
           # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
           wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
           sudo tar -C / -xvjf libomp.tbz2 opt
-
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp39-* cp310-*"
+          CIBW_BUILD: "cp3?-* cp310-*"
+          CIBW_SKIP: "cp36-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CC: /usr/bin/clang
-          CXX: /usr/bin/clang++
-          CPPFLAGS: "-Xpreprocessor -fopenmp"
-          CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-          CXXFLAGS: "-I/usr/local/opt/libomp/include"
-          LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
-
-      - name: Build wheels for CPython (MacOS)
-        run: |
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: "cp3?-*"
-          CIBW_SKIP: "cp36-* cp39-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.16
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
           CPPFLAGS: "-Xpreprocessor -fopenmp"
