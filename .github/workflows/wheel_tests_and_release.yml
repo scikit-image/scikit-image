@@ -8,6 +8,7 @@ env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
+  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
 
 
 jobs:
