@@ -1448,7 +1448,7 @@ class PolynomialTransform(GeometricTransform):
         A[rows:, -1] = yd
 
         _, _, V = np.linalg.svd(A)
-
+      
         # solution is right singular vector that corresponds to smallest
         # singular value
         params = - V[-1, :-1] / V[-1, -1]

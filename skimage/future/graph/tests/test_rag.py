@@ -1,3 +1,4 @@
+import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
 from skimage.future import graph
@@ -46,13 +47,16 @@ def test_rag_merge():
     assert list(g.edges()) == []
 
 
-def test_threshold_cut():
+@pytest.mark.parametrize(
+    "img_channels", [channels for channels in range(1, 5)]
+)
+def test_threshold_cut(img_channels):
 
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 254, 254, 254
-    img[50:, :50] = 2, 2, 2
-    img[50:, 50:] = 1, 1, 1
+    img = np.zeros((100, 100, img_channels), dtype='uint8')
+    img[:50, :50] = 255
+    img[:50, 50:] = 254
+    img[50:, :50] = 2
+    img[50:, 50:] = 1
 
     labels = np.zeros((100, 100), dtype='uint8')
     labels[:50, :50] = 0
@@ -70,13 +74,16 @@ def test_threshold_cut():
     assert new_labels.max() == 1
 
 
-def test_cut_normalized():
+@pytest.mark.parametrize(
+    "img_channels", [channels for channels in range(1, 5)]
+)
+def test_cut_normalized(img_channels):
 
-    img = np.zeros((100, 100, 3), dtype='uint8')
-    img[:50, :50] = 255, 255, 255
-    img[:50, 50:] = 254, 254, 254
-    img[50:, :50] = 2, 2, 2
-    img[50:, 50:] = 1, 1, 1
+    img = np.zeros((100, 100, img_channels), dtype='uint8')
+    img[:50, :50] = 255
+    img[:50, 50:] = 254
+    img[50:, :50] = 2
+    img[50:, 50:] = 1
 
     labels = np.zeros((100, 100), dtype='uint8')
     labels[:50, :50] = 0
