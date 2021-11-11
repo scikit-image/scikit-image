@@ -102,9 +102,9 @@ jobs:
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
           CPPFLAGS: "-Xpreprocessor -fopenmp"
-          CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-          CXXFLAGS: "-I/usr/local/opt/libomp/include"
-          LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+          CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
+          CXXFLAGS: "-I/opt/local/include/libomp"
+          LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
