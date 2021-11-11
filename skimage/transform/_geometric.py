@@ -1,6 +1,8 @@
 import math
 import numpy as np
 from scipy import spatial
+from scipy.sparse.linalg import svds
+from scipy.linalg import svd
 import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
@@ -1446,8 +1448,13 @@ class PolynomialTransform(GeometricTransform):
 
         A[:rows, -1] = xd
         A[rows:, -1] = yd
-
-        _, _, V = np.linalg.svd(A)
+        
+        if A.shape[1] <= A.shape[0]:
+            # scipy sparse svd uses less memory
+             _, _, V = svds(A, k=1, which='SM', return_singular_vectors='vh')
+        else:
+            # use full SVD in the overdetermined case
+            _, _, V = np.linalg.svd(A, full_matrices=True)
 
         # solution is right singular vector that corresponds to smallest
         # singular value
