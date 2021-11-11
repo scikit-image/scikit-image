@@ -271,7 +271,7 @@ def test_denoise_bilateral_negative2():
 
     # 2 images with a given offset should give the same result (with the same
     # offset)
-    assert_array_equal(out1, out2 + 10)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
