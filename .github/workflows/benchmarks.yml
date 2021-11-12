@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.7'
+
       - name: Setup some dependencies
         shell: bash -l {0}
         run: |
