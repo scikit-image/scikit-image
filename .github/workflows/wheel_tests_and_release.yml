@@ -7,7 +7,7 @@ on:
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
-  CIBW_TEST_COMMAND: pytest --pyargs skimage
+  CIBW_TEST_COMMAND: pytest --pyargs skimage -vv
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
   CIBW_ARCHS_LINUX: x86_64 aarch64  # TODO: fix i686
   # (currently not avaialable for scipy)
