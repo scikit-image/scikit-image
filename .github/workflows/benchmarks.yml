@@ -67,6 +67,8 @@ jobs:
         run: |
           set -x
 
+          python -m pip install virtualenv
+
           # ID this runner
           asv machine --yes
 
