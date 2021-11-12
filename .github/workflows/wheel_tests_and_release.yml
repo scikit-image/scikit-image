@@ -28,7 +28,11 @@ jobs:
           - os: ubuntu-18.04
             cibw_python: "cp39-*"
             cibw_manylinux: manylinux2010
-            cibw_arch: [ "x86_64", "i686" ]
+            cibw_arch: x86_64
+          - os: ubuntu-18.04
+            cibw_python: "cp39-*"
+            cibw_manylinux: manylinux2010
+            cibw_arch: i686
           - os: ubuntu-18.04
             cibw_python: "cp310-*"
             cibw_manylinux: manylinux2014
