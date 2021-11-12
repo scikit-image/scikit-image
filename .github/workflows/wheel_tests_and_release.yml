@@ -7,7 +7,7 @@ on:
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
-  CIBW_TEST_COMMAND: pytest --pyargs skimage
+  CIBW_TEST_COMMAND: pytest --pyargs skimage -vv
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
   # (currently not avaialable for scipy)
   CIBW_ARCHS_MACOS: x86_64 # TODO: add arm64 universal2
