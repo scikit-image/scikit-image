@@ -55,7 +55,7 @@ jobs:
           path: ./dist/*.whl
 
   build_linux_aarch64_wheels:
-    name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.cibw_python }} aarch64 wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -192,7 +192,7 @@ jobs:
 
   deploy:
     name: Release
-    needs: [build_linux_37_and_above_wheels, build_macos_wheels, build_windows_wheels]
+    needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
     if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
     runs-on: ubuntu-latest
     steps:
