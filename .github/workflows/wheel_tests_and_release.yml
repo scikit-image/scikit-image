@@ -15,7 +15,7 @@ env:
 
 jobs:
   build_linux_37_and_above_wheels:
-    name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
