@@ -10,9 +10,14 @@ environment:
       PYTHON: C:\Python39
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\Python39-x64
-    # build pre release packages on Python 3.8 since it has been out long
+    # NumPy does not currently provide a 32-bit windows wheel for Python 3.10
+    # so only test x86_64 here.
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: C:\Python310-x64
+    # build pre release packages on Python 3.9 since it has been out long
     # enough for wheels to be built for packages that need to be compiled.
-    - PYTHON: C:\Python38-x64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: C:\Python39-x64
       PIP_FLAGS: --pre
 
 matrix:
@@ -43,7 +48,8 @@ install:
   # Install the build and runtime dependencies of the project.
   - pip install %PIP_FLAGS% -r requirements/default.txt
   - pip install %PIP_FLAGS% -r requirements/build.txt
-  - python setup.py bdist_wheel bdist_wininst
+  - pip wheel --wheel-dir=dist .
+
   - ps: "ls dist"
 
   # Install the generated wheel package to test it.
