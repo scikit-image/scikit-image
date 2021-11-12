@@ -24,11 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          installer-url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-
       - name: Setup some dependencies
         shell: bash -l {0}
         run: |
@@ -72,9 +67,6 @@ jobs:
 
           echo "Baseline:  ${{ github.event.pull_request.base.sha }} (${{ github.event.pull_request.base.label }})"
           echo "Contender: ${GITHUB_SHA} (${{ github.event.pull_request.head.label }})"
-
-          # Use mamba for env creation
-          export CONDA_EXE=$(which mamba)
 
           # Run benchmarks for current commit against base
           ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
