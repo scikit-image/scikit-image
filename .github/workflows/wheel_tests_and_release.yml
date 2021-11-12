@@ -9,7 +9,6 @@ env:
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-  CIBW_ARCHS_LINUX: x86_64 aarch64  # TODO: fix i686
   # (currently not avaialable for scipy)
   CIBW_ARCHS_MACOS: x86_64 # TODO: add arm64 universal2
 
@@ -39,6 +38,39 @@ jobs:
         name: Install Python
         with:
           python-version: '3.7'
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install cibuildwheel
+      - name: Build the wheel
+        run: |
+          python -m cibuildwheel --output-dir dist
+        env:
+          CIBW_BUILD: ${{ matrix.cibw_python }}
+          CIBW_ARCHS_LINUX: x86_64 i686
+          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: ./dist/*.whl
+
+  build_linux_aarch64_wheels:
+    name: Build python ${{ matrix.cibw_python }} wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+        cibw_python: [ "cp37-*", "cp38-*" , "cp39-*" , "cp310-*" ]
+        cibw_manylinux: [ manylinux2014 ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.7'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -52,6 +84,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_SKIP: "*-musllinux_*"
+          CIBW_ARCHS_LINUX: aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
       - uses: actions/upload-artifact@v2
