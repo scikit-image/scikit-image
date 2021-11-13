@@ -168,7 +168,7 @@ fig, ax = plt.subplots(1, 1)
 ax.imshow(composite_img, cmap="gray", vmin=0, vmax=1)
 ax.set_axis_off()
 ax.set_title(f"Reconstructed image (PSNR={psnr_composite:.2f})")
-
 fig.tight_layout()
+# sphinx_gallery_thumbnail_number = 2
 
 plt.show()

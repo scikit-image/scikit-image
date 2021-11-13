@@ -4,8 +4,7 @@ from numpy.testing import assert_array_equal, assert_equal
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
-from skimage.filters._gaussian import (_guess_spatial_dimensions,
-                                       difference_of_gaussians, gaussian)
+from skimage.filters import difference_of_gaussians, gaussian
 
 
 def test_negative_sigma():
@@ -128,19 +127,6 @@ def test_4d_ok():
     assert np.allclose(res.sum(), 1)
 
 
-def test_guess_spatial_dimensions():
-    im1 = np.zeros((5, 5))
-    im2 = np.zeros((5, 5, 5))
-    im3 = np.zeros((5, 5, 3))
-    im4 = np.zeros((5, 5, 5, 3))
-    im5 = np.zeros((5,))
-    assert_equal(_guess_spatial_dimensions(im1), 2)
-    assert_equal(_guess_spatial_dimensions(im2), 3)
-    assert_equal(_guess_spatial_dimensions(im3), None)
-    assert_equal(_guess_spatial_dimensions(im4), 3)
-    assert_equal(_guess_spatial_dimensions(im5), 1)
-
-
 @pytest.mark.parametrize(
     "dtype", [np.float32, np.float64]
 )
@@ -162,12 +148,16 @@ def test_output_error():
 
 @pytest.mark.parametrize("s", [1, (2, 3)])
 @pytest.mark.parametrize("s2", [4, (5, 6)])
-def test_difference_of_gaussians(s, s2):
+@pytest.mark.parametrize("channel_axis", [None, 0, 1, -1])
+def test_difference_of_gaussians(s, s2, channel_axis):
     image = np.random.rand(10, 10)
-    im1 = gaussian(image, s, preserve_range=True)
-    im2 = gaussian(image, s2, preserve_range=True)
+    if channel_axis is not None:
+        n_channels = 5
+        image = np.stack((image,) * n_channels, channel_axis)
+    im1 = gaussian(image, s, preserve_range=True, channel_axis=channel_axis)
+    im2 = gaussian(image, s2, preserve_range=True, channel_axis=channel_axis)
     dog = im1 - im2
-    dog2 = difference_of_gaussians(image, s, s2)
+    dog2 = difference_of_gaussians(image, s, s2, channel_axis=channel_axis)
     assert np.allclose(dog, dog2)
 
 

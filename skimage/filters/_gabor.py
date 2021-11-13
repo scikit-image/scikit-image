@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -9,7 +11,7 @@ __all__ = ['gabor_kernel', 'gabor']
 def _sigma_prefactor(bandwidth):
     b = bandwidth
     # See http://www.cs.rug.nl/~imaging/simplecell.html
-    return 1.0 / np.pi * np.sqrt(np.log(2) / 2.0) * \
+    return 1.0 / np.pi * math.sqrt(math.log(2) / 2.0) * \
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
@@ -83,19 +85,26 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     if np.dtype(dtype).kind != 'c':
         raise ValueError("dtype must be complex")
 
-    x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
-                     np.abs(n_stds * sigma_y * np.sin(theta)), 1))
-    y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
-                     np.abs(n_stds * sigma_x * np.sin(theta)), 1))
-    y, x = np.mgrid[-y0:y0 + 1, -x0:x0 + 1]
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    x0 = math.ceil(
+        max(abs(n_stds * sigma_x * ct), abs(n_stds * sigma_y * st), 1)
+    )
+    y0 = math.ceil(
+        max(abs(n_stds * sigma_y * ct), abs(n_stds * sigma_x * st), 1)
+    )
+    y, x = np.meshgrid(np.arange(-y0, y0 + 1),
+                       np.arange(-x0, x0 + 1),
+                       indexing='ij',
+                       sparse=True)
+    rotx = x * ct + y * st
+    roty = -x * st + y * ct
 
-    rotx = x * np.cos(theta) + y * np.sin(theta)
-    roty = -x * np.sin(theta) + y * np.cos(theta)
-
-    g = np.zeros(y.shape, dtype=dtype)
-    g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
-    g /= 2 * np.pi * sigma_x * sigma_y
-    g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
+    g = np.empty(roty.shape, dtype=dtype)
+    np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2)
+           + 1j * (2 * np.pi * frequency * rotx + offset),
+           out=g)
+    g *= 1 / (2 * np.pi * sigma_x * sigma_y)
 
     return g
 
@@ -173,10 +182,14 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.show()               # doctest: +SKIP
     """
     check_nD(image, 2)
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    # do not cast integer types to float!
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+        kernel_dtype = np.promote_types(image.dtype, np.complex64)
+    else:
+        kernel_dtype = np.complex128
 
-    kernel_dtype = np.promote_types(image.dtype, np.complex64)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset, dtype=kernel_dtype)
 

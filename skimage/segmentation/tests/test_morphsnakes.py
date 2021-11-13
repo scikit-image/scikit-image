@@ -65,7 +65,6 @@ def test_morphsnakes_iterations_kwarg_deprecation():
     ls = disk_level_set(img.shape, center=(5, 5), radius=3)
 
     ref_zeros = np.zeros(img.shape, dtype=np.int8)
-    ref_ones = np.ones(img.shape, dtype=np.int8)
 
     with expected_warnings(["`iterations` is a deprecated argument"]):
         acwe_ls = morphological_chan_vese(img, iterations=6, init_level_set=ls)

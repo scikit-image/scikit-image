@@ -3,11 +3,11 @@ import pytest
 from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_array_equal, assert_array_less, assert_equal)
 from scipy.ndimage import fourier_shift, shift as real_shift
+import scipy.fft as fft
 
-from skimage._shared.fft import fftmodule as fft
-from skimage._shared.testing import fetch, expected_warnings
+from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
-from skimage.data import camera, stereo_motorcycle, brain
+from skimage.data import camera, brain
 
 
 from skimage.io import imread
