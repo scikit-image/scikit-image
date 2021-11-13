@@ -7,7 +7,9 @@ This tutorial shows how to build interactive tools and applications
 using [Panel](https://panel.holoviz.org/), [HoloViews](https://holoviews.org/) you can use to make
 you and your teams analysis more interactive and powerful.
 
-![A video showcasing the application](https://user-images.githubusercontent.com/42288570/141608299-21fb5aa0-e30e-463b-b3bb-dbd12a71ec86.mp4)
+![A video showcasing the application]\
+(https://user-images.githubusercontent.com/\
+42288570/141608299-21fb5aa0-e30e-463b-b3bb-dbd12a71ec86.mp4)
 
 You can develop using notebooks or .py files. You can use it with a very broad range of Pythons Viz.
 You can use the tools in your notebook or deploy on your web server.
@@ -16,7 +18,8 @@ To run this example you would need to get some python packages installed. You ca
 environment from scratch using.
 
 ```bash
-conda create -n scikit-image-demo -c conda-forge jupyterlab panel holoviews scikit-image selenium firefox geckodriver
+conda create -n scikit-image-demo -c conda-forge jupyterlab panel holoviews scikit-image selenium \
+firefox geckodriver
 conda activate scikit-image-demo
 jupyter serverextension enable panel.io.jupyter_server_extension
 ```
@@ -133,12 +136,12 @@ def callback():
         cmap=cmap.value, height=height, width=width, xaxis=None, yaxis=None
     )
 
-    b = BytesIO()
-    hv.save(plot, b, fmt="png")
-    b.seek(0)
+    bytesio = BytesIO()
+    hv.save(plot, bytesio, fmt="png")
+    bytesio.seek(0)
 
     download.loading = False
-    return b
+    return bytesio
 
 
 download.callback = callback
@@ -172,6 +175,9 @@ pn.template.FastListTemplate(
 ).servable()
 
 ########################################
-# You can serve the app using `panel serve ScikitImageSobelApp.ipynb` and the app will be available at [http://localhost:5006/ScikitImageSobelApp](http://localhost:5006/ScikitImageSobelApp). Add the `--autoreload` flag for hot reloading during development.
+# You can serve the app using `panel serve ScikitImageSobelApp.ipynb` and the app will be available
+# at [http://localhost:5006/ScikitImageSobelApp](http://localhost:5006/ScikitImageSobelApp).
+# Add the `--autoreload` flag for hot reloading during development.
 #
-# You can also install the jupyterlab preview for hot reload inside Jupyter Lab during development. See https://blog.holoviz.org/panel_0.12.0.html#JupyterLab-previews
+# You can also install the jupyterlab preview for hot reload inside Jupyter Lab during development.
+# See https://blog.holoviz.org/panel_0.12.0.html#JupyterLab-previews
