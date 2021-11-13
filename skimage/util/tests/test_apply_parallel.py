@@ -123,7 +123,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
 
     For depth and chunks, test in three ways:
     1.) scalar (to be applied over all axes)
-    2.) tuple of length `image.ndim - 1` value corresponding to spatial axes
+    2.) tuple of length ``image.ndim - 1`` corresponding to spatial axes
     3.) tuple of length `image.ndim` corresponding to all axes
     """
     cat = img_as_float(data.chelsea())
@@ -131,10 +131,10 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat, channel_axis=-1)
 
-    # channels axis along first dimension instead
+    # move channel axis to another position
     cat = np.moveaxis(cat, -1, channel_axis)
     if chunks == 'ndim':
-        # explicitly specify the chunksize for the channels axis
+        # explicitly specify the chunksize for the channel axis
         chunks = [128, 128]
         chunks.insert(channel_axis % cat.ndim, cat.shape[channel_axis])
     if depth == 'ndim':

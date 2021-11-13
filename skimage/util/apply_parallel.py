@@ -165,7 +165,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         except NotImplementedError:
             ncpu = 4
         if channel_axis is not None:
-            # use a single chunk along the channels axis
+            # use a single chunk along the channel axis
             spatial_shape = shape[:channel_axis] + shape[channel_axis + 1:]
             chunks = list(_get_chunks(spatial_shape, ncpu))
             chunks.insert(channel_axis, shape[channel_axis])
@@ -173,7 +173,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         else:
             chunks = _get_chunks(shape, ncpu)
     elif channel_axis is not None and len(chunks) == array.ndim - 1:
-        # insert a single chunk along the channel_axis
+        # insert a single chunk along the channel axis
         chunks = list(chunks)
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
