@@ -17,7 +17,6 @@ import numbers
 import numpy as np
 from ..util import img_as_float, img_as_uint
 from ..color.adapt_rgb import adapt_rgb, hsv_value
-from ..exposure import rescale_intensity
 
 
 NR_OF_GRAY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
@@ -74,6 +73,7 @@ def equalize_adapthist(image, kernel_size=None,
     .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
+    from ._multimethods import rescale_intensity
 
     image = img_as_uint(image)
     image = np.round(
