@@ -183,7 +183,7 @@ def _label_kw_image_colors_alpha_bglabel_bgcolor_replacer(
             colors,
             dispatchables[2],
             bg_label,
-            dispatchables[3],
+            bg_color,
         ) + args, kw_out
 
     return self_method(*args, **kwargs)

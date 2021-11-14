@@ -7,8 +7,7 @@ from numpy.testing import (assert_array_almost_equal,
                            assert_warns)
 
 from skimage._shared.testing import expected_warnings
-from skimage.color.colorconv import hsv2rgb, rgb2hsv
-from skimage.color.colorlabel import label2rgb
+from skimage.color import hsv2rgb, label2rgb, rgb2hsv
 
 
 def test_shape_mismatch():
