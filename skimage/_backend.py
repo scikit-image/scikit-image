@@ -22,6 +22,14 @@ class scalar_or_array:
     pass
 
 
+class array_or_transform:
+    """
+    Special case argument that can be either an array or GeometricTransform
+    for __ua_convert__.
+    """
+    pass
+
+
 _mark_output = functools.partial(ua.Dispatchable,
                                  dispatch_type=image_output,
                                  coercible=False)
@@ -29,6 +37,11 @@ _mark_output = functools.partial(ua.Dispatchable,
 
 _mark_scalar_or_array = functools.partial(
     ua.Dispatchable, dispatch_type=scalar_or_array, coercible=True
+)
+
+
+_mark_transform = functools.partial(
+    ua.Dispatchable, dispatch_type=array_or_transform, coercible=True
 )
 
 
@@ -77,13 +90,20 @@ class _ScikitImageBackend:
                 return NotImplemented
             return value
 
-        if dispatch_type is np.dtype:
+        elif dispatch_type is np.dtype:
             return np.dtype(value)
 
-        if dispatch_type is scalar_or_array:
+        elif dispatch_type is scalar_or_array:
             if np.isscalar(value):
                 return value
             elif not coerce and not isinstance(value, np.ndarray):
+                return NotImplemented
+            return value
+
+        elif dispatch_type is array_or_transform:
+            from skimage.transform._geometric import GeometricTransform
+            if not (isinstance(value, np.ndarray)
+                    or isinstance(value, GeometricTransform)):
                 return NotImplemented
             return value
 

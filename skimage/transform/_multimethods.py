@@ -11,9 +11,12 @@ from uarray import (
 )
 from unumpy import mark_dtype
 
-from skimage._backend import _mark_output, _mark_scalar_or_array
+from skimage._backend import (_mark_output, _mark_scalar_or_array,
+                              _mark_transform)
 
 from skimage.transform import _api
+
+
 
 __all__ = [
     # 'AffineTransform',
@@ -282,15 +285,10 @@ def _image_inversemap_kw_mapargs_outputshape_replacer(
     args, kwargs, dispatchables
 ):
     def self_method(
-        image, inverse_map, map_args={}, output_shape=None, *args, **kwargs
+        image, inverse_map, *args, **kwargs
     ):
         kw_out = kwargs.copy()
-        return (
-            dispatchables[0],
-            dispatchables[1],
-            map_args,
-            dispatchables[2],
-        ) + args, kw_out
+        return (dispatchables[0], dispatchables[1]) + args, kw_out
 
     return self_method(*args, **kwargs)
 
@@ -652,7 +650,7 @@ def warp(
     clip=True,
     preserve_range=False,
 ):
-    return (image, output_shape)
+    return (image, _mark_transform(inverse_map))
 
 
 @create_skimage_transform(_coordmap_shape_kw_dtype_replacer)
