@@ -5,7 +5,7 @@ from ._multimethods import (erosion, dilation, opening, closing, white_tophat,
                             black_tophat)
 from ._multimethods import (square, rectangle, diamond, disk, cube, octahedron,
                             ball, octagon, star)
-from ..measure._label import label
+from ..measure import label
 from ._multimethods import skeletonize, medial_axis, thin, skeletonize_3d
 from ._multimethods import convex_hull_image, convex_hull_object
 from ._multimethods import reconstruction
