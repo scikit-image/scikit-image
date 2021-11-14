@@ -2,7 +2,7 @@ from .._shared import lazy
 
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
-    submodules={'rank'},
+    submodules={'rank', '_api'},
     submod_attrs={
         'lpi_filter': ['LPIFilter2D'],
         '_multimethods': ['inverse', 'wiener', 'gaussian',

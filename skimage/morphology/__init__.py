@@ -1,3 +1,4 @@
+from . import _api
 from ._multimethods import (binary_erosion, binary_dilation, binary_opening,
                             binary_closing)
 from ._multimethods import (erosion, dilation, opening, closing, white_tophat,
