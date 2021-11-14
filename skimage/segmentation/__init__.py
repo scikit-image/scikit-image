@@ -1,19 +1,12 @@
-from ._expand_labels import expand_labels
-from .random_walker_segmentation import random_walker
-from .active_contour_model import active_contour
-from ._felzenszwalb import felzenszwalb
-from .slic_superpixels import slic
-from ._quickshift import quickshift
-from .boundaries import find_boundaries, mark_boundaries
-from ._clear_border import clear_border
-from ._join import join_segmentations, relabel_sequential
-from ._watershed import watershed
-from ._chan_vese import chan_vese
-from .morphsnakes import (morphological_geodesic_active_contour,
-                          morphological_chan_vese, inverse_gaussian_gradient,
-                          disk_level_set, checkerboard_level_set)
 from ..morphology import flood, flood_fill
-
+from . import _api
+from ._multimethods import (active_contour, chan_vese, checkerboard_level_set,
+                            clear_border, disk_level_set, expand_labels,
+                            felzenszwalb, find_boundaries,
+                            inverse_gaussian_gradient, join_segmentations,
+                            mark_boundaries, morphological_chan_vese,
+                            morphological_geodesic_active_contour, quickshift,
+                            random_walker, relabel_sequential, slic, watershed)
 
 __all__ = [
     'expand_labels',

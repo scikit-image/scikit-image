@@ -123,8 +123,6 @@ def test_bad_input():
         active_contour(img, init, boundary_condition='wrong')
     with pytest.raises(ValueError):
         active_contour(img, init, max_num_iter=-15)
-    with expected_warnings(["`max_iterations` is a deprecated argument"]):
-        active_contour(img, init, max_iterations=15)
 
 
 def test_coord_raises():

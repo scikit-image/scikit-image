@@ -14,7 +14,6 @@ from warnings import warn
 import numpy as np
 
 from .._shared.utils import _supported_float_type, check_nD
-from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 from ..util import img_as_float, invert
 
 
@@ -136,6 +135,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
         Array with (sorted) eigenvalues of Hessian eigenvalues for each pixel
         of the input image.
     """
+    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
     # Convert image to float
     float_dtype = _supported_float_type(image.dtype)
