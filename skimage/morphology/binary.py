@@ -4,7 +4,6 @@ Binary morphological operations
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import deprecate_kwarg
 from .misc import default_footprint
 
 
@@ -12,7 +11,6 @@ from .misc import default_footprint
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def binary_erosion(image, footprint=None, out=None):
     """Return fast binary morphological erosion of an image.
 
@@ -49,7 +47,6 @@ def binary_erosion(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def binary_dilation(image, footprint=None, out=None):
     """Return fast binary morphological dilation of an image.
 
@@ -84,7 +81,6 @@ def binary_dilation(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def binary_opening(image, footprint=None, out=None):
     """Return fast binary morphological opening of an image.
 
@@ -119,7 +115,6 @@ def binary_opening(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def binary_closing(image, footprint=None, out=None):
     """Return fast binary morphological closing of an image.
 

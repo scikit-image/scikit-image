@@ -11,7 +11,7 @@ Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 """
 import numpy as np
 
-from .._shared.utils import deprecate_kwarg, warn
+from .._shared.utils import warn
 from ..util import dtype_limits, invert, crop
 from . import grayreconstruct, _util
 from ._extrema_cy import _local_maxima
@@ -45,7 +45,6 @@ def _subtract_constant_clip(image, const_value):
     return(result)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def h_maxima(image, h, footprint=None):
     """Determine all maxima of the image with height >= h.
 
@@ -175,7 +174,6 @@ def h_maxima(image, h, footprint=None):
     return (residue_img >= h).astype(np.uint8)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def h_minima(image, h, footprint=None):
     """Determine all minima of the image with depth >= h.
 
@@ -273,7 +271,6 @@ def h_minima(image, h, footprint=None):
     return (residue_img >= h).astype(np.uint8)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def local_maxima(image, footprint=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local maxima of n-dimensional array.
@@ -438,7 +435,6 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
         return flags.view(bool)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def local_minima(image, footprint=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local minima of n-dimensional array.

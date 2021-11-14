@@ -35,11 +35,6 @@ def test_median_warning(image, mode, cval, behavior,
         assert isinstance(rec.message, warning_type)
 
 
-def test_selem_kwarg_deprecation(image):
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        median(image, selem=None)
-
-
 @pytest.mark.parametrize(
     "behavior, func, params",
     [('ndimage', ndimage.median_filter, {'size': (3, 3)}),

@@ -11,21 +11,15 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
+from skimage.filters import (threshold_isodata, threshold_li, threshold_local,
+                             threshold_mean, threshold_minimum,
+                             threshold_multiotsu, threshold_niblack,
+                             threshold_otsu, threshold_sauvola,
+                             threshold_triangle, threshold_yen,
+                             try_all_threshold)
 from skimage.filters._multiotsu import (_get_multiotsu_thresh_indices,
                                         _get_multiotsu_thresh_indices_lut)
-from skimage.filters.thresholding import (_cross_entropy, _mean_std,
-                                          threshold_isodata,
-                                          threshold_li,
-                                          threshold_local,
-                                          threshold_mean,
-                                          threshold_minimum,
-                                          threshold_multiotsu,
-                                          threshold_niblack,
-                                          threshold_otsu,
-                                          threshold_sauvola,
-                                          threshold_triangle,
-                                          threshold_yen,
-                                          try_all_threshold)
+from skimage.filters.thresholding import _cross_entropy, _mean_std
 
 
 class TestSimpleImage():
@@ -529,13 +523,6 @@ def test_threshold_minimum_histogram():
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=hist)
     assert_equal(threshold, 85)
-
-
-def test_threshold_minimum_deprecated_max_iter_kwarg():
-    camera = util.img_as_ubyte(data.camera())
-    hist = histogram(camera.ravel(), 256, source_range='image')
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        threshold_minimum(hist=hist, max_iter=5000)
 
 
 def test_threshold_minimum_counts():

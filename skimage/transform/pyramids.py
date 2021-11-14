@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared import utils
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
 from .._shared.utils import convert_to_float
 from ..transform import resize
 

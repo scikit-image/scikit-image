@@ -22,7 +22,7 @@ References
 
 """
 
-from ..._shared.utils import check_nD, deprecate_kwarg
+from ..._shared.utils import check_nD
 from . import percentile_cy
 from .generic import _preprocess_input
 
@@ -45,7 +45,6 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, p0, p1,
     return out.reshape(out.shape[:2])
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def autolevel_percentile(image, footprint, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0, p1=1):
     """Return grayscale local autolevel of an image.
@@ -85,7 +84,6 @@ def autolevel_percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
                         shift_y=False, p0=0, p1=1):
     """Return local gradient of an image (i.e. local maximum - local minimum).
@@ -122,7 +120,6 @@ def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
     """Return local mean of an image.
@@ -159,7 +156,6 @@ def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def subtract_mean_percentile(image, footprint, out=None, mask=None,
                              shift_x=False, shift_y=False, p0=0, p1=1):
     """Return image subtracted from its local mean.
@@ -196,7 +192,6 @@ def subtract_mean_percentile(image, footprint, out=None, mask=None,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def enhance_contrast_percentile(image, footprint, out=None, mask=None,
                                 shift_x=False, shift_y=False, p0=0, p1=1):
     """Enhance contrast of an image.
@@ -237,7 +232,6 @@ def enhance_contrast_percentile(image, footprint, out=None, mask=None,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def percentile(image, footprint, out=None, mask=None, shift_x=False,
                shift_y=False, p0=0):
     """Return local percentile of an image.
@@ -276,7 +270,6 @@ def percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=0.)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local number (population) of pixels.
@@ -316,7 +309,6 @@ def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def sum_percentile(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local sum of pixels.
@@ -356,7 +348,6 @@ def sum_percentile(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def threshold_percentile(image, footprint, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
     """Local threshold of an image.

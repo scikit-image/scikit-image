@@ -6,7 +6,7 @@ import numpy as np
 
 cimport numpy as cnp
 
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
 from .._shared.utils import warn
 from ..measure._ccomp cimport find_root, join_trees
 from ..util import img_as_float64

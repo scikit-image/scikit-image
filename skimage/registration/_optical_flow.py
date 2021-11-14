@@ -9,7 +9,7 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.filters import gaussian as gaussian_filter
+from .._shared.multimethods import gaussian as gaussian_filter
 from .._shared.utils import _supported_float_type
 from ..transform import warp
 from ._optical_flow_utils import coarse_to_fine, get_warp_points

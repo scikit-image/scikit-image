@@ -154,6 +154,8 @@ else:
         _raise_build_error(e)
 
     # All skimage root imports go here
+    from ._backend import (register_backend, set_backend, set_global_backend,
+                           skip_backend)
     from .util.dtype import (img_as_float32,
                              img_as_float64,
                              img_as_float,

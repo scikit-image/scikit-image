@@ -11,11 +11,9 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
-from .._shared.utils import deprecate_kwarg
 from ..filters._rank_order import rank_order
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
 def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """Perform a morphological reconstruction of an image.
 

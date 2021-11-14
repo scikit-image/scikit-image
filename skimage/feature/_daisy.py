@@ -5,10 +5,9 @@ from numpy import arctan2, exp, pi, sqrt
 
 from .. import draw
 from ..util.dtype import img_as_float
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
 from .._shared.utils import check_nD
 from ..color import gray2rgb
-
 
 
 def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,

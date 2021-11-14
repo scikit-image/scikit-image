@@ -4,7 +4,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
 from .._shared.utils import _supported_float_type, check_nD
 from ..transform import integral_image
 from ..util import img_as_float

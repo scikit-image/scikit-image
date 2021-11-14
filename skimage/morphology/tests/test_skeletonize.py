@@ -146,12 +146,6 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert_array_equal(result, expected)
 
-    def test_max_iter_kwarg_deprecation(self):
-        result1 = thin(self.input_image, max_num_iter=1).astype(np.uint8)
-        with expected_warnings(["`max_iter` is a deprecated argument name"]):
-            result2 = thin(self.input_image, max_iter=1).astype(np.uint8)
-        assert_array_equal(result1, result2)
-
     def test_noiter(self):
         result = thin(self.input_image).astype(np.uint8)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],

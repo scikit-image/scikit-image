@@ -6,8 +6,10 @@ import pytest
 from numpy.testing import assert_equal
 from pytest import raises, warns
 
+from skimage import morphology
 from skimage._shared.testing import expected_warnings
-from skimage.morphology import extrema
+from skimage.morphology.extrema import _add_constant_clip, _subtract_constant_clip
+
 
 
 eps = 1e-12
@@ -30,14 +32,14 @@ class TestExtrema():
                          [4, 10, 1, 3]],
                         dtype=np.uint8)
         # adding the constant
-        img_constant_added = extrema._add_constant_clip(data, 4)
+        img_constant_added = _add_constant_clip(data, 4)
         expected = np.array([[254, 255, 9, 9],
                              [104, 204, 255, 255],
                              [8, 14, 5, 7]],
                             dtype=np.uint8)
         error = diff(img_constant_added, expected)
         assert error < eps
-        img_constant_subtracted = extrema._subtract_constant_clip(data, 4)
+        img_constant_subtracted = _subtract_constant_clip(data, 4)
         expected = np.array([[246, 247, 1, 1],
                              [96, 196, 249, 248],
                              [0, 6, 0, 0]],
@@ -49,13 +51,13 @@ class TestExtrema():
         data = np.array([[32767, 32766],
                          [-32768, -32767]],
                         dtype=np.int16)
-        img_constant_added = extrema._add_constant_clip(data, 1)
+        img_constant_added = _add_constant_clip(data, 1)
         expected = np.array([[32767, 32767],
                              [-32767, -32766]],
                             dtype=np.int16)
         error = diff(img_constant_added, expected)
         assert error < eps
-        img_constant_subtracted = extrema._subtract_constant_clip(data, 1)
+        img_constant_subtracted = _subtract_constant_clip(data, 1)
         expected = np.array([[32766, 32765],
                              [-32768, -32768]],
                             dtype=np.int16)
@@ -90,7 +92,7 @@ class TestExtrema():
                                    dtype=np.uint8)
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
             data = data.astype(dtype)
-            out = extrema.h_maxima(data, 40)
+            out = morphology.h_maxima(data, 40)
 
             error = diff(expected_result, out)
             assert error < eps
@@ -123,7 +125,7 @@ class TestExtrema():
                                    dtype=np.uint8)
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
             data = data.astype(dtype)
-            out = extrema.h_minima(data, 40)
+            out = morphology.h_minima(data, 40)
 
             error = diff(expected_result, out)
             assert error < eps
@@ -154,7 +156,7 @@ class TestExtrema():
                         dtype=np.float32)
         inverted_data = 1.0 - data
 
-        out = extrema.h_maxima(data, 0.003)
+        out = morphology.h_maxima(data, 0.003)
         expected_result = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
@@ -170,7 +172,7 @@ class TestExtrema():
         error = diff(expected_result, out)
         assert error < eps
 
-        out = extrema.h_minima(inverted_data, 0.003)
+        out = morphology.h_minima(inverted_data, 0.003)
         error = diff(expected_result, out)
         assert error < eps
 
@@ -189,7 +191,7 @@ class TestExtrema():
         expected_result[(data > 19.9)] = 1.0
 
         for h in [1.0e-12, 1.0e-6, 1.0e-3, 1.0e-2, 1.0e-1, 0.1]:
-            out = extrema.h_maxima(data, h)
+            out = morphology.h_maxima(data, h)
             error = diff(expected_result, out)
             assert error < eps
 
@@ -211,7 +213,7 @@ class TestExtrema():
                 msgs = []
 
             with expected_warnings(msgs):
-                maxima = extrema.h_maxima(data, h)
+                maxima = morphology.h_maxima(data, h)
 
             if (maxima[2, 2] == 0):
                 failures += 1
@@ -226,7 +228,7 @@ class TestExtrema():
                          [10, 13, 13, 13, 10],
                          [10, 10, 10, 10, 10]], dtype=np.uint8)
 
-        maxima = extrema.h_maxima(data, 5)
+        maxima = morphology.h_maxima(data, 5)
         assert (np.sum(maxima) == 0)
 
         data = np.array([[10, 10, 10, 10, 10],
@@ -235,7 +237,7 @@ class TestExtrema():
                          [10, 13, 13, 13, 10],
                          [10, 10, 10, 10, 10]], dtype=np.float32)
 
-        maxima = extrema.h_maxima(data, 5.0)
+        maxima = morphology.h_maxima(data, 5.0)
         assert (np.sum(maxima) == 0)
 
     def test_h_minima_float_image(self):
@@ -253,7 +255,7 @@ class TestExtrema():
         expected_result[(data < 180.1)] = 1.0
 
         for h in [1.0e-12, 1.0e-6, 1.0e-3, 1.0e-2, 1.0e-1, 0.1]:
-            out = extrema.h_minima(data, h)
+            out = morphology.h_minima(data, h)
             error = diff(expected_result, out)
             assert error < eps
 
@@ -274,7 +276,7 @@ class TestExtrema():
                 msgs = []
 
             with expected_warnings(msgs):
-                minima = extrema.h_minima(data, h)
+                minima = morphology.h_minima(data, h)
 
             if (minima[2, 2] == 0):
                 failures += 1
@@ -289,7 +291,7 @@ class TestExtrema():
                          [14, 11, 11, 11, 14],
                          [14, 14, 14, 14, 14]], dtype=np.uint8)
 
-        maxima = extrema.h_minima(data, 5)
+        maxima = morphology.h_minima(data, 5)
         assert (np.sum(maxima) == 0)
 
         data = np.array([[14, 14, 14, 14, 14],
@@ -298,7 +300,7 @@ class TestExtrema():
                          [14, 11, 11, 11, 14],
                          [14, 14, 14, 14, 14]], dtype=np.float32)
 
-        maxima = extrema.h_minima(data, 5.0)
+        maxima = morphology.h_minima(data, 5.0)
         assert (np.sum(maxima) == 0)
 
 
@@ -342,18 +344,18 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_empty(self):
         """Test result with empty image."""
-        result = extrema.local_maxima(np.array([[]]), indices=False)
+        result = morphology.local_maxima(np.array([[]]), indices=False)
         assert result.size == 0
         assert result.dtype == bool
         assert result.shape == (1, 0)
 
-        result = extrema.local_maxima(np.array([]), indices=True)
+        result = morphology.local_maxima(np.array([]), indices=True)
         assert isinstance(result, tuple)
         assert len(result) == 1
         assert result[0].size == 0
         assert result[0].dtype == np.intp
 
-        result = extrema.local_maxima(np.array([[]]), indices=True)
+        result = morphology.local_maxima(np.array([[]]), indices=True)
         assert isinstance(result, tuple)
         assert len(result) == 2
         assert result[0].size == 0
@@ -364,7 +366,7 @@ class TestLocalMaxima(unittest.TestCase):
     def test_dtypes(self):
         """Test results with default configuration for all supported dtypes."""
         for dtype in self.supported_dtypes:
-            result = extrema.local_maxima(self.image.astype(dtype))
+            result = morphology.local_maxima(self.image.astype(dtype))
             assert result.dtype == bool
             assert_equal(result, self.expected_default)
 
@@ -401,24 +403,24 @@ class TestLocalMaxima(unittest.TestCase):
         )
         for dtype in self.supported_dtypes:
             image = data.astype(dtype)
-            result = extrema.local_maxima(image)
+            result = morphology.local_maxima(image)
             assert result.dtype == bool
             assert_equal(result, expected)
 
     def test_connectivity(self):
         """Test results if footprint is a scalar."""
         # Connectivity 1: generates cross shaped footprint
-        result_conn1 = extrema.local_maxima(self.image, connectivity=1)
+        result_conn1 = morphology.local_maxima(self.image, connectivity=1)
         assert result_conn1.dtype == bool
         assert_equal(result_conn1, self.expected_cross)
 
         # Connectivity 2: generates square shaped footprint
-        result_conn2 = extrema.local_maxima(self.image, connectivity=2)
+        result_conn2 = morphology.local_maxima(self.image, connectivity=2)
         assert result_conn2.dtype == bool
         assert_equal(result_conn2, self.expected_default)
 
         # Connectivity 3: generates square shaped footprint
-        result_conn3 = extrema.local_maxima(self.image, connectivity=3)
+        result_conn3 = morphology.local_maxima(self.image, connectivity=3)
         assert result_conn3.dtype == bool
         assert_equal(result_conn3, self.expected_default)
 
@@ -426,7 +428,7 @@ class TestLocalMaxima(unittest.TestCase):
         """Test results if footprint is given."""
         footprint_cross = np.array(
             [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=bool)
-        result_footprint_cross = extrema.local_maxima(
+        result_footprint_cross = morphology.local_maxima(
             self.image, footprint=footprint_cross)
         assert result_footprint_cross.dtype == bool
         assert_equal(result_footprint_cross, self.expected_cross)
@@ -439,7 +441,7 @@ class TestLocalMaxima(unittest.TestCase):
         ]:
             # Test different dtypes for footprint which expects a boolean array
             # but will accept and convert other types if possible
-            result_footprint_square = extrema.local_maxima(
+            result_footprint_square = morphology.local_maxima(
                 self.image, footprint=footprint
             )
             assert result_footprint_square.dtype == bool
@@ -455,7 +457,7 @@ class TestLocalMaxima(unittest.TestCase):
              [0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]],
             dtype=bool
         )
-        result_footprint_x = extrema.local_maxima(self.image,
+        result_footprint_x = morphology.local_maxima(self.image,
                                                   footprint=footprint_x)
         assert result_footprint_x.dtype == bool
         assert_equal(result_footprint_x, expected_footprint_x)
@@ -464,13 +466,13 @@ class TestLocalMaxima(unittest.TestCase):
         """Test output if indices of peaks are desired."""
         # Connectivity 1
         expected_conn1 = np.nonzero(self.expected_cross)
-        result_conn1 = extrema.local_maxima(self.image, connectivity=1,
+        result_conn1 = morphology.local_maxima(self.image, connectivity=1,
                                             indices=True)
         assert_equal(result_conn1, expected_conn1)
 
         # Connectivity 2
         expected_conn2 = np.nonzero(self.expected_default)
-        result_conn2 = extrema.local_maxima(self.image, connectivity=2,
+        result_conn2 = morphology.local_maxima(self.image, connectivity=2,
                                             indices=True)
         assert_equal(result_conn2, expected_conn2)
 
@@ -478,7 +480,7 @@ class TestLocalMaxima(unittest.TestCase):
         """Test maxima detection at the image border."""
         # Use connectivity 1 to allow many maxima, only filtering at border is
         # of interest
-        result_with_boder = extrema.local_maxima(
+        result_with_boder = morphology.local_maxima(
             self.image, connectivity=1, allow_borders=True)
         assert result_with_boder.dtype == bool
         assert_equal(result_with_boder, self.expected_cross)
@@ -492,7 +494,7 @@ class TestLocalMaxima(unittest.TestCase):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             dtype=bool
         )
-        result_without_border = extrema.local_maxima(
+        result_without_border = morphology.local_maxima(
             self.image, connectivity=1, allow_borders=False)
         assert result_with_boder.dtype == bool
         assert_equal(result_without_border, expected_without_border)
@@ -503,7 +505,7 @@ class TestLocalMaxima(unittest.TestCase):
         x_1d = np.array([1, 1, 0, 1, 2, 3, 0, 2, 1, 2, 0])
         expected_1d = np.array([1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
                                dtype=bool)
-        result_1d = extrema.local_maxima(x_1d)
+        result_1d = morphology.local_maxima(x_1d)
         assert result_1d.dtype == bool
         assert_equal(result_1d, expected_1d)
 
@@ -529,7 +531,7 @@ class TestLocalMaxima(unittest.TestCase):
         x_3d[6:8, 6:8, 6:8] = 200
         x_3d[7, 7, 7] = 255
         expected_3d[7, 7, 7] = 1
-        result_3d = extrema.local_maxima(x_3d)
+        result_3d = morphology.local_maxima(x_3d)
         assert result_3d.dtype == bool
         assert_equal(result_3d, expected_3d)
 
@@ -540,11 +542,11 @@ class TestLocalMaxima(unittest.TestCase):
         for dtype in self.supported_dtypes:
             const_image = const_image.astype(dtype)
             # test for local maxima
-            result = extrema.local_maxima(const_image)
+            result = morphology.local_maxima(const_image)
             assert result.dtype == bool
             assert_equal(result, expected)
             # test for local minima
-            result = extrema.local_minima(const_image)
+            result = morphology.local_minima(const_image)
             assert result.dtype == bool
             assert_equal(result, expected)
 
@@ -580,12 +582,12 @@ class TestLocalMaxima(unittest.TestCase):
         )
 
         # Test for local maxima with automatic step calculation
-        result = extrema.local_maxima(image)
+        result = morphology.local_maxima(image)
         assert result.dtype == bool
         assert_equal(result, expected_result)
 
         # Test for local minima with automatic step calculation
-        result = extrema.local_minima(inverted_image)
+        result = morphology.local_minima(inverted_image)
         assert result.dtype == bool
         assert_equal(result, expected_result)
 
@@ -593,22 +595,22 @@ class TestLocalMaxima(unittest.TestCase):
         """Test if input validation triggers correct exceptions."""
         # Mismatching number of dimensions
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(
+            morphology.local_maxima(
                 self.image, footprint=np.ones((3, 3, 3), dtype=bool))
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(
+            morphology.local_maxima(
                 self.image, footprint=np.ones((3,), dtype=bool))
 
         # All dimensions in footprint must be of size 3
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(
+            morphology.local_maxima(
                 self.image, footprint=np.ones((2, 3), dtype=bool))
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(
+            morphology.local_maxima(
                 self.image, footprint=np.ones((5, 5), dtype=bool))
 
         with raises(TypeError, match="float16 which is not supported"):
-            extrema.local_maxima(np.empty(1, dtype=np.float16))
+            morphology.local_maxima(np.empty(1, dtype=np.float16))
 
     def test_small_array(self):
         """Test output for arrays with dimension smaller 3.
@@ -623,27 +625,16 @@ class TestLocalMaxima(unittest.TestCase):
         """
         warning_msg = "maxima can't exist .* any dimension smaller 3 .*"
         x = np.array([0, 1])
-        extrema.local_maxima(x, allow_borders=True)  # no warning
+        morphology.local_maxima(x, allow_borders=True)  # no warning
         with warns(UserWarning, match=warning_msg):
-            result = extrema.local_maxima(x, allow_borders=False)
+            result = morphology.local_maxima(x, allow_borders=False)
         assert_equal(result, [0, 0])
         assert result.dtype == bool
 
         x = np.array([[1, 2], [2, 2]])
-        extrema.local_maxima(x, allow_borders=True, indices=True)  # no warning
+        morphology.local_maxima(x, allow_borders=True, indices=True)  # no warning
         with warns(UserWarning, match=warning_msg):
-            result = extrema.local_maxima(x, allow_borders=False, indices=True)
+            result = morphology.local_maxima(x, allow_borders=False, indices=True)
         assert_equal(result, np.zeros((2, 0), dtype=np.intp))
         assert result[0].dtype == np.intp
         assert result[1].dtype == np.intp
-
-
-@pytest.mark.parametrize(
-    'function',
-    ['local_maxima', 'local_minima', 'h_minima', 'h_maxima']
-)
-def test_selem_kwarg_deprecation(function):
-    img = np.zeros((16, 16))
-    args = (20,) if function.startswith('h_') else ()
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(extrema, function)(img, *args, selem=np.ones((3, 3)))

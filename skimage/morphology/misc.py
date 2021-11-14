@@ -36,7 +36,7 @@ def default_footprint(func):
     def func_out(image, footprint=None, *args, **kwargs):
         if footprint is None:
             footprint = _default_footprint(image.ndim)
-        return func(image, footprint=footprint, *args, **kwargs)
+        return func(image, footprint, *args, **kwargs)
 
     return func_out
 
