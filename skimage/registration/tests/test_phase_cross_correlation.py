@@ -7,9 +7,8 @@ import scipy.fft as fft
 from skimage import img_as_float
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, binary_blobs
-from skimage.registration._phase_cross_correlation import (
-    phase_cross_correlation, _upsampled_dft
-)
+from skimage.registration import phase_cross_correlation
+from skimage.registration._phase_cross_correlation import _upsampled_dft
 
 
 @pytest.mark.parametrize('normalization', [None, 'phase'])
