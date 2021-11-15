@@ -93,6 +93,8 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_SKIP: "*-musllinux_*"
+          # skip aarch64 tests which often exceed the 6 hour time limit
+          CIBW_TEST_SKIP: "*_aarch64"
           CIBW_ARCHS_LINUX: aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
