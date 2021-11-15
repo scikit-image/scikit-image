@@ -1,7 +1,8 @@
 import numpy as np
-from skimage.util._map_array import map_array, ArrayMap
+import pytest
 
-from skimage._shared import testing
+from skimage.util import map_array
+from skimage.util._map_array import ArrayMap
 
 
 def test_map_array_incorrect_output_shape():
@@ -9,7 +10,7 @@ def test_map_array_incorrect_output_shape():
     out = np.empty((24, 24))
     in_values = np.unique(labels)
     out_values = np.random.random(in_values.shape).astype(out.dtype)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         map_array(labels, in_values, out_values, out=out)
 
 
@@ -18,7 +19,7 @@ def test_map_array_non_contiguous_output_array():
     out = np.empty((24 * 3, 25 * 2))[::3, ::2]
     in_values = np.unique(labels)
     out_values = np.random.random(in_values.shape).astype(out.dtype)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         map_array(labels, in_values, out_values, out=out)
 
 

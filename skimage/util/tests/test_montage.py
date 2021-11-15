@@ -1,8 +1,8 @@
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_array_equal
-from skimage._shared._warnings import expected_warnings
-
 import numpy as np
+import pytest
+from numpy.testing import assert_equal, assert_array_equal
+
+from skimage._shared._warnings import expected_warnings
 from skimage.util import montage
 
 
@@ -52,7 +52,7 @@ def test_montage_simple_rgb():
     assert_array_equal(arr_out, arr_ref)
 
 
-@testing.parametrize('channel_axis', (0, 1, 2, 3, -1, -2, -3, -4))
+@pytest.mark.parametrize('channel_axis', (0, 1, 2, 3, -1, -2, -3, -4))
 def test_montage_simple_rgb_channel_axes(channel_axis):
     n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
     arr_in = np.arange(n_images * n_rows * n_cols * n_channels, dtype=float)
@@ -83,10 +83,10 @@ def test_montage_simple_rgb_channel_axes(channel_axis):
     assert_array_equal(arr_out, arr_ref)
 
 
-@testing.parametrize('channel_axis', (4, -5))
+@pytest.mark.parametrize('channel_axis', (4, -5))
 def test_montage_invalid_channel_axes(channel_axis):
     arr_in = np.arange(16, dtype=float).reshape(2, 2, 2, 2)
-    with testing.raises(np.AxisError):
+    with pytest.raises(np.AxisError):
         montage(arr_in, channel_axis=channel_axis)
 
 
@@ -171,19 +171,19 @@ def test_montage_simple_padding_gray():
 
 def test_error_ndim():
     arr_error = np.random.randn(1, 2)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         montage(arr_error)
 
     arr_error = np.random.randn(1, 2, 3, 4)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         montage(arr_error)
 
     arr_error = np.random.randn(1, 2, 3)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         with expected_warnings(["'multichannel is a deprecated argument"]):
             montage(arr_error, multichannel=True)
 
     arr_error = np.random.randn(1, 2, 3, 4, 5)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         with expected_warnings(["'multichannel is a deprecated argument"]):
             montage(arr_error, multichannel=True)

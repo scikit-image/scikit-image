@@ -1,28 +1,27 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_equal
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal
-
-from skimage.util._label import label_points
+from skimage.util import label_points
 
 
 def test_label_points_coords_dimension():
     coords, output_shape = np.array([[1, 2], [3, 4]]), (5, 5, 2)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         label_points(coords, output_shape)
 
 
 def test_label_points_coords_range():
     coords, output_shape = np.array([[0, 0],
                                      [5, 5]]), (5, 5)
-    with testing.raises(IndexError):
+    with pytest.raises(IndexError):
         label_points(coords, output_shape)
 
 
 def test_label_points_coords_negative():
     coords, output_shape = np.array([[-1, 0],
                                      [5, 5]]), (5, 5)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         label_points(coords, output_shape)
 
 

@@ -1,5 +1,4 @@
 import numpy as np
-from ..util import img_as_float
 from itertools import product
 
 
@@ -33,6 +32,8 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
+    from ._multimethods import img_as_float
+
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 

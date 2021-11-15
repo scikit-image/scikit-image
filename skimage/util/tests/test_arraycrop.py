@@ -1,7 +1,7 @@
-
 import numpy as np
+from numpy.testing import assert_array_equal, assert_equal
+
 from skimage.util import crop
-from skimage._shared.testing import (assert_array_equal, assert_equal)
 
 
 def test_multi_crop():

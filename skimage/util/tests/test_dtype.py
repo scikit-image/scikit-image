@@ -1,12 +1,13 @@
-import numpy as np
 import itertools
+
+import numpy as np
+import pytest
+from numpy.testing import assert_equal
+
 from skimage import (img_as_float, img_as_float32, img_as_float64,
                      img_as_int, img_as_uint, img_as_ubyte)
-from skimage.util.dtype import _convert
-
 from skimage._shared._warnings import expected_warnings
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, parametrize
+from skimage.util.dtype import _convert
 
 
 dtype_range = {np.uint8: (0, 255),
@@ -29,8 +30,8 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@parametrize("dtype, f_and_dt",
-             itertools.product(dtype_range, img_funcs_and_types))
+@pytest.mark.parametrize("dtype, f_and_dt",
+                         itertools.product(dtype_range, img_funcs_and_types))
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
@@ -62,7 +63,7 @@ dtype_pairs = [(np.uint8, np.uint32),
                (np.int32, np.float32)]
 
 
-@parametrize("dtype_in, dt", dtype_pairs)
+@pytest.mark.parametrize("dtype_in, dt", dtype_pairs)
 def test_range_extra_dtypes(dtype_in, dt):
     """Test code paths that are not skipped by `test_range`"""
 
@@ -86,10 +87,10 @@ def test_downcast():
 
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         img_as_int(too_high)
     too_low = np.array([-2], dtype=np.float32)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         img_as_int(too_low)
 
 
