@@ -1,6 +1,6 @@
 import numpy as np
 
-# guard against import of a non-existant metrics module in older skimage
+# guard against import of a non-existent metrics module in older skimage
 try:
     from skimage import metrics
 except ImportError:
