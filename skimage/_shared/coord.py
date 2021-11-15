@@ -94,9 +94,9 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
             batch_list = [coords]
         else:
             coord_count = len(coords)
-            split_count = int(np.log2(coord_count / min_split_size)) + 1
+            split_count = int(np.log2(coord_count / min_split_size))
             split_idx = np.cumsum(
-                [coord_count // (2 ** i) for i in range(1, split_count)])
+                [coord_count // (2 ** i) for i in range(split_count, 0, -1)])
             batch_list = np.array_split(coords, split_idx)
 
         output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
