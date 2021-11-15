@@ -88,7 +88,7 @@ def test_flat_int_range_dtype():
     assert_equal(frequencies.shape, (256,))
 
 
-@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_peak_float_out_of_range_image(dtype):
     im = np.array([10, 100], dtype=dtype)
     frequencies, bin_centers = exposure.histogram(im, nbins=90)
@@ -97,7 +97,7 @@ def test_peak_float_out_of_range_image(dtype):
     assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
 
 
-@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_peak_float_out_of_range_dtype(dtype):
     im = np.array([10, 100], dtype=dtype)
     nbins = 10
@@ -266,7 +266,7 @@ def test_rescale_shrink():
     assert_array_almost_equal(out, [0, 0.5, 1])
 
 
-@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rescale_in_range(dtype):
     image = np.array([51., 102., 153.], dtype=dtype)
     out = exposure.rescale_intensity(image, in_range=(0, 255))
@@ -281,7 +281,7 @@ def test_rescale_in_range_clip():
     assert_array_almost_equal(out, [0.5, 1, 1])
 
 
-@pytest.mark.parametrize("dtype", [np.int8, np.int32, np.float16, np.float32,
+@pytest.mark.parametrize('dtype', [np.int8, np.int32, np.float16, np.float32,
                                    np.float64])
 def test_rescale_out_range(dtype):
     """Check that output range is correct.
@@ -291,7 +291,7 @@ def test_rescale_out_range(dtype):
         matches the output.
 
     .. versionchanged:: 0.19
-        float16 and float32 inputs now result in float32 input. Formerly they
+        float16 and float32 inputs now result in float32 output. Formerly they
         would give float64 outputs.
     """
     image = np.array([-10, 0, 10], dtype=dtype)
@@ -411,7 +411,7 @@ def test_rescale_raises_on_incorrect_out_range():
 # Test adaptive histogram equalization
 # ====================================
 
-@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_adapthist_grayscale(dtype):
     """Test a grayscale float image
     """

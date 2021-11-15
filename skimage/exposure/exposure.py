@@ -454,6 +454,8 @@ def _output_dtype(dtype_or_range, image_dtype):
     dtype_or_range : type, string, or 2-tuple of int/float
         The desired range for the output, expressed as either a NumPy dtype or
         as a (min, max) pair of numbers.
+    image_dtype : np.dtype
+        The input image dtype.
 
     Returns
     -------
