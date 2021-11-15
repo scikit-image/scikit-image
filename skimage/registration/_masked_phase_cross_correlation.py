@@ -96,8 +96,8 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
     return -shifts + (size_mismatch / 2)
 
 
-def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
-                           overlap_ratio=0.3):
+def cross_correlate_masked(arr1, arr2, mask1, mask2, mode='full',
+                           axes=(-2, -1), overlap_ratio=0.3):
     """
     Masked normalized cross-correlation between arrays.
 
@@ -108,12 +108,12 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     arr2 : ndarray
         Seconds array. The dimensions of `arr2` along axes that are not
         transformed should be equal to that of `arr1`.
-    m1 : ndarray
+    mask1 : ndarray
         Mask of `arr1`. The mask should evaluate to `True`
-        (or 1) on valid pixels. `m1` should have the same shape as `arr1`.
-    m2 : ndarray
+        (or 1) on valid pixels. `mask1` should have the same shape as `arr1`.
+    mask2 : ndarray
         Mask of `arr2`. The mask should evaluate to `True`
-        (or 1) on valid pixels. `m2` should have the same shape as `arr2`.
+        (or 1) on valid pixels. `mask2` should have the same shape as `arr2`.
     mode : {'full', 'same'}, optional
         'full':
             This returns the convolution at each point of overlap. At
@@ -163,9 +163,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         raise ValueError("complex-valued arr1, arr2 are not supported")
 
     fixed_image = fixed_image.astype(float_dtype)
-    fixed_mask = np.array(m1, dtype=bool)
+    fixed_mask = np.array(mask1, dtype=bool)
     moving_image = moving_image.astype(float_dtype)
-    moving_mask = np.array(m2, dtype=bool)
+    moving_mask = np.array(mask2, dtype=bool)
     eps = np.finfo(float_dtype).eps
 
     # Array dimensions along non-transformation axes should be equal.
