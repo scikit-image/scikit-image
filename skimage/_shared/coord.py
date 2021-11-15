@@ -59,7 +59,7 @@ def _ensure_spacing(coord, spacing, p_norm, max_out):
 
 
 def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
-                   max_out=None):
+                   max_out=None, *, max_split_size=2e4):
     """Returns a subset of coord where a minimum spacing is guaranteed.
 
     Parameters
@@ -96,7 +96,11 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
             coord_count = len(coords)
             split_count = int(np.log2(coord_count / min_split_size))
             split_idx = np.cumsum(
-                [coord_count // (2 ** i) for i in range(split_count, 0, -1)])
+                np.minimum(
+                    [coord_count // (2 ** i)
+                     for i in range(split_count, 0, -1)],
+                    int(max_split_size))
+            )
             batch_list = np.array_split(coords, split_idx)
 
         output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
