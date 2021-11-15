@@ -5,22 +5,28 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 from scipy.spatial import distance
 
 from skimage._shared._warnings import expected_warnings
-from skimage.metrics import hausdorff_distance, hausdorff_pair, modified_hausdorff_distance
+from skimage.metrics import hausdorff_distance, hausdorff_pair
 
 
 def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=bool)
     non_empty = np.zeros((3, 2), dtype=bool)
-    assert hausdorff_distance(empty, non_empty) == 0.
-    assert modified_hausdorff_distance(empty, non_empty) == 0.
+    assert hausdorff_distance(empty, non_empty) == 0.0  # standard Hausdorff
+    assert (
+        hausdorff_distance(empty, non_empty, method="modified") == 0.0
+    )  # modified Hausdorff
     with expected_warnings(["One or both of the images is empty"]):
         assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
-    assert hausdorff_distance(non_empty, empty) == 0.
-    assert modified_hausdorff_distance(non_empty, empty) == 0.
+    assert hausdorff_distance(non_empty, empty) == 0.0  # standard Hausdorff
+    assert (
+        hausdorff_distance(non_empty, empty, method="modified") == 0.0
+    )  # modified Hausdorff
     with expected_warnings(["One or both of the images is empty"]):
         assert_array_equal(hausdorff_pair(non_empty, empty), [(), ()])
-    assert hausdorff_distance(empty, non_empty) == 0.
-    assert modified_hausdorff_distance(empty, non_empty) == 0.
+    assert hausdorff_distance(empty, non_empty) == 0.0  # standard Hausdorff
+    assert (
+        hausdorff_distance(empty, non_empty, method="modified") == 0.0
+    )  # modified Hausdorff
     with expected_warnings(["One or both of the images is empty"]):
         assert_array_equal(hausdorff_pair(empty, non_empty), [(), ()])
 
@@ -33,23 +39,23 @@ def test_hausdorff_simple():
     coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
-    dist = np.sqrt(sum((ca - cb) ** 2
-                       for ca, cb in zip(points_a, points_b)))
+    dist = np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(points_a, points_b)))
     d = distance.cdist([points_a], [points_b])
     dist_modified = max(np.mean(np.min(d, axis=0)), np.mean(np.min(d, axis=1)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
-                                                            points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
     assert_almost_equal(
-        modified_hausdorff_distance(
+        hausdorff_distance(
             coords_a,
-            coords_b),
-        dist_modified)
+            coords_b,
+            method="modified",
+        ),
+        dist_modified,
+    )
 
 
 @pytest.mark.parametrize(
-    "points_a, points_b",
-    itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2)
+    "points_a, points_b", itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2)
 )
 def test_hausdorff_region_single(points_a, points_b):
     shape = (5, 5)
@@ -58,24 +64,21 @@ def test_hausdorff_region_single(points_a, points_b):
     coords_a[points_a] = True
     coords_b[points_b] = True
 
-    dist = np.sqrt(sum((ca - cb) ** 2
-                       for ca, cb in zip(points_a, points_b)))
+    dist = np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(points_a, points_b)))
     d = distance.cdist([points_a], [points_b])
     dist_modified = max(np.mean(np.min(d, axis=0)), np.mean(np.min(d, axis=1)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
-                                                            points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
     assert_almost_equal(
-        modified_hausdorff_distance(
-            coords_a,
-            coords_b),
-        dist_modified)
+        hausdorff_distance(coords_a, coords_b, method="modified"), dist_modified
+    )
 
 
 @pytest.mark.parametrize(
     "points_a, points_b",
-    itertools.product([(5, 4), (4, 5), (3, 4), (4, 3)],
-                      [(6, 4), (2, 6), (2, 4), (4, 0)])
+    itertools.product(
+        [(5, 4), (4, 5), (3, 4), (4, 3)], [(6, 4), (2, 6), (2, 4), (4, 0)]
+    ),
 )
 def test_hausdorff_region_different_points(points_a, points_b):
     shape = (7, 7)
@@ -84,18 +87,14 @@ def test_hausdorff_region_different_points(points_a, points_b):
     coords_a[points_a] = True
     coords_b[points_b] = True
 
-    dist = np.sqrt(sum((ca - cb) ** 2
-                       for ca, cb in zip(points_a, points_b)))
+    dist = np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(points_a, points_b)))
     d = distance.cdist([points_a], [points_b])
     dist_modified = max(np.mean(np.min(d, axis=0)), np.mean(np.min(d, axis=1)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
-                                                            points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
     assert_almost_equal(
-        modified_hausdorff_distance(
-            coords_a,
-            coords_b),
-        dist_modified)
+        hausdorff_distance(coords_a, coords_b, method="modified"), dist_modified
+    )
 
 
 def test_gallery():
@@ -137,23 +136,26 @@ def test_gallery():
     # Should return 10, the distance between the furthest tip of the kite and
     # its closest point on the diamond, which is the furthest someone can make
     # you travel to encounter your nearest neighboring point on the other set.
-    assert_almost_equal(hausdorff_distance(coords_a, coords_b), 10.)
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b), 10.0)
 
     # There are two pairs of points ((30, 20), (30, 10) or (30, 40), (30, 50)),
     # that are Hausdorff distance apart. This tests for either of them.
     hd_points = hausdorff_pair(coords_a, coords_b)
-    assert np.equal(hd_points, ((30, 20), (30, 10))).all() or \
-        np.equal(hd_points, ((30, 40), (30, 50))).all()
+    assert (
+        np.equal(hd_points, ((30, 20), (30, 10))).all()
+        or np.equal(hd_points, ((30, 40), (30, 50))).all()
+    )
 
     # Test the Modified Hausdorff function on the coordinates
     # Should return 7.5.
-    assert_almost_equal(modified_hausdorff_distance(coords_a, coords_b), 7.5)
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b, method="modified"), 7.5)
 
 
 @pytest.mark.parametrize(
     "points_a, points_b",
-    itertools.product([(0, 0, 1), (0, 1, 0), (1, 0, 0)],
-                      [(0, 0, 2), (0, 2, 0), (2, 0, 0)])
+    itertools.product(
+        [(0, 0, 1), (0, 1, 0), (1, 0, 0)], [(0, 0, 2), (0, 2, 0), (2, 0, 0)]
+    ),
 )
 def test_3d_hausdorff_region(points_a, points_b):
     shape = (3, 3, 3)
@@ -162,18 +164,14 @@ def test_3d_hausdorff_region(points_a, points_b):
     coords_a[points_a] = True
     coords_b[points_b] = True
 
-    dist = np.sqrt(sum((ca - cb) ** 2
-                       for ca, cb in zip(points_a, points_b)))
+    dist = np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(points_a, points_b)))
     d = distance.cdist([points_a], [points_b])
     dist_modified = max(np.mean(np.min(d, axis=0)), np.mean(np.min(d, axis=1)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), dist)
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
-                                                            points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
     assert_almost_equal(
-        modified_hausdorff_distance(
-            coords_a,
-            coords_b),
-        dist_modified)
+        hausdorff_distance(coords_a, coords_b, method="modified"), dist_modified
+    )
 
 
 def test_hausdorff_metrics_match():
@@ -186,8 +184,6 @@ def test_hausdorff_metrics_match():
     coords_b = np.zeros(shape, dtype=bool)
     coords_a[points_a] = True
     coords_b[points_b] = True
-    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a,
-                                                            points_b))
+    assert_array_equal(hausdorff_pair(coords_a, coords_b), (points_a, points_b))
     euclidean_distance = distance.euclidean(points_a, points_b)
-    assert_almost_equal(euclidean_distance, hausdorff_distance(coords_a,
-                                                               coords_b))
+    assert_almost_equal(euclidean_distance, hausdorff_distance(coords_a, coords_b))
