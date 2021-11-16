@@ -74,7 +74,7 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
         ``inf`` corresponds to the Chebyshev distance and 2 to the
         Euclidean distance.
     min_split_size : int
-        Minimum split size used to process ``coord`` by batch to save
+        Minimum split size used to process ``coords`` by batch to save
         memory. If None, the memory saving strategy is not applied.
     max_out : int
         If not None, only the first ``max_out`` candidates are returned.
