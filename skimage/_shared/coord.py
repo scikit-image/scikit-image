@@ -79,7 +79,7 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
     max_out : int
         If not None, only the first ``max_out`` candidates are returned.
     max_split_size : int
-        Maximum split size used to process ``coord`` by batch to save
+        Maximum split size used to process ``coords`` by batch to save
         memory.
 
     Returns
