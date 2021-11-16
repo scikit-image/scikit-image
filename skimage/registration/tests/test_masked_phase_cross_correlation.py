@@ -62,13 +62,13 @@ def test_masked_registration_random_masks():
 def test_masked_registration_3d_contiguous_mask():
     """masked_register_translation should be able to register translations
     between volumes with contiguous masks."""
-    ref_vol = brain()
+    ref_vol = brain()[:, ::2, ::2]
 
-    offset = (2, -9, 20)
+    offset = (1, -5, 10)
 
     # create square mask
     ref_mask = np.zeros_like(ref_vol, dtype=bool)
-    ref_mask[:-2, 150:200, 150:200] = True
+    ref_mask[:-2, 75:100, 75:100] = True
     ref_shifted = real_shift(ref_vol, offset)
 
     measured_offset = masked_register_translation(
