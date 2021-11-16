@@ -3,11 +3,16 @@
 environment:
   matrix:
     - PYTHON: C:\Python37
+      ARCH: x86
     - PYTHON: C:\Python37-x64
+      ARCH: x64
     - PYTHON: C:\Python38
+      ARCH: x86
     - PYTHON: C:\Python38-x64
+      ARCH: x64
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\Python39
+      ARCH: x86
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\Python39-x64
     # NumPy does not currently provide a 32-bit windows wheel for Python 3.10
@@ -19,6 +24,7 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\Python39-x64
       PIP_FLAGS: --pre
+      ARCH: x64
 
 matrix:
   fast_finish: true
@@ -39,6 +45,11 @@ install:
 
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install -U pip"
+
+  # pythran needs clang-cl
+  - "choco install --%ARCH% llvm"
+  - "SET PATH=C:\\Program Files\\LLVM\\bin;%PATH%"
+  - "SET PATH=C:\\Program Files (x86)\\LLVM\\bin;%PATH%"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
