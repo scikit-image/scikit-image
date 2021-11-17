@@ -57,7 +57,6 @@ from scipy import linalg
 
 from .._shared.utils import (_supported_float_type, channel_as_last_axis,
                              identity, reshape_nd, slice_at_axis)
-from ..util import dtype, dtype_limits
 
 
 def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
@@ -901,6 +900,7 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         RGBA image. A new dimension of length 4 is added to input
         image shape.
     """
+    from ..util import dtype_limits
 
     arr = np.asarray(image)
 
