@@ -7,3 +7,4 @@ pytest>=5.2.0
 pytest-cov>=2.7.0
 pytest-localserver
 pytest-faulthandler
+pytest-timeout

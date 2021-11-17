@@ -56,6 +56,15 @@ def test_ensure_spacing_batch_processing(p, size):
                           expected)
 
 
+@pytest.mark.timeout(5)
+def test_max_batch_size():
+    """Small batches are slow, large batches -> large allocations -> also slow.
+
+    https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691
+    """
+    coords = np.random.randint(low=0, high=1848, size=(64000, 2))
+    ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=2000)
+
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
 @pytest.mark.parametrize("size", [30, 50, None])
