@@ -185,7 +185,7 @@ class BRIEF(DescriptorExtractor):
         self.mask = _mask_border_keypoints(image.shape, keypoints,
                                            patch_size // 2)
 
-        keypoints = np.array(keypoints[self.mask, :], dtype=np.intp,
+        keypoints = np.array(keypoints[self.mask, :], dtype=np.int64,
                              order='C', copy=False)
 
         self.descriptors = np.zeros((keypoints.shape[0], desc_size),

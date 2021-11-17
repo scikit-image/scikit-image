@@ -1,5 +1,5 @@
 from .._shared.utils import warn
-from .._shared import has_mpl
+from .._shared._dependency_checks import has_mpl
 from .qt import has_qt
 
 if not has_qt:

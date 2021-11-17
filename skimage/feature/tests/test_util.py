@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage._shared import has_mpl
+from skimage._shared._dependency_checks import has_mpl
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
                                   _mask_border_keypoints, plot_matches)

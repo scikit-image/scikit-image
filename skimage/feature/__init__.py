@@ -18,6 +18,7 @@ from ._multimethods import (blob_dog, blob_doh, blob_log, canny, corner_fast,
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
+from .sift import SIFT
 
 __all__ = ['canny',
            'Cascade',
@@ -49,6 +50,7 @@ __all__ = ['canny',
            'BRIEF',
            'CENSURE',
            'ORB',
+           'SIFT',
            'match_descriptors',
            'plot_matches',
            'blob_dog',

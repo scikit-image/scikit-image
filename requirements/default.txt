@@ -5,5 +5,6 @@ pillow>=6.1.0,!=7.1.0,!=7.1.1,!=8.3.0
 imageio>=2.4.1
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
+packaging>=20.0
 # uarray 0.6.0 is the newest on pypi.org, but that is not new enough
 git+git://github.com/Quansight-Labs/uarray@0.8.2#egg=uarray
