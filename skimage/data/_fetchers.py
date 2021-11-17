@@ -5,9 +5,9 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
-from distutils.version import LooseVersion
 import numpy as np
 import shutil
+from packaging import version
 
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
@@ -82,7 +82,7 @@ def create_image_fetcher():
             retry = {'retry_if_failed': 3}
             # Keep version check in synch with
             # scikit-image/requirements/optional.txt
-            if LooseVersion(pooch_version) < LooseVersion('1.3.0'):
+            if version.parse(pooch_version) < version.parse('1.3.0'):
                 # we need a more recent version of pooch to retry
                 retry = {}
     except ImportError:
