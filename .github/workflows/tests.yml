@@ -37,7 +37,7 @@ jobs:
             EAGER_IMPORT: 1
             # Test mininum requirements (don't build docs there is a problem
             # with dask and astropy)
-            OPTIONS_NAME: "mini-req"
+            OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1

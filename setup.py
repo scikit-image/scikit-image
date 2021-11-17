@@ -11,7 +11,11 @@ from numpy.distutils.command.build_ext import build_ext as npy_build_ext
 import setuptools
 from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
-from distutils.errors import CompileError, LinkError
+try:
+    from setuptools.errors import CompileError, LinkError
+except ImportError:
+    # can remove this except case once we require setuptools>=59.0
+    from distutils.errors import CompileError, LinkError
 
 from pythran.dist import PythranBuildExt as pythran_build_ext
 

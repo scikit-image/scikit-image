@@ -2,6 +2,7 @@
 requires = [
     "wheel",
     "setuptools",
+    "packaging",
     "Cython>=0.29.24,<3.0",
     "pythran",
 
