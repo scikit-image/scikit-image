@@ -156,12 +156,13 @@ jobs:
           path: ./dist/*.whl
 
   build_windows_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
+        cibw_arch: ["AMD64", "x86"]
 
     steps:
       - uses: actions/checkout@v2
@@ -173,17 +174,38 @@ jobs:
         with:
           python-version: '3.7'
 
-      - name: Install cibuildwheel
+      # install choco package manager
+      - uses: crazy-max/ghaction-chocolatey@v1
+        name: Install chocolatey
+        with:
+          args: -h
+
+      # install x86 clang-cl (needed for Pythran)
+      - name: Install x86 clang-cl
+        if: matrix.cibw_arch == 'x86'
+        run: |
+          choco install --force --x86 llvm
+
+      # install clang-cl (needed for Pythran)
+      - name: Install clang-cl
+        if: matrix.cibw_arch == 'AMD64'
+        run: |
+          choco install --force llvm
+
+      - name: Install cibuildwheel and add clang-cl to path
         run: |
           python -m pip install cibuildwheel
-      - name: Build wheels for CPython 3.10 (Windows)
+          SET PATH="C:\\Program Files\\LLVM\\bin;%PATH%"
+          SET PATH="C:\\Program Files (x86)\\LLVM\\bin;%PATH%"
+
+      - name: Build Windows wheels for CPython 3.10
+        # NumPy dropped x86 wheels for Python 3.10
+        if: matrix.cibw_arch == 'ARM64'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp310-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_ARCHS_WINDOWS: AMD64  # no x86 NumPy wheels for Python 3.10
+          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
 
       - name: Build Windows wheels for CPython
         run: |
@@ -191,14 +213,13 @@ jobs:
         env:
           CIBW_BUILD: "cp3?-*"
           CIBW_SKIP: "cp36-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_ARCHS_WINDOWS: AMD64 x86
+          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
 
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: ./dist/*.whl
+
 
 
   deploy:
