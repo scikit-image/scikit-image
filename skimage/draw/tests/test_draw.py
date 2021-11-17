@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import pytest
 
 from skimage._shared.testing import test_parallel
-from skimage._shared import has_mpl
+from skimage._shared._dependency_checks import has_mpl
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           disk, circle_perimeter, circle_perimeter_aa,

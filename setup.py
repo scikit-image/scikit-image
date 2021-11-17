@@ -6,13 +6,14 @@ import tempfile
 import shutil
 import builtins
 import textwrap
+from numpy.distutils.command.build_ext import build_ext as npy_build_ext
 
 import setuptools
 from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
-from numpy.distutils.command.build_ext import build_ext
 
+from pythran.dist import PythranBuildExt as pythran_build_ext
 
 DISTNAME = 'scikit-image'
 DESCRIPTION = 'Image processing in Python'
@@ -55,7 +56,7 @@ builtins.__SKIMAGE_SETUP__ = True
 
 # Support for openmp
 
-class ConditionalOpenMP(build_ext):
+class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
 
     def can_compile_link(self, compile_flags, link_flags):
 
@@ -117,7 +118,7 @@ class ConditionalOpenMP(build_ext):
                 ext.extra_compile_args += compile_flags
                 ext.extra_link_args += link_flags
 
-        build_ext.build_extensions(self)
+        super(ConditionalOpenMP, self).build_extensions()
 
 
 with open('skimage/__init__.py', encoding='utf-8') as fid:
@@ -142,11 +143,6 @@ extras_require = {
     dep: parse_requirements_file('requirements/' + dep + '.txt')
     for dep in ['docs', 'optional', 'test', 'data']
 }
-
-# requirements for those browsing PyPI
-REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
-REQUIRES = [r.replace('==', ' (== ') for r in REQUIRES]
-REQUIRES = [r.replace('[array]', '') for r in REQUIRES]
 
 
 def configuration(parent_package='', top_path=None):
@@ -198,10 +194,10 @@ if __name__ == "__main__":
             print(textwrap.dedent("""
                 To install scikit-image from source, you will need NumPy
                 and Cython.
-                Install NumPy and Cython with your python package manager.
+                Install NumPy, Cython with your python package manager.
                 If you are using pip, the commands are:
 
-                  pip install numpy cython
+                  pip install numpy cython pythran
 
                 For more details, see:
 
@@ -241,7 +237,6 @@ if __name__ == "__main__":
             'Operating System :: MacOS',
         ],
         install_requires=INSTALL_REQUIRES,
-        requires=REQUIRES,
         extras_require=extras_require,
         python_requires='>=3.7',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),

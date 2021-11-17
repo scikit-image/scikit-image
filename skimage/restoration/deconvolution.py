@@ -133,13 +133,6 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
 
-    # TODO: can remove astype call below once minimum SciPy >= 1.4
-    if deconv.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    deconv = deconv.astype(deconv_type, copy=False)
-
     if clip:
         deconv[deconv > 1] = 1
         deconv[deconv < -1] = -1
@@ -365,13 +358,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         x_postmean = uft.uirfft2(x_postmean, shape=image.shape)
     else:
         x_postmean = uft.uifft2(x_postmean)
-
-    # TODO: remove astype call below once minimum SciPy >= 1.4
-    if x_postmean.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    x_postmean = x_postmean.astype(deconv_type, copy=False)
 
     if clip:
         x_postmean[x_postmean > 1] = 1

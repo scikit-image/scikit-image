@@ -102,6 +102,12 @@ def test_gray_2d_deprecated_multichannel():
                    start_label=0)
 
 
+def _check_segment_labels(seg1, seg2, allowed_mismatch_ratio=0.1):
+    size = seg1.size
+    ndiff = np.sum(seg1 != seg2)
+    assert (ndiff / size) < allowed_mismatch_ratio
+
+
 def test_slic_consistency_across_image_magnitude():
     # verify that that images of various scales across integer and float dtypes
     # give the same segmentation result
@@ -117,7 +123,9 @@ def test_slic_consistency_across_image_magnitude():
 
     np.testing.assert_array_equal(seg1, seg2)
     np.testing.assert_array_equal(seg1, seg3)
-    np.testing.assert_array_equal(seg1, seg4)
+    # allow some mismatch, to account for floating point error
+    # observed mismatch ratio was 0 on x86_64, but ~0.0775 during i686 testing
+    _check_segment_labels(seg1, seg4, allowed_mismatch_ratio=0.1)
 
 
 def test_color_3d():
