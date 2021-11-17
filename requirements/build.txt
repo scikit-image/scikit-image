@@ -1,4 +1,5 @@
 Cython>=0.29.21,!=0.29.18
+packaging>=20.0
 pythran
 wheel
 # numpy 1.18.0 breaks builds on MacOSX
