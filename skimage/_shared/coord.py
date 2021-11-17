@@ -80,7 +80,13 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
         If not None, only the first ``max_out`` candidates are returned.
     max_split_size : int
         Maximum split size used to process ``coords`` by batch to save
-        memory.
+        memory. This number was decided by profiling with a large number
+        of points. Too small a number results in too much looping in
+        Python instead of C, slowing down the process, while too large
+        a number results in large memory allocations, slowdowns, and,
+        potentially, in the process being killed -- see gh-6010. See
+        benchmark results `here
+        <https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691>`_.
 
     Returns
     -------
