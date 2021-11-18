@@ -56,6 +56,10 @@ def test_ensure_spacing_batch_processing(p, size):
                           expected)
 
 
+@pytest.mark.skipif(
+        sys.platform != 'linux' or sys.version_info[:2] != (3, 9),
+        reason='Slow test, run only on Linux Py3.9',
+        )
 @pytest.mark.timeout(5)
 def test_max_batch_size():
     """Small batches are slow, large batches -> large allocations -> also slow.
