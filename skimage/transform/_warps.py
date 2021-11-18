@@ -159,8 +159,11 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     order = _validate_interpolation_order(input_type, order)
     if order > 0:
         image = convert_to_float(image, preserve_range)
-    # create copy so input value range stays accessible through image for clip
-    img_in = image
+
+    img_bounds = None
+    if clip:
+        # Save input value range for clip
+        img_bounds = np.array([image.min(), image.max()])
 
     # Translate modes used by np.pad to those used by scipy.ndimage
     ndi_mode = _to_ndimage_mode(mode)
@@ -177,7 +180,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
-                                     cval=cval, mode=ndi_mode)
+                                    cval=cval, mode=ndi_mode)
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
@@ -231,7 +234,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-    _clip_warp_output(img_in, out, mode, cval, clip)
+    _clip_warp_output(img_bounds, out, mode, cval, clip)
 
     return out
 
