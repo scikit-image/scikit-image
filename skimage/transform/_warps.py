@@ -160,10 +160,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     if order > 0:
         image = convert_to_float(image, preserve_range)
 
-    img_bounds = None
-    if clip:
-        # Save input value range for clip
-        img_bounds = np.array([image.min(), image.max()])
+    # Save input value range for clip
+    img_bounds = np.array([image.min(), image.max()]) if clip else None
 
     # Translate modes used by np.pad to those used by scipy.ndimage
     ndi_mode = _to_ndimage_mode(mode)
