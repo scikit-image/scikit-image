@@ -17,6 +17,9 @@ from scipy.fft import next_fast_len
 from .._shared.utils import _supported_float_type
 
 
+
+
+
 def _masked_phase_cross_correlation(reference_image, moving_image,
                                     reference_mask, moving_mask=None,
                                     overlap_ratio=0.3):
