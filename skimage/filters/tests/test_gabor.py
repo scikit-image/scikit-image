@@ -3,7 +3,6 @@ import pytest
 from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_equal)
 
-from skimage._shared import testing
 from skimage._shared.utils import _supported_float_type
 from skimage.filters._gabor import _sigma_prefactor, gabor, gabor_kernel
 
@@ -94,12 +93,14 @@ def test_gabor():
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_gabor_dtype(dtype):
+def test_gabor_float_dtype(dtype):
     image = np.ones((16, 16), dtype=dtype)
     y = gabor(image, 0.3)
     assert all(arr.dtype == _supported_float_type(image.dtype) for arr in y)
 
 
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
+@pytest.mark.parametrize('dtype', [np.uint8, np.int32, np.intp])
+def test_gabor_int_dtype(dtype):
+    image = np.full((16, 16), 128, dtype=dtype)
+    y = gabor(image, 0.3)
+    assert all(arr.dtype == dtype for arr in y)

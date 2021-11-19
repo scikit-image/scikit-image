@@ -271,7 +271,7 @@ def test_denoise_bilateral_negative2():
 
     # 2 images with a given offset should give the same result (with the same
     # offset)
-    assert_array_equal(out1, out2 + 10)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
@@ -1213,7 +1213,3 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
 
     with expected_warnings(exp_warn):
         restoration.cycle_spin(noisy, denoise_func, 1, 1, None, False)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
