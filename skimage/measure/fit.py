@@ -5,6 +5,8 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
+_EPSILON = np.spacing(1)
+
 
 def _check_data_dim(data, dim):
     if data.ndim != 2 or data.shape[1] != dim:
@@ -610,19 +612,14 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     trials : int
         Number of trials.
     """
-    if n_inliers == 0:
-        return np.inf
-
-    if probability == 1:
-        return np.inf
-
-    if n_inliers == n_samples:
-        return 1
-
-    nom = math.log(1 - probability)
-    denom = math.log(1 - (n_inliers / n_samples) ** min_samples)
-
-    return int(np.ceil(nom / denom))
+    inlier_ratio = n_inliers / float(n_samples)
+    nom = max(_EPSILON, 1 - probability)
+    denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
+    if nom == 1:
+        return 0
+    if denom == 1:
+        return float("inf")
+    return abs(float(np.ceil(np.log(nom) / np.log(denom))))
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
@@ -837,7 +834,11 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # estimate model for current random sample set
     model = model_class()
 
-    for num_trials in range(max_trials):
+    num_trials = 0
+
+    while num_trials < max_trials:
+        num_trials += 1
+
         # do sample selection according data pairs
         samples = [d[spl_idxs] for d in data]
 
@@ -874,13 +875,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
             best_inlier_num = inliers_count
             best_inlier_residuals_sum = residuals_sum
             best_inliers = inliers
-            dynamic_max_trials = _dynamic_max_trials(best_inlier_num,
-                                                     num_samples,
-                                                     min_samples,
-                                                     stop_probability)
+            max_trials = min(max_trials,
+                             _dynamic_max_trials(best_inlier_num,
+                                                 num_samples,
+                                                 min_samples,
+                                                 stop_probability))
             if (best_inlier_num >= stop_sample_num
-                    or best_inlier_residuals_sum <= stop_residuals_sum
-                    or num_trials >= dynamic_max_trials):
+                    or best_inlier_residuals_sum <= stop_residuals_sum):
                 break
 
     # estimate final model using all inliers
