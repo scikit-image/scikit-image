@@ -24,7 +24,7 @@ def hausdorff_distance(image0, image1, method="standard"):
         ``image0`` and ``image1``, using the Euclidian distance.
 
     Notes
-    ______
+    ------
     The Hausdorff distance [1]_ is the maximum distance between any point on
     ``image0`` and its nearest point on ``image1``, and vice-versa.
     The Modified Hausdorff Distance (MHD) has been shown to perform better
