@@ -7,9 +7,9 @@ Work in progress
 
 array 
     Numerical array, provided by the {class}`numpy.ndarray` object. In
-    ``scikit-image``, images are NumPy arrays, which dimensions
+    ``scikit-image``, images are NumPy arrays with dimensions that
     correspond to spatial dimensions of the image, and color channels for
-    color images. See {ref}`numpy`. 
+    color images. See {ref}`numpy`.
 
 channel
     Typically used to refer to a single color channel in a color image. RGBA
@@ -22,25 +22,32 @@ channel
     represent color or alpha information, but may be any generic batch
     dimension over which to operate.
 
+circle
+    The perimeter of a {term}`disk`.
+
 contour
-iso-valued contour
     Curve along which a 2-D image has a constant value. The interior
     (resp. exterior) of the contour has values greater (resp. smaller)
-    than the contour value. 
+    than the contour value.
 
 contrast
     Differences of intensity or color in an image, which make objects
     distinguishable. Several functions to manipulate the contrast of an
     image are available in {mod}`skimage.exposure`. See {ref}`exposure`.
 
+disk
+    A filled-in {term}`circle`.
+
 float
-float values
     Representation of real numbers, for example as {obj}`np.float32` or
     {obj}`np.float64`. See {ref}`data_types`. Some operations on images
     need a float datatype (such as multiplying image values with
     exponential prefactors in {func}`filters.gaussian`), so that 
     images of integer type are often converted to float type internally. Also
     see {term}`int` values.
+
+float values
+    See {term}`float`.
 
 histogram
     For an image, histogram of intensity values, where the range of
@@ -49,7 +56,6 @@ histogram
     {func}`exposure.histogram`.
 
 int
-int values
     Representation of integer numbers, which can be signed or not, and
     encoded on one, two, four or eight bytes according to the maximum value
     which needs to be represented. In ``scikit-image``, the most common
@@ -57,8 +63,13 @@ int values
     {obj}`np.uint8` (for small integer values, typically images of labels
     with less than 255 labels). See {ref}`data_types`. 
 
+int values
+    See {term}`int`.
+
+iso-valued contour
+    See {term}`contour`.
+
 labels
-label image
     An image of labels is of integer type, where pixels with the same
     integer value belong to the same object. For example, the result of a
     segmentation is an image of labels. {func}`measure.label` labels
@@ -66,6 +77,9 @@ label image
     labels. Labels are usually contiguous integers, and
     {func}`segmentation.relabel_sequential` can be used to relabel
     arbitrary labels to sequential (contiguous) ones.
+
+label image
+    See {term}`labels`.
 
 pixel
     Smallest element of an image. An image is a grid of pixels, and the

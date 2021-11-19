@@ -7,7 +7,6 @@ Author: Damian Eads
 import numpy as np
 from numpy.testing import assert_equal
 
-from skimage import data
 from skimage._shared.testing import fetch
 from skimage.morphology import footprints
 

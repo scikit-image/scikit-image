@@ -4,13 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-# TODO: remove except case once minimum SciPy is >= 1.4
-try:
-    from scipy.fft import fftn, ifftn
-except ImportError:
-    # scipy < 1.4 does not have an fft module
-    from scipy.fftpack import fftn, ifftn
-from scipy.fftpack import fftfreq
+from scipy.fft import fftn, ifftn, fftfreq
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 

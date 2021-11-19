@@ -124,7 +124,7 @@ def test_bad_input():
     with pytest.raises(ValueError):
         active_contour(img, init, max_num_iter=-15)
     with expected_warnings(["`max_iterations` is a deprecated argument"]):
-        snake = active_contour(img, init, max_iterations=15)
+        active_contour(img, init, max_iterations=15)
 
 
 def test_coord_raises():
@@ -135,14 +135,14 @@ def test_coord_raises():
     init = np.array([x, y]).T
     # coordinates='xy' is not valid
     with pytest.raises(ValueError):
-        snake = active_contour(gaussian(img, 3), init,
-                               boundary_condition='periodic', alpha=0.015,
-                               beta=10, w_line=0, w_edge=1, gamma=0.001,
-                               max_num_iter=100, coordinates='xy')
+        active_contour(gaussian(img, 3), init,
+                       boundary_condition='periodic', alpha=0.015,
+                       beta=10, w_line=0, w_edge=1, gamma=0.001,
+                       max_num_iter=100, coordinates='xy')
 
     # coordinates=None is not valid
     with pytest.raises(ValueError):
-        snake = active_contour(gaussian(img, 3), init,
-                               boundary_condition='periodic', alpha=0.015,
-                               beta=10, w_line=0, w_edge=1, gamma=0.001,
-                               max_num_iter=100, coordinates=None)
+        active_contour(gaussian(img, 3), init,
+                       boundary_condition='periodic', alpha=0.015,
+                       beta=10, w_line=0, w_edge=1, gamma=0.001,
+                       max_num_iter=100, coordinates=None)

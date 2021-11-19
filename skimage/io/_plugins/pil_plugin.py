@@ -1,15 +1,13 @@
 __all__ = ['imread', 'imsave']
 
-from distutils.version import LooseVersion
-import warnings
 import numpy as np
+from packaging import version
 from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
 
 # Check CVE-2021-27921 and others
-from distutils.version import LooseVersion
-if LooseVersion(pil_version) < LooseVersion('8.1.2'):
+if version.parse(pil_version) < version.parse('8.1.2'):
     from warnings import warn
     warn('Your installed pillow version is < 8.1.2. '
          'Several security issues (CVE-2021-27921, '

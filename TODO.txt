@@ -42,14 +42,6 @@ Version 1.0
 
 Other (2022)
 ------------
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and
-  `skimage.registration._phase_cross_correlation.py` once the minimum supported
-  version of ``scipy`` reaches 1.4.
-* Remove unneeded `deconv_type` and astype call in `weiner` and
-  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
-  supported version of ``scipy`` reaches 1.4.
-* Remove two unneeded astype calls in `butterworth` once the minimum supported
-  version of ``scipy`` reaches 1.4.
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
@@ -66,3 +58,5 @@ Other
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).
+* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
+  ``skimage/morphology/convex_hull.py``.

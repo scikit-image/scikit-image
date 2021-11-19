@@ -1,4 +1,3 @@
-import warnings
 from itertools import cycle
 
 import numpy as np
