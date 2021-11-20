@@ -612,13 +612,13 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     trials : int
         Number of trials.
     """
-    inlier_ratio = n_inliers / float(n_samples)
+    inlier_ratio = n_inliers / n_samples
     nom = max(_EPSILON, 1 - probability)
     denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
     if nom == 1:
         return 0
     if denom == 1:
-        return float("inf")
+        return np.inf
     return abs(float(np.ceil(np.log(nom) / np.log(denom))))
 
 
@@ -835,7 +835,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     model = model_class()
 
     num_trials = 0
-
+    # max_trials can be updated inside the loop, so this cannot be a for-loop
     while num_trials < max_trials:
         num_trials += 1
 
