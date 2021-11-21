@@ -220,7 +220,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _validate_interpolation_order(input_type, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
