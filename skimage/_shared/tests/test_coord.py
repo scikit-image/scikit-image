@@ -1,7 +1,9 @@
-import sys
-import pytest
+import time
+
 import numpy as np
+import pytest
 from scipy.spatial.distance import pdist, minkowski
+
 from skimage._shared.coord import ensure_spacing
 
 
@@ -57,17 +59,23 @@ def test_ensure_spacing_batch_processing(p, size):
                           expected)
 
 
-@pytest.mark.skipif(
-    sys.platform != 'linux' or sys.version_info[:2] != (3, 9),
-    reason='Slow test, run only on Linux Py3.9')
-@pytest.mark.timeout(5)
 def test_max_batch_size():
     """Small batches are slow, large batches -> large allocations -> also slow.
 
     https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691
     """
-    coords = np.random.randint(low=0, high=1848, size=(64000, 2))
-    ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=2000)
+    coords = np.random.randint(low=0, high=1848, size=(40000, 2))
+    tstart = time.time()
+    ensure_spacing(coords, spacing=100, min_split_size=50,
+                   max_split_size=2000)
+    dur1 = time.time() - tstart
+
+    tstart = time.time()
+    ensure_spacing(coords, spacing=100, min_split_size=50,
+                   max_split_size=20000)
+    dur2 = time.time() - tstart
+
+    assert dur1 < dur2
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
