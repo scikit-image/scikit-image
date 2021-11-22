@@ -497,21 +497,26 @@ Other Updates
 Contributors to this release
 ----------------------------
 
-74 authors added to this release [alphabetical by first name or login]
+
+80 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Abhinavmishra8960 (Abhinavmishra8960)
+- abouysso
 - Alessia Marcolini
 - Alex Brooks
 - Alexandre de Siqueira
 - Andres Fernandez
+- Andrew Hurlbatt
 - andrewnags (andrewnags)
 - Antoine Bierret
 - BMaster123 (BMaster123)
+- Boaz Mohar
+- Bozhidar Karaargirov
 - Carlos Andrés Álvarez Restrepo
 - Christoph Gohlke
 - Christoph Sommer
 - Clement Ng
-- cmarasinou (cmarasinou)
+- cmarasinou
 - Cris Luengo
 - David Manthey
 - Devanshu Shah
@@ -521,6 +526,7 @@ Contributors to this release
 - Emmanuelle Gouillart
 - Erik Reed
 - erykoff (erykoff)
+- Fabian Schneider
 - Felipe Gutierrez-Barragan
 - François Boulogne
 - Fred Bunt
@@ -558,32 +564,34 @@ Contributors to this release
 - Pradyumna Rahul
 - R
 - Raphael
-- Riadh
 - Riadh Fezzani
 - Robert Haase
 - Sebastian Gonzalez Tirado
+- Sebastián Vanrell
+- serge-sans-paille (serge-sans-paille)
 - Stefan van der Walt
 - t.ae
+- that1solodev (Xyno18)
 - Thomas Walter
 - Tim Gates
 - Tom Flux
 - Vinicius D. Cerutti
 - Volker Hilsenstein
 - WeiChungChang
-- Xyno18 (Xyno18)
 - yacth
 - Yash-10 (Yash-10)
 
-
-59 reviewers added to this release [alphabetical by first name or login]
+63 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Abhinavmishra8960
 - Alessia Marcolini
 - Alex Brooks
 - Alexandre de Siqueira
 - Andres Fernandez
+- Andrew Hurlbatt
 - andrewnags
 - BMaster123
+- Boaz Mohar
 - Carlos Andrés Álvarez Restrepo
 - Clement Ng
 - Cris Luengo
@@ -592,6 +600,7 @@ Contributors to this release
 - Egor Panfilov
 - Emmanuelle Gouillart
 - erykoff
+- Fabian Schneider
 - Felipe Gutierrez-Barragan
 - François Boulogne
 - Fukai Yohsuke
@@ -631,6 +640,7 @@ Contributors to this release
 - Sebastian Berg
 - Sebastian Gonzalez Tirado
 - Sebastian Wallkötter
+- serge-sans-paille
 - Stefan van der Walt
 - t.ae
 - Vinicius D. Cerutti
