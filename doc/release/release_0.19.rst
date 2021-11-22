@@ -432,7 +432,7 @@ Newly introduced deprecations:
     ============================ ============================
 
 - The ``selem`` argument has been renamed to ``footprint`` throughout the
-  library. The ``footprint`` argument is now deprecated.
+  library. The ``selem`` argument is now deprecated.
 
 
 Development process
