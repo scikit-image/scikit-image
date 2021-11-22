@@ -13,7 +13,7 @@ https://scikit-image.org
 
 A highlight of this release is the addition of the popular scale-invariant
 feature transform (SIFT) feature detector and descriptor. This release also
-introduces a perceptual blur metric, new pixel graph algorithms and most
+introduces a perceptual blur metric, new pixel graph algorithms, and most
 functions now operate in single-precision when single-precision inputs are
 provided. Many other bug fixes, enhancements and performance improvements are
 detailed below.
@@ -78,7 +78,7 @@ New Features
   now support a ``threshold_rel`` keyword argument that can be used to specify
   a relative threshold (in range [0, 1]) rather than an absolute one. (gh-5517)
 - Implement lazy submodule importing (gh-5101)
-- Weighted estimation of geometric transform matrices (gh-5601)
+- Implement weighted estimation of geometric transform matrices (gh-5601)
 - Added new pixel graph algorithms in ``skimage.graph``:
   ``pixel_graph`` generates a graph (network) of pixels
   according to their adjacency, and ``central_pixel`` finds
@@ -136,16 +136,16 @@ Documentation
 - Add stitching gallery example (gh-5365)
 - Add draft SKIP3: transition to scikit-image 1.0 (gh-5475)
 - Mention commit messages in the contribution guidelines. (gh-5504)
-- Fix and standardize docstrings for blob detection functions (gh-5547)
-- Updated the User Guide to reflect usage of ``channel_axis`` rather than
+- Fix and standardize docstrings for blob detection functions. (gh-5547)
+- Update the User Guide to reflect usage of ``channel_axis`` rather than
   ``multichannel``. (gh-5554)
 - Update the user guide to use channel_axis rather than multichannel (gh-5556)
 - Add hyperlinks to referenced documentation places. (gh-5560)
-- Update branching instructions to change the location of the pooch repo
+- Update branching instructions to change the location of the pooch repo.
   (gh-5565)
-- add Notes and References section to the Cascade class docstring (gh-5568)
+- Add Notes and References section to the Cascade class docstring. (gh-5568)
 - Clarify 2D vs nD in skimage.feature.corner docstrings (gh-5569)
-- Fixed math formulas in plot_swirl.py example (gh-5574)
+- Fix math formulas in plot_swirl.py example. (gh-5574)
 - Update references in texture feature detectors docstrings (gh-5578)
 - Update mailing list location to discuss.scientific-python.org forum (gh-5951)
 - DOC: Fix docstring in rescale_intensity() (gh-5964)
@@ -187,8 +187,8 @@ Improvements
   ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
   multithreaded use.
 - A ``skimage.color.label2rgb`` performance regression was addressed.
-- Improved numerical precision in ``CircleModel.estimate``. (gh-5190)
-- Added default keyword argument values to
+- Improve numerical precision in ``CircleModel.estimate``. (gh-5190)
+- Add default keyword argument values to
   ``skimage.restoration.denoise_tv_bregman``, ``skimage.measure.block_reduce``,
   and ``skimage.filters.threshold_local``. (gh-5454)
 - Make matplotlib an optional dependency (gh-5990)
@@ -232,7 +232,7 @@ API Changes
   data that was not already scaled to [0, 1] range. There is now an automatic
   internal rescaling of the input to [0, 1] so that the ``compactness``
   parameter has an effect that is independent of the input image's scaling.
-- A bug fix to the phase nomalization applied within
+- A bug fix to the phase normalization applied within
   ``skimage.register.phase_cross_correlation`` may result in a different result
   as compared to prior releases. The prior behavior of "unnormalized" cross
   correlation is still available by explicitly setting ``normalization=None``.
@@ -282,7 +282,7 @@ Bugfixes
 - Fix broken doctests in ``skimage.exposure.histogram`` and
   ``skimage.measure.regionprops_table``. (gh-5522)
 - Rescale image consistently during SLIC superpixel segmentation. (gh-5518)
-- Corrected phase correlation in ``skimage.register.phase_cross_correlation``.
+- Correct phase correlation in ``skimage.register.phase_cross_correlation``.
   (gh-5461)
 - Fix hidden attribute 'offsets' in skimage.graph.MCP (gh-5551)
 - fix phase_cross_correlation for 3D with reference masks (gh-5559)
@@ -461,7 +461,7 @@ Development process
 - Ensure that README.txt has write permissions for subsequent imports.
 - Decorators for helping with the transition between the keyword argument
   multichannel and channel_axis.
-- Missing import in lch2lab docstring example (gh-5998)
+- Add missing import in lch2lab docstring example (gh-5998)
 - Prefer importing build_py and sdist from setuptools (gh-6007)
 - Reintroduce skimage.test utility (gh-5909)
 
@@ -473,7 +473,7 @@ Other Updates
 - Simplify resize implementation using new SciPy 1.6 zoom option.
 - Fix duplicate test function names in ``test_unsharp_mask.py``.
 - Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature.
-- prefer use of new-style NumPy random API in tests (gh-5450)
+- Prefer use of new-style NumPy random API in tests (gh-5450)
 - Add fixture enforcing SimpleITK I/O in test_simpleitk.py (gh-5526)
 - MNT: Remove unused stat import from skimage data (gh-5566)
 - MAINT: Remove unused imports (gh-5595)
@@ -483,9 +483,9 @@ Other Updates
 - Lazily load data_dir into the top-level namespace (gh-5996)
 - Update scipy requirement to 1.4.1 and use scipy.fft instead of scipy.fftpack
   (gh-5999)
-- removed lines generating Requires metadata (gh-6017)
+- Remove lines generating Requires metadata (gh-6017)
 - Update wheel builds to include Python 3.10 (gh-6021)
-- update pyproject.toml to handle Python 3.10 and Apple arm64 (gh-6022)
+- Update pyproject.toml to handle Python 3.10 and Apple arm64 (gh-6022)
 - Add python 3.10 test runs on GitHub Actions and Appveyor (gh-6027)
 - Pin sphinx to <4.3 until new sphinx-gallery release is available (gh-6029)
 - Relax a couple of equality tests causing i686 test failures on cibuildwheel
