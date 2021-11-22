@@ -57,22 +57,24 @@ jobs:
       architecture: '$(ARCH)'
     name: python
 
-  # # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
-  # - task: Cache@2
-  #   inputs:
-  #     key: '"skimage_data" | skimage/data/_registry.py'
-  #     path: $(SKIMAGE_DATA_CACHE_FOLDER)
-  #   displayName: Cache scikit-image data files
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
+  - task: Cache@2
+    inputs:
+      key: '"skimage_data" | skimage/data/_registry.py'
+      path: $(SKIMAGE_DATA_CACHE_FOLDER)
+    displayName: Cache scikit-image data files
+    continueOnError: true
 
-  # # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
-  # - task: Cache@2
-  #   inputs:
-  #     key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
-  #     restoreKeys: |
-  #       "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
-  #       "Python$(PYTHON_VERSION)-$(ARCH)"
-  #     path: $(PIP_CACHE_DIR)
-  #   displayName: Cache pip packages
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
+  - task: Cache@2
+    inputs:
+      key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
+      restoreKeys: |
+        "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
+        "Python$(PYTHON_VERSION)-$(ARCH)"
+      path: $(PIP_CACHE_DIR)
+    displayName: Cache pip packages
+    continueOnError: true
 
   - script: |
       choco install --$(ARCH) -y llvm
