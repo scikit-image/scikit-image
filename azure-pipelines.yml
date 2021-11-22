@@ -63,6 +63,8 @@ jobs:
       key: '"skimage_data" | skimage/data/_registry.py'
       path: $(SKIMAGE_DATA_CACHE_FOLDER)
     displayName: Cache scikit-image data files
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
     continueOnError: true
 
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
@@ -74,6 +76,8 @@ jobs:
         "Python$(PYTHON_VERSION)-$(ARCH)"
       path: $(PIP_CACHE_DIR)
     displayName: Cache pip packages
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
     continueOnError: true
 
   - script: |
