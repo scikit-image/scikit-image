@@ -118,7 +118,7 @@ def create_image_fetcher():
         path=pooch.os_cache("scikit-image"),
         base_url=url,
         version=skimage_version_for_pooch,
-        version_dev="main",
+        version_dev="v0.19.x",
         env="SKIMAGE_DATADIR",
         registry=registry,
         urls=registry_urls,
