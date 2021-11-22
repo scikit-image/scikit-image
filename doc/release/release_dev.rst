@@ -11,6 +11,31 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
+A highlight of this release is the addition of the popular scale-invariant
+feature transform (SIFT) feature detector and descriptor. This release also
+introduces a perceptual blur metric, new pixel graph algorithms, and most
+functions now operate in single-precision when single-precision inputs are
+provided. Many other bug fixes, enhancements and performance improvements are
+detailed below.
+
+A significant change in this release is in the treatment of multichannel
+images. The existing ``multichannel`` argument to functions has been deprecated
+in favor of a new ``channel_axis`` argument. ``channel_axis`` can be used to
+specify which axis of an array contains channel information (with
+``channel_axis=None`` indicating a grayscale image).
+
+scikit-image now uses "lazy loading", which enables users to access the
+functions from all ``skimage`` submodules without the overhead of eagerly
+importing all submodules. As a concrete example, after calling "import skimage"
+a user can directly call a function such as ``skimage.transform.warp`` whereas
+previously it would have been required to first "import skimage.transform".
+
+An exciting change on the development side is the introduction of support for
+Pythran as an alternative to Cython for generating compiled code. We plan to
+keep Cython support as well going forward, so developers are free to use either
+one as appropriate. For those curious about Pythran, a good overview was given
+in the SciPy 2021 presentation, "Building SciPy Kernels with Pythran" (https://www.youtube.com/watch?v=6a9D9WL6ZjQ).
+
 
 New Features
 ------------
@@ -45,17 +70,27 @@ New Features
   were added to ``skimage.color.lab2rgb``, ``skimage.color.rgb2lab``,
   ``skimage.color.xyz2lab``, ``skimage.color.lab2xyz``,
   ``skimage.color.xyz2luv`` and ``skimage.color.luv2xyz``.
+- ``skimage.filters.threshold_multiotsu`` has a new ``hist`` keyword argument
+  to allow use with a user-supplied histogram. (gh-5543)
+- ``skimage.restoration.denoise_bilateral`` added support for images containing
+  negative values. (gh-5527)
+- The ``skimage.feature`` functions ``blob_dog``, ``blob_doh`` and ``blob_log``
+  now support a ``threshold_rel`` keyword argument that can be used to specify
+  a relative threshold (in range [0, 1]) rather than an absolute one. (gh-5517)
+- Implement lazy submodule importing (gh-5101)
+- Implement weighted estimation of geometric transform matrices (gh-5601)
 - Added new pixel graph algorithms in ``skimage.graph``:
   ``pixel_graph`` generates a graph (network) of pixels
   according to their adjacency, and ``central_pixel`` finds
   the geodesic center of the pixels. (gh-5602)
+- scikit-image now supports use of Pythran in contributed code. (gh-3226)
 
 
 Documentation
 -------------
 
 - A new doc tutorial presenting a 3D biomedical imaging example has been added
-  to the gallery (#4946). The technical content benefited from conversations
+  to the gallery (gh-4946). The technical content benefited from conversations
   with Genevieve Buckley, Kevin Mader, and Volker Hilsenstein.
 - New gallery example for 3D structure tensor.
 - New gallery example displaying a 3D dataset.
@@ -98,6 +133,29 @@ Documentation
 - Update reference link documentation in the ``adjust_sigmoid`` function.
 - Fix reference to multiscale_basic_features in TrainableSegmenter.
 - Slight ``shape_index`` docstring modification to specify 2D array.
+- Add stitching gallery example (gh-5365)
+- Add draft SKIP3: transition to scikit-image 1.0 (gh-5475)
+- Mention commit messages in the contribution guidelines. (gh-5504)
+- Fix and standardize docstrings for blob detection functions. (gh-5547)
+- Update the User Guide to reflect usage of ``channel_axis`` rather than
+  ``multichannel``. (gh-5554)
+- Update the user guide to use channel_axis rather than multichannel (gh-5556)
+- Add hyperlinks to referenced documentation places. (gh-5560)
+- Update branching instructions to change the location of the pooch repo.
+  (gh-5565)
+- Add Notes and References section to the Cascade class docstring. (gh-5568)
+- Clarify 2D vs nD in skimage.feature.corner docstrings (gh-5569)
+- Fix math formulas in plot_swirl.py example. (gh-5574)
+- Update references in texture feature detectors docstrings (gh-5578)
+- Update mailing list location to discuss.scientific-python.org forum (gh-5951)
+- DOC: Fix docstring in rescale_intensity() (gh-5964)
+- Fix slic documentation (gh-5975)
+- Update docstring for dilation, which is now nD. (gh-5978)
+- Change stitching gallery example thumbnail (gh-5985)
+- Add circle and disk to glossary.md (gh-5590)
+- Update pixel graphs example (gh-5991)
+- Separate entries that have the same description in glossary.md (gh-5592)
+- Do not use space before colon in directive name (gh-6002)
 
 
 Improvements
@@ -111,13 +169,13 @@ Improvements
   faster.
 - The performance of the SLIC superpixels algorithm
   (``skimage.segmentation.slice``) was improved for the case where a mask
-  is supplied by the user (#4903). The specific superpixels produced by
+  is supplied by the user (gh-4903). The specific superpixels produced by
   masked SLIC will not be identical to those produced by prior releases.
 - ``exposure.adjust_gamma`` has been accelerated for ``uint8`` images thanks to
-  a LUT (#4966).
+  a LUT (gh-4966).
 - ``measure.label`` has been accelerated for boolean input images, by using
-  ``scipy.ndimage``'s implementation for this case (#4945).
-- ``util.apply_parallel`` now works with multichannel data (#4927).
+  ``scipy.ndimage``'s implementation for this case (gh-4945).
+- ``util.apply_parallel`` now works with multichannel data (gh-4927).
 - ``skimage.feature.peak_local_max`` supports now any Minkowski distance.
 - Fast, non-Cython implementation for ``skimage.filters.correlate_sparse``.
 - For efficiency, the histogram is now precomputed within
@@ -129,6 +187,21 @@ Improvements
   ``skimage.restoration.denoise_bilateral`` now release the GIL, enabling
   multithreaded use.
 - A ``skimage.color.label2rgb`` performance regression was addressed.
+- Improve numerical precision in ``CircleModel.estimate``. (gh-5190)
+- Add default keyword argument values to
+  ``skimage.restoration.denoise_tv_bregman``, ``skimage.measure.block_reduce``,
+  and ``skimage.filters.threshold_local``. (gh-5454)
+- Make matplotlib an optional dependency (gh-5990)
+- single precision support in skimage.filters (gh-5354)
+- Support nD images and labels in label2rgb (gh-5550)
+- Regionprops table performance refactor (gh-5576)
+- add regionprops benchmark script (gh-5579)
+- remove use of apply_along_axes from greycomatrix & greycoprops (gh-5580)
+- refactor gabor_kernel for efficiency (gh-5582)
+- remove need for channel_as_last_axis decorator in skimage.filters (gh-5584)
+- replace use of scipy.ndimage.gaussian_filter with skimage.filters.gaussian
+  (gh-5872)
+- add channel_axis argument to quickshift (gh-5987)
 
 
 API Changes
@@ -143,7 +216,7 @@ API Changes
 - Most functions now return float32 images when the input has float32 dtype.
 - A default value has been added to ``measure.find_contours``, corresponding to
   the half distance between the min and max values of the image
-  (#4862).
+  (gh-4862).
 - ``data.cat`` has been introduced as an alias of ``data.chelsea`` for a more
   descriptive name.
 - The ``level`` parameter of ``measure.find_contours`` is now a keyword
@@ -155,15 +228,26 @@ API Changes
   can be used to override this behavior when desired.
 - Color conversion functions now have a new ``channel_axis`` keyword argument
   (see **New Features** section).
+- SLIC superpixel segmentation outputs may differ from previous versions for
+  data that was not already scaled to [0, 1] range. There is now an automatic
+  internal rescaling of the input to [0, 1] so that the ``compactness``
+  parameter has an effect that is independent of the input image's scaling.
+- A bug fix to the phase normalization applied within
+  ``skimage.register.phase_cross_correlation`` may result in a different result
+  as compared to prior releases. The prior behavior of "unnormalized" cross
+  correlation is still available by explicitly setting ``normalization=None``.
+  There is no change to the masked cross-correlation case, which uses a
+  different algorithm.
 
 
 Bugfixes
 --------
 
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
-  is avoided (#5047).
+  is avoided (gh-5047).
+- fix clip bug in resize when anti_aliasing is applied (gh-5202)
 - Nonzero values at the image edge are no longer incorrectly marked as a
-  boundary when using ``find_bounaries`` with mode='subpixel' (#5447).
+  boundary when using ``find_bounaries`` with mode='subpixel' (gh-5447).
 - Fix return dtype of ``_label2rgb_avg`` function.
 - Ensure ``skimage.color.separate_stains`` does not return negative values.
 - Prevent integer overflow in ``EllipseModel``.
@@ -188,7 +272,40 @@ Bugfixes
 - Fixed NaN issue in ``skimage.filters.threshold_otsu``.
 - Fix ``skimage.feature.blob_dog`` docstring example and normalization.
 - Fix uint8 overflow in ``skimage.exposure.adjust_gamma``.
-- Work with pooch 1.5.0 for fetching data (#5529).
+- Work with pooch 1.5.0 for fetching data (gh-5529).
+- The ``offsets`` attribute of ``skimage.graph.MCP`` is now public. (gh-5547)
+- Fix io.imread behavior with pathlib.Path inputs (gh-5543)
+- Make scikit-image imports from Pooch, compatible with pooch >= 1.5.0.
+  (gh-5529)
+- Fix several broken doctests and restore doctesting on GitHub Actions.
+  (gh-5505)
+- Fix broken doctests in ``skimage.exposure.histogram`` and
+  ``skimage.measure.regionprops_table``. (gh-5522)
+- Rescale image consistently during SLIC superpixel segmentation. (gh-5518)
+- Correct phase correlation in ``skimage.register.phase_cross_correlation``.
+  (gh-5461)
+- Fix hidden attribute 'offsets' in skimage.graph.MCP (gh-5551)
+- fix phase_cross_correlation for 3D with reference masks (gh-5559)
+- fix return shape of blob_log and blob_dog when no peaks are found (gh-5567)
+- Fix find contours key error (gh-5577)
+- Refactor measure.ransac and add warning when the estimated model is not valid
+  (gh-5583)
+- Restore integer image rescaling for edge filters (gh-5589)
+- trainable_segmentation: re-raise in error case (gh-5600)
+- allow regionprops_table to be called with deprecated property names (gh-5908)
+- Fix weight calculation in fast mode of non-local means (gh-5923)
+- fix for #5948: lower boundary 1 for kernel_size in equalize_adapthist
+  (gh-5949)
+- convert pathlib.Path to str in imsave (gh-5971)
+- Fix slic spacing (gh-5974)
+- Add small regularization to avoid zero-division in richardson_lucy (gh-5976)
+- Fix benchmark suite (watershed function was moved) (gh-5982)
+- catch QhullError and return empty array (``convex_hull``) (gh-6008)
+- add property getters for all newly deprecated regionprops names (gh-6000)
+- Fix the estimation of ellipsoid axis lengths in the 3D case (gh-6013)
+- Fix peak local max segfault (gh-6035)
+- Avoid circular import errors when EAGER_IMPORT=1 (gh-6042)
+- remove all use of the deprecated distutils package (gh-6044)
 
 
 Deprecations
@@ -205,7 +322,8 @@ Completed deprecations from prior releases
 - ``skimage.color.rgb2gray`` no longer allows grayscale or RGBA inputs.
 - The deprecated ``alpha`` parameter of ``skimage.color.gray2rgb`` has now been
   removed. Use ``skimage.color.gray2rgba`` for conversion to RGBA.
-- Attempting to warp a boolean image with ``order > 0`` now raises a ValueError.
+- Attempting to warp a boolean image with ``order > 0`` now raises a
+  ValueError.
 - When warping or rescaling boolean images, setting ``anti-aliasing=True`` will
   raise a ValueError.
 - The ``bg_label`` parameter of ``skimage.color.label2rgb`` is now 0.
@@ -343,6 +461,9 @@ Development process
 - Ensure that README.txt has write permissions for subsequent imports.
 - Decorators for helping with the transition between the keyword argument
   multichannel and channel_axis.
+- Add missing import in lch2lab docstring example (gh-5998)
+- Prefer importing build_py and sdist from setuptools (gh-6007)
+- Reintroduce skimage.test utility (gh-5909)
 
 
 Other Updates
@@ -352,7 +473,176 @@ Other Updates
 - Simplify resize implementation using new SciPy 1.6 zoom option.
 - Fix duplicate test function names in ``test_unsharp_mask.py``.
 - Benchmarks: ``fix ResizeLocalMeanSuite.time_resize_local_mean`` signature.
+- Prefer use of new-style NumPy random API in tests (gh-5450)
+- Add fixture enforcing SimpleITK I/O in test_simpleitk.py (gh-5526)
+- MNT: Remove unused stat import from skimage data (gh-5566)
+- MAINT: Remove unused imports (gh-5595)
+- MAINT: Refactor duplicated tests, remove unnecessary assignments and
+  variables (gh-5596)
+- Remove obsolete lazy import (gh-5992)
+- Lazily load data_dir into the top-level namespace (gh-5996)
+- Update scipy requirement to 1.4.1 and use scipy.fft instead of scipy.fftpack
+  (gh-5999)
+- Remove lines generating Requires metadata (gh-6017)
+- Update wheel builds to include Python 3.10 (gh-6021)
+- Update pyproject.toml to handle Python 3.10 and Apple arm64 (gh-6022)
+- Add python 3.10 test runs on GitHub Actions and Appveyor (gh-6027)
+- Pin sphinx to <4.3 until new sphinx-gallery release is available (gh-6029)
+- Relax a couple of equality tests causing i686 test failures on cibuildwheel
+  (gh-6031)
+- Avoid matplotlib import overhead during 'import skimage' (gh-6032)
+- Update sphinx gallery pin (gh-6034)
 
 
 Contributors to this release
 ----------------------------
+
+
+80 authors added to this release [alphabetical by first name or login]
+----------------------------------------------------------------------
+- Abhinavmishra8960 (Abhinavmishra8960)
+- abouysso
+- Alessia Marcolini
+- Alex Brooks
+- Alexandre de Siqueira
+- Andres Fernandez
+- Andrew Hurlbatt
+- andrewnags (andrewnags)
+- Antoine Bierret
+- BMaster123 (BMaster123)
+- Boaz Mohar
+- Bozhidar Karaargirov
+- Carlos Andrés Álvarez Restrepo
+- Christoph Gohlke
+- Christoph Sommer
+- Clement Ng
+- cmarasinou
+- Cris Luengo
+- David Manthey
+- Devanshu Shah
+- Dhiraj Kumar Sah
+- divyank agarwal
+- Egor Panfilov
+- Emmanuelle Gouillart
+- Erik Reed
+- erykoff (erykoff)
+- Fabian Schneider
+- Felipe Gutierrez-Barragan
+- François Boulogne
+- Fred Bunt
+- Fukai Yohsuke
+- Gregory R. Lee
+- Hari Prasad
+- Harish Venkataraman
+- Harshit Dixit
+- Ian Hunt-Isaak
+- Jaime Rodríguez-Guerra
+- Jan-Hendrik Müller
+- Janakarajan Natarajan
+- Jenny Vo
+- john lee
+- Jonathan Striebel
+- Joseph Fox-Rabinovitz
+- Juan Antonio Barragan Noguera
+- Juan Nunez-Iglesias
+- Julien Jerphanion
+- Jurneo
+- klaussfreire (klaussfreire)
+- Larkinnjm1 (Larkinnjm1)
+- Lars Grüter
+- Mads Dyrmann
+- Marianne Corvellec
+- Marios Achilias
+- Mark Boer
+- Mark Harfouche
+- Matthias Bussonnier
+- Mauro Silberberg
+- Max Frei
+- michalkrawczyk (michalkrawczyk)
+- Niels Cautaerts
+- Pamphile ROY
+- Pradyumna Rahul
+- R
+- Raphael
+- Riadh Fezzani
+- Robert Haase
+- Sebastian Gonzalez Tirado
+- Sebastián Vanrell
+- serge-sans-paille (serge-sans-paille)
+- Stefan van der Walt
+- t.ae
+- that1solodev (Xyno18)
+- Thomas Walter
+- Tim Gates
+- Tom Flux
+- Vinicius D. Cerutti
+- Volker Hilsenstein
+- WeiChungChang
+- yacth
+- Yash-10 (Yash-10)
+
+63 reviewers added to this release [alphabetical by first name or login]
+------------------------------------------------------------------------
+- Abhinavmishra8960
+- Alessia Marcolini
+- Alex Brooks
+- Alexandre de Siqueira
+- Andres Fernandez
+- Andrew Hurlbatt
+- andrewnags
+- BMaster123
+- Boaz Mohar
+- Carlos Andrés Álvarez Restrepo
+- Clement Ng
+- Cris Luengo
+- Dan Schult
+- David Manthey
+- Egor Panfilov
+- Emmanuelle Gouillart
+- erykoff
+- Fabian Schneider
+- Felipe Gutierrez-Barragan
+- François Boulogne
+- Fukai Yohsuke
+- Genevieve Buckley
+- Gregory R. Lee
+- Jan Eglinger
+- Jan-Hendrik Müller
+- Janakarajan Natarajan
+- Jarrod Millman
+- Jirka Borovec
+- Joan Massich
+- Johannes Schönberger
+- john lee
+- Jon Crall
+- Joseph Fox-Rabinovitz
+- Josh Warner
+- Juan Nunez-Iglesias
+- Julien Jerphanion
+- Kenneth Hoste
+- klaussfreire
+- Larkinnjm1
+- Lars Grüter
+- Marianne Corvellec
+- Mark Boer
+- Mark Harfouche
+- Matthias Bussonnier
+- Max Frei
+- michalkrawczyk
+- Niels Cautaerts
+- Pamphile ROY
+- Pomax
+- R
+- Raphael
+- Riadh Fezzani
+- Robert Kern
+- Ross Barnowski
+- Sebastian Berg
+- Sebastian Gonzalez Tirado
+- Sebastian Wallkötter
+- serge-sans-paille
+- Stefan van der Walt
+- t.ae
+- Vinicius D. Cerutti
+- Volker Hilsenstein
+- Yash-10
