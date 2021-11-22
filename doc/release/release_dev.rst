@@ -245,6 +245,7 @@ Bugfixes
 
 - Input ``labels`` argument renumbering in ``skimage.feature.peak_local_max``
   is avoided (gh-5047).
+- fix clip bug in resize when anti_aliasing is applied (gh-5202)
 - Nonzero values at the image edge are no longer incorrectly marked as a
   boundary when using ``find_bounaries`` with mode='subpixel' (gh-5447).
 - Fix return dtype of ``_label2rgb_avg`` function.
@@ -302,7 +303,9 @@ Bugfixes
 - catch QhullError and return empty array (``convex_hull``) (gh-6008)
 - add property getters for all newly deprecated regionprops names (gh-6000)
 - Fix the estimation of ellipsoid axis lengths in the 3D case (gh-6013)
-
+- Fix peak local max segfault (gh-6035)
+- Avoid circular import errors when EAGER_IMPORT=1 (gh-6042)
+- remove all use of the deprecated distutils package (gh-6044)
 
 
 Deprecations
@@ -481,13 +484,14 @@ Other Updates
 - Update scipy requirement to 1.4.1 and use scipy.fft instead of scipy.fftpack
   (gh-5999)
 - removed lines generating Requires metadata (gh-6017)
+- Update wheel builds to include Python 3.10 (gh-6021)
 - update pyproject.toml to handle Python 3.10 and Apple arm64 (gh-6022)
 - Add python 3.10 test runs on GitHub Actions and Appveyor (gh-6027)
 - Pin sphinx to <4.3 until new sphinx-gallery release is available (gh-6029)
 - Relax a couple of equality tests causing i686 test failures on cibuildwheel
   (gh-6031)
 - Avoid matplotlib import overhead during 'import skimage' (gh-6032)
-
+- Update sphinx gallery pin (gh-6034)
 
 
 Contributors to this release
