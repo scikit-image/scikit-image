@@ -2,10 +2,6 @@
 # Windows
 environment:
   matrix:
-    - PYTHON: C:\Python37
-      ARCH: x86
-    - PYTHON: C:\Python37-x64
-      ARCH: x64
     - PYTHON: C:\Python38
       ARCH: x86
     - PYTHON: C:\Python38-x64
