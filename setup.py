@@ -35,7 +35,7 @@ PROJECT_URLS = {
 with open('README.md', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
-if sys.version_info < (3, 6):
+if sys.version_info < (3, 7):
 
     error = """Python {py} detected.
 
