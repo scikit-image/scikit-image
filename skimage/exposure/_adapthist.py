@@ -13,6 +13,7 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
+import math
 import numbers
 
 import numpy as np
@@ -155,18 +156,19 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     hist_blocks = image[tuple(hist_slices)].reshape(hist_blocks_shape)
     hist_blocks = np.transpose(hist_blocks, axes=hist_blocks_axis_order)
     hist_block_assembled_shape = hist_blocks.shape
-    hist_blocks = hist_blocks.reshape((np.product(ns_hist), -1))
+    hist_blocks = hist_blocks.reshape((math.prod(ns_hist), -1))
 
     # Calculate actual clip limit
+    kernel_elements = math.prod(kernel_size)
     if clip_limit > 0.0:
-        clim = int(np.clip(clip_limit * np.product(kernel_size), 1, None))
+        clim = int(np.clip(clip_limit * kernel_elements, 1, None))
     else:
         # largest possible value, i.e., do not clip (AHE)
-        clim = np.product(kernel_size)
+        clim = kernel_elements
 
     hist = np.apply_along_axis(np.bincount, -1, hist_blocks, minlength=nbins)
     hist = np.apply_along_axis(clip_histogram, -1, hist, clip_limit=clim)
-    hist = map_histogram(hist, 0, NR_OF_GRAY - 1, np.product(kernel_size))
+    hist = map_histogram(hist, 0, NR_OF_GRAY - 1, kernel_elements)
     hist = hist.reshape(hist_block_assembled_shape[:ndim] + (-1,))
 
     # duplicate leading mappings in each dim
@@ -187,8 +189,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     blocks = image.reshape(blocks_shape)
     blocks = np.transpose(blocks, axes=blocks_axis_order)
     blocks_flattened_shape = blocks.shape
-    blocks = np.reshape(blocks, (np.product(ns_proc),
-                                 np.product(blocks.shape[ndim:])))
+    blocks = np.reshape(blocks, (math.prod(ns_proc),
+                                 math.prod(blocks.shape[ndim:])))
 
     # calculate interpolation coefficients
     coeffs = np.meshgrid(*tuple([np.arange(k) / k
@@ -203,14 +205,14 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
         edge_maps = map_array[tuple([slice(e, e + n)
                                      for e, n in zip(edge, ns_proc)])]
-        edge_maps = edge_maps.reshape((np.product(ns_proc), -1))
+        edge_maps = edge_maps.reshape((math.prod(ns_proc), -1))
 
         # apply map
         edge_mapped = np.take_along_axis(edge_maps, blocks, axis=-1)
 
         # interpolate
-        edge_coeffs = np.product([[inv_coeffs, coeffs][e][d]
-                                  for d, e in enumerate(edge[::-1])], 0)
+        edge_coeffs = math.prod([[inv_coeffs, coeffs][e][d]
+                                 for d, e in enumerate(edge[::-1])], 0)
 
         result += (edge_mapped * edge_coeffs).astype(result.dtype)
 
