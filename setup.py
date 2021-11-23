@@ -35,11 +35,11 @@ PROJECT_URLS = {
 with open('README.md', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
-if sys.version_info < (3, 6):
+if sys.version_info < (3, 7):
 
     error = """Python {py} detected.
 
-scikit-image 0.18+ supports only Python 3.7 and above.
+scikit-image 0.19+ supports only Python 3.7 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
@@ -233,6 +233,7 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
