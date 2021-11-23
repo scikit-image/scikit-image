@@ -15,7 +15,7 @@
     "install_timeout": 1200,
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
-    "pythons": ["3.7"],
+    "pythons": ["3.8"],
     "matrix": {
          "virtualenv": [],
          "cython": [],
