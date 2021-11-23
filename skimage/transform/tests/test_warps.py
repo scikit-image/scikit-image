@@ -376,6 +376,25 @@ def test_resize_dtype():
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
+@pytest.mark.parametrize('order', [0, 1])
+@pytest.mark.parametrize('preserve_range', [True, False])
+@pytest.mark.parametrize('anti_aliasing', [True, False])
+@pytest.mark.parametrize('dtype', [np.float64, np.uint8])
+def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
+    # test if clip as expected
+    if dtype == np.uint8 and (preserve_range or order==0):
+        expected_max = 255
+    else:
+        expected_max = 1.0
+    x = np.ones((5, 5), dtype=dtype)
+    if dtype == np.uint8:
+        x *= 255
+    resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
+                     anti_aliasing=anti_aliasing)
+
+    assert resized.max() == expected_max
+
+
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
@@ -716,23 +735,28 @@ def test_bool_img_resize():
     assert_array_equal(res, expected)
 
 
-def test_bool_array_warnings():
+def test_bool_and_anti_aliasing_errors():
     img = np.zeros((10, 10), dtype=bool)
 
-    with expected_warnings(['Input image dtype is bool']):
+    with pytest.raises(ValueError):
         rescale(img, 0.5, anti_aliasing=True)
 
-    with expected_warnings(['Input image dtype is bool']):
+    with pytest.raises(ValueError):
         resize(img, (5, 5), anti_aliasing=True)
 
-    with expected_warnings(['Input image dtype is bool']):
-        rescale(img, 0.5, order=1)
 
-    with expected_warnings(['Input image dtype is bool']):
-        resize(img, (5, 5), order=1)
+@pytest.mark.parametrize("order", [1, 2, 3, 4, 5])
+def test_bool_nonzero_order_errors(order):
+    img = np.zeros((10, 10), dtype=bool)
 
-    with expected_warnings(['Input image dtype is bool']):
-        warp(img, np.eye(3), order=1)
+    with pytest.raises(ValueError):
+        rescale(img, 0.5, order=order)
+
+    with pytest.raises(ValueError):
+        resize(img, (5, 5), order=order)
+
+    with pytest.raises(ValueError):
+        warp(img, np.eye(3), order=order)
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])

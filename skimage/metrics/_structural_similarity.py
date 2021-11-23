@@ -1,13 +1,13 @@
 import functools
 
 import numpy as np
-from scipy.ndimage import uniform_filter, gaussian_filter
+from scipy.ndimage import uniform_filter
 
 from .._shared import utils
+from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
-from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-
+from ..util.dtype import dtype_range
 
 __all__ = ['structural_similarity']
 
@@ -166,9 +166,14 @@ def structural_similarity(im1, im2,
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
-            "win_size exceeds image extent.  If the input is a multichannel "
-            "(color) image, set channel_axis to the axis number corresponding "
-            "to the channels.")
+            'win_size exceeds image extent. '
+            'Either ensure that your images are '
+            'at least 7x7; or pass win_size explicitly '
+            'in the function call, with an odd value '
+            'less than or equal to the smaller side of your '
+            'images. If your images are multichannel '
+            '(with color channels), set channel_axis to '
+            'the axis number corresponding to the channels.')
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
@@ -183,8 +188,8 @@ def structural_similarity(im1, im2,
     ndim = im1.ndim
 
     if gaussian_weights:
-        filter_func = gaussian_filter
-        filter_args = {'sigma': sigma, 'truncate': truncate}
+        filter_func = gaussian
+        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}

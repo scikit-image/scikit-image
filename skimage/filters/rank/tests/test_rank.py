@@ -1,18 +1,15 @@
 import numpy as np
-from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose,
-                                     assert_array_almost_equal)
-from skimage._shared import testing
+import pytest
 
-from skimage.util import img_as_ubyte, img_as_float
-from skimage import data, util, morphology
-from skimage.morphology import gray, disk, ball
+from skimage import data, morphology, util
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_allclose, assert_array_almost_equal,
+                                     assert_equal, fetch, test_parallel)
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, parametrize, fetch
-import pytest
+from skimage.morphology import ball, disk, gray
+from skimage.util import img_as_float, img_as_ubyte
 
 
 def test_otsu_edge_case():
@@ -77,17 +74,25 @@ class TestRank():
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
-    @parametrize('filter', all_rank_filters)
-    def test_rank_filter(self, filter):
+    @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
+    @pytest.mark.parametrize('filter', all_rank_filters)
+    def test_rank_filter(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
-            result = getattr(rank, filter)(self.image, self.footprint)
+            if outdt is not None:
+                out = np.zeros_like(expected, dtype=outdt)
+            else:
+                out = None
+            result = getattr(rank, filter)(self.image, self.footprint, out=out)
             if filter == "entropy":
                 # There may be some arch dependent rounding errors
                 # See the discussions in
                 # https://github.com/scikit-image/scikit-image/issues/3091
                 # https://github.com/scikit-image/scikit-image/issues/2528
+                if outdt is not None:
+                    # Adjust expected precision
+                    expected = expected.astype(outdt)
                 assert_allclose(expected, result, atol=0, rtol=1E-15)
             elif filter == "otsu":
                 # OTSU May also have some optimization dependent failures
@@ -104,26 +109,45 @@ class TestRank():
                 result[19, 18] = 172
                 assert_array_almost_equal(expected, result)
             else:
+                if outdt is not None:
+                    # Avoid rounding issues comparing to expected result
+                    result = result.astype(expected.dtype)
                 assert_array_almost_equal(expected, result)
 
         check()
 
-    @parametrize('filter', all_rank_filters)
+    @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter_selem_kwarg_deprecation(self, filter):
         with expected_warnings(["`selem` is a deprecated argument name"]):
             getattr(rank, filter)(self.image.astype(np.uint8),
                                   selem=self.footprint)
 
-    @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
-                            'majority', 'maximum', 'mean', 'geometric_mean',
-                            'subtract_mean', 'median', 'minimum', 'modal',
-                            'enhance_contrast', 'pop', 'sum', 'threshold',
-                            'noise_filter', 'entropy'])
-    def test_rank_filters_3D(self, filter):
+    @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
+    @pytest.mark.parametrize(
+        'filter', ['equalize', 'otsu', 'autolevel', 'gradient',
+                   'majority', 'maximum', 'mean', 'geometric_mean',
+                   'subtract_mean', 'median', 'minimum', 'modal',
+                   'enhance_contrast', 'pop', 'sum', 'threshold',
+                   'noise_filter', 'entropy']
+    )
+    def test_rank_filters_3D(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs_3d[filter]
-            result = getattr(rank, filter)(self.volume, self.footprint_3d)
+            if outdt is not None:
+                out = np.zeros_like(expected, dtype=outdt)
+            else:
+                out = None
+            result = getattr(rank, filter)(self.volume, self.footprint_3d,
+                                           out=out)
+            if outdt is not None:
+                # Avoid rounding issues comparing to expected result
+                if filter == 'sum':
+                    # sum test data seems to be 8-bit disguised as 16-bit
+                    datadt = np.uint8
+                else:
+                    datadt = expected.dtype
+                result = result.astype(datadt)
             assert_array_almost_equal(expected, result)
 
         check()
@@ -284,7 +308,7 @@ class TestRank():
         footprint = disk(20)
         image = (np.random.rand(500, 500) * 256).astype(np.uint8)
         out = image
-        with testing.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             rank.mean(image, footprint, out=out)
 
     def test_compare_autolevels(self):
@@ -398,10 +422,11 @@ class TestRank():
                 out_s = func(volume_s, ball(3))
             assert_equal(out_u, out_s)
 
-    @parametrize('method',
-                 ['autolevel', 'equalize', 'gradient', 'maximum',
-                  'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                  'enhance_contrast', 'pop', 'threshold'])
+    @pytest.mark.parametrize(
+        'method', ['autolevel', 'equalize', 'gradient', 'maximum',
+                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+                   'enhance_contrast', 'pop', 'threshold']
+    )
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -823,5 +848,5 @@ class TestRank():
     def test_input_boolean_dtype(self):
         image = (np.random.rand(100, 100) * 256).astype(bool)
         elem = np.ones((3, 3), dtype=bool)
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             rank.maximum(image=image, footprint=elem)

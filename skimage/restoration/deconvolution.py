@@ -133,13 +133,6 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
 
-    # TODO: can remove astype call below once minimum SciPy >= 1.4
-    if deconv.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    deconv = deconv.astype(deconv_type, copy=False)
-
     if clip:
         deconv[deconv > 1] = 1
         deconv[deconv < -1] = -1
@@ -255,9 +248,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         for s in ('max', 'min'):
             if (s + '_iter') in user_params:
                 warning_msg = (
-                    f"`{s}_iter` is a deprecated key for `user_params`."
-                    "It will be removed in version 1.0. "
-                    f"Use `{s}_num_iter` instead."
+                    f'`{s}_iter` is a deprecated key for `user_params`. '
+                    f'It will be removed in version 1.0. '
+                    f'Use `{s}_num_iter` instead.'
                 )
                 warnings.warn(warning_msg, FutureWarning)
                 user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
@@ -366,13 +359,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         x_postmean = uft.uifft2(x_postmean)
 
-    # TODO: remove astype call below once minimum SciPy >= 1.4
-    if x_postmean.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    x_postmean = x_postmean.astype(deconv_type, copy=False)
-
     if clip:
         x_postmean[x_postmean > 1] = 1
         x_postmean[x_postmean < -1] = -1
@@ -426,12 +412,13 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     im_deconv = np.full(image.shape, 0.5, dtype=float_type)
     psf_mirror = np.flip(psf)
 
+    # Small regularization parameter used to avoid 0 divisions
+    eps = 1e-12
+
     for _ in range(num_iter):
-        conv = convolve(im_deconv, psf, mode='same')
+        conv = convolve(im_deconv, psf, mode='same') + eps
         if filter_epsilon:
-            with np.errstate(invalid='ignore'):
-                relative_blur = np.where(conv < filter_epsilon, 0,
-                                         image / conv)
+            relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
         else:
             relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')

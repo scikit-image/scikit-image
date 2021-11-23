@@ -61,10 +61,10 @@ ax[3].imshow(rotated_polar)
 plt.show()
 
 shifts, error, phasediff = phase_cross_correlation(image_polar, rotated_polar)
-print("Expected value for counterclockwise rotation in degrees: "
-      f"{angle}")
-print("Recovered value for counterclockwise rotation: "
-      f"{shifts[0]}")
+print(f'Expected value for counterclockwise rotation in degrees: '
+      f'{angle}')
+print(f'Recovered value for counterclockwise rotation: '
+      f'{shifts[0]}')
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
@@ -109,11 +109,11 @@ shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
 
-print(f"Expected value for cc rotation in degrees: {angle}")
-print(f"Recovered value for cc rotation: {shiftr}")
+print(f'Expected value for cc rotation in degrees: {angle}')
+print(f'Recovered value for cc rotation: {shiftr}')
 print()
-print(f"Expected value for scaling difference: {scale}")
-print(f"Recovered value for scaling difference: {shift_scale}")
+print(f'Expected value for scaling difference: {scale}')
+print(f'Recovered value for scaling difference: {shift_scale}')
 
 ######################################################################
 # Register rotation and scaling on a translated image - Part 1
@@ -132,7 +132,7 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
-from scipy.fftpack import fft2, fftshift
+from scipy.fft import fft2, fftshift
 
 angle = 24
 scale = 1.4
@@ -169,11 +169,11 @@ ax[3].imshow(warped_rts)
 fig.suptitle('log-polar-based registration fails when no shared center')
 plt.show()
 
-print(f"Expected value for cc rotation in degrees: {angle}")
-print(f"Recovered value for cc rotation: {shiftr}")
+print(f'Expected value for cc rotation in degrees: {angle}')
+print(f'Recovered value for cc rotation: {shiftr}')
 print()
-print(f"Expected value for scaling difference: {scale}")
-print(f"Recovered value for scaling difference: {shift_scale}")
+print(f'Expected value for scaling difference: {scale}')
+print(f'Recovered value for scaling difference: {shift_scale}')
 
 ######################################################################
 # Register rotation and scaling on a translated image - Part 2
@@ -235,11 +235,11 @@ ax[3].imshow(warped_rts_fs, cmap='magma')
 fig.suptitle('Working in frequency domain can recover rotation and scaling')
 plt.show()
 
-print(f"Expected value for cc rotation in degrees: {angle}")
-print(f"Recovered value for cc rotation: {recovered_angle}")
+print(f'Expected value for cc rotation in degrees: {angle}')
+print(f'Recovered value for cc rotation: {recovered_angle}')
 print()
-print(f"Expected value for scaling difference: {scale}")
-print(f"Recovered value for scaling difference: {shift_scale}")
+print(f'Expected value for scaling difference: {scale}')
+print(f'Recovered value for scaling difference: {shift_scale}')
 
 ######################################################################
 # Some notes on this approach

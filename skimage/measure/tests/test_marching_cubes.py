@@ -1,9 +1,10 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_allclose
+
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import marching_cubes, mesh_surface_area
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
-import pytest
+
 
 def test_marching_cubes_isotropic():
     ellipsoid_isotropic = ellipsoid(6, 10, 16, levelset=True)
@@ -56,23 +57,23 @@ def test_marching_cubes_anisotropic():
 
 def test_invalid_input():
     # Classic
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 0, method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 1, method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2), method='_lorensen')
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((20, 20)), 0, method='_lorensen')
 
     # Lewiner
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 0)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 1)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         marching_cubes(np.zeros((20, 20)), 0)
 
 
@@ -153,7 +154,7 @@ def test_masked_marching_cubes():
     ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
     area = mesh_surface_area(ver, faces)
 
-    np.testing.assert_allclose(area, 299.56878662109375, rtol=.01)
+    assert_allclose(area, 299.56878662109375, rtol=.01)
 
 
 def test_masked_marching_cubes_empty():
@@ -175,6 +176,5 @@ def test_masked_marching_cubes_all_true():
     mask = np.ones_like(ellipsoid_scalar, dtype=bool)
     ver_m, faces_m, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
     ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
-    np.testing.assert_allclose(ver_m, ver, rtol=.00001)
-    np.testing.assert_allclose(faces_m, faces, rtol=.00001)
-
+    assert_allclose(ver_m, ver, rtol=.00001)
+    assert_allclose(faces_m, faces, rtol=.00001)

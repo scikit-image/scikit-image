@@ -7,7 +7,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg, warn
+from .._shared.utils import check_nD, deprecate_kwarg
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -84,8 +84,8 @@ def skeletonize(image, *, method=None):
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
         skeleton = skeletonize_3d(image)
     else:
-        raise ValueError('skeletonize requires a 2D or 3D image as input, '
-                         'got {}D.'.format(image.ndim))
+        raise ValueError(f'skeletonize requires a 2D or 3D image as input, '
+                         f'got {image.ndim}D.')
     return skeleton
 
 

@@ -1,19 +1,19 @@
 import numpy as np
-from warnings import warn
+
 from .._shared import utils
 from .._shared.utils import convert_to_float
-from ._nl_means_denoising import (
-    _nl_means_denoising_2d,
-    _nl_means_denoising_3d,
-    _fast_nl_means_denoising_2d,
-    _fast_nl_means_denoising_3d)
+from ._nl_means_denoising import (_nl_means_denoising_2d,
+                                  _nl_means_denoising_3d,
+                                  _fast_nl_means_denoising_2d,
+                                  _fast_nl_means_denoising_3d,
+                                  _fast_nl_means_denoising_4d)
 
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
-                     preserve_range=None, channel_axis=None):
+                     preserve_range=False, channel_axis=None):
     """Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
 
@@ -143,36 +143,41 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     >>> rng = np.random.default_rng()
     >>> a += 0.3 * rng.standard_normal(a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
-
     """
-    if image.ndim == 2:
+    if channel_axis is None:
+        multichannel = False
         image = image[..., np.newaxis]
-        channel_axis = -1
-    if image.ndim != 3:
-        raise NotImplementedError("Non-local means denoising is only \
-        implemented for 2D grayscale and RGB images or 3-D grayscale images.")
+    else:
+        multichannel = True
 
-    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. By default denoise_nl_means will '
-             'assume you want to preserve the range of your image '
-             '(preserve_range=True). In scikit-image 0.19 this behavior will '
-             'change to preserve_range=False. To avoid this warning, '
-             'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
-        preserve_range = True
+    ndim_no_channel = image.ndim - 1
+    if (ndim_no_channel < 2) or (ndim_no_channel > 4):
+        raise NotImplementedError(
+            "Non-local means denoising is only implemented for 2D, "
+            "3D or 4D grayscale or multichannel images.")
 
     image = convert_to_float(image, preserve_range)
     if not image.flags.c_contiguous:
         image = np.ascontiguousarray(image)
 
     kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
-    if channel_axis is not None:  # 2-D images
+    if ndim_no_channel == 2:
+        nlm_func = (_fast_nl_means_denoising_2d if fast_mode else
+                    _nl_means_denoising_2d)
+    elif ndim_no_channel == 3:
+        if multichannel and not fast_mode:
+            raise NotImplementedError(
+                "Multichannel 3D requires fast_mode to be True.")
         if fast_mode:
-            return _fast_nl_means_denoising_2d(image, **kwargs)
+            nlm_func = _fast_nl_means_denoising_3d
         else:
-            return _nl_means_denoising_2d(image, **kwargs)
-    else:  # 3-D grayscale
+            # have to drop the size 1 channel axis for slow mode
+            image = image[..., 0]
+            nlm_func = _nl_means_denoising_3d
+    elif ndim_no_channel == 4:
         if fast_mode:
-            return _fast_nl_means_denoising_3d(image, **kwargs)
+            nlm_func = _fast_nl_means_denoising_4d
         else:
-            return _nl_means_denoising_3d(image, **kwargs)
+            raise NotImplementedError("4D requires fast_mode to be True.")
+    dn = np.asarray(nlm_func(image, **kwargs))
+    return dn

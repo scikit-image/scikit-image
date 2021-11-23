@@ -1,5 +1,7 @@
 import sys
 
+from packaging import version as _version
+
 
 def ensure_python_version(min_version):
     if not isinstance(min_version, tuple):
@@ -43,19 +45,15 @@ def _check_version(actver, version, cmp_op):
 
     Distributed under the terms of the BSD License.
     """
-    # since version_requirements.py is in the critical import path, we
-    # lazy import it
-    from distutils.version import LooseVersion
-
     try:
         if cmp_op == '>':
-            return LooseVersion(actver) > LooseVersion(version)
+            return _version.parse(actver) > _version.parse(version)
         elif cmp_op == '>=':
-            return LooseVersion(actver) >= LooseVersion(version)
+            return _version.parse(actver) >= _version.parse(version)
         elif cmp_op == '=':
-            return LooseVersion(actver) == LooseVersion(version)
+            return _version.parse(actver) == _version.parse(version)
         elif cmp_op == '<':
-            return LooseVersion(actver) < LooseVersion(version)
+            return _version.parse(actver) < _version.parse(version)
         else:
             return False
     except TypeError:

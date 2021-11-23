@@ -11,12 +11,13 @@ jobs:
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
+        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, '3.10']
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         QT: ["PyQt5"]
@@ -33,9 +34,10 @@ jobs:
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
-            # Test miminum requirements (don't build docs there is a problem
+            EAGER_IMPORT: 1
+            # Test mininum requirements (don't build docs there is a problem
             # with dask and astropy)
-            OPTIONS_NAME: "mini-req"
+            OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
             python-version: 3.7
             MINIMUM_REQUIREMENTS: 1
@@ -43,22 +45,23 @@ jobs:
             BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.8
+            python-version: 3.9
             PIP_FLAGS: "--pre"
+            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test pre-releases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.8
             BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.8
             PYTHONOPTIMIZE: 2
             BUILD_DOCS: 0
             OPTIONS_NAME: "optimize"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.8
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
 
@@ -100,6 +103,7 @@ jobs:
             BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
             TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
             OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+            EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
             echo $PIP_FLAGS
             pip install $PIP_FLAGS -r requirements/test.txt
@@ -129,7 +133,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, '3.10']
         QT: ["PyQt5"]
         BUILD_DOCS: [1]
         TEST_EXAMPLES: [0]
@@ -138,7 +142,7 @@ jobs:
         include:
           - python-version: 3.7
             OPTIONAL_DEPS: 0
-          - python-version: 3.9
+          - python-version: '3.10'
             OPTIONAL_DEPS: 0
         exclude:
           - python-version: 3.7
@@ -146,7 +150,9 @@ jobs:
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-
+          # a number of optional deps don't yet have Python 3.10 wheels
+          - python-version: '3.10'
+            OPTIONAL_DEPS: 1
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0

@@ -63,6 +63,9 @@ jobs:
       key: '"skimage_data" | skimage/data/_registry.py'
       path: $(SKIMAGE_DATA_CACHE_FOLDER)
     displayName: Cache scikit-image data files
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
 
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
   - task: Cache@2
@@ -73,6 +76,16 @@ jobs:
         "Python$(PYTHON_VERSION)-$(ARCH)"
       path: $(PIP_CACHE_DIR)
     displayName: Cache pip packages
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
+
+  - script: |
+      choco install --$(ARCH) -y llvm
+      set PATH=C:\Program Files\LLVM\bin;%PATH%
+      set PATH=C:\Program Files (x86)\LLVM\bin;%PATH%
+      echo '##vso[task.setvariable variable=PATH]%PATH%'
+    displayName: 'Install clang-cl'
 
   - bash: |
       set -ex
@@ -105,6 +118,9 @@ jobs:
   - bash: |
       set -ex
       PYTHON="$(python.pythonLocation)\\python.exe"
+      if [ "$(ARCH)" = "x86" ] ; then
+          export CXXFLAGS="-m32"
+      fi
 
       # Compile the package and build the wheel
       $PYTHON setup.py bdist_wheel

@@ -3,8 +3,8 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun!  Join us on the `scikit-image mailing
-list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ and tell us
+Developing Open Source is great fun! Join us on the `scikit-image
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
 which of the following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
@@ -60,13 +60,14 @@ Here's the long and short of it:
       git checkout main
       git pull upstream main
 
-   * Create a branch for the feature you want to work on. Since the
-     branch name will appear in the merge message, use a sensible name
+   * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
       git checkout -b transform-speedups
 
-   * Commit locally as you progress (``git add`` and ``git commit``)
+   * Commit locally as you progress (with ``git add`` and ``git commit``).
+     Please write `good commit messages
+     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
 3. To submit your contribution:
 
@@ -78,11 +79,11 @@ Here's the long and short of it:
      users can remove this step by `connecting to GitHub with SSH
      <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
 
-   * Go to GitHub. The new branch will show up with a green Pull Request
-     button - click it.
+   * Go to GitHub. The new branch will show up with a green "pull request"
+     button -- click it.
 
-   * If you want, post on the `mailing list
-     <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ to explain your changes or
+   * If you want, post on the `developer forum
+     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
@@ -91,7 +92,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 4. Review process:
 
    * Reviewers (the other developers and interested community members) will
-     write inline and/or general comments on your Pull Request (PR) to help
+     write inline and/or general comments on your pull request (PR) to help
      you improve its implementation, documentation, and style.  Every single
      developer working on the project has their code reviewed, and we've come
      to see it as a friendly conversation from which we all learn and the
@@ -104,12 +105,12 @@ For a more detailed discussion, read these :doc:`detailed documents
      and commit. As soon as those changes are pushed up (to the same branch as
      before) the pull request will update automatically.
 
-   * `Travis-CI <https://travis-ci.org/>`__, a continuous integration service,
-     is triggered after each Pull Request update to build the code, run unit
-     tests, measure code coverage and check coding style (PEP8) of your
-     branch. The Travis tests must pass before your PR can be merged. If
-     Travis fails, you can find out why by clicking on the "failed" icon (red
-     cross) and inspecting the build and test log.
+   * Continuous integration (CI) services are triggered after each pull request
+     submission to build the package, run unit tests, measure code coverage,
+     and check the coding style (PEP8) of your branch. The tests must pass
+     before your PR can be merged. If CI fails, you can find out why by
+     clicking on the "failed" icon (red cross) and inspecting the build and
+     test logs.
 
    * A pull request must be approved by two core team members before merging.
 
@@ -137,7 +138,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 Divergence between ``upstream main`` and your feature branch
 ------------------------------------------------------------
 
-If GitHub indicates that the branch of your Pull Request can no longer
+If GitHub indicates that the branch of your PR can no longer
 be merged automatically, merge the main branch into yours::
 
    git fetch upstream main
@@ -203,7 +204,7 @@ Guidelines
   likely to be controversial, two reviews should still be encouraged. The
   second case is that of minor fixes which restore CI to a working state,
   because these should be merged fairly quickly. Reach out on the
-  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
 
@@ -279,31 +280,6 @@ detailing the test coverage::
   skimage/color/colorconv                             77     77   100%
   skimage/filter/__init__                              1      1   100%
   ...
-
-
-Activate Travis-CI for your fork (optional)
--------------------------------------------
-
-Travis-CI checks all unit tests in the project to prevent breakage.
-
-Before sending a pull request, you may want to check that Travis-CI
-successfully passes all tests. To do so,
-
-* Go to `Travis-CI <https://travis-ci.org/>`__ and follow the Sign In link at
-  the top
-
-* Go to your `profile page <https://travis-ci.org/profile>`__ and switch on
-  your scikit-image fork
-
-It corresponds to steps one and two in
-`Travis-CI documentation <https://docs.travis-ci.com/user/tutorial/#to-get-started-with-travis-ci-using-github>`__
-(Step three is already done in scikit-image).
-
-Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
-and you will receive an email notification when the process is done.
-
-Every time Travis is triggered, it also calls on `Codecov
-<https://codecov.io>`_ to inspect the current test overage.
 
 
 Building docs
@@ -392,25 +368,6 @@ Fixing Warnings
 
 -  Make sure to use pre-sphinxification paths to images (not the
    \_images directory)
-
-Auto-generating dev docs
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-This set of instructions was used to create
-scikit-image/tools/deploy-docs.sh
-
--  Go to Github account settings -> personal access tokens
--  Create a new token with access rights ``public_repo`` and
-   ``user:email only``
--  Install the travis command line tool: ``gem install travis``. On OSX,
-   you can get gem via ``brew install ruby``.
--  Take then token generated by Github and run
-   ``travis encrypt GH_TOKEN=<token>`` from inside a scikit-image repo
--  Paste the output into the secure: field of ``.travis.yml``.
--  The decrypted GH\_TOKEN env var will be available for travis scripts
-
-https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
-https://docs.travis-ci.com/user/encryption-keys/
 
 Deprecation cycle
 -----------------

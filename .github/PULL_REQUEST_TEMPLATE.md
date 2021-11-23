@@ -15,6 +15,7 @@
 - Unit tests
 - Clean style in [the spirit of PEP8](https://www.python.org/dev/peps/pep-0008/)
 - Describes the changes in towncrier news fragments as explained in [doc/source/upcoming_changes/README.md](https://github.com/scikit-image/scikit-image/tree/master/doc/release/upcoming_changes)
+- Descriptive commit messages (see below)
 
 <!-- For detailed information on these and other aspects see -->
 <!-- the scikit-image contribution guidelines. -->

@@ -24,14 +24,19 @@ a patch release is required for an older version, a branch can be created from
 the appropriate point in main and the following instructions are still apt.
 
 If you have issues with the automated process of release notes generation you
-can follow the steps described in doc/release/upcoming_changes/README.md. By default release
-notes are created automatically using a Github action that uses the Towncrier
-package and a custom script for aggregating the contributors. Towncrier relies
-on “news fragments” being generated appropriately by contributors for each PR
-that was merged. You can review the upcoming changes that will be part of the
-release notes in `doc/release/upcoming_changes`. These will be deleted upon each
-release. In addition to the news fragments, `tools/aggregate_contributors.py`
-will compile information across all PRs that are part of the release.
+can follow the steps described in doc/release/upcoming_changes/README.md. By
+default release notes are created automatically using a Github action that uses
+the Towncrier package and a custom script for aggregating the contributors.
+Towncrier relies on “news fragments” being generated appropriately by
+contributors for each PR that was merged. You can review the upcoming changes
+that will be part of the release notes in `doc/release/upcoming_changes`. These
+will be deleted upon each release. In addition to the news fragments,
+`tools/aggregate_contributors.py` will compile information across all PRs that
+are part of the release.
+
+- Update the file ``skimage/data/_fetchers.py`` to point the pooch repository
+  to the new branch instead of main during testing. Look for the parameter ``version_dev="main",`` for ``pooch.create`` and change it to the newly
+  created branch name.
 
 - On the main branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
@@ -113,9 +118,10 @@ will compile information across all PRs that are part of the release.
     in `robots.txt`
   - Commit and push (this will also build and update the website).
 
-- Post release notes on mailing lists, blog, Twitter, etc.
+- Post release notes on user & dev forums, blog, Twitter, etc.
 
-  - scikit-image@python.org
+  - https://forum.image.sc/tag/scikit-image
+  - https://discuss.scientific-python.org/c/contributor/skimage
   - scipy-user@python.org
   - scikit-learn@python.org
 
