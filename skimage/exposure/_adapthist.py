@@ -211,8 +211,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         edge_mapped = np.take_along_axis(edge_maps, blocks, axis=-1)
 
         # interpolate
-        edge_coeffs = math.prod([[inv_coeffs, coeffs][e][d]
-                                 for d, e in enumerate(edge[::-1])], 0)
+        edge_coeffs = np.prod([[inv_coeffs, coeffs][e][d]
+                               for d, e in enumerate(edge[::-1])], 0)
 
         result += (edge_mapped * edge_coeffs).astype(result.dtype)
 
