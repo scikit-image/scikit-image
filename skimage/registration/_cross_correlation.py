@@ -21,7 +21,7 @@ from .._shared.utils import _supported_float_type
 
 def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
                       axes=None, pad_axes=None,
-                      space="real", normalization="phase",
+                      normalization=None,
                       upsample_factor=1, overlap_ratio=0.3):
     """Masked/unmasked cross-correlation between two arrays.
 
@@ -84,24 +84,29 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
     """
     if mode not in {'full', 'same'}:
         raise ValueError(f"Correlation mode '{mode}' is not valid.")
-    if normalization not in {'phase', 'normalized', None}:
+    if normalization not in {'phase', 'zero_normalized', None}:
         raise ValueError(f"Correlation normalization '{normalization}' is not valid.")
-    if pad_axes is None:
+    if pad_axes is not None:
+        if mask1 is None and mask2 is None:
+            mask1 = np.ones(shape=arr1.shape)
+            mask2 = np.ones(shape=arr2.shape)
+    else:
         pad_axes = ()
-
+    if axes is None:
+        axes = tuple(range(len(arr1.shape)))
     if mask1 is not None or mask2 is not None:
+        print("masked")
         cross_correlation = _masked_cross_correlation(arr1, arr2,
                                                       mask1, mask2,
                                                       mode, axes, pad_axes,
-                                                      space, normalization,
+                                                      normalization,
                                                       upsample_factor=upsample_factor)
     else:
         cross_correlation = _cross_correlation(arr1, arr2,
-                                               mask1, mask2,
                                                mode, axes, pad_axes,
-                                               space, normalization,
+                                               normalization,
                                                upsample_factor=upsample_factor)
-        return cross_correlation
+    return cross_correlation
 
 def _ifft_upsample(x, axes, upsample_factor=1, ):
     shifted = np.fft.fftshift(x)
@@ -141,9 +146,15 @@ def get_fft_ifft(arr1_shape, arr2_shape, axes, pad_axes, mode="same", upsample_f
         final_shape = tuple([int(upsample_factor * sz) for sz in final_shape])
     if mode is "full":
         final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
-
-    else:
-        final_slice = tuple([slice(int(sz // 4), int(sz - sz // 4)) for sz in final_shape])
+    elif mode is "same":
+        cur_shape = arr1_shape
+        final_slice = [slice(None, None)] * len(arr1_shape)
+        if upsample_factor is not 1:
+            cur_shape = tuple([int(upsample_factor * sz) for sz in cur_shape])
+        for ax in axes:
+            startind = (final_shape[ax]//2) - cur_shape[ax]//2
+            endind = (final_shape[ax]//2) + cur_shape[ax]//2
+            final_slice[ax] = slice(startind, endind)
     # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or
     # 7)
     fast_shape = tuple(next_fast_len(final_shape[ax])
@@ -179,17 +190,40 @@ def _cross_correlation(arr1, arr2,
                                                        upsample_factor=upsample_factor)
     float_dtype = _supported_float_type([arr1.dtype, arr2.dtype])
     eps = np.finfo(float_dtype).eps
+
+    if normalization is "zero_normalized" or "normalized":
+        std1 = np.std(arr1, axis=axes)
+        std2 = np.std(arr2, axis=axes)
+    if normalization is "zero_normalized":
+        arr1 = np.subtract(arr1, np.mean(arr1, axis=axes))
+        arr2 = np.subtract(arr2, np.mean(arr2, axis=axes))
     arr1_fft = fft(arr1)
     rotated_arr2 = _flip(arr2, axes=axes)
     rotated_arr2_fft = fft(rotated_arr2)
+    rotated_mask = fft(_flip(np.ones(arr2.shape), axes=axes))
+    mask = fft(np.ones(arr1.shape))
+    num_points = ifft(rotated_mask*mask)
+    num_points[:] = np.round(num_points)
+    num_points[:] = np.fmax(num_points, eps)
 
     if normalization is None:
-        return ifft(arr1_fft*rotated_arr2_fft)
+        corr = (ifft(rotated_arr2_fft*arr1_fft) *
+                (num_points/np.max(num_points)))
     elif normalization is "phase":
         product = arr1_fft * rotated_arr2_fft
         product /= np.maximum(np.abs(product), 100 * eps)
+        corr = ifft(product)
     elif normalization is "normalized":
+        numerator = ifft(arr1_fft * rotated_arr2_fft)
+        corr = numerator/(num_points*std1*std2)
+
+    elif normalization is "zero_normalized":
         numerator = ifft(arr1_fft*rotated_arr2_fft)
+        denominator = np.multiply(std1, std2)*num_points
+        corr = numerator/denominator
+    # Slice back to expected convolution shape.
+    corr = corr[final_slice]
+    return corr
 
 
 
@@ -197,7 +231,7 @@ def _cross_correlation(arr1, arr2,
 def _masked_cross_correlation(arr1, arr2, mask1=None,
                               mask2=None, mode="full",
                               axes=None, pad_axes=None,
-                              space="real", normalization="phase",
+                              normalization="phase",
                               upsample_factor=1,
                               overlap_ratio=0.3):
     fft, ifft, final_slice, final_shape = get_fft_ifft(arr1_shape=arr1.shape,
@@ -249,7 +283,7 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
                                np.max(number_overlap_masked_px))
         out = out[final_slice]
         number_overlap_masked_px = number_overlap_masked_px[final_slice]
-    elif normalization is "normalized":
+    elif normalization is "zero_normalized":
         masked_correlated_fixed_fft = ifft(rotated_mask2_fft * arr1_fft)
         masked_correlated_rotated_moving_fft = ifft(
             mask1_fft * rotated_arr2_fft)
@@ -276,17 +310,6 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         denom = denom[final_slice]
         number_overlap_masked_px = number_overlap_masked_px[final_slice]
 
-        if mode == 'same':
-            if upsample_factor is not 1:
-                new_shape = [int(round(sz * upsample_factor)) for sz in arr1.shape]
-            else:
-                new_shape = arr1.shape
-            _centering = partial(_centered,
-                                 newshape=new_shape, axes=axes)
-            denom = _centering(denom)
-            numerator = _centering(numerator)
-            number_overlap_masked_px = _centering(number_overlap_masked_px)
-
         # Pixels where `denom` is very small will introduce large
         # numbers after division. To get around this problem,
         # we zero-out problematic pixels.
@@ -302,9 +325,9 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         return
 
     # Apply overlap ratio threshold
-    number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
-                                                 axis=axes, keepdims=True)
-    out[number_overlap_masked_px < number_px_threshold] = 0.0
+    #number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
+    #                                             axis=axes, keepdims=True)
+    #out[number_overlap_masked_px < number_px_threshold] = 0.0
 
     return out
 
