@@ -612,13 +612,13 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     trials : int
         Number of trials.
     """
+    if probability == 0:
+        return 0
+    if n_inliers == 0:
+        return np.inf
     inlier_ratio = n_inliers / n_samples
     nom = max(_EPSILON, 1 - probability)
     denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
-    if nom == 1:
-        return 0
-    if denom == 1:
-        return np.inf
     return abs(float(np.ceil(np.log(nom) / np.log(denom))))
 
 
