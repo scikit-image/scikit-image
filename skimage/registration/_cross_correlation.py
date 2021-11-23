@@ -111,6 +111,9 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
 def _ifft_upsample(x, axes, upsample_factor=1, ):
     shifted = np.fft.fftshift(x)
     padding = np.array(np.round((upsample_factor - 1) * np.array(np.shape(x)) / 2), dtype=int)
+    for ax in range(len(x.shape)):
+        if ax not in axes:
+            padding[ax]=0
     shifted = np.pad(shifted, padding)
     unshifted = np.fft.ifftshift(shifted)
     transformed = fftmodule.ifftn(unshifted, axes=axes)
@@ -155,6 +158,7 @@ def get_fft_ifft(arr1_shape, arr2_shape, axes, pad_axes, mode="same", upsample_f
             startind = (final_shape[ax]//2) - cur_shape[ax]//2
             endind = (final_shape[ax]//2) + cur_shape[ax]//2
             final_slice[ax] = slice(startind, endind)
+        print(final_slice)
     # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or
     # 7)
     fast_shape = tuple(next_fast_len(final_shape[ax])
@@ -167,23 +171,23 @@ def get_fft_ifft(arr1_shape, arr2_shape, axes, pad_axes, mode="same", upsample_f
     # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
     # results in arr_fft shape (4, 4, 7)
     fft = partial(fftmodule.fftn, s=fast_shape, axes=axes)
+    _ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
+    # assume complex data is already in Fourier space
+    def ifft(x):
+        return _ifft(x).real
     if upsample_factor is 1:
-        _ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
-
-        # assume complex data is already in Fourier space
-        def ifft(x):
-            return _ifft(x).real
+        ifft_up =None
     else:
-        ifft = partial(_ifft_upsample, axes=axes, upsample_factor=upsample_factor)
+        ifft_up = partial(_ifft_upsample, axes=axes, upsample_factor=upsample_factor)
 
-    return fft, ifft, final_slice, final_shape
+    return fft, ifft, final_slice, final_shape, ifft_up
 
 def _cross_correlation(arr1, arr2,
                        mode="full",
                        axes=None, pad_axes=None,
                        normalization="phase",
                        upsample_factor=1):
-    fft, ifft, final_slice, final_shape = get_fft_ifft(arr1_shape=arr1.shape,
+    fft, ifft, final_slice, final_shape, ifft_up = get_fft_ifft(arr1_shape=arr1.shape,
                                                        arr2_shape=arr2.shape,
                                                        axes=axes, mode=mode,
                                                        pad_axes=pad_axes,
@@ -223,6 +227,9 @@ def _cross_correlation(arr1, arr2,
         corr = numerator/denominator
     # Slice back to expected convolution shape.
     corr = corr[final_slice]
+    if upsample_factor != 1.0:
+        power = fft(corr)
+        corr = ifft_up(power)
     return corr
 
 
@@ -234,7 +241,7 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
                               normalization="phase",
                               upsample_factor=1,
                               overlap_ratio=0.3):
-    fft, ifft, final_slice, final_shape = get_fft_ifft(arr1_shape=arr1.shape,
+    fft, ifft, final_slice, final_shape, ifft_up = get_fft_ifft(arr1_shape=arr1.shape,
                                                        arr2_shape=arr2.shape,
                                                        axes=axes, mode=mode,
                                                        pad_axes=pad_axes,
@@ -274,16 +281,7 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         out = out[final_slice]
         number_overlap_masked_px = number_overlap_masked_px[final_slice]
 
-    elif normalization is "phase":
-        # Normalize
-        product = rotated_arr2_fft * arr1_fft
-        eps = np.finfo(product.real.dtype).eps
-        product /= np.maximum(np.abs(product), 100 * eps)
-        out = ifft(product) * (number_overlap_masked_px /
-                               np.max(number_overlap_masked_px))
-        out = out[final_slice]
-        number_overlap_masked_px = number_overlap_masked_px[final_slice]
-    elif normalization is "zero_normalized":
+    elif normalization is "zero_normalized" or "phase":
         masked_correlated_fixed_fft = ifft(rotated_mask2_fft * arr1_fft)
         masked_correlated_rotated_moving_fft = ifft(
             mask1_fft * rotated_arr2_fft)
@@ -321,9 +319,17 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         out = np.zeros_like(denom, dtype=float_dtype)
         out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
         np.clip(out, a_min=-1, a_max=1, out=out)
-    else:
-        return
+        if normalization is "phase":
+            product = fft(out)
+            eps = np.finfo(product.real.dtype).eps
+            product /= np.maximum(np.abs(product), 100 * eps)
+            out = ifft(product)
 
+    if upsample_factor != 1.0:
+        print(out.shape)
+        power = fft(out)
+        out = ifft_up(power)
+    print("out shape", out.shape)
     # Apply overlap ratio threshold
     #number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
     #                                             axis=axes, keepdims=True)
