@@ -39,7 +39,7 @@ if sys.version_info < (3, 6):
 
     error = """Python {py} detected.
 
-scikit-image 0.19+ supports only Python 3.8 and above.
+scikit-image supports only Python 3.8 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
