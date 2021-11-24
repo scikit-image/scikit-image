@@ -9,8 +9,6 @@ env:
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-  # (currently not avaialable for scipy)
-  CIBW_ARCHS_MACOS: x86_64 # TODO: add arm64 universal2
 
 
 jobs:
@@ -104,14 +102,23 @@ jobs:
           path: ./dist/*.whl
 
   build_macos_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest]
-    env:
-      MACOSX_DEPLOYMENT_TARGET: "10.13"
+        cibw_python: [ "cp37-*", "cp38-*", "cp39-*", "cp310-*" ]
+        # TODO: add "universal2" once a universal2 libomp is available
+        cibw_arch: [ "x86_64", "arm64"]
+        exclude:
+          - os: macos-latest
+            cibw_python: "cp37-*"
+            cibw_arch: arm64
+        #   - os: macos-latest
+        #     cibw_python: "cp37-*"
+        #     cibw_arch: universal2
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -120,7 +127,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       - name: Install cibuildwheel
         run: |
@@ -134,14 +141,24 @@ jobs:
           # supported macos version is: High Sierra / 10.13. When upgrading
           # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
           # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+          if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
+              # SciPy requires 12.0 on arm to prevent kernel panics
+              # https://github.com/scipy/scipy/issues/14688
+              # so being conservative, we just do the same here
+              export MACOSX_DEPLOYMENT_TARGET=12.0
+              wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
+          else
+              export MACOSX_DEPLOYMENT_TARGET=10.13
+              wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+          fi
           sudo tar -C / -xvjf libomp.tbz2 opt
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp3?-* cp310-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_BUILD: ${{ matrix.cibw_python }}
+          CIBW_ARCHS_MACOS: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_TEST_SKIP: "*-macosx_arm64"
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
@@ -220,8 +237,6 @@ jobs:
           name: wheels
           path: ./dist/*.whl
 
-
-
   deploy:
     name: Release
     needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
@@ -252,9 +267,9 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           python setup.py sdist
-          ls -la ${{ github.workspace }}/dist 
-          # We prefer to release wheels before source because otherwise there is a 
-          # small window during which users who pip install scikit-image will require compilation. 
+          ls -la ${{ github.workspace }}/dist
+          # We prefer to release wheels before source because otherwise there is a
+          # small window during which users who pip install scikit-image will require compilation.
           twine upload ${{ github.workspace }}/dist/*.whl
           twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
         env:
