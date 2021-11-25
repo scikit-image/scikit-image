@@ -1,3 +1,4 @@
+import math
 from collections.abc import Iterable
 from warnings import warn
 
@@ -372,7 +373,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         if use_mask:
             segment_size = mask.sum() / n_centroids
         else:
-            segment_size = np.prod(image.shape[:3]) / n_centroids
+            segment_size = math.prod(image.shape[:3]) / n_centroids
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(

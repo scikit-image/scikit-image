@@ -1016,7 +1016,7 @@ def _mean_std(image, w):
     kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
                      for indices in kernel_indices]
 
-    total_window_size = np.prod(w)
+    total_window_size = math.prod(w)
     kernel_shape = tuple(_w + 1 for _w in w)
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)

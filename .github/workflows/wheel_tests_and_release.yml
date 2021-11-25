@@ -26,14 +26,6 @@ jobs:
         cibw_arch: [ "x86_64", "i686" ]
         include:
           - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: x86_64
-          - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: i686
-          - os: ubuntu-18.04
             cibw_python: "cp310-*"
             cibw_manylinux: manylinux2014
             cibw_arch: x86_64
@@ -45,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
@@ -70,7 +62,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04]
-        cibw_python: [ "cp37-*", "cp38-*" , "cp39-*" , "cp310-*" ]
+        cibw_python: [ "cp38-*" , "cp39-*" , "cp310-*" ]
         cibw_manylinux: [ manylinux2014 ]
     steps:
       - uses: actions/checkout@v2
@@ -79,7 +71,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -120,7 +112,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       - name: Install cibuildwheel
         run: |
@@ -139,7 +131,7 @@ jobs:
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp3?-* cp310-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_SKIP: "cp36-* cp37-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
@@ -172,7 +164,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       # install choco package manager
       - uses: crazy-max/ghaction-chocolatey@v1
@@ -212,7 +204,7 @@ jobs:
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp3?-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
 
       - uses: actions/upload-artifact@v2
