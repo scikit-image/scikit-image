@@ -23,46 +23,20 @@ triggered by pushing a git tag to the scikit-image repository on github.  If
 a patch release is required for an older version, a branch can be created from
 the appropriate point in main and the following instructions are still apt.
 
-- Update the release notes (note this will soon change with the addition of
-  Towncrier integrated directly into the CI):
+If you have issues with the automated process of release notes generation you
+can follow the steps described in doc/release/upcoming_changes/README.md. By
+default release notes are created automatically using a Github action that uses
+the Towncrier package and a custom script for aggregating the contributors.
+Towncrier relies on “news fragments” being generated appropriately by
+contributors for each PR that was merged. You can review the upcoming changes
+that will be part of the release notes in `doc/release/upcoming_changes`. These
+will be deleted upon each release. In addition to the news fragments,
+`tools/aggregate_contributors.py` will compile information across all PRs that
+are part of the release.
 
-  1. Review and cleanup ``doc/release/release_dev.rst``.
-
-  2. Make a list of merges, contributors, and reviewers by running
-     ``tools/generate_release_notes.py -h`` and following that file's usage.
-
-  3. Paste this list at the end of the ``release_dev.txt``.
-
-  4. Scan the PR titles for highlights, deprecations, API changes,
-     and bugfixes, and mention these in the relevant sections of the notes.
-     Try to present the information in an expressive way by mentioning
-     the affected functions, elaborating on the changes and their
-     consequences. If possible, organize semantically close PRs in groups.
-
-  5. Check for duplicate names in the automatically generated list of
-     contributors and reviewers
-
-  6. Rename the file to ``doc/release/release_<major>.<minor>.txt``
-
-  7. Copy ``doc/release/release_template.txt`` to
-     ``doc/release/release_dev.txt`` for the next release.
-
-  8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
-     to ``release_dev.txt``.
-
-  9. Update the file ``skimage/data/_fetchers.py`` to point the pooch
-     repository to the new branch instead of main during testing.
-     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
-     change it to the newly created branch name.
-
-- Submit the release notes for review by other project maintainers:
-
-  - Create a PR from v<major>.<minor>.x branch to `main` (at this point,
-    the difference should show the full contents of the release notes).
-  - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
-  - Once the consensus is found, ask the project maintainers to merge
-    the PR.
-  - Cherry pick the change onto the release branch.
+- Update the file ``skimage/data/_fetchers.py`` to point the pooch repository
+  to the new branch instead of main during testing. Look for the parameter ``version_dev="main",`` for ``pooch.create`` and change it to the newly
+  created branch name.
 
 - On the main branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
