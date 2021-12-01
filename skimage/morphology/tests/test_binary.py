@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
-from skimage.morphology import binary, gray
+from skimage.morphology import binary, footprints, gray
 
 
 img = color.rgb2gray(data.astronaut())
@@ -55,6 +55,38 @@ def test_binary_opening():
     binary_res = binary.binary_opening(bw_img, footprint)
     gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
+
+
+@pytest.mark.parametrize("function", ["binary_erosion", "binary_dilation"])
+def test_iterated_binary_erosion_and_dilation(function):
+    footprint = footprints.square(3)
+    iterations = 3
+    binary_func = getattr(binary, function)
+    expected = bw_img
+    for i in range(iterations):
+        expected = binary_func(expected, footprint)
+    result = binary_func(bw_img, footprint, iterations=iterations)
+    assert_array_equal(expected, result)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_closing"]
+)
+def test_iterated_binary_vs_scipy(function):
+    footprint = footprints.square(3)
+    iterations = 3
+
+    scipy_func = getattr(ndi, function)
+    scipy_result = scipy_func(bw_img, footprint, iterations=iterations)
+
+    # omit border from comparison due to differences in border_value setting
+    # for erosion vs. dilation within opening/closing operations in SciPy
+    center = (slice(iterations, -iterations),) * bw_img.ndim
+
+    skimage_func = getattr(binary, function)
+    skimage_result = skimage_func(bw_img, footprint, iterations=iterations)
+    assert_array_equal(skimage_result[center], scipy_result[center])
 
 
 def test_footprint_overflow():

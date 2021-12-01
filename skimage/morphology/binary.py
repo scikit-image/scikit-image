@@ -13,7 +13,7 @@ from .misc import default_footprint
 # axis.
 @default_footprint
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def binary_erosion(image, footprint=None, out=None):
+def binary_erosion(image, footprint=None, out=None, *, num_iter=1):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -33,6 +33,9 @@ def binary_erosion(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    num_iter : int
+        The number of iterations to repeat binary_erosion with the same
+        footprint.
 
     Returns
     -------
@@ -44,13 +47,13 @@ def binary_erosion(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
     ndi.binary_erosion(image, structure=footprint, output=out,
-                       border_value=True)
+                       border_value=True, iterations=num_iter)
     return out
 
 
 @default_footprint
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def binary_dilation(image, footprint=None, out=None):
+def binary_dilation(image, footprint=None, out=None, *, num_iter=1):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -70,6 +73,9 @@ def binary_dilation(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    num_iter : int
+        The number of iterations to repeat binary_erosion with the same
+        footprint.
 
     Returns
     -------
@@ -79,13 +85,14 @@ def binary_dilation(image, footprint=None, out=None):
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
-    ndi.binary_dilation(image, structure=footprint, output=out)
+    ndi.binary_dilation(image, structure=footprint, output=out,
+                        iterations=num_iter)
     return out
 
 
 @default_footprint
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def binary_opening(image, footprint=None, out=None):
+def binary_opening(image, footprint=None, out=None, *, num_iter=1):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as grayscale opening but performs
@@ -106,6 +113,9 @@ def binary_opening(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    num_iter : int
+        The number of iterations to repeat binary_erosion with the same
+        footprint.
 
     Returns
     -------
@@ -113,14 +123,14 @@ def binary_opening(image, footprint=None, out=None):
         The result of the morphological opening.
 
     """
-    eroded = binary_erosion(image, footprint)
-    out = binary_dilation(eroded, footprint, out=out)
+    eroded = binary_erosion(image, footprint, iterations=num_iter)
+    out = binary_dilation(eroded, footprint, out=out, iterations=num_iter)
     return out
 
 
 @default_footprint
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
-def binary_closing(image, footprint=None, out=None):
+def binary_closing(image, footprint=None, out=None, *, num_iter=1):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as grayscale closing but performs
@@ -141,6 +151,9 @@ def binary_closing(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
+    num_iter : int
+        The number of iterations to repeat binary_erosion with the same
+        footprint.
 
     Returns
     -------
@@ -148,6 +161,6 @@ def binary_closing(image, footprint=None, out=None):
         The result of the morphological closing.
 
     """
-    dilated = binary_dilation(image, footprint)
-    out = binary_erosion(dilated, footprint, out=out)
+    dilated = binary_dilation(image, footprint, iterations=num_iter)
+    out = binary_erosion(dilated, footprint, out=out, iterations=num_iter)
     return out
