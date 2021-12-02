@@ -211,13 +211,16 @@ def _cross_correlation(arr1, arr2,
     return corr
 
 
-
-
 def _masked_cross_correlation(arr1, arr2, mask1=None,
                               mask2=None, mode="full",
                               axes=None, pad_axes=None,
                               normalization="phase",
                               overlap_ratio=0.3):
+    if mask1 is None:
+        mask1 = np.ones(arr1.shape, dtype=bool)
+    if mask2 is None:
+        mask2 = np.ones(arr2.shape, dtype=bool)
+
     fft, ifft, final_slice, final_shape = get_fft_ifft(arr1_shape=arr1.shape,
                                                        arr2_shape=arr2.shape,
                                                        axes=axes, mode=mode,
