@@ -166,8 +166,16 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version=None):
     no_header = split[1:]
     while not no_header[0].strip():
         no_header.pop(0)
+
+    # Store the initial description before any of the Parameters fields.
+    # Usually this is a single line, but the while loop covers any case
+    # where it is not.
+    descr = no_header.pop(0)
+    while no_header[0].strip():
+        descr += '\n    ' + no_header.pop(0)
+    descr += '\n\n'
     # '\n    ' rather than '\n' here to restore the original indentation.
-    final_docstring = no_header[0] + '\n' + '\n    '.join(no_header[1:])
+    final_docstring = descr + '\n    '.join(no_header)
     return final_docstring
 
 
