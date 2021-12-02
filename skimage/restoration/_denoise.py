@@ -259,7 +259,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                       deprecated_version="0.19")
 def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
                        isotropic=True, *, channel_axis=None,
                        multichannel=False):
