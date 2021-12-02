@@ -46,15 +46,13 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
         'same':
             The output is the same size as `arr1`, centered with respect
             to the `‘full’` output. Boundary effects are less prominent.
-    upsample_factor: float
-        Arr1 and Arr2 will be upsampled by this factor providing some
     axes : tuple of ints, optional
         Axes along which to compute the cross-correlation.
     pad_axes : tuple of ints, optional
         Axes along which to pad the data with zeros.
     normalization:{"Normalized","phase", None}
-        The normalization applied to the signal. The default is to calculate the normalized
-        cross-correlation.(Insert math)
+        The normalization applied to the signal. The default is to
+        calculate the normalized cross-correlation.(Insert math)
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for
         translations corresponding with an overlap ratio lower than this
@@ -78,14 +76,15 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
            IEEE Transactions on Image Processing, vol. 21(5),
            pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
-    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
-           Pattern Recognition, pp. 2918-2925 (2010).
+    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision
+           and Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
         raise ValueError(f"Correlation mode '{mode}' is not valid.")
     if normalization not in {'phase', 'zero_normalized', None}:
-        raise ValueError(f"Correlation normalization '{normalization}' is not valid.")
+        raise ValueError(f"Correlation normalization '{normalization}' is "
+                         f"not valid.")
     if pad_axes is not None:
         # If padding axes use the masked version of cross-correlation
         if mask1 is None and mask2 is None:
@@ -98,17 +97,18 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
         # cross-correlation applied along all axes
         axes = tuple(range(len(arr1.shape)))
     if mask1 is not None or mask2 is not None:
-        cross_correlation = _masked_cross_correlation(arr1, arr2,
-                                                      mask1, mask2,
-                                                      mode, axes, pad_axes,
-                                                      normalization,
-                                                      )
+        cc = _masked_cross_correlation(arr1, arr2,
+                                       mask1, mask2,
+                                       mode, axes, pad_axes,
+                                       normalization,
+                                       overlap_ratio,
+                                       )
     else:
-        cross_correlation = _cross_correlation(arr1, arr2,
-                                               mode, axes, pad_axes,
-                                               normalization,
-                                               )
-    return cross_correlation
+        cc = _cross_correlation(arr1, arr2,
+                                mode, axes, pad_axes,
+                                normalization,
+                                )
+    return cc
 
 
 def get_fft_ifft(arr1_shape, arr2_shape,
@@ -133,8 +133,7 @@ def get_fft_ifft(arr1_shape, arr2_shape,
     final_shape = list(arr1_shape)
     for axis in axes:
         if axis in pad_axes:
-            final_shape[axis] = arr1_shape[axis] + \
-                                arr2_shape[axis] - 1
+            final_shape[axis] = arr1_shape[axis] + arr2_shape[axis] - 1
     final_shape = tuple(final_shape)
     if mode == "full":
         final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
@@ -142,9 +141,12 @@ def get_fft_ifft(arr1_shape, arr2_shape,
         cur_shape = arr1_shape
         final_slice = [slice(None, None)] * len(arr1_shape)
         for ax in axes:
-            startind = (final_shape[ax]//2) - cur_shape[ax]//2
-            endind = (final_shape[ax]//2) + cur_shape[ax]//2
-            final_slice[ax] = slice(startind, endind)
+            start_index = (final_shape[ax] // 2) - cur_shape[ax] // 2
+            end_index = (final_shape[ax] // 2) + cur_shape[ax] // 2
+            final_slice[ax] = slice(start_index, end_index)
+    else:
+        print("Mode must be one of `same` or `full`")
+        return
     # Extent transform axes to the next fast length (i.e. multiple of 3, 5, or
     # 7)
     fast_shape = tuple(next_fast_len(final_shape[ax])
@@ -159,6 +161,7 @@ def get_fft_ifft(arr1_shape, arr2_shape,
     fft = partial(fftmodule.fftn, s=fast_shape, axes=axes)
     _ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
     # assume complex data is already in Fourier space
+
     def ifft(x):
         return _ifft(x).real
     return fft, ifft, final_slice, final_shape
@@ -189,7 +192,7 @@ def _cross_correlation(arr1, arr2,
     rotated_arr2_fft = fft(rotated_arr2)
 
     if normalization is None:
-        corr = ifft(rotated_arr2_fft*arr1_fft)
+        corr = ifft(rotated_arr2_fft * arr1_fft)
     else:
         # Normalize by the number of points
         ax1 = [arr1.shape[a] for a in axes]
@@ -201,11 +204,15 @@ def _cross_correlation(arr1, arr2,
             corr = ifft(product)
         elif normalization == "normalized":
             numerator = ifft(arr1_fft * rotated_arr2_fft)
-            corr = numerator/(num_points*std1*std2)
+            corr = numerator / (num_points * std1 * std2)
         elif normalization == "zero_normalized":
-            numerator = ifft(arr1_fft*rotated_arr2_fft)
-            denominator = np.multiply(std1, std2)*num_points
-            corr = numerator/denominator
+            numerator = ifft(arr1_fft * rotated_arr2_fft)
+            denominator = np.multiply(std1, std2) * num_points
+            corr = numerator / denominator
+        else:
+            print("Normalization must be one of `zero_normalized`, `phase` or "
+                  "None")
+            return
     # Slice back to expected convolution shape.
     corr = corr[tuple(final_slice)]
     return corr
@@ -232,7 +239,8 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
     arr1[np.logical_not(mask1)] = 0.0
     arr2[np.logical_not(mask2)] = 0.0
 
-    # N-dimensional analog to rotation by 180deg is flip over all relevant axes.
+    # N-dimensional analog to rotation by 180deg
+    # is flip over all relevant axes.
     # See [1] for discussion.
     rotated_arr2 = _flip(arr2, axes=axes)
     rotated_mask2 = _flip(mask2, axes=axes)
@@ -266,16 +274,17 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         out = out[tuple(final_slice)]
         number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
         out = out * (number_overlap_masked_px /
-                           np.max(number_overlap_masked_px))
+                     np.max(number_overlap_masked_px))
 
     elif normalization == "zero_normalized":
         numerator = ifft(rotated_arr2_fft * arr1_fft)
         masked_correlated_fixed_fft = ifft(rotated_mask2_fft * arr1_fft)
-        masked_correlated_rotated_moving_fft = ifft(
-            mask1_fft * rotated_arr2_fft)
+        masked_correlated_rotated_moving_fft = ifft(mask1_fft *
+                                                    rotated_arr2_fft)
 
-        numerator -= masked_correlated_fixed_fft * \
-                     masked_correlated_rotated_moving_fft / number_overlap_masked_px
+        numerator -= (masked_correlated_fixed_fft *
+                      masked_correlated_rotated_moving_fft /
+                      number_overlap_masked_px)
 
         arr1_squared_fft = fft(np.square(arr1))
         arr1_denom = ifft(rotated_mask2_fft * arr1_squared_fft)
@@ -308,12 +317,11 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         # explicitly set out dtype for compatibility with SciPy < 1.4, where
         # fftmodule will be numpy.fft which always uses float64 dtype.
         out = np.zeros_like(denom, dtype=float_dtype)
-        out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
+        out[nonzero_indices] = (numerator[nonzero_indices] /
+                                denom[nonzero_indices])
         np.clip(out, a_min=-1, a_max=1, out=out)
 
-
-
-    #Apply overlap ratio threshold
+    # Apply overlap ratio threshold
     number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
                                                  axis=axes, keepdims=True)
     out[number_overlap_masked_px < number_px_threshold] = 0.0
