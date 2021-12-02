@@ -284,15 +284,15 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
                       / number_overlap_masked_px)
         arr1_squared_fft = fft(np.square(arr1))
         arr1_denom = ifft(rotated_mask2_fft * arr1_squared_fft)
-        arr1_denom -= np.square(masked_correlated_fixed_fft) / \
-                      number_overlap_masked_px
+        arr1_denom -= (np.square(masked_correlated_fixed_fft)
+                       / number_overlap_masked_px)
         arr1_denom = np.abs(arr1_denom)
         arr1_denom[:] = np.fmax(arr1_denom, 0.0)
 
         rotated_arr2_squared_fft = fft(np.square(rotated_arr2))
         arr2_denom = ifft(mask1_fft * rotated_arr2_squared_fft)
-        arr2_denom -= np.square(masked_correlated_rotated_moving_fft) / \
-                      number_overlap_masked_px
+        arr2_denom -= (np.square(masked_correlated_rotated_moving_fft)
+                       / number_overlap_masked_px)
 
         arr2_denom = np.abs(arr2_denom)
         arr2_denom[:] = np.fmax(arr2_denom, 0.0)
@@ -313,8 +313,8 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         # explicitly set out dtype for compatibility with SciPy < 1.4, where
         # fftmodule will be numpy.fft which always uses float64 dtype.
         out = np.zeros_like(denom, dtype=float_dtype)
-        out[nonzero_indices] = (numerator[nonzero_indices] /
-                                denom[nonzero_indices])
+        out[nonzero_indices] = (numerator[nonzero_indices]
+                                / denom[nonzero_indices])
         np.clip(out, a_min=-1, a_max=1, out=out)
 
     # Apply overlap ratio threshold
