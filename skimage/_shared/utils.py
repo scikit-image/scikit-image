@@ -235,7 +235,7 @@ class deprecate_kwarg:
             newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
                                               self.deprecated_version)
             fixed_func.__doc__ = newdoc
-            return fixed_func
+        return fixed_func
 
 
 class deprecate_multichannel_kwarg(deprecate_kwarg):
