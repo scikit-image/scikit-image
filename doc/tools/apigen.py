@@ -210,6 +210,7 @@ class ApiDocWriter(object):
         classes = []
         submodules = []
         for obj_str in obj_strs:
+            # find the actual object from its string representation
             try:
                 obj = getattr(mod, obj_str)
             except AttributeError:
