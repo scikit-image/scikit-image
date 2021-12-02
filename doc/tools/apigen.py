@@ -211,9 +211,17 @@ class ApiDocWriter(object):
         submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
-            if obj_str not in mod.__dict__:
+            if hasattr(mod, '__getattr__'):
+                # handle skimage subpackages that use
+                # __getattr__, __dir__, __all__ = lazy.attach(...)
+                try:
+                    obj = mod.__getattr__(obj_str)
+                except AttributeError:
+                    continue
+            elif obj_str not in mod.__dict__:
                 continue
-            obj = mod.__dict__[obj_str]
+            else:
+                obj = mod.__dict__[obj_str]
 
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
