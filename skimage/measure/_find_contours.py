@@ -8,7 +8,9 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-@deprecate_kwarg({'array': 'image'}, removed_version="0.20")
+@deprecate_kwarg({'array': 'image'},
+                 deprecated_version='0.18',
+                 removed_version='0.20')
 def find_contours(image, level=None,
                   fully_connected='low', positive_orientation='low',
                   *,
