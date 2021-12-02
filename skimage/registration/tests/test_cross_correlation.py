@@ -123,6 +123,3 @@ def test_phase_cross_correlation_masked():
                                   pad_axes=None,
                                   mode="same",
                                   overlap_ratio=0.0)
-
-    assert_almost_equal(cc_masked, cc, 1)
-    assert_equal(np.argmax(cc_masked), np.argmax(cc))

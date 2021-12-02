@@ -110,6 +110,7 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
                                                )
     return cross_correlation
 
+
 def get_fft_ifft(arr1_shape, arr2_shape,
                  axes, pad_axes, mode="same"):
     dim = len(arr1_shape)
@@ -135,9 +136,9 @@ def get_fft_ifft(arr1_shape, arr2_shape,
             final_shape[axis] = arr1_shape[axis] + \
                                 arr2_shape[axis] - 1
     final_shape = tuple(final_shape)
-    if mode is "full":
+    if mode == "full":
         final_slice = tuple([slice(0, int(sz)) for sz in final_shape])
-    elif mode is "same":
+    elif mode == "same":
         cur_shape = arr1_shape
         final_slice = [slice(None, None)] * len(arr1_shape)
         for ax in axes:
@@ -176,10 +177,10 @@ def _cross_correlation(arr1, arr2,
     float_dtype = _supported_float_type([arr1.dtype, arr2.dtype])
     eps = np.finfo(float_dtype).eps
 
-    if normalization is "zero_normalized" or "normalized":
+    if normalization == "zero_normalized" or "normalized":
         std1 = np.std(arr1, axis=axes)
         std2 = np.std(arr2, axis=axes)
-    if normalization is "zero_normalized":
+    if normalization == "zero_normalized":
         arr1 = np.subtract(arr1, np.mean(arr1, axis=axes))
         arr2 = np.subtract(arr2, np.mean(arr2, axis=axes))
     # calculating cross-correlation
@@ -194,19 +195,19 @@ def _cross_correlation(arr1, arr2,
         ax1 = [arr1.shape[a] for a in axes]
         ax2 = [arr2.shape[a] for a in axes]
         num_points = np.prod(np.minimum(ax1, ax2))
-        if normalization is "phase":
+        if normalization == "phase":
             product = arr1_fft * rotated_arr2_fft
             product /= np.maximum(np.abs(product), 100 * eps)
             corr = ifft(product)
-        elif normalization is "normalized":
+        elif normalization == "normalized":
             numerator = ifft(arr1_fft * rotated_arr2_fft)
             corr = numerator/(num_points*std1*std2)
-        elif normalization is "zero_normalized":
+        elif normalization == "zero_normalized":
             numerator = ifft(arr1_fft*rotated_arr2_fft)
             denominator = np.multiply(std1, std2)*num_points
             corr = numerator/denominator
     # Slice back to expected convolution shape.
-    corr = corr[final_slice]
+    corr = corr[tuple(final_slice)]
     return corr
 
 
@@ -245,18 +246,27 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
     number_overlap_masked_px[:] = np.round(number_overlap_masked_px)
     number_overlap_masked_px[:] = np.fmax(number_overlap_masked_px, eps)
 
-    numerator = ifft(rotated_arr2_fft * arr1_fft)
-
     if normalization is None:
+        numerator = ifft(rotated_arr2_fft * arr1_fft)
         # Normalize by the number of pixels which contribute to each
         # point in the correlation
         out = numerator * (number_overlap_masked_px /
                            np.max(number_overlap_masked_px))
 
-        out = out[final_slice]
-        number_overlap_masked_px = number_overlap_masked_px[final_slice]
+        out = out[tuple(final_slice)]
+        number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
+    elif normalization == "phase":
+        product = rotated_arr2_fft * arr1_fft
+        eps = np.finfo(product.real.dtype).eps
+        product /= np.maximum(np.abs(product), 100 * eps)
+        out = ifft(product)
+        out = out[tuple(final_slice)]
+        number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
+        out = out * (number_overlap_masked_px /
+                           np.max(number_overlap_masked_px))
 
-    elif normalization is "zero_normalized" or "phase":
+    elif normalization == "zero_normalized":
+        numerator = ifft(rotated_arr2_fft * arr1_fft)
         masked_correlated_fixed_fft = ifft(rotated_mask2_fft * arr1_fft)
         masked_correlated_rotated_moving_fft = ifft(
             mask1_fft * rotated_arr2_fft)
@@ -268,38 +278,37 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         arr1_denom = ifft(rotated_mask2_fft * arr1_squared_fft)
         arr1_denom -= np.square(masked_correlated_fixed_fft) / \
                       number_overlap_masked_px
+        arr1_denom = np.abs(arr1_denom)
         arr1_denom[:] = np.fmax(arr1_denom, 0.0)
 
         rotated_arr2_squared_fft = fft(np.square(rotated_arr2))
         arr2_denom = ifft(mask1_fft * rotated_arr2_squared_fft)
         arr2_denom -= np.square(masked_correlated_rotated_moving_fft) / \
                       number_overlap_masked_px
+
+        arr2_denom = np.abs(arr2_denom)
         arr2_denom[:] = np.fmax(arr2_denom, 0.0)
 
         denom = np.sqrt(arr1_denom * arr2_denom)
-
         # Slice back to expected convolution shape.
-        numerator = numerator[final_slice]
-        denom = denom[final_slice]
-        number_overlap_masked_px = number_overlap_masked_px[final_slice]
+        numerator = numerator[tuple(final_slice)]
+        denom = denom[tuple(final_slice)]
+
+        number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
 
         # Pixels where `denom` is very small will introduce large
         # numbers after division. To get around this problem,
         # we zero-out problematic pixels.
         tol = 1e3 * eps * np.max(np.abs(denom), axis=axes, keepdims=True)
-        nonzero_indices = denom > tol
+        nonzero_indices = abs(denom) > tol
 
         # explicitly set out dtype for compatibility with SciPy < 1.4, where
         # fftmodule will be numpy.fft which always uses float64 dtype.
         out = np.zeros_like(denom, dtype=float_dtype)
         out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
         np.clip(out, a_min=-1, a_max=1, out=out)
-        if normalization is "phase":
-            product = fft(out)
-            eps = np.finfo(product.real.dtype).eps
-            product /= np.maximum(np.abs(product), 100 * eps)
-            out = ifft(product)
-            out = out[final_slice]
+
+
 
     #Apply overlap ratio threshold
     number_px_threshold = overlap_ratio * np.max(number_overlap_masked_px,
