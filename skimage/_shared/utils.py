@@ -114,7 +114,7 @@ class remove_arg:
         return fixed_func
 
 
-def docstring_add_deprecated(func, kwarg_mapping, deprecated_version=None):
+def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
     Parmeters
@@ -124,7 +124,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version=None):
     kwarg_mapping : dict
         A dict containing {old_arg: new_arg} key/value pairs as used by
         `deprecate_kwarg`.
-    deprecated_version : str, optional
+    deprecated_version : str
         A major.minor version string specifying when old_arg was
         deprecated.
 
@@ -144,12 +144,9 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version=None):
 
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
-        if deprecated_version is None:
-            desc = [f'Deprecated in favor of `{new_arg}`.']
-        else:
-            desc = [f'Deprecated in favor of `{new_arg}`.',
-                    f'',
-                    f'.. deprecated:: {deprecated_version}']
+        desc = [f'Deprecated in favor of `{new_arg}`.',
+                f'',
+                f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg,
                       type='DEPRECATED',
@@ -188,19 +185,19 @@ class deprecate_kwarg:
     kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
+    deprecated_version : str
+        The package version in which the argument was first deprecated.
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
     removed_version : str
         The package version in which the deprecated argument will be
         removed.
-    deprecated_version : str
-        The package version in which the argument was first deprecated.
 
     """
 
-    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None,
-                 deprecated_version=None):
+    def __init__(self, kwarg_mapping, deprecated_version, warning_msg=None,
+                 removed_version=None):
         self.kwarg_mapping = kwarg_mapping
         if warning_msg is None:
             self.warning_msg = ("`{old_arg}` is a deprecated argument name "
@@ -251,6 +248,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
     def __init__(self, removed_version='1.0', multichannel_position=None):
         super().__init__(
             kwarg_mapping={'multichannel': 'channel_axis'},
+            deprecated_version='0.19',
             warning_msg=None,
             removed_version=removed_version)
         self.position = multichannel_position
