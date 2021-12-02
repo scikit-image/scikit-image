@@ -14,6 +14,13 @@ complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
     complex_dtypes += [np.complex256]
 
+have_numpydoc = False
+try:
+    import numpydoc
+    # have_numpydoc = True
+except ImportError:
+    pass
+
 
 def test_remove_argument():
 
@@ -159,7 +166,10 @@ def test_deprecate_kwarg():
         assert foo.__name__ == 'foo'
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            assert foo.__doc__ == """Expected docstring
+            if not have_numpydoc:
+                assert foo.__doc__ == """Expected docstring"""
+            else:
+                assert foo.__doc__ == """Expected docstring
 
 
     Other Parameters
