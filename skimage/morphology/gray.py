@@ -132,7 +132,8 @@ def pad_for_eccentric_footprints(func):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological erosion of an image.
 
@@ -193,7 +194,8 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological dilation of an image.
 
@@ -260,7 +262,8 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def opening(image, footprint=None, out=None):
@@ -311,7 +314,8 @@ def opening(image, footprint=None, out=None):
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def closing(image, footprint=None, out=None):
@@ -363,7 +367,8 @@ def closing(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def white_tophat(image, footprint=None, out=None):
     """Return white top hat of an image.
 
@@ -437,7 +442,8 @@ def white_tophat(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def black_tophat(image, footprint=None, out=None):
     """Return black top hat of an image.
 

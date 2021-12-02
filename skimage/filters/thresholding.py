@@ -763,7 +763,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
