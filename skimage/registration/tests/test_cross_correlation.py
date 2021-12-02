@@ -18,7 +18,7 @@ def test_zero_normalized_cross_correlation(pad_axes, mode):
     if mode is "full":
         assert np.max(cc[75:200, 75:200]) < 0.1
     else:
-        assert np.max(cc[1:-1,1:-1]) < 0.1
+        assert np.max(cc[1:-1, 1:-1]) < 0.1
     m1 = np.ones(x.shape)
     m2 = np.ones(y.shape)
     cc_masked = cross_correlation(x, y, m1, m2,
@@ -98,7 +98,7 @@ def test_normalized_cross_correlation_mask():
                                   pad_axes=None,
                                   mode="same",
                                   overlap_ratio=0.1)
-    assert_almost_equal(cc_masked, cc,2)
+    assert_almost_equal(cc_masked, cc, 2)
 
 
 def test_phase_cross_correlation_masked():
@@ -106,10 +106,10 @@ def test_phase_cross_correlation_masked():
     # should be zero (or about 0)
     np.random.seed(9001)
     x = np.random.random((100, 100))
-    x[20:25, 20:25]=1
+    x[20:25, 20:25] = 1
     np.random.seed(9009)
     y = np.random.random((100, 100))
-    y[40:45, 30:35]=1
+    y[40:45, 30:35] = 1
     cc = cross_correlation(x, y,
                            normalization="phase",
                            pad_axes=None,

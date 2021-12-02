@@ -17,9 +17,6 @@ from scipy.fft import next_fast_len
 from .._shared.utils import _supported_float_type
 
 
-
-
-
 def _masked_phase_cross_correlation(reference_image, moving_image,
                                     reference_mask, moving_mask=None,
                                     overlap_ratio=0.3):
@@ -208,7 +205,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0
 
-    # N-dimensional analog to rotation by 180deg is flip over all relevant axes.
+    # N-dimensional analog to rotation by 180deg is flip over all
+    # relevant axes.
     # See [1] for discussion.
     rotated_moving_image = _flip(moving_image, axes=axes)
     rotated_moving_mask = _flip(moving_mask, axes=axes)

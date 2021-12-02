@@ -261,9 +261,8 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         numerator = ifft(rotated_arr2_fft * arr1_fft)
         # Normalize by the number of pixels which contribute to each
         # point in the correlation
-        out = numerator * (number_overlap_masked_px /
-                           np.max(number_overlap_masked_px))
-
+        out = numerator * (number_overlap_masked_px
+                           / np.max(number_overlap_masked_px))
         out = out[tuple(final_slice)]
         number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
     elif normalization == "phase":
@@ -273,19 +272,16 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
         out = ifft(product)
         out = out[tuple(final_slice)]
         number_overlap_masked_px = number_overlap_masked_px[tuple(final_slice)]
-        out = out * (number_overlap_masked_px /
-                     np.max(number_overlap_masked_px))
-
+        out = out * (number_overlap_masked_px
+                     / np.max(number_overlap_masked_px))
     elif normalization == "zero_normalized":
         numerator = ifft(rotated_arr2_fft * arr1_fft)
         masked_correlated_fixed_fft = ifft(rotated_mask2_fft * arr1_fft)
-        masked_correlated_rotated_moving_fft = ifft(mask1_fft *
-                                                    rotated_arr2_fft)
-
-        numerator -= (masked_correlated_fixed_fft *
-                      masked_correlated_rotated_moving_fft /
-                      number_overlap_masked_px)
-
+        masked_correlated_rotated_moving_fft = ifft(mask1_fft
+                                                    * rotated_arr2_fft)
+        numerator -= (masked_correlated_fixed_fft
+                      * masked_correlated_rotated_moving_fft
+                      / number_overlap_masked_px)
         arr1_squared_fft = fft(np.square(arr1))
         arr1_denom = ifft(rotated_mask2_fft * arr1_squared_fft)
         arr1_denom -= np.square(masked_correlated_fixed_fft) / \
