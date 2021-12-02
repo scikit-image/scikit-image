@@ -117,10 +117,10 @@ class remove_arg:
 def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
-    Parmeters
+    Parameters
     ---------
     func : function
-        The function whos docstring we wish to update.
+        The function whose docstring we wish to update.
     kwarg_mapping : dict
         A dict containing {old_arg: new_arg} key/value pairs as used by
         `deprecate_kwarg`.
