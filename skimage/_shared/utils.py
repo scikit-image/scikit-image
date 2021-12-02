@@ -134,6 +134,8 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version=None):
         The updated docstring. Returns the original docstring if numpydoc is
         not available.
     """
+    if func.__doc__ is None:
+        return None
     try:
         from numpydoc.docscrape import FunctionDoc, Parameter
     except ImportError:
@@ -220,10 +222,11 @@ class deprecate_kwarg:
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
 
-        newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
-                                          self.deprecated_version)
-        fixed_func.__doc__ = newdoc
-        return fixed_func
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
+                                              self.deprecated_version)
+            fixed_func.__doc__ = newdoc
+            return fixed_func
 
 
 class deprecate_multichannel_kwarg(deprecate_kwarg):
@@ -279,9 +282,10 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
 
-        newdoc = docstring_add_deprecated(
-            func, {'multichannel': 'channel_axis'}, '0.19')
-        fixed_func.__doc__ = newdoc
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(
+                func, {'multichannel': 'channel_axis'}, '0.19')
+            fixed_func.__doc__ = newdoc
         return fixed_func
 
 
