@@ -173,6 +173,10 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     descr += '\n\n'
     # '\n    ' rather than '\n' here to restore the original indentation.
     final_docstring = descr + '\n    '.join(no_header)
+    # strip any extra spaces from ends of lines
+    final_docstring = '\n'.join(
+        [line.rstrip() for line in final_docstring.split('\n')]
+    )
     return final_docstring
 
 

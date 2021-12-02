@@ -118,14 +118,15 @@ def test_change_default_value():
     assert not record.list
 
 
-def test_deprecated_kwarg():
+def test_deprecate_kwarg():
 
-    @deprecate_kwarg({'old_arg1': 'new_arg1'})
+    @deprecate_kwarg({'old_arg1': 'new_arg1'}, '0.19')
     def foo(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
         return arg0, new_arg1, arg2
 
     @deprecate_kwarg({'old_arg1': 'new_arg1'},
+                     deprecated_version='0.19',
                      warning_msg="Custom warning message")
     def bar(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
@@ -158,7 +159,16 @@ def test_deprecated_kwarg():
         assert foo.__name__ == 'foo'
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            assert foo.__doc__ == 'Expected docstring'
+            assert foo.__doc__ == """Expected docstring
+
+
+    Other Parameters
+    ----------------
+    old_arg1 : DEPRECATED
+        Deprecated in favor of `new_arg1`.
+
+        .. deprecated:: 0.19
+"""
 
     # Assert no warning was raised
     assert not record.list
