@@ -3,9 +3,7 @@ Announcement: scikit-image 0.19.0
 
 We're happy to announce the release of scikit-image v0.19.0!
 
-scikit-image is an image processing toolbox for SciPy that includes algorithms
-for segmentation, geometric transformations, color space manipulation,
-analysis, filtering, morphology, feature detection, and more.
+scikit-image is an image processing toolbox for SciPy that includes algorithms for segmentation, geometric transformations, color space manipulation, analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
@@ -34,7 +32,11 @@ An exciting change on the development side is the introduction of support for
 Pythran as an alternative to Cython for generating compiled code. We plan to
 keep Cython support as well going forward, so developers are free to use either
 one as appropriate. For those curious about Pythran, a good overview was given
-in the SciPy 2021 presentation, "Building SciPy Kernels with Pythran" (https://www.youtube.com/watch?v=6a9D9WL6ZjQ).
+in the SciPy 2021 presentation, "Building SciPy Kernels with Pythran"
+(https://www.youtube.com/watch?v=6a9D9WL6ZjQ).
+
+This release now supports 3.7-3.10. Apple M1 architecture (arm64) support is
+new to this release. MacOS 12 wheels are provided for Python 3.8-3.10.
 
 
 New Features
@@ -156,6 +158,8 @@ Documentation
 - Update pixel graphs example (gh-5991)
 - Separate entries that have the same description in glossary.md (gh-5592)
 - Do not use space before colon in directive name (gh-6002)
+- Backport gh-6073 on v0.19.x (Handle autoupdate of docstrings to mention deprecated parameters in deprecate_kwarg) (gh-6081)
+- Backport PR #6075 on branch v0.19.x (Fix API docs autogeneration for lazy loaded subpackages) (gh-6083)
 
 
 Improvements
@@ -202,6 +206,7 @@ Improvements
 - replace use of scipy.ndimage.gaussian_filter with skimage.filters.gaussian
   (gh-5872)
 - add channel_axis argument to quickshift (gh-5987)
+- add MacOS arm64 wheels (gh-6068)
 
 
 API Changes
@@ -306,6 +311,8 @@ Bugfixes
 - Fix peak local max segfault (gh-6035)
 - Avoid circular import errors when EAGER_IMPORT=1 (gh-6042)
 - remove all use of the deprecated distutils package (gh-6044)
+- Backport PR #6061 on branch v0.19.x (remove use of deprecated np.int in SIFT) (gh-6062)
+- Backport PR #6060 on branch v0.19.x (Fix test failures observed with numpy 1.22rc0) (gh-6063)
 
 
 Deprecations
