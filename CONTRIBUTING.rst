@@ -610,3 +610,4 @@ the skimage.filter module benchmarks on release v0.17.2::
 
     asv run -b Filter v0.17.2^!
 
+
