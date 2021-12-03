@@ -68,7 +68,7 @@ def sh3(cmd):
 
 def init_repo(path):
     """clone the gh-pages repo if we haven't already."""
-    sh("git clone --branch gh-pages %s %s --depth 1"%(pages_repo, path))
+    sh(f'git clone --branch gh-pages {pages_repo} {path} --depth 1')
     here = os.getcwd()
     cd(path)
     sh('git checkout gh-pages')
