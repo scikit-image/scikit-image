@@ -1,18 +1,15 @@
 import numpy as np
-from skimage._shared.testing import (assert_equal, assert_array_equal,
-                                     assert_allclose,
-                                     assert_array_almost_equal)
-from skimage._shared import testing
+import pytest
 
-from skimage.util import img_as_ubyte, img_as_float
-from skimage import data, util, morphology
-from skimage.morphology import gray, disk, ball
+from skimage import data, morphology, util
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_allclose, assert_array_almost_equal,
+                                     assert_equal, fetch, test_parallel)
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, parametrize, fetch
-import pytest
+from skimage.morphology import ball, disk, gray
+from skimage.util import img_as_float, img_as_ubyte
 
 
 def test_otsu_edge_case():
@@ -77,8 +74,8 @@ class TestRank():
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
-    @parametrize('outdt', [None, np.float32, np.float64])
-    @parametrize('filter', all_rank_filters)
+    @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
+    @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
@@ -119,18 +116,20 @@ class TestRank():
 
         check()
 
-    @parametrize('filter', all_rank_filters)
+    @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter_selem_kwarg_deprecation(self, filter):
         with expected_warnings(["`selem` is a deprecated argument name"]):
             getattr(rank, filter)(self.image.astype(np.uint8),
                                   selem=self.footprint)
 
-    @parametrize('outdt', [None, np.float32, np.float64])
-    @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
-                            'majority', 'maximum', 'mean', 'geometric_mean',
-                            'subtract_mean', 'median', 'minimum', 'modal',
-                            'enhance_contrast', 'pop', 'sum', 'threshold',
-                            'noise_filter', 'entropy'])
+    @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
+    @pytest.mark.parametrize(
+        'filter', ['equalize', 'otsu', 'autolevel', 'gradient',
+                   'majority', 'maximum', 'mean', 'geometric_mean',
+                   'subtract_mean', 'median', 'minimum', 'modal',
+                   'enhance_contrast', 'pop', 'sum', 'threshold',
+                   'noise_filter', 'entropy']
+    )
     def test_rank_filters_3D(self, filter, outdt):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
@@ -309,7 +308,7 @@ class TestRank():
         footprint = disk(20)
         image = (np.random.rand(500, 500) * 256).astype(np.uint8)
         out = image
-        with testing.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             rank.mean(image, footprint, out=out)
 
     def test_compare_autolevels(self):
@@ -423,10 +422,11 @@ class TestRank():
                 out_s = func(volume_s, ball(3))
             assert_equal(out_u, out_s)
 
-    @parametrize('method',
-                 ['autolevel', 'equalize', 'gradient', 'maximum',
-                  'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                  'enhance_contrast', 'pop', 'threshold'])
+    @pytest.mark.parametrize(
+        'method', ['autolevel', 'equalize', 'gradient', 'maximum',
+                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+                   'enhance_contrast', 'pop', 'threshold']
+    )
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -848,5 +848,5 @@ class TestRank():
     def test_input_boolean_dtype(self):
         image = (np.random.rand(100, 100) * 256).astype(bool)
         elem = np.ones((3, 3), dtype=bool)
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             rank.maximum(image=image, footprint=elem)

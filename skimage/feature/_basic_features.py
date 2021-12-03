@@ -2,7 +2,7 @@ from itertools import combinations_with_replacement
 import itertools
 import numpy as np
 from skimage import filters, feature
-from skimage import img_as_float32
+from skimage.util.dtype import img_as_float32
 from skimage._shared import utils
 from concurrent.futures import ThreadPoolExecutor
 

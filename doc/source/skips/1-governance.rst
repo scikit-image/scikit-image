@@ -53,7 +53,7 @@ project in concrete ways, such as:
   `tutorials <https://github.com/scikit-image/skimage-tutorials>`_ via a
   GitHub pull request;
 - discussing the design of the library, website, or tutorials on the
-  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_,
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_,
   in the
   `project chat room <https://skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
@@ -120,7 +120,7 @@ Decision Making Process
 Decisions about the future of the project are made through discussion with all
 members of the community. All non-sensitive project management discussion takes
 place on the project
-`mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_
+`developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 and the `issue tracker <https://github.com/scikit-image/scikit-image/issues>`_.
 Occasionally, sensitive discussion may occur on a private list.
 

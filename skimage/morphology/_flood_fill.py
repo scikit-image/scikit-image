@@ -4,8 +4,6 @@ This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
 """
 
-from warnings import warn
-
 import numpy as np
 
 from .._shared.utils import deprecate_kwarg
@@ -14,7 +12,8 @@ from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
                     _set_border_values,)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def flood_fill(image, seed_point, new_value, *, footprint=None,
                connectivity=None, tolerance=None, in_place=False):
     """Perform flood filling on an image.
@@ -112,7 +111,8 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
     return image
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def flood(image, seed_point, *, footprint=None, connectivity=None,
           tolerance=None):
     """Mask corresponding to a flood fill.

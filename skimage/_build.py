@@ -1,6 +1,6 @@
 import sys
 import os
-from distutils.version import LooseVersion
+from packaging import version
 from multiprocessing import cpu_count
 
 CYTHON_VERSION = '0.23.4'
@@ -41,7 +41,7 @@ def cython(pyx_files, working_path=''):
 
     try:
         from Cython import __version__
-        if LooseVersion(__version__) < CYTHON_VERSION:
+        if version.parse(__version__) < version.parse(CYTHON_VERSION):
             raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
 
         from Cython.Build import cythonize

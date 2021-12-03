@@ -47,7 +47,7 @@ noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
 sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
-print(f"estimated noise standard deviation = {sigma_est}")
+print(f'estimated noise standard deviation = {sigma_est}')
 
 patch_kw = dict(patch_size=5,      # 5x5 patches
                 patch_distance=6,  # 13x13 search area
@@ -100,10 +100,10 @@ psnr2 = peak_signal_noise_ratio(astro, denoise2)
 psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
 psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
 
-print(f"PSNR (noisy) = {psnr_noisy:0.2f}")
-print(f"PSNR (slow) = {psnr:0.2f}")
-print(f"PSNR (slow, using sigma) = {psnr2:0.2f}")
-print(f"PSNR (fast) = {psnr_fast:0.2f}")
-print(f"PSNR (fast, using sigma) = {psnr2_fast:0.2f}")
+print(f'PSNR (noisy) = {psnr_noisy:0.2f}')
+print(f'PSNR (slow) = {psnr:0.2f}')
+print(f'PSNR (slow, using sigma) = {psnr2:0.2f}')
+print(f'PSNR (fast) = {psnr_fast:0.2f}')
+print(f'PSNR (fast, using sigma) = {psnr2_fast:0.2f}')
 
 plt.show()

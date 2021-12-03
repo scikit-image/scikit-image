@@ -17,8 +17,8 @@
 from __future__ import print_function
 import sys; print(sys.version)
 import platform; print(platform.platform())
-import skimage; print("scikit-image version: {}".format(skimage.__version__))
-import numpy; print("numpy version: {}".format(numpy.__version__))
+import skimage; print(f'scikit-image version: {skimage.__version__}')
+import numpy; print(f'numpy version: {numpy.__version__}')
 ```
 
 ```python

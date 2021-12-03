@@ -44,12 +44,15 @@ Original author: Lee Kamentsky
 
 import math
 import unittest
-import pytest
+
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
 
-from .._watershed import watershed
+from skimage._shared.filters import gaussian
 from skimage.measure import label
+
+from .._watershed import watershed
 
 eps = 1e-12
 blob = np.array([[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
@@ -360,7 +363,7 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = ndi.gaussian_filter(image, 4)
+        image = gaussian(image, 4, mode='reflect')
         watershed(image, markers, self.eight)
         ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 
@@ -466,17 +469,17 @@ def test_numeric_seed_watershed():
 
 
 def test_incorrect_markers_shape():
+    image = np.ones((5, 6))
+    markers = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        markers = np.ones((5, 7))
-        output = watershed(image, markers)
+        watershed(image, markers)
 
 
 def test_incorrect_mask_shape():
+    image = np.ones((5, 6))
+    mask = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        mask = np.ones((5, 7))
-        output = watershed(image, markers=4, mask=mask)
+        watershed(image, markers=4, mask=mask)
 
 
 def test_markers_in_mask():
@@ -535,7 +538,3 @@ def test_connectivity():
 
     for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
         assert np.sum(labels_c2 == lab) == area
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

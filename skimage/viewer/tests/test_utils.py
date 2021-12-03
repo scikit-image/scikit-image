@@ -1,10 +1,13 @@
+import pytest
+
+pytest.importorskip("matplotlib")
+
 from skimage.viewer import utils
 from skimage.viewer.utils import dialogs
 from skimage.viewer.qt import QtCore, QtWidgets, has_qt
-from skimage._shared import testing
 
 
-@testing.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_event_loop():
     utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -12,7 +15,7 @@ def test_event_loop():
     utils.start_qtapp()
 
 
-@testing.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_format_filename():
     fname = dialogs._format_filename(('apple', 2))
     assert fname == 'apple'
@@ -20,7 +23,7 @@ def test_format_filename():
     assert fname is None
 
 
-@testing.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_open_file_dialog():
     QApp = utils.init_qtapp()
     timer = QtCore.QTimer()
@@ -29,7 +32,7 @@ def test_open_file_dialog():
     assert filename is None
 
 
-@testing.skipif(not has_qt, reason="Qt not installed")
+@pytest.mark.skipif(not has_qt, reason="Qt not installed")
 def test_save_file_dialog():
     QApp = utils.init_qtapp()
     timer = QtCore.QTimer()

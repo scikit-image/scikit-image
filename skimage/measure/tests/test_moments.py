@@ -156,7 +156,7 @@ def test_moments_dtype(dtype):
     image = np.zeros((20, 20), dtype=dtype)
     image[13:15, 13:17] = 1
 
-    expected_dtype = _supported_float_type(image)
+    expected_dtype = _supported_float_type(dtype)
     mu = moments_central(image, (13.5, 14.5))
     assert mu.dtype == expected_dtype
 

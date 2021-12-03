@@ -1,7 +1,6 @@
 from numpy.testing import assert_array_equal
 import numpy as np
 from skimage.future import graph
-from skimage._shared.version_requirements import is_installed
 from skimage import segmentation, data
 from skimage._shared import testing
 

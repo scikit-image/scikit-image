@@ -116,7 +116,11 @@ plt.tight_layout()
 plt.show()
 
 ######################################################################
-# The above estimation relies on accurate selection of corresponding points.
+# The above estimation relies on accurate knowledge of the location of points
+# and an accurate selection of their correspondance. If point locations have
+# an uncertainty associated with them, then weighting can be provided so that
+# the resulting transform prioritises an accurate fit to those points with the
+# highest weighting.
 # An alternative approach called the
 # `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_
 # is useful when the correspondence points are not perfectly accurate.

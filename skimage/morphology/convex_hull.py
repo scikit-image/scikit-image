@@ -8,6 +8,13 @@ from ..measure._label import label
 from ..util import unique_rows
 from .._shared.utils import warn
 
+try:
+    # Should be public API of scipy spatial once #15003 is released
+    # see https://github.com/scipy/scipy/pull/15003
+    from scipy.spatial import QhullError
+except ImportError:
+    from scipy.spatial.qhull import QhullError
+
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
 
@@ -115,7 +122,13 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
             # when offsetting, we multiply number of vertices by 2 * ndim.
             # therefore, we reduce the number of coordinates by using a
             # convex hull on the original set, before offsetting.
-            hull0 = ConvexHull(coords)
+            try:
+                hull0 = ConvexHull(coords)
+            except QhullError as err:
+                warn(f"Failed to get convex hull image. "
+                     f"Returning empty image, see error message below:\n"
+                     f"{err}")
+                return np.zeros(image.shape, dtype=bool)
             coords = hull0.points[hull0.vertices]
 
     # Add a vertex for the middle of each pixel edge
@@ -128,7 +141,13 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     coords = unique_rows(coords)
 
     # Find the convex hull
-    hull = ConvexHull(coords)
+    try:
+        hull = ConvexHull(coords)
+    except QhullError as err:
+        warn(f"Failed to get convex hull image. "
+             f"Returning empty image, see error message below:\n"
+             f"{err}")
+        return np.zeros(image.shape, dtype=bool)
     vertices = hull.points[hull.vertices]
 
     # If 2D, use fast Cython function to locate convex hull pixels

@@ -6,8 +6,6 @@ from skimage._shared.testing import test_parallel
 from skimage import data
 from skimage import transform
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
-from skimage.feature import canny
-
 
 @test_parallel()
 def test_hough_line():

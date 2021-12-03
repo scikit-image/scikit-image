@@ -1,5 +1,4 @@
 import numpy as np
-from ._remap import _map_array
 
 
 def map_array(input_arr, input_vals, output_vals, out=None):
@@ -22,6 +21,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     out : array, same shape as `input_arr`
         The array of mapped values.
     """
+    from ._remap import _map_array
 
     if not np.issubdtype(input_arr.dtype, np.integer):
         raise TypeError(

@@ -20,7 +20,7 @@ https://en.wikipedia.org/wiki/Color_difference
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type, slice_at_axis
+from .._shared.utils import _supported_float_type
 from .colorconv import lab2lch, _cart2polar_2pi
 
 

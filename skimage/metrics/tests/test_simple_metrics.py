@@ -4,7 +4,6 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
 from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
                              mean_squared_error, normalized_mutual_information)
 

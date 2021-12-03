@@ -9,9 +9,10 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 
-from ._optical_flow_utils import coarse_to_fine, get_warp_points
+from .._shared.filters import gaussian as gaussian_filter
 from .._shared.utils import _supported_float_type
 from ..transform import warp
+from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 
 def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
@@ -263,7 +264,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     if gaussian:
         sigma = ndim * (size / 4, )
-        filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
+        filter_func = partial(gaussian_filter, sigma=sigma, mode='mirror')
     else:
         filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
                               mode='mirror')

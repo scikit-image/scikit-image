@@ -43,7 +43,7 @@ corrupted_pixels = rng.choice([False, True], size=image.shape, p=[0.25, 0.75])
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
 offset_image *= corrupted_pixels
-print(f"Known offset (row, col): {shift}")
+print(f'Known offset (row, col): {shift}')
 
 # Determine what the mask is based on which pixels are invalid
 # In this case, we know what the mask should be since we corrupted
@@ -53,7 +53,7 @@ mask = corrupted_pixels
 detected_shift = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask)
 
-print(f"Detected pixel offset (row, col): {-detected_shift}")
+print(f'Detected pixel offset (row, col): {-detected_shift}')
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharex=True, sharey=True,
                                     figsize=(8, 3))
@@ -97,13 +97,13 @@ offset_image = ndi.shift(image, shift)
 image *= mask1
 offset_image *= mask2
 
-print(f"Known offset (row, col): {shift}")
+print(f'Known offset (row, col): {shift}')
 
 detected_shift = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask1,
                                          moving_mask=mask2)
 
-print(f"Detected pixel offset (row, col): {-detected_shift}")
+print(f'Detected pixel offset (row, col): {-detected_shift}')
 
 fig = plt.figure(figsize=(8,3))
 ax1 = plt.subplot(1, 2, 1)

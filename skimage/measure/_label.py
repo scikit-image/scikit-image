@@ -30,7 +30,9 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
         return result[0]
 
 
-@deprecate_kwarg({"input": "label_image"}, removed_version="1.0")
+@deprecate_kwarg({'input': 'label_image'},
+                 deprecated_version='0.19',
+                 removed_version='1.0')
 def label(label_image, background=None, return_num=False, connectivity=None):
     r"""Label connected regions of an integer array.
 

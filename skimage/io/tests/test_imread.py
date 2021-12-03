@@ -1,8 +1,7 @@
-import os
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage import data, io
+from skimage import io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing

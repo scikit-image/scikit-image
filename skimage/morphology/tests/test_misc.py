@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 import pytest
 from skimage.morphology import remove_small_objects, remove_small_holes

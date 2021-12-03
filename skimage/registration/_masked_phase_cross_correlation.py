@@ -11,8 +11,9 @@ http://www.dirkpadfield.com/
 from functools import partial
 
 import numpy as np
+import scipy.fft as fftmodule
+from scipy.fft import next_fast_len
 
-from .._shared.fft import fftmodule, next_fast_len
 from .._shared.utils import _supported_float_type
 
 
@@ -76,8 +77,10 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
             raise ValueError(
                 "Image sizes must match their respective mask sizes.")
 
-    xcorr = cross_correlate_masked(moving_image, reference_image, moving_mask,
-                                   reference_mask, axes=(0, 1), mode='full',
+    xcorr = cross_correlate_masked(moving_image, reference_image,
+                                   moving_mask, reference_mask,
+                                   axes=tuple(range(moving_image.ndim)),
+                                   mode='full',
                                    overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
@@ -188,8 +191,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     # 7)
     fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axes])
 
-    # We use numpy.fft or the new scipy.fft because they allow leaving the
-    # transform axes unchanged which was not possible with scipy.fftpack's
+    # We use the new scipy.fft because they allow leaving the transform axes
+    # unchanged which was not possible with scipy.fftpack's
     # fftn/ifftn in older versions of SciPy.
     # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
     # results in arr_fft shape (4, 4, 7)

@@ -55,8 +55,8 @@ model, inliers = ransac((keypoints_left[matches[:, 0]],
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]
 inlier_keypoints_right = keypoints_right[matches[inliers, 1]]
 
-print(f"Number of matches: {matches.shape[0]}")
-print(f"Number of inliers: {inliers.sum()}")
+print(f'Number of matches: {matches.shape[0]}')
+print(f'Number of inliers: {inliers.sum()}')
 
 # Compare estimated sparse disparities to the dense ground-truth disparities.
 

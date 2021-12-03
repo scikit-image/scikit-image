@@ -22,9 +22,9 @@ In what follows we'll refer to the upstream scikit-image ``main`` branch, as
 * Name your branch for the purpose of the changes - e.g.
   ``bugfix-for-issue-14`` or ``refactor-database-code``.
 * If you can possibly avoid it, avoid merging trunk or any other branches into
-  your feature branch while you are working.  
+  your feature branch while you are working.
 * If you do find yourself merging from trunk, consider :ref:`rebase-on-trunk`
-* Ask on the `scikit-image mailing list`_ if you get stuck.
+* Ask on the `scikit-image developer forum`_ if you get stuck.
 * Ask for code review!
 
 This way of working helps to keep work well organized, with readable history.

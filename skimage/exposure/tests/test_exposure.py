@@ -2,19 +2,20 @@ import warnings
 
 import numpy as np
 import pytest
-from skimage import util
+from numpy.testing import (assert_allclose,
+                           assert_almost_equal,
+                           assert_array_almost_equal,
+                           assert_array_equal,
+                           assert_equal)
+
 from skimage import data
 from skimage import exposure
-from skimage.exposure.exposure import intensity_range
+from skimage import util
 from skimage.color import rgb2gray
+from skimage.exposure.exposure import intensity_range
 from skimage.util.dtype import dtype_range
-
 from skimage._shared._warnings import expected_warnings
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal,
-                                     assert_array_almost_equal,
-                                     assert_equal,
-                                     assert_almost_equal)
+from skimage._shared.utils import _supported_float_type
 
 
 # Test integer histograms
@@ -22,8 +23,9 @@ from skimage._shared.testing import (assert_array_equal,
 
 def test_wrong_source_range():
     im = np.array([-1, 100], dtype=np.int8)
-    with testing.raises(ValueError):
-        frequencies, bin_centers = exposure.histogram(im, source_range='foobar')
+    with pytest.raises(ValueError):
+        frequencies, bin_centers = exposure.histogram(im,
+                                                      source_range='foobar')
 
 
 def test_negative_overflow():
@@ -86,17 +88,22 @@ def test_flat_int_range_dtype():
     assert_equal(frequencies.shape, (256,))
 
 
-def test_peak_float_out_of_range_image():
-    im = np.array([10, 100], dtype=np.float16)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_peak_float_out_of_range_image(dtype):
+    im = np.array([10, 100], dtype=dtype)
     frequencies, bin_centers = exposure.histogram(im, nbins=90)
+    assert bin_centers.dtype == dtype
     # offset values by 0.5 for float...
     assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
 
 
-def test_peak_float_out_of_range_dtype():
-    im = np.array([10, 100], dtype=np.float16)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_peak_float_out_of_range_dtype(dtype):
+    im = np.array([10, 100], dtype=dtype)
     nbins = 10
-    frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
+    frequencies, bin_centers = exposure.histogram(im, nbins=nbins,
+                                                  source_range='dtype')
+    assert bin_centers.dtype == dtype
     assert_almost_equal(np.min(bin_centers), -0.9, 3)
     assert_almost_equal(np.max(bin_centers), 0.9, 3)
     assert_equal(len(bin_centers), 10)
@@ -122,7 +129,8 @@ def test_normalize():
 @pytest.mark.parametrize('source_range', ['dtype', 'image'])
 @pytest.mark.parametrize('dtype', [np.uint8, np.int16, np.float64])
 @pytest.mark.parametrize('channel_axis', [0, 1, -1])
-def test_multichannel_hist_common_bins_uint8(dtype, source_range, channel_axis):
+def test_multichannel_hist_common_bins_uint8(dtype, source_range,
+                                             channel_axis):
     """Check that all channels use the same binning."""
     # Construct multichannel image with uniform values within each channel,
     # but the full range of values across channels.
@@ -162,7 +170,7 @@ def test_equalize_uint8_approx():
     """Check integer bins used for uint8 images."""
     img_eq0 = exposure.equalize_hist(test_img_int)
     img_eq1 = exposure.equalize_hist(test_img_int, nbins=3)
-    np.testing.assert_allclose(img_eq0, img_eq1)
+    assert_allclose(img_eq0, img_eq1)
 
 
 def test_equalize_ubyte():
@@ -173,12 +181,15 @@ def test_equalize_ubyte():
     check_cdf_slope(cdf)
 
 
-def test_equalize_float():
-    img = util.img_as_float(test_img)
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_equalize_float(dtype):
+    img = util.img_as_float(test_img).astype(dtype, copy=False)
     img_eq = exposure.equalize_hist(img)
+    assert img_eq.dtype == _supported_float_type(dtype)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
+    assert bin_edges.dtype == _supported_float_type(dtype)
 
 
 def test_equalize_masked():
@@ -205,7 +216,7 @@ def check_cdf_slope(cdf):
 # ====================
 
 
-@testing.parametrize("test_input,expected", [
+@pytest.mark.parametrize("test_input,expected", [
     ('image', [0, 1]),
     ('dtype', [0, 255]),
     ((10, 20), [10, 20])
@@ -216,7 +227,7 @@ def test_intensity_range_uint8(test_input, expected):
     assert_array_equal(out, expected)
 
 
-@testing.parametrize("test_input,expected", [
+@pytest.mark.parametrize("test_input,expected", [
     ('image', [0.1, 0.2]),
     ('dtype', [-1, 1]),
     ((0.3, 0.4), [0.3, 0.4])
@@ -255,10 +266,13 @@ def test_rescale_shrink():
     assert_array_almost_equal(out, [0, 0.5, 1])
 
 
-def test_rescale_in_range():
-    image = np.array([51., 102., 153.])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_rescale_in_range(dtype):
+    image = np.array([51., 102., 153.], dtype=dtype)
     out = exposure.rescale_intensity(image, in_range=(0, 255))
-    assert_array_almost_equal(out, [0.2, 0.4, 0.6])
+    assert_array_almost_equal(out, [0.2, 0.4, 0.6], decimal=4)
+    # with out_range='dtype', the output has the same dtype
+    assert out.dtype == image.dtype
 
 
 def test_rescale_in_range_clip():
@@ -267,16 +281,22 @@ def test_rescale_in_range_clip():
     assert_array_almost_equal(out, [0.5, 1, 1])
 
 
-def test_rescale_out_range():
+@pytest.mark.parametrize('dtype', [np.int8, np.int32, np.float16, np.float32,
+                                   np.float64])
+def test_rescale_out_range(dtype):
     """Check that output range is correct.
 
     .. versionchanged:: 0.17
         This function used to return dtype matching the input dtype. It now
         matches the output.
+
+    .. versionchanged:: 0.19
+        float16 and float32 inputs now result in float32 output. Formerly they
+        would give float64 outputs.
     """
-    image = np.array([-10, 0, 10], dtype=np.int8)
+    image = np.array([-10, 0, 10], dtype=dtype)
     out = exposure.rescale_intensity(image, out_range=(0, 127))
-    assert out.dtype == float
+    assert out.dtype == _supported_float_type(image.dtype)
     assert_array_almost_equal(out, [0, 63.5, 127])
 
 
@@ -371,35 +391,39 @@ def test_rescale_output_dtype(out_range, out_dtype):
 def test_rescale_no_overflow():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=np.uint8)
-    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert_array_equal(output_image, [0, 128, 255])
     assert output_image.dtype == np.uint8
 
 
 def test_rescale_float_output():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=(0, 255))
-    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert_array_equal(output_image, [0, 128, 255])
     assert output_image.dtype == float
 
 
 def test_rescale_raises_on_incorrect_out_range():
     image = np.array([-128, 0, 127], dtype=np.int8)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _ = exposure.rescale_intensity(image, out_range='flat')
+
 
 # Test adaptive histogram equalization
 # ====================================
 
-def test_adapthist_grayscale():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adapthist_grayscale(dtype):
     """Test a grayscale float image
     """
-    img = util.img_as_float(data.astronaut())
+    img = util.img_as_float(data.astronaut()).astype(dtype, copy=False)
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                           clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 100.140, 3)
+    assert adapted.dtype == _supported_float_type(dtype)
+    snr_decimal = 3 if dtype != np.float16 else 2
+    assert_almost_equal(peak_snr(img, adapted), 100.140, snr_decimal)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
@@ -567,7 +591,7 @@ def norm_brightness_err(img1, img2):
 
 def test_adjust_gamma_1x1_shape():
     """Check that the shape is maintained"""
-    img = np.ones([1,1])
+    img = np.ones([1, 1])
     result = exposure.adjust_gamma(img, 1.5)
     assert img.shape == result.shape
 
@@ -579,12 +603,14 @@ def test_adjust_gamma_one():
     assert_array_equal(result, image)
 
 
-def test_adjust_gamma_zero():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_gamma_zero(dtype):
     """White image should be returned for gamma equal to zero"""
-    image = np.random.uniform(0, 255, (8, 8))
+    image = np.random.uniform(0, 255, (8, 8)).astype(dtype, copy=False)
     result = exposure.adjust_gamma(image, 0)
     dtype = image.dtype.type
     assert_array_equal(result, dtype_range[dtype][1])
+    assert result.dtype == image.dtype
 
 
 def test_adjust_gamma_less_one():
@@ -625,7 +651,7 @@ def test_adjust_gamma_greater_one():
 
 def test_adjust_gamma_negative():
     image = np.arange(0, 255, 4, np.uint8).reshape((8, 8))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         exposure.adjust_gamma(image, -1)
 
 
@@ -638,11 +664,13 @@ def test_adjust_gamma_u8_overflow():
 # Test Logarithmic Correction
 # ===========================
 
-def test_adjust_log_1x1_shape():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_log_1x1_shape(dtype):
     """Check that the shape is maintained"""
-    img = np.ones([1, 1])
+    img = np.ones([1, 1], dtype=dtype)
     result = exposure.adjust_log(img, 1)
     assert img.shape == result.shape
+    assert result.dtype == dtype
 
 
 def test_adjust_log():
@@ -684,11 +712,13 @@ def test_adjust_inv_log():
 # Test Sigmoid Correction
 # =======================
 
-def test_adjust_sigmoid_1x1_shape():
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_adjust_sigmoid_1x1_shape(dtype):
     """Check that the shape is maintained"""
-    img = np.ones([1, 1])
+    img = np.ones([1, 1], dtype=dtype)
     result = exposure.adjust_sigmoid(img, 1, 5)
     assert img.shape == result.shape
+    assert result.dtype == dtype
 
 
 def test_adjust_sigmoid_cutoff_one():
@@ -795,7 +825,7 @@ def test_is_low_contrast_boolean():
                                            exposure.adjust_sigmoid])
 def test_negative_input(exposure_func):
     image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         exposure_func(image)
 
 

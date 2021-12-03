@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 import itertools
 from skimage import (img_as_float, img_as_float32, img_as_float64,

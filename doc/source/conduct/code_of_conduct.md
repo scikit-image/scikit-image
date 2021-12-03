@@ -9,7 +9,7 @@ Introduction
 ------------
 
 This code of conduct applies to all spaces managed by the scikit-image project,
-including all public and private mailing lists, issue trackers, wikis, blogs,
+including all public and private forums, issue trackers, wikis, blogs,
 Twitter, and any other communication channel used by our community.  The scikit-image
 project does not organise in-person events, however events related to our
 community should have a code of conduct similar in spirit to this one.

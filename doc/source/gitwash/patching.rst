@@ -45,7 +45,7 @@ Overview
    git format-patch -M -C main
 
 Then, send the generated patch files to the `scikit-image
-mailing list`_ |emdash| where we will thank you warmly.
+developer forum`_ |emdash| where we will thank you warmly.
 
 In detail
 ---------
@@ -100,7 +100,7 @@ In detail
       0001-BF-added-tests-for-Funny-bug.patch
       0002-BF-added-fix-for-Funny-bug.patch
 
-   Send these files to the `scikit-image mailing list`_.
+   Send these files to the `scikit-image developer forum`_.
 
 When you are done, to switch back to the main copy of the
 code, just return to the ``main`` branch::

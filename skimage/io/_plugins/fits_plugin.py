@@ -1,7 +1,6 @@
 __all__ = ['imread', 'imread_collection']
 
 import skimage.io as io
-from warnings import warn
 
 try:
     from astropy.io import fits

@@ -1,12 +1,12 @@
 import os
+import pathlib
 import tempfile
 
 import numpy as np
-from skimage import io
+import pytest
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
-from skimage._shared.testing import fetch
+from skimage import io
+from skimage._shared.testing import assert_array_equal, fetch
 from skimage.data import data_dir
 
 
@@ -25,6 +25,7 @@ one_by_one_jpeg = (
     b'\x00?\x00*\x9f\xff\xd9'
 )
 
+
 def test_stack_basic():
     x = np.arange(12).reshape(3, 4)
     io.push(x)
@@ -33,13 +34,13 @@ def test_stack_basic():
 
 
 def test_stack_non_array():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         io.push([[1, 2, 3]])
 
 
 def test_imread_file_url():
     # tweak data path so that file URI works on both unix and windows.
-    data_path = str(testing.fetch('data/camera.png'))
+    data_path = str(fetch('data/camera.png'))
     data_path = data_path.replace(os.path.sep, '/')
     image_url = f'file:///{data_path}'
     image = io.imread(image_url)
@@ -55,6 +56,21 @@ def test_imread_http_url(httpserver):
     # by extension
     image = io.imread(httpserver.url + '/test.jpg' + '?' + 's' * 266)
     assert image.shape == (1, 1)
+
+
+def test_imread_pathlib_tiff():
+    """Tests reading from Path object (issue gh-5545)."""
+
+    # read via fetch
+    expected = io.imread(fetch('data/multipage.tif'))
+
+    # read by passing in a pathlib.Path object
+    fname = os.path.join(data_dir, 'multipage.tif')
+    path = pathlib.Path(fname)
+    img = io.imread(path)
+
+    assert img.shape == (2, 15, 10)
+    assert_array_equal(expected, img)
 
 
 def _named_tempfile_func(error_class):
@@ -77,7 +93,7 @@ def _named_tempfile_func(error_class):
     from the Python standard library could raise. As of this writing, these
     are ``FileNotFoundError``, ``FileExistsError``, ``PermissionError``, and
     ``BaseException``. See
-    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__
+    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__  # noqa
     for more information.
     """
     def named_temp_file(*args, **kwargs):
@@ -85,7 +101,7 @@ def _named_tempfile_func(error_class):
     return named_temp_file
 
 
-@testing.parametrize(
+@pytest.mark.parametrize(
     'error_class', [
         FileNotFoundError, FileExistsError, PermissionError, BaseException
     ]
@@ -100,5 +116,5 @@ def test_failed_temporary_file(monkeypatch, error_class):
         monkeypatch.setattr(
             tempfile, 'NamedTemporaryFile', _named_tempfile_func(error_class)
         )
-        with testing.raises(error_class):
-            image = io.imread(image_url)
+        with pytest.raises(error_class):
+            io.imread(image_url)

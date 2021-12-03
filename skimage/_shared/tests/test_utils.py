@@ -1,11 +1,9 @@
 import sys
 
 import numpy as np
-import numpy.testing as npt
 import pytest
 
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
@@ -15,6 +13,13 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
     complex_dtypes += [np.complex256]
+
+have_numpydoc = False
+try:
+    import numpydoc
+    have_numpydoc = True
+except ImportError:
+    pass
 
 
 def test_remove_argument():
@@ -120,14 +125,15 @@ def test_change_default_value():
     assert not record.list
 
 
-def test_deprecated_kwarg():
+def test_deprecate_kwarg():
 
-    @deprecate_kwarg({'old_arg1': 'new_arg1'})
+    @deprecate_kwarg({'old_arg1': 'new_arg1'}, '0.19')
     def foo(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
         return arg0, new_arg1, arg2
 
     @deprecate_kwarg({'old_arg1': 'new_arg1'},
+                     deprecated_version='0.19',
                      warning_msg="Custom warning message")
     def bar(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
@@ -160,7 +166,19 @@ def test_deprecated_kwarg():
         assert foo.__name__ == 'foo'
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            assert foo.__doc__ == 'Expected docstring'
+            if not have_numpydoc:
+                assert foo.__doc__ == """Expected docstring"""
+            else:
+                assert foo.__doc__ == """Expected docstring
+
+
+    Other Parameters
+    ----------------
+    old_arg1 : DEPRECATED
+        Deprecated in favor of `new_arg1`.
+
+        .. deprecated:: 0.19
+"""
 
     # Assert no warning was raised
     assert not record.list
@@ -261,7 +279,3 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size is None
     else:
         assert size == x.shape[channel_axis]
-
-
-if __name__ == "__main__":
-    npt.run_module_suite()

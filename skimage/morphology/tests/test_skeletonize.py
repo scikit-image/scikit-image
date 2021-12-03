@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
 
-from skimage import data, draw
+from skimage import draw
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.io import imread

@@ -1,11 +1,13 @@
 import functools
 
 import numpy as np
+import scipy.fft as fft
 
-from .._shared.fft import fftmodule as fft
+from .._shared.utils import _supported_float_type
 
 
-def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
+def _get_ND_butterworth_filter(shape, factor, order, high_pass, real,
+                               dtype=np.float64):
     """Create a N-dimensional Butterworth mask for an FFT
 
     Parameters
@@ -41,6 +43,7 @@ def _get_ND_butterworth_filter(shape, factor, order, high_pass, real):
     q2 = functools.reduce(
             np.add, np.meshgrid(*ranges, indexing="ij", sparse=True)
             )
+    q2 = q2.astype(dtype)
     wfilt = 1 / (1 + np.power(q2, order))
     if high_pass:
         wfilt = 1 - wfilt
@@ -115,8 +118,10 @@ def butterworth(
     fft_shape = (image.shape if channel_axis is None
                  else np.delete(image.shape, channel_axis))
     is_real = np.isrealobj(image)
+    float_dtype = _supported_float_type(image.dtype, allow_complex=True)
     wfilt = _get_ND_butterworth_filter(
-        fft_shape, cutoff_frequency_ratio, order, high_pass, is_real
+        fft_shape, cutoff_frequency_ratio, order, high_pass, is_real,
+        float_dtype
     )
     axes = np.arange(image.ndim)
     if channel_axis is not None:

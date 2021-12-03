@@ -3,9 +3,6 @@ from ...util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
 
-from ..._shared.version_requirements import is_installed
-
-
 __all__ = ['OverlayPlugin']
 
 

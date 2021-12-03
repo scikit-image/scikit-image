@@ -3,8 +3,8 @@ ImageViewer class for viewing and interacting with images.
 """
 
 import numpy as np
-from ... import io, img_as_float
-from ...util.dtype import dtype_range
+from ... import io
+from ...util.dtype import dtype_range, img_as_float
 from ...exposure import rescale_intensity
 from ..qt import QtWidgets, QtGui, Qt, Signal
 from ..widgets import Slider

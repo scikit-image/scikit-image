@@ -1,6 +1,5 @@
 from tempfile import NamedTemporaryFile
 
-import pytest
 import numpy as np
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 

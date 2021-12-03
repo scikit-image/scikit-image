@@ -54,18 +54,16 @@ mse_const = mean_squared_error(img, img_const)
 ssim_const = ssim(img, img_const,
                   data_range=img_const.max() - img_const.min())
 
-label = 'MSE: {:.2f}, SSIM: {:.2f}'
-
 ax[0].imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax[0].set_xlabel(label.format(mse_none, ssim_none))
+ax[0].set_xlabel(f'MSE: {mse_none:.2f}, SSIM: {ssim_none:.2f}')
 ax[0].set_title('Original image')
 
 ax[1].imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax[1].set_xlabel(label.format(mse_noise, ssim_noise))
+ax[1].set_xlabel(f'MSE: {mse_noise:.2f}, SSIM: {ssim_noise:.2f}')
 ax[1].set_title('Image with noise')
 
 ax[2].imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax[2].set_xlabel(label.format(mse_const, ssim_const))
+ax[2].set_xlabel(f'MSE: {mse_const:.2f}, SSIM: {ssim_const:.2f}')
 ax[2].set_title('Image plus constant')
 
 plt.tight_layout()

@@ -5,7 +5,8 @@
 [![codecov.io](https://codecov.io/github/scikit-image/scikit-image/coverage.svg?branch=main)](https://codecov.io/github/scikit-image/scikit-image?branch=main)
 
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
-- **Mailing list:** [https://mail.python.org/mailman3/lists/scikit-image.python.org/](https://mail.python.org/mailman3/lists/scikit-image.python.org/)
+- **User forum:** [https://forum.image.sc/tag/scikit-image](https://forum.image.sc/tag/scikit-image)
+- **Developer forum:** [https://discuss.scientific-python.org/c/contributor/skimage](https://discuss.scientific-python.org/c/contributor/skimage)
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
 - **Benchmarks:** [https://pandas.pydata.org/speed/scikit-image/](https://pandas.pydata.org/speed/scikit-image/)
 
@@ -14,7 +15,6 @@
 - **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
 - **OSX:** ``pip install scikit-image``
 - **Anaconda:** ``conda install -c conda-forge scikit-image``
-- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image)
 
 Also see [installing ``scikit-image``](INSTALL.rst).
 

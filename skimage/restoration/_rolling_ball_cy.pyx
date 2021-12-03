@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
@@ -124,7 +126,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
-    cdef Py_ssize_t kernel_leading_dims = np.prod(kernel_shape[0:(ndim - 1)])
+    cdef Py_ssize_t kernel_leading_dims = math.prod(kernel_shape[0:(ndim - 1)])
     cdef Py_ssize_t kernel_last_dim = kernel_shape[ndim - 1]
     cdef Py_ssize_t ker_idx_leading, ker_idx_last
 
@@ -213,7 +215,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     out_data_size = out.size
 
     cdef Py_ssize_t ndim = kernel_shape.shape[0]
-    cdef Py_ssize_t kernel_leading_dims = np.prod(kernel_shape[0:(ndim - 1)])
+    cdef Py_ssize_t kernel_leading_dims = math.prod(kernel_shape[0:(ndim - 1)])
     cdef Py_ssize_t kernel_last_dim = kernel_shape[ndim - 1]
     cdef Py_ssize_t ker_idx_leading, ker_idx_last
 

@@ -3,13 +3,13 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-from scipy import ndimage as ndi
 
 cimport numpy as cnp
-from ..measure._ccomp cimport find_root, join_trees
 
-from ..util import img_as_float64
+from .._shared.filters import gaussian
 from .._shared.utils import warn
+from ..measure._ccomp cimport find_root, join_trees
+from ..util import img_as_float64
 
 cnp.import_array()
 
@@ -54,7 +54,8 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
-    image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
+    image = gaussian(image, sigma=[sigma, sigma, 0], mode='reflect',
+                     channel_axis=-1)
     height, width = image.shape[:2]
 
     # compute edge weights in 8 connectivity:

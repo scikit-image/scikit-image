@@ -60,7 +60,7 @@ plt.gray()
 sigma_est = estimate_sigma(noisy, channel_axis=-1, average_sigmas=True)
 # Due to clipping in random_noise, the estimate will be a bit smaller than the
 # specified sigma.
-print(f"Estimated Gaussian noise standard deviation = {sigma_est}")
+print(f'Estimated Gaussian noise standard deviation = {sigma_est}')
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')

@@ -1,4 +1,3 @@
-import warnings
 from itertools import cycle
 
 import numpy as np
@@ -210,7 +209,8 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
     return 1.0 / np.sqrt(1.0 + alpha * gradnorm)
 
 
-@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def morphological_chan_vese(image, num_iter, init_level_set='checkerboard',
                             smoothing=1, lambda1=1, lambda2=1,
                             iter_callback=lambda x: None):
@@ -314,7 +314,8 @@ def morphological_chan_vese(image, num_iter, init_level_set='checkerboard',
     return u
 
 
-@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def morphological_geodesic_active_contour(gimage, num_iter,
                                           init_level_set='disk', smoothing=1,
                                           threshold='auto', balloon=0,

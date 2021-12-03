@@ -183,7 +183,7 @@ def test_bounding_values():
     image = img_as_float(data.page())
     template = np.zeros((3, 3))
     template[1, 1] = 1
-    result = match_template(img_as_float(data.page()), template)
+    result = match_template(image, template)
     print(result.max())
     assert result.max() < 1 + 1e-7
     assert result.min() > -1 - 1e-7

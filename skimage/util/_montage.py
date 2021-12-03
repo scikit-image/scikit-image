@@ -1,6 +1,7 @@
 import numpy as np
 
 from .._shared import utils
+from .. import exposure
 
 __all__ = ['montage']
 
@@ -93,11 +94,6 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     >>> arr_out_nonsquare.shape
     (2, 6)
     """
-
-    # exposure imports scipy.linalg which is quite expensive.
-    # Since skimage.util is in the critical import path, we lazy import
-    # exposure to improve import time
-    from .. import exposure
 
     if channel_axis is not None:
         arr_in = np.asarray(arr_in)

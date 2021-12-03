@@ -1,7 +1,5 @@
 __all__ = ['imread']
 
-from warnings import warn
-
 try:
     import osgeo.gdal as gdal
 except ImportError:

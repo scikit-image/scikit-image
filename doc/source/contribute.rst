@@ -3,4 +3,4 @@
  
    gitwash/index
 
-.. include:: ../../CONTRIBUTING.txt
+.. include:: ../../CONTRIBUTING.rst

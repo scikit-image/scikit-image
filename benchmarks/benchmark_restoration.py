@@ -1,3 +1,4 @@
+import inspect
 import os
 
 import numpy as np
@@ -12,6 +13,12 @@ try:
 except ImportError:
     from skimage.morphology import circle as disk
 from . import _channel_kwarg, _skip_slow
+
+# inspect signature to automatically handle API changes across versions
+if 'num_iter' in inspect.signature(restoration.richardson_lucy).parameters:
+    rl_iter_kwarg = dict(num_iter=10)
+else:
+    rl_iter_kwarg = dict(iterations=10)
 
 
 class RestorationSuite:
@@ -95,20 +102,20 @@ class DeconvolutionSuite:
 
     def time_richardson_lucy_f64(self):
         restoration.richardson_lucy(self.volume_f64, self.psf_f64,
-                                    iterations=10)
+                                    **rl_iter_kwarg)
 
     def time_richardson_lucy_f32(self):
         restoration.richardson_lucy(self.volume_f32, self.psf_f32,
-                                    iterations=10)
+                                    **rl_iter_kwarg)
 
     # use iterations=1 for peak-memory cases to save time
     def peakmem_richardson_lucy_f64(self):
         restoration.richardson_lucy(self.volume_f64, self.psf_f64,
-                                    iterations=1)
+                                    **rl_iter_kwarg)
 
     def peakmem_richardson_lucy_f32(self):
         restoration.richardson_lucy(self.volume_f32, self.psf_f32,
-                                    iterations=1)
+                                    **rl_iter_kwarg)
 
 
 class RollingBall(object):

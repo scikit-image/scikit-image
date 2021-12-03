@@ -15,9 +15,9 @@ s = integral_image(x)
 )
 @pytest.mark.parametrize('dtype_as_kwarg', [False, True])
 def test_integral_image_validity(dtype, dtype_as_kwarg):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     dtype_kwarg = dtype if dtype_as_kwarg else None
-    y = (rstate.rand(20, 20) * 255).astype(dtype)
+    y = (rstate.random((20, 20)) * 255).astype(dtype)
     out = integral_image(y, dtype=dtype_kwarg)
     if y.dtype.kind == 'f':
         if dtype_as_kwarg:

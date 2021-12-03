@@ -1,11 +1,12 @@
 import numpy as np
+import pytest
 from scipy.signal import get_window
+
 from skimage.filters import window
-from skimage._shared.testing import parametrize, raises
 
 
-@parametrize("size", [5, 6])
-@parametrize("ndim", [2, 3, 4])
+@pytest.mark.parametrize("size", [5, 6])
+@pytest.mark.parametrize("ndim", [2, 3, 4])
 def test_window_shape_isotropic(size, ndim):
     w = window('hann', (size,)*ndim)
     assert w.ndim == ndim
@@ -14,13 +15,13 @@ def test_window_shape_isotropic(size, ndim):
         assert np.allclose(w.sum(axis=0), w.sum(axis=i))
 
 
-@parametrize("shape", [(8, 16), (16, 8), (2, 3, 4)])
+@pytest.mark.parametrize("shape", [(8, 16), (16, 8), (2, 3, 4)])
 def test_window_shape_anisotropic(shape):
     w = window('hann', shape)
     assert w.shape == shape
 
 
-@parametrize("shape", [[17, 33], [17, 97]])
+@pytest.mark.parametrize("shape", [[17, 33], [17, 97]])
 def test_window_anisotropic_amplitude(shape):
     w = window(('tukey', 0.8), shape)
 
@@ -31,10 +32,9 @@ def test_window_anisotropic_amplitude(shape):
     assert abs(profile_w.mean() - profile_h.mean()) < .01
 
 
-@parametrize("wintype",
-             [16,
-              'triang',
-              ('tukey', 0.8)])
+@pytest.mark.parametrize(
+    "wintype", [16, 'triang', ('tukey', 0.8)]
+)
 def test_window_type(wintype):
     w = window(wintype, (9, 9))
     assert w.ndim == 2
@@ -42,7 +42,7 @@ def test_window_type(wintype):
     assert np.allclose(w.sum(axis=0), w.sum(axis=1))
 
 
-@parametrize("size", [10, 11])
+@pytest.mark.parametrize("size", [10, 11])
 def test_window_1d(size):
     w = window('hann', size)
     w1 = get_window('hann', size, fftbins=False)
@@ -50,7 +50,7 @@ def test_window_1d(size):
 
 
 def test_window_invalid_shape():
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         window(10, shape=(-5, 10))
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         window(10, shape=(1.3, 2.0))
