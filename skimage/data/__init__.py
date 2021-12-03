@@ -13,7 +13,9 @@ __getattr__, __dir__, __all__ = lazy.attach(
                       'immunohistochemistry', 'kidney',
                       'lbp_frontal_face_cascade_filename', 'lily',
                       'lfw_subset', 'logo', 'microaneurysms', 'moon', 'page',
+                      'protein_transport',
                       'text', 'retina', 'rocket', 'shepp_logan_phantom',
-                      'skin', 'stereo_motorcycle', 'vortex']
+                      'skin', 'nickel_solidification', 'stereo_motorcycle',
+                      'vortex']
     }
 )

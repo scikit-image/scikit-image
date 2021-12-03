@@ -637,8 +637,8 @@ def human_mitosis():
 
     Returns
     -------
-    human_mitosis: (512, 512) uint8 ndimage
-        Data of human cells undergoing mitosis taken during the preperation
+    human_mitosis: (512, 512) uint8 ndarray
+        Data of human cells undergoing mitosis taken during the preparation
         of the manuscript in [1]_.
 
     Notes
@@ -1144,6 +1144,38 @@ def skin():
     skin : (960, 1280, 3) RGB image of uint8
     """
     return _load('data/skin.jpg')
+
+
+def nickel_solidification():
+    """Image sequence of synchrotron x-radiographs showing the rapid
+    solidification of a nickel alloy sample.
+
+    Returns
+    -------
+    nickel_solidification: (11, 384, 512) uint16 ndarray
+
+    Notes
+    -----
+    See https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/solidification.tif')
+
+
+def protein_transport():
+    """Microscopy image sequence with fluorescence tagging of proteins
+    re-localizing from the cytoplasmic area to the nuclear envelope.
+
+    Returns
+    -------
+    protein_transport: (15, 2, 180, 183) uint8 ndarray
+
+    Notes
+    -----
+    See https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/protein_transport.tif')
 
 
 def brain():
