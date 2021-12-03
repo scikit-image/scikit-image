@@ -12,165 +12,165 @@ env:
 
 
 jobs:
-  build_linux_37_and_above_wheels:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        cibw_python: [ "cp38-*", "cp39-*"]
-        cibw_manylinux: [ manylinux2014 ]
-        cibw_arch: [ "x86_64", "i686" ]
-        include:
-          - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: x86_64
-          - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: i686
-          - os: ubuntu-18.04
-            cibw_python: "cp310-*"
-            cibw_manylinux: manylinux2014
-            cibw_arch: x86_64
-            # exclude i686 on Python 3.10 (No NumPy or SciPy wheels available)
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.7'
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
-          CIBW_SKIP: "*-musllinux_*"
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: wheels
-          path: ./dist/*.whl
+  # build_linux_37_and_above_wheels:
+  #   name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-18.04]
+  #       cibw_python: [ "cp38-*", "cp39-*"]
+  #       cibw_manylinux: [ manylinux2014 ]
+  #       cibw_arch: [ "x86_64", "i686" ]
+  #       include:
+  #         - os: ubuntu-18.04
+  #           cibw_python: "cp37-*"
+  #           cibw_manylinux: manylinux2010
+  #           cibw_arch: x86_64
+  #         - os: ubuntu-18.04
+  #           cibw_python: "cp37-*"
+  #           cibw_manylinux: manylinux2010
+  #           cibw_arch: i686
+  #         - os: ubuntu-18.04
+  #           cibw_python: "cp310-*"
+  #           cibw_manylinux: manylinux2014
+  #           cibw_arch: x86_64
+  #           # exclude i686 on Python 3.10 (No NumPy or SciPy wheels available)
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-python@v2
+  #       name: Install Python
+  #       with:
+  #         python-version: '3.7'
+  #     - name: Install cibuildwheel
+  #       run: |
+  #         python -m pip install cibuildwheel
+  #     - name: Build the wheel
+  #       run: |
+  #         python -m cibuildwheel --output-dir dist
+  #       env:
+  #         CIBW_BUILD: ${{ matrix.cibw_python }}
+  #         CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
+  #         CIBW_SKIP: "*-musllinux_*"
+  #         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
+  #         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: wheels
+  #         path: ./dist/*.whl
 
-  build_linux_aarch64_wheels:
-    name: Build python ${{ matrix.cibw_python }} aarch64 wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        cibw_python: [ "cp37-*", "cp38-*" , "cp39-*" , "cp310-*" ]
-        cibw_manylinux: [ manylinux2014 ]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.7'
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          platforms: arm64
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_SKIP: "*-musllinux_*"
-          # skip aarch64 tests which often exceed the 6 hour time limit
-          CIBW_TEST_SKIP: "*_aarch64"
-          CIBW_ARCHS_LINUX: aarch64
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: wheels
-          path: ./dist/*.whl
+  # build_linux_aarch64_wheels:
+  #   name: Build python ${{ matrix.cibw_python }} aarch64 wheels on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-18.04]
+  #       cibw_python: [ "cp37-*", "cp38-*" , "cp39-*" , "cp310-*" ]
+  #       cibw_manylinux: [ manylinux2014 ]
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-python@v2
+  #       name: Install Python
+  #       with:
+  #         python-version: '3.7'
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v1
+  #       with:
+  #         platforms: arm64
+  #     - name: Install cibuildwheel
+  #       run: |
+  #         python -m pip install cibuildwheel
+  #     - name: Build the wheel
+  #       run: |
+  #         python -m cibuildwheel --output-dir dist
+  #       env:
+  #         CIBW_BUILD: ${{ matrix.cibw_python }}
+  #         CIBW_SKIP: "*-musllinux_*"
+  #         # skip aarch64 tests which often exceed the 6 hour time limit
+  #         CIBW_TEST_SKIP: "*_aarch64"
+  #         CIBW_ARCHS_LINUX: aarch64
+  #         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
+  #         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: wheels
+  #         path: ./dist/*.whl
 
-  build_macos_wheels:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-        cibw_python: [ "cp37-*", "cp38-*", "cp39-*", "cp310-*" ]
-        # TODO: add "universal2" once a universal2 libomp is available
-        cibw_arch: [ "x86_64", "arm64"]
-        exclude:
-          - os: macos-latest
-            cibw_python: "cp37-*"
-            cibw_arch: arm64
-        #   - os: macos-latest
-        #     cibw_python: "cp37-*"
-        #     cibw_arch: universal2
+  # build_macos_wheels:
+  #   name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [macos-latest]
+  #       cibw_python: [ "cp37-*", "cp38-*", "cp39-*", "cp310-*" ]
+  #       # TODO: add "universal2" once a universal2 libomp is available
+  #       cibw_arch: [ "x86_64", "arm64"]
+  #       exclude:
+  #         - os: macos-latest
+  #           cibw_python: "cp37-*"
+  #           cibw_arch: arm64
+  #       #   - os: macos-latest
+  #       #     cibw_python: "cp37-*"
+  #       #     cibw_arch: universal2
 
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
 
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.9'
+  #     - uses: actions/setup-python@v2
+  #       name: Install Python
+  #       with:
+  #         python-version: '3.9'
 
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Build wheels for CPython Mac OS
-        run: |
-          # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into
-          # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/.  Currently, the oldest
-          # supported macos version is: High Sierra / 10.13. When upgrading
-          # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
-          # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
-              # SciPy requires 12.0 on arm to prevent kernel panics
-              # https://github.com/scipy/scipy/issues/14688
-              # so being conservative, we just do the same here
-              export MACOSX_DEPLOYMENT_TARGET=12.0
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
-          else
-              export MACOSX_DEPLOYMENT_TARGET=10.13
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
-          fi
-          sudo tar -C / -xvjf libomp.tbz2 opt
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_MACOS: ${{ matrix.cibw_arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_TEST_SKIP: "*-macosx_arm64"
-          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CC: /usr/bin/clang
-          CXX: /usr/bin/clang++
-          CPPFLAGS: "-Xpreprocessor -fopenmp"
-          CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
-          CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
+  #     - name: Install cibuildwheel
+  #       run: |
+  #         python -m pip install cibuildwheel
+  #     - name: Build wheels for CPython Mac OS
+  #       run: |
+  #         # Make sure to use a libomp version binary compatible with the oldest
+  #         # supported version of the macos SDK as libomp will be vendored into
+  #         # the scikit-image wheels for macos. The list of binaries are in
+  #         # https://packages.macports.org/libomp/.  Currently, the oldest
+  #         # supported macos version is: High Sierra / 10.13. When upgrading
+  #         # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
+  #         # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
+  #         if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
+  #             # SciPy requires 12.0 on arm to prevent kernel panics
+  #             # https://github.com/scipy/scipy/issues/14688
+  #             # so being conservative, we just do the same here
+  #             export MACOSX_DEPLOYMENT_TARGET=12.0
+  #             wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
+  #         else
+  #             export MACOSX_DEPLOYMENT_TARGET=10.13
+  #             wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+  #         fi
+  #         sudo tar -C / -xvjf libomp.tbz2 opt
+  #         python -m cibuildwheel --output-dir dist
+  #       env:
+  #         CIBW_BUILD: ${{ matrix.cibw_python }}
+  #         CIBW_ARCHS_MACOS: ${{ matrix.cibw_arch }}
+  #         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+  #         CIBW_MANYLINUX_I686_IMAGE: manylinux1
+  #         CIBW_TEST_SKIP: "*-macosx_arm64"
+  #         # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
+  #         CC: /usr/bin/clang
+  #         CXX: /usr/bin/clang++
+  #         CPPFLAGS: "-Xpreprocessor -fopenmp"
+  #         CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
+  #         CXXFLAGS: "-I/opt/local/include/libomp"
+  #         LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: wheels
-          path: ./dist/*.whl
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: wheels
+  #         path: ./dist/*.whl
 
   build_windows_wheels:
     name: Build ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
@@ -179,7 +179,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        cibw_arch: ["AMD64", "x86"]
+        cibw_arch: ["AMD64"]  # , "x86"
 
     steps:
       - uses: actions/checkout@v2
@@ -228,8 +228,8 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp3?-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_BUILD: "cp310-*"
+          # CIBW_SKIP: "cp36-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
 
       - uses: actions/upload-artifact@v2
@@ -237,47 +237,47 @@ jobs:
           name: wheels
           path: ./dist/*.whl
 
-  deploy:
-    name: Release
-    needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
-    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.7'
+  # deploy:
+  #   name: Release
+  #   needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
+  #   if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-python@v2
+  #       name: Install Python
+  #       with:
+  #         python-version: '3.7'
       
-      - name: Install Twine
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/build.txt
-          pip install twine
+  #     - name: Install Twine
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r requirements/build.txt
+  #         pip install twine
       
-      - uses: actions/download-artifact@v2
-        id: download
-        with:
-          name: wheels
-          path: ./dist
+  #     - uses: actions/download-artifact@v2
+  #       id: download
+  #       with:
+  #         name: wheels
+  #         path: ./dist
     
-      - name: Publish the source distribution on PyPI
-        run: |
-          SK_VERSION=$(git describe --tags)
-          python setup.py sdist
-          ls -la ${{ github.workspace }}/dist
-          # We prefer to release wheels before source because otherwise there is a
-          # small window during which users who pip install scikit-image will require compilation.
-          twine upload ${{ github.workspace }}/dist/*.whl
-          twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+  #     - name: Publish the source distribution on PyPI
+  #       run: |
+  #         SK_VERSION=$(git describe --tags)
+  #         python setup.py sdist
+  #         ls -la ${{ github.workspace }}/dist
+  #         # We prefer to release wheels before source because otherwise there is a
+  #         # small window during which users who pip install scikit-image will require compilation.
+  #         twine upload ${{ github.workspace }}/dist/*.whl
+  #         twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
+  #       env:
+  #         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+  #         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
               
-      - name: Github release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+  #     - name: Github release
+  #       uses: softprops/action-gh-release@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         GITHUB_REPOSITORY: ${{ github.repository }}
