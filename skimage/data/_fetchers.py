@@ -1156,7 +1156,8 @@ def nickel_solidification():
 
     Notes
     -----
-    See https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+    See info under `nickel_solidification.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
 
     """
     return _load('data/solidification.tif')
@@ -1172,7 +1173,8 @@ def protein_transport():
 
     Notes
     -----
-    See https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+    See info under `NPCsingleNucleus.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
 
     """
     return _load('data/protein_transport.tif')
