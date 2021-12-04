@@ -77,8 +77,7 @@ def test_pyramid_expand_rgb_deprecated_multichannel():
 
 def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
-    out = pyramids.pyramid_expand(image_gray, upscale=2,
-                                  channel_axis=None)
+    out = pyramids.pyramid_expand(image_gray, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2))
 
 
