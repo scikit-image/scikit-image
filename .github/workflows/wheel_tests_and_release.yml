@@ -126,7 +126,7 @@ jobs:
           # supported macos version is: High Sierra / 10.13. When upgrading
           # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
           # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          if [[ "$CIBW_BUILD" == *-macosx_arm64 ]]; then
+          if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
               # SciPy requires 12.0 on arm to prevent kernel panics
               # https://github.com/scipy/scipy/issues/14688
               # so being conservative, we just do the same here
@@ -136,6 +136,7 @@ jobs:
               export MACOSX_DEPLOYMENT_TARGET=10.13
               wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
           fi
+          echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
           sudo tar -C / -xvjf libomp.tbz2 opt
           python -m cibuildwheel --output-dir dist
         env:
@@ -202,7 +203,7 @@ jobs:
 
       - name: Build Windows wheels for CPython 3.10
         # NumPy dropped x86 wheels for Python 3.10
-        if: matrix.cibw_arch == 'ARM64'
+        if: matrix.cibw_arch == 'AMD64'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
