@@ -179,8 +179,7 @@ def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    scaled = rescale(x, 2, order=0,
-                     channel_axis=None, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_array_almost_equal(scaled, ref)
@@ -189,8 +188,7 @@ def test_rescale():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
 
-    scaled = rescale(x, (2, 1), order=0,
-                     channel_axis=None, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, (2, 1), order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_array_almost_equal(scaled, ref)
