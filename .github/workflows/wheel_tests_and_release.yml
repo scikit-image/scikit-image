@@ -218,7 +218,7 @@ jobs:
 
       - name: Build Windows wheels for CPython 3.10
         # NumPy dropped x86 wheels for Python 3.10
-        if: matrix.cibw_arch == 'ARM64'
+        if: matrix.cibw_arch == 'AMD64'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
