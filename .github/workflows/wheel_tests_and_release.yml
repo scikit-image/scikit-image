@@ -48,6 +48,7 @@ jobs:
           CIBW_SKIP: "*-musllinux_*"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          LDFLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -88,6 +89,7 @@ jobs:
           CIBW_ARCHS_LINUX: aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          LDFLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -151,7 +153,7 @@ jobs:
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
           CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
+          LDFLAGS: "-Wl,--strip-debug,-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -209,6 +211,7 @@ jobs:
         env:
           CIBW_BUILD: "cp310-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          LDFLAGS: "-Wl,--strip-debug"
 
       - name: Build Windows wheels for CPython
         run: |
@@ -217,53 +220,54 @@ jobs:
           CIBW_BUILD: "cp3?-*"
           CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          LDFLAGS: "-Wl,--strip-debug"
 
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: ./dist/*.whl
 
-  deploy:
-    name: Release
-    needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
-    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.9'
+  # deploy:
+  #   name: Release
+  #   needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
+  #   if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-python@v2
+  #       name: Install Python
+  #       with:
+  #         python-version: '3.9'
       
-      - name: Install Twine
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/build.txt
-          pip install twine
+  #     - name: Install Twine
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r requirements/build.txt
+  #         pip install twine
       
-      - uses: actions/download-artifact@v2
-        id: download
-        with:
-          name: wheels
-          path: ./dist
+  #     - uses: actions/download-artifact@v2
+  #       id: download
+  #       with:
+  #         name: wheels
+  #         path: ./dist
     
-      - name: Publish the source distribution on PyPI
-        run: |
-          SK_VERSION=$(git describe --tags)
-          python setup.py sdist
-          ls -la ${{ github.workspace }}/dist
-          # We prefer to release wheels before source because otherwise there is a
-          # small window during which users who pip install scikit-image will require compilation.
-          twine upload ${{ github.workspace }}/dist/*.whl
-          twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+  #     - name: Publish the source distribution on PyPI
+  #       run: |
+  #         SK_VERSION=$(git describe --tags)
+  #         python setup.py sdist
+  #         ls -la ${{ github.workspace }}/dist
+  #         # We prefer to release wheels before source because otherwise there is a
+  #         # small window during which users who pip install scikit-image will require compilation.
+  #         twine upload ${{ github.workspace }}/dist/*.whl
+  #         twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
+  #       env:
+  #         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+  #         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
               
-      - name: Github release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+  #     - name: Github release
+  #       uses: softprops/action-gh-release@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         GITHUB_REPOSITORY: ${{ github.repository }}
