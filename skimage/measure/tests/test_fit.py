@@ -307,7 +307,8 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
+                                random_state=random_state)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
