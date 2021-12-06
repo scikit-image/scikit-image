@@ -153,7 +153,7 @@ jobs:
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
           CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,--strip-debug,-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
+          LDFLAGS: "-Wl,-S -Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -211,7 +211,8 @@ jobs:
         env:
           CIBW_BUILD: "cp310-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          LDFLAGS: "-Wl,--strip-debug"
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - name: Build Windows wheels for CPython
         run: |
@@ -220,7 +221,8 @@ jobs:
           CIBW_BUILD: "cp3?-*"
           CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          LDFLAGS: "-Wl,--strip-debug"
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - uses: actions/upload-artifact@v2
         with:
