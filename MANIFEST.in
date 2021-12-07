@@ -8,7 +8,8 @@ recursive-include requirements *.txt
 include requirements/README.md
 include Makefile
 include skimage/scripts/skivi
-recursive-include skimage *.pyx *.pxd *.pxi *.h unwrap*.c *.py *.ini *.npy *.txt *.in *.md
+include skimage/restoration/unwrap_*_ljmu.c
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.h *.ini *.npy *.txt *.in *.md
 recursive-include skimage/data *
 recursive-include skimage/*/tests/data *
 

@@ -115,7 +115,7 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
             compile_flags += ['/openmp']
         else:
             compile_flags += ['-fopenmp']
-            link_flags += ['-fopenmp']
+            link_flags += ['-fopenmp', '-Wl,--strip-debug']
 
         if self.can_compile_link(compile_flags, link_flags):
             for ext in self.extensions:
