@@ -116,6 +116,8 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
         else:
             compile_flags += ['-fopenmp']
             link_flags += ['-fopenmp']
+        if 'SKIMAGE_LINK_FLAGS' in os.environ:
+            link_flags += [os.environ['SKIMAGE_LINK_FLAGS']]
 
         if self.can_compile_link(compile_flags, link_flags):
             for ext in self.extensions:
@@ -244,7 +246,7 @@ if __name__ == "__main__":
         extras_require=extras_require,
         python_requires='>=3.8',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
-        include_package_data=True,
+        include_package_data=False,
         zip_safe=False,  # the package can run out of an .egg file
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],

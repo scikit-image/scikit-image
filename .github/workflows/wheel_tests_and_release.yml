@@ -48,6 +48,8 @@ jobs:
           CIBW_SKIP: "*-musllinux_*"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
+          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -88,6 +90,8 @@ jobs:
           CIBW_ARCHS_LINUX: aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
+          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -151,7 +155,7 @@ jobs:
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
           CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
+          LDFLAGS: "-Wl,-S -Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -209,6 +213,8 @@ jobs:
         env:
           CIBW_BUILD: "cp310-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - name: Build Windows wheels for CPython
         run: |
@@ -217,6 +223,8 @@ jobs:
           CIBW_BUILD: "cp3?-*"
           CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -236,13 +244,13 @@ jobs:
         name: Install Python
         with:
           python-version: '3.9'
-      
+
       - name: Install Twine
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements/build.txt
           pip install twine
-      
+
       - uses: actions/download-artifact@v2
         id: download
         with:
