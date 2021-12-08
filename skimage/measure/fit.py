@@ -619,7 +619,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     inlier_ratio = n_inliers / n_samples
     nom = max(_EPSILON, 1 - probability)
     denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
-    return abs(float(np.ceil(np.log(nom) / np.log(denom))))
+    return np.ceil(np.log(nom) / np.log(denom))
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
