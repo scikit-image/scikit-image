@@ -16,7 +16,7 @@ Other Pull Requests
 - Fix two equality comparison bugs in the wheel build script (gh-6098)
 - Backport of gh-6109 (Add linker flags to strip debug symbols during wheel building) (gh-6110)
 - Pin setuptools maximum in v0.19.x to avoid breaking on planned distutils API changes (gh-6112)
-- avoid potential circular import of rgb2gray (gh-6113)
+- Avoid potential circular import of rgb2gray (gh-6113)
 
 
 3 authors added to this release [alphabetical by first name or login]
