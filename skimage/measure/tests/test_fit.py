@@ -342,28 +342,37 @@ def test_ransac_dynamic_max_trials():
 
     # e = 0%, min_samples = X
     assert_equal(_dynamic_max_trials(100, 100, 2, 0.99), 1)
+    assert_equal(_dynamic_max_trials(100, 100, 2, 1), 1)
 
     # e = 5%, min_samples = 2
     assert_equal(_dynamic_max_trials(95, 100, 2, 0.99), 2)
+    assert_equal(_dynamic_max_trials(95, 100, 2, 1), 16)
     # e = 10%, min_samples = 2
     assert_equal(_dynamic_max_trials(90, 100, 2, 0.99), 3)
+    assert_equal(_dynamic_max_trials(90, 100, 2, 1), 22)
     # e = 30%, min_samples = 2
     assert_equal(_dynamic_max_trials(70, 100, 2, 0.99), 7)
+    assert_equal(_dynamic_max_trials(70, 100, 2, 1), 54)
     # e = 50%, min_samples = 2
     assert_equal(_dynamic_max_trials(50, 100, 2, 0.99), 17)
+    assert_equal(_dynamic_max_trials(50, 100, 2, 1),126)
 
     # e = 5%, min_samples = 8
     assert_equal(_dynamic_max_trials(95, 100, 8, 0.99), 5)
+    assert_equal(_dynamic_max_trials(95, 100, 8, 1), 34)
     # e = 10%, min_samples = 8
     assert_equal(_dynamic_max_trials(90, 100, 8, 0.99), 9)
+    assert_equal(_dynamic_max_trials(90, 100, 8, 1), 65)
     # e = 30%, min_samples = 8
     assert_equal(_dynamic_max_trials(70, 100, 8, 0.99), 78)
+    assert_equal(_dynamic_max_trials(70, 100, 8, 1), 608)
     # e = 50%, min_samples = 8
     assert_equal(_dynamic_max_trials(50, 100, 8, 0.99), 1177)
+    assert_equal(_dynamic_max_trials(50, 100, 8, 1), 9210)
 
     # e = 0%, min_samples = 10
     assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
-    assert_equal(_dynamic_max_trials(1, 100, 10, 1), np.inf)
+    assert_equal(_dynamic_max_trials(1, 100, 10, 1), -np.inf)
 
 
 def test_ransac_invalid_input():
