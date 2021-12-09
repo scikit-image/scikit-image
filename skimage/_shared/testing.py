@@ -46,8 +46,10 @@ if _error_on_warnings.lower() == 'true':
 elif _error_on_warnings.lower() == 'false':
     _error_on_warnings = False
 else:
-    _error_on_warnings = bool(int(_error_on_warnings))
-
+    try:
+        _error_on_warnings = bool(int(_error_on_warnings))
+    except ValueError:
+        _error_on_warnings = False
 
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
