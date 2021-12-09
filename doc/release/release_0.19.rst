@@ -1,5 +1,5 @@
-Announcement: scikit-image 0.19.0
-=================================
+scikit-image 0.19.1
+===================
 
 We're happy to announce the release of scikit-image v0.19.01
 
