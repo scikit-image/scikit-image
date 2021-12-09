@@ -355,7 +355,7 @@ def test_ransac_dynamic_max_trials():
     assert_equal(_dynamic_max_trials(70, 100, 2, 1), 54)
     # e = 50%, min_samples = 2
     assert_equal(_dynamic_max_trials(50, 100, 2, 0.99), 17)
-    assert_equal(_dynamic_max_trials(50, 100, 2, 1),126)
+    assert_equal(_dynamic_max_trials(50, 100, 2, 1), 126)
 
     # e = 5%, min_samples = 8
     assert_equal(_dynamic_max_trials(95, 100, 8, 0.99), 5)
