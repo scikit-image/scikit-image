@@ -4,11 +4,11 @@
 # stdlib imports
 import os, sys
 
+from packaging import version as _version
+
 # local imports
 from apigen import ApiDocWriter
 
-# version comparison
-from distutils.version import LooseVersion as V
 
 #*****************************************************************************
 
@@ -36,13 +36,13 @@ if __name__ == '__main__':
     # for older or newer versions if such versions are installed on the system.
 
     # exclude any appended git hash and date
-    installed_version = V(module.__version__.split('+git')[0])
+    installed_version = _version.parse(module.__version__.split('+git')[0])
 
     source_lines = open('../skimage/__init__.py').readlines()
     version = 'vUndefined'
     for l in source_lines:
         if l.startswith('__version__'):
-            source_version = V(l.split("'")[1])
+            source_version = _version.parse(l.split("'")[1])
             break
 
     if source_version != installed_version:

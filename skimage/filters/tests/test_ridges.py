@@ -33,11 +33,13 @@ def test_2d_null_matrix():
 
 def test_3d_null_matrix():
 
-    a_black = np.zeros((3, 3, 3)).astype(np.uint8)
+    # Note: last axis intentionally not size 3 to avoid 2D+RGB autodetection
+    #       warning from an internal call to `skimage.filters.gaussian`.
+    a_black = np.zeros((3, 3, 5)).astype(np.uint8)
     a_white = invert(a_black)
 
-    zeros = np.zeros((3, 3, 3))
-    ones = np.ones((3, 3, 3))
+    zeros = np.zeros((3, 3, 5))
+    ones = np.ones((3, 3, 5))
 
     assert_allclose(meijering(a_black, black_ridges=True), zeros, atol=1e-1)
     assert_allclose(meijering(a_white, black_ridges=False), zeros, atol=1e-1)
@@ -138,7 +140,9 @@ def test_2d_linearity():
 
 def test_3d_linearity():
 
-    a_black = np.ones((3, 3, 3)).astype(np.uint8)
+    # Note: last axis intentionally not size 3 to avoid 2D+RGB autodetection
+    #       warning from an internal call to `skimage.filters.gaussian`.
+    a_black = np.ones((3, 3, 5)).astype(np.uint8)
     a_white = invert(a_black)
 
     assert_allclose(meijering(1 * a_black, black_ridges=True),
@@ -199,11 +203,11 @@ def test_ridge_output_dtype(func, dtype):
 def test_3d_cropped_camera_image():
 
     a_black = crop(camera(), ((200, 212), (100, 312)))
-    a_black = np.dstack([a_black, a_black, a_black])
+    a_black = np.stack([a_black] * 5, axis=-1)
     a_white = invert(a_black)
 
-    zeros = np.zeros((100, 100, 3))
-    ones = np.ones((100, 100, 3))
+    zeros = np.zeros(a_black.shape)
+    ones = np.ones(a_black.shape)
 
     assert_allclose(meijering(a_black, black_ridges=True),
                     meijering(a_white, black_ridges=False))

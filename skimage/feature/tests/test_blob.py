@@ -287,9 +287,7 @@ def test_blob_log_no_warnings():
     xs, ys = disk((7, 6), 2)
     img[xs, ys] = 255
 
-    with pytest.warns(None) as records:
-        blob_log(img, max_sigma=20, num_sigma=10, threshold=.1)
-    assert len(records) == 0
+    blob_log(img, max_sigma=20, num_sigma=10, threshold=.1)
 
 
 def test_blob_log_3d():
