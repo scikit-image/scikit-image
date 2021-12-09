@@ -7,7 +7,7 @@ This is a small bug fix release that resolves a couple of backwards compatibilit
 
 
 Other Pull Requests
-*******************
+-------------------
 - Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) (gh-6115)
 - Backport PR #6097 on branch v0.19.x (restore non-underscore functions in skimage.data) (gh-6099)
 - Backport PR #6095 on branch v0.19.x (Preserve backwards compatibility for `channel_axis` parameter in transform functions) (gh-6100)
