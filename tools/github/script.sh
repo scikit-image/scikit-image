@@ -11,6 +11,11 @@ tools/build_versions.py
 
 TEST_ARGS="--doctest-modules --cov=skimage"
 
+if [[ ${WITHOUT_POOCH} != "0" ]]; then
+  # remove pooch (previously installed via requirements/test.txt)
+  pip uninstall pooch -y
+fi
+
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
 # in there. pytest will crawl that instead of the module we installed and want to test

@@ -140,6 +140,26 @@ else:
     has_pooch = True
 
 
+def _skip_pytest_case_requiring_pooch(data_filename):
+    """If a test case is calling pooch, skip it.
+
+    This running the test suite in environments without internet
+    access, skipping only the tests that try to fetch external data.
+    """
+
+    # Check if pytest is currently running.
+    # Packagers might use pytest to run the tests suite, but may not
+    # want to run it online with pooch as a dependency.
+    # As such, we will avoid failing the test, and silently skipping it.
+    if 'PYTEST_CURRENT_TEST' in os.environ:
+        # https://docs.pytest.org/en/latest/example/simple.html#pytest-current-test-environment-variable  # noqa
+        import pytest
+        # Pytest skip raises an exception that allows the
+        # tests to be skipped
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
+
+
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
@@ -194,6 +214,8 @@ def _fetch(data_filename):
     # Case 3:
     # Pooch not found.
     if image_fetcher is None:
+        _skip_pytest_case_requiring_pooch(data_filename)
+
         raise ModuleNotFoundError(
             "The requested file is part of the scikit-image distribution, "
             "but requires the installation of an optional dependency, pooch. "
@@ -209,6 +231,8 @@ def _fetch(data_filename):
     try:
         resolved_path = image_fetcher.fetch(data_filename)
     except ConnectionError as err:
+        _skip_pytest_case_requiring_pooch(data_filename)
+
         # If we decide in the future to suppress the underlying 'requests'
         # error, change this to `raise ... from None`. See PEP 3134.
         raise ConnectionError(
