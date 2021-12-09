@@ -1,7 +1,7 @@
 scikit-image 0.19.1
 ===================
 
-We're happy to announce the release of scikit-image v0.19.01
+We're happy to announce the release of scikit-image v0.19.1!
 
 This is a small bug fix release that resolves a couple of backwards compatibility issues and a couple of issues with the wheels on PyPI. Specifically, Apple M1 wheels on PyPI were broken in 0.19.0, but should now be repaired. Wheel sizes are also greatly reduced relative to 0.19.0 by stripping debug symbols from the binaries and making sure that Cython-generated source files are not bundled in the wheels.
 
