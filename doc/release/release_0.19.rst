@@ -1,6 +1,40 @@
 Announcement: scikit-image 0.19.0
 =================================
 
+We're happy to announce the release of scikit-image v0.19.01
+
+This is a small bug fix release that resolves a couple of backwards compatibility issues and a couple of issues with the wheels on PyPI. Specifically, Apple M1 wheels on PyPI were broken in 0.19.0, but should now be repaired. Wheel sizes are also greatly reduced relative to 0.19.0 by stripping debug symbols from the binaries and making sure that Cython-generated source files are not bundled in the wheels.
+
+
+Other Pull Requests
+*******************
+- Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) (gh-6115)
+- Backport PR #6097 on branch v0.19.x (restore non-underscore functions in skimage.data) (gh-6099)
+- Backport PR #6095 on branch v0.19.x (Preserve backwards compatibility for `channel_axis` parameter in transform functions) (gh-6100)
+- Backport PR #6103 on branch v0.19.x (make rank filter test comparisons robust across architectures) (gh-6106)
+- Backport PR #6105 on branch v0.19.x (pass a specific random_state into ransac in test_ransac_geometric) (gh-6107)
+- Fix two equality comparison bugs in the wheel build script (gh-6098)
+- Backport of gh-6109 (Add linker flags to strip debug symbols during wheel building) (gh-6110)
+- Pin setuptools maximum in v0.19.x to avoid breaking on planned distutils API changes (gh-6112)
+- avoid potential circular import of rgb2gray (gh-6113)
+
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Gregory R. Lee
+- Joshua Newton
+- Mark Harfouche
+
+3 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Gregory R. Lee
+- Juan Nunez-Iglesias
+- Mark Harfouche
+
+
+Announcement: scikit-image 0.19.0
+=================================
+
 We're happy to announce the release of scikit-image v0.19.0!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms for segmentation, geometric transformations, color space manipulation, analysis, filtering, morphology, feature detection, and more.
