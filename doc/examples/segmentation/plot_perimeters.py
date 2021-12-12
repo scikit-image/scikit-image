@@ -16,7 +16,7 @@ import numpy as np
 
 
 # scale parameter can be used to increase the grid size. The resulting curves
-# should be smoothed with higer scales
+# should be smoothed with higher scales
 scale = 10
 
 # Construct 2 figures, square and disks
@@ -36,7 +36,7 @@ true_perimeters = [80 * scale, 2 * np.pi * R / dX]
 # for each type of objects, the different perimeters are evaluated
 for index, obj in enumerate([square, disk]):
 
-    # 2 neighbourhoud configurations for measure.perimeter
+    # 2 neighborhood configurations for measure.perimeter
     for n in [4, 6]:
         p = []
         angles = range(90)
