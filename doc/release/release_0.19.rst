@@ -17,7 +17,7 @@ Pull Requests Included
 - Backport of gh-6109 (Add linker flags to strip debug symbols during wheel building) (gh-6110)
 - Pin setuptools maximum in v0.19.x to avoid breaking on planned distutils API changes (gh-6112)
 - Avoid potential circular import of rgb2gray (gh-6113)
-- Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) gh-6115
+- Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) (gh-6115)
 - Backport PR #6118 on branch v0.19.x (Fixes to tests.yml and fixes for expected warnings) (gh-6127)
 - Backport PR #6114 on branch v0.19.x (relax test condition to make it more robust to variable CI load) (gh-6128)
 
