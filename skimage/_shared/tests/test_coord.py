@@ -75,7 +75,11 @@ def test_max_batch_size():
                    max_split_size=20000)
     dur2 = time.time() - tstart
 
-    assert dur1 < dur2
+    # Originally checked dur1 < dur2 to assert that the default batch size was
+    # faster than a much larger batch size. However, on rare occasion a CI test
+    # case would fail with dur1 ~5% larger than dur2. To be more robust to
+    # variable load or differences across architectures, we relax this here.
+    assert dur1 < 1.33 * dur2
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
