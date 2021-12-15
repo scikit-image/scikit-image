@@ -541,6 +541,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
         denoised_wrong_multichannel, channel_axis, -1
     )
 
+    img = img.astype(denoised_wrong_multichannel.dtype)
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert psnr_ok > psnr_wrong
