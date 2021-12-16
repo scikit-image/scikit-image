@@ -13,7 +13,7 @@ from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
-           'reshape_nd', 'identity', 'slice_at_axis']
+           'reshape_nd', 'identity', 'slice_at_axis', 'get_namespace']
 
 
 class skimage_deprecation(Warning):
@@ -752,3 +752,14 @@ def _supported_float_type(input_dtype, allow_complex=False):
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
     return image
+
+
+def get_namespace(x):
+    """Determine the array module based on x
+
+    Notes
+    -----
+    Could extend to multiple arguments as in the example in
+    https://numpy.org/neps/nep-0047-array-api-standard.html
+    """
+    return x.__array_namespace__() if hasattr(x, '__array_namespace__') else np
