@@ -103,7 +103,7 @@ def test_normalized_cross_correlation_mask():
 
 def test_phase_cross_correlation_masked():
     # Normalized cross_correlation of random arrays
-    # should be zero (or about 0)
+    # should be (close to) zero.
     np.random.seed(9001)
     x = np.random.random((100, 100))
     x[20:25, 20:25] = 1
