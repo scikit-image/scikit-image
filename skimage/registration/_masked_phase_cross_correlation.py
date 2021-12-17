@@ -67,15 +67,14 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
         if reference_image.shape != moving_image.shape:
             raise ValueError(
                 "Input images have different shapes, moving_mask must "
-                "be explicitely set.")
+                "be explicitly set.")
         moving_mask = reference_mask.astype(bool)
 
-    # We need masks to be of the same size as their respective images
     for (im, mask) in [(reference_image, reference_mask),
                        (moving_image, moving_mask)]:
         if im.shape != mask.shape:
             raise ValueError(
-                "Image sizes must match their respective mask sizes.")
+                "Image shapes must match their respective mask shapes.")
 
     xcorr = cross_correlate_masked(moving_image, reference_image,
                                    moving_mask, reference_mask,
@@ -98,16 +97,15 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
 
 def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
                            overlap_ratio=0.3):
-    """
-    Masked normalized cross-correlation between arrays.
+    """Return the normalized cross-correlation between two masked arrays.
 
     Parameters
     ----------
     arr1 : ndarray
         First array.
     arr2 : ndarray
-        Seconds array. The dimensions of `arr2` along axes that are not
-        transformed should be equal to that of `arr1`.
+        Second array. The dimensions of `arr2` along axes that are not
+        transformed should be equal to those of `arr1`.
     m1 : ndarray
         Mask of `arr1`. The mask should evaluate to `True`
         (or 1) on valid pixels. `m1` should have the same shape as `arr1`.
@@ -121,16 +119,17 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
             completely, and boundary effects may be seen.
         'same':
             The output is the same size as `arr1`, centered with respect
-            to the `‘full’` output. Boundary effects are less prominent.
+            to the `'full'` output. Boundary effects are less prominent.
     axes : tuple of ints, optional
         Axes along which to compute the cross-correlation.
     overlap_ratio : float, optional
-        Minimum allowed overlap ratio between images. The correlation for
-        translations corresponding with an overlap ratio lower than this
+        Minimum allowed overlap ratio between the two arrays. The 
+        correlation for translations corresponding with an overlap ratio 
+        lower than this
         threshold will be ignored. A lower `overlap_ratio` leads to smaller
         maximum translation, while a higher `overlap_ratio` leads to greater
         robustness against spurious matches due to small overlap between
-        masked images.
+        masked arrays.
 
     Returns
     -------
@@ -146,7 +145,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     ----------
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
            IEEE Transactions on Image Processing, vol. 21(5),
-           pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
+           pp. 2706-2718 (2012). 
+           :DOI:`10.1109/TIP.2011.2181402`
     .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
@@ -205,7 +205,8 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0
 
-    # N-dimensional analog to rotation by 180deg is flip over all relevant axes.
+    # N-dimensional analog to rotation by 180deg is flip over all
+    # relevant axes.
     # See [1] for discussion.
     rotated_moving_image = _flip(moving_image, axes=axes)
     rotated_moving_mask = _flip(moving_mask, axes=axes)

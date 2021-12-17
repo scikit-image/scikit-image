@@ -161,10 +161,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
         robustness against spurious matches due to small overlap between
         masked images. Used only if one of ``reference_mask`` or
         ``moving_mask`` is None.
-    normalization : {"phase", None}
-        The type of normalization to apply to the cross-correlation. This
-        parameter is unused when masks (`reference_mask` and `moving_mask`) are
-        supplied.
+    normalization : {"phase","normalized", None}
+        The type of normalization to apply to the cross-correlation.
 
     Returns
     -------
