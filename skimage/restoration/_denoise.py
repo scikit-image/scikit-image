@@ -278,8 +278,8 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
     weight : float
         Denoising weight. The smaller the `weight`, the more denoising (at
         the expense of less similarity to the `input`). (i.e. smaller weights
-        lead to more smoothing). The regularization parameter `lambda` is chosen
-        as `2 * weight`.
+        lead to more smoothing). The regularization parameter `lambda` is
+        chosen as `2 * weight`.
     eps : float, optional
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when::
@@ -362,7 +362,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
         the expense of fidelity to `input`). (i.e. larger weights lead
-        to more smoothing). 
+        to more smoothing).
     eps : float, optional
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when:
@@ -448,7 +448,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     weight : float, optional
         Denoising weight. The greater `weight`, the more denoising (at
         the expense of fidelity to `input`). (i.e. larger weights lead
-        to more smoothing). 
+        to more smoothing).
     eps : float, optional
         Relative difference of the value of the cost function that
         determines the stop criterion. The algorithm stops when:
