@@ -29,7 +29,7 @@ installed. You can create an environment from scratch using.
 
 
 ############################
-# Import pacakges
+# Import packages
 # ==========================
 
 
