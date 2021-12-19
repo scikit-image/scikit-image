@@ -184,3 +184,6 @@ pn.template.FastListTemplate(
 # can also install the jupyterlab preview for hot reload inside Jupyter
 # Lab during development. See
 # https://blog.holoviz.org/panel_0.12.0.html#JupyterLab-previews
+# 
+# For more inspiration checkout `Panel <https://panel.holoviz.org>`_ and 
+# `awesome-panel.org <https://awesome-panel.org>`_
