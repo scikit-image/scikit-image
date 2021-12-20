@@ -1,6 +1,6 @@
 """
 =======================================
-Interactive Tools and Apps with HoloViz
+Explore and annotate image data interactively with with HoloViz
 =======================================
 
 This tutorial shows how to build interactive dashboards and applications
