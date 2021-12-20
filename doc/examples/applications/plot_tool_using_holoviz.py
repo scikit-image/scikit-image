@@ -3,7 +3,8 @@
 Interactive Tools and Apps with HoloViz
 =======================================
 
-This tutorial shows how to build interactive tools and applications
+This tutorial shows how to build interactive dashboards and applications
+
 using `Panel <https://panel.holoviz.org>`_, `HoloViews <https://holoviews.org>`_ you can use to make you and your teams
 analysis more interactive and powerful.
 
