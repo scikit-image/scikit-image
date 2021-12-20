@@ -5,8 +5,8 @@ Explore and annotate image data interactively with with HoloViz
 
 This tutorial shows how to build interactive dashboards and applications
 
-using `Panel <https://panel.holoviz.org>`_, `HoloViews <https://holoviews.org>`_ you can use to make you and your teams
-analysis more interactive and powerful.
+using `Panel <https://panel.holoviz.org>`_ and `HoloViews <https://holoviews.org>`_.
+These tools can make your analyses more interactive and, hence, powerful.
 
 .. figure:: https://user-images.githubusercontent.com/42288570/146666639-02f0106f-a3e2-4306-9033-707554e4e61e.gif
    :alt: Screencast showcasing the example application.
