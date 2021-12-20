@@ -9,7 +9,7 @@ using `Panel <https://panel.holoviz.org>`_, `HoloViews <https://holoviews.org>`_
 analysis more interactive and powerful.
 
 .. figure:: https://user-images.githubusercontent.com/42288570/146666639-02f0106f-a3e2-4306-9033-707554e4e61e.gif
-   :alt: A video showcasing the application
+   :alt: Screencast showcasing the example application.
 
    Screencast showcasing the example application.
 
