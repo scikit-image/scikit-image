@@ -10,7 +10,8 @@ analysis more interactive and powerful.
 .. figure:: https://user-images.githubusercontent.com/42288570/146666639-02f0106f-a3e2-4306-9033-707554e4e61e.gif
    :alt: A video showcasing the application
 
-   A video showcasing the application
+   Screencast showcasing the example application.
+
 
 You can develop using notebooks or .py files. You can use it with a very
 broad range of Pythons Viz. You can use the tools in a notebook, your editor/ IDE or
