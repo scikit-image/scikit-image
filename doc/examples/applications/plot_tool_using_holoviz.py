@@ -43,6 +43,7 @@ from skimage import data, filters
 
 #############################################
 # Activate the Panel and HoloViews extensions
+# ==================================
 
 
 pn.extension(sizing_mode="fixed")
