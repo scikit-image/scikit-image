@@ -4,7 +4,10 @@ Explore and annotate image data interactively with with HoloViz
 ===============================================================
 
 In this tutorial, we build interactive tools and an application using `Panel <https://panel.holoviz.org>`_ and 
-`HoloViews <https://holoviews.org>`_.
+`HoloViews <https://holoviews.org>`_. 
+
+We will build an application based on the Sobel algorithm to interactively find a great 
+color map for the visualization. We will add some nice features, like a download button, to make sharing your findings easier.
 
 These techniques can make your analyses more interactive and, hence, powerful.
 
@@ -61,7 +64,7 @@ hv.Image(image, bounds=bounds).opts(
 )
 
 ##########################################
-# Find the Edges Using the Sobel Algorithm
+# Find the edges using the Sobel algorithm
 
 edges = filters.sobel(image) * 256
 
@@ -75,10 +78,10 @@ hv.Image(edges, bounds=bounds).opts(
 )
 
 
-##################################
-# Make an Color Maps Select Widget
-# ================================
-# Let us create a *color map selection* widget.
+#################################
+# Make a color map select widget
+# ===============================
+# Let us create a widget for selecting a color map.
 
 cmaps = [cmap for cmap in hv.plotting.list_cmaps() if (cmap.endswith("_r") and cmap.islower())]
 cmap = pn.widgets.Select(
@@ -86,8 +89,8 @@ cmap = pn.widgets.Select(
 )
 cmap
 
-###############################################
-# Then we can define the two interactive images
+####################################################
+# Let us also define a *before* and an *after* image
 
 before_img = hv.Image(image, bounds=bounds).apply.opts(
     cmap=cmap, responsive=True, title="Before", active_tools=["box_zoom"], tools=["hover"]
@@ -109,7 +112,7 @@ layout = pn.Column(cmap, plots, sizing_mode="stretch_both")
 layout
 
 ##############################
-# Make a Download Image Button
+# Make a download image button
 # ============================
 
 download = pn.widgets.FileDownload(
@@ -148,7 +151,7 @@ layout.append(download)
 
 
 #################################
-# Wrap it Up as A Web Application
+# Wrap it up as a web application
 # ===============================
 # We include the value of the color map in the url to make it easy to share a link with colleagues
 
