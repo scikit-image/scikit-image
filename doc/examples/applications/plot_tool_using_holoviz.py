@@ -1,12 +1,12 @@
 """
-=======================================
+===============================================================
 Explore and annotate image data interactively with with HoloViz
-=======================================
+===============================================================
 
-This tutorial shows how to build interactive dashboards and applications
+In this tutorial, we build interactive tools and an application using `Panel <https://panel.holoviz.org>`_ and 
+`HoloViews <https://holoviews.org>`_.
 
-using `Panel <https://panel.holoviz.org>`_ and `HoloViews <https://holoviews.org>`_.
-These tools can make your analyses more interactive and, hence, powerful.
+These techniques can make your analyses more interactive and, hence, powerful.
 
 .. figure:: https://user-images.githubusercontent.com/42288570/146666639-02f0106f-a3e2-4306-9033-707554e4e61e.gif
    :alt: Screencast showcasing the example application.
@@ -30,28 +30,18 @@ installed. You can create an environment from scratch using.
 """
 
 
-############################
-# Import packages
-# ==========================
-
-
 from io import BytesIO
 
 import holoviews as hv
 import panel as pn
 from skimage import data, filters
 
-#############################################
-# Activate the Panel and HoloViews extensions
-# ==================================
-
-
 pn.extension(sizing_mode="fixed")
 hv.extension("bokeh")
 
 
-##############################
-# Start With an Image of Coins
+#######################################
+# Load an image of coins and display it
 
 image = data.coins()
 bounds = (-1, -1, 1, 1)
@@ -85,11 +75,10 @@ hv.Image(edges, bounds=bounds).opts(
 )
 
 
-#############################################################
-# We Make an Interactive Tool to Try Out Different Color Maps
-# ===========================================================
-#
-# First we create the *color map selection* widget.
+##################################
+# Make an Color Maps Select Widget
+# ================================
+# Let us create a *color map selection* widget.
 
 cmaps = [cmap for cmap in hv.plotting.list_cmaps() if (cmap.endswith("_r") and cmap.islower())]
 cmap = pn.widgets.Select(
@@ -97,8 +86,8 @@ cmap = pn.widgets.Select(
 )
 cmap
 
-###########################################
-# Then we define the two interactive images
+###############################################
+# Then we can define the two interactive images
 
 before_img = hv.Image(image, bounds=bounds).apply.opts(
     cmap=cmap, responsive=True, title="Before", active_tools=["box_zoom"], tools=["hover"]
@@ -112,24 +101,24 @@ after_img = hv.Image(edges, bounds=bounds).apply.opts(
 )
 
 
-############################
-# Finally we layout the tool
+################################
+# Finally we can layout the tool
 
 plots = pn.panel((before_img + after_img), sizing_mode="scale_both", aspect_ratio=aspect_ratio * 2)
 layout = pn.Column(cmap, plots, sizing_mode="stretch_both")
 layout
 
-#################################
-# We Make a Download Image Button
-# ===============================
+##############################
+# Make a Download Image Button
+# ============================
 
 download = pn.widgets.FileDownload(
     filename="after.png", label="Download .png", button_type="success", sizing_mode="stretch_width"
 )
 download
 
-####################################
-# and define the *download callback*
+######################################
+# Lets us define a *download callback*
 
 
 def callback():
@@ -158,13 +147,10 @@ download.callback = callback
 layout.append(download)
 
 
-####################################
-# We Wrap it Up as A Web Application
-# ==================================
+#################################
+# Wrap it Up as A Web Application
+# ===============================
 # We include the value of the color map in the url to make it easy to share a link with colleagues
-
-###########################################################
-# We sync the browser url arguments to the color map widget
 
 if pn.state.location:
     pn.state.location.sync(cmap, {"value": "cmap"})
