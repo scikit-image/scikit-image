@@ -10,7 +10,7 @@ from ._nl_means_denoising import (_nl_means_denoising_2d,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=4)
+@utils.deprecate_multichannel_kwarg(multichannel_position=4, extra_stacklevel=1)
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
                      preserve_range=False, channel_axis=None):

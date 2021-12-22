@@ -22,7 +22,7 @@ def _match_cumulative_cdf(source, template):
 
 
 @utils.channel_as_last_axis(channel_arg_positions=(0, 1))
-@utils.deprecate_multichannel_kwarg()
+@utils.deprecate_multichannel_kwarg(extra_stacklevel=1)
 def match_histograms(image, reference, *, channel_axis=None,
                      multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.

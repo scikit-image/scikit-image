@@ -48,7 +48,7 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=5)
+@utils.deprecate_multichannel_kwarg(multichannel_position=5, extra_stacklevel=1)
 def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
                multichannel=False, func_kw={}, *, channel_axis=-1):
     """Cycle spinning (repeatedly apply func to shifted versions of x).

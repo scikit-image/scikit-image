@@ -190,7 +190,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=2)
+@utils.deprecate_multichannel_kwarg(multichannel_position=2, extra_stacklevel=1)
 def inpaint_biharmonic(image, mask, multichannel=False, *,
                        split_into_regions=False, channel_axis=None):
     """Inpaint masked points in image with biharmonic equations.

@@ -101,7 +101,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=6)
+@utils.deprecate_multichannel_kwarg(multichannel_position=6, extra_stacklevel=1)
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
                    preserve_range=False, *, channel_axis=None):
@@ -172,7 +172,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=7)
+@utils.deprecate_multichannel_kwarg(multichannel_position=7, extra_stacklevel=1)
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                      mode='reflect', cval=0, multichannel=False,
                      preserve_range=False, *, channel_axis=-1):

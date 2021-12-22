@@ -237,7 +237,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg(multichannel_position=7)
+@deprecate_multichannel_kwarg(multichannel_position=7, extra_stacklevel=1)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
@@ -1049,7 +1049,7 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg()
+@deprecate_multichannel_kwarg(extra_stacklevel=1)
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
                scaling='linear', multichannel=False, channel_axis=None,
                **kwargs):

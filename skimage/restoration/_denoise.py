@@ -93,7 +93,7 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=7)
+@utils.deprecate_multichannel_kwarg(multichannel_position=7, extra_stacklevel=1)
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       bins=10000, mode='constant', cval=0, multichannel=False,
                       *, channel_axis=None):
@@ -258,9 +258,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg()
+@utils.deprecate_multichannel_kwarg(extra_stacklevel=1)
 @utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19")
+                       deprecated_version="0.19", extra_stacklevel=1)
 def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
                        isotropic=True, *, channel_axis=None,
                        multichannel=False):
@@ -432,7 +432,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     return out
 
 
-@utils.deprecate_multichannel_kwarg(multichannel_position=4)
+@utils.deprecate_multichannel_kwarg(multichannel_position=4, extra_stacklevel=1)
 def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
                          multichannel=False, *, channel_axis=None):
     """Perform total-variation denoising on n-dimensional images.
@@ -751,7 +751,7 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=5)
+@utils.deprecate_multichannel_kwarg(multichannel_position=5, extra_stacklevel=1)
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink',
@@ -933,7 +933,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     return out
 
 
-@utils.deprecate_multichannel_kwarg(multichannel_position=2)
+@utils.deprecate_multichannel_kwarg(multichannel_position=2, extra_stacklevel=1)
 def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
                    channel_axis=None):
     """

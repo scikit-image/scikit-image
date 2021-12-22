@@ -46,7 +46,7 @@ def _hog_channel_gradient(channel):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=8)
+@utils.deprecate_multichannel_kwarg(multichannel_position=8, extra_stacklevel=1)
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm='L2-Hys', visualize=False, transform_sqrt=False,
         feature_vector=True, multichannel=None, *, channel_axis=None):

@@ -208,7 +208,7 @@ class deprecate_kwarg:
                                 "for `{func_name}`. ")
             if removed_version is not None:
                 self.warning_msg += (f'It will be removed in '
-                                     f'version {removed_version}.')
+                                     f'version {removed_version}. ')
             self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
@@ -249,13 +249,14 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
     """
 
-    def __init__(self, removed_version='1.0', multichannel_position=None):
+    def __init__(self, removed_version='1.0', multichannel_position=None, extra_stacklevel=0):
         super().__init__(
             kwarg_mapping={'multichannel': 'channel_axis'},
             deprecated_version='0.19',
             warning_msg=None,
             removed_version=removed_version)
         self.position = multichannel_position
+        self.extra_stacklevel = extra_stacklevel
 
     def __call__(self, func):
         @functools.wraps(func)
@@ -269,7 +270,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 )
                 warnings.warn(warning_msg.format(func_name=func.__name__),
                               FutureWarning,
-                              stacklevel=2)
+                              stacklevel=2+self.extra_stacklevel)
                 if 'channel_axis' in kwargs:
                     raise ValueError(
                         "Cannot provide both a `channel_axis` kwarg and a "
@@ -283,7 +284,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 #  warn that the function interface has changed:
                 warnings.warn(self.warning_msg.format(
                     old_arg='multichannel', func_name=func.__name__,
-                    new_arg='channel_axis'), FutureWarning, stacklevel=2)
+                    new_arg='channel_axis'), FutureWarning, stacklevel=2+self.extra_stacklevel)
 
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
@@ -344,7 +345,7 @@ class channel_as_last_axis():
                 channel_axis = (channel_axis,)
             if len(channel_axis) > 1:
                 raise ValueError(
-                    "only a single channel axis is currently suported")
+                    "only a single channel axis is currently supported")
 
             if channel_axis == (-1,) or channel_axis == -1:
                 return func(*args, **kwargs)
