@@ -261,9 +261,9 @@ def setup_test():
             module='skimage.io'
         )
 
-        # match both "Viewer requires Qt" and "Viewer requires matplotlib"
+        # match both "viewer requires Qt" and "viewer requires matplotlib"
         warnings.filterwarnings(
-            'default', message='Viewer requires ', category=UserWarning
+            'default', message='viewer requires ', category=UserWarning
         )
 
         # ignore warning from cycle_spin about Dask not being installed
