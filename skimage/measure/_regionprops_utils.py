@@ -142,8 +142,8 @@ def euler_number(image, connectivity=None, axes=None):
     """
 
     image_axes = np.asarray(axes) if axes is not None else None
-    coord_axes = np.array([i for i in range(image.ndim) if i not in image_axes]) if image_axes is not None else None
     dims = image_axes.size if image_axes is not None else image.ndim
+    coord_dims = image.ndim - dims
     assert dims in [2, 3]
 
     # as image can be a label image, transform it to binary
@@ -185,9 +185,9 @@ def euler_number(image, connectivity=None, axes=None):
     XF_flat = flatten_along_axes(XF, axes=image_axes)
 
     bin_edges = np.arange(0, bins+0.1, 1)
-    h = xh.histogram(XF_flat, bins=bin_edges, axis=-1)[0]
+    h = histogram_along_axes(XF_flat, bins=bin_edges, axes=-1 if coord_dims else None)
 
-    coord_frame = [1 for i in range(coord_axes.size)] if coord_axes is not None else []
+    coord_frame = [1 for i in range(coord_dims)]
     if dims == 2:
         return (coefs.reshape(*coord_frame, -1) * h).sum(axis=-1)
     else:
@@ -222,6 +222,12 @@ def flatten_along_axes(arr, axes=None):
     arr_flat = np.transpose(arr, axes=np.hstack([coord_axes, image_axes]))
     arr_flat = arr_flat.reshape(*([sh for i, sh in enumerate(arr.shape) if i in coord_axes] + [-1]))
     return arr_flat
+
+
+def histogram_along_axes(arr, bins=None, axes=None):
+    if axes is None:
+        return np.histogram(arr, bins=bins)[0]
+    return xh.histogram(arr, bins=bins, axis=axes)[0]
 
 
 def perimeter(image, neighbourhood=4):
