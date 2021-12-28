@@ -1,6 +1,8 @@
 from math import sqrt
 import numpy as np
 from scipy import ndimage as ndi
+import xarray as xr
+import xhistogram.xarray as xh
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -19,8 +21,8 @@ STREL_8 = np.ones((3, 3), dtype=np.uint8)
 # LUT. Computing the Euler number from the addition of the contributions of
 # local configurations is possible thanks to an integral geometry formula
 # (see the paper by Ohser et al. for more details).
-EULER_COEFS2D_4 = [0, 1, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0]
-EULER_COEFS2D_8 = [0, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, -1, 0]
+EULER_COEFS2D_4 = np.array([0, 1, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0])
+EULER_COEFS2D_8 = np.array([0, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, -1, 0])
 EULER_COEFS3D_26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
                             1, -2, 0, -1, 0, -1, -1, 0,
                             1, 0, -2, -1, -2, -1, -1, -2,
@@ -55,7 +57,7 @@ EULER_COEFS3D_26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
                             -1, 2, 0, 1, 0, 1, 1, 0, ])
 
 
-def euler_number(image, connectivity=None):
+def euler_number(image, connectivity=None, axes=None):
     """Calculate the Euler characteristic in binary image.
 
     For 2D objects, the Euler number is the number of objects minus the number
@@ -77,6 +79,9 @@ def euler_number(image, connectivity=None):
         respectively).
         6 or 26 neighborhoods are defined for 3D images, (connectivity 1 and 3,
         respectively). Connectivity 2 is not defined.
+    axes: List[int], optional
+        list of axes along which the image bits are stored. These axes will be removed,
+        and euler number will be computed for each image enumerated by the rest of axes.
 
     Returns
     -------
@@ -137,9 +142,14 @@ def euler_number(image, connectivity=None):
     2
     """
 
+    image_axes = np.asarray(axes) if axes is not None else None
+    coord_axes = np.array([i for i in range(image.ndim) if i not in image_axes]) if image_axes is not None else None
+    dims = image_axes.size if image_axes is not None else image.ndim
+    assert dims in [2, 3]
+
     # as image can be a label image, transform it to binary
     image = (image > 0).astype(int)
-    image = np.pad(image, pad_width=1, mode='constant')
+    image = pad_along_axes(image, axes=image_axes)
 
     # check connectivity
     if connectivity is None:
@@ -148,8 +158,7 @@ def euler_number(image, connectivity=None):
     # config variable is an adjacency configuration. A coefficient given by
     # variable coefs is attributed to each configuration in order to get
     # the Euler characteristic.
-    if image.ndim == 2:
-
+    if dims == 2:
         config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
         if connectivity == 1:
             coefs = EULER_COEFS2D_4
@@ -161,7 +170,6 @@ def euler_number(image, connectivity=None):
             raise NotImplementedError(
                     'For 3D images, Euler number is implemented '
                     'for connectivities 1 and 3 only')
-
         config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                            [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
                            [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
@@ -174,13 +182,53 @@ def euler_number(image, connectivity=None):
     # XF has values in the 0-255 range in 3D, and in the 0-15 range in 2D,
     # with one unique value for each binary configuration of the
     # 27-voxel cube in 3D / 8-pixel square in 2D, up to symmetries
-    XF = ndi.convolve(image, config, mode='constant', cval=0)
-    h = np.bincount(XF.ravel(), minlength=bins)
+    XF = convolve_along_axes(image, config, image_axes, mode='constant', cval=0)
+    XF_flat = flatten_along_axes(XF, axes=image_axes)
 
-    if image.ndim == 2:
-        return coefs @ h
+    bin_edges = np.arange(0, bins+0.1, 1)
+    h = histogram_along_axes(XF_flat, bins=bin_edges, dim=[f"dim_{XF_flat.ndim-1}"])
+
+    coord_frame = [1 for i in range(coord_axes.size)] if coord_axes is not None else []
+    if dims == 2:
+        return (coefs.reshape(*coord_frame, -1) * h).sum(axis=-1)
     else:
-        return int(0.125 * coefs @ h)
+        return (0.125 * (coefs.reshape(*coord_frame, -1) * h).sum(axis=-1)).astype(int)
+
+
+def pad_along_axes(arr, axes):
+    pad_width = 1
+    if axes is not None:
+        pad_width = [(1, 1) if i in axes else (0, 0) for i in range(arr.ndim)]
+    arr = np.pad(arr, pad_width=pad_width, mode='constant')
+    return arr
+
+
+def convolve_along_axes(arr, kernel, axes, **kwargs):
+    if axes is None:
+        return ndi.convolve(arr, kernel, **kwargs)
+    new_shape = list(kernel.shape)
+    for axis in range(arr.ndim):
+        if axis in axes:
+            continue
+        new_shape.insert(axis, 1)
+    aug_kernel = kernel.reshape(new_shape)
+    return ndi.convolve(arr, aug_kernel, **kwargs)
+
+
+def flatten_along_axes(arr, axes=None):
+    if axes is None:
+        return arr.ravel()
+    image_axes = np.asarray(axes)
+    coord_axes = np.array([i for i in range(arr.ndim) if i not in image_axes])
+    arr_flat = np.transpose(arr, axes=np.hstack([coord_axes, image_axes]))
+    arr_flat = arr_flat.reshape(*([sh for i, sh in enumerate(arr.shape) if i in coord_axes] + [-1]))
+    return arr_flat
+
+
+def histogram_along_axes(arr, dim=None, bins=None):
+    xarr = xr.DataArray(arr, name="tmp")
+    xhist = xh.histogram(xarr, dim=dim, bins=bins)
+    return xhist.data
 
 
 def perimeter(image, neighbourhood=4):

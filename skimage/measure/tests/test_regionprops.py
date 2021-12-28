@@ -256,9 +256,26 @@ def test_euler_number():
     en = euler_number(SAMPLE_3D_2, 3)
     assert en == 1
 
-    SAMPLE_3D_2[45:55, 45:55, 45:55] = 0
-    en = euler_number(SAMPLE_3D_2, 3)
+    SAMPLE_3D_3 = SAMPLE_3D_2.copy()
+    SAMPLE_3D_3[45:55, 45:55, 45:55] = 0
+    en = euler_number(SAMPLE_3D_3, 3)
     assert en == 2
+
+    two_samples = np.array([SAMPLE, SAMPLE_mod])
+    en = euler_number(two_samples, 1, axes=[1, 2])
+    assert not np.any(en - np.array([2, 1]))
+
+    two_samples = np.array([SAMPLE, SAMPLE_mod]).T
+    en = euler_number(two_samples, 1, axes=[0, 1])
+    assert not np.any(en - np.array([2, 1]))
+
+    two_samples_3D = np.array([SAMPLE_3D_2, SAMPLE_3D_3])
+    en = euler_number(two_samples_3D, 1, axes=[1, 2, 3])
+    assert not np.any(en - np.array([1, 2]))
+
+    two_samples_3D = np.array([SAMPLE_3D_2, SAMPLE_3D_3]).T
+    en = euler_number(two_samples_3D, 1, axes=[0, 1, 2])
+    assert not np.any(en - np.array([1, 2]))
 
 
 def test_extent():
