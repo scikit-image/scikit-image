@@ -1,8 +1,7 @@
 from math import sqrt
 import numpy as np
 from scipy import ndimage as ndi
-import xarray as xr
-import xhistogram.xarray as xh
+import xhistogram.core as xh
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -186,7 +185,7 @@ def euler_number(image, connectivity=None, axes=None):
     XF_flat = flatten_along_axes(XF, axes=image_axes)
 
     bin_edges = np.arange(0, bins+0.1, 1)
-    h = histogram_along_axes(XF_flat, bins=bin_edges, dim=[f"dim_{XF_flat.ndim-1}"])
+    h = xh.histogram(XF_flat, bins=bin_edges, axis=-1)[0]
 
     coord_frame = [1 for i in range(coord_axes.size)] if coord_axes is not None else []
     if dims == 2:
@@ -223,12 +222,6 @@ def flatten_along_axes(arr, axes=None):
     arr_flat = np.transpose(arr, axes=np.hstack([coord_axes, image_axes]))
     arr_flat = arr_flat.reshape(*([sh for i, sh in enumerate(arr.shape) if i in coord_axes] + [-1]))
     return arr_flat
-
-
-def histogram_along_axes(arr, dim=None, bins=None):
-    xarr = xr.DataArray(arr, name="tmp")
-    xhist = xh.histogram(xarr, dim=dim, bins=bins)
-    return xhist.data
 
 
 def perimeter(image, neighbourhood=4):
