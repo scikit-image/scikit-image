@@ -185,7 +185,6 @@ def test_build_laplacian_pyramid_nd():
         pyramid = pyramids.pyramid_laplacian(img, downscale=2,
                                              channel_axis=None)
         for layer, out in enumerate(pyramid):
-            print(out.shape)
             layer_shape = original_shape / 2 ** layer
             assert_array_equal(out.shape, layer_shape)
 
