@@ -138,8 +138,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     return A_elems
 
 
-def hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
-                                 order='rc'):
+def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
+                                  order='rc'):
     """Compute the Hessian matrix using convolutions with Gaussian derivatives.
 
     In 2D, the Hessian matrix is defined as:
@@ -202,7 +202,7 @@ def hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     # deriv_step{1/2}[::-1] thus in reverse order, because the image
     # will be in coordinates [(z,)y,x], but we need the Hessian in
     # order [d^2/dx^2, d^2/(dx*dy), ...], so in reverse order.
-    for deriv_dirs in itertools.combinations_with_replacement(idx, 2):
+    for deriv_dirs in combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
         deriv_step1 = 1 * (idx == deriv_dirs[0])
