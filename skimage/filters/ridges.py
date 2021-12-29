@@ -107,7 +107,8 @@ def _check_sigmas(sigmas):
                          'than zero.')
     return sigmas
 
-def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0,
+
+def hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
                                  order='rc'):
     """Compute the Hessian matrix using convolutions with Gaussian derivatives.
     In 2D, the Hessian matrix is defined as:
@@ -146,10 +147,10 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0,
         input image. In 2D, this will be a three element list containing [Hrr,
         Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
     --------
-    >>> from skimage.filters.ridges import hessian_matrix_with_Gaussian
+    >>> from skimage.filters.ridges import hessian_matrix_with_gaussian
     >>> square = np.zeros((30, 30))
     >>> square[15, 15] = 1
-    >>> Hrr, Hrc, Hcc = hessian_matrix_with_Gaussian(square, sigma=1)
+    >>> Hrr, Hrc, Hcc = hessian_matrix_with_gaussian(square, sigma=1)
     >>> import matplotlib.pyplot as plt
     >>> plt.imshow(Hcc)
     >>> plt.colorbar()
@@ -203,7 +204,7 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0,
             # direction. Hence, we reverse the list order.
 
         # Apply two successive Gaussian filter operations, as per detailed in
-        # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
+        # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct   # noqa
         if np.all(np.array(sigma)>1):
             H_elems.append(
                 ndi.gaussian_filter(
@@ -239,7 +240,7 @@ def hessian_matrix_with_Gaussian(image, sigma=1, mode='reflect', cval=0,
 
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
-                                use_Gaussian_derivatives=False):
+                                use_gaussian_derivatives=False):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -261,7 +262,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    use_Gaussian_derivatives : boolean, optional
+    use_gaussian_derivatives : boolean, optional
         Indicates whether the Hessian is computed by convolving with Gaussian
         derivatives, or by an FD operation.
 
@@ -280,8 +281,8 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
-    if use_Gaussian_derivatives:
-        hessian_elements = hessian_matrix_with_Gaussian(image, sigma=sigma,
+    if use_gaussian_derivatives:
+        hessian_elements = hessian_matrix_with_gaussian(image, sigma=sigma,
                                                         order='rc', mode=mode,
                                                         cval=cval)
     else:
@@ -309,7 +310,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
 
 def meijering(image, sigmas=range(1, 10, 2), alpha=-1/3,
               black_ridges=True, mode='reflect', cval=0,
-              use_Gaussian_derivatives=True):
+              use_gaussian_derivatives=True):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -379,9 +380,10 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1/3,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
-                            mode=mode, cval=cval,
-                            use_Gaussian_derivatives=use_Gaussian_derivatives)
+        eigenvalues = compute_hessian_eigenvalues(
+            image, sigma, sorting='abs', mode=mode, cval=cval,
+            use_gaussian_derivatives=use_gaussian_derivatives
+        )
 
         if ndim > 1:
 
