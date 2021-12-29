@@ -46,8 +46,10 @@ if _error_on_warnings.lower() == 'true':
 elif _error_on_warnings.lower() == 'false':
     _error_on_warnings = False
 else:
-    _error_on_warnings = bool(int(_error_on_warnings))
-
+    try:
+        _error_on_warnings = bool(int(_error_on_warnings))
+    except ValueError:
+        _error_on_warnings = False
 
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
@@ -221,6 +223,13 @@ def setup_test():
         warnings.filterwarnings(
             'default', message='TiffWriter:', category=DeprecationWarning
         )
+        # newer tifffile change the start of the warning string
+        # e.g. <tifffile.TiffWriter.write> data with shape ...
+        warnings.filterwarnings(
+            'default',
+            message='<tifffile.',
+            category=DeprecationWarning
+        )
 
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
@@ -252,8 +261,16 @@ def setup_test():
             module='skimage.io'
         )
 
+        # match both "viewer requires Qt" and "viewer requires matplotlib"
         warnings.filterwarnings(
-            'default', message='Viewer requires Qt', category=UserWarning
+            'default', message='viewer requires ', category=UserWarning
+        )
+
+        # ignore warning from cycle_spin about Dask not being installed
+        warnings.filterwarnings(
+            'default',
+            message='The optional dask dependency is not installed.',
+            category=UserWarning
         )
 
         warnings.filterwarnings(

@@ -763,7 +763,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
@@ -1016,7 +1017,7 @@ def _mean_std(image, w):
     kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
                      for indices in kernel_indices]
 
-    total_window_size = np.prod(w)
+    total_window_size = math.prod(w)
     kernel_shape = tuple(_w + 1 for _w in w)
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)

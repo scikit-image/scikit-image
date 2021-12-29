@@ -8,19 +8,10 @@ variables:
 jobs:
 - job: 'Default'
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-latest'
   strategy:
     maxParallel: 10
     matrix:
-      Python37:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python37-x64:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
       Python38:
         PYTHON_VERSION: '3.8'
         ARCH: 'x86'
@@ -44,6 +35,7 @@ jobs:
         PYTHON_VERSION: '3.9'
         ARCH: 'x64'
         PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
         # NOTE(honles): winpty is required by one of the doc dependencies,
         #               but does not provide a wheel for Python 3.9
         # TEST_EXAMPLES: 'true'
@@ -63,6 +55,9 @@ jobs:
       key: '"skimage_data" | skimage/data/_registry.py'
       path: $(SKIMAGE_DATA_CACHE_FOLDER)
     displayName: Cache scikit-image data files
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
 
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
   - task: Cache@2
@@ -73,6 +68,9 @@ jobs:
         "Python$(PYTHON_VERSION)-$(ARCH)"
       path: $(PIP_CACHE_DIR)
     displayName: Cache pip packages
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
 
   - script: |
       choco install --$(ARCH) -y llvm
