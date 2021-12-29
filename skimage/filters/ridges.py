@@ -134,7 +134,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
         the image boundaries.
     use_gaussian_derivatives : boolean, optional
         Indicates whether the Hessian is computed by convolving with Gaussian
-        derivatives, or by an FD operation.
+        derivatives, or by a simple finite-difference operation.
 
     Returns
     -------

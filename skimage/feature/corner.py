@@ -291,6 +291,9 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
         the image axes in gradient computation. 'rc' indicates the use of
         the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
         usage of the last axis initially (Hxx, Hxy, Hyy)
+    use_gaussian_derivatives : boolean, optional
+        Indicates whether the Hessian is computed by convolving with Gaussian
+        derivatives, or by a simple finite-difference operation.
 
     Returns
     -------
