@@ -108,136 +108,6 @@ def _check_sigmas(sigmas):
     return sigmas
 
 
-def hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
-                                 order='rc'):
-    """Compute the Hessian matrix using convolutions with Gaussian derivatives.
-    In 2D, the Hessian matrix is defined as:
-
-        H = [Hrr Hrc]
-            [Hrc Hcc]
-
-    which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective r- and c-directions.
-
-    The implementation here also supports n-dimensional data.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    sigma : float
-        Standard deviation used for the Gaussian kernel, which sets the
-        amount of smoothing in terms of pixel-distances. It is
-        advised to not choose a sigma much than 1.0, otherwise
-        aliasing artifacts may occur.
-    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
-    cval : float, optional
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-    order : {'rc', 'xy'}, optional
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
-        usage of the last axis initially (Hxx, Hxy, Hyy)
-    Returns
-    -------
-    H_elems : list of ndarray
-        Upper-diagonal elements of the hessian matrix for each pixel in the
-        input image. In 2D, this will be a three element list containing [Hrr,
-        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
-    --------
-    >>> from skimage.filters.ridges import hessian_matrix_with_gaussian
-    >>> square = np.zeros((30, 30))
-    >>> square[15, 15] = 1
-    >>> Hrr, Hrc, Hcc = hessian_matrix_with_gaussian(square, sigma=1)
-    >>> import matplotlib.pyplot as plt
-    >>> plt.imshow(Hcc)
-    >>> plt.colorbar()
-    >>> plt.show()
-    """
-    image = img_as_float(image)
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
-
-    H_elems = []
-    idx = np.arange(image.ndim)
-    # The derivative of an image I convolved with a Gaussian G is
-    #       (d/dx_i)[I*G]
-    # where * indicates a convolution. The distributive property
-    # of derivatives and convolutions allows us to restate this as
-    #        I * dG/dx_i
-    # that is, the convolution of I with the derivative of a Gaussian.
-    # We need to call scipy.ndimage.gaussian_filter with the argument
-    # "order" which indicates the derivative order in the respective
-    # directions, where 0 = just Gaussian smoothing
-    #                   1 = convolve with first derivative of Gaussian
-    #                   etc.
-    # so supplying order=[2, 0] computes the 2nd Gaussian derivative in
-    # the first direction, and just smoothes the field in the second
-    # direction. That corresponds to the lower-right element of the
-    # Hessian matrix, Hcc. This is why below we will call the array
-    # deriv_step{1/2}[::-1] thus in reverse order, because the image
-    # will be in coordinates [(z,)y,x], but we need the Hessian in
-    # order [d^2/dx^2, d^2/(dx*dy), ...], so in reverse order.
-    for deriv_dirs in itertools.combinations_with_replacement(idx, 2):
-        # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
-
-        deriv_step1 = 1 * (idx == deriv_dirs[0])
-        deriv_step2 = 1 * (idx == deriv_dirs[1])
-        # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
-        #                                and deriv_step2=[1, 0]
-        #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
-        #                                and deriv_step2=[0, 1]
-        #       etc., expressing the two successive derivative
-        #             operations in the Hessian
-
-        if order == 'rc':
-            deriv_step1 = deriv_step1[::-1]
-            deriv_step2 = deriv_step2[::-1]
-            # For, e.g., deriv_order=[2, 0], we want the second
-            # derivative in the "horizontal"/"row" direction, and
-            # just Gaussian smoothing in the "vertical"/"column"
-            # direction. To do that on an array, we need to
-            # differentiate as [0, 2], because the first direction
-            # is the vertical direction, and the second the horizontal
-            # direction. Hence, we reverse the list order.
-
-        # Apply two successive Gaussian filter operations, as per detailed in
-        # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct   # noqa
-        if np.all(np.array(sigma)>1):
-            H_elems.append(
-                ndi.gaussian_filter(
-                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma,
-                                        mode=mode, cval=cval,
-                                        order=deriv_step1, truncate=8),
-                    sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                    cval=cval, order=deriv_step2,
-                    truncate=8)
-            )
-        else:
-            # For small values of sigma, the scipy Gaussian filter
-            # suffers from aliasing and edge artifacts, given that
-            # the filter will approximate a sinc or sinc derivative
-            # which only goes to 0 very slowly (order 1/n^2). Thus,
-            # we will use a much larger truncate value to reduce any
-            # edge artifacts.
-            H_elems.append(
-                ndi.gaussian_filter(
-                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma,
-                                        mode=mode, cval=cval,
-                                        order=deriv_step1, truncate=100),
-                    sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                    cval=cval, order=deriv_step2,
-                    truncate=100)
-            )
-            # The truncation must be fairly large here, as the FFT-based
-            # kernel does not go to 0 quickly, if a small sigma is
-            # chosen.
-
-    return H_elems
-
-
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
                                 use_gaussian_derivatives=False):
@@ -281,14 +151,13 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
-    if use_gaussian_derivatives:
-        hessian_elements = hessian_matrix_with_gaussian(image, sigma=sigma,
-                                                        order='rc', mode=mode,
-                                                        cval=cval)
-    else:
-        # Kept as a legacy function
-        hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
-                                          mode=mode, cval=cval)
+    hessian_matrix_kwargs = dict(
+        sigma=sigma, order='rc', mode=mode, cval=cval,
+        use_gaussian_derivatives=use_gaussian_derivatives
+    )
+    hessian_elements = hessian_matrix(image, **hessian_matrix_kwargs)
+    if not use_gaussian_derivatives:
+        # Kept to preserve legacy behavior
         hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     # Compute Hessian eigenvalues
