@@ -54,8 +54,8 @@ def hausdorff_distance(image0, image1, method="standard"):
 
     """
 
-    if method not in ("standard", "modified"):
-        raise ValueError("unrecognized method '%s'" % method)
+    if method not in ('standard', 'modified'):
+        raise ValueError(f'unrecognized method {method}')
 
     a_points = np.transpose(np.nonzero(image0))
     b_points = np.transpose(np.nonzero(image1))
@@ -73,16 +73,10 @@ def hausdorff_distance(image0, image1, method="standard"):
         cKDTree(b_points).query(a_points, k=1)[0],
     )
 
-    if method == "standard":  # standard Hausdorff distance
-        return max(
-            max(fwd),
-            max(bwd),
-        )
-    elif method == "modified":  # modified Hausdorff distance
-        return max(
-            np.mean(fwd),
-            np.mean(bwd),
-        )
+    if method == 'standard':  # standard Hausdorff distance
+        return max(max(fwd), max(bwd))
+    elif method == 'modified':  # modified Hausdorff distance
+        return max(np.mean(fwd), np.mean(bwd))
 
 
 def hausdorff_pair(image0, image1):
