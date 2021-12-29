@@ -307,7 +307,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
+    ...                                use_gaussian_derivatives=False)
     >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
@@ -325,7 +326,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
         warn("use_gaussian_derivatives currently defaults to False, but will "
              "change to True in a future version. Please specficy this "
              "argument explicitly to maintain the current behavior",
-             stacklevel=2)
+             category=FutureWarning, stacklevel=2)
 
     if use_gaussian_derivatives:
         return _hessian_matrix_with_gaussian(image, sigma=sigma, mode=mode,
@@ -387,7 +388,9 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
         integral = integral_image(image)
         return np.array(_hessian_matrix_det(integral, sigma))
     else:  # slower brute-force implementation for nD images
-        hessian_mat_array = _symmetric_image(hessian_matrix(image, sigma))
+        hessian_mat_array = _symmetric_image(
+            hessian_matrix(image, sigma, use_gaussian_derivatives=False)
+        )
         return np.linalg.det(hessian_mat_array)
 
 
@@ -550,7 +553,8 @@ def hessian_matrix_eigvals(H_elems):
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc',
+    ...                          use_gaussian_derivatives=False)
     >>> hessian_matrix_eigvals(H_elems)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
@@ -627,7 +631,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
+    H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc',
+                       use_gaussian_derivatives=False)
     l1, l2 = hessian_matrix_eigvals(H)
 
     # don't warn on divide by 0 as occurs in the docstring example
