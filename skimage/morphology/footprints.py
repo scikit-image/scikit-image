@@ -550,7 +550,7 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     """
     quadrant = footprint[footprint.shape[0] // 2:, footprint.shape[1] // 2:]
     col_sums = quadrant.sum(0, dtype=int)
-    col_sums = np.concatenate((col_sums, np.asarray([0,], dtype=int)))
+    col_sums = np.concatenate((col_sums, np.asarray([0], dtype=int)))
     i_prev = 0
     idx = {}
     sum0 = 0
