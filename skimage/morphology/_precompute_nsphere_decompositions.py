@@ -98,7 +98,9 @@ def precompute_decompositions(
             sequence = []
             n_t, n_diamond, n_square = best_vals[(ndim, radius)]
             print(
-                f"radius = {radius}, sum = {desired.sum()}, error={min_err}:\n\tn_t={n_t}, n_diamond={n_diamond}, n_square={n_square}\n"
+                f'radius = {radius}, sum = {desired.sum()}, '
+                f'error={min_err}:\n\tn_t={n_t}, '
+                f'n_diamond={n_diamond}, n_square={n_square}\n'
             )
             if n_t > 0:
                 sequence += [(t, n_t) for t in all_t]

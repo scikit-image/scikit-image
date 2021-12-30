@@ -92,7 +92,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
     else:
         # composite and decomposition=None are identical so only 1 extra plot
         num_subplots = num_seq + 1
-    fig = plt.figure(figsize=(4*num_subplots, 5))
+    fig = plt.figure(figsize=(4 * num_subplots, 5))
     if ndim == 2:
         ax = fig.add_subplot(1, num_subplots, num_subplots)
         ax.imshow(footprint, cmap=cmap, vmin=0, vmax=1)
