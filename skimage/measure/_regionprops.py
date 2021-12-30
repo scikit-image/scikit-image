@@ -1,6 +1,10 @@
 import inspect
+from functools import wraps
+from math import atan2
+from math import pi as PI
+from math import sqrt
 from warnings import warn
-from math import sqrt, atan2, pi as PI
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist
@@ -9,9 +13,6 @@ from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
-
-from functools import wraps
-
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -227,6 +228,49 @@ def only2d(method):
     return func2d
 
 
+def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
+    """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
+
+    Paramters
+    ---------
+    inertia_tensor_eigvals : seqeunce of float
+        A sequence of 3 floating point eigenvalues, sorted in descending order.
+
+    Returns
+    -------
+    axis_lengths : list of float
+        The ellipsoid axis lengths sorted in descending order.
+
+    Notes
+    -----
+    Let a >= b >= c be the ellipsoid semi-axes and s1 >= s2 >= s3 be the
+    inertia tensor eigenvalues.
+
+    The inertia tensor eigenvalues are given for a solid ellipsoid in [1]_.
+    s1 = 1 / 5 * (a**2 + b**2)
+    s2 = 1 / 5 * (a**2 + c**2)
+    s3 = 1 / 5 * (b**2 + c**2)
+
+    Rearranging to solve for a, b, c in terms of s1, s2, s3 gives
+    a = math.sqrt(5 / 2 * ( s1 + s2 - s3))
+    b = math.sqrt(5 / 2 * ( s1 - s2 + s3))
+    c = math.sqrt(5 / 2 * (-s1 + s2 + s3))
+
+    We can then simply replace sqrt(5/2) by sqrt(10) to get the full axes
+    lengths rather than the semi-axes lengths.
+
+    References
+    ----------
+    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors  # noqa
+    """
+    axis_lengths = []
+    for ax in range(2, -1, -1):
+        w = sum(v * -1 if i == ax else v
+                for i, v in enumerate(inertia_tensor_eigvals))
+        axis_lengths.append(sqrt(10 * w))
+    return axis_lengths
+
+
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
@@ -261,19 +305,19 @@ class RegionProperties:
         self._spatial_axes = tuple(range(self._ndim))
 
         self._extra_properties = {}
-        if extra_properties is None:
-            extra_properties = []
-        for func in extra_properties:
-            name = func.__name__
-            if hasattr(self, name):
-                msg = (
-                    f"Extra property '{name}' is shadowed by existing "
-                    f"property and will be inaccessible. Consider renaming it."
-                )
-                warn(msg)
-        self._extra_properties = {
-            func.__name__: func for func in extra_properties
-        }
+        if extra_properties is not None:
+            for func in extra_properties:
+                name = func.__name__
+                if hasattr(self, name):
+                    msg = (
+                        f"Extra property '{name}' is shadowed by existing "
+                        f"property and will be inaccessible. Consider "
+                        f"renaming it."
+                    )
+                    warn(msg)
+            self._extra_properties = {
+                func.__name__: func for func in extra_properties
+            }
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
@@ -298,13 +342,22 @@ class RegionProperties:
                 return func(self.image)
             else:
                 raise AttributeError(
-                    f'Custom regionprop function\'s number of arguments must be 1 or 2, '
-                    f'but {attr} takes {n_args} arguments.'
+                    f'Custom regionprop function\'s number of arguments must '
+                    f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
+        elif attr in PROPS and attr.lower() == attr:
+            # retrieve deprecated property (excluding old CamelCase ones)
+            return getattr(self, PROPS[attr])
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
             )
+
+    def __setattr__(self, name, value):
+        if name in PROPS:
+            super().__setattr__(PROPS[name], value)
+        else:
+            super().__setattr__(name, value)
 
     @property
     @_cached
@@ -378,7 +431,8 @@ class RegionProperties:
             coordinates = np.vstack(find_contours(identity_convex_hull, .5,
                                                   fully_connected='high'))
         elif self._ndim == 3:
-            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull,
+                                                  level=.5)
         distances = pdist(coordinates, 'sqeuclidean')
         return sqrt(np.max(distances))
 
@@ -422,18 +476,23 @@ class RegionProperties:
         return self._intensity_image[self.slice] * image
 
     def _image_intensity_double(self):
-        return self.image_intensity.astype(np.double)
+        return self.image_intensity.astype(np.double, copy=False)
 
     @property
     def centroid_local(self):
         M = self.moments
-        return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
-                     M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     def intensity_max(self):
-        return np.max(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.max(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def intensity_mean(self):
@@ -441,18 +500,32 @@ class RegionProperties:
 
     @property
     def intensity_min(self):
-        return np.min(self.image_intensity[self.image], axis=0)\
-                 .astype(np.double)
+        vals = self.image_intensity[self.image]
+        return np.min(vals, axis=0).astype(np.double, copy=False)
 
     @property
     def axis_major_length(self):
-        l1 = self.inertia_tensor_eigvals[0]
-        return 4 * sqrt(l1)
+        if self._ndim == 2:
+            l1 = self.inertia_tensor_eigvals[0]
+            return 4 * sqrt(l1)
+        elif self._ndim == 3:
+            # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[0]
+            ev = self.inertia_tensor_eigvals
+            return sqrt(10 * (ev[0] + ev[1] - ev[2]))
+        else:
+            raise ValueError("axis_major_length only available in 2D and 3D")
 
     @property
     def axis_minor_length(self):
-        l2 = self.inertia_tensor_eigvals[-1]
-        return 4 * sqrt(l2)
+        if self._ndim == 2:
+            l2 = self.inertia_tensor_eigvals[-1]
+            return 4 * sqrt(l2)
+        elif self._ndim == 3:
+            # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[-1]
+            ev = self.inertia_tensor_eigvals
+            return sqrt(10 * (-ev[0] + ev[1] + ev[2]))
+        else:
+            raise ValueError("axis_minor_length only available in 2D and 3D")
 
     @property
     @_cached
@@ -512,8 +585,13 @@ class RegionProperties:
     @property
     def centroid_weighted_local(self):
         M = self.moments_weighted
-        return (M[tuple(np.eye(self._ndim, dtype=int))] /
-                M[(0,) * self._ndim])
+        M0 = M[(0,) * self._ndim]
+
+        def _get_element(axis):
+            return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
+
+        return np.asarray(
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
 
     @property
     @_cached
@@ -719,12 +797,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 intensity=r._intensity_image is not None,
                 ndim=r.image.ndim,
             )
-        column_buffer = np.zeros(n, dtype=dtype)
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
+            column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[orig_prop] = np.copy(column_buffer)
@@ -734,12 +812,26 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             else:
                 shape = (len(rp),)
 
+            # precompute property column names and locations
+            modified_props = []
+            locs = []
             for ind in np.ndindex(shape):
-                for k in range(n):
-                    loc = ind if len(ind) > 1 else ind[0]
-                    column_buffer[k] = regions[k][prop][loc]
-                modified_prop = separator.join(map(str, (orig_prop,) + ind))
-                out[modified_prop] = np.copy(column_buffer)
+                modified_props.append(
+                    separator.join(map(str, (orig_prop,) + ind))
+                )
+                locs.append(ind if len(ind) > 1 else ind[0])
+
+            # fill temporary column data_array
+            n_columns = len(locs)
+            column_data = np.empty((n, n_columns), dtype=dtype)
+            for k in range(n):
+                rp = regions[k][prop]
+                for i, loc in enumerate(locs):
+                    column_data[k, i] = rp[loc]
+
+            # add the columns to the output dictionary
+            for i, modified_prop in enumerate(modified_props):
+                out[modified_prop] = column_data[:, i]
     return out
 
 

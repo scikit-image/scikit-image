@@ -1742,7 +1742,7 @@ def lch2lab(lch, *, channel_axis=-1):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import rgb2lab, lch2lab
+    >>> from skimage.color import rgb2lab, lch2lab, lab2lch
     >>> img = data.astronaut()
     >>> img_lab = rgb2lab(img)
     >>> img_lch = lab2lch(img_lab)

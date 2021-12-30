@@ -2,9 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 from scipy.ndimage import fourier_shift
+import scipy.fft as fft
 
 from skimage import img_as_float
-from skimage._shared.fft import fftmodule as fft
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, binary_blobs
 from skimage.registration._phase_cross_correlation import (
@@ -131,8 +132,9 @@ def test_wrong_input():
     image = np.ones((5, 5))
     image[0][0] = np.nan
     template = np.ones((5, 5))
-    with pytest.raises(ValueError):
-        phase_cross_correlation(template, image, return_error=True)
+    with expected_warnings([r'invalid value encountered in true_divide|\A\Z']):
+        with pytest.raises(ValueError):
+            phase_cross_correlation(template, image, return_error=True)
 
 
 def test_4d_input_pixel():

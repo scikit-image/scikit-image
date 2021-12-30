@@ -271,7 +271,7 @@ def test_denoise_bilateral_negative2():
 
     # 2 images with a given offset should give the same result (with the same
     # offset)
-    assert_array_equal(out1, out2 + 10)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
@@ -541,6 +541,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
         denoised_wrong_multichannel, channel_axis, -1
     )
 
+    img = img.astype(denoised_wrong_multichannel.dtype)
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert psnr_ok > psnr_wrong

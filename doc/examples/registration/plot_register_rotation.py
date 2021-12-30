@@ -132,7 +132,7 @@ print(f'Recovered value for scaling difference: {shift_scale}')
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
-from scipy.fftpack import fft2, fftshift
+from scipy.fft import fft2, fftshift
 
 angle = 24
 scale = 1.4

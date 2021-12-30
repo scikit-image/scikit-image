@@ -1,9 +1,12 @@
 import math
+
 import numpy as np
 from scipy import ndimage as ndi
-from ..transform import resize
+
 from .._shared import utils
+from .._shared.filters import gaussian
 from .._shared.utils import convert_to_float
+from ..transform import resize
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
@@ -13,8 +16,11 @@ def _smooth(image, sigma, mode, cval, multichannel=None):
     # apply Gaussian filter to all channels independently
     if multichannel:
         sigma = (sigma, ) * (image.ndim - 1) + (0, )
-    ndi.gaussian_filter(image, sigma, output=smoothed,
-                        mode=mode, cval=cval)
+        channel_axis = -1
+    else:
+        channel_axis = None
+    gaussian(image, sigma, output=smoothed, mode=mode, cval=cval,
+             channel_axis=channel_axis)
     return smoothed
 
 
@@ -98,7 +104,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
-                   preserve_range=False, *, channel_axis=-1):
+                   preserve_range=False, *, channel_axis=None):
     """Upsample and then smooth image.
 
     Parameters

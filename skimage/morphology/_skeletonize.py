@@ -254,7 +254,8 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def thin(image, max_num_iter=None):
     """
     Perform morphological thinning of a binary image.

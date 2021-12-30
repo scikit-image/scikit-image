@@ -8,62 +8,60 @@ jobs:
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
     runs-on: ubuntu-20.04
-    env:
-        BUILD_DOCS: 1
-        TEST_EXAMPLES: 0
-        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, '3.10']
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
-        QT: ["PyQt5"]
-        WITH_PYSIDE: [0]
         BUILD_DOCS: [1]
         PYTHONOPTIMIZE: [0]
         TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [0]
         OPTIONS_NAME: ["default"]
         INSTALL_FROM_SDIST: [0]
+        WITHOUT_POOCH: [0]
+        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: [0]
+        EAGER_IMPORT: [0]
         include:
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.8
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
-            # Test miminum requirements (don't build docs there is a problem
+            EAGER_IMPORT: 1
+            # Test mininum requirements (don't build docs there is a problem
             # with dask and astropy)
-            OPTIONS_NAME: "mini-req"
+            OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.8
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.8
+            python-version: 3.9
             PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test pre-releases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.9
             BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.9
             PYTHONOPTIMIZE: 2
+            WITHOUT_POOCH: 1
             BUILD_DOCS: 0
-            OPTIONS_NAME: "optimize"
+            OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
-            python-version: 3.7
+            python-version: 3.9
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
-
 
     steps:
       - name: Checkout scikit-image
@@ -76,8 +74,8 @@ jobs:
 
       - name: Build package
         env:
-            VERSION: ${{ matrix.python-version }}
-            PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
+            # Set variables here that are used by the build script below
+            # (including those used within tools/github/before_install.sh)
             MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
             PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
             INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
@@ -86,7 +84,7 @@ jobs:
             source tools/github/before_install.sh
             set -ex
             python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST != "0" ]]; then
+            if [[ $INSTALL_FROM_SDIST == "1" ]]; then
                 pip uninstall cython -y;
                 pip install dist/scikit-image-*.tar.gz;
             else
@@ -95,13 +93,18 @@ jobs:
 
       - name: Run tests
         env:
+            # Set variables here that are used by the run script below
+            # (including those used within tools/github/script.sh)
+            # Also includes the EAGER_IMPORT and
+            # SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL env vars that skimage checks.
             PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
-            QT: ${{ matrix.QT }}
-            WITH_PYSIDE: ${{ matrix.WITH_PYSIDE }}
             BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
             TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
             OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+            INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+            EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: ${{ matrix.SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL }}
+            WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
             echo $PIP_FLAGS
             pip install $PIP_FLAGS -r requirements/test.txt
@@ -110,7 +113,7 @@ jobs:
             touch ${MPL_DIR}/matplotlibrc
             if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
                 pip install -r ./requirements/optional.txt
-                if [[ "${EXTRA_DEPS}" != "0" ]]; then
+                if [[ "${EXTRA_DEPS}" == "1" ]]; then
                 # Extra deps need compilation, and it may not always be possible to
                 # compile them easily on all platforms
                     pip install -r ./requirements/extras.txt
@@ -131,24 +134,21 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-        QT: ["PyQt5"]
-        BUILD_DOCS: [1]
-        TEST_EXAMPLES: [0]
+        python-version: [3.8, 3.9, '3.10']
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: 3.7
-            OPTIONAL_DEPS: 0
           - python-version: 3.9
             OPTIONAL_DEPS: 0
+          - python-version: '3.10'
+            OPTIONAL_DEPS: 0
         exclude:
-          - python-version: 3.7
-            OPTIONAL_DEPS: 1
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
-
+          # a number of optional deps don't yet have Python 3.10 wheels
+          - python-version: '3.10'
+            OPTIONAL_DEPS: 1
     env:
         BUILD_DOCS: 1
         TEST_EXAMPLES: 0
@@ -182,6 +182,10 @@ jobs:
             pip install -vv --no-build-isolation -e .;
 
       - name: Run tests
+        env:
+            # Note: BUILD_DOCS and TEST_EXAMPLES are not in the matrix.
+            #       They get inherited from the job-level env.
+            OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
             pip install $PIP_FLAGS -r requirements/test.txt
             export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`

@@ -68,14 +68,42 @@ dtype_limits
 
 """
 
-import sys
+__version__ = '0.20.0.dev0'
+
+submodules = [
+    'color',
+    'data',
+    'draw',
+    'exposure',
+    'feature',
+    'filters',
+    'future',
+    'graph',
+    'io',
+    'measure',
+    'metrics',
+    'morphology',
+    'registration',
+    'restoration',
+    'segmentation',
+    'transform',
+    'util',
+    'viewer'
+]
 
 from ._shared.version_requirements import ensure_python_version
+ensure_python_version((3, 7))
+
+from ._shared import lazy
+__getattr__, __lazy_dir__, _ = lazy.attach(
+    __name__,
+    submodules,
+    submod_attrs={'data': ['data_dir']}
+)
 
 
-__version__ = '0.19.0.dev0'
-
-ensure_python_version((3, 5))
+def __dir__():
+    return __lazy_dir__() + ['__version__']
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
@@ -114,6 +142,7 @@ except NameError:
     __SKIMAGE_SETUP__ = False
 
 if __SKIMAGE_SETUP__:
+    import sys
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
@@ -133,10 +162,7 @@ else:
                              img_as_ubyte,
                              img_as_bool,
                              dtype_limits)
-    from .data import data_dir
     from .util.lookfor import lookfor
-
-del sys
 
 if 'dev' in __version__:
     # Append last commit date and hash to dev version information, if available

@@ -110,8 +110,10 @@ class TestRank():
                 assert_array_almost_equal(expected, result)
             else:
                 if outdt is not None:
-                    # Avoid rounding issues comparing to expected result
-                    result = result.astype(expected.dtype)
+                    # Avoid rounding issues comparing to expected result.
+                    # Take modulus first to avoid undefined behavior for
+                    # float->uint8 conversions.
+                    result = np.mod(result, 256.0).astype(expected.dtype)
                 assert_array_almost_equal(expected, result)
 
         check()
@@ -154,7 +156,9 @@ class TestRank():
                     datadt = np.uint8
                 else:
                     datadt = expected.dtype
-                result = result.astype(datadt)
+                # Take modulus first to avoid undefined behavior for
+                # float->uint8 conversions.
+                result = np.mod(result, 256.0).astype(datadt)
             assert_array_almost_equal(expected, result)
 
         check()

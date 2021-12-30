@@ -20,6 +20,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 import warnings
 
 from .. import data, io
+from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
 
@@ -45,8 +46,10 @@ if _error_on_warnings.lower() == 'true':
 elif _error_on_warnings.lower() == 'false':
     _error_on_warnings = False
 else:
-    _error_on_warnings = bool(int(_error_on_warnings))
-
+    try:
+        _error_on_warnings = bool(int(_error_on_warnings))
+    except ValueError:
+        _error_on_warnings = False
 
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
@@ -220,6 +223,13 @@ def setup_test():
         warnings.filterwarnings(
             'default', message='TiffWriter:', category=DeprecationWarning
         )
+        # newer tifffile change the start of the warning string
+        # e.g. <tifffile.TiffWriter.write> data with shape ...
+        warnings.filterwarnings(
+            'default',
+            message='<tifffile.',
+            category=DeprecationWarning
+        )
 
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
@@ -251,8 +261,16 @@ def setup_test():
             module='skimage.io'
         )
 
+        # match both "viewer requires Qt" and "viewer requires matplotlib"
         warnings.filterwarnings(
-            'default', message='Viewer requires Qt', category=UserWarning
+            'default', message='viewer requires ', category=UserWarning
+        )
+
+        # ignore warning from cycle_spin about Dask not being installed
+        warnings.filterwarnings(
+            'default',
+            message='The optional dask dependency is not installed.',
+            category=UserWarning
         )
 
         warnings.filterwarnings(
@@ -275,7 +293,7 @@ def teardown_test():
 def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
-        return data._fetch(data_filename)
+        return _fetch(data_filename)
     except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}',
                     allow_module_level=True)

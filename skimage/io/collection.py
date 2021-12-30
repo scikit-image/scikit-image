@@ -6,13 +6,13 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
+from packaging import version
 
 import numpy as np
 from PIL import Image, __version__ as pil_version
 
 # Check CVE-2021-27921 and others
-from distutils.version import LooseVersion
-if LooseVersion(pil_version) < LooseVersion('8.1.2'):
+if version.parse(pil_version) < version.parse('8.1.2'):
     from warnings import warn
     warn('Your installed pillow version is < 8.1.2. '
          'Several security issues (CVE-2021-27921, '
