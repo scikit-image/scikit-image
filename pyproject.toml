@@ -2,6 +2,7 @@
 requires = [
     "wheel",
     "setuptools",
+    "packaging",
     "Cython>=0.29.24,<3.0",
     "pythran",
 
@@ -9,7 +10,6 @@ requires = [
     # https://github.com/scipy/scipy/blob/master/pyproject.toml
     # numpy 1.19 was the first minor release to provide aarch64 wheels, but
     # wheels require fixes contained in numpy 1.19.2
-    "numpy==1.19.2; python_version=='3.7' and platform_machine=='aarch64'",
     "numpy==1.19.2; python_version=='3.8' and platform_machine=='aarch64'",
     # aarch64 for py39 and py310 are covered by the default requirement below
 
@@ -19,13 +19,9 @@ requires = [
     # arm64 for py310 is covered by the default requirement below
 
     # default numpy requirements
-    "numpy==1.17.3; python_version=='3.7' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
     "numpy==1.17.3; python_version=='3.8' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
     "numpy==1.19.3; python_version=='3.9' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_python_implementation != 'PyPy'",
     "numpy==1.21.4; python_version=='3.10' and platform_python_implementation != 'PyPy'",
-
-    # First PyPy versions for which there are numpy wheels
-    "numpy==1.20.0; python_version=='3.7' and platform_python_implementation=='PyPy'",
 
     # For Python versions which aren't yet officially supported,
     # we specify an unpinned NumPy which allows source distributions

@@ -31,8 +31,9 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-@deprecate_kwarg({"height": "ncols", "width": "nrows"},
-                 removed_version="0.20.0")
+@deprecate_kwarg({'height': 'ncols', 'width': 'nrows'},
+                 deprecated_version='0.18.0',
+                 removed_version='0.20.0')
 def rectangle(nrows, ncols, dtype=np.uint8):
     """Generates a flat, rectangular-shaped footprint.
 

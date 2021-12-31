@@ -256,7 +256,7 @@ This directory contains the following files:
     ├── azure-pipelines.yml
     ├── benchmarks
     ├── CODE_OF_CONDUCT.md
-    ├── CONTRIBUTING.txt
+    ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
     ├── doc
     ├── INSTALL.rst

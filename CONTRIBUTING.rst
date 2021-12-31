@@ -606,6 +606,7 @@ command::
 
 Finally, one can also run ASV benchmarks only for a specific commit hash or
 release tag by appending ``^!`` to the commit or tag name. For example to run
-the skimage.filter module benchmarks on release v0.17.2:
+the skimage.filter module benchmarks on release v0.17.2::
 
-asv run -b Filter v0.17.2^!
+    asv run -b Filter v0.17.2^!
+    

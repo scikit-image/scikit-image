@@ -3,8 +3,9 @@ import math
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
-from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
-                           assert_array_equal, assert_equal)
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_almost_equal, assert_array_equal,
+                           assert_equal)
 
 from skimage import data, draw, transform
 from skimage._shared._warnings import expected_warnings
@@ -762,7 +763,8 @@ def test_multichannel():
         else:
             # property uses multiple channels, returns props stacked along
             # final axis
-            assert_array_equal(p, np.asarray(p_multi)[..., 1])
+            assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12,
+                            atol=1e-12)
 
 
 def test_3d_ellipsoid_axis_lengths():

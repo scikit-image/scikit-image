@@ -11,7 +11,11 @@ from numpy.distutils.command.build_ext import build_ext as npy_build_ext
 import setuptools
 from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
-from distutils.errors import CompileError, LinkError
+try:
+    from setuptools.errors import CompileError, LinkError
+except ImportError:
+    # can remove this except case once we require setuptools>=59.0
+    from distutils.errors import CompileError, LinkError
 
 from pythran.dist import PythranBuildExt as pythran_build_ext
 
@@ -31,11 +35,11 @@ PROJECT_URLS = {
 with open('README.md', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
-if sys.version_info < (3, 6):
+if sys.version_info < (3, 8):
 
     error = """Python {py} detected.
 
-scikit-image 0.18+ supports only Python 3.7 and above.
+scikit-image supports only Python 3.8 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
@@ -112,6 +116,8 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
         else:
             compile_flags += ['-fopenmp']
             link_flags += ['-fopenmp']
+        if 'SKIMAGE_LINK_FLAGS' in os.environ:
+            link_flags += [os.environ['SKIMAGE_LINK_FLAGS']]
 
         if self.can_compile_link(compile_flags, link_flags):
             for ext in self.extensions:
@@ -226,9 +232,9 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
@@ -238,9 +244,9 @@ if __name__ == "__main__":
         ],
         install_requires=INSTALL_REQUIRES,
         extras_require=extras_require,
-        python_requires='>=3.7',
+        python_requires='>=3.8',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
-        include_package_data=True,
+        include_package_data=False,
         zip_safe=False,  # the package can run out of an .egg file
         entry_points={
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
