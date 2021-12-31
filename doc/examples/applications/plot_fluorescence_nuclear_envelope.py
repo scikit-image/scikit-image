@@ -39,12 +39,13 @@ from scipy import ndimage as ndi
 from skimage import (
     filters, measure, morphology, segmentation
 )
+from skimage.data import protein_transport
 
 
 #####################################################################
 # We start with a single cell/nucleus to construct the workflow.
 
-image_sequence = imageio.volread('http://cmci.embl.de/sampleimages/NPCsingleNucleus.tif')
+image_sequence = protein_transport()
 
 print(f'shape: {image_sequence.shape}')
 
