@@ -716,7 +716,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            1997 IEEE Workshop on Nonlinear Signal and Image Processing, London,
            UK.
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
-    .. [3] https://en.wikipedia.org/wiki/Rhombicuboctahedron
+    .. [2] https://en.wikipedia.org/wiki/Rhombicuboctahedron
     """
     if decomposition is None:
         n = 2 * radius + 1
