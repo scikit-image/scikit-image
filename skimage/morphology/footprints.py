@@ -860,23 +860,3 @@ def star(a, dtype=np.uint8):
     footprint[footprint > 0] = 1
 
     return footprint.astype(dtype)
-
-
-def _default_footprint(ndim):
-    """Generates a cross-shaped footprint (connectivity=1).
-
-    This is the default footprint (footprint) if no footprint was
-    specified.
-
-    Parameters
-    ----------
-    ndim : int
-        Number of dimensions of the image.
-
-    Returns
-    -------
-    footprint : ndarray
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-
-    """
-    return ndi.generate_binary_structure(ndim, 1)
