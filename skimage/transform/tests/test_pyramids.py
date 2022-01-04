@@ -63,7 +63,7 @@ def test_pyramid_expand_rgb(channel_axis):
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     out = pyramids.pyramid_expand(image, upscale=2,
-                                   channel_axis=channel_axis)
+                                  channel_axis=channel_axis)
     expected_shape = [rows * 2, cols * 2]
     expected_shape.insert(channel_axis % image.ndim, dim)
     assert_array_equal(out.shape, expected_shape)
