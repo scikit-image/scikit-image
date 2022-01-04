@@ -7,6 +7,7 @@ from scipy import ndimage as ndi
 
 from .. import draw
 from .._shared.utils import deprecate_kwarg
+from skimage import morphology
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
 # radius of the desired decomposition is used to index into the first axis of
@@ -88,13 +89,12 @@ def footprint_from_sequence(footprints):
     footprint : ndarray
         An single array equivalent to applying the sequence of `footprints`.
     """
-    from skimage.morphology import binary_dilation
 
     # Create a single pixel image of sufficient size and apply binary dilation.
     shape = _shape_from_sequence(footprints)
     imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
-    return binary_dilation(imag, footprints)
+    return morphology.binary_dilation(imag, footprints)
 
 
 def square(width, dtype=np.uint8, *, decomposition=None):
