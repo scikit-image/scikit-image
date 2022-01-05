@@ -25,7 +25,7 @@ else
   (cd .. && pytest $TEST_ARGS --pyargs skimage)
 fi
 
-flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
+flake8 --exit-zero --exclude=test_* skimage doc/examples
 
 if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples
