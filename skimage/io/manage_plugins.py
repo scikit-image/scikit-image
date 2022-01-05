@@ -38,7 +38,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['imageio', 'pil', 'matplotlib', 'qt'],
+    'all': ['imageio', 'pil', 'matplotlib'],
     'imshow': ['matplotlib'],
     'imshow_collection': ['matplotlib']
 }
