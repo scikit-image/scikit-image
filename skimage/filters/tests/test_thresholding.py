@@ -259,18 +259,18 @@ class TestSimpleImage():
 
 
 def test_otsu_camera_image():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     assert 101 < threshold_otsu(camera) < 103
 
 
 def test_otsu_camera_image_histogram():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=hist) < 103
 
 
 def test_otsu_camera_image_counts():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 101 < threshold_otsu(hist=counts) < 103
 
@@ -289,17 +289,17 @@ def test_otsu_zero_count_histogram():
 
 
 def test_otsu_coins_image():
-    coins = util.img_as_ubyte(data.coins())
+    coins = util.rescale_to_ubyte(data.coins())
     assert 106 < threshold_otsu(coins) < 108
 
 
 def test_otsu_coins_image_as_float():
-    coins = util.img_as_float(data.coins())
+    coins = util.rescale_to_float(data.coins())
     assert 0.41 < threshold_otsu(coins) < 0.42
 
 
 def test_otsu_astro_image():
-    img = util.img_as_ubyte(data.astronaut())
+    img = util.rescale_to_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
         assert 109 < threshold_otsu(img) < 111
 
@@ -315,7 +315,7 @@ def test_otsu_one_color_image_3d():
 
 
 def test_li_camera_image():
-    image = util.img_as_ubyte(data.camera())
+    image = util.rescale_to_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 78 < threshold_li(image) < 79
@@ -324,7 +324,7 @@ def test_li_camera_image():
 
 
 def test_li_coins_image():
-    image = util.img_as_ubyte(data.coins())
+    image = util.rescale_to_ubyte(data.coins())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 94 < threshold_li(image) < 95
@@ -338,12 +338,12 @@ def test_li_coins_image():
 
 
 def test_li_coins_image_as_float():
-    coins = util.img_as_float(data.coins())
+    coins = util.rescale_to_float(data.coins())
     assert 94/255 < threshold_li(coins) < 95/255
 
 
 def test_li_astro_image():
-    image = util.img_as_ubyte(data.astronaut())
+    image = util.rescale_to_ubyte(data.astronaut())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 64 < threshold < 65
@@ -404,29 +404,29 @@ def test_li_pathological_arrays():
 
 
 def test_yen_camera_image():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     assert 145 < threshold_yen(camera) < 147
 
 
 def test_yen_camera_image_histogram():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     assert 145 < threshold_yen(hist=hist) < 147
 
 
 def test_yen_camera_image_counts():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     assert 145 < threshold_yen(hist=counts) < 147
 
 
 def test_yen_coins_image():
-    coins = util.img_as_ubyte(data.coins())
+    coins = util.rescale_to_ubyte(data.coins())
     assert 109 < threshold_yen(coins) < 111
 
 
 def test_yen_coins_image_as_float():
-    coins = util.img_as_float(data.coins())
+    coins = util.rescale_to_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
@@ -437,7 +437,7 @@ def test_local_even_block_size_error():
 
 
 def test_isodata_camera_image():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
 
     threshold = threshold_isodata(camera)
     assert np.floor((camera[camera <= threshold].mean() +
@@ -448,21 +448,21 @@ def test_isodata_camera_image():
 
 
 def test_isodata_camera_image_histogram():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_isodata(hist=hist)
     assert threshold == 102
 
 
 def test_isodata_camera_image_counts():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_isodata(hist=counts)
     assert threshold == 102
 
 
 def test_isodata_coins_image():
-    coins = util.img_as_ubyte(data.coins())
+    coins = util.rescale_to_ubyte(data.coins())
 
     threshold = threshold_isodata(coins)
     assert np.floor((coins[coins <= threshold].mean() +
@@ -473,7 +473,7 @@ def test_isodata_coins_image():
 
 
 def test_isodata_moon_image():
-    moon = util.img_as_ubyte(data.moon())
+    moon = util.rescale_to_ubyte(data.moon())
 
     threshold = threshold_isodata(moon)
     assert np.floor((moon[moon <= threshold].mean() +
@@ -488,7 +488,7 @@ def test_isodata_moon_image():
 
 
 def test_isodata_moon_image_negative_int():
-    moon = util.img_as_ubyte(data.moon()).astype(np.int32)
+    moon = util.rescale_to_ubyte(data.moon()).astype(np.int32)
     moon -= 100
 
     threshold = threshold_isodata(moon)
@@ -504,7 +504,7 @@ def test_isodata_moon_image_negative_int():
 
 
 def test_isodata_moon_image_negative_float():
-    moon = util.img_as_ubyte(data.moon()).astype(np.float64)
+    moon = util.rescale_to_ubyte(data.moon()).astype(np.float64)
     moon -= 100
 
     assert -14 < threshold_isodata(moon) < -13
@@ -516,32 +516,32 @@ def test_isodata_moon_image_negative_float():
 
 
 def test_threshold_minimum():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
     assert_equal(threshold, 85)
 
-    astronaut = util.img_as_ubyte(data.astronaut())
+    astronaut = util.rescale_to_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 
 
 def test_threshold_minimum_histogram():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=hist)
     assert_equal(threshold, 85)
 
 
 def test_threshold_minimum_deprecated_max_iter_kwarg():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     hist = histogram(camera.ravel(), 256, source_range='image')
     with expected_warnings(["`max_iter` is a deprecated argument"]):
         threshold_minimum(hist=hist, max_iter=5000)
 
 
 def test_threshold_minimum_counts():
-    camera = util.img_as_ubyte(data.camera())
+    camera = util.rescale_to_ubyte(data.camera())
     counts, bin_centers = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=counts)
     assert_equal(threshold, 85)
@@ -711,7 +711,7 @@ def test_multiotsu_output():
 
 
 def test_multiotsu_astro_image():
-    img = util.img_as_ubyte(data.astronaut())
+    img = util.rescale_to_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
         assert_almost_equal(threshold_multiotsu(img), [58, 149])
 

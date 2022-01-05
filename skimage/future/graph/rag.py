@@ -509,7 +509,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
 
     if ax is None:
         fig, ax = plt.subplots()
-    out = util.img_as_float(image, force_copy=True)
+    out = util.rescale_to_float(image, force_copy=True)
 
     if img_cmap is None:
         if image.ndim < 3 or image.shape[2] not in [3, 4]:

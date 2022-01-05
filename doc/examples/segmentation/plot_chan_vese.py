@@ -44,10 +44,10 @@ References
        :arXiv:`1107.2782`
 """
 import matplotlib.pyplot as plt
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage.segmentation import chan_vese
 
-image = img_as_float(data.camera())
+image = rescale_to_float(data.camera())
 # Feel free to play around with the parameters to see how they impact the result
 cv = chan_vese(image, mu=0.25, lambda1=1, lambda2=1, tol=1e-3,
                max_num_iter=200, dt=0.5, init_level_set="checkerboard",

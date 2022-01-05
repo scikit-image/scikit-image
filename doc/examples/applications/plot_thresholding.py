@@ -195,10 +195,10 @@ plt.show()
 
 from skimage.morphology import disk
 from skimage.filters import threshold_otsu, rank
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 
 
-img = img_as_ubyte(data.page())
+img = rescale_to_ubyte(data.page())
 
 radius = 15
 footprint = disk(radius)

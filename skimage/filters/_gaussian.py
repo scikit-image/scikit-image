@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from .._shared import utils
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, convert_to_float, warn
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 __all__ = ['gaussian', 'difference_of_gaussians']
 
@@ -86,7 +86,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     used when approximating the inverted Laplacian of Gaussian, which is used
     in edge and blob detection.
 
-    Input image is converted according to the conventions of ``img_as_float``.
+    Input image is converted according to the conventions of ``rescale_to_float``.
 
     Except for sigma values, all parameters are used for both filters.
 
@@ -118,7 +118,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
            https://doi.org/10.1098/rspb.1980.0020
 
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     low_sigma = np.array(low_sigma, dtype='float', ndmin=1)
     if high_sigma is None:
         high_sigma = low_sigma * 1.6

@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type
 from ..metrics import mean_squared_error
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 
 
@@ -96,7 +96,7 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+        Input data to be denoised (converted using `rescale_to_float`).
     denoise_function : function
         Original denoising function.
     stride : int, optional
@@ -113,7 +113,7 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     output : ndarray
         Denoised image, of same shape as `image`.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
 
     # promote float16->float32 if needed
     float_dtype = _supported_float_type(image.dtype)
@@ -178,7 +178,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+        Input data to be denoised (converted using `rescale_to_float`).
     denoise_function : function
         Denoising function to be calibrated.
     denoise_parameters : dict of list
@@ -271,7 +271,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+        Input data to be denoised (converted using `rescale_to_float`).
     denoise_function : function
         Denoising function to be calibrated.
     denoise_parameters : dict of list
@@ -292,7 +292,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
     losses : list of int
         Self-supervised loss for each set of parameters in `parameters_tested`.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     parameters_tested = list(_product_from_dict(denoise_parameters))
     losses = []
 

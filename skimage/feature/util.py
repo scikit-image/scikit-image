@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..util import img_as_float
+from ..util import rescale_to_float
 from .._shared.utils import _supported_float_type, check_nD
 
 
@@ -73,8 +73,8 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         the other, ``'vertical'``.
 
     """
-    image1 = img_as_float(image1)
-    image2 = img_as_float(image2)
+    image1 = rescale_to_float(image1)
+    image2 = rescale_to_float(image2)
 
     new_shape1 = list(image1.shape)
     new_shape2 = list(image2.shape)
@@ -141,7 +141,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
     check_nD(image, 2)
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 
@@ -149,7 +149,7 @@ def _prepare_grayscale_input_2D(image):
 def _prepare_grayscale_input_nD(image):
     image = np.squeeze(image)
     check_nD(image, range(2, 6))
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 

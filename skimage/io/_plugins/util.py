@@ -2,7 +2,7 @@ import numpy as np
 from . import _colormixer
 from . import _histograms
 import threading
-from ...util import img_as_ubyte
+from ...util import rescale_to_ubyte
 
 # utilities to make life easier for plugin writers.
 
@@ -133,7 +133,7 @@ def prepare_for_display(npy_img):
     width = npy_img.shape[1]
 
     out = np.empty((height, width, 3), dtype=np.uint8)
-    npy_img = img_as_ubyte(npy_img)
+    npy_img = rescale_to_ubyte(npy_img)
 
     if npy_img.ndim == 2 or \
        (npy_img.ndim == 3 and npy_img.shape[2] == 1):

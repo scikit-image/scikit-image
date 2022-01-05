@@ -38,12 +38,12 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.registration import phase_cross_correlation
 from skimage.transform import warp_polar, rotate, rescale
-from skimage.util import img_as_float
+from skimage.util import rescale_to_float
 
 radius = 705
 angle = 35
 image = data.retina()
-image = img_as_float(image)
+image = rescale_to_float(image)
 rotated = rotate(image, angle)
 image_polar = warp_polar(image, radius=radius, channel_axis=-1)
 rotated_polar = warp_polar(rotated, radius=radius, channel_axis=-1)
@@ -82,7 +82,7 @@ radius = 1500
 angle = 53.7
 scale = 2.2
 image = data.retina()
-image = img_as_float(image)
+image = rescale_to_float(image)
 rotated = rotate(image, angle)
 rescaled = rescale(rotated, scale, channel_axis=-1)
 image_polar = warp_polar(image, radius=radius,

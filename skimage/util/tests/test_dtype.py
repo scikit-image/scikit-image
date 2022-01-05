@@ -1,7 +1,7 @@
 import numpy as np
 import itertools
-from skimage import (img_as_float, img_as_float32, img_as_float64,
-                     img_as_int, img_as_uint, img_as_ubyte)
+from skimage import (rescale_to_float, rescale_to_float32, rescale_to_float64,
+                     rescale_to_int, rescale_to_uint, rescale_to_ubyte)
 from skimage.util.dtype import _convert
 
 from skimage._shared._warnings import expected_warnings
@@ -17,8 +17,8 @@ dtype_range = {np.uint8: (0, 255),
                np.float64: (-1.0, 1.0)}
 
 
-img_funcs = (img_as_int, img_as_float64, img_as_float32,
-             img_as_uint, img_as_ubyte)
+img_funcs = (rescale_to_int, rescale_to_float64, rescale_to_float32,
+             rescale_to_uint, rescale_to_ubyte)
 dtypes_for_img_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
 img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
 
@@ -79,7 +79,7 @@ def test_range_extra_dtypes(dtype_in, dt):
 def test_downcast():
     x = np.arange(10).astype(np.uint64)
     with expected_warnings(['Downcasting']):
-        y = img_as_int(x)
+        y = rescale_to_int(x)
     assert np.allclose(y, x.astype(np.int16))
     assert y.dtype == np.int16, y.dtype
 
@@ -87,21 +87,21 @@ def test_downcast():
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
     with testing.raises(ValueError):
-        img_as_int(too_high)
+        rescale_to_int(too_high)
     too_low = np.array([-2], dtype=np.float32)
     with testing.raises(ValueError):
-        img_as_int(too_low)
+        rescale_to_int(too_low)
 
 
 def test_float_float_all_ranges():
     arr_in = np.array([[-10., 10., 1e20]], dtype=np.float32)
-    np.testing.assert_array_equal(img_as_float(arr_in), arr_in)
+    np.testing.assert_array_equal(rescale_to_float(arr_in), arr_in)
 
 
 def test_copy():
     x = np.array([1], dtype=np.float64)
-    y = img_as_float(x)
-    z = img_as_float(x, force_copy=True)
+    y = rescale_to_float(x)
+    z = rescale_to_float(x, force_copy=True)
 
     assert y is x
     assert z is not x
@@ -112,10 +112,10 @@ def test_bool():
     img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
     img8[1, 1] = True
-    for (func, dt) in [(img_as_int, np.int16),
-                       (img_as_float, np.float64),
-                       (img_as_uint, np.uint16),
-                       (img_as_ubyte, np.ubyte)]:
+    for (func, dt) in [(rescale_to_int, np.int16),
+                       (rescale_to_float, np.float64),
+                       (rescale_to_uint, np.uint16),
+                       (rescale_to_ubyte, np.ubyte)]:
         converted_ = func(img_)
         assert np.sum(converted_) == dtype_range[dt][1]
         converted8 = func(img8)
@@ -123,7 +123,7 @@ def test_bool():
 
 
 def test_clobber():
-    # The `img_as_*` functions should never modify input arrays.
+    # The `rescale_to_*` functions should never modify input arrays.
     for func_input_type in img_funcs:
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
@@ -137,13 +137,13 @@ def test_clobber():
 
 def test_signed_scaling_float32():
     x = np.array([-128,  127], dtype=np.int8)
-    y = img_as_float32(x)
+    y = rescale_to_float32(x)
     assert_equal(y.max(), 1)
 
 
 def test_float32_passthrough():
     x = np.array([-1, 1], dtype=np.float32)
-    y = img_as_float(x)
+    y = rescale_to_float(x)
     assert_equal(y.dtype, x.dtype)
 
 
@@ -192,14 +192,14 @@ def test_subclass_conversion():
 
 
 def test_int_to_float():
-    """Check Normalization when casting img_as_float from int types to float"""
+    """Check Normalization when casting from int types to float"""
     int_list = np.arange(9, dtype=np.int64)
-    converted = img_as_float(int_list)
+    converted = rescale_to_float(int_list)
     assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
 
     ii32 = np.iinfo(np.int32)
     ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
-    floats = img_as_float(ii_list)
+    floats = rescale_to_float(ii_list)
 
     assert_equal(floats.max(), 1)
     assert_equal(floats.min(), -1)

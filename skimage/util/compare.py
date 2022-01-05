@@ -1,5 +1,5 @@
 import numpy as np
-from ..util import img_as_float
+from ..util import rescale_to_float
 from itertools import product
 
 
@@ -36,8 +36,8 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 
-    img1 = img_as_float(image1)
-    img2 = img_as_float(image2)
+    img1 = rescale_to_float(image1)
+    img2 = rescale_to_float(image2)
 
     if method == 'diff':
         comparison = np.abs(img2 - img1)

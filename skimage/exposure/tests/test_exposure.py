@@ -162,7 +162,7 @@ np.random.seed(0)
 
 test_img_int = data.camera()
 # squeeze image intensities to lower image contrast
-test_img = util.img_as_float(test_img_int)
+test_img = util.rescale_to_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
 
 
@@ -174,7 +174,7 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    img = util.img_as_ubyte(test_img)
+    img = util.rescale_to_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -183,7 +183,7 @@ def test_equalize_ubyte():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_equalize_float(dtype):
-    img = util.img_as_float(test_img).astype(dtype, copy=False)
+    img = util.rescale_to_float(test_img).astype(dtype, copy=False)
     img_eq = exposure.equalize_hist(img)
     assert img_eq.dtype == _supported_float_type(dtype)
 
@@ -193,7 +193,7 @@ def test_equalize_float(dtype):
 
 
 def test_equalize_masked():
-    img = util.img_as_float(test_img)
+    img = util.rescale_to_float(test_img)
     mask = np.zeros(test_img.shape)
     mask[100:400, 100:400] = 1
     img_mask_eq = exposure.equalize_hist(img, mask=mask)
@@ -415,7 +415,7 @@ def test_rescale_raises_on_incorrect_out_range():
 def test_adapthist_grayscale(dtype):
     """Test a grayscale float image
     """
-    img = util.img_as_float(data.astronaut()).astype(dtype, copy=False)
+    img = util.rescale_to_float(data.astronaut()).astype(dtype, copy=False)
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
@@ -430,7 +430,7 @@ def test_adapthist_grayscale(dtype):
 def test_adapthist_color():
     """Test an RGB color uint16 image
     """
-    img = util.img_as_uint(data.astronaut())
+    img = util.rescale_to_uint(data.astronaut())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
@@ -449,7 +449,7 @@ def test_adapthist_color():
 def test_adapthist_alpha():
     """Test an RGBA color image
     """
-    img = util.img_as_float(data.astronaut())
+    img = util.rescale_to_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
     adapted = exposure.equalize_adapthist(img)
@@ -468,10 +468,10 @@ def test_adapthist_grayscale_Nd():
     not to be interpreted as a color image by @adapt_rgb
     """
     # take 2d image, subsample and stack it
-    img = util.img_as_float(data.astronaut())
+    img = util.rescale_to_float(data.astronaut())
     img = rgb2gray(img)
     a = 15
-    img2d = util.img_as_float(img[0:-1:a, 0:-1:a])
+    img2d = util.rescale_to_float(img[0:-1:a, 0:-1:a])
     img3d = np.array([img2d] * (img.shape[0] // a))
 
     # apply CLAHE
@@ -511,7 +511,7 @@ def test_adapthist_constant():
 def test_adapthist_borders():
     """Test border processing
     """
-    img = rgb2gray(util.img_as_float(data.astronaut()))
+    img = rgb2gray(util.rescale_to_float(data.astronaut()))
 
     # maximize difference between orig and processed img
     img /= 100.
@@ -531,7 +531,7 @@ def test_adapthist_borders():
 
 def test_adapthist_clip_limit():
     img_u = data.moon()
-    img_f = util.img_as_float(img_u)
+    img_f = util.rescale_to_float(img_u)
 
     # uint8 input
     img_clahe0 = exposure.equalize_adapthist(img_u, clip_limit=0)
@@ -559,8 +559,8 @@ def peak_snr(img1, img2):
     """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
-    img1 = util.img_as_float(img1)
-    img2 = util.img_as_float(img2)
+    img1 = util.rescale_to_float(img1)
+    img2 = util.rescale_to_float(img2)
     mse = 1. / img1.size * np.square(img1 - img2).sum()
     _, max_ = dtype_range[img1.dtype.type]
     return 20 * np.log(max_ / mse)

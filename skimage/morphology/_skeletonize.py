@@ -4,7 +4,7 @@ Algorithms for computing the skeleton of a binary image
 
 
 import numpy as np
-from ..util import img_as_ubyte, crop
+from ..util import rescale_to_ubyte, crop
 from scipy import ndimage as ndi
 
 from .._shared.utils import check_nD, deprecate_kwarg
@@ -626,7 +626,7 @@ def skeletonize_3d(image):
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          "got image.ndim = %s instead." % image.ndim)
     image = np.ascontiguousarray(image)
-    image = img_as_ubyte(image, force_copy=False)
+    image = rescale_to_ubyte(image, force_copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying

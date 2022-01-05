@@ -37,11 +37,11 @@ from `skimage.data` for all comparisons.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 from skimage import data
 from skimage.exposure import histogram
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 hist, hist_centers = histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
@@ -68,7 +68,7 @@ from skimage.morphology import disk, ball
 
 rng = np.random.default_rng()
 noise = rng.random(noisy_image.shape)
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
@@ -143,7 +143,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import mean_bilateral
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
@@ -185,7 +185,7 @@ plt.tight_layout()
 from skimage import exposure
 from skimage.filters import rank
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 # equalize globally and locally
 glob = exposure.equalize_hist(noisy_image) * 255
@@ -229,7 +229,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import autolevel
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
@@ -303,7 +303,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import enhance_contrast
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
@@ -332,7 +332,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import enhance_contrast_percentile
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
@@ -488,7 +488,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import maximum, minimum, gradient
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = rescale_to_ubyte(data.camera())
 
 closing = maximum(minimum(noisy_image, disk(5)), disk(5))
 opening = minimum(maximum(noisy_image, disk(5)), disk(5))

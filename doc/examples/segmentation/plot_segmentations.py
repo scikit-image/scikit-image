@@ -91,9 +91,9 @@ from skimage.color import rgb2gray
 from skimage.filters import sobel
 from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
 from skimage.segmentation import mark_boundaries
-from skimage.util import img_as_float
+from skimage.util import rescale_to_float
 
-img = img_as_float(astronaut()[::2, ::2])
+img = rescale_to_float(astronaut()[::2, ::2])
 
 segments_fz = felzenszwalb(img, scale=100, sigma=0.5, min_size=50)
 segments_slic = slic(img, n_segments=250, compactness=10, sigma=1,

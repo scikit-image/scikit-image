@@ -9,7 +9,7 @@ cimport numpy as cnp
 from .._shared.filters import gaussian
 from .._shared.utils import warn
 from ..measure._ccomp cimport find_root, join_trees
-from ..util import img_as_float64
+from ..util import rescale_to_float64
 
 cnp.import_array()
 
@@ -50,7 +50,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
             "which may not be intended." % str(image.shape[2])),
             stacklevel=3)
 
-    image = img_as_float64(image)
+    image = rescale_to_float64(image)
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.

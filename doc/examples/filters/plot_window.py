@@ -25,12 +25,12 @@ visible in the plot of the frequency component of the FFT.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.fft import fft2, fftshift
-from skimage import img_as_float
+from skimage import rescale_to_float
 from skimage.color import rgb2gray
 from skimage.data import astronaut
 from skimage.filters import window
 
-image = img_as_float(rgb2gray(astronaut()))
+image = rescale_to_float(rgb2gray(astronaut()))
 
 wimage = image * window('hann', image.shape)
 

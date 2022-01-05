@@ -1,5 +1,5 @@
 import numpy as np
-from .dtype import img_as_float
+from .dtype import rescale_to_float
 
 
 __all__ = ['random_noise']
@@ -130,7 +130,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     else:
         low_clip = 0.
 
-    image = img_as_float(image)
+    image = rescale_to_float(image)
 
     rng = np.random.default_rng(seed)
 

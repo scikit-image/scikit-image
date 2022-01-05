@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 from .._shared.utils import _supported_float_type, deprecate_kwarg
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ..filters import sobel
 
 
@@ -113,7 +113,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         raise ValueError("Invalid boundary condition.\n" +
                          "Should be one of: "+", ".join(valid_bcs)+'.')
 
-    img = img_as_float(image)
+    img = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     img = img.astype(float_dtype, copy=False)
 

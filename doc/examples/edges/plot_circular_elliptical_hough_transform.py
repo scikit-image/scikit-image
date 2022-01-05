@@ -41,11 +41,11 @@ from skimage import data, color
 from skimage.transform import hough_circle, hough_circle_peaks
 from skimage.feature import canny
 from skimage.draw import circle_perimeter
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 
 
 # Load picture and detect edges
-image = img_as_ubyte(data.coins()[160:230, 70:270])
+image = rescale_to_ubyte(data.coins()[160:230, 70:270])
 edges = canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
 
@@ -96,7 +96,7 @@ plt.show()
 
 import matplotlib.pyplot as plt
 
-from skimage import data, color, img_as_ubyte
+from skimage import data, color, rescale_to_ubyte
 from skimage.feature import canny
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
@@ -124,7 +124,7 @@ orientation = best[5]
 cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
 image_rgb[cy, cx] = (0, 0, 255)
 # Draw the edge (white) and the resulting ellipse (red)
-edges = color.gray2rgb(img_as_ubyte(edges))
+edges = color.gray2rgb(rescale_to_ubyte(edges))
 edges[cy, cx] = (250, 0, 0)
 
 fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),

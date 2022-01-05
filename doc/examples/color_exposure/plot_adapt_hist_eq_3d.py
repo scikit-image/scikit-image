@@ -26,7 +26,7 @@ import imageio as io
 
 from skimage.data import cells3d
 
-im_orig = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
+im_orig = util.rescale_to_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 # Reorder axis order from (z, y, x) to (x, y, z)
 im_orig = im_orig.transpose()

@@ -6,7 +6,7 @@ import numpy as np
 
 from .._shared.utils import check_nD
 from ..color import gray2rgb
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
                        _multiblock_lbp)
@@ -461,7 +461,7 @@ def draw_multiblock_lbp(image, r, c, width, height,
         output = gray2rgb(image)
 
     # Colors are specified in floats.
-    output = img_as_float(output)
+    output = rescale_to_float(output)
 
     # Offsets of neighbor rectangles relative to central one.
     # It has order starting from top left and going clockwise.

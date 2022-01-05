@@ -2,7 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from ..color import rgb2gray
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 
 __all__ = ['blur_effect']
@@ -63,7 +63,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
             raise
         image = rgb2gray(image)
     n_axes = image.ndim
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     shape = image.shape
     B = []
 

@@ -2,9 +2,9 @@ import numpy as np
 from warnings import warn
 
 
-__all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
-           'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool', 'dtype_limits']
+__all__ = ['rescale_to_float32', 'rescale_to_float64', 'rescale_to_float',
+           'rescale_to_int', 'rescale_to_uint', 'rescale_to_ubyte',
+           'rescale_to_bool', 'dtype_limits']
 
 # For integers Numpy uses `_integer_types` basis internally, and builds a leaky
 # `np.XintYY` abstraction on top of it. This leads to situations when, for
@@ -387,7 +387,7 @@ if _convert.__doc__ is not None:
     """
 
 
-def img_as_float32(image, force_copy=False):
+def rescale_to_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
     Parameters
@@ -410,10 +410,11 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float32, force_copy)
+    return _img_as_float(image, force_copy, preserve_range=False,
+                         dtype=np.float32)
 
 
-def img_as_float64(image, force_copy=False):
+def rescale_to_float64(image, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -436,13 +437,14 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float64, force_copy)
+    return _img_as_float(image, force_copy, preserve_range=False,
+                         dtype=np.float64)
 
 
-def img_as_float(image, force_copy=False):
+def rescale_to_float(image, force_copy=False):
     """Convert an image to floating point format.
 
-    This function is similar to `img_as_float64`, but will not convert
+    This function is similar to `rescale_to_float64`, but will not convert
     lower-precision floating point arrays to `float64`.
 
     Parameters
@@ -465,10 +467,36 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.floating, force_copy)
+    return _img_as_float(image, force_copy, preserve_range=False)
 
 
-def img_as_uint(image, force_copy=False):
+def _img_as_float(image, force_copy=False, *, preserve_range=True, dtype=None):
+
+    if image.dtype == np.float16:
+        return image.astype(np.float32)
+    if preserve_range:
+        # Convert image to double only if it is not single or double
+        # precision float
+        if dtype is not None and np.dtype(dtype).char not in 'df':
+            raise ValueError(
+                "dtype must be be either np.float32 or np.float64"
+            )
+        if image.dtype.char not in 'df':
+            dtype = float if dtype is None else dtype
+            image = image.astype(dtype)
+        elif dtype is not None:
+            image = image.astype(dtype, copy=force_copy)
+        elif force_copy:
+            image = image.copy()
+    else:
+        if dtype is None:
+            return _convert(image, np.floating, force_copy)
+        else:
+            return _convert(image, dtype, force_copy)
+    return image
+
+
+def rescale_to_uint(image, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -492,7 +520,7 @@ def img_as_uint(image, force_copy=False):
     return _convert(image, np.uint16, force_copy)
 
 
-def img_as_int(image, force_copy=False):
+def rescale_to_int(image, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -517,7 +545,7 @@ def img_as_int(image, force_copy=False):
     return _convert(image, np.int16, force_copy)
 
 
-def img_as_ubyte(image, force_copy=False):
+def rescale_to_ubyte(image, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -541,7 +569,7 @@ def img_as_ubyte(image, force_copy=False):
     return _convert(image, np.uint8, force_copy)
 
 
-def img_as_bool(image, force_copy=False):
+def rescale_to_bool(image, force_copy=False):
     """Convert an image to boolean format.
 
     Parameters

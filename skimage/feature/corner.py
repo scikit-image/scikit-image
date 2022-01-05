@@ -7,7 +7,7 @@ from scipy import spatial, stats
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, safe_as_int
 from ..transform import integral_image
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .peak import peak_local_max
@@ -181,7 +181,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
            [ 0.,  0.,  0.,  0.,  0.]])
     """
 
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -234,7 +234,7 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     is not accurate, i.e., not similar to the result obtained if someone
     computed the Hessian and took its determinant.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     if image.ndim == 2 and approximate:
@@ -1117,7 +1117,7 @@ def corner_moravec(image, window_size=1):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]])
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     return _corner_moravec(np.ascontiguousarray(image), window_size)

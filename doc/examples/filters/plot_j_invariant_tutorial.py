@@ -30,13 +30,13 @@ from skimage.restoration import (calibrate_denoiser,
                                  denoise_wavelet,
                                  denoise_tv_chambolle, denoise_nl_means,
                                  estimate_sigma)
-from skimage.util import img_as_float, random_noise
+from skimage.util import rescale_to_float, random_noise
 from skimage.color import rgb2gray
 from functools import partial
 
 _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
-image = img_as_float(chelsea())
+image = rescale_to_float(chelsea())
 sigma = 0.2
 noisy = random_noise(image, var=sigma ** 2)
 
@@ -210,7 +210,7 @@ ax.set_xlabel('sigma')
 # loss shows that the TV norm denoiser is the best for this noisy image.
 #
 
-image = rgb2gray(img_as_float(hubble_deep_field()[100:250, 50:300]))
+image = rgb2gray(rescale_to_float(hubble_deep_field()[100:250, 50:300]))
 
 sigma = 0.4
 noisy = random_noise(image, mode='speckle', var=sigma ** 2)
