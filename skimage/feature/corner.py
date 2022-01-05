@@ -1,5 +1,4 @@
 from itertools import combinations_with_replacement
-from warnings import warn
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -41,7 +40,7 @@ def _compute_derivatives(image, mode='constant', cval=0):
     return derivatives
 
 
-def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
+def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute structure tensor using sum of squared differences.
 
     The (2-dimensional) structure tensor A is defined as::
@@ -105,18 +104,10 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     if order == 'xy' and image.ndim > 2:
         raise ValueError('Only "rc" order is supported for dim > 2.')
 
-    if order is None:
-        if image.ndim == 2:
-            # The legacy 2D code followed (x, y) convention, so we swap the
-            # axis order to maintain compatibility with old code
-            warn('deprecation warning: the default order of the structure '
-                 'tensor values will be "row-column" instead of "xy" starting '
-                 'in skimage version 0.20. Use order="rc" or order="xy" to '
-                 'set this explicitly.  (Specify order="xy" to maintain the '
-                 'old behavior.)', category=FutureWarning, stacklevel=2)
-            order = 'xy'
-        else:
-            order = 'rc'
+    if order not in ['rc', 'xy']:
+        raise ValueError(
+            f'order {order} is invalid. Must be either "rc" or "xy"'
+        )
 
     if not np.isscalar(sigma):
         sigma = tuple(sigma)
@@ -349,47 +340,6 @@ def structure_tensor_eigenvalues(A_elems):
     structure_tensor
     """
     return _symmetric_compute_eigenvalues(A_elems)
-
-
-def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute eigenvalues of structure tensor.
-
-    Parameters
-    ----------
-    Axx : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Axy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Ayy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-
-    Returns
-    -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
-
-    Examples
-    --------
-    >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
-    >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
-    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]  # doctest: +SKIP
-    array([[0., 0., 0., 0., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 4., 0., 4., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 0., 0., 0., 0.]])
-
-    """
-    warn('deprecation warning: the function structure_tensor_eigvals is '
-         'deprecated and will be removed in version 0.20. Please use '
-         'structure_tensor_eigenvalues instead.',
-         category=FutureWarning, stacklevel=2)
-
-    return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
 def hessian_matrix_eigvals(H_elems):
@@ -722,10 +672,10 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
@@ -800,9 +750,9 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
-           corner detection. In European conference on computer vision (pp. 430-443).
-           Springer, Berlin, Heidelberg.
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for
+           high-speed corner detection. In European conference on computer
+           vision (pp. 430-443). Springer, Berlin, Heidelberg.
            :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
@@ -868,10 +818,10 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
