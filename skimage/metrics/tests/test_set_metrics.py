@@ -1,4 +1,3 @@
-import itertools
 import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal
@@ -54,9 +53,8 @@ def test_hausdorff_simple():
     )
 
 
-@pytest.mark.parametrize(
-    "points_a, points_b", itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2)
-)
+@pytest.mark.parametrize("points_a", [(0, 0), (3, 0), (1, 4), (4, 1)])
+@pytest.mark.parametrize("points_b", [(0, 0), (3, 0), (1, 4), (4, 1)])
 def test_hausdorff_region_single(points_a, points_b):
     shape = (5, 5)
     coords_a = np.zeros(shape, dtype=bool)
@@ -74,12 +72,8 @@ def test_hausdorff_region_single(points_a, points_b):
     )
 
 
-@pytest.mark.parametrize(
-    "points_a, points_b",
-    itertools.product(
-        [(5, 4), (4, 5), (3, 4), (4, 3)], [(6, 4), (2, 6), (2, 4), (4, 0)]
-    ),
-)
+@pytest.mark.parametrize("points_a", [(5, 4), (4, 5), (3, 4), (4, 3)])
+@pytest.mark.parametrize("points_b", [(6, 4), (2, 6), (2, 4), (4, 0)])
 def test_hausdorff_region_different_points(points_a, points_b):
     shape = (7, 7)
     coords_a = np.zeros(shape, dtype=bool)
@@ -151,12 +145,8 @@ def test_gallery():
     assert_almost_equal(hausdorff_distance(coords_a, coords_b, method="modified"), 7.5)
 
 
-@pytest.mark.parametrize(
-    "points_a, points_b",
-    itertools.product(
-        [(0, 0, 1), (0, 1, 0), (1, 0, 0)], [(0, 0, 2), (0, 2, 0), (2, 0, 0)]
-    ),
-)
+@pytest.mark.parametrize("points_a", [(0, 0, 1), (0, 1, 0), (1, 0, 0)])
+@pytest.mark.parametrize("points_b", [(0, 0, 2), (0, 2, 0), (2, 0, 0)])
 def test_3d_hausdorff_region(points_a, points_b):
     shape = (3, 3, 3)
     coords_a = np.zeros(shape, dtype=bool)
