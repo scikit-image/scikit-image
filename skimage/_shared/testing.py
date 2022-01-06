@@ -208,7 +208,6 @@ def setup_test():
     if _error_on_warnings:
         from scipy import signal, ndimage, special, optimize, linalg
         from scipy.io import loadmat
-        from skimage import viewer
 
         np.random.seed(0)
 
@@ -235,11 +234,6 @@ def setup_test():
             'default', message='unclosed file', category=ResourceWarning
         )
 
-        # ignore known FutureWarnings from viewer module
-        warnings.filterwarnings(
-            'ignore', category=FutureWarning, module='skimage.viewer'
-        )
-
         # Ignore other warnings only seen when using older versions of
         # dependencies.
         warnings.filterwarnings(
@@ -259,11 +253,6 @@ def setup_test():
             message='Your installed pillow version',
             category=UserWarning,
             module='skimage.io'
-        )
-
-        # match both "viewer requires Qt" and "viewer requires matplotlib"
-        warnings.filterwarnings(
-            'default', message='viewer requires ', category=UserWarning
         )
 
         # ignore warning from cycle_spin about Dask not being installed
