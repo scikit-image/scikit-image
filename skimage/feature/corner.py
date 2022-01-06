@@ -1,3 +1,4 @@
+import math
 from itertools import combinations_with_replacement
 from warnings import warn
 
@@ -155,10 +156,10 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     ----------
     image : ndarray
         Input image.
-    sigma : float
+    sigma : float or sequence of float, optional
         Standard deviation used for the Gaussian kernel, which sets the
         amount of smoothing in terms of pixel-distances. It is
-        advised to not choose a sigma much than 1.0, otherwise
+        advised to not choose a sigma much less than 1.0, otherwise
         aliasing artifacts may occur.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
@@ -205,8 +206,8 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     for deriv_dirs in combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        deriv_step1 = 1 * (idx == deriv_dirs[0])
-        deriv_step2 = 1 * (idx == deriv_dirs[1])
+        deriv_step1 = (idx == deriv_dirs[0]).astype(1)
+        deriv_step2 = (idx == deriv_dirs[1]).astype(1)
         # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
         #                                and deriv_step2=[1, 0]
         #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
@@ -227,35 +228,28 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
 
         # Apply two successive Gaussian filter operations, as per detailed in
         # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
-        if np.all(np.array(sigma)>1):
-            H_elems.append(
-                ndi.gaussian_filter(
-                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma,
-                                        mode=mode, cval=cval,
-                                        order=deriv_step1, truncate=8),
-                    sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                    cval=cval, order=deriv_step2,
-                    truncate=8)
+        if np.isscalar(sigma):
+            sigma = (sigma,) * image.ndim
+
+        # For small values of sigma, the scipy Gaussian filter
+        # suffers from aliasing and edge artifacts, given that
+        # the filter will approximate a sinc or sinc derivative
+        # which only goes to 0 very slowly (order 1/n^2). Thus,
+        # we will use a much larger truncate value to reduce any
+        # edge artifacts.
+        truncate = 8 if all(s > 1 for s in sigma) else 100
+
+        sq1_2 = 1 / math.sqrt(2)
+        sigma_scaled = tuple(sq1_2 * s for s in sigma)
+        common_kwargs = dict(sigma=sigma_scaled, mode=mode, cval=cval,
+                             truncate=truncate)
+        H_elems.append(
+            ndi.gaussian_filter(
+                ndi.gaussian_filter(image, order=deriv_step1, **common_kwargs),
+                order=deriv_step2,
+                **common_kwargs,
             )
-        else:
-            # For small values of sigma, the scipy Gaussian filter
-            # suffers from aliasing and edge artifacts, given that
-            # the filter will approximate a sinc or sinc derivative
-            # which only goes to 0 very slowly (order 1/n^2). Thus,
-            # we will use a much larger truncate value to reduce any
-            # edge artifacts.
-            H_elems.append(
-                ndi.gaussian_filter(
-                    ndi.gaussian_filter(image, sigma=np.sqrt(1 / 2) * sigma,
-                                        mode=mode, cval=cval,
-                                        order=deriv_step1, truncate=100),
-                    sigma=np.sqrt(1 / 2) * sigma, mode=mode,
-                    cval=cval, order=deriv_step2,
-                    truncate=100)
-            )
-            # The truncation must be fairly large here, as the FFT-based
-            # kernel does not go to 0 quickly, if a small sigma is
-            # chosen.
+        )
 
     return H_elems
 
