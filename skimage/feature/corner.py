@@ -203,11 +203,25 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     # deriv_step{1/2}[::-1] thus in reverse order, because the image
     # will be in coordinates [(z,)y,x], but we need the Hessian in
     # order [d^2/dx^2, d^2/(dx*dy), ...], so in reverse order.
+    if np.isscalar(sigma):
+        sigma = (sigma,) * image.ndim
+    # For small values of sigma, the scipy Gaussian filter
+    # suffers from aliasing and edge artifacts, given that
+    # the filter will approximate a sinc or sinc derivative
+    # which only goes to 0 very slowly (order 1/n^2). Thus,
+    # we will use a much larger truncate value to reduce any
+    # edge artifacts.
+    truncate = 8 if all(s > 1 for s in sigma) else 100
+    sq1_2 = 1 / math.sqrt(2)
+    sigma_scaled = tuple(sq1_2 * s for s in sigma)
+    common_kwargs = dict(sigma=sigma_scaled, mode=mode, cval=cval,
+                         truncate=truncate)
+
     for deriv_dirs in combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        deriv_step1 = (idx == deriv_dirs[0]).astype(1)
-        deriv_step2 = (idx == deriv_dirs[1]).astype(1)
+        deriv_step1 = (idx == deriv_dirs[0]).astype(int)
+        deriv_step2 = (idx == deriv_dirs[1]).astype(int)
         # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
         #                                and deriv_step2=[1, 0]
         #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
@@ -225,24 +239,9 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
             # differentiate as [0, 2], because the first direction
             # is the vertical direction, and the second the horizontal
             # direction. Hence, we reverse the list order.
-
+            
         # Apply two successive Gaussian filter operations, as per detailed in
         # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
-        if np.isscalar(sigma):
-            sigma = (sigma,) * image.ndim
-
-        # For small values of sigma, the scipy Gaussian filter
-        # suffers from aliasing and edge artifacts, given that
-        # the filter will approximate a sinc or sinc derivative
-        # which only goes to 0 very slowly (order 1/n^2). Thus,
-        # we will use a much larger truncate value to reduce any
-        # edge artifacts.
-        truncate = 8 if all(s > 1 for s in sigma) else 100
-
-        sq1_2 = 1 / math.sqrt(2)
-        sigma_scaled = tuple(sq1_2 * s for s in sigma)
-        common_kwargs = dict(sigma=sigma_scaled, mode=mode, cval=cval,
-                             truncate=truncate)
         H_elems.append(
             ndi.gaussian_filter(
                 ndi.gaussian_filter(image, order=deriv_step1, **common_kwargs),
