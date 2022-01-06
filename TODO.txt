@@ -19,8 +19,6 @@ Version 0.20
   `structure_tensor`.
 * In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
   function.
-* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
 Version 1.0
 -----------

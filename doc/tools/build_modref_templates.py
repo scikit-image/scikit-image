@@ -54,7 +54,6 @@ if __name__ == '__main__':
         r'\.fixes$',
         r'\.externals$',
         r'filter$',
-        r'viewer.viewers$',  # all functions already imported to viewer
     ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')

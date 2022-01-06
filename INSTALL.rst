@@ -272,7 +272,6 @@ This directory contains the following files:
     ├── skimage
     ├── TODO.txt
     ├── tools
-    └── viewer_examples
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
