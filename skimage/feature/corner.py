@@ -68,11 +68,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'rc', 'xy'}, optional
-        NOTE: Only applies in 2D. Higher dimensions must always use 'rc' order.
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
-        usage of the last axis initially (Axx, Axy, Ayy).
+        NOTE: 'xy' is only an option for 2D images, higher dimensions must
+        always use 'rc' order. This parameter allows for the use of reverse or
+        forward order of the image axes in gradient computation. 'rc' indicates
+        the use of the first axis initially (Arr, Arc, Acc), whilst 'xy'
+        indicates the usage of the last axis initially (Axx, Axy, Ayy).
 
     Returns
     -------
