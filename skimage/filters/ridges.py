@@ -12,8 +12,6 @@ perpendicular but not along the structure.
 from warnings import warn
 
 import numpy as np
-import itertools
-from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
@@ -177,7 +175,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     return hessian_eigenvalues
 
 
-def meijering(image, sigmas=range(1, 10, 2), alpha=-1/3,
+def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
               black_ridges=True, mode='reflect', cval=0,
               use_gaussian_derivatives=True):
     """

@@ -858,10 +858,10 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
@@ -936,9 +936,9 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
-           corner detection. In European conference on computer vision (pp. 430-443).
-           Springer, Berlin, Heidelberg.
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for
+           high-speed corner detection. In European conference on computer
+           vision (pp. 430-443). Springer, Berlin, Heidelberg.
            :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
@@ -1004,10 +1004,10 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
