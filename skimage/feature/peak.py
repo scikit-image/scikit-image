@@ -185,7 +185,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     The peak local maximum function returns the coordinates of local peaks
     (maxima) in an image. Internally, a maximum filter is used for finding
     local maxima. This operation dilates the original image. After comparison
-    of the dilated and original image, this function returns the coordinates
+    of the dilated and original images, this function returns the coordinates
     of the peaks where the dilated image equals the original image.
 
     See also

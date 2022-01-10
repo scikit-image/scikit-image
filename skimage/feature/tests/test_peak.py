@@ -235,7 +235,7 @@ class TestPeakLocalMax():
                                        min_distance=1, threshold_rel=0,
                                        exclude_border=False)
         result = np.zeros_like(image, dtype=bool)
-        result[tuple(peak_idx.T)] = 1
+        result[tuple(peak_idx.T)] = True
         assert np.all(result == (labels == 1))
 
     def test_adjacent_and_same(self):
@@ -326,7 +326,7 @@ class TestPeakLocalMax():
                                        threshold_rel=0,
                                        exclude_border=False)
         result = np.zeros_like(image, dtype=bool)
-        result[tuple(peak_idx.T)] = 1
+        result[tuple(peak_idx.T)] = True
         assert np.all(result == expected)
 
     def test_disk(self):
