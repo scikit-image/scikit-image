@@ -1,12 +1,12 @@
 ## Support for scikit-image
 
 Welcome to scikit-image! We use GitHub for tracking bugs and feature requests.
-GitHub [Issues](https://github.com/scikit-image/scikit-image/discussions)
+GitHub [Issues](https://github.com/scikit-image/scikit-image/issues)
 should be used for reporting bugs or performance regressions. We prefer use of
 GitHub [Discussions](https://github.com/scikit-image/scikit-image/discussions)
-rather than issues for feature requests. This GitHub repository isn't the right
-place to get support for using scikit-image, but the following resources are
-available for that purpose.
+rather than issues for feature requests. If you need support for using
+scikit-image, please feel free to reach out to the developers and the community
+using the following resources.
 
 ### Support
 
@@ -18,7 +18,7 @@ someone who has worked on a similar problem.
 
 ### Real-time Chat
 
-For chat, we have the [skimage zulip](https://napari.zulipchat.com). Feel free
+For chat, we have the [skimage zulip](https://skimage.zulipchat.com). Feel free
 to ask questions there or just say hello and let us know how you are using
 scikit-image!
 
