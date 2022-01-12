@@ -72,7 +72,8 @@ class change_default_value(SkimageDecorator):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        stacklevel = self.get_stacklevel(func)
+        self.update_stacklevel(func)
+        stacklevel = self._stacklevel[func]
 
         if self.warning_msg is None:
             self.warning_msg = (
