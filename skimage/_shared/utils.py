@@ -30,17 +30,29 @@ class SkimageDecorator:
     Used to manage warnings stacklevel. Decorators must inherit from
     this class.
 
-    The _stacklevel class variable is used to store the stacklevel of
-    each decorated function: each time a function `func` is decorated,
-    _stacklevel[func] is incremented by 1 level.
+    The _stack_length class variable is used to store the number of
+    times a function is wrapped by a decorator. `update_stack_length`
+    must be called in each decorator `__call__` method to ensure
+    `_stack_length` is up to date.
+
+    `get_stack_length` must be called before updating `stack_length` to
+    obtain current decorator rank in the call stack.
+
+    The stacklevel is computed as `stacklevel = 1 + stack_length -
+    wrap_rank` where `stack_length` is the total number of times a
+    current decorated function is wrapped, and `wrap_rank` is the rank
+    of the decorator in the wrapping stack.
 
     """
 
-    _stacklevel = {}
+    _stack_length = {}
 
-    def update_stacklevel(self, func):
-        
-        self._stacklevel[func] = self._stacklevel.get(func, 1) + 1
+    def get_stack_length(self, func):
+        return self._stack_length.get(func.__name__, 0)
+
+    def update_stack_length(self, func):
+        rank = self.get_stack_length(func)
+        self._stack_length[func.__name__] = rank + 1
 
 
 class change_default_value(SkimageDecorator):
@@ -72,8 +84,8 @@ class change_default_value(SkimageDecorator):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        self.update_stacklevel(func)
-        stacklevel = self._stacklevel[func]
+        wrap_rank = self.get_stack_length(func)
+        self.update_stack_length(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -86,6 +98,7 @@ class change_default_value(SkimageDecorator):
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - wrap_rank
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
                 warnings.warn(self.warning_msg, FutureWarning,
@@ -116,6 +129,7 @@ class remove_arg(SkimageDecorator):
         self.changed_version = changed_version
 
     def __call__(self, func):
+
         parameters = inspect.signature(func).parameters
         arg_idx = list(parameters.keys()).index(self.arg_name)
         warning_msg = (
@@ -127,11 +141,12 @@ class remove_arg(SkimageDecorator):
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
-        self.update_stacklevel(func)
-        stacklevel = self._stacklevel[func]
+        wrap_rank = self.get_stack_length(func)
+        self.update_stack_length(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - wrap_rank
             if len(args) > arg_idx or self.arg_name in kwargs.keys():
                 # warn that arg_name is deprecated
                 warnings.warn(warning_msg, FutureWarning,
@@ -244,11 +259,13 @@ class deprecate_kwarg(SkimageDecorator):
 
     def __call__(self, func):
 
-        self.update_stacklevel(func)
-        stacklevel = self._stacklevel[func]
+        wrap_rank = self.get_stack_length(func)
+        self.update_stack_length(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - wrap_rank
+
             for old_arg, new_arg in self.kwarg_mapping.items():
                 if old_arg in kwargs:
                     #  warn that the function interface has changed:
@@ -290,11 +307,12 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
     def __call__(self, func):
 
-        self.update_stacklevel(func)
-        stacklevel = self._stacklevel[func]
+        wrap_rank = self.get_stack_length(func)
+        self.update_stack_length(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - wrap_rank
 
             if self.position is not None and len(args) > self.position:
                 warning_msg = (
@@ -365,8 +383,7 @@ class channel_as_last_axis(SkimageDecorator):
         self.multichannel_output = multichannel_output
 
     def __call__(self, func):
-
-        self.update_stacklevel(func)
+        self.update_stack_length(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -437,8 +454,7 @@ class deprecated(SkimageDecorator):
         self.removed_version = removed_version
 
     def __call__(self, func):
-
-        self.update_stacklevel(func)
+        self.update_stack_length(func)
 
         alt_msg = ''
         if self.alt_func is not None:
