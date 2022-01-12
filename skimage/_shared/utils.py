@@ -24,7 +24,7 @@ class skimage_deprecation(Warning):
     pass
 
 
-class SkimageDecorator:
+class DecoratorBaseClass:
     """Decorators base class.
 
     Used to manage warnings stacklevel. Decorators must inherit from
@@ -55,7 +55,7 @@ class SkimageDecorator:
         self._stack_length[func.__name__] = rank + 1
 
 
-class change_default_value(SkimageDecorator):
+class change_default_value(DecoratorBaseClass):
     """Decorator for changing the default value of an argument.
 
     Parameters
@@ -108,7 +108,7 @@ class change_default_value(SkimageDecorator):
         return fixed_func
 
 
-class remove_arg(SkimageDecorator):
+class remove_arg(DecoratorBaseClass):
     """Decorator to remove an argument from function's signature.
 
     Parameters
@@ -222,7 +222,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-class deprecate_kwarg(SkimageDecorator):
+class deprecate_kwarg(DecoratorBaseClass):
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
@@ -353,7 +353,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
         return fixed_func
 
 
-class channel_as_last_axis(SkimageDecorator):
+class channel_as_last_axis(DecoratorBaseClass):
     """Decorator for automatically making channels axis last for all arrays.
 
     This decorator reorders axes for compatibility with functions that only
@@ -432,7 +432,7 @@ class channel_as_last_axis(SkimageDecorator):
         return fixed_func
 
 
-class deprecated(SkimageDecorator):
+class deprecated(DecoratorBaseClass):
     """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
