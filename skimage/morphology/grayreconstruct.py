@@ -165,8 +165,6 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     isize = images.size
     # use -isize so we get a signed dtype rather than an unsigned one
     signed_int_dtype = np.result_type(np.min_scalar_type(-isize), np.int32)
-    # the corresponding unsigned type has same char, but uppercase
-    unsigned_int_dtype = np.dtype(signed_int_dtype.char.upper())
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
@@ -198,8 +196,9 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         value_rank, value_map = rank_order(-images)
         value_map = -value_map
 
-    start = index_sorted[0]
-    value_rank = value_rank.astype(unsigned_int_dtype, copy=False)
+    start = np.int64(index_sorted[0])
+    vdtype = np.uint32 if np.iinfo(value_rank.dtype).bits == 32 else np.uint64
+    value_rank = value_rank.astype(vdtype)
     reconstruction_loop(value_rank, prev, next, nb_strides, start,
                         image_stride)
 
