@@ -24,7 +24,26 @@ class skimage_deprecation(Warning):
     pass
 
 
-class change_default_value:
+class SkimageDecorator:
+    """Decorators base class.
+
+    Used to manage warnings stacklevel. Decorators must inherit from
+    this class.
+
+    The _stacklevel class variable is used to store the stacklevel of
+    each decorated function: each time a function `func` is decorated,
+    _stacklevel[func] is incremented by 1 level.
+
+    """
+
+    _stacklevel = {}
+
+    def update_stacklevel(self, func):
+        
+        self._stacklevel[func] = self._stacklevel.get(func, 1) + 1
+
+
+class change_default_value(SkimageDecorator):
     """Decorator for changing the default value of an argument.
 
     Parameters
@@ -53,6 +72,8 @@ class change_default_value:
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
+        stacklevel = self.get_stacklevel(func)
+
         if self.warning_msg is None:
             self.warning_msg = (
                 f'The new recommended value for {self.arg_name} is '
@@ -66,13 +87,14 @@ class change_default_value:
         def fixed_func(*args, **kwargs):
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
-                warnings.warn(self.warning_msg, FutureWarning, stacklevel=2)
+                warnings.warn(self.warning_msg, FutureWarning,
+                              stacklevel=stacklevel)
             return func(*args, **kwargs)
 
         return fixed_func
 
 
-class remove_arg:
+class remove_arg(SkimageDecorator):
     """Decorator to remove an argument from function's signature.
 
     Parameters
@@ -104,11 +126,15 @@ class remove_arg:
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
+        self.update_stacklevel(func)
+        stacklevel = self._stacklevel[func]
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             if len(args) > arg_idx or self.arg_name in kwargs.keys():
                 # warn that arg_name is deprecated
-                warnings.warn(warning_msg, FutureWarning, stacklevel=2)
+                warnings.warn(warning_msg, FutureWarning,
+                              stacklevel=stacklevel)
             return func(*args, **kwargs)
 
         return fixed_func
@@ -180,7 +206,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-class deprecate_kwarg:
+class deprecate_kwarg(SkimageDecorator):
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
@@ -217,6 +243,9 @@ class deprecate_kwarg:
 
     def __call__(self, func):
 
+        self.update_stacklevel(func)
+        stacklevel = self._stacklevel[func]
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             for old_arg, new_arg in self.kwarg_mapping.items():
@@ -224,7 +253,8 @@ class deprecate_kwarg:
                     #  warn that the function interface has changed:
                     warnings.warn(self.warning_msg.format(
                         old_arg=old_arg, func_name=func.__name__,
-                        new_arg=new_arg), FutureWarning, stacklevel=2)
+                        new_arg=new_arg), FutureWarning,
+                        stacklevel=stacklevel)
                     # Substitute new_arg to old_arg
                     kwargs[new_arg] = kwargs.pop(old_arg)
 
@@ -258,6 +288,10 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
         self.position = multichannel_position
 
     def __call__(self, func):
+
+        self.update_stacklevel(func)
+        stacklevel = self._stacklevel[func]
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
 
@@ -269,7 +303,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 )
                 warnings.warn(warning_msg.format(func_name=func.__name__),
                               FutureWarning,
-                              stacklevel=2)
+                              stacklevel=stacklevel)
                 if 'channel_axis' in kwargs:
                     raise ValueError(
                         "Cannot provide both a `channel_axis` kwarg and a "
@@ -283,7 +317,8 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 #  warn that the function interface has changed:
                 warnings.warn(self.warning_msg.format(
                     old_arg='multichannel', func_name=func.__name__,
-                    new_arg='channel_axis'), FutureWarning, stacklevel=2)
+                    new_arg='channel_axis'), FutureWarning,
+                    stacklevel=stacklevel)
 
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
@@ -299,7 +334,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
         return fixed_func
 
 
-class channel_as_last_axis():
+class channel_as_last_axis(SkimageDecorator):
     """Decorator for automatically making channels axis last for all arrays.
 
     This decorator reorders axes for compatibility with functions that only
@@ -329,6 +364,9 @@ class channel_as_last_axis():
         self.multichannel_output = multichannel_output
 
     def __call__(self, func):
+
+        self.update_stacklevel(func)
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
 
@@ -376,7 +414,7 @@ class channel_as_last_axis():
         return fixed_func
 
 
-class deprecated(object):
+class deprecated(SkimageDecorator):
     """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
@@ -398,6 +436,8 @@ class deprecated(object):
         self.removed_version = removed_version
 
     def __call__(self, func):
+
+        self.update_stacklevel(func)
 
         alt_msg = ''
         if self.alt_func is not None:
