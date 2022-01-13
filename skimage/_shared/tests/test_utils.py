@@ -1,5 +1,6 @@
 import sys
 import warnings
+import functools
 
 import numpy as np
 import pytest
@@ -9,7 +10,8 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
                                    _supported_float_type,
-                                   channel_as_last_axis)
+                                   channel_as_last_axis,
+                                   DecoratorBaseClass)
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -275,3 +277,33 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size is None
     else:
         assert size == x.shape[channel_axis]
+
+
+def test_decorator_warnings_stacklevel():
+
+    class TestDecorator(DecoratorBaseClass):
+
+        def __init__(self, expected_stacklevel):
+            self.expected_stacklevel = expected_stacklevel
+
+        def __call__(self, func):
+            stack_rank = self.get_stack_length(func)
+            self.update_stack_length(func)
+            
+            @functools.wraps(func)
+            def wrapped_func(*args, **kwargs):
+                stacklevel = 1 + self.get_stack_length(func) - stack_rank
+
+                assert stacklevel == self.expected_stacklevel
+
+                return func(*args, **kwargs)
+
+            return wrapped_func
+
+
+    @TestDecorator(expected_stacklevel=5)
+    @TestDecorator(expected_stacklevel=4)
+    @TestDecorator(expected_stacklevel=3)
+    @TestDecorator(expected_stacklevel=2)
+    def do_nothing():
+        pass
