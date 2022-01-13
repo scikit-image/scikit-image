@@ -445,12 +445,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         key_count = 0
         for o, (octave, delta) in enumerate(zip(gaussian_scalespace,
                                                 self.deltas)):
+            gradient_space.append(np.gradient(octave))
+
             in_oct = octaves == o
+            if not np.any(in_oct):
+                continue
             positions = positions_oct[in_oct]
             scales = scales_oct[in_oct]
             sigmas = sigmas_oct[in_oct]
 
-            gradient_space.append(np.gradient(octave))
             oshape = octave.shape[:2]
             # convert to octave's dimensions
             yx = positions / delta
