@@ -289,7 +289,7 @@ def test_decorator_warnings_stacklevel():
         def __call__(self, func):
             stack_rank = self.get_stack_length(func)
             self.update_stack_length(func)
-            
+
             @functools.wraps(func)
             def wrapped_func(*args, **kwargs):
                 stacklevel = 1 + self.get_stack_length(func) - stack_rank
@@ -299,7 +299,6 @@ def test_decorator_warnings_stacklevel():
                 return func(*args, **kwargs)
 
             return wrapped_func
-
 
     @TestDecorator(expected_stacklevel=5)
     @TestDecorator(expected_stacklevel=4)
