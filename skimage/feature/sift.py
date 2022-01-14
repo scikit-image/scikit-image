@@ -151,7 +151,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         Subpixel-precision keypoint coordinates as ``(row, col)``.
     sigmas : (N, ) array
         The corresponding sigma (blur) value of a keypoint.
-    sigmas : (N, ) array
+    scales : (N, ) array
         The corresponding scale of a keypoint.
     orientations : (N, ) array
         The orientations of the gradient around every keypoint.
@@ -335,6 +335,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             # find extrema
             keys = _local_max(np.ascontiguousarray(octave), threshold)
             if keys.size == 0:
+                extrema_pos.append(np.empty((0, 2)))
                 continue
 
             # localize extrema
@@ -413,13 +414,14 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             extrema_scales.append(keys[border_filter, 2])
             extrema_sigmas.append(sigmas[border_filter])
 
-        if not extrema_pos:
+        octave_indices = np.concatenate([np.full(len(p), i)
+                                         for i, p in enumerate(extrema_pos)])
+
+        if len(octave_indices) == 0:
             raise RuntimeError(
                 "SIFT found no features. Try passing in an image containing "
                 "greater intensity contrasts between adjacent pixels.")
 
-        octave_indices = np.concatenate([np.full(len(p), i)
-                                         for i, p in enumerate(extrema_pos)])
         extrema_pos = np.concatenate(extrema_pos)
         extrema_scales = np.concatenate(extrema_scales)
         extrema_sigmas = np.concatenate(extrema_sigmas)
@@ -443,12 +445,15 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         key_count = 0
         for o, (octave, delta) in enumerate(zip(gaussian_scalespace,
                                                 self.deltas)):
+            gradient_space.append(np.gradient(octave))
+
             in_oct = octaves == o
+            if not np.any(in_oct):
+                continue
             positions = positions_oct[in_oct]
             scales = scales_oct[in_oct]
             sigmas = sigmas_oct[in_oct]
 
-            gradient_space.append(np.gradient(octave))
             oshape = octave.shape[:2]
             # convert to octave's dimensions
             yx = positions / delta
