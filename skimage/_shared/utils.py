@@ -30,18 +30,19 @@ class DecoratorBaseClass:
     Used to manage warnings stacklevel. Decorators must inherit from
     this class.
 
+    `stack_length` is the total number of times a decorated function is wrapped.
+    `stack_rank` is the rank of the decorator in the call stack.
+    
     The _stack_length class variable is used to store the number of
     times a function is wrapped by a decorator. `update_stack_length`
-    must be called in each decorator `__call__` method to ensure
+    must be called in each decorator's `__call__` method to ensure
     `_stack_length` is up to date.
 
     `get_stack_length` must be called before updating `stack_length` to
-    obtain current decorator rank in the call stack.
+    obtain the decorator's current rank in the call stack.
 
     The stacklevel is computed as `stacklevel = 1 + stack_length -
-    stack_rank` where `stack_length` is the total number of times a
-    current decorated function is wrapped, and `stack_rank` is the
-    rank of the decorator in the call stack.
+    stack_rank`.
 
     """
 
