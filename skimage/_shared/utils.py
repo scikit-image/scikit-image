@@ -250,7 +250,7 @@ class deprecate_kwarg(DecoratorBaseClass):
                                 "for `{func_name}`. ")
             if removed_version is not None:
                 self.warning_msg += (f'It will be removed in '
-                                     f'version {removed_version}.')
+                                     f'version {removed_version}. ')
             self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
