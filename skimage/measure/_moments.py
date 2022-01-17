@@ -1,7 +1,10 @@
+import itertools
+
 import numpy as np
+
 from .._shared.utils import _supported_float_type, check_nD
 from . import _moments_cy
-import itertools
+from ._moments_analytical import moments_raw_to_central
 
 
 def moments_coords(coords, order=3):
@@ -241,7 +244,10 @@ def moments_central(image, center=None, order=3, **kwargs):
            [ 0.,  0.,  0.,  0.]])
     """
     if center is None:
-        center = centroid(image)
+        # Note: No need for an explicit call to centroid.
+        #       The centroid will be obtained from the raw moments.
+        moments_raw = moments(image, order=order)
+        return moments_raw_to_central(moments_raw)
     float_dtype = _supported_float_type(image.dtype)
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):

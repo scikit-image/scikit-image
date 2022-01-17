@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 import numpy as np
 from scipy import ndimage as ndi
@@ -11,6 +13,31 @@ from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_allclose)
 from skimage._shared.utils import _supported_float_type
+
+
+def compare_moments(m1, m2, thresh=1e-8):
+    """Compare two moments arrays.
+
+    Compares only values in the upper-left triangle of m1, m2 to account since
+    values below the diagonal exceed the specified order and are not computed
+    when the analytical computation is used.
+
+    Also, there the first order central moments will be exactly zero with the
+    analytical calculation, but will not be zero due to limited floating point
+    precision when using a numerical computation. Here we just specify the
+    tolerance as a fraction of the maximum absolute value in the moments array.
+    """
+    m1 = m1.copy()
+    m2 = m2.copy()
+    max_val = np.abs(m1[m1 != 0]).max()
+    for orders in itertools.product(*((range(m1.shape[0]),) * m1.ndim)):
+        if sum(orders) > m1.shape[0] - 1:
+            m1[orders] = 0
+            m2[orders] = 0
+            continue
+        abs_diff = abs(m1[orders] - m2[orders])
+        rel_diff = abs_diff / max_val
+        assert rel_diff < thresh
 
 
 def test_moments():
@@ -35,7 +62,7 @@ def test_moments_central():
 
     # check for proper centroid computation
     mu_calc_centroid = moments_central(image)
-    assert_equal(mu, mu_calc_centroid)
+    compare_moments(mu_calc_centroid, mu)
 
     # shift image by dx=2, dy=2
     image2 = np.zeros((20, 20), dtype=np.double)
@@ -124,7 +151,31 @@ def test_moments_normalized_3d():
 
     coords = np.where(image)
     mu_coords = moments_coords_central(coords)
-    assert_almost_equal(mu_coords, mu_image)
+    assert_almost_equal(mu_image, mu_coords)
+
+
+@pytest.mark.parametrize('dtype', [np.uint8, np.int32, np.float32, np.float64])
+@pytest.mark.parametrize('order', [1, 2, 3, 4])
+@pytest.mark.parametrize('ndim', [2, 3, 4])
+def test_analytical_moments_calculation(dtype, order, ndim):
+    if ndim == 2:
+        shape = (256, 256)
+    elif ndim == 3:
+        shape = (64, 64, 64)
+    else:
+        shape = (16, ) * ndim
+    rng = np.random.default_rng(1234)
+    if np.dtype(dtype).kind in 'iu':
+        x = rng.integers(0, 256, shape, dtype=dtype)
+    else:
+        x = rng.standard_normal(shape, dtype=dtype)
+    # setting center=None will use the analytic code path
+    m1 = moments_central(x, center=None, order=order)
+    # providing explicit centroid will bypass the analytic code path
+    m2 = moments_central(x, center=centroid(x), order=order)
+    # ensure numeric and analytical central moments are close
+    thresh = 1e-4 if x.dtype == np.float32 else 1e-9
+    compare_moments(m1, m2, thresh=thresh)
 
 
 def test_moments_normalized_invalid():
