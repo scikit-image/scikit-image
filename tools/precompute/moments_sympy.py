@@ -48,7 +48,7 @@ if ndim == 2:
             expr = expr.subs(M[0, 1]/M[0, 0], c_y)
 
             # print python code for generation of the central moment
-            python_code = f"M[{p}, {q}] = {pycode(expr)}\n"
+            python_code = f"moments_central[{p}, {q}] = {pycode(expr)}\n"
             # replace symbol names with corresponding python variable names
             python_code = python_code.replace('c_', 'c')
             python_code = python_code.replace('M[', 'm[')
@@ -93,7 +93,7 @@ elif ndim == 3:
 
                 # print python code for generation of the central moment
 
-                python_code = f"M[{p}, {q}, {r}] = {pycode(expr)}\n"
+                python_code = f"moments_central[{p}, {q}, {r}] = {pycode(expr)}\n"
                 # replace symbol names with corresponding python variable names
                 python_code = python_code.replace('c_', 'c')
                 python_code = python_code.replace('M[', 'm[')
