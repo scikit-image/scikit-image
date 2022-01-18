@@ -99,7 +99,7 @@ def _moments_raw_to_central_fast(moments_raw):
                                         - 2*cx*m[1, 0, 1]
                                         - cz*(-cx*m[1, 0, 0] + m[2, 0, 0])
                                         + m[2, 0, 1])
-            moments_central[2, 1, 0] = (cx**2*m[0, 1, 0] -
+            moments_central[2, 1, 0] = (cx**2*m[0, 1, 0]
                                         - 2*cx*m[1, 1, 0]
                                         - cy*(-cx*m[1, 0, 0] + m[2, 0, 0])
                                         + m[2, 1, 0])
