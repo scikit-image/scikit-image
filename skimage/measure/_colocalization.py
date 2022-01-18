@@ -70,7 +70,7 @@ def pcc(imgA, imgB, roi=None):
 
     .. math::
         r = \frac{\sum (A_i - m_A_i) (B_i - m_B_i)}
-                 {\sqrt{\sum (A_i - m_A_i)^2 \sum (B_i - m_B_i)^2}}
+        {\sqrt{\sum (A_i - m_A_i)^2 \sum (B_i - m_B_i)^2}}
 
     where
         :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`
@@ -154,8 +154,7 @@ def mcc(imgA, imgB_mask, roi=None):
     The implemented equation is:
 
     .. math::
-        r = \frac{\sum A_{i,coloc}}
-                 {\sum A_i}
+        r = \frac{\sum A_{i,coloc}}{\sum A_i}
 
     where
         :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`
@@ -219,8 +218,7 @@ def moc(imgA, imgB, roi=None):
     Manders' Overlap Coefficient (MOC) is given by the equation [1]_:
 
     .. math::
-        r = \frac{\sum A_i B_i}
-                 {\sqrt{\sum A_i^2 \sum B_i^2}}
+        r = \frac{\sum A_i B_i}{\sqrt{\sum A_i^2 \sum B_i^2}}
 
     where
         :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`

@@ -74,7 +74,7 @@ def test_mcc():
 
 def test_moc():
     img1 = np.ones((4, 4))
-    img2 = 2*np.ones((4, 4))
+    img2 = 2 * np.ones((4, 4))
     assert moc(img1, img2) == 1
 
 
