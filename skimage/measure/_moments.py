@@ -353,8 +353,8 @@ def moments_hu(nu):
     >>> mu = moments_central(image)
     >>> nu = moments_normalized(mu)
     >>> moments_hu(nu)
-    array([7.45370370e-01, 3.51165981e-01, 1.04049179e-01, 4.06442107e-02,
-           2.64312299e-03, 2.40854582e-02, 4.33680869e-19])
+    array([0.74537037, 0.35116598, 0.10404918, 0.04064421, 0.00264312,
+           0.02408546, 0.        ])
     """
     dtype = np.float32 if nu.dtype == 'float32' else np.float64
     return _moments_cy.moments_hu(nu.astype(dtype, copy=False))
