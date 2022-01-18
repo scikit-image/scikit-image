@@ -5,7 +5,6 @@ raw moments into central moments in skimage/measure/_moments_analytical.py
 
 from sympy import symbols, binomial, Sum
 from sympy import IndexedBase, Idx
-from sympy import init_printing, pprint
 from sympy.printing.pycode import pycode
 
 # Define a moments matrix, m
@@ -35,9 +34,9 @@ if ndim == 2:
             # https://en.wikipedia.org/wiki/Image_moment#Central_moments
             expr = Sum(
                 (
-                    binomial(p, i) * binomial(q, j) *
-                    (-cx)**(p - i) * (-cy)**(q - j) *
-                    m[i, j]
+                    binomial(p, i) * binomial(q, j)
+                    * (-cx)**(p - i) * (-cy)**(q - j)
+                    * m[i, j]
                 ),
                 (i, 0, p), (j, 0, q)
             ).doit()
@@ -47,8 +46,7 @@ if ndim == 2:
             expr = expr.subs(m[0, 1]/m[0, 0], cy)
 
             # print python code for generation of the central moment
-            print(f"m[{p}, {q}] = {pycode(expr)}")
-            print("\n")
+            print(f"m[{p}, {q}] = {pycode(expr)}\n")
 
 elif ndim == 3:
 
@@ -77,9 +75,9 @@ elif ndim == 3:
                 # https://en.wikipedia.org/wiki/Image_moment#Central_moments
                 expr = Sum(
                     (
-                        binomial(p, i) * binomial(q, j) * binomial(r, k) *
-                        (-cx)**(p - i) * (-cy)**(q - j) * (-cz)**(r - k) *
-                        m[i, j, k]
+                        binomial(p, i) * binomial(q, j) * binomial(r, k)
+                        * (-cx)**(p - i) * (-cy)**(q - j) * (-cz)**(r - k)
+                        * m[i, j, k]
                     ),
                     (i, 0, p), (j, 0, q), (k, 0, r)
                 ).doit()
@@ -90,5 +88,4 @@ elif ndim == 3:
                 expr = expr.subs(m[0, 0, 1]/m[0, 0, 0], cz)
 
                 # print python code for generation of the central moment
-                print(f"m[{p}, {q}, {r}] = {pycode(expr)}")
-                print("\n")
+                print(f"m[{p}, {q}, {r}] = {pycode(expr)}\n")

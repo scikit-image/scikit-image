@@ -50,15 +50,12 @@ def _moments_raw_to_central_fast(moments_raw):
             moments_central[0, 2] = m[0, 2] - cy*m[0, 1]
         if order > 2:
             # 3rd order moments
-            moments_central[2, 1] = (m[2, 1] - 2*cx*m[1, 1] -
-                                     cy*m[2, 0] + cx**2*m[0, 1] +
-                                     cy*cx*m[1, 0])
-            moments_central[1, 2] = (m[1, 2] - 2*cy*m[1, 1] -
-                                     cx*m[0, 2] + 2*cy*cx*m[0, 1])
-            moments_central[3, 0] = (m[3, 0] - 3*cx*m[2, 0] +
-                                     2*cx**2*m[1, 0])
-            moments_central[0, 3] = (m[0, 3] - 3*cy*m[0, 2] +
-                                     2*cy**2*m[0, 1])
+            moments_central[2, 1] = (m[2, 1] - 2*cx*m[1, 1] - cy*m[2, 0]
+                                     + cx**2*m[0, 1] + cy*cx*m[1, 0])
+            moments_central[1, 2] = (m[1, 2] - 2*cy*m[1, 1] - cx*m[0, 2]
+                                     + 2*cy*cx*m[0, 1])
+            moments_central[3, 0] = m[3, 0] - 3*cx*m[2, 0] + 2*cx**2*m[1, 0]
+            moments_central[0, 3] = m[0, 3] - 3*cy*m[0, 2] + 2*cy**2*m[0, 1]
     else:
         # 3D case
         cx = m[1, 0, 0] / m[0, 0, 0]
@@ -76,39 +73,39 @@ def _moments_raw_to_central_fast(moments_raw):
             moments_central[2, 0, 0] = -cx*m[1, 0, 0] + m[2, 0, 0]
         if order > 2:
             # 3rd order moments
-            moments_central[0, 0, 3] = (2*cz**2*m[0, 0, 1] -
-                                        3*cz*m[0, 0, 2] +
-                                        m[0, 0, 3])
-            moments_central[0, 1, 2] = (-cy*m[0, 0, 2] -
-                                        2*cz*(-cy*m[0, 0, 1] + m[0, 1, 1]) +
-                                        m[0, 1, 2])
-            moments_central[0, 2, 1] = (cy**2*m[0, 0, 1] - 2*cy*m[0, 1, 1] -
-                                        cz*(-cy*m[0, 1, 0] + m[0, 2, 0]) +
-                                        m[0, 2, 1])
-            moments_central[0, 3, 0] = (2*cy**2*m[0, 1, 0] -
-                                        3*cy*m[0, 2, 0] +
-                                        m[0, 3, 0])
-            moments_central[1, 0, 2] = (-cx*m[0, 0, 2] -
-                                        2*cz*(-cx*m[0, 0, 1] + m[1, 0, 1]) +
-                                        m[1, 0, 2])
-            moments_central[1, 1, 1] = (-cx*m[0, 1, 1] -
-                                        cy*(-cx*m[0, 0, 1] + m[1, 0, 1]) -
-                                        cz*(-cx*m[0, 1, 0] + m[1, 1, 0]) +
-                                        m[1, 1, 1])
-            moments_central[1, 2, 0] = (-cx*m[0, 2, 0] -
-                                        2*cy*(-cx*m[0, 1, 0] + m[1, 1, 0]) +
-                                        m[1, 2, 0])
-            moments_central[2, 0, 1] = (cx**2*m[0, 0, 1] -
-                                        2*cx*m[1, 0, 1] -
-                                        cz*(-cx*m[1, 0, 0] + m[2, 0, 0]) +
-                                        m[2, 0, 1])
+            moments_central[0, 0, 3] = (2*cz**2*m[0, 0, 1]
+                                        - 3*cz*m[0, 0, 2]
+                                        + m[0, 0, 3])
+            moments_central[0, 1, 2] = (-cy*m[0, 0, 2]
+                                        - 2*cz*(-cy*m[0, 0, 1] + m[0, 1, 1])
+                                        + m[0, 1, 2])
+            moments_central[0, 2, 1] = (cy**2*m[0, 0, 1] - 2*cy*m[0, 1, 1]
+                                        - cz*(-cy*m[0, 1, 0] + m[0, 2, 0])
+                                        + m[0, 2, 1])
+            moments_central[0, 3, 0] = (2*cy**2*m[0, 1, 0]
+                                        - 3*cy*m[0, 2, 0]
+                                        + m[0, 3, 0])
+            moments_central[1, 0, 2] = (-cx*m[0, 0, 2]
+                                        - 2*cz*(-cx*m[0, 0, 1] + m[1, 0, 1])
+                                        + m[1, 0, 2])
+            moments_central[1, 1, 1] = (-cx*m[0, 1, 1]
+                                        - cy*(-cx*m[0, 0, 1] + m[1, 0, 1])
+                                        - cz*(-cx*m[0, 1, 0] + m[1, 1, 0])
+                                        + m[1, 1, 1])
+            moments_central[1, 2, 0] = (-cx*m[0, 2, 0]
+                                        - 2*cy*(-cx*m[0, 1, 0] + m[1, 1, 0])
+                                        + m[1, 2, 0])
+            moments_central[2, 0, 1] = (cx**2*m[0, 0, 1]
+                                        - 2*cx*m[1, 0, 1]
+                                        - cz*(-cx*m[1, 0, 0] + m[2, 0, 0])
+                                        + m[2, 0, 1])
             moments_central[2, 1, 0] = (cx**2*m[0, 1, 0] -
-                                        2*cx*m[1, 1, 0] -
-                                        cy*(-cx*m[1, 0, 0] + m[2, 0, 0]) +
-                                        m[2, 1, 0])
-            moments_central[3, 0, 0] = (2*cx**2*m[1, 0, 0] -
-                                        3*cx*m[2, 0, 0] +
-                                        m[3, 0, 0])
+                                        - 2*cx*m[1, 1, 0]
+                                        - cy*(-cx*m[1, 0, 0] + m[2, 0, 0])
+                                        + m[2, 1, 0])
+            moments_central[3, 0, 0] = (2*cx**2*m[1, 0, 0]
+                                        - 3*cx*m[2, 0, 0]
+                                        + m[3, 0, 0])
 
     return moments_central.astype(float_dtype, copy=False)
 
