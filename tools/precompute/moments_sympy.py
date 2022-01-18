@@ -6,20 +6,22 @@ raw moments into central moments in skimage/measure/_moments_analytical.py
 from sympy import symbols, binomial, Sum
 from sympy import IndexedBase, Idx
 from sympy.printing.pycode import pycode
+# from sympy import init_printing, pprint
+# init_printing(use_unicode=True)
 
-# Define a moments matrix, m
-m = IndexedBase('m')
+# Define a moments matrix, M
+M = IndexedBase('M')
 
 ndim = 3
 if ndim == 2:
     # symbols for the centroid componets
-    cx, cy, cz = symbols('cx cy')
-    # indices into the moments matrix, m
+    c_x, c_y = symbols('c_x c_y')
+    # indices into the moments matrix, M
     i, j = symbols('i j', cls=Idx)
 
     # centroid
-    cx = m[1, 0] / m[0, 0]
-    cy = m[0, 1] / m[0, 0]
+    cx = M[1, 0] / M[0, 0]
+    cy = M[0, 1] / M[0, 0]
 
     # loop over all moments with order <= `order`.
     order = 3
@@ -41,24 +43,28 @@ if ndim == 2:
                 (i, 0, p), (j, 0, q)
             ).doit()
 
-            # substitute back in the cx and cy symbols
-            expr = expr.subs(m[1, 0]/m[0, 0], cx)
-            expr = expr.subs(m[0, 1]/m[0, 0], cy)
+            # substitute back in the c_x and c_y symbols
+            expr = expr.subs(M[1, 0]/M[0, 0], c_x)
+            expr = expr.subs(M[0, 1]/M[0, 0], c_y)
 
             # print python code for generation of the central moment
-            print(f"m[{p}, {q}] = {pycode(expr)}\n")
+            python_code = f"M[{p}, {q}] = {pycode(expr)}\n"
+            # replace symbol names with corresponding python variable names
+            python_code = python_code.replace('c_', 'c')
+            python_code = python_code.replace('M[', 'm[')
+            print(python_code)
 
 elif ndim == 3:
 
     # symbols for the centroid componets
-    cx, cy, cz = symbols('cx cy cz')
-    # indices into the moments matrix, m
+    c_x, c_y, c_z = symbols('c_x c_y c_z')
+    # indices into the moments matrix, M
     i, j, k = symbols('i j k', cls=Idx)
 
     # centroid
-    cx = m[1, 0, 0] / m[0, 0, 0]
-    cy = m[0, 1, 0] / m[0, 0, 0]
-    cz = m[0, 0, 1] / m[0, 0, 0]
+    cx = M[1, 0, 0] / M[0, 0, 0]
+    cy = M[0, 1, 0] / M[0, 0, 0]
+    cz = M[0, 0, 1] / M[0, 0, 0]
 
     # loop over all moments with order <= `order`.
     order = 3
@@ -77,15 +83,20 @@ elif ndim == 3:
                     (
                         binomial(p, i) * binomial(q, j) * binomial(r, k)
                         * (-cx)**(p - i) * (-cy)**(q - j) * (-cz)**(r - k)
-                        * m[i, j, k]
+                        * M[i, j, k]
                     ),
                     (i, 0, p), (j, 0, q), (k, 0, r)
                 ).doit()
 
-                # substitute back in cx, cy, cz
-                expr = expr.subs(m[1, 0, 0]/m[0, 0, 0], cx)
-                expr = expr.subs(m[0, 1, 0]/m[0, 0, 0], cy)
-                expr = expr.subs(m[0, 0, 1]/m[0, 0, 0], cz)
+                # substitute back in c_x, c_y, c_z
+                expr = expr.subs(M[1, 0, 0]/M[0, 0, 0], c_x)
+                expr = expr.subs(M[0, 1, 0]/M[0, 0, 0], c_y)
+                expr = expr.subs(M[0, 0, 1]/M[0, 0, 0], c_z)
 
                 # print python code for generation of the central moment
-                print(f"m[{p}, {q}, {r}] = {pycode(expr)}\n")
+
+                python_code = f"M[{p}, {q}, {r}] = {pycode(expr)}\n"
+                # replace symbol names with corresponding python variable names
+                python_code = python_code.replace('c_', 'c')
+                python_code = python_code.replace('M[', 'm[')
+                print(python_code)
