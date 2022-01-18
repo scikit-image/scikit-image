@@ -13,6 +13,7 @@ from sympy.printing.pycode import pycode
 M = IndexedBase('M')
 
 ndim = 3
+order = 3
 if ndim == 2:
     # symbols for the centroid componets
     c_x, c_y = symbols('c_x c_y')
@@ -24,7 +25,6 @@ if ndim == 2:
     cy = M[0, 1] / M[0, 0]
 
     # loop over all moments with order <= `order`.
-    order = 3
     print(f"Generating expressions for {ndim}D moments with order <= {order}")
     for p in range(0, order + 1):
         for q in range(0, order + 1):
@@ -38,7 +38,7 @@ if ndim == 2:
                 (
                     binomial(p, i) * binomial(q, j)
                     * (-cx)**(p - i) * (-cy)**(q - j)
-                    * m[i, j]
+                    * M[i, j]
                 ),
                 (i, 0, p), (j, 0, q)
             ).doit()
@@ -67,8 +67,6 @@ elif ndim == 3:
     cz = M[0, 0, 1] / M[0, 0, 0]
 
     # loop over all moments with order <= `order`.
-    order = 3
-
     print(f"Generating expressions for {ndim}D moments with order <= {order}")
     for p in range(0, order + 1):
         for q in range(0, order + 1):

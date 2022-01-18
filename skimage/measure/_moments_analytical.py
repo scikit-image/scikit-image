@@ -33,7 +33,7 @@ def _moments_raw_to_central_fast(moments_raw):
     # convert to float64 during the computation for better accuracy
     moments_raw = moments_raw.astype(np.float64, copy=False)
     moments_central = np.zeros_like(moments_raw)
-    if order > 4 or ndim not in [2, 3]:
+    if order >= 4 or ndim not in [2, 3]:
         raise ValueError(
             "This function only supports 2D or 3D moments with order < 4"
         )
