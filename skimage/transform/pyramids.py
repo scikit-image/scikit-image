@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-from scipy import ndimage as ndi
 
 from .._shared import utils
 from .._shared.filters import gaussian
@@ -33,7 +32,7 @@ def _check_factor(factor):
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
-                   preserve_range=False, *, channel_axis=-1):
+                   preserve_range=False, *, channel_axis=None):
     """Smooth and then downsample image.
 
     Parameters
@@ -178,7 +177,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                      mode='reflect', cval=0, multichannel=False,
-                     preserve_range=False, *, channel_axis=-1):
+                     preserve_range=False, *, channel_axis=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -269,7 +268,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                       mode='reflect', cval=0, multichannel=False,
-                      preserve_range=False, *, channel_axis=-1):
+                      preserve_range=False, *, channel_axis=None):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
