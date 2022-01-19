@@ -145,6 +145,14 @@ def test_build_gaussian_pyramid_gray():
         assert_array_equal(out.shape, layer_shape)
 
 
+def test_build_gaussian_pyramid_gray_defaults():
+    rows, cols = image_gray.shape
+    pyramid = pyramids.pyramid_gaussian(image_gray)
+    for layer, out in enumerate(pyramid):
+        layer_shape = (rows / 2 ** layer, cols / 2 ** layer)
+        assert_array_equal(out.shape, layer_shape)
+
+
 def test_build_gaussian_pyramid_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8, ) * ndim))

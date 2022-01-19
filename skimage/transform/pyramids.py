@@ -178,7 +178,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                      mode='reflect', cval=0, multichannel=False,
-                     preserve_range=False, *, channel_axis=-1):
+                     preserve_range=False, *, channel_axis=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
