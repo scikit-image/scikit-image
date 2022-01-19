@@ -23,7 +23,7 @@ class RegionpropsTableIndividual(object):
 
     def setup(self, prop):
         try:
-            from skimage.measure import regionprops_table
+            from skimage.measure import regionprops_table  # noqa
         except ImportError:
             # regionprops_table was introduced in scikit-image v0.16.0
             raise NotImplementedError("regionprops_table unavailable")
@@ -43,7 +43,7 @@ class RegionpropsTableAll(object):
 
     def setup(self, cache):
         try:
-            from skimage.measure import regionprops_table
+            from skimage.measure import regionprops_table  # noqa
         except ImportError:
             # regionprops_table was introduced in scikit-image v0.16.0
             raise NotImplementedError("regionprops_table unavailable")
@@ -59,8 +59,7 @@ class RegionpropsTableAll(object):
 class MomentsSuite:
     params = ([(64, 64), (4096, 2048), (32, 32, 32), (256, 256, 192)],
               [np.uint8, np.float32, np.float64],
-              [1, 2, 3],
-          )
+              [1, 2, 3])
     param_names = ['shape', 'dtype', 'order']
 
     """Benchmark for filter routines in scikit-image."""
