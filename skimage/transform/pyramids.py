@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-from scipy import ndimage as ndi
 
 from .._shared import utils
 from .._shared.filters import gaussian
