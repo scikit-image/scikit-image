@@ -48,6 +48,15 @@ def test_pyramid_reduce_gray():
     assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
 
 
+def test_pyramid_reduce_gray_defaults():
+    rows, cols = image_gray.shape
+    out1 = pyramids.pyramid_reduce(image_gray)
+    assert_array_equal(out1.shape, (rows / 2, cols / 2))
+    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
+    out2 = pyramids.pyramid_reduce(image_gray, preserve_range=True)
+    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
+
+
 def test_pyramid_reduce_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8, ) * ndim))
@@ -63,7 +72,7 @@ def test_pyramid_expand_rgb(channel_axis):
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     out = pyramids.pyramid_expand(image, upscale=2,
-                                   channel_axis=channel_axis)
+                                  channel_axis=channel_axis)
     expected_shape = [rows * 2, cols * 2]
     expected_shape.insert(channel_axis % image.ndim, dim)
     assert_array_equal(out.shape, expected_shape)
