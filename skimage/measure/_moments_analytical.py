@@ -12,7 +12,7 @@ import numpy as np
 
 
 def _moments_raw_to_central_fast(moments_raw):
-    """Analytical equations for 2D and 3D central moments with order < 4.
+    """Analytical equations for 2D and 3D central moments of order < 4.
 
     `moments_raw_to_central` will automatically call this function when
     possible.
@@ -35,7 +35,7 @@ def _moments_raw_to_central_fast(moments_raw):
     moments_central = np.zeros_like(moments_raw)
     if order >= 4 or ndim not in [2, 3]:
         raise ValueError(
-            "This function only supports 2D or 3D moments with order < 4"
+            "This function only supports 2D or 3D moments of order < 4."
         )
     m = moments_raw
     if ndim == 2:
