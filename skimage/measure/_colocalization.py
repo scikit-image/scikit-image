@@ -7,8 +7,6 @@ __all__ = ['pearson_corr_coeff',
            'manders_coloc_coeff',
            'manders_overlap_coeff',
            'intersection_coeff',
-           'pixel_intensity_sum',
-           'average_pixel_intensity',
            ]
 
 
@@ -295,56 +293,3 @@ def intersection_coeff(image0_mask, image1_mask, roi=None):
         return 0
     denom = np.count_nonzero(image0_mask)
     return np.count_nonzero(np.logical_and(image0_mask, image1_mask)) / denom
-
-
-def pixel_intensity_sum(image, roi=None):
-    """Sum of all intensity values of image within the ROI.
-
-    Parameters
-    ----------
-    img : (M, N) ndarray
-    roi : (M, N) ndarray of dtype bool, optional
-        Only `img` pixel values within this region of interest mask are
-        included in the calculation.
-        Must have same dimensions as `img`.
-
-    Returns
-    -------
-    float
-        Sum of all intensity values of image within the ROI.
-
-    Notes
-    -------
-    Equivalent to "Integrated Density" "in ImageJ [1]_.
-
-    References
-    ----------
-    .. [1] https://imagej.nih.gov/ij/docs/menus/analyze.html
-
-    """
-    image = np.asarray(image)
-    if roi is not None:
-        roi = is_binary_ndarray(roi)
-        check_shape_equality(image, roi)
-        image = image[roi]
-
-    return np.sum(image)
-
-
-def average_pixel_intensity(image, roi=None):
-    """ Average intensity of all pixels within the ROI.
-
-    Parameters
-    ----------
-    img : (M, N) ndarray
-    roi : (M, N) ndarray of dtype bool, optional
-        Only `img` pixel values within this region of interest mask are
-        included in the calculation.
-        Must have same dimensions as `img`.
-
-    Returns
-    -------
-    float
-
-    """
-    return pixel_intensity_sum(image, roi=roi)/ np.size(image)

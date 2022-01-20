@@ -15,8 +15,7 @@ from ._label import label
 from .entropy import shannon_entropy
 from ._blur_effect import blur_effect
 from ._colocalization import (pearson_corr_coeff, manders_coloc_coeff,
-                              manders_overlap_coeff, intersection_coeff,
-                              pixel_intensity_sum, average_pixel_intensity)
+                              manders_overlap_coeff, intersection_coeff)
 
 __all__ = ['find_contours',
            'regionprops',
@@ -51,6 +50,4 @@ __all__ = ['find_contours',
            'manders_coloc_coeff',
            'manders_overlap_coeff',
            'intersection_coeff',
-           'pixel_intensity_sum',
-           'average_pixel_intensity',
            ]

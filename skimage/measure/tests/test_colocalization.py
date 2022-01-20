@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 from skimage.measure import (pearson_corr_coeff, manders_coloc_coeff,
-                              manders_overlap_coeff, intersection_coeff,
-                              pixel_intensity_sum, average_pixel_intensity)
+                              manders_overlap_coeff, intersection_coeff)
 
 
 def test_invalid_input():
@@ -44,14 +43,6 @@ def test_invalid_input():
         intersection_coeff(img1 > 2, img1 > 1, mask)
     with pytest.raises(Warning):
         intersection_coeff(img1 > 2, img1 > 1, non_binary_mask)
-    with pytest.raises(ValueError):
-        pixel_intensity_sum(img1, mask)
-    with pytest.raises(Warning):
-        pixel_intensity_sum(img1, non_binary_mask)
-    with pytest.raises(ValueError):
-        average_pixel_intensity(img1, mask)
-    with pytest.raises(Warning):
-        average_pixel_intensity(img1, non_binary_mask)
 
 
 def test_pcc():
@@ -87,13 +78,3 @@ def test_intersection_coefficient():
     img3_mask = np.array([[1 for j in range(4)] for i in range(4)])
     assert intersection_coeff(img1_mask, img2_mask) == 0.5
     assert intersection_coeff(img1_mask, img3_mask) == 1
-
-
-def test_pixel_intensity_sum():
-    img1 = np.array([[i + j for j in range(4)] for i in range(4)])
-    assert pixel_intensity_sum(img1) == 48
-
-
-def test_av_pixel_intensity():
-    img1 = np.array([[i + j for j in range(4)] for i in range(4)])
-    assert average_pixel_intensity(img1) == 3
