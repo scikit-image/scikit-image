@@ -1,52 +1,32 @@
 import numpy as np
 from scipy.stats import pearsonr
 from functools import wraps
-from .._shared.utils import check_shape_equality
+from .._shared.utils import check_shape_equality, is_binary_ndarray
 
-__all__ = ['pearson_r',
-           'manders_colocalization_coeff',
+__all__ = ['pearson_corr_coeff',
+           'manders_coloc_coeff',
            'manders_overlap_coeff',
-           'overlap',
-           'integrated_density',
-           'average_integrated_density'
+           'intersection_coeff',
+           'pixel_intensity_sum',
+           'average_pixel_intensity',
            ]
 
 
-def check_shape_equality_all(*args):
-    # check that all np.arrays passed to it have the same shape
-    im1 = args[0]
-    for im in args[1:]:
-        check_shape_equality(im1, im)
-    return
-
-
-def check_numpy_arr(arr, name, bool_expected=False):
-    if type(arr) != np.ndarray:
-        raise ValueError(
-            f"{name} is of type {type(arr)} not nd.array of dtype boolean as",
-            "expected")
-    if bool_expected:
-        if np.sum(np.where(arr > 1, 1, 0)) > 0:
-            raise ValueError(
-                f"{name} is ndarray of dtype {arr.dtype} with non-binary",
-                "values.Check if image mask was passed in as expected.")
-
-
-def pcc(imgA, imgB, roi=None):
+def pearson_corr_coeff(image0, image1, roi=None):
     """Calculate Pearson's Correlation Coefficient between pixel intensities in
     channels.
 
     Parameters
     ----------
-    imgA : (M, N) ndarray
+    image0 : (M, N) ndarray
         Image of channel A.
-    imgB : (M, N) ndarray
+    image1 : (M, N) ndarray
         Image of channel 2 to be correlated with channel B.
-        Must have same dimensions as `imgA`.
+        Must have same dimensions as `image0`.
     roi : (M, N) ndarray of dtype bool, optional
-        Only `imgA` and `imgB` pixels within this region of interest mask are
+        Only `image0` and `image1` pixels within this region of interest mask are
         included in the calculation.
-        Must have same dimensions as `imgA`.
+        Must have same dimensions as `image0`.
 
     Returns
     -------
@@ -73,10 +53,10 @@ def pcc(imgA, imgB, roi=None):
         {\sqrt{\sum (A_i - m_A_i)^2 \sum (B_i - m_B_i)^2}}
 
     where
-        :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`
-        :math:`B_i` is the value of the :math:`i^{th}` pixel in `imgB`,
-        :math:`m_A_i` is the mean of the pixel values in `imgA`
-        :math:`m_B_i` is the mean of the pixel values in `imgB`
+        :math:`A_i` is the value of the :math:`i^{th}` pixel in `image0`
+        :math:`B_i` is the value of the :math:`i^{th}` pixel in `image1`,
+        :math:`m_A_i` is the mean of the pixel values in `image0`
+        :math:`m_B_i` is the mean of the pixel values in `image1`
 
     A low PCC value does not necessarily mean that there is no correlation
     between the two channel intensities, just that there is no linear
@@ -104,32 +84,36 @@ def pcc(imgA, imgB, roi=None):
            Microscopy, 224: 213-232.
            https://doi.org/10.1111/j.1365-2818.2006.01706.x
     """
-    if roi is None:
-        roi = np.ones_like(imgA)
-    check_numpy_arr(imgA, 'imgA', bool_expected=False)
-    check_numpy_arr(imgB, 'imgB', bool_expected=False)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(imgA, imgB, roi)
+    image0 = np.asarray(image0)
+    image1 = np.asarray(image1)
+    if roi is not None:
+        roi = is_binary_ndarray(roi)
+        check_shape_equality(image0, image1, roi)
+        image0 = image0[roi]
+        image1 = image1[roi]
+    else:
+        check_shape_equality(image0, image1)
+        # scipy pearsonr function only takes flattened arrays
+        image0 = np.ravel(image0)
+        image1 = np.ravel(image1)
 
-    imgA_masked = imgA[roi.astype(bool)]
-    imgB_masked = imgB[roi.astype(bool)]
-    return pearsonr(imgA_masked, imgB_masked)
+    return pearsonr(image0, image1)
 
 
-def mcc(imgA, imgB_mask, roi=None):
+def manders_coloc_coeff(image, mask, roi=None):
     """Manders' colocalization coefficient between two channels.
 
     Parameters
     ----------
-    imgA : (M, N) ndarray
+    image : (M, N) ndarray
         Image of channel A.
-    imgB_mask : (M, N) ndarray of dytpe bool or a float
+    mask : (M, N) ndarray of dtype bool
         Binary mask with segmented regions of interest in channel B.
-        Must have same dimensions as `imgA`.
+        Must have same dimensions as `image`.
     roi : (M, N) ndarray of dtype bool, optional
-        Only `imgA` pixel values within this region of interest mask are
+        Only `image0` pixel values within this region of interest mask are
         included in the calculation.
-        Must have same dimensions as `imgA`.
+        Must have same dimensions as `image`.
 
     Returns
     -------
@@ -147,9 +131,9 @@ def mcc(imgA, imgB_mask, roi=None):
     in a subceullar compartment. Typically a threshold on the second channel is
     set and values above this are used in the MCC calculation.In this
     implementation, the thresholded image is provided as the argument
-    `imgB_mask`. Alternative segmentation methods on the second channel can
+    `image1_mask`. Alternative segmentation methods on the second channel can
     also be performed, with the resulting image mask being provided as
-    `imgB_mask`.
+    `image1_mask`.
 
     The implemented equation is:
 
@@ -157,9 +141,10 @@ def mcc(imgA, imgB_mask, roi=None):
         r = \frac{\sum A_{i,coloc}}{\sum A_i}
 
     where
-        :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`
+        :math:`A_i` is the value of the :math:`i^{th}` pixel in `image`
         :math:`A_{i,coloc} = A_i` if math:`Bmask_i > 0`
-        :math:`Bmask_i` is the value of the :math:`i^{th}` pixel in `imgB_mask`
+        :math:`Bmask_i` is the value of the :math:`i^{th}` pixel in
+        `mask`
 
     MCC is sensitive to noise, with diffuse signal in the first channel
     inflating its value. Images should be processed to remove out of focus and
@@ -178,34 +163,36 @@ def mcc(imgA, imgB_mask, roi=None):
            https://doi.org/10.1152/ajpcell.00462.2010
 
     """
-    if roi is None:
-        roi = np.ones_like(imgA)
-    check_numpy_arr(imgA, 'imgA', bool_expected=False)
-    check_numpy_arr(imgB_mask, 'imgB_mask', bool_expected=True)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(imgA, imgB_mask, roi)
+    image = np.asarray(image)
+    mask = is_binary_ndarray(mask)
+    if roi is not None:
+        roi = is_binary_ndarray(roi)
+        check_shape_equality(image, mask, roi)
+        image = image[roi]
+        mask = mask[roi]
+    else:
+        check_shape_equality(image, mask)
 
-    imgA = imgA[roi.astype(bool)]
-    imgB_mask = imgB_mask[roi.astype(bool)]
-    if (np.sum(imgA) == 0):
+    if (np.sum(image) == 0):
         return 0
-    return np.sum(np.multiply(imgA, imgB_mask)) / np.sum(imgA)
+    return np.sum(np.multiply(image, mask)) / np.sum(image)
 
 
-def moc(imgA, imgB, roi=None):
+def manders_overlap_coeff(image0, image1, roi=None):
     """Manders' overlap coefficient
 
     Parameters
     ----------
-    imgA : (M, N) ndarray
+    image0 : (M, N) ndarray
         Image of channel A.
-    imgB : (M, N) ndarray
+    image1 : (M, N) ndarray
         Image of channel B.
-        Must have same dimensions as `imgA`
+        Must have same dimensions as `image0`
     roi : (M, N) ndarray of dtype bool, optional
-        Only `imgA` and `imgB` pixel values within this region of interest mask
+        Only `image0` and `image1` pixel values within this region of interest
+        mask
         are included in the calculation.
-        Must have same dimensions as `imgA`.
+        Must have same dimensions as `image0`.
 
     Returns
     -------
@@ -221,8 +208,8 @@ def moc(imgA, imgB, roi=None):
         r = \frac{\sum A_i B_i}{\sqrt{\sum A_i^2 \sum B_i^2}}
 
     where
-        :math:`A_i` is the value of the :math:`i^{th}` pixel in `imgA`
-        :math:`B_i` is the value of the :math:`i^{th}` pixel in `imgB`
+        :math:`A_i` is the value of the :math:`i^{th}` pixel in `image0`
+        :math:`B_i` is the value of the :math:`i^{th}` pixel in `image1`
 
     It ranges between 0 for no colocalization and 1 for complete colocalization
     of all pixels.
@@ -257,58 +244,60 @@ def moc(imgA, imgB, roi=None):
            910– 920. https://doi.org/10.1002/cyto.a.24336
 
     """
-    if roi is None:
-        roi = np.ones_like(imgA)
-    check_numpy_arr(imgA, 'imgA', bool_expected=False)
-    check_numpy_arr(imgB, 'imgB', bool_expected=False)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(imgA, imgB, roi)
+    image0 = np.asarray(image0)
+    image1 = np.asarray(image1)
+    if roi is not None:
+        roi = is_binary_ndarray(roi)
+        check_shape_equality(image0, image1, roi)
+        image0 = image0[roi]
+        image1 = image1[roi]
+    else:
+        check_shape_equality(image0, image1)
 
-    imgA = imgA[roi.astype(bool)]
-    imgB = imgB[roi.astype(bool)]
-
-    denom = (np.sum(np.square(imgA)) * (np.sum(np.square(imgB)))) ** 0.5
-    return np.sum(np.multiply(imgA, imgB)) / denom
+    denom = (np.sum(np.square(image0)) * (np.sum(np.square(image1)))) ** 0.5
+    return np.sum(np.multiply(image0, image1)) / denom
 
 
-def intersection_coefficient(imgA_mask, imgB_mask, roi=None):
+def intersection_coeff(image0_mask, image1_mask, roi=None):
     """Fraction of a channel's segmented binary mask that overlaps with a
     second channel's segmented binary mask.
 
     Parameters
     ----------
-    imgA_mask : (M, N) ndarray of dtype bool
+    image0_mask : (M, N) ndarray of dtype bool
         Image of channel A.
-    imgB_mask : (M, N) ndarray of dtype bool
+    image1_mask : (M, N) ndarray of dtype bool
         Image of channel B.
-        Must have same dimensions as `imgA_mask`.
+        Must have same dimensions as `image0_mask`.
     roi : (M, N) ndarray of dtype bool, optional
-        Only `imgA_mask` and `imgB_mask` pixels within this region of interest
+        Only `image0_mask` and `image1_mask` pixels within this region of
+        interest
         mask are included in the calculation.
-        Must have same dimensions as `imgA_mask`.
+        Must have same dimensions as `image0_mask`.
 
     Returns
     -------
     Intersection coefficient, float
-        Fraction of `imag1_mask` that overlaps with `imgB_mask`.
+        Fraction of `imag1_mask` that overlaps with `image1_mask`.
 
     """
-    if roi is None:
-        roi = np.ones_like(imgA_mask)
-    check_numpy_arr(imgA_mask, 'imgA_mask', bool_expected=True)
-    check_numpy_arr(imgB_mask, 'imgB_mask', bool_expected=True)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(imgA_mask, imgB_mask, roi)
+    image0_mask = is_binary_ndarray(image0_mask)
+    image1_mask = is_binary_ndarray(image1_mask)
+    if roi is not None:
+        roi = is_binary_ndarray(roi)
+        check_shape_equality(image0_mask, image1_mask, roi)
+        image0_mask = image0_mask[roi]
+        image1_mask = image1_mask[roi]
+    else:
+        check_shape_equality(image0_mask, image1_mask)
 
-    imgA_mask = imgA_mask[roi.astype(bool)]
-    imgB_mask = imgB_mask[roi.astype(bool)]
-    if np.count_nonzero(imgA_mask) == 0:
+    if np.count_nonzero(image0_mask) == 0:
         return 0
-    denom = np.count_nonzero(imgA_mask)
-    return np.count_nonzero(np.logical_and(imgA_mask, imgB_mask)) / denom
+    denom = np.count_nonzero(image0_mask)
+    return np.count_nonzero(np.logical_and(image0_mask, image1_mask)) / denom
 
 
-def pixel_intensity_sum(img, roi=None):
+def pixel_intensity_sum(image, roi=None):
     """Sum of all intensity values of image within the ROI.
 
     Parameters
@@ -333,17 +322,16 @@ def pixel_intensity_sum(img, roi=None):
     .. [1] https://imagej.nih.gov/ij/docs/menus/analyze.html
 
     """
-    if roi is None:
-        roi = np.ones_like(img)
-    check_numpy_arr(img, 'img', bool_expected=False)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(img, roi)
+    image = np.asarray(image)
+    if roi is not None:
+        roi = is_binary_ndarray(roi)
+        check_shape_equality(image, roi)
+        image = image[roi]
 
-    img = img[roi.astype(bool)]
-    return np.sum(img)
+    return np.sum(image)
 
 
-def av_pixel_intensity(img, roi=None):
+def average_pixel_intensity(image, roi=None):
     """ Average intensity of all pixels within the ROI.
 
     Parameters
@@ -359,11 +347,4 @@ def av_pixel_intensity(img, roi=None):
     float
 
     """
-    if roi is None:
-        roi = np.ones_like(img)
-    check_numpy_arr(img, 'img', bool_expected=False)
-    check_numpy_arr(roi, 'roi', bool_expected=True)
-    check_shape_equality_all(img, roi)
-
-    img = img[roi.astype(bool)]
-    return np.sum(img) / np.size(img)
+    return pixel_intensity_sum(image, roi=roi)/ np.size(image)

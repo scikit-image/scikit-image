@@ -14,8 +14,9 @@ from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
 from ._blur_effect import blur_effect
-from ._colocalization import (pcc, mcc, moc, intersection_coefficient,
-                              pixel_intensity_sum, av_pixel_intensity)
+from ._colocalization import (pearson_corr_coeff, manders_coloc_coeff,
+                              manders_overlap_coeff, intersection_coeff,
+                              pixel_intensity_sum, average_pixel_intensity)
 
 __all__ = ['find_contours',
            'regionprops',
@@ -46,10 +47,10 @@ __all__ = ['find_contours',
            'grid_points_in_poly',
            'shannon_entropy',
            'blur_effect',
-           'pcc',
-           'mcc',
-           'moc',
-           'intersection_coefficient',
+           'pearson_corr_coeff',
+           'manders_coloc_coeff',
+           'manders_overlap_coeff',
+           'intersection_coeff',
            'pixel_intensity_sum',
-           'av_pixel_intensity',
+           'average_pixel_intensity',
            ]

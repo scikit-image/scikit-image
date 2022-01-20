@@ -507,9 +507,10 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def check_shape_equality(im1, im2):
-    """Raise an error if the shape do not match."""
-    if not im1.shape == im2.shape:
+def check_shape_equality(*images):
+    """Check that all images have the same shape"""
+    image0 = images[0]
+    if not all(image0.shape == image.shape for image in images[1:]):
         raise ValueError('Input images must have the same dimensions.')
     return
 
@@ -752,3 +753,11 @@ def _supported_float_type(input_dtype, allow_complex=False):
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
     return image
+
+def is_binary_ndarray(mask):
+    if not mask.dtype == bool:
+        if np.any((mask != 1)&(mask!=0)):
+            raise Warning("Mask array is not of dtype boolean or contains "
+                          "values other than 0 and 1 so cannot be safely cast "
+                          "to boolean array.")
+    return np.asarray(mask, dtype=bool)
