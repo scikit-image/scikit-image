@@ -1,6 +1,5 @@
 import sys
 import warnings
-import functools
 import inspect
 
 import numpy as np
@@ -11,8 +10,7 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
                                    _supported_float_type,
-                                   channel_as_last_axis,
-                                   DecoratorBaseClass, _get_stack_rank)
+                                   channel_as_last_axis)
 from skimage.feature import hog
 from skimage.transform import pyramid_gaussian
 
@@ -282,13 +280,18 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size == x.shape[channel_axis]
 
 
-def test_decorator_warnings_stacklevel():
+def test_decorator_warnings():
+    """Assets that warning messages issued by decorators points to
+    expected file and line number.
+
+    """
 
     with pytest.warns(FutureWarning) as record:
         pyramid_gaussian(None, multichannel=True)
         expected_lineno = inspect.currentframe().f_lineno - 1
 
     assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__
 
     img = np.random.rand(100, 100, 3)
 
@@ -297,3 +300,4 @@ def test_decorator_warnings_stacklevel():
         expected_lineno = inspect.currentframe().f_lineno - 1
 
     assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__
