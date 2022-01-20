@@ -46,16 +46,15 @@ def _get_stack_length(func):
 
 
 class _DecoratorBaseClass:
-    """Decorators base class.
+    """Used to manage decorators' warnings stacklevel.
 
-    Used to manage warnings stacklevel. The _stack_length class
-    variable is used to store the number of times a function is
-    wrapped by a decorator.
+    The _stack_length class variable is used to store the number of
+    times a function is wrapped by a decorator.
 
-    The stacklevel is computed as `stacklevel = 1 + stack_length -
-    stack_rank` where `stack_length` is the total number of times a
-    current decorated function is wrapped, and `stack_rank` is the
-    rank of the decorator in the call stack.
+    Let `stack_length` be the total number of times a decorated
+    function is wrapped, and `stack_rank` be the rank of the decorator
+    in the decorators stack. The stacklevel of a warning is then
+    `stacklevel = 1 + stack_length - stack_rank`.
 
     """
 
