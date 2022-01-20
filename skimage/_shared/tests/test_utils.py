@@ -1,6 +1,7 @@
 import sys
 import warnings
 import functools
+import inspect
 
 import numpy as np
 import pytest
@@ -11,7 +12,9 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    change_default_value, remove_arg,
                                    _supported_float_type,
                                    channel_as_last_axis,
-                                   DecoratorBaseClass)
+                                   DecoratorBaseClass, _get_stack_rank)
+from skimage.feature import hog
+from skimage.transform import pyramid_gaussian
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -281,28 +284,16 @@ def test_decorated_channel_axis_shape(channel_axis):
 
 def test_decorator_warnings_stacklevel():
 
-    class TestDecorator(DecoratorBaseClass):
+    with pytest.warns(FutureWarning) as record:
+        pyramid_gaussian(None, multichannel=True)
+        expected_lineno = inspect.currentframe().f_lineno - 1
 
-        def __init__(self, expected_stacklevel):
-            self.expected_stacklevel = expected_stacklevel
+    assert record[0].lineno == expected_lineno
 
-        def __call__(self, func):
-            stack_rank = self.get_stack_length(func)
-            self.update_stack_length(func)
+    img = np.random.rand(100, 100, 3)
 
-            @functools.wraps(func)
-            def wrapped_func(*args, **kwargs):
-                stacklevel = 1 + self.get_stack_length(func) - stack_rank
+    with pytest.warns(FutureWarning) as record:
+        hog(img, multichannel=True)
+        expected_lineno = inspect.currentframe().f_lineno - 1
 
-                assert stacklevel == self.expected_stacklevel
-
-                return func(*args, **kwargs)
-
-            return wrapped_func
-
-    @TestDecorator(expected_stacklevel=5)
-    @TestDecorator(expected_stacklevel=4)
-    @TestDecorator(expected_stacklevel=3)
-    @TestDecorator(expected_stacklevel=2)
-    def do_nothing():
-        pass
+    assert record[0].lineno == expected_lineno

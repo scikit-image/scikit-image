@@ -24,19 +24,33 @@ class skimage_deprecation(Warning):
     pass
 
 
+def _get_stack_rank(func):
+    """Returns function rank in the call stack
+
+    """
+    if _is_wrapped(func):
+        return 1 + _get_stack_rank(func.__wrapped__)
+    else:
+        return 0
+
+
+def _is_wrapped(func):
+    return "__wrapped__" in dir(func)
+
+
+def _get_stack_length(func):
+    """Returns function call stack length.
+
+    """
+    return _get_stack_rank(func.__globals__.get(func.__name__, func))
+
+
 class DecoratorBaseClass:
     """Decorators base class.
 
-    Used to manage warnings stacklevel. Decorators must inherit from
-    this class.
-
-    The _stack_length class variable is used to store the number of
-    times a function is wrapped by a decorator. `update_stack_length`
-    must be called in each decorator `__call__` method to ensure
-    `_stack_length` is up to date.
-
-    `get_stack_length` must be called before updating `stack_length` to
-    obtain current decorator rank in the call stack.
+    Used to manage warnings stacklevel. The _stack_length class
+    variable is used to store the number of times a function is
+    wrapped by a decorator.
 
     The stacklevel is computed as `stacklevel = 1 + stack_length -
     stack_rank` where `stack_length` is the total number of times a
@@ -48,11 +62,8 @@ class DecoratorBaseClass:
     _stack_length = {}
 
     def get_stack_length(self, func):
-        return self._stack_length.get(func.__name__, 0)
-
-    def update_stack_length(self, func):
-        rank = self.get_stack_length(func)
-        self._stack_length[func.__name__] = rank + 1
+        return self._stack_length.get(func.__name__,
+                                      _get_stack_length(func))
 
 
 class change_default_value(DecoratorBaseClass):
@@ -84,8 +95,7 @@ class change_default_value(DecoratorBaseClass):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        stack_rank = self.get_stack_length(func)
-        self.update_stack_length(func)
+        stack_rank = _get_stack_rank(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -141,8 +151,7 @@ class remove_arg(DecoratorBaseClass):
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
-        stack_rank = self.get_stack_length(func)
-        self.update_stack_length(func)
+        stack_rank = _get_stack_rank(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -259,8 +268,7 @@ class deprecate_kwarg(DecoratorBaseClass):
 
     def __call__(self, func):
 
-        stack_rank = self.get_stack_length(func)
-        self.update_stack_length(func)
+        stack_rank = _get_stack_rank(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -307,8 +315,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
     def __call__(self, func):
 
-        stack_rank = self.get_stack_length(func)
-        self.update_stack_length(func)
+        stack_rank = _get_stack_rank(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -353,7 +360,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
         return fixed_func
 
 
-class channel_as_last_axis(DecoratorBaseClass):
+class channel_as_last_axis:
     """Decorator for automatically making channels axis last for all arrays.
 
     This decorator reorders axes for compatibility with functions that only
@@ -383,7 +390,6 @@ class channel_as_last_axis(DecoratorBaseClass):
         self.multichannel_output = multichannel_output
 
     def __call__(self, func):
-        self.update_stack_length(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -432,7 +438,7 @@ class channel_as_last_axis(DecoratorBaseClass):
         return fixed_func
 
 
-class deprecated(DecoratorBaseClass):
+class deprecated:
     """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
@@ -454,7 +460,6 @@ class deprecated(DecoratorBaseClass):
         self.removed_version = removed_version
 
     def __call__(self, func):
-        self.update_stack_length(func)
 
         alt_msg = ''
         if self.alt_func is not None:
