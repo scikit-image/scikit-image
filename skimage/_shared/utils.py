@@ -45,7 +45,7 @@ def _get_stack_length(func):
     return _get_stack_rank(func.__globals__.get(func.__name__, func))
 
 
-class DecoratorBaseClass:
+class _DecoratorBaseClass:
     """Decorators base class.
 
     Used to manage warnings stacklevel. The _stack_length class
@@ -66,7 +66,7 @@ class DecoratorBaseClass:
                                       _get_stack_length(func))
 
 
-class change_default_value(DecoratorBaseClass):
+class change_default_value(_DecoratorBaseClass):
     """Decorator for changing the default value of an argument.
 
     Parameters
@@ -118,7 +118,7 @@ class change_default_value(DecoratorBaseClass):
         return fixed_func
 
 
-class remove_arg(DecoratorBaseClass):
+class remove_arg(_DecoratorBaseClass):
     """Decorator to remove an argument from function's signature.
 
     Parameters
@@ -231,7 +231,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-class deprecate_kwarg(DecoratorBaseClass):
+class deprecate_kwarg(_DecoratorBaseClass):
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
