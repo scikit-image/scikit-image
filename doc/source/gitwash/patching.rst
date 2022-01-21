@@ -29,7 +29,7 @@ Overview
    git config --global user.email you@yourdomain.example.com
    git config --global user.name "Your Name Comes Here"
    # get the repository if you don't have it
-   git clone git://github.com/scikit-image/scikit-image.git
+   git clone https://github.com/scikit-image/scikit-image.git
    # make a branch for your patching
    cd scikit-image
    git branch the-fix-im-thinking-of
@@ -59,7 +59,7 @@ In detail
 #. If you don't already have one, clone a copy of the
    `scikit-image`_ repository::
 
-      git clone git://github.com/scikit-image/scikit-image.git
+      git clone https://github.com/scikit-image/scikit-image.git
       cd scikit-image
 
 #. Make a 'feature branch'.  This will be where you work on
