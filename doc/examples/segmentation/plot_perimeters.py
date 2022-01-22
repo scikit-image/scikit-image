@@ -38,7 +38,7 @@ true_perimeters = [80 * scale, 2 * np.pi * R / dX]
 # according to different approximations
 for index, obj in enumerate([square, disk]):
 
-    # 4 or 8 neighbourhood can be used by the classic perimeter estimator
+    # `neighbourhood` value can be 4 or 8 for the classic perimeter estimator
     for n in [4, 8]:
         p = []
         angles = range(90)
@@ -47,7 +47,7 @@ for index, obj in enumerate([square, disk]):
             p.append(perimeter(rotated, n))
         ax[index].plot(angles, p)
 
-    # 2 or 4 directions can be used by the Crofton estimator
+    # `directions` value can be 2 or 4 for the Crofton estimator
     for d in [2, 4]:
         p = []
         angles = np.arange(0, 90, 2)
