@@ -1,7 +1,7 @@
 from math import sqrt
 import numpy as np
 from scipy import ndimage as ndi
-from ..._shared.utils import deprecate_kwarg
+from .._shared.utils import deprecate_kwarg
 
 
 STREL_4 = np.array([[0, 1, 0],
