@@ -466,8 +466,8 @@ def draw_multiblock_lbp(image, r, c, width, height,
     # Offsets of neighbor rectangles relative to central one.
     # It has order starting from top left and going clockwise.
     neighbor_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
-                              (0, 1), (1, 1), (1, 0),
-                              (1, -1), (0, -1))
+                             (0, 1), (1, 1), (1, 0),
+                             (1, -1), (0, -1))
 
     # Pre-multiply the offsets with width and height.
     neighbor_rect_offsets = np.array(neighbor_rect_offsets)
