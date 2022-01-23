@@ -38,7 +38,7 @@ true_perimeters = [80 * scale, 2 * np.pi * R / dX]
 # according to different approximations
 for index, obj in enumerate([square, disk]):
 
-    # `neighbourhood` value can be 4 or 8 for the classic perimeter estimator
+    # `neighborhood` value can be 4 or 8 for the classic perimeter estimator
     for n in [4, 8]:
         p = []
         angles = range(90)
