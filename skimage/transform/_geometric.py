@@ -1357,7 +1357,7 @@ class SimilarityTransform(EuclideanTransform):
 
         self.params = _umeyama(src, dst, estimate_scale=True)
 
-        return True
+        return not np.any(np.isnan(self.params))
 
     @property
     def scale(self):

@@ -519,7 +519,7 @@ def test_degenerate():
     src = dst = np.zeros((10, 2))
 
     tform = SimilarityTransform()
-    assert tform.estimate(src, dst)  # NOTE: Always returns true.
+    assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
     tform = AffineTransform()
