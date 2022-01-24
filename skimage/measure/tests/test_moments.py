@@ -169,7 +169,7 @@ def test_analytical_moments_calculation(dtype, order, ndim):
         x = rng.integers(0, 256, shape, dtype=dtype)
     else:
         x = rng.standard_normal(shape, dtype=dtype)
-    # setting center=None will use the analytic code path
+    # setting center=None will use the analytical expressions
     m1 = moments_central(x, center=None, order=order)
     # providing explicit centroid will bypass the analytic code path
     m2 = moments_central(x, center=centroid(x), order=order)

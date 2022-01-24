@@ -1,6 +1,6 @@
 """
 This script uses SymPy to generate the analytical equations used to transform
-raw moments into central moments in skimage/measure/_moments_analytical.py
+raw moments into central moments in ``skimage/measure/_moments_analytical.py``
 """
 
 from sympy import symbols, binomial, Sum
@@ -25,7 +25,7 @@ if ndim == 2:
     cy = M[0, 1] / M[0, 0]
 
     # Loop over all moments of order <= `order`.
-    print(f"Generating expressions for {ndim}D moments with order <= {order}")
+    print(f"Generating expressions for {ndim}D moments of order <= {order}")
     for p in range(0, order + 1):
         for q in range(0, order + 1):
             if p + q > order:
@@ -66,7 +66,7 @@ elif ndim == 3:
     cy = M[0, 1, 0] / M[0, 0, 0]
     cz = M[0, 0, 1] / M[0, 0, 0]
 
-    # loop over all moments with order <= `order`.
+    # Loop over all moments of order <= `order`.
     print(f"Generating expressions for {ndim}D moments of order <= {order}")
     for p in range(0, order + 1):
         for q in range(0, order + 1):

@@ -1,7 +1,7 @@
 """Analytical transformations from raw image moments to central moments.
 
 The expressions for the 2D central moments of order <=2 are often given in
-textboks. Expressions for higher orders and dimensions were generated in SymPy
+textbooks. Expressions for higher orders and dimensions were generated in SymPy
 using ``tools/precompute/moments_sympy.py`` in the GitHub repository.
 
 """
@@ -12,10 +12,10 @@ import numpy as np
 
 
 def _moments_raw_to_central_fast(moments_raw):
-    """Analytical equations for 2D and 3D central moments of order < 4.
+    """Analytical formulae for 2D and 3D central moments of order < 4.
 
     `moments_raw_to_central` will automatically call this function when
-    possible.
+    ndim < 4 and order < 4.
 
     Parameters
     ----------
