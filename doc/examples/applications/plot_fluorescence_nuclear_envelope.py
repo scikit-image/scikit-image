@@ -60,16 +60,19 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# To begin with, let us consider the first channel of the first image.
+# To begin with, let us consider the first channel of the first image (step
+# ``a)`` in the figure below).
 
 image_t_0_channel_0 = image_sequence[0, 0, :, :]
 
 #####################################################################
 # Segment the nucleus rim
 # =======================
-# Let us apply a Gaussian low-pass filter to this image in order to smooth it.
+# Let us apply a Gaussian low-pass filter to this image in order to smooth it
+# (step ``b)``).
 # Next, we segment the nuclei, finding the threshold between the background
-# and foreground with Otsu's method: We get a binary image.
+# and foreground with Otsu's method: We get a binary image (step ``c)``). We
+# then fill the holes in the objects (step ``c-1)``).
 
 smooth = filters.gaussian(image_t_0_channel_0, sigma=1.5)
 
@@ -80,22 +83,23 @@ fill = ndi.binary_fill_holes(thresh)
 
 #####################################################################
 # Following the original workflow, let us remove objects which touch the image
-# border. Here, we can see part of another nucleus in the bottom right-hand
-# corner.
+# border (step ``c-2)``). Here, we can see that part of another nucleus was
+# touching the bottom right-hand corner.
 
 clear = segmentation.clear_border(fill)
 clear.dtype
 
 #####################################################################
-# We compute both the morphological dilation of this binary image and its
-# morphological erosion.
+# We compute both the morphological dilation of this binary image
+# (step ``d)``) and its morphological erosion (step ``e)``).
 
 dilate = morphology.binary_dilation(clear)
 
 erode = morphology.binary_erosion(clear)
 
 #####################################################################
-# Finally, we subtract the eroded from the dilated to get the nucleus rim.
+# Finally, we subtract the eroded from the dilated to get the nucleus rim
+#(step ``f)``).
 
 mask = dilate.astype(int) - erode.astype(int)
 mask.dtype
