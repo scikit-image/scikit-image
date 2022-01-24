@@ -188,7 +188,7 @@ n_z = image_sequence.shape[0]  # number of frames
 
 smooth_seq = filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
 thresh_values = [filters.threshold_otsu(s) for s in smooth_seq[:]]
-thresh_seq = [smooth_seq[k, :, :] > thresh_values[k] for k in range(n_z)]
+thresh_seq = [smooth_seq[k, ...] > val for val in thresh_values]
 
 #####################################################################
 # Alternatively, we could compute ``thresh_values`` without using a list
@@ -206,11 +206,9 @@ thresh_seq = [smooth_seq[k, :, :] > thresh_values[k] for k in range(n_z)]
 # We use the following flat structuring element for morphological
 # computations:
 
-footprint = np.stack((np.zeros((3, 3)), np.ones((3, 3)), np.zeros((3, 3))))
-footprint[1, 0, 0] = 0
-footprint[1, 0, -1] = 0
-footprint[1, -1, 0] = 0
-footprint[1, -1, -1] = 0
+footprint = np.stack((np.zeros((3, 3)),
+                      ndi.generate_binary_structure(2, 1),
+                      np.zeros((3, 3))))
 footprint
 
 #####################################################################
@@ -257,7 +255,7 @@ mask_seq = dilate_seq.astype(int) - erode_seq.astype(int)
 # Let us give each mask (corresponding to each time point) a different label,
 # running from 1 to 15.
 
-mask_list = [mask_seq[k] * (k + 1) for k in range(n_z)]
+mask_list = [mask * lab for lab, mask in enumerate(mask_seq, 1)]
 mask_sequence = np.stack(mask_list)
 
 #####################################################################
