@@ -281,9 +281,8 @@ def test_decorated_channel_axis_shape(channel_axis):
 
 
 def test_decorator_warnings():
-    """Assets that warning messages issued by decorators points to
+    """Assert that warning message issued by decorator points to
     expected file and line number.
-
     """
 
     with pytest.warns(FutureWarning) as record:

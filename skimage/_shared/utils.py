@@ -25,9 +25,7 @@ class skimage_deprecation(Warning):
 
 
 def _get_stack_rank(func):
-    """Returns function rank in the call stack
-
-    """
+    """Return function rank in the call stack."""
     if _is_wrapped(func):
         return 1 + _get_stack_rank(func.__wrapped__)
     else:
@@ -39,16 +37,14 @@ def _is_wrapped(func):
 
 
 def _get_stack_length(func):
-    """Returns function call stack length.
-
-    """
+    """Return function call stack length."""
     return _get_stack_rank(func.__globals__.get(func.__name__, func))
 
 
 class _DecoratorBaseClass:
     """Used to manage decorators' warnings stacklevel.
 
-    The _stack_length class variable is used to store the number of
+    The `_stack_length` class variable is used to store the number of
     times a function is wrapped by a decorator.
 
     Let `stack_length` be the total number of times a decorated
