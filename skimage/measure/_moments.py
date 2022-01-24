@@ -313,7 +313,7 @@ def moments_normalized(mu, order=3):
 def moments_hu(nu):
     """Calculate Hu's set of image moments (2D-only).
 
-    Note that this set of moments is proofed to be translation, scale and
+    Note that this set of moments is proved to be translation, scale and
     rotation invariant.
 
     Parameters

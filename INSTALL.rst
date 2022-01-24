@@ -272,7 +272,6 @@ This directory contains the following files:
     ├── skimage
     ├── TODO.txt
     ├── tools
-    └── viewer_examples
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
@@ -477,9 +476,6 @@ functionality is only available with the following installed:
 
 * `Astropy <https://www.astropy.org>`__
     Provides FITS I/O capability.
-
-* `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
-    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <https://pyamg.org/>`__
     The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
