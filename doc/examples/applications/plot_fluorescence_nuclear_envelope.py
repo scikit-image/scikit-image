@@ -188,7 +188,7 @@ n_z = image_sequence.shape[0]  # number of frames
 
 smooth_seq = filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
 thresh_values = [filters.threshold_otsu(s) for s in smooth_seq[:]]
-thresh_seq = [smooth_seq[k, ...] > val for val in thresh_values]
+thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 
 #####################################################################
 # Alternatively, we could compute ``thresh_values`` without using a list
