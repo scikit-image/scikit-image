@@ -103,7 +103,7 @@ mask.dtype
 #####################################################################
 # Let us visualize these processing steps in a sequence of subplots.
 
-_, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
+fig, ax = plt.subplots(2, 4, figsize=(12, 6), sharey=True)
 
 ax[0, 0].imshow(image_t_0_channel_0, cmap=plt.cm.gray)
 ax[0, 0].set_title('a) Raw')
@@ -130,7 +130,9 @@ ax[1, 3].imshow(mask, cmap=plt.cm.gray)
 ax[1, 3].set_title('f) Nucleus Rim')
 
 for a in ax.ravel():
-    a.axis('off')
+    a.set_axis_off()
+
+fig.tight_layout()
 
 #####################################################################
 # Apply the segmented rim as a mask
@@ -141,15 +143,17 @@ for a in ax.ravel():
 image_t_0_channel_1 = image_sequence[0, 1, :, :]
 selection = np.where(mask, image_t_0_channel_1, 0)
 
-_, ax = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 
-ax[0].imshow(image_t_0_channel_1)
-ax[0].set_title('Second channel (raw)')
-ax[0].axis('off')
+ax0.imshow(image_t_0_channel_1)
+ax0.set_title('Second channel (raw)')
+ax0.set_axis_off()
 
-ax[1].imshow(selection)
-ax[1].set_title('Selection')
-_ = ax[1].axis('off')
+ax1.imshow(selection)
+ax1.set_title('Selection')
+ax1.set_axis_off()
+
+fig.tight_layout()
 
 #####################################################################
 # Measure the total intensity
@@ -272,12 +276,13 @@ fluorescence_change = [props['area'][i] * props['intensity_mean'][i]
 
 fluorescence_change /= fluorescence_change[0]  # normalization
 
-_, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.plot(fluorescence_change, 'rs')
 ax.grid()
 ax.set_xlabel('Time point')
 ax.set_ylabel('Normalized total intensity')
 ax.set_title('Change in fluorescence intensity at the nuclear envelope')
+fig.tight_layout()
 
 plt.show()
 
