@@ -27,7 +27,7 @@
   later.
 - Check that new functions are imported in corresponding `__init__.py`.
 - Check that new features, API changes, and deprecations are mentioned in
-    `doc/release/release_dev.rst`.
+  `doc/release/release_dev.rst`.
 - There is a bot to help automate backporting a PR to an older branch. For
   example, to backport to v0.19.x after merging, add the following in a PR
   comment: `@meeseeksdev backport to v0.19.x`
