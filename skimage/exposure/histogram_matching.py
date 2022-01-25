@@ -19,8 +19,8 @@ def _match_cumulative_cdf(source, template):
         tmpl_values = tmpl_values[tmpl_values_exist]
     else:
         src_values, src_lookup, src_counts = np.unique(source.ravel(),
-                                                           return_inverse=True,
-                                                           return_counts=True)
+                                                       return_inverse=True,
+                                                       return_counts=True)
         tmpl_values, tmpl_counts = np.unique(template.ravel(), return_counts=True)
 
     # calculate normalized quantiles for each array
