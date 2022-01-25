@@ -547,7 +547,7 @@ def test_degenerate():
     dst = np.array([[0, 1, 0], [0, 1, 0], [0, 3, 0]])
     tform = AffineTransform()
     assert not tform.estimate(src, dst)
-    # Prior to gh-xxxx, the above would set the parameters as the identity.
+    # Prior to gh-6207, the above would set the parameters as the identity.
     assert np.all(np.isnan(tform.params))
 
 

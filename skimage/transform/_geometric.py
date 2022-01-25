@@ -1357,6 +1357,7 @@ class SimilarityTransform(EuclideanTransform):
 
         self.params = _umeyama(src, dst, estimate_scale=True)
 
+        # _umeyama will return nan if the problem is not well-conditioned.
         return not np.any(np.isnan(self.params))
 
     @property
