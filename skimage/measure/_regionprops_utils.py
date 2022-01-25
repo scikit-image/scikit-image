@@ -185,7 +185,7 @@ def euler_number(image, connectivity=None):
 
 
 @deprecate_kwarg(kwarg_mapping={'neighbourhood': 'neighborhood'},
-                 removed_version="1.0",
+                 removed_version="1.2",
                  deprecated_version="0.19.2")
 def perimeter(image, neighborhood=4):
     """Calculate total perimeter of all objects in binary image.

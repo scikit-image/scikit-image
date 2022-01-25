@@ -29,7 +29,7 @@ API Changes
 - All references to EN-GB spelling for the word ``neighbour`` and others—e.g.,
   ``neigbourhood``, ``neighboring``, were changed to their EN-US spelling,
   ``neighbor``. With that, ``skimage.measure.perimeter` parameter ``neighbourhood``
-  was deprecated in favor of ``neighborhood`` in 1.0.
+  was deprecated in favor of ``neighborhood`` in 0.19.2.
 
 Bugfixes
 --------
