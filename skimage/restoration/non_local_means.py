@@ -66,7 +66,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
 
     The non-local means algorithm is well suited for denoising images with
     specific textures. The principle of the algorithm is to average the value
-    of a given pixel with values of other pixels in a limited neighbourhood,
+    of a given pixel with values of other pixels in a limited neighborhood,
     provided that the *patches* centered on the other pixels are similar enough
     to the patch centered on the pixel of interest.
 
