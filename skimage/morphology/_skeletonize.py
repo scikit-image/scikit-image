@@ -640,12 +640,75 @@ def skeletonize_3d(image):
     image_o[image_o != 0] = 1
 
     # do the computation
-    image_o = np.asarray(_compute_thin_image(image_o))
+    image_o = np.asarray(_compute_thin_image(image_o, surface=False))
 
     # crop it back and restore the original intensity range
     image_o = crop(image_o, crop_width=1)
     if image.ndim == 2:
         image_o = image_o[0]
+    image_o *= maxval
+
+    return image_o
+
+
+def medial_surface(image):
+    """Compute the medial surface of a binary image.
+
+    Thinning is used to reduce each connected component in a binary image
+    to a single-pixel thick surface.
+
+    Parameters
+    ----------
+    image : ndarray, 3D
+        A binary image containing the objects to be thinned. Zeros
+        represent background, nonzero values are foreground.
+
+    Returns
+    -------
+    surfaces : ndarray
+        The thinned image.
+
+    See Also
+    --------
+    skeletonize_3d, medial_axis
+
+    Notes
+    -----
+    The method of [Lee94]_ uses an octree data structure to examine a 3x3x3
+    neighborhood of a pixel. The algorithm proceeds by iteratively sweeping
+    over the image, and removing pixels at each iteration until the image
+    stops changing. Each iteration consists of two steps: first, a list of
+    candidates for removal is assembled; then pixels from this list are
+    rechecked sequentially, to better preserve connectivity of the image.
+
+    References
+    ----------
+    .. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
+           via 3-D medial surface/axis thinning algorithms.
+           Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
+
+    """
+    # make sure the image is 3D
+    if image.ndim != 3:
+        raise ValueError("medial_surface can only handle 3D images; "
+                         "got image.ndim = %s instead." % image.ndim)
+    image = np.ascontiguousarray(image)
+    image = img_as_ubyte(image, force_copy=False)
+
+    # pad the in image w/ zeros to simplify dealing w/ boundaries
+    # NB: careful here to not clobber the original *and* minimize copying
+    image_o = image
+    image_o = np.pad(image_o, pad_width=1, mode='constant')
+
+    # normalize to binary
+    maxval = image_o.max()
+    image_o[image_o != 0] = 1
+
+    # do the computation
+    image_o = np.asarray(_compute_thin_image(image_o, surface=True))
+
+    # crop it back and restore the original intensity range
+    image_o = crop(image_o, crop_width=1)
     image_o *= maxval
 
     return image_o
