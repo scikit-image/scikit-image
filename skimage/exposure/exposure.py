@@ -360,6 +360,8 @@ def _equalize_hist_uint(image, mask=None, lut_max=255):
     mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
+    lut_max : int, optional
+        The maximum integer value to use for the bincount histogram.
 
     Returns
     -------
