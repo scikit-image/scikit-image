@@ -98,8 +98,9 @@ dilate = morphology.binary_dilation(clear)
 erode = morphology.binary_erosion(clear)
 
 #####################################################################
-# Finally, we select pixels that are in ``dilate``, but not ``erode`` to get
-# the nucleus rim (step ``f)``). 
+# Finally, we subtract the eroded from the dilated to get the nucleus rim
+# (step ``f)``). This is equivalent to selecting the pixels which are in
+# ``dilate``, but not in ``erode``:
 
 mask = np.logical_and(dilate, ~erode)
 
@@ -207,7 +208,7 @@ thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 #                                         arr=smooth_seq.reshape(n_z, -1))
 #
 # We use the following flat structuring element for morphological
-# computations (``np.newaxis`` is used to prepend an axis of size 1 for time):.
+# computations (``np.newaxis`` is used to prepend an axis of size 1 for time):
 
 footprint = ndi.generate_binary_structure(2, 1)[np.newaxis, ...]
 footprint
@@ -254,13 +255,12 @@ mask_sequence = np.logical_and(dilate_seq, ~erode_seq)
 
 #####################################################################
 # Let us give each mask (corresponding to each time point) a different label,
-# running from 1 to 15. We use ``np.min_scalar_type`` to determine the minimum
-# size integer dtype needed to represent the number of timepoints.
+# running from 1 to 15. We use ``np.min_scalar_type`` to determine the
+# minimum-size integer dtype needed to represent the number of time points:
 
-n_label = len(mask_sequence) + 1  # add one for the background
-label_dtype = np.min_scalar_type(n_label)
+label_dtype = np.min_scalar_type(n_z)
 mask_sequence = mask_sequence.astype(label_dtype)
-labels = np.arange(1, n_label, dtype=label_dtype)
+labels = np.arange(1, n_z + 1, dtype=label_dtype)
 mask_sequence *= labels[:, np.newaxis, np.newaxis]
 
 #####################################################################
