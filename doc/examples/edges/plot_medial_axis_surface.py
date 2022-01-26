@@ -21,11 +21,6 @@ pixels at each iteration until the image stops changing. Each iteration
 consists of two steps: first, a list of candidates for removal is assembled;
 then pixels from this list are rechecked sequentially, to better preserve
 connectivity of the image.
-
-.. [Lee94] T.-C. Lee, R.L. Kashyap and C.-N. Chu, Building skeleton models
-           via 3-D medial surface/axis thinning algorithms.
-           Computer Vision, Graphics, and Image Processing, 56(6):462-478,
-           1994.
 """
 
 
