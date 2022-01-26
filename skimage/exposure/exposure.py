@@ -386,8 +386,8 @@ def _equalize_hist_uint(image, mask=None, lut_max=255):
     cdf = hist.cumsum()
 
     # make sure first bin corresponds to 0 in the lookup table
-    first_nonzero = np.nonzero(cdf)[0][0]
-    cdf[first_nonzero:] = cdf[first_nonzero:] - cdf[first_nonzero]
+    first_nonzero = np.flatnonzero(cdf)[0]
+    cdf[first_nonzero:] -= cdf[first_nonzero]
 
     # normalize so last bin corresponds to lut_max
     lookup_table = np.around(cdf * (lut_max / cdf[-1])).astype(np.uint8)
