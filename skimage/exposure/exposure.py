@@ -1,7 +1,6 @@
 import numpy as np
 
 from .._shared import utils
-from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_limits, dtype_range
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
@@ -892,6 +891,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         return not ((image.max() == 1) and (image.min() == 0))
 
     if image.ndim == 3:
+        from ..color.colorconv import rgb2gray, rgba2rgb  # no circular import
 
         if image.shape[2] == 4:
             image = rgba2rgb(image)
