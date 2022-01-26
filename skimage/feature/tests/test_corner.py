@@ -2,21 +2,18 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from skimage import data
-from skimage import img_as_float
-from skimage import draw
-from skimage._shared.utils import _supported_float_type
+from skimage import data, draw, img_as_float
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
+from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
-from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
-                             corner_subpix, peak_local_max, corner_peaks,
-                             corner_kitchen_rosenfeld, corner_foerstner,
-                             corner_fast, corner_orientations,
-                             structure_tensor, structure_tensor_eigvals,
-                             structure_tensor_eigenvalues,
-                             hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det, shape_index)
+from skimage.feature import (corner_fast, corner_foerstner, corner_harris,
+                             corner_kitchen_rosenfeld, corner_moravec,
+                             corner_orientations, corner_peaks,
+                             corner_shi_tomasi, corner_subpix, hessian_matrix,
+                             hessian_matrix_det, hessian_matrix_eigvals,
+                             peak_local_max, shape_index, structure_tensor,
+                             structure_tensor_eigenvalues)
 from skimage.morphology import cube, octagon
 
 
@@ -89,12 +86,11 @@ def test_structure_tensor_3d_rc_only():
 def test_structure_tensor_orders():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    with expected_warnings(['the default order of the structure']):
-        A_elems_default = structure_tensor(square, sigma=0.1)
+    A_elems_default = structure_tensor(square, sigma=0.1)
     A_elems_xy = structure_tensor(square, sigma=0.1, order='xy')
     A_elems_rc = structure_tensor(square, sigma=0.1, order='rc')
-    assert_array_equal(A_elems_xy, A_elems_default)
-    assert_array_equal(A_elems_xy, A_elems_rc[::-1])
+    assert_array_equal(A_elems_rc, A_elems_default)
+    assert_array_equal(A_elems_xy, A_elems_default[::-1])
 
 
 @pytest.mark.parametrize('ndim', [2, 3])
@@ -179,16 +175,6 @@ def test_structure_tensor_eigenvalues_3d():
     e0, e1, e2 = structure_tensor_eigenvalues(A_elems)
     # e0 should detect facets
     assert np.all(e0[boundary] != 0)
-
-
-def test_structure_tensor_eigvals():
-    square = np.zeros((5, 5))
-    square[2, 2] = 1
-    A_elems = structure_tensor(square, sigma=0.1, order='rc')
-    with expected_warnings(['structure_tensor_eigvals is deprecated']):
-        eigvals = structure_tensor_eigvals(*A_elems)
-    eigenvalues = structure_tensor_eigenvalues(A_elems)
-    assert_array_equal(eigvals, eigenvalues)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -434,7 +420,7 @@ def test_subpix_no_class():
     img[25, 25] = 1e-10
     corner = peak_local_max(corner_harris(img),
                             min_distance=10, threshold_rel=0, num_peaks=1)
-    subpix = corner_subpix(img, np.array([[25, 25]]))
+    subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (np.nan, np.nan))
 
 

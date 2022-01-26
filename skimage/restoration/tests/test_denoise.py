@@ -93,8 +93,8 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
     denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
 
     with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised = restoration.denoise_tv_chambolle(astro, weight=0.1,
-                                                    multichannel=True)
+        restoration.denoise_tv_chambolle(astro, weight=0.1,
+                                         multichannel=True)
 
     # providing multichannel argument positionally also warns
     with expected_warnings(["Providing the `multichannel` argument"]):
@@ -102,6 +102,17 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
                                                     True)
 
     assert_array_equal(denoised[..., 0], denoised0)
+
+
+def test_denoise_tv_chambolle_n_iter_max_deprecation():
+    expected = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                max_num_iter=10)
+
+    with expected_warnings(["`n_iter_max` is a deprecated argument"]):
+        denoised = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                    n_iter_max=10)
+
+    assert_array_equal(expected, denoised)
 
 
 def test_denoise_tv_chambolle_float_result_range():
@@ -271,7 +282,7 @@ def test_denoise_bilateral_negative2():
 
     # 2 images with a given offset should give the same result (with the same
     # offset)
-    assert_array_equal(out1, out2 + 10)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
@@ -541,6 +552,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
         denoised_wrong_multichannel, channel_axis, -1
     )
 
+    img = img.astype(denoised_wrong_multichannel.dtype)
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert psnr_ok > psnr_wrong

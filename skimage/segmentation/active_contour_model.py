@@ -6,7 +6,8 @@ from ..util import img_as_float
 from ..filters import sobel
 
 
-@deprecate_kwarg({'max_iterations': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iterations': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    max_px_move=1.0,

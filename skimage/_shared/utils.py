@@ -10,6 +10,7 @@ from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
+
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
            'reshape_nd', 'identity', 'slice_at_axis']
@@ -113,6 +114,72 @@ class remove_arg:
         return fixed_func
 
 
+def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
+    """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
+
+    Parameters
+    ---------
+    func : function
+        The function whose docstring we wish to update.
+    kwarg_mapping : dict
+        A dict containing {old_arg: new_arg} key/value pairs as used by
+        `deprecate_kwarg`.
+    deprecated_version : str
+        A major.minor version string specifying when old_arg was
+        deprecated.
+
+    Returns
+    -------
+    new_doc : str
+        The updated docstring. Returns the original docstring if numpydoc is
+        not available.
+    """
+    if func.__doc__ is None:
+        return None
+    try:
+        from numpydoc.docscrape import FunctionDoc, Parameter
+    except ImportError:
+        # Return an unmodified docstring if numpydoc is not available.
+        return func.__doc__
+
+    Doc = FunctionDoc(func)
+    for old_arg, new_arg in kwarg_mapping.items():
+        desc = [f'Deprecated in favor of `{new_arg}`.',
+                f'',
+                f'.. deprecated:: {deprecated_version}']
+        Doc['Other Parameters'].append(
+            Parameter(name=old_arg,
+                      type='DEPRECATED',
+                      desc=desc)
+        )
+    new_docstring = str(Doc)
+
+    # new_docstring will have a header starting with:
+    #
+    # .. function:: func.__name__
+    #
+    # and some additional blank lines. We strip these off below.
+    split = new_docstring.split('\n')
+    no_header = split[1:]
+    while not no_header[0].strip():
+        no_header.pop(0)
+
+    # Store the initial description before any of the Parameters fields.
+    # Usually this is a single line, but the while loop covers any case
+    # where it is not.
+    descr = no_header.pop(0)
+    while no_header[0].strip():
+        descr += '\n    ' + no_header.pop(0)
+    descr += '\n\n'
+    # '\n    ' rather than '\n' here to restore the original indentation.
+    final_docstring = descr + '\n    '.join(no_header)
+    # strip any extra spaces from ends of lines
+    final_docstring = '\n'.join(
+        [line.rstrip() for line in final_docstring.split('\n')]
+    )
+    return final_docstring
+
+
 class deprecate_kwarg:
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
@@ -122,6 +189,8 @@ class deprecate_kwarg:
     kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
+    deprecated_version : str
+        The package version in which the argument was first deprecated.
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
@@ -131,7 +200,8 @@ class deprecate_kwarg:
 
     """
 
-    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
+    def __init__(self, kwarg_mapping, deprecated_version, warning_msg=None,
+                 removed_version=None):
         self.kwarg_mapping = kwarg_mapping
         if warning_msg is None:
             self.warning_msg = ("`{old_arg}` is a deprecated argument name "
@@ -143,7 +213,10 @@ class deprecate_kwarg:
         else:
             self.warning_msg = warning_msg
 
+        self.deprecated_version = deprecated_version
+
     def __call__(self, func):
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             for old_arg, new_arg in self.kwarg_mapping.items():
@@ -157,6 +230,11 @@ class deprecate_kwarg:
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
+
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
+                                              self.deprecated_version)
+            fixed_func.__doc__ = newdoc
         return fixed_func
 
 
@@ -174,6 +252,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
     def __init__(self, removed_version='1.0', multichannel_position=None):
         super().__init__(
             kwarg_mapping={'multichannel': 'channel_axis'},
+            deprecated_version='0.19',
             warning_msg=None,
             removed_version=removed_version)
         self.position = multichannel_position
@@ -212,6 +291,11 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
+
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(
+                func, {'multichannel': 'channel_axis'}, '0.19')
+            fixed_func.__doc__ = newdoc
         return fixed_func
 
 

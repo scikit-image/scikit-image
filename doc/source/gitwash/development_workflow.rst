@@ -206,8 +206,7 @@ Now all those people can do::
 
     git clone git@githhub.com:your-user-name/scikit-image.git
 
-Remember that links starting with ``git@`` use the ssh protocol and are
-read-write; links starting with ``git://`` are read-only.
+Remember that links starting with ``git@`` use the ssh protocol.
 
 Your collaborators can then commit directly into that repo with the
 usual::

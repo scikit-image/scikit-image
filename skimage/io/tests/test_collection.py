@@ -7,7 +7,7 @@ from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
 from skimage.io import reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose, TestCase
+from skimage._shared.testing import assert_equal, assert_allclose, fetch
 
 
 def test_string_split():
@@ -44,14 +44,14 @@ def test_imagecollection_input():
     assert len(images) == 3
 
 
-class TestImageCollection(TestCase):
+class TestImageCollection():
     pattern = [os.path.join(data_dir, pic)
                for pic in ['brick.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['brick.png', 'moon.png']]
 
-    def setUp(self):
+    def setup_method(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
         self.images = ImageCollection(self.pattern)
@@ -96,7 +96,7 @@ class TestImageCollection(TestCase):
             set_files('newfiles')
 
     def test_custom_load_func_w_kwarg(self):
-        load_pattern = os.path.join(data_dir, 'no_time_for_that_tiny.gif')
+        load_pattern = fetch('data/no_time_for_that_tiny.gif')
 
         def load_fn(f, step):
             vid = imageio.get_reader(f)

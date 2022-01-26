@@ -4,13 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-# TODO: remove except case once minimum SciPy is >= 1.4
-try:
-    from scipy.fft import fftn, ifftn
-except ImportError:
-    # scipy < 1.4 does not have an fft module
-    from scipy.fftpack import fftn, ifftn
-from scipy.fftpack import fftfreq
+from scipy.fft import fftn, ifftn, fftfreq
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
@@ -166,7 +160,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
         maximum translation, while a higher `overlap_ratio` leads to greater
         robustness against spurious matches due to small overlap between
         masked images. Used only if one of ``reference_mask`` or
-        ``moving_mask`` is None.
+        ``moving_mask`` is not None.
     normalization : {"phase", None}
         The type of normalization to apply to the cross-correlation. This
         parameter is unused when masks (`reference_mask` and `moving_mask`) are

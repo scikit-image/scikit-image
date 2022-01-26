@@ -172,7 +172,8 @@ def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
     return res.astype(dtype, copy=False)
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
               max_num_iter=500, dt=0.5, init_level_set='checkerboard',
               extended_output=False):

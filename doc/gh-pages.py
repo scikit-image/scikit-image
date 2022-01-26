@@ -68,7 +68,7 @@ def sh3(cmd):
 
 def init_repo(path):
     """clone the gh-pages repo if we haven't already."""
-    sh("git clone %s %s"%(pages_repo, path))
+    sh(f'git clone --branch gh-pages {pages_repo} {path} --depth 1')
     here = os.getcwd()
     cd(path)
     sh('git checkout gh-pages')
@@ -92,7 +92,6 @@ if __name__ == '__main__':
                 tag = '.'.join(tag.split('.')[:-1] + ['x'])
 
             break
-
 
     startdir = os.getcwd()
     if not os.path.exists(pages_dir):

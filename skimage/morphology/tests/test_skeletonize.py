@@ -69,7 +69,7 @@ class TestSkeletonize():
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbours(self):
+    def test_skeletonize_num_neighbors(self):
         # an empty image
         image = np.zeros((300, 300))
 

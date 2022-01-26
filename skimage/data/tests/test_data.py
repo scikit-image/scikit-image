@@ -198,3 +198,12 @@ def test_vortex():
     image0, image1 = data.vortex()
     for image in [image0, image1]:
         assert image.shape == (512, 512)
+
+
+@pytest.mark.parametrize(
+    'function_name', ['create_image_fetcher', 'file_hash', 'image_fetcher']
+)
+def test_fetchers_are_public(function_name):
+    # Check that the following functions that are only used indirectly in the
+    # above tests are public.
+    assert hasattr(data, function_name)

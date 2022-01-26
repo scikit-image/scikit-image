@@ -67,7 +67,7 @@ def test_euclidean_estimation():
 
     # via estimate method
     tform3 = EuclideanTransform()
-    tform3.estimate(SRC, DST)
+    assert tform3.estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
 
 
@@ -114,7 +114,7 @@ def test_similarity_estimation():
 
     # via estimate method
     tform3 = SimilarityTransform()
-    tform3.estimate(SRC, DST)
+    assert tform3.estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
 
 
@@ -180,7 +180,7 @@ def test_affine_estimation():
 
     # via estimate method
     tform3 = AffineTransform()
-    tform3.estimate(SRC, DST)
+    assert tform3.estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
 
 
@@ -210,7 +210,7 @@ def test_affine_init():
 
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform()
-    tform.estimate(SRC, DST)
+    assert tform.estimate(SRC, DST)
     # make sure each single affine transform is exactly estimated
     assert_almost_equal(tform(SRC), DST)
     assert_almost_equal(tform.inverse(DST), SRC)
@@ -324,8 +324,34 @@ def test_projective_estimation():
 
     # via estimate method
     tform3 = ProjectiveTransform()
-    tform3.estimate(SRC, DST)
+    assert tform3.estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
+
+
+def test_projective_weighted_estimation():
+
+    # Exact solution with same points, and unity weights
+    tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
+    tform_w = estimate_transform('projective',
+                                 SRC[:4, :], DST[:4, :], np.ones(4))
+    assert_almost_equal(tform.params, tform_w.params)
+
+    # Over-determined solution with same points, and unity weights
+    tform = estimate_transform('projective', SRC, DST)
+    tform_w = estimate_transform('projective',
+                                 SRC, DST, np.ones(SRC.shape[0]))
+    assert_almost_equal(tform.params, tform_w.params)
+
+    # Repeating a point, but setting its weight small, should give nearly
+    # the same result.
+    point_weights = np.ones(SRC.shape[0] + 1)
+    point_weights[0] = 1.0e-15
+    tform1 = estimate_transform('projective', SRC, DST)
+    tform2 = estimate_transform('projective',
+                                SRC[np.arange(-1, SRC.shape[0]), :],
+                                DST[np.arange(-1, SRC.shape[0]), :],
+                                point_weights)
+    assert_almost_equal(tform1.params, tform2.params, decimal=3)
 
 
 def test_projective_init():
@@ -342,8 +368,31 @@ def test_polynomial_estimation():
 
     # via estimate method
     tform2 = PolynomialTransform()
-    tform2.estimate(SRC, DST, order=10)
+    assert tform2.estimate(SRC, DST, order=10)
     assert_almost_equal(tform2.params, tform.params)
+
+
+def test_polynomial_weighted_estimation():
+    # Over-determined solution with same points, and unity weights
+    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    tform_w = estimate_transform('polynomial',
+                                 SRC,
+                                 DST,
+                                 order=10,
+                                 weights=np.ones(SRC.shape[0]))
+    assert_almost_equal(tform.params, tform_w.params)
+
+    # Repeating a point, but setting its weight small, should give nearly
+    # the same result.
+    point_weights = np.ones(SRC.shape[0] + 1)
+    point_weights[0] = 1.0e-15
+    tform1 = estimate_transform('polynomial', SRC, DST, order=10)
+    tform2 = estimate_transform('polynomial',
+                                SRC[np.arange(-1, SRC.shape[0]), :],
+                                DST[np.arange(-1, SRC.shape[0]), :],
+                                order=10,
+                                weights=point_weights)
+    assert_almost_equal(tform1.params, tform2.params, decimal=4)
 
 
 def test_polynomial_init():
@@ -470,15 +519,15 @@ def test_degenerate():
     src = dst = np.zeros((10, 2))
 
     tform = SimilarityTransform()
-    tform.estimate(src, dst)
+    assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
     tform = AffineTransform()
-    tform.estimate(src, dst)
+    assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
     tform = ProjectiveTransform()
-    tform.estimate(src, dst)
+    assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
     # See gh-3926 for discussion details
@@ -493,6 +542,13 @@ def test_degenerate():
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
+
+    src = np.array([[0, 2, 0], [0, 2, 0], [0, 4, 0]])
+    dst = np.array([[0, 1, 0], [0, 1, 0], [0, 3, 0]])
+    tform = AffineTransform()
+    assert not tform.estimate(src, dst)
+    # Prior to gh-6207, the above would set the parameters as the identity.
+    assert np.all(np.isnan(tform.params))
 
 
 def test_normalize_degenerate_points():
@@ -563,7 +619,7 @@ def test_estimate_affine_3d():
     dst = tf(src)
     dst_noisy = dst + np.random.random((25, ndim))
     tf2 = AffineTransform(dimensionality=ndim)
-    tf2.estimate(src, dst_noisy)
+    assert tf2.estimate(src, dst_noisy)
     # we check rot/scale/etc more tightly than translation because translation
     # estimation is on the 1 pixel scale
     assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)

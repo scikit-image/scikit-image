@@ -342,6 +342,11 @@ def cumulative_distribution(image, nbins=256):
     hist, bin_centers = histogram(image, nbins)
     img_cdf = hist.cumsum()
     img_cdf = img_cdf / float(img_cdf[-1])
+
+    # cast img_cdf to single precision for float32 or float16 inputs
+    cdf_dtype = utils._supported_float_type(image.dtype)
+    img_cdf = img_cdf.astype(cdf_dtype, copy=False)
+
     return img_cdf, bin_centers
 
 
@@ -446,7 +451,10 @@ def equalize_hist(image, nbins=256, mask=None, *, method='float'):
     else:
         cdf, bin_centers = cumulative_distribution(image, nbins)
     out = np.interp(image.flat, bin_centers, cdf)
-    return out.reshape(image.shape)
+    out = out.reshape(image.shape)
+    # Unfortunately, np.interp currently always promotes to float64, so we
+    # have to cast back to single precision when float32 output is desired
+    return out.astype(utils._supported_float_type(image.dtype), copy=False)
 
 
 def intensity_range(image, range_values='image', clip_negative=False):
@@ -492,7 +500,7 @@ def intensity_range(image, range_values='image', clip_negative=False):
     return i_min, i_max
 
 
-def _output_dtype(dtype_or_range):
+def _output_dtype(dtype_or_range, image_dtype):
     """Determine the output dtype for rescale_intensity.
 
     The dtype is determined according to the following rules:
@@ -502,13 +510,16 @@ def _output_dtype(dtype_or_range):
       in which case the data type that can contain it will be used
       (e.g. uint16 in this case).
     - if ``dtype_or_range`` is a pair of values, the output data type will be
-      float.
+      ``_supported_float_type(image_dtype)``. This preserves float32 output for
+      float32 inputs.
 
     Parameters
     ----------
     dtype_or_range : type, string, or 2-tuple of int/float
         The desired range for the output, expressed as either a NumPy dtype or
         as a (min, max) pair of numbers.
+    image_dtype : np.dtype
+        The input image dtype.
 
     Returns
     -------
@@ -517,7 +528,7 @@ def _output_dtype(dtype_or_range):
     """
     if type(dtype_or_range) in [list, tuple, np.ndarray]:
         # pair of values: always return float.
-        return float
+        return utils._supported_float_type(image_dtype)
     if type(dtype_or_range) == type:
         # already a type: return it
         return dtype_or_range
@@ -629,9 +640,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     array([127, 127, 127], dtype=int32)
     """
     if out_range in ['dtype', 'image']:
-        out_dtype = _output_dtype(image.dtype.type)
+        out_dtype = _output_dtype(image.dtype.type, image.dtype)
     else:
-        out_dtype = _output_dtype(out_range)
+        out_dtype = _output_dtype(out_range, image.dtype)
 
     imin, imax = map(float, intensity_range(image, in_range))
     omin, omax = map(float, intensity_range(image, out_range,
@@ -879,6 +890,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         return not ((image.max() == 1) and (image.min() == 0))
 
     if image.ndim == 3:
+
         if image.shape[2] == 4:
             image = rgba2rgb(image)
         if image.shape[2] == 3:

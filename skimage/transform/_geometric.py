@@ -631,7 +631,7 @@ class ProjectiveTransform(GeometricTransform):
         """
         return self._apply_mat(coords, self._inv_matrix)
 
-    def estimate(self, src, dst):
+    def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
@@ -664,6 +664,13 @@ class ProjectiveTransform(GeometricTransform):
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
 
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
         In case of the affine transformation the coefficients c0 and c1 are 0.
         Thus the system of equations is::
 
@@ -680,6 +687,8 @@ class ProjectiveTransform(GeometricTransform):
             Source coordinates.
         dst : (N, 2) array
             Destination coordinates.
+        weights : (N,) array, optional
+            Relative weight values for each pair of points.
 
         Returns
         -------
@@ -687,12 +696,13 @@ class ProjectiveTransform(GeometricTransform):
             True, if model estimation succeeds.
 
         """
+
         n, d = src.shape
 
         src_matrix, src = _center_and_normalize_points(src)
         dst_matrix, dst = _center_and_normalize_points(dst)
         if not np.all(np.isfinite(src_matrix + dst_matrix)):
-            self.params = np.full((d, d), np.nan)
+            self.params = np.full((d + 1, d + 1), np.nan)
             return False
 
         # params: a0, a1, a2, b0, b1, b2, c0, c1
@@ -710,12 +720,20 @@ class ProjectiveTransform(GeometricTransform):
         # Select relevant columns, depending on params
         A = A[:, list(self._coeffs) + [-1]]
 
-        _, _, V = np.linalg.svd(A)
+        # Get the vectors that correspond to singular values, also applying
+        # the weighting if provided
+        if weights is None:
+            _, _, V = np.linalg.svd(A)
+        else:
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
+            _, _, V = np.linalg.svd(W @ A)
+
         # if the last element of the vector corresponding to the smallest
         # singular value is close to zero, this implies a degenerate case
         # because it is a rank-defective transform, which would map points
         # to a line rather than a plane.
         if np.isclose(V[-1, -1], 0):
+            self.params = np.full((d + 1, d + 1), np.nan)
             return False
 
         H = np.zeros((d+1, d+1))
@@ -726,6 +744,10 @@ class ProjectiveTransform(GeometricTransform):
 
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
+
+        # Small errors can creep in if points are not exact, causing the last
+        # element of H to deviate from unity. Correct for that here.
+        H /= H[-1, -1]
 
         self.params = H
 
@@ -1335,7 +1357,8 @@ class SimilarityTransform(EuclideanTransform):
 
         self.params = _umeyama(src, dst, estimate_scale=True)
 
-        return True
+        # _umeyama will return nan if the problem is not well-conditioned.
+        return not np.any(np.isnan(self.params))
 
     @property
     def scale(self):
@@ -1377,7 +1400,7 @@ class PolynomialTransform(GeometricTransform):
             raise ValueError("invalid shape of transformation parameters")
         self.params = params
 
-    def estimate(self, src, dst, order=2):
+    def estimate(self, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
@@ -1411,6 +1434,13 @@ class PolynomialTransform(GeometricTransform):
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
 
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
         Parameters
         ----------
         src : (N, 2) array
@@ -1419,6 +1449,8 @@ class PolynomialTransform(GeometricTransform):
             Destination coordinates.
         order : int, optional
             Polynomial order (number of coefficients is order + 1).
+        weights : (N,) array, optional
+            Relative weight values for each pair of points.
 
         Returns
         -------
@@ -1447,7 +1479,13 @@ class PolynomialTransform(GeometricTransform):
         A[:rows, -1] = xd
         A[rows:, -1] = yd
 
-        _, _, V = np.linalg.svd(A)
+        # Get the vectors that correspond to singular values, also applying
+        # the weighting if provided
+        if weights is None:
+            _, _, V = np.linalg.svd(A)
+        else:
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), 2))
+            _, _, V = np.linalg.svd(W @ A)
 
         # solution is right singular vector that corresponds to smallest
         # singular value
@@ -1507,7 +1545,7 @@ TRANSFORMS = {
 }
 
 
-def estimate_transform(ttype, src, dst, **kwargs):
+def estimate_transform(ttype, src, dst, *args, **kwargs):
     """Estimate 2D geometric transformation parameters.
 
     You can determine the over-, well- and under-determined parameters
@@ -1576,7 +1614,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
                          'implemented' % ttype)
 
     tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
-    tform.estimate(src, dst, **kwargs)
+    tform.estimate(src, dst, *args, **kwargs)
 
     return tform
 

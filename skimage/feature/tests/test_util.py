@@ -1,34 +1,28 @@
 import numpy as np
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
+import pytest
 
-from skimage._shared.testing import assert_equal
-
+from skimage._shared._dependency_checks import has_mpl
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
                                   _mask_border_keypoints, plot_matches)
 
-from skimage._shared import testing
-
 
 def test_feature_detector():
-    with testing.raises(NotImplementedError):
+    with pytest.raises(NotImplementedError):
         FeatureDetector().detect(None)
 
 
 def test_descriptor_extractor():
-    with testing.raises(NotImplementedError):
+    with pytest.raises(NotImplementedError):
         DescriptorExtractor().extract(None, None)
 
 
 def test_prepare_grayscale_input_2D():
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 3, 3)))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 1)))
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         _prepare_grayscale_input_2D(np.zeros((3, 1, 1)))
     _prepare_grayscale_input_2D(np.zeros((3, 3)))
     _prepare_grayscale_input_2D(np.zeros((3, 3, 1)))
@@ -37,20 +31,21 @@ def test_prepare_grayscale_input_2D():
 
 def test_mask_border_keypoints():
     keypoints = np.array([[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]])
-    assert_equal(_mask_border_keypoints((10, 10), keypoints, 0),
-                 [1, 1, 1, 1, 1])
-    assert_equal(_mask_border_keypoints((10, 10), keypoints, 2),
-                 [0, 0, 1, 1, 1])
-    assert_equal(_mask_border_keypoints((4, 4), keypoints, 2),
-                 [0, 0, 1, 0, 0])
-    assert_equal(_mask_border_keypoints((10, 10), keypoints, 5),
-                 [0, 0, 0, 0, 0])
-    assert_equal(_mask_border_keypoints((10, 10), keypoints, 4),
-                 [0, 0, 0, 0, 1])
+    np.testing.assert_equal(_mask_border_keypoints((10, 10), keypoints, 0),
+                            [1, 1, 1, 1, 1])
+    np.testing.assert_equal(_mask_border_keypoints((10, 10), keypoints, 2),
+                            [0, 0, 1, 1, 1])
+    np.testing.assert_equal(_mask_border_keypoints((4, 4), keypoints, 2),
+                            [0, 0, 1, 0, 0])
+    np.testing.assert_equal(_mask_border_keypoints((10, 10), keypoints, 5),
+                            [0, 0, 0, 0, 0])
+    np.testing.assert_equal(_mask_border_keypoints((10, 10), keypoints, 4),
+                            [0, 0, 0, 0, 1])
 
 
-@testing.skipif(plt is None, reason="Matplotlib not installed")
+@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 def test_plot_matches():
+    from matplotlib import pyplot as plt
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
     shapes = (((10, 10), (10, 10)),

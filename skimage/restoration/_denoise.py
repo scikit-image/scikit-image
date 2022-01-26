@@ -259,7 +259,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 @utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg()
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                       deprecated_version="0.19")
 def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
                        isotropic=True, *, channel_axis=None,
                        multichannel=False):
@@ -350,7 +351,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
     return np.squeeze(out[1:-1, 1:-1])
 
 
-def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
@@ -366,7 +367,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
 
             (E_(n-1) - E_n) < eps * E_0
 
-    n_iter_max : int, optional
+    max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
 
     Returns
@@ -384,7 +385,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     g = np.zeros_like(p)
     d = np.zeros_like(image)
     i = 0
-    while i < n_iter_max:
+    while i < max_num_iter:
         if i > 0:
             # d will be the (negative) divergence of p
             d = -p.sum(0)
@@ -431,8 +432,10 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     return out
 
 
+@utils.deprecate_kwarg({'n_iter_max': 'max_num_iter'}, removed_version="1.0",
+                       deprecated_version="0.19.2")
 @utils.deprecate_multichannel_kwarg(multichannel_position=4)
-def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
+def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
                          multichannel=False, *, channel_axis=None):
     """Perform total-variation denoising on n-dimensional images.
 
@@ -451,7 +454,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
 
             (E_(n-1) - E_n) < eps * E_0
 
-    n_iter_max : int, optional
+    max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     multichannel : bool, optional
         Apply total-variation denoising separately for each channel. This
@@ -528,9 +531,9 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
         out = np.zeros_like(image)
         for c in range(image.shape[channel_axis]):
             out[_at(c)] = _denoise_tv_chambolle_nd(image[_at(c)], weight, eps,
-                                                   n_iter_max)
+                                                   max_num_iter)
     else:
-        out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max)
+        out = _denoise_tv_chambolle_nd(image, weight, eps, max_num_iter)
     return out
 
 

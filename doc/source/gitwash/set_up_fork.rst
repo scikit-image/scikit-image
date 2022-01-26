@@ -13,7 +13,7 @@ Overview
 
    git clone git@github.com:your-user-name/scikit-image.git
    cd scikit-image
-   git remote add upstream git://github.com/scikit-image/scikit-image.git
+   git remote add upstream https://github.com/scikit-image/scikit-image.git
 
 In detail
 =========
@@ -46,21 +46,21 @@ Linking your repository to the upstream repo
 ::
 
    cd scikit-image
-   git remote add upstream git://github.com/scikit-image/scikit-image.git
+   git remote add upstream https://github.com/scikit-image/scikit-image.git
 
 ``upstream`` here is just the arbitrary name we're using to refer to the
 main `scikit-image`_ repository at `scikit-image github`_.
 
-Note that we've used ``git://`` for the URL rather than ``git@``.  The
-``git://`` URL is read only.  This means we that we can't accidentally
+Note that we've used ``https://`` for the URL rather than ``git@``.  The
+``https://`` URL is read only.  This means we that we can't accidentally
 (or deliberately) write to the upstream repo, and we are only going to
 use it to merge into our own code.
 
 Just for your own satisfaction, show yourself that you now have a new
 'remote', with ``git remote -v show``, giving you something like::
 
-   upstream	git://github.com/scikit-image/scikit-image.git (fetch)
-   upstream	git://github.com/scikit-image/scikit-image.git (push)
+   upstream	https://github.com/scikit-image/scikit-image.git (fetch)
+   upstream	https://github.com/scikit-image/scikit-image.git (push)
    origin	git@github.com:your-user-name/scikit-image.git (fetch)
    origin	git@github.com:your-user-name/scikit-image.git (push)
 
