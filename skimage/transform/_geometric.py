@@ -968,7 +968,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         Returns
         -------
         success : bool
-            True, if model estimation succeeds.
+            True, if all pieces of the model are successfully estimated.
 
         """
 
@@ -976,11 +976,14 @@ class PiecewiseAffineTransform(GeometricTransform):
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
+
+        ok = True
+
         # find affine mapping from source positions to destination
         self.affines = []
         for tri in self._tesselation.vertices:
             affine = AffineTransform(dimensionality=ndim)
-            affine.estimate(src[tri, :], dst[tri, :])
+            ok &= affine.estimate(src[tri, :], dst[tri, :])
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -990,10 +993,10 @@ class PiecewiseAffineTransform(GeometricTransform):
         self.inverse_affines = []
         for tri in self._inverse_tesselation.vertices:
             affine = AffineTransform(dimensionality=ndim)
-            affine.estimate(dst[tri, :], src[tri, :])
+            ok &= affine.estimate(dst[tri, :], src[tri, :])
             self.inverse_affines.append(affine)
 
-        return True
+        return ok
 
     def __call__(self, coords):
         """Apply forward transformation.
