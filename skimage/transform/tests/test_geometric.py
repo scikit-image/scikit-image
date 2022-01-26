@@ -522,6 +522,10 @@ def test_degenerate():
     assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
+    tform = EuclideanTransform()
+    assert not tform.estimate(src, dst)
+    assert np.all(np.isnan(tform.params))
+
     tform = AffineTransform()
     assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
