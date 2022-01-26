@@ -98,11 +98,10 @@ dilate = morphology.binary_dilation(clear)
 erode = morphology.binary_erosion(clear)
 
 #####################################################################
-# Finally, we subtract the eroded from the dilated to get the nucleus rim
-#(step ``f)``).
+# Finally, we select pixels that are in ``dilate``, but not ``erode`` to get
+# the nucleus rim (step ``f)``). 
 
-mask = dilate.astype(int) - erode.astype(int)
-mask.dtype
+mask = np.logical_and(dilate, ~erode)
 
 #####################################################################
 # Let us visualize these processing steps in a sequence of subplots.
@@ -166,7 +165,7 @@ fig.tight_layout()
 # image.
 
 props = measure.regionprops_table(
-    mask,
+    mask.astype(np.uint8),
     intensity_image=image_t_0_channel_1,
     properties=('label', 'area', 'intensity_mean')
 )
@@ -208,11 +207,9 @@ thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 #                                         arr=smooth_seq.reshape(n_z, -1))
 #
 # We use the following flat structuring element for morphological
-# computations:
+# computations (``np.newaxis`` is used to prepend an axis of size 1 for time):.
 
-footprint = np.stack((np.zeros((3, 3)),
-                      ndi.generate_binary_structure(2, 1),
-                      np.zeros((3, 3))))
+footprint = ndi.generate_binary_structure(2, 1)[np.newaxis, ...]
 footprint
 
 #####################################################################
@@ -253,14 +250,18 @@ clear_seq = segmentation.clear_border(fill_seq, mask=border_mask)
 
 dilate_seq = morphology.binary_dilation(clear_seq, footprint=footprint)
 erode_seq = morphology.binary_erosion(clear_seq, footprint=footprint)
-mask_seq = dilate_seq.astype(int) - erode_seq.astype(int)
+mask_sequence = np.logical_and(dilate_seq, ~erode_seq)
 
 #####################################################################
 # Let us give each mask (corresponding to each time point) a different label,
-# running from 1 to 15.
+# running from 1 to 15. We use ``np.min_scalar_type`` to determine the minimum
+# size integer dtype needed to represent the number of timepoints.
 
-mask_list = [mask * lab for lab, mask in enumerate(mask_seq, 1)]
-mask_sequence = np.stack(mask_list)
+n_label = len(mask_sequence) + 1  # add one for the background
+label_dtype = np.min_scalar_type(n_label)
+mask_sequence = mask_sequence.astype(label_dtype)
+labels = np.arange(1, n_label, dtype=label_dtype)
+mask_sequence *= labels[:, np.newaxis, np.newaxis]
 
 #####################################################################
 # Let us compute the region properties of interest for all these labeled
