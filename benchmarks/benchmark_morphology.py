@@ -46,3 +46,21 @@ class Skeletonize3d(object):
 
     def peakmem_skeletonize_3d(self):
         self.skeletonize(self.image)
+
+
+class MedialSurface(object):
+
+    def setup(self, *args):
+        try:
+            self.medial_surface = morphology.medial_surface
+        except AttributeError:
+            raise NotImplementedError("medial_surface is unavailable")
+        self.image = np.stack(5 * [util.invert(data.horse())])
+
+    def time_skeletonize_3d(self):
+        self.medial_surface(self.image)
+
+
+
+
+

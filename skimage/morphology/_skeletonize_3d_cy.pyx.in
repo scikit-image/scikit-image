@@ -188,14 +188,15 @@ cdef void find_simple_border_points(pixel_type[:, :, ::1] img,
                 # * it must not be an endpoint for medial axis thinning or
                 #   a surface endpoint for medial surface thinning
                 #   (condition 4 in [Lee94]_)
-                if (not is_Euler_invariant(neighborhood, Euler_LUT) or
-                        not is_simple_point(neighborhood)):
+                if not is_Euler_invariant(neighborhood, Euler_LUT):
                     continue
                 if (surface_flag == 0 and
-                        is_endpoint(neighborhood)):
+                    is_endpoint(neighborhood)):
                     continue
                 elif (surface_flag == 1 and
                       is_surface_endpoint(neighborhood)):
+                    continue
+                if not is_simple_point(neighborhood):
                     continue
 
                 # ok, add (p, r, c) to the list of simple border points
