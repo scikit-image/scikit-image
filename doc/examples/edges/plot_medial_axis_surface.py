@@ -24,13 +24,12 @@ connectivity of the image.
 """
 
 
-from skimage.morphology import medial_axis, skeletonize
-from skimage import data
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
-from skimage.morphology import skeletonize, medial_surface
+from skimage import data
+from skimage.morphology import medial_axis, medial_surface, skeletonize
 
 # Generate 3D input data.
 # The shape of the data closely matches the example shown in
