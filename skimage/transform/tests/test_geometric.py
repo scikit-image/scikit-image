@@ -554,6 +554,26 @@ def test_degenerate():
     # Prior to gh-6207, the above would set the parameters as the identity.
     assert np.all(np.isnan(tform.params))
 
+    # The tesselation on the following points produces one degenerate affine
+    # warp within PiecewiseAffineTransform.
+    src = np.asarray([
+        [0, 192, 256], [0, 256, 256], [5, 0, 192], [5, 64, 0], [5, 64, 64],
+        [5, 64, 256], [5, 192, 192], [5, 256, 256], [0, 192, 256],
+    ])
+
+    dst = np.asarray([
+        [0, 142, 206], [0, 206, 206], [5, -50, 142], [5, 14, 0], [5, 14, 64],
+        [5, 14, 206], [5, 142, 142], [5, 206, 206], [0, 142, 206],
+    ])
+    tform = PiecewiseAffineTransform()
+    assert not tform.estimate(src, dst)
+    assert np.all(np.isnan(tform.affines[4].params))  # degenerate affine
+    for idx, affine in enumerate(tform.affines):
+        if idx != 4:
+            assert not np.all(np.isnan(affine.params))
+    for affine in tform.inverse_affines:
+        assert not np.all(np.isnan(affine.params))
+
 
 def test_normalize_degenerate_points():
     """Return nan matrix *of appropriate size* when point is repeated."""
