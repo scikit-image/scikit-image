@@ -52,6 +52,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     equal to output_shape_length.
 
     """
+    output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
     if output_ndim > image.ndim:
