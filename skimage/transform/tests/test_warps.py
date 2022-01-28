@@ -380,7 +380,7 @@ def test_resize_dtype():
 @pytest.mark.parametrize('dtype', [np.float64, np.uint8])
 def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     # test if clip as expected
-    if dtype == np.uint8 and (preserve_range or order==0):
+    if dtype == np.uint8 and (preserve_range or order == 0):
         expected_max = 255
     else:
         expected_max = 1.0
@@ -911,3 +911,11 @@ def test_resize_local_mean_dtype():
                              preserve_range=False).dtype == x_f32.dtype
     assert resize_local_mean(x_f32, (10, 10),
                              preserve_range=True).dtype == x_f32.dtype
+
+
+@pytest.mark.parametrize("_type", [tuple, np.asarray, list])
+def test_output_shape_arg_type(_type):
+    img = np.random.rand(3, 3)
+    output_shape = _type([5, 5])
+
+    assert resize(img, output_shape).shape == tuple(output_shape)
