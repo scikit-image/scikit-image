@@ -755,9 +755,10 @@ def identity(image, *args, **kwargs):
     return image
 
 def is_binary_ndarray(mask):
+    mask = np.asarray(mask)
     if not mask.dtype == bool:
-        if np.any((mask != 1)&(mask!=0)):
-            raise Warning("Mask array is not of dtype boolean or contains "
+        if np.any((mask != 1)&(mask != 0)):
+            raise Warning("msk array is not of dtype boolean or contains "
                           "values other than 0 and 1 so cannot be safely cast "
                           "to boolean array.")
     return np.asarray(mask, dtype=bool)

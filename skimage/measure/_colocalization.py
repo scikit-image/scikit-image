@@ -11,7 +11,7 @@ __all__ = ['pearson_corr_coeff',
 
 
 def pearson_corr_coeff(image0, image1, roi=None):
-    """Calculate Pearson's Correlation Coefficient between pixel intensities in
+    r"""Calculate Pearson's Correlation Coefficient between pixel intensities in
     channels.
 
     Parameters
@@ -58,7 +58,7 @@ def pearson_corr_coeff(image0, image1, roi=None):
 
     A low PCC value does not necessarily mean that there is no correlation
     between the two channel intensities, just that there is no linear
-    correlation. You may wish to plot the pixel intensities of each of thw two
+    correlation. You may wish to plot the pixel intensities of each of the two
     channels in a 2D scatterplot and use Spearman's rank correlation if a
     non-linear correlation is visually identified [2]_. Also consider if you
     are interested in correlation or co-occurence, in which case a method
@@ -92,19 +92,19 @@ def pearson_corr_coeff(image0, image1, roi=None):
     else:
         check_shape_equality(image0, image1)
         # scipy pearsonr function only takes flattened arrays
-        image0 = np.ravel(image0)
-        image1 = np.ravel(image1)
+        image0 = image0.reshape(-1)
+        image1 = image1.reshape(-1)
 
     return pearsonr(image0, image1)
 
 
 def manders_coloc_coeff(image, mask, roi=None):
-    """Manders' colocalization coefficient between two channels.
+    r"""Manders' colocalization coefficient between two channels.
 
     Parameters
     ----------
     image : (M, N) ndarray
-        Image of channel A.
+        Image of channel A. All pixel values should be non-negative.
     mask : (M, N) ndarray of dtype bool
         Binary mask with segmented regions of interest in channel B.
         Must have same dimensions as `image`.
@@ -140,7 +140,7 @@ def manders_coloc_coeff(image, mask, roi=None):
 
     where
         :math:`A_i` is the value of the :math:`i^{th}` pixel in `image`
-        :math:`A_{i,coloc} = A_i` if math:`Bmask_i > 0`
+        :math:`A_{i,coloc} = A_i` if :math:`Bmask_i > 0`
         :math:`Bmask_i` is the value of the :math:`i^{th}` pixel in
         `mask`
 
@@ -149,7 +149,7 @@ def manders_coloc_coeff(image, mask, roi=None):
     background light before the MCC is calculated [2]_.
 
     References
-    -------
+    ----------
     .. [1] Manders, E.M.M., Verbeek, F.J. and Aten, J.A. (1993), Measurement of
            co-localization of objects in dual-colour confocal images. Journal
            of Microscopy, 169: 375-382.
@@ -170,21 +170,25 @@ def manders_coloc_coeff(image, mask, roi=None):
         mask = mask[roi]
     else:
         check_shape_equality(image, mask)
+    # check non-negative image
+    if image.min() < 0:
+        raise ValueError("image contains negative values")
 
-    if (np.sum(image) == 0):
+    sum = np.sum(image)
+    if (sum == 0):
         return 0
-    return np.sum(np.multiply(image, mask)) / np.sum(image)
+    return np.sum(image * mask) / sum
 
 
 def manders_overlap_coeff(image0, image1, roi=None):
-    """Manders' overlap coefficient
+    r"""Manders' overlap coefficient
 
     Parameters
     ----------
     image0 : (M, N) ndarray
-        Image of channel A.
+        Image of channel A. All pixel values should be non-negative.
     image1 : (M, N) ndarray
-        Image of channel B.
+        Image of channel B. All pixel values should be non-negative.
         Must have same dimensions as `image0`
     roi : (M, N) ndarray of dtype bool, optional
         Only `image0` and `image1` pixel values within this region of interest
@@ -252,20 +256,26 @@ def manders_overlap_coeff(image0, image1, roi=None):
     else:
         check_shape_equality(image0, image1)
 
+    # check non-negative image
+    if image0.min() < 0:
+        raise ValueError("image0 contains negative values")
+    if image1.min() < 0:
+        raise ValueError("image1 contains negative values")
+
     denom = (np.sum(np.square(image0)) * (np.sum(np.square(image1)))) ** 0.5
     return np.sum(np.multiply(image0, image1)) / denom
 
 
 def intersection_coeff(image0_mask, image1_mask, roi=None):
-    """Fraction of a channel's segmented binary mask that overlaps with a
+    r"""Fraction of a channel's segmented binary mask that overlaps with a
     second channel's segmented binary mask.
 
     Parameters
     ----------
     image0_mask : (M, N) ndarray of dtype bool
-        Image of channel A.
+        Image mask of channel A.
     image1_mask : (M, N) ndarray of dtype bool
-        Image of channel B.
+        Image mask of channel B.
         Must have same dimensions as `image0_mask`.
     roi : (M, N) ndarray of dtype bool, optional
         Only `image0_mask` and `image1_mask` pixels within this region of
@@ -276,7 +286,7 @@ def intersection_coeff(image0_mask, image1_mask, roi=None):
     Returns
     -------
     Intersection coefficient, float
-        Fraction of `imag1_mask` that overlaps with `image1_mask`.
+        Fraction of `image0_mask` that overlaps with `image1_mask`.
 
     """
     image0_mask = is_binary_ndarray(image0_mask)
@@ -289,7 +299,8 @@ def intersection_coeff(image0_mask, image1_mask, roi=None):
     else:
         check_shape_equality(image0_mask, image1_mask)
 
-    if np.count_nonzero(image0_mask) == 0:
+    nonzero_image0 = np.count_nonzero(image0_mask)
+    if nonzero_image0 == 0:
         return 0
-    denom = np.count_nonzero(image0_mask)
-    return np.count_nonzero(np.logical_and(image0_mask, image1_mask)) / denom
+    nonzero_joint = np.count_nonzero(np.logical_and(image0_mask, image1_mask))
+    return  nonzero_joint / nonzero_image0
