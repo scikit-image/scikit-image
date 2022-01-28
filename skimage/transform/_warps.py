@@ -28,7 +28,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     ----------
     image: ndarray
         Image to be resized.
-    output_shape: tuple or ndarray
+    output_shape: iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved.
 
@@ -82,7 +82,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     ----------
     image : ndarray
         Input image.
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved. In case the
         number of input channels does not equal the number of output channels a
@@ -1213,7 +1213,7 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     image : ndarray
         Input image. If this is a multichannel image, the axis corresponding
         to channels should be specified using `channel_axis`
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image. When `channel_axis` is not None,
         the `channel_axis` should either be omitted from `output_shape` or the
         ``output_shape[channel_axis]`` must match
