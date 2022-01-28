@@ -1241,7 +1241,8 @@ class EuclideanTransform(ProjectiveTransform):
 
         self.params = _umeyama(src, dst, False)
 
-        return True
+        # _umeyama will return nan if the problem is not well-conditioned.
+        return not np.any(np.isnan(self.params))
 
     @property
     def rotation(self):
