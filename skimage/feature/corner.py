@@ -245,9 +245,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
         H_elems.append(
             ndi.gaussian_filter(
                 ndi.gaussian_filter(image, order=deriv_step1, **common_kwargs),
-                order=deriv_step2,
-                **common_kwargs,
-            )
+                order=deriv_step2, **common_kwargs)
         )
 
     return H_elems
