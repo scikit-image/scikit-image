@@ -31,8 +31,9 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-@deprecate_kwarg({"height": "ncols", "width": "nrows"},
-                 removed_version="0.20.0")
+@deprecate_kwarg({'height': 'ncols', 'width': 'nrows'},
+                 deprecated_version='0.18.0',
+                 removed_version='0.20.0')
 def rectangle(nrows, ncols, dtype=np.uint8):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -145,8 +146,8 @@ def ellipse(width, height, dtype=np.uint8):
 
     Examples
     --------
-    >>> from skimage.morphology import footprint
-    >>> footprint.ellipse(5, 3)
+    >>> from skimage.morphology import footprints
+    >>> footprints.ellipse(5, 3)
     array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

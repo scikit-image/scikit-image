@@ -92,7 +92,7 @@ cdef struct Stage:
 
 cdef vector[Detection] _group_detections(vector[Detection] detections,
                                          cnp.float32_t intersection_score_threshold=0.5,
-                                         int min_neighbour_number=4):
+                                         int min_neighbor_number=4):
     """Group similar detections into a single detection and eliminate weak
     (non-overlapping) detections.
 
@@ -107,7 +107,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
     ----------
     detections : vector[Detection]
         A cluster of detections.
-    min_neighbour_number : int
+    min_neighbor_number : int
         Minimum amount of intersecting detections in order for detection
         to be approved by the function.
     intersection_score_threshold : cnp.float32_t
@@ -172,7 +172,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
                                             clusters[best_cluster_nr],
                                             detections[current_detection_nr])
 
-    clusters = threshold_clusters(clusters, min_neighbour_number)
+    clusters = threshold_clusters(clusters, min_neighbor_number)
     return get_mean_detections(clusters)
 
 
@@ -424,13 +424,37 @@ cdef class Cascade:
     window_height : Py_ssize_t
         The height of a detection window.
     stages : Stage*
-        A link to the c array that stores stages information using
+        A pointer to the C array that stores stages information using a
         Stage struct.
     features : MBLBP*
-        Link to the c array that stores MBLBP features using MBLBP struct.
+        A pointer to the C array that stores MBLBP features using an MBLBP
+        struct.
     LUTs : cnp.uint32_t*
-        The ling to the array with look-up tables that are used by trained
+        A pointer to the C array with look-up tables that are used by trained
         MBLBP features (MBLBPStumps) to evaluate a particular region.
+
+    Notes
+    -----
+    The cascade approach was first described by Viola and Jones [1]_, [2]_,
+    although these initial publications used a set of Haar-like features. This
+    implementation instead uses multi-scale block local binary pattern (MB-LBP)
+    features [3]_.
+
+    References
+    ----------
+    .. [1] Viola, P. and Jones, M. "Rapid object detection using a boosted
+           cascade of simple features," In: Proceedings of the 2001 IEEE
+           Computer Society Conference on Computer Vision and Pattern
+           Recognition. CVPR 2001, pp. I-I.
+           :DOI:`10.1109/CVPR.2001.990517`
+    .. [2] Viola, P. and Jones, M.J, "Robust Real-Time Face Detection",
+           International Journal of Computer Vision 57, 137–154 (2004).
+           :DOI:`10.1023/B:VISI.0000013087.49260.fb`
+    .. [3] Liao, S. et al. Learning Multi-scale Block Local Binary Patterns for
+           Face Recognition. International Conference on Biometrics (ICB),
+           2007, pp. 828-837. In: Lecture Notes in Computer Science, vol 4642.
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/978-3-540-74549-5_87`
     """
 
     cdef:
@@ -626,7 +650,7 @@ cdef class Cascade:
 
     def detect_multi_scale(self, img, cnp.float32_t scale_factor,
                            cnp.float32_t step_ratio, min_size, max_size,
-                           min_neighbour_number=4,
+                           min_neighbor_number=4,
                            intersection_score_threshold=0.5):
         """Search for the object on multiple scales of input image.
 
@@ -651,7 +675,7 @@ cdef class Cascade:
             Minimum size of the search window.
         max_size : typle (int, int)
             Maximum size of the search window.
-        min_neighbour_number : int
+        min_neighbor_number : int
             Minimum amount of intersecting detections in order for detection
             to be approved by the function.
         intersection_score_threshold : cnp.float32_t
@@ -757,7 +781,7 @@ cdef class Cascade:
             openmp.omp_destroy_lock(&mylock)
 
         return list(_group_detections(output, intersection_score_threshold,
-                                      min_neighbour_number))
+                                      min_neighbor_number))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.

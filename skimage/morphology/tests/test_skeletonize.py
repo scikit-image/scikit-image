@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
 
-from skimage import data, draw
+from skimage import draw
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.io import imread
@@ -69,7 +69,7 @@ class TestSkeletonize():
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbours(self):
+    def test_skeletonize_num_neighbors(self):
         # an empty image
         image = np.zeros((300, 300))
 

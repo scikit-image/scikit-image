@@ -19,13 +19,6 @@ Version 0.20
   `structure_tensor`.
 * In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
   function.
-* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
-  `skivi.py` in `skimage/io/_plugins`.
-* Remove enrirely the folder skimage/scripts containing skivi app.
-  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
-  setup.py
-* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
 Version 1.0
 -----------
@@ -37,15 +30,11 @@ Version 1.0
   clear_border(), and update the tests.
 * Remove the deprecation warning for `input` kwarg of the `label`
   function in `skimage/measure/_label.py`
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
 
 Other (2022)
 ------------
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and
-  `skimage.registration._phase_cross_correlation.py` once the minimum supported
-  version of ``scipy`` reaches 1.4.
-* Remove unneeded `deconv_type` and astype call in `weiner` and
-  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
-  supported version of ``scipy`` reaches 1.4.
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 
@@ -62,3 +51,5 @@ Other
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).
+* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
+  ``skimage/morphology/convex_hull.py``.

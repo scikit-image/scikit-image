@@ -2,18 +2,16 @@ from itertools import combinations_with_replacement
 
 import numpy as np
 from scipy import ndimage as ndi
-from scipy import stats
-from scipy import spatial
+from scipy import spatial, stats
 
+from .._shared.filters import gaussian
+from .._shared.utils import _supported_float_type, safe_as_int
+from ..transform import integral_image
 from ..util import img_as_float
+from ._hessian_det_appx import _hessian_matrix_det
+from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
-from .corner_cy import _corner_fast
-from ._hessian_det_appx import _hessian_matrix_det
-from ..transform import integral_image
-from .._shared.utils import _supported_float_type, safe_as_int
-from .corner_cy import _corner_moravec, _corner_orientations
-from warnings import warn
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -42,7 +40,7 @@ def _compute_derivatives(image, mode='constant', cval=0):
     return derivatives
 
 
-def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
+def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute structure tensor using sum of squared differences.
 
     The (2-dimensional) structure tensor A is defined as::
@@ -70,11 +68,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'rc', 'xy'}, optional
-        NOTE: Only applies in 2D. Higher dimensions must always use 'rc' order.
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
-        usage of the last axis initially (Axx, Axy, Ayy).
+        NOTE: 'xy' is only an option for 2D images, higher dimensions must
+        always use 'rc' order. This parameter allows for the use of reverse or
+        forward order of the image axes in gradient computation. 'rc' indicates
+        the use of the first axis initially (Arr, Arc, Acc), whilst 'xy'
+        indicates the usage of the last axis initially (Axx, Axy, Ayy).
 
     Returns
     -------
@@ -106,18 +104,10 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     if order == 'xy' and image.ndim > 2:
         raise ValueError('Only "rc" order is supported for dim > 2.')
 
-    if order is None:
-        if image.ndim == 2:
-            # The legacy 2D code followed (x, y) convention, so we swap the
-            # axis order to maintain compatibility with old code
-            warn('deprecation warning: the default order of the structure '
-                 'tensor values will be "row-column" instead of "xy" starting '
-                 'in skimage version 0.20. Use order="rc" or order="xy" to '
-                 'set this explicitly.  (Specify order="xy" to maintain the '
-                 'old behavior.)', category=FutureWarning, stacklevel=2)
-            order = 'xy'
-        else:
-            order = 'rc'
+    if order not in ['rc', 'xy']:
+        raise ValueError(
+            f'order {order} is invalid. Must be either "rc" or "xy"'
+        )
 
     if not np.isscalar(sigma):
         sigma = tuple(sigma)
@@ -133,22 +123,24 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
         derivatives = reversed(derivatives)
 
     # structure tensor
-    A_elems = [ndi.gaussian_filter(der0 * der1, sigma, mode=mode, cval=cval)
+    A_elems = [gaussian(der0 * der1, sigma, mode=mode, cval=cval)
                for der0, der1 in combinations_with_replacement(derivatives, 2)]
 
     return A_elems
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
-    """Compute Hessian matrix.
+    """Compute the Hessian matrix.
 
-    The Hessian matrix is defined as::
+    In 2D, the Hessian matrix is defined as::
 
         H = [Hrr Hrc]
             [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
     of the Gaussian kernel in the respective r- and c-directions.
+
+    The implementation here also supports n-dimensional data.
 
     Parameters
     ----------
@@ -170,12 +162,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     Returns
     -------
-    Hrr : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hrc : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hcc : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
+    H_elems : list of ndarray
+        Upper-diagonal elements of the hessian matrix for each pixel in the
+        input image. In 2D, this will be a three element list containing [Hrr,
+        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
 
     Examples
     --------
@@ -195,8 +185,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
-    gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
-                                            mode=mode, cval=cval)
+    gaussian_filtered = gaussian(image, sigma=sigma, mode=mode, cval=cval)
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
@@ -213,14 +202,14 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     """Compute the approximate Hessian Determinant over an image.
 
     The 2D approximate method uses box filters over integral images to
-    compute the approximate Hessian Determinant, as described in [1]_.
+    compute the approximate Hessian Determinant.
 
     Parameters
     ----------
-    image : array
-        The image over which to compute Hessian Determinant.
+    image : ndarray
+        The image over which to compute the Hessian Determinant.
     sigma : float, optional
-        Standard deviation used for the Gaussian kernel, used for the Hessian
+        Standard deviation of the Gaussian kernel used for the Hessian
         matrix.
     approximate : bool, optional
         If ``True`` and the image is 2D, use a much faster approximate
@@ -353,47 +342,6 @@ def structure_tensor_eigenvalues(A_elems):
     return _symmetric_compute_eigenvalues(A_elems)
 
 
-def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute eigenvalues of structure tensor.
-
-    Parameters
-    ----------
-    Axx : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Axy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Ayy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-
-    Returns
-    -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
-
-    Examples
-    --------
-    >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
-    >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
-    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]
-    array([[0., 0., 0., 0., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 4., 0., 4., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 0., 0., 0., 0.]])
-
-    """
-    warn('deprecation warning: the function structure_tensor_eigvals is '
-         'deprecated and will be removed in version 0.20. Please use '
-         'structure_tensor_eigenvalues instead.',
-         category=FutureWarning, stacklevel=2)
-
-    return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
-
-
 def hessian_matrix_eigvals(H_elems):
     """Compute eigenvalues of Hessian matrix.
 
@@ -433,7 +381,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     single valued measure of local curvature, assuming the image as a 3D plane
     with intensities representing heights.
 
-    It is derived from the eigen values of the Hessian, and its
+    It is derived from the eigenvalues of the Hessian, and its
     value ranges from -1 to 1 (and is undefined (=NaN) in *flat* regions),
     with following ranges representing following shapes:
 
@@ -495,7 +443,9 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
     l1, l2 = hessian_matrix_eigvals(H)
 
-    return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
+    # don't warn on divide by 0 as occurs in the docstring example
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
@@ -511,7 +461,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
@@ -568,7 +518,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     method : {'k', 'eps'}, optional
         Method to compute the response image from the auto-correlation matrix.
@@ -644,7 +594,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -707,7 +657,7 @@ def corner_foerstner(image, sigma=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -722,10 +672,10 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
@@ -780,7 +730,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Parameters
     ----------
-    image : 2D ndarray
+    image : (M, N) ndarray
         Input image.
     n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
@@ -800,9 +750,9 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
-           corner detection. In European conference on computer vision (pp. 430-443).
-           Springer, Berlin, Heidelberg.
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for
+           high-speed corner detection. In European conference on computer
+           vision (pp. 430-443). Springer, Berlin, Heidelberg.
            :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
@@ -852,9 +802,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
-    corners : (N, 2) ndarray
+    corners : (K, 2) ndarray
         Corner coordinates `(row, col)`.
     window_size : int, optional
         Search window size for subpixel estimation.
@@ -863,15 +813,15 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Returns
     -------
-    positions : (N, 2) ndarray
+    positions : (K, 2) ndarray
         Subpixel corner positions. NaN for "not classified" corners.
 
     References
     ----------
-    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
-           precise location of distinct points, corners and centres of circular
-           features. In Proc. ISPRS intercommission conference on fast processing of
-           photogrammetric data (pp. 281-305).
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for
+           detection and precise location of distinct points, corners and
+           centres of circular features. In Proc. ISPRS intercommission
+           conference on fast processing of photogrammetric data (pp. 281-305).
            https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
@@ -1031,7 +981,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     min_distance : int, optional
         The minimal allowed distance separating peaks.
@@ -1131,7 +1081,7 @@ def corner_moravec(image, window_size=1):
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N) ndarray
         Input image.
     window_size : int, optional
         Window size.
@@ -1184,9 +1134,9 @@ def corner_orientations(image, corners, mask):
 
     Parameters
     ----------
-    image : 2D array
+    image : (M, N) array
         Input grayscale image.
-    corners : (N, 2) array
+    corners : (K, 2) array
         Corner coordinates as ``(row, col)``.
     mask : 2D array
         Mask defining the local neighborhood of the corner used for the
@@ -1194,7 +1144,7 @@ def corner_orientations(image, corners, mask):
 
     Returns
     -------
-    orientations : (N, 1) array
+    orientations : (K, 1) array
         Orientations of corners in the range [-pi, pi].
 
     References

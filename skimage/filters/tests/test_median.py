@@ -3,8 +3,8 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy import ndimage
 
-from skimage.filters import median, rank
 from skimage._shared.testing import expected_warnings
+from skimage.filters import median, rank
 
 
 @pytest.fixture
@@ -18,21 +18,19 @@ def image():
 
 
 @pytest.mark.parametrize(
-    "mode, cval, behavior, n_warning, warning_type",
-    [('nearest', 0.0, 'ndimage', 0, []),
-     ('constant', 0.0, 'rank', 1, (UserWarning,)),
-     ('nearest', 0.0, 'rank', 0, []),
-     ('nearest', 0.0, 'ndimage', 0, [])]
+    "mode, cval, behavior, warning_type",
+    [('nearest', 0.0, 'ndimage', None),
+     ('constant', 0.0, 'rank', UserWarning),
+     ('nearest', 0.0, 'rank', None),
+     ('nearest', 0.0, 'ndimage', None)]
 )
-def test_median_warning(image, mode, cval, behavior,
-                        n_warning, warning_type):
+def test_median_warning(image, mode, cval, behavior, warning_type):
 
-    with pytest.warns(None) as records:
+    if warning_type:
+        with pytest.warns(warning_type):
+            median(image, mode=mode, behavior=behavior)
+    else:
         median(image, mode=mode, behavior=behavior)
-
-    assert len(records) == n_warning
-    for rec in records:
-        assert isinstance(rec.message, warning_type)
 
 
 def test_selem_kwarg_deprecation(image):

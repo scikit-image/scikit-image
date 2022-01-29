@@ -93,8 +93,8 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
     denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
 
     with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised = restoration.denoise_tv_chambolle(astro, weight=0.1,
-                                                    multichannel=True)
+        restoration.denoise_tv_chambolle(astro, weight=0.1,
+                                         multichannel=True)
 
     # providing multichannel argument positionally also warns
     with expected_warnings(["Providing the `multichannel` argument"]):
@@ -102,6 +102,17 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
                                                     True)
 
     assert_array_equal(denoised[..., 0], denoised0)
+
+
+def test_denoise_tv_chambolle_n_iter_max_deprecation():
+    expected = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                max_num_iter=10)
+
+    with expected_warnings(["`n_iter_max` is a deprecated argument"]):
+        denoised = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                    n_iter_max=10)
+
+    assert_array_equal(expected, denoised)
 
 
 def test_denoise_tv_chambolle_float_result_range():
@@ -152,7 +163,7 @@ def test_denoise_tv_chambolle_4d():
 def test_denoise_tv_chambolle_weighting():
     # make sure a specified weight gives consistent results regardless of
     # the number of input image dimensions
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     img2d = astro_gray.copy()
     img2d += 0.15 * rstate.standard_normal(img2d.shape)
     img2d = np.clip(img2d, 0, 1)
@@ -244,6 +255,34 @@ def test_denoise_tv_bregman_multichannel():
     out2 = restoration.denoise_tv_bregman(img, weight=60.0, channel_axis=-1)
 
     assert_array_equal(out1, out2)
+
+
+def test_denoise_bilateral_null():
+    img = np.zeros((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image full of zeros should return identity
+    assert_array_equal(out, img)
+
+
+def test_denoise_bilateral_negative():
+    img = -np.ones((50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image with only negative values should be ok
+    assert_array_equal(out, img)
+
+
+def test_denoise_bilateral_negative2():
+    img = np.ones((50, 50))
+    img[2, 2] = 2
+
+    out1 = restoration.denoise_bilateral(img)
+    out2 = restoration.denoise_bilateral(img - 10)  # contains negative values
+
+    # 2 images with a given offset should give the same result (with the same
+    # offset)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
@@ -389,7 +428,7 @@ def test_denoise_nl_means_2d(fast_mode):
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
     sigma = 0.3
-    img += sigma * np.random.randn(*img.shape)
+    img += sigma * np.random.standard_normal(img.shape)
     img_f32 = img.astype('float32')
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(img, 7, 5, 0.2,
@@ -472,7 +511,7 @@ def test_denoise_nl_means_3d(fast_mode, dtype):
     img = np.zeros((12, 12, 8), dtype=dtype)
     img[5:-5, 5:-5, 2:-2] = 1.
     sigma = 0.3
-    imgn = img + sigma * np.random.randn(*img.shape)
+    imgn = img + sigma * np.random.standard_normal(img.shape)
     imgn = imgn.astype(dtype)
     psnr_noisy = peak_signal_noise_ratio(img, imgn)
     for s in [sigma, 0]:
@@ -488,7 +527,6 @@ def test_denoise_nl_means_3d(fast_mode, dtype):
 @pytest.mark.parametrize('channel_axis', [0, -1])
 def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
     # for true 3D data, 3D denoising is better than denoising as 2D+channels
-    dtype = np.float64
 
     # synthetic 3d volume
     img = data.binary_blobs(length=32, n_dim=3, seed=5)
@@ -514,6 +552,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
         denoised_wrong_multichannel, channel_axis, -1
     )
 
+    img = img.astype(denoised_wrong_multichannel.dtype)
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert psnr_ok > psnr_wrong
@@ -609,7 +648,7 @@ def test_denoise_nl_means_wrong_dimension():
 def test_no_denoising_for_small_h(fast_mode, dtype):
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
-    img += 0.3*np.random.randn(*img.shape)
+    img += 0.3 * np.random.standard_normal(img.shape)
     img = img.astype(dtype)
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,
@@ -662,9 +701,9 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
      (astro_odd, True, True)]
 )
 def test_wavelet_denoising(img, multichannel, convert2ycbcr):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     sigma = 0.1
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     channel_axis = -1 if multichannel else None
@@ -710,10 +749,10 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 @pytest.mark.parametrize('convert2ycbcr', [False, True])
 def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     sigma = 0.1
     img = astro_odd
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     img = np.moveaxis(img, -1, channel_axis)
@@ -730,10 +769,10 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
 
 
 def test_wavelet_denoising_deprecated():
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     sigma = 0.1
     img = astro_odd
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     with expected_warnings(["`multichannel` is a deprecated argument"]):
@@ -762,7 +801,7 @@ def test_wavelet_denoising_deprecated():
 def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                    estimate_sigma):
     """Test cases for images without prescaling via img_as_float."""
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
 
     if case == '1d':
         # 1D single-channel in range [0, 255]
@@ -774,7 +813,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
 
     # add noise and clip to original signal range
     sigma = 25.
-    noisy = x + sigma * rstate.randn(*x.shape)
+    noisy = x + sigma * rstate.standard_normal(x.shape)
     noisy = np.clip(noisy, x.min(), x.max())
     noisy = noisy.astype(x.dtype)
 
@@ -831,11 +870,11 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
 
 
 def test_wavelet_threshold():
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
 
     img = astro_gray
     sigma = 0.1
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     # employ a single, user-specified threshold instead of BayesShrink sigmas
@@ -864,7 +903,7 @@ def test_wavelet_threshold():
     )
 )
 def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     # Generate a very simple test image
     if ndim < 3:
         img = 0.2*np.ones((128, )*ndim)
@@ -873,7 +912,7 @@ def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
     img[(slice(5, 13), ) * ndim] = 0.8
 
     sigma = 0.1
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     # Mark H. 2018.08:
@@ -899,7 +938,7 @@ def test_wavelet_invalid_method():
 
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_levels(rescale_sigma):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     ndim = 2
     N = 256
     wavelet = 'db1'
@@ -908,7 +947,7 @@ def test_wavelet_denoising_levels(rescale_sigma):
     img[(slice(5, 13), ) * ndim] = 0.8
 
     sigma = 0.1
-    noisy = img + sigma * rstate.randn(*(img.shape))
+    noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
 
     denoised = restoration.denoise_wavelet(noisy, wavelet=wavelet,
@@ -941,7 +980,7 @@ def test_wavelet_denoising_levels(rescale_sigma):
 
 
 def test_estimate_sigma_gray():
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     # astronaut image
     img = astro_gray.copy()
     sigma = 0.1
@@ -956,7 +995,7 @@ def test_estimate_sigma_masked_image():
     # Verify computation on an image with a large, noise-free border.
     # (zero regions will be masked out by _sigma_est_dwt to avoid returning
     #  sigma = 0)
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     # uniform image
     img = np.zeros((128, 128))
     center_roi = (slice(32, 96), slice(32, 96))
@@ -971,7 +1010,7 @@ def test_estimate_sigma_masked_image():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_estimate_sigma_color(channel_axis):
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     # astronaut image
     img = astro.copy()
     sigma = 0.1
@@ -994,7 +1033,7 @@ def test_estimate_sigma_color(channel_axis):
 
 
 def test_estimate_sigma_color_deprecated_multichannel():
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
     # astronaut image
     img = astro.copy()
     sigma = 0.1
@@ -1020,7 +1059,7 @@ def test_wavelet_denoising_args(rescale_sigma):
     arguments can be passed.
     """
     img = astro
-    noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
+    noisy = img.copy() + 0.1 * np.random.standard_normal(img.shape)
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
@@ -1054,7 +1093,7 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_cycle_spinning_multichannel(rescale_sigma):
     sigma = 0.1
-    rstate = np.random.RandomState(1234)
+    rstate = np.random.default_rng(1234)
 
     for channel_axis in -1, None:
         if channel_axis is not None:
@@ -1074,7 +1113,7 @@ def test_cycle_spinning_multichannel(rescale_sigma):
             invalid_shifts = [(1, 1, 2), (1, )]
             invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
 
-        noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+        noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
         denoise_func = restoration.denoise_wavelet
         func_kw = dict(sigma=sigma, channel_axis=channel_axis,
@@ -1128,8 +1167,8 @@ def test_cycle_spinning_multichannel(rescale_sigma):
 def test_cycle_spinning_num_workers():
     img = astro_gray
     sigma = 0.1
-    rstate = np.random.RandomState(1234)
-    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+    rstate = np.random.default_rng(1234)
+    noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
     denoise_func = restoration.denoise_wavelet
     func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
@@ -1152,8 +1191,8 @@ def test_cycle_spinning_num_workers():
 def test_cycle_spinning_num_workers_deprecated_multichannel():
     img = astro_gray[:32, :32]
     sigma = 0.1
-    rstate = np.random.RandomState(1234)
-    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+    rstate = np.random.default_rng(1234)
+    noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
     denoise_func = restoration.denoise_wavelet
 
@@ -1186,7 +1225,3 @@ def test_cycle_spinning_num_workers_deprecated_multichannel():
 
     with expected_warnings(exp_warn):
         restoration.cycle_spin(noisy, denoise_func, 1, 1, None, False)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

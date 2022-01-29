@@ -88,6 +88,24 @@ def test_invalid_block_size():
         block_reduce(image, [1, 0.5])
 
 
+def test_default_block_size():
+    image = np.arange(4 * 6).reshape(4, 6)
+    out = block_reduce(image, func=np.min)
+    expected = np.array([[0, 2, 4],
+                         [12, 14, 16]])
+    assert_equal(expected, out)
+
+
+def test_scalar_block_size():
+    image = np.arange(6 * 6).reshape(6, 6)
+    out = block_reduce(image, 3, func=np.min)
+    expected1 = np.array([[0, 3],
+                         [18, 21]])
+    assert_equal(expected1, out)
+    expected2 = block_reduce(image, (3, 3), func=np.min)
+    assert_equal(expected2, out)
+
+
 def test_func_kwargs_same_dtype():
     image = np.array([[97, 123, 173, 227],
                      [217, 241, 221, 214],

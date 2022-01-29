@@ -132,7 +132,8 @@ def pad_for_eccentric_footprints(func):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological erosion of an image.
 
@@ -193,27 +194,29 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological dilation of an image.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets the value of a pixel to the maximum over all
+    pixel values within a local neighborhood centered about it. The values
+    where the footprint is 1 define this neighborhood.
+    Dilation enlarges bright regions and shrinks dark regions.
 
     Parameters
     ----------
     image : ndarray
         Image array.
     footprint : ndarray, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The neighborhood expressed as an array of 1's and 0's.
         If None, use cross-shaped footprint (connectivity=1).
     out : ndarray, optional
-        The array to store the result of the morphology. If None, is
+        The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        Shift footprint about center point. This only affects
-        eccentric footprints (i.e. footprint with even numbered
+        Shift footprint about center point. This only affects 2D
+        eccentric footprints (i.e., footprints with even-numbered
         sides).
 
     Returns
@@ -259,7 +262,8 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def opening(image, footprint=None, out=None):
@@ -310,7 +314,8 @@ def opening(image, footprint=None, out=None):
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def closing(image, footprint=None, out=None):
@@ -362,7 +367,8 @@ def closing(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def white_tophat(image, footprint=None, out=None):
     """Return white top hat of an image.
 
@@ -436,7 +442,8 @@ def white_tophat(image, footprint=None, out=None):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def black_tophat(image, footprint=None, out=None):
     """Return black top hat of an image.
 

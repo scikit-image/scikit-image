@@ -382,18 +382,18 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
     ycoords_peaks = []
     xcoords_peaks = []
 
-    # relative coordinate grid for local neighbourhood suppression
+    # relative coordinate grid for local neighborhood suppression
     ycoords_ext, xcoords_ext = np.mgrid[-min_ydistance:min_ydistance + 1,
                                         -min_xdistance:min_xdistance + 1]
 
     for ycoords_idx, xcoords_idx in coords:
         accum = img_max[ycoords_idx, xcoords_idx]
         if accum > threshold:
-            # absolute coordinate grid for local neighbourhood suppression
+            # absolute coordinate grid for local neighborhood suppression
             ycoords_nh = ycoords_idx + ycoords_ext
             xcoords_nh = xcoords_idx + xcoords_ext
 
-            # no reflection for distance neighbourhood
+            # no reflection for distance neighborhood
             ycoords_in = np.logical_and(ycoords_nh > 0, ycoords_nh < rows)
             ycoords_nh = ycoords_nh[ycoords_in]
             xcoords_nh = xcoords_nh[ycoords_in]
@@ -408,7 +408,7 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
             ycoords_nh[xcoords_high] = rows - ycoords_nh[xcoords_high]
             xcoords_nh[xcoords_high] -= cols
 
-            # suppress neighbourhood
+            # suppress neighborhood
             img_max[ycoords_nh, xcoords_nh] = 0
 
             # add current feature to peaks

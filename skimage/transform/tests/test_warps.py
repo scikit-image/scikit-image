@@ -179,8 +179,7 @@ def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    scaled = rescale(x, 2, order=0,
-                     channel_axis=None, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_array_almost_equal(scaled, ref)
@@ -189,8 +188,7 @@ def test_rescale():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
 
-    scaled = rescale(x, (2, 1), order=0,
-                     channel_axis=None, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, (2, 1), order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_array_almost_equal(scaled, ref)
@@ -374,6 +372,25 @@ def test_resize_dtype():
     assert resize(x_b, (10, 10), preserve_range=True).dtype == bool
     assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
     assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+
+
+@pytest.mark.parametrize('order', [0, 1])
+@pytest.mark.parametrize('preserve_range', [True, False])
+@pytest.mark.parametrize('anti_aliasing', [True, False])
+@pytest.mark.parametrize('dtype', [np.float64, np.uint8])
+def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
+    # test if clip as expected
+    if dtype == np.uint8 and (preserve_range or order == 0):
+        expected_max = 255
+    else:
+        expected_max = 1.0
+    x = np.ones((5, 5), dtype=dtype)
+    if dtype == np.uint8:
+        x *= 255
+    resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
+                     anti_aliasing=anti_aliasing)
+
+    assert resized.max() == expected_max
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -894,3 +911,11 @@ def test_resize_local_mean_dtype():
                              preserve_range=False).dtype == x_f32.dtype
     assert resize_local_mean(x_f32, (10, 10),
                              preserve_range=True).dtype == x_f32.dtype
+
+
+@pytest.mark.parametrize("_type", [tuple, np.asarray, list])
+def test_output_shape_arg_type(_type):
+    img = np.random.rand(3, 3)
+    output_shape = _type([5, 5])
+
+    assert resize(img, output_shape).shape == tuple(output_shape)

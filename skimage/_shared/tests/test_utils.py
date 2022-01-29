@@ -1,11 +1,10 @@
 import sys
+import warnings
 
 import numpy as np
-import numpy.testing as npt
 import pytest
 
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
                                    change_default_value, remove_arg,
@@ -15,6 +14,13 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
     complex_dtypes += [np.complex256]
+
+have_numpydoc = False
+try:
+    import numpydoc
+    have_numpydoc = True
+except ImportError:
+    pass
 
 
 def test_remove_argument():
@@ -61,9 +67,7 @@ def test_remove_argument():
         assert bar(0, arg1=1) == (0, 1, 1)
 
     assert str(record[0].message) == expected_msg
-
-    # Assert that nothing happens if arg1 is set
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings(record=True) as recorded:
         # No kwargs
         assert foo(0) == (0, 0, 1)
         assert foo(0, arg2=0) == (0, 0, 0)
@@ -73,9 +77,8 @@ def test_remove_argument():
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
             assert foo.__doc__ == 'Expected docstring'
-
-    # Assert no warning was raised
-    assert not record.list
+    # Assert no warnings were raised
+    assert len(recorded) == 0
 
 
 def test_change_default_value():
@@ -105,7 +108,7 @@ def test_change_default_value():
     assert str(record[1].message) == "Custom warning message"
 
     # Assert that nothing happens if arg1 is set
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings(record=True) as recorded:
         # No kwargs
         assert foo(0, 2) == (0, 2, 1)
         assert foo(0, arg1=0) == (0, 0, 1)
@@ -115,19 +118,19 @@ def test_change_default_value():
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
             assert foo.__doc__ == 'Expected docstring'
+    # Assert no warnings were raised
+    assert len(recorded) == 0
 
-    # Assert no warning was raised
-    assert not record.list
 
+def test_deprecate_kwarg():
 
-def test_deprecated_kwarg():
-
-    @deprecate_kwarg({'old_arg1': 'new_arg1'})
+    @deprecate_kwarg({'old_arg1': 'new_arg1'}, '0.19')
     def foo(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
         return arg0, new_arg1, arg2
 
     @deprecate_kwarg({'old_arg1': 'new_arg1'},
+                     deprecated_version='0.19',
                      warning_msg="Custom warning message")
     def bar(arg0, new_arg1=1, arg2=None):
         """Expected docstring"""
@@ -146,7 +149,7 @@ def test_deprecated_kwarg():
 
     # Assert that nothing happens when the function is called with the
     # new API
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings(record=True) as recorded:
         # No kwargs
         assert foo(0) == (0, 1, None)
         assert foo(0, 2) == (0, 2, None)
@@ -160,10 +163,21 @@ def test_deprecated_kwarg():
         assert foo.__name__ == 'foo'
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            assert foo.__doc__ == 'Expected docstring'
+            if not have_numpydoc:
+                assert foo.__doc__ == """Expected docstring"""
+            else:
+                assert foo.__doc__ == """Expected docstring
 
-    # Assert no warning was raised
-    assert not record.list
+
+    Other Parameters
+    ----------------
+    old_arg1 : DEPRECATED
+        Deprecated in favor of `new_arg1`.
+
+        .. deprecated:: 0.19
+"""
+
+    assert len(recorded) == 0
 
 
 def test_check_nD():
@@ -261,7 +275,3 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size is None
     else:
         assert size == x.shape[channel_axis]
-
-
-if __name__ == "__main__":
-    npt.run_module_suite()

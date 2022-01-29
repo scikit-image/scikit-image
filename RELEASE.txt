@@ -50,6 +50,11 @@ the appropriate point in main and the following instructions are still apt.
   8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
      to ``release_dev.txt``.
 
+  9. Update the file ``skimage/data/_fetchers.py`` to point the pooch
+     repository to the new branch instead of main during testing.
+     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
+     change it to the newly created branch name.
+
 - Submit the release notes for review by other project maintainers:
 
   - Create a PR from v<major>.<minor>.x branch to `main` (at this point,
@@ -139,9 +144,10 @@ the appropriate point in main and the following instructions are still apt.
     in `robots.txt`
   - Commit and push (this will also build and update the website).
 
-- Post release notes on mailing lists, blog, Twitter, etc.
+- Post release notes on user & dev forums, blog, Twitter, etc.
 
-  - scikit-image@python.org
+  - https://forum.image.sc/tag/scikit-image
+  - https://discuss.scientific-python.org/c/contributor/skimage
   - scipy-user@python.org
   - scikit-learn@python.org
 

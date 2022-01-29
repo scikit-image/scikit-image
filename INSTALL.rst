@@ -220,8 +220,8 @@ Additional help
 
 If you still have questions, reach out through
 
-- our `forum on image.sc <https://forum.image.sc/tags/scikit-image>`_
-- our `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_
+- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 - our `chat channel <https://skimage.zulipchat.com/>`_
 - `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
 
@@ -256,7 +256,7 @@ This directory contains the following files:
     ├── azure-pipelines.yml
     ├── benchmarks
     ├── CODE_OF_CONDUCT.md
-    ├── CONTRIBUTING.txt
+    ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
     ├── doc
     ├── INSTALL.rst
@@ -272,7 +272,6 @@ This directory contains the following files:
     ├── skimage
     ├── TODO.txt
     ├── tools
-    └── viewer_examples
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
@@ -477,9 +476,6 @@ functionality is only available with the following installed:
 
 * `Astropy <https://www.astropy.org>`__
     Provides FITS I/O capability.
-
-* `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
-    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <https://pyamg.org/>`__
     The ``pyamg`` module is used for the fast ``cg_mg`` mode of random

@@ -4,13 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-# TODO: remove except case once minimum SciPy is >= 1.4
-try:
-    from scipy.fft import fftn, ifftn
-except ImportError:
-    # scipy < 1.4 does not have an fft module
-    from scipy.fftpack import fftn, ifftn
-from scipy.fftpack import fftfreq
+from scipy.fft import fftn, ifftn, fftfreq
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
@@ -118,14 +112,15 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
 def phase_cross_correlation(reference_image, moving_image, *,
                             upsample_factor=1, space="real",
                             return_error=True, reference_mask=None,
-                            moving_mask=None, overlap_ratio=0.3):
+                            moving_mask=None, overlap_ratio=0.3,
+                            normalization="phase"):
     """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
     in a fraction of the computation time and with reduced memory requirements.
     It obtains an initial estimate of the cross-correlation peak by an FFT and
     then refines the shift estimation by upsampling the DFT only in a small
-    neighborhood of that estimate by means of a matrix-multiply DFT.
+    neighborhood of that estimate by means of a matrix-multiply DFT [1]_.
 
     Parameters
     ----------
@@ -165,7 +160,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
         maximum translation, while a higher `overlap_ratio` leads to greater
         robustness against spurious matches due to small overlap between
         masked images. Used only if one of ``reference_mask`` or
-        ``moving_mask`` is None.
+        ``moving_mask`` is not None.
+    normalization : {"phase", None}
+        The type of normalization to apply to the cross-correlation. This
+        parameter is unused when masks (`reference_mask` and `moving_mask`) are
+        supplied.
 
     Returns
     -------
@@ -180,20 +179,41 @@ def phase_cross_correlation(reference_image, moving_image, *,
         Global phase difference between the two images (should be
         zero if images are non-negative).
 
+    Notes
+    -----
+    The use of cross-correlation to estimate image translation has a long
+    history dating back to at least [2]_. The "phase correlation"
+    method (selected by ``normalization="phase"``) was first proposed in [3]_.
+    Publications [1]_ and [2]_ use an unnormalized cross-correlation
+    (``normalization=None``). Which form of normalization is better is
+    application-dependent. For example, the phase correlation method works
+    well in registering images under different illumination, but is not very
+    robust to noise. In a high noise scenario, the unnormalized method may be
+    preferable.
+
+    When masks are provided, a masked normalized cross-correlation algorithm is
+    used [5]_, [6]_.
+
     References
     ----------
     .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
            "Efficient subpixel image registration algorithms,"
            Optics Letters 33, 156-158 (2008). :DOI:`10.1364/OL.33.000156`
-    .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
+    .. [2] P. Anuta, Spatial registration of multispectral and multitemporal
+           digital imagery using fast Fourier transform techniques, IEEE Trans.
+           Geosci. Electron., vol. 8, no. 4, pp. 353–368, Oct. 1970.
+           :DOI:`10.1109/TGE.1970.271435`.
+    .. [3] C. D. Kuglin D. C. Hines. The phase correlation image alignment
+           method, Proceeding of IEEE International Conference on Cybernetics
+           and Society, pp. 163-165, New York, NY, USA, 1975, pp. 163–165.
+    .. [4] James R. Fienup, "Invariant error metrics for image reconstruction"
            Optics Letters 36, 8352-8357 (1997). :DOI:`10.1364/AO.36.008352`
-    .. [3] Dirk Padfield. Masked Object Registration in the Fourier Domain.
+    .. [5] Dirk Padfield. Masked Object Registration in the Fourier Domain.
            IEEE Transactions on Image Processing, vol. 21(5),
            pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
-    .. [4] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+    .. [6] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
-
     """
     if (reference_mask is not None) or (moving_mask is not None):
         return _masked_phase_cross_correlation(reference_image, moving_image,
@@ -218,6 +238,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
+    if normalization == "phase":
+        eps = np.finfo(image_product.real.dtype).eps
+        image_product /= np.maximum(np.abs(image_product), 100 * eps)
+    elif normalization is not None:
+        raise ValueError("normalization must be either phase or None")
     cross_correlation = ifftn(image_product)
 
     # Locate maximum

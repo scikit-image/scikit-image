@@ -1,5 +1,3 @@
-from warnings import warn
-
 import numpy as np
 
 from .._shared import utils
@@ -16,14 +14,14 @@ from ._nl_means_denoising import (_nl_means_denoising_2d,
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
                      preserve_range=False, channel_axis=None):
-    """Perform non-local means denoising on 2-D or 3-D grayscale images, and
-    2-D RGB images.
+    """Perform non-local means denoising on 2D-4D grayscale or RGB images.
 
     Parameters
     ----------
     image : 2D or 3D ndarray
         Input image to be denoised, which can be 2D or 3D, and grayscale
-        or RGB (for 2D images only, see ``multichannel`` parameter).
+        or RGB (for 2D images only, see ``multichannel`` parameter). There can
+        be any number of channels (does not strictly have to be RGB).
     patch_size : int, optional
         Size of patches used for denoising.
     patch_distance : int, optional
@@ -68,7 +66,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
 
     The non-local means algorithm is well suited for denoising images with
     specific textures. The principle of the algorithm is to average the value
-    of a given pixel with values of other pixels in a limited neighbourhood,
+    of a given pixel with values of other pixels in a limited neighborhood,
     provided that the *patches* centered on the other pixels are similar enough
     to the patch centered on the pixel of interest.
 

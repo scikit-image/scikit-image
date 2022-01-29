@@ -96,7 +96,7 @@ def _local_binary_pattern(double[:, ::1] image,
     image : (N, M) double array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of
+        Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
@@ -272,7 +272,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
 
 # Constant values that are used by `_multiblock_lbp` function.
-# Values represent offsets of neighbour rectangles relative to central one.
+# Values represent offsets of neighbor rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
     Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0],
@@ -310,10 +310,11 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
 
     References
     ----------
-    .. [1] Face Detection Based on Multi-Block LBP
-           Representation. Lun Zhang, Rufeng Chu, Shiming Xiang, Shengcai Liao,
-           Stan Z. Li
+    .. [1] L. Zhang, R. Chu, S. Xiang, S. Liao, S.Z. Li. "Face Detection Based
+           on Multi-Block LBP Representation", In Proceedings: Advances in
+           Biometrics, International Conference, ICB 2007, Seoul, Korea.
            http://www.cbsr.ia.ac.cn/users/scliao/papers/Zhang-ICB07-MBLBP.pdf
+           :DOI:`10.1007/978-3-540-74549-5_2`
     """
 
     cdef:

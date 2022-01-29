@@ -141,14 +141,14 @@ from packaging.version import parse
 v = parse(release)
 if v.release is None:
     raise ValueError(
-        'Ill-formed version: {!r}. Version should follow '
-        'PEP440'.format(version))
+        f'Ill-formed version: {version!r}. Version should follow '
+        f'PEP440')
 
 if v.is_devrelease:
     binder_branch = 'main'
 else:
     major, minor = v.release[:2]
-    binder_branch = 'v{}.{}.x'.format(major, minor)
+    binder_branch = f'v{major}.{minor}.x'
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 import plotly.io as pio
@@ -188,7 +188,8 @@ sphinx_gallery_conf = {
         'repo': 'scikit-image',
         'branch': binder_branch,  # Can be any branch, tag, or commit hash
         'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': '../../.binder/requirements.txt',
+        'dependencies': ['../../.binder/requirements.txt',
+                         '../../.binder/runtime.txt'],
         # Optional keys
         'use_jupyter_lab': False
      },
@@ -381,7 +382,7 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
+_python_version_str = f'{sys.version_info.major}.{sys.version_info.minor}'
 _python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
@@ -441,7 +442,7 @@ def linkcode_resolve(domain, info):
         linespec = ""
     else:
         stop_line = start_line + len(source) - 1
-        linespec = f"#L{start_line}-L{stop_line}"
+        linespec = f'#L{start_line}-L{stop_line}'
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
