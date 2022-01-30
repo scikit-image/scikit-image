@@ -482,7 +482,7 @@ def pyramid_expand(
     cval=0,
     preserve_range=False,
     *,
-    channel_axis=-1,
+    channel_axis=None,
 ):
     return (image,)
 
@@ -500,7 +500,7 @@ def pyramid_gaussian(
     cval=0,
     preserve_range=False,
     *,
-    channel_axis=-1,
+    channel_axis=None,
 ):
     return (image,)
 
@@ -518,7 +518,7 @@ def pyramid_laplacian(
     cval=0,
     preserve_range=False,
     *,
-    channel_axis=-1,
+    channel_axis=None,
 ):
     return (image,)
 
@@ -535,7 +535,7 @@ def pyramid_reduce(
     cval=0,
     preserve_range=False,
     *,
-    channel_axis=-1,
+    channel_axis=None,
 ):
     return (image,)
 

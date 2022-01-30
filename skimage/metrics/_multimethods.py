@@ -133,7 +133,7 @@ def contingency_table(
 @create_skimage_metrics(_image0_image1_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def hausdorff_distance(image0, image1):
+def hausdorff_distance(image0, image1, method="standard"):
     return (image0, image1)
 
 
