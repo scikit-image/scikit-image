@@ -39,11 +39,11 @@ cdef inline Py_ssize_t fmin(Py_ssize_t one, Py_ssize_t two) nogil:
 ctypedef fused np_real_numeric_out:
     np_real_numeric
 
-cdef inline void nearest_neighbour_interpolation(
+cdef inline void nearest_neighbor_interpolation(
         np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
         np_floats r, np_floats c, char mode, np_real_numeric cval,
         np_real_numeric_out* out) nogil:
-    """Nearest neighbour interpolation at a given position in the image.
+    """Nearest neighbor interpolation at a given position in the image.
 
     Parameters
     ----------

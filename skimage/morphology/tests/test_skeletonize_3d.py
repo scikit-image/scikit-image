@@ -105,7 +105,7 @@ def check_input(img):
     assert_equal(img, orig)
 
 
-def test_skeletonize_num_neighbours():
+def test_skeletonize_num_neighbors():
     # an empty image
     image = np.zeros((300, 300))
 
