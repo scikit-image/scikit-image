@@ -8,19 +8,10 @@ variables:
 jobs:
 - job: 'Default'
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-latest'
   strategy:
     maxParallel: 10
     matrix:
-      Python37:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python37-x64:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
       Python38:
         PYTHON_VERSION: '3.8'
         ARCH: 'x86'
@@ -44,6 +35,7 @@ jobs:
         PYTHON_VERSION: '3.9'
         ARCH: 'x64'
         PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
         # NOTE(honles): winpty is required by one of the doc dependencies,
         #               but does not provide a wheel for Python 3.9
         # TEST_EXAMPLES: 'true'

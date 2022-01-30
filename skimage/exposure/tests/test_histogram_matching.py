@@ -61,6 +61,7 @@ class TestMatchHistogram:
         reference = np.moveaxis(self.template_rgb, -1, channel_axis)
         matched = exposure.match_histograms(image, reference,
                                             channel_axis=channel_axis)
+        assert matched.dtype == image.dtype
         matched = np.moveaxis(matched, channel_axis, -1)
         reference = np.moveaxis(reference, channel_axis, -1)
         matched_pdf = self._calculate_image_empirical_pdf(matched)

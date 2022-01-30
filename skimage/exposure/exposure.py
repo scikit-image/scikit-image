@@ -1,6 +1,5 @@
 import numpy as np
 
-from ..color import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
 from .._shared import utils
 
@@ -826,6 +825,8 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         return not ((image.max() == 1) and (image.min() == 0))
 
     if image.ndim == 3:
+        from ..color import rgb2gray, rgba2rgb  # avoid circular import
+
         if image.shape[2] == 4:
             image = rgba2rgb(image)
         if image.shape[2] == 3:

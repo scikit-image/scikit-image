@@ -39,9 +39,6 @@ transform
     Geometric and other transforms, e.g., rotation or the Radon transform.
 util
     Generic utilities.
-viewer
-    A simple graphical user interface for visualizing results and exploring
-    parameters.
 
 Utility Functions
 -----------------
@@ -88,7 +85,6 @@ submodules = [
     'segmentation',
     'transform',
     'util',
-    'viewer'
 ]
 
 from ._shared.version_requirements import ensure_python_version

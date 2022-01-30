@@ -13,8 +13,7 @@ from ._multimethods import (blob_dog, blob_doh, blob_log, canny, corner_fast,
                             match_template, multiblock_lbp,
                             multiscale_basic_features, peak_local_max,
                             plot_matches, shape_index, structure_tensor,
-                            structure_tensor_eigenvalues,
-                            structure_tensor_eigvals)
+                            structure_tensor_eigenvalues)
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -32,7 +31,6 @@ __all__ = ['canny',
            'peak_local_max',
            'structure_tensor',
            'structure_tensor_eigenvalues',
-           'structure_tensor_eigvals',
            'hessian_matrix',
            'hessian_matrix_det',
            'hessian_matrix_eigvals',

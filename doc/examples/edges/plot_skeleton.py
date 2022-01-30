@@ -45,7 +45,7 @@ plt.show()
 # the image, removing pixels on object borders. This continues until no
 # more pixels can be removed.  The image is correlated with a
 # mask that assigns each pixel a number in the range [0...255]
-# corresponding to each possible pattern of its 8 neighbouring
+# corresponding to each possible pattern of its 8 neighboring
 # pixels. A look up table is then used to assign the pixels a
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.

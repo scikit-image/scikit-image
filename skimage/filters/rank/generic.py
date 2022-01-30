@@ -1344,8 +1344,7 @@ def windowed_histogram(image, footprint, out=None, mask=None,
 
 def majority(image, footprint, *, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
-    """Majority filter assign to each pixel the most occuring value within
-    its neighborhood.
+    """Assign to each pixel the most common value within its neighborhood.
 
     Parameters
     ----------

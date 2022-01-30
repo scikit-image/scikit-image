@@ -56,7 +56,6 @@ __all__ = [
     'shape_index',
     'structure_tensor',
     'structure_tensor_eigenvalues',
-    'structure_tensor_eigvals',
 ]
 
 
@@ -777,10 +776,3 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
 @_get_docs
 def structure_tensor_eigenvalues(A_elems):
     return (A_elems,)
-
-
-@create_skimage_feature(_Axx_Axy_Ayy_replacer)
-@all_of_type(ndarray)
-@_get_docs
-def structure_tensor_eigvals(Axx, Axy, Ayy):
-    return (Axx, Axy, Ayy)

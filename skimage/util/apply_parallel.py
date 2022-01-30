@@ -184,6 +184,11 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         mode = 'reflect'
     elif mode == 'edge':
         mode = 'nearest'
+    elif mode is None:
+        # default value for Dask.
+        # Note: that for dask >= 2022.03 it will change to 'none' so we set it
+        #       here for consistent behavior across Dask versions.
+        mode = 'reflect'
 
     if channel_axis is not None:
         if numpy.isscalar(depth):

@@ -140,6 +140,26 @@ else:
     has_pooch = True
 
 
+def _skip_pytest_case_requiring_pooch(data_filename):
+    """If a test case is calling pooch, skip it.
+
+    This running the test suite in environments without internet
+    access, skipping only the tests that try to fetch external data.
+    """
+
+    # Check if pytest is currently running.
+    # Packagers might use pytest to run the tests suite, but may not
+    # want to run it online with pooch as a dependency.
+    # As such, we will avoid failing the test, and silently skipping it.
+    if 'PYTEST_CURRENT_TEST' in os.environ:
+        # https://docs.pytest.org/en/latest/example/simple.html#pytest-current-test-environment-variable  # noqa
+        import pytest
+        # Pytest skip raises an exception that allows the
+        # tests to be skipped
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
+
+
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
@@ -194,6 +214,8 @@ def _fetch(data_filename):
     # Case 3:
     # Pooch not found.
     if image_fetcher is None:
+        _skip_pytest_case_requiring_pooch(data_filename)
+
         raise ModuleNotFoundError(
             "The requested file is part of the scikit-image distribution, "
             "but requires the installation of an optional dependency, pooch. "
@@ -209,6 +231,8 @@ def _fetch(data_filename):
     try:
         resolved_path = image_fetcher.fetch(data_filename)
     except ConnectionError as err:
+        _skip_pytest_case_requiring_pooch(data_filename)
+
         # If we decide in the future to suppress the underlying 'requests'
         # error, change this to `raise ... from None`. See PEP 3134.
         raise ConnectionError(
@@ -637,8 +661,8 @@ def human_mitosis():
 
     Returns
     -------
-    human_mitosis: (512, 512) uint8 ndimage
-        Data of human cells undergoing mitosis taken during the preperation
+    human_mitosis: (512, 512) uint8 ndarray
+        Data of human cells undergoing mitosis taken during the preparation
         of the manuscript in [1]_.
 
     Notes
@@ -1144,6 +1168,40 @@ def skin():
     skin : (960, 1280, 3) RGB image of uint8
     """
     return _load('data/skin.jpg')
+
+
+def nickel_solidification():
+    """Image sequence of synchrotron x-radiographs showing the rapid
+    solidification of a nickel alloy sample.
+
+    Returns
+    -------
+    nickel_solidification: (11, 384, 512) uint16 ndarray
+
+    Notes
+    -----
+    See info under `nickel_solidification.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/solidification.tif')
+
+
+def protein_transport():
+    """Microscopy image sequence with fluorescence tagging of proteins
+    re-localizing from the cytoplasmic area to the nuclear envelope.
+
+    Returns
+    -------
+    protein_transport: (15, 2, 180, 183) uint8 ndarray
+
+    Notes
+    -----
+    See info under `NPCsingleNucleus.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/protein_transport.tif')
 
 
 def brain():
