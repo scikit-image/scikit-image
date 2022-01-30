@@ -56,8 +56,8 @@ def test_pcc():
 
     # change background of roi and see if values are same
     roi = np.where(img1 <= 2, 0, 1)
-    assert pearson_corr_coeff(img1, img1, roi=roi) \
-           == pearson_corr_coeff(img1, img2, roi=roi)
+    assert pearson_corr_coeff(img1, img1, roi) \
+           == pearson_corr_coeff(img1, img2, roi)
 
 
 def test_mcc():
