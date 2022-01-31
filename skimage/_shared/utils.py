@@ -51,7 +51,6 @@ class _DecoratorBaseClass:
     function is wrapped, and `stack_rank` be the rank of the decorator
     in the decorators stack. The stacklevel of a warning is then
     `stacklevel = 1 + stack_length - stack_rank`.
-
     """
 
     _stack_length = {}
