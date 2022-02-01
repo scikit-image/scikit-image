@@ -21,7 +21,7 @@ from .._shared.utils import _supported_float_type
 
 def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
                       axes=None, pad_axes=None,
-                      normalization=None,
+                      normalization=None,return_power_spectrum=False,
                       overlap_ratio=0.3):
     """Masked/unmasked cross-correlation between two arrays.
 
@@ -111,11 +111,12 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
                                        mode, axes, pad_axes,
                                        normalization,
                                        overlap_ratio,
+                                       return_power_spectrum=return_power_spectrum
                                        )
     else:
         cc = _cross_correlation(arr1, arr2,
                                 mode, axes, pad_axes,
-                                normalization,
+                                normalization,return_power_spectrum=return_power_spectrum
                                 )
     return cc
 
@@ -179,7 +180,7 @@ def get_fft_ifft(arr1_shape, arr2_shape,
 def _cross_correlation(arr1, arr2,
                        mode="full",
                        axes=None, pad_axes=None,
-                       normalization="phase",
+                       normalization="phase",return_power_spectrum=False,
                        ):
     fft, ifft, final_slice, final_shape = get_fft_ifft(arr1_shape=arr1.shape,
                                                        arr2_shape=arr2.shape,
@@ -224,14 +225,17 @@ def _cross_correlation(arr1, arr2,
             return
     # Slice back to expected convolution shape.
     corr = corr[tuple(final_slice)]
-    return corr
+    if return_power_spectrum:
+        return corr, fft(corr)
+    else:
+        return corr
 
 
 def _masked_cross_correlation(arr1, arr2, mask1=None,
                               mask2=None, mode="full",
                               axes=None, pad_axes=None,
                               normalization="phase",
-                              overlap_ratio=0.3):
+                              overlap_ratio=0.3,return_power_spectrum=False,):
     if mask1 is None:
         mask1 = np.ones(arr1.shape, dtype=bool)
     if mask2 is None:
@@ -331,7 +335,10 @@ def _masked_cross_correlation(arr1, arr2, mask1=None,
                                                  axis=axes, keepdims=True)
     out[number_overlap_masked_px < number_px_threshold] = 0.0
 
-    return out
+    if return_power_spectrum:
+        return out, fft(out)
+    else:
+        return out
 
 
 def _centered(arr, newshape, axes):

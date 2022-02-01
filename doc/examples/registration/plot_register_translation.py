@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.registration import phase_cross_correlation
+from skimage.registration import cross_correlation
 from skimage.registration._phase_cross_correlation import _upsampled_dft
 from scipy.ndimage import fourier_shift
 
