@@ -79,6 +79,15 @@ def cross_correlation(arr1, arr2, mask1=None, mask2=None, mode="full",
     .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision
            and Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
+
+    Examples
+    --------
+    >>> from skimage.registration import cross_correlation
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> offset_image = np.zeros(image.shape)
+    >>> offset_image[22:,33:] = image[:-22,:-33]
+    >>> cc = cross_correlation(image,offset_image, normalization="zero_normalized", pad_axes=(0,1))
     """
     if mode not in {'full', 'same'}:
         raise ValueError(f"Correlation mode '{mode}' is not valid.")
