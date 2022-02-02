@@ -197,8 +197,8 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     for deriv_dirs in combinations_with_replacement(idx, 2):
         # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
 
-        deriv_step1 = (idx == deriv_dirs[0]).astype(1)
-        deriv_step2 = (idx == deriv_dirs[1]).astype(1)
+        deriv_step1 = (idx == deriv_dirs[0]).astype(int)
+        deriv_step2 = (idx == deriv_dirs[1]).astype(int)
         # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
         #                                and deriv_step2=[1, 0]
         #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
