@@ -1,6 +1,5 @@
 import math
 from itertools import combinations_with_replacement
-from warnings import warn
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -42,7 +41,7 @@ def _compute_derivatives(image, mode='constant', cval=0):
     return derivatives
 
 
-def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
+def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute structure tensor using sum of squared differences.
 
     The (2-dimensional) structure tensor A is defined as::
@@ -70,11 +69,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'rc', 'xy'}, optional
-        NOTE: Only applies in 2D. Higher dimensions must always use 'rc' order.
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
-        usage of the last axis initially (Axx, Axy, Ayy).
+        NOTE: 'xy' is only an option for 2D images, higher dimensions must
+        always use 'rc' order. This parameter allows for the use of reverse or
+        forward order of the image axes in gradient computation. 'rc' indicates
+        the use of the first axis initially (Arr, Arc, Acc), whilst 'xy'
+        indicates the usage of the last axis initially (Axx, Axy, Ayy).
 
     Returns
     -------
@@ -106,18 +105,10 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     if order == 'xy' and image.ndim > 2:
         raise ValueError('Only "rc" order is supported for dim > 2.')
 
-    if order is None:
-        if image.ndim == 2:
-            # The legacy 2D code followed (x, y) convention, so we swap the
-            # axis order to maintain compatibility with old code
-            warn('deprecation warning: the default order of the structure '
-                 'tensor values will be "row-column" instead of "xy" starting '
-                 'in skimage version 0.20. Use order="rc" or order="xy" to '
-                 'set this explicitly.  (Specify order="xy" to maintain the '
-                 'old behavior.)', category=FutureWarning, stacklevel=2)
-            order = 'xy'
-        else:
-            order = 'rc'
+    if order not in ['rc', 'xy']:
+        raise ValueError(
+            f'order {order} is invalid. Must be either "rc" or "xy"'
+        )
 
     if not np.isscalar(sigma):
         sigma = tuple(sigma)
@@ -483,47 +474,6 @@ def structure_tensor_eigenvalues(A_elems):
     structure_tensor
     """
     return _symmetric_compute_eigenvalues(A_elems)
-
-
-def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute eigenvalues of structure tensor.
-
-    Parameters
-    ----------
-    Axx : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Axy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-    Ayy : ndarray
-        Element of the structure tensor for each pixel in the input image.
-
-    Returns
-    -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
-
-    Examples
-    --------
-    >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
-    >>> square = np.zeros((5, 5))
-    >>> square[2, 2] = 1
-    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]  # doctest: +SKIP
-    array([[0., 0., 0., 0., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 4., 0., 4., 0.],
-           [0., 2., 4., 2., 0.],
-           [0., 0., 0., 0., 0.]])
-
-    """
-    warn('deprecation warning: the function structure_tensor_eigvals is '
-         'deprecated and will be removed in version 0.20. Please use '
-         'structure_tensor_eigenvalues instead.',
-         category=FutureWarning, stacklevel=2)
-
-    return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
 def hessian_matrix_eigvals(H_elems):

@@ -9,8 +9,6 @@ env:
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-  # (currently not avaialable for scipy)
-  CIBW_ARCHS_MACOS: x86_64 # TODO: add arm64 universal2
 
 
 jobs:
@@ -26,14 +24,6 @@ jobs:
         cibw_arch: [ "x86_64", "i686" ]
         include:
           - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: x86_64
-          - os: ubuntu-18.04
-            cibw_python: "cp37-*"
-            cibw_manylinux: manylinux2010
-            cibw_arch: i686
-          - os: ubuntu-18.04
             cibw_python: "cp310-*"
             cibw_manylinux: manylinux2014
             cibw_arch: x86_64
@@ -45,7 +35,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
@@ -58,6 +48,8 @@ jobs:
           CIBW_SKIP: "*-musllinux_*"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
+          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
@@ -70,7 +62,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04]
-        cibw_python: [ "cp37-*", "cp38-*" , "cp39-*" , "cp310-*" ]
+        cibw_python: [ "cp38-*" , "cp39-*" , "cp310-*" ]
         cibw_manylinux: [ manylinux2014 ]
     steps:
       - uses: actions/checkout@v2
@@ -79,7 +71,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -98,20 +90,24 @@ jobs:
           CIBW_ARCHS_LINUX: aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
+          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: ./dist/*.whl
 
   build_macos_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest]
-    env:
-      MACOSX_DEPLOYMENT_TARGET: "10.13"
+        cibw_python: [ "cp38-*", "cp39-*", "cp310-*" ]
+        # TODO: add "universal2" once a universal2 libomp is available
+        cibw_arch: [ "x86_64", "arm64"]
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -120,7 +116,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       - name: Install cibuildwheel
         run: |
@@ -134,21 +130,32 @@ jobs:
           # supported macos version is: High Sierra / 10.13. When upgrading
           # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
           # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+          if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
+              # SciPy requires 12.0 on arm to prevent kernel panics
+              # https://github.com/scipy/scipy/issues/14688
+              # so being conservative, we just do the same here
+              export MACOSX_DEPLOYMENT_TARGET=12.0
+              wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
+          else
+              export MACOSX_DEPLOYMENT_TARGET=10.13
+              wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+          fi
+          echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
           sudo tar -C / -xvjf libomp.tbz2 opt
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp3?-* cp310-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_BUILD: ${{ matrix.cibw_python }}
+          CIBW_ARCHS_MACOS: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
+          CIBW_TEST_SKIP: "*-macosx_arm64"
           # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
           CC: /usr/bin/clang
           CXX: /usr/bin/clang++
           CPPFLAGS: "-Xpreprocessor -fopenmp"
           CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
           CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
+          LDFLAGS: "-Wl,-S -Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
@@ -172,7 +179,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       # install choco package manager
       - uses: crazy-max/ghaction-chocolatey@v1
@@ -200,27 +207,29 @@ jobs:
 
       - name: Build Windows wheels for CPython 3.10
         # NumPy dropped x86 wheels for Python 3.10
-        if: matrix.cibw_arch == 'ARM64'
+        if: matrix.cibw_arch == 'AMD64'
         run: |
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp310-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - name: Build Windows wheels for CPython
         run: |
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp3?-*"
-          CIBW_SKIP: "cp36-*"
+          CIBW_SKIP: "cp36-* cp37-*"
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
 
       - uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: ./dist/*.whl
-
-
 
   deploy:
     name: Release
@@ -234,14 +243,14 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
-      
+          python-version: '3.9'
+
       - name: Install Twine
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements/build.txt
           pip install twine
-      
+
       - uses: actions/download-artifact@v2
         id: download
         with:
@@ -252,9 +261,9 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           python setup.py sdist
-          ls -la ${{ github.workspace }}/dist 
-          # We prefer to release wheels before source because otherwise there is a 
-          # small window during which users who pip install scikit-image will require compilation. 
+          ls -la ${{ github.workspace }}/dist
+          # We prefer to release wheels before source because otherwise there is a
+          # small window during which users who pip install scikit-image will require compilation.
           twine upload ${{ github.workspace }}/dist/*.whl
           twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
         env:

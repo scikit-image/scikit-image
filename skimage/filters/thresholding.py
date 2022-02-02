@@ -171,7 +171,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
-        Method used to determine adaptive threshold for local neighbourhood in
+        Method used to determine adaptive threshold for local neighborhood in
         weighted mean image.
 
         * 'generic': use custom function (see ``param`` parameter)
@@ -191,7 +191,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     param : {int, function}, optional
         Either specify sigma for 'gaussian' method or function object for
         'generic' method. This functions takes the flat array of local
-        neighbourhood as a single argument and returns the calculated
+        neighborhood as a single argument and returns the calculated
         threshold for the centre pixel.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
@@ -753,7 +753,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             mean_fore = np.mean(image[foreground])
             mean_back = np.mean(image[~foreground])
 
-            t_next = ((mean_back - mean_fore) 
+            t_next = ((mean_back - mean_fore)
                       / (np.log(mean_back) - np.log(mean_fore)))
 
             if iter_callback is not None:
@@ -763,7 +763,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
@@ -1016,7 +1017,7 @@ def _mean_std(image, w):
     kernel_values = [(-1) ** (image.ndim % 2 != np.sum(indices) % 2)
                      for indices in kernel_indices]
 
-    total_window_size = np.prod(w)
+    total_window_size = math.prod(w)
     kernel_shape = tuple(_w + 1 for _w in w)
     m = _correlate_sparse(integral, kernel_shape, kernel_indices,
                           kernel_values)

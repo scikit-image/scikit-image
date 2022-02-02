@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from scipy.signal import fftconvolve
 
@@ -140,7 +142,7 @@ def match_template(image, template, pad_input=False, mode='constant',
         image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
     template_mean = template.mean()
-    template_volume = np.prod(template.shape)
+    template_volume = math.prod(template.shape)
     template_ssd = np.sum((template - template_mean) ** 2)
 
     if image.ndim == 2:

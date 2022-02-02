@@ -19,13 +19,6 @@ Version 0.20
   `structure_tensor`.
 * In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
   function.
-* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
-  `skivi.py` in `skimage/io/_plugins`.
-* Remove enrirely the folder skimage/scripts containing skivi app.
-  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
-  setup.py
-* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
 Version 1.0
 -----------

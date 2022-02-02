@@ -43,7 +43,8 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1,
     return out.reshape(out.shape[:2])
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
@@ -102,7 +103,8 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Return the local number (population) of pixels.
@@ -159,7 +161,8 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.

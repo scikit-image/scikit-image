@@ -188,7 +188,8 @@ sphinx_gallery_conf = {
         'repo': 'scikit-image',
         'branch': binder_branch,  # Can be any branch, tag, or commit hash
         'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': '../../.binder/requirements.txt',
+        'dependencies': ['../../.binder/requirements.txt',
+                         '../../.binder/runtime.txt'],
         # Optional keys
         'use_jupyter_lab': False
      },

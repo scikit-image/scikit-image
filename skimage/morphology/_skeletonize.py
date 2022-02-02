@@ -117,7 +117,7 @@ def skeletonize_2d(image):
     removing pixels on object borders. This continues until no
     more pixels can be removed.  The image is correlated with a
     mask that assigns each pixel a number in the range [0...255]
-    corresponding to each possible pattern of its 8 neighbouring
+    corresponding to each possible pattern of its 8 neighboring
     pixels. A look up table is then used to assign the pixels a
     value of 0, 1, 2 or 3, which are selectively removed during
     the iterations.
@@ -254,7 +254,8 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def thin(image, max_num_iter=None):
     """
     Perform morphological thinning of a binary image.
@@ -452,7 +453,7 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
     # (if the number of connected components is different with and
     # without the central pixel)
     # OR
-    # 3. Keep if # pixels in neighbourhood is 2 or less
+    # 3. Keep if # pixels in neighborhood is 2 or less
     # Note that table is independent of image
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
     table = (center_is_foreground  # condition 1.
@@ -478,7 +479,7 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
     # with fewer neighbors are more "cornery" and should be processed last.
     # We use a cornerness_table lookup table where the score of a
     # configuration is the number of background (0-value) pixels in the
-    # 3x3 neighbourhood
+    # 3x3 neighborhood
     cornerness_table = np.array([9 - np.sum(_pattern_of(index))
                                  for index in range(512)])
     corner_score = _table_lookup(masked_image, cornerness_table)

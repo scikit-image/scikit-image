@@ -92,7 +92,7 @@ cdef struct Stage:
 
 cdef vector[Detection] _group_detections(vector[Detection] detections,
                                          cnp.float32_t intersection_score_threshold=0.5,
-                                         int min_neighbour_number=4):
+                                         int min_neighbor_number=4):
     """Group similar detections into a single detection and eliminate weak
     (non-overlapping) detections.
 
@@ -107,7 +107,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
     ----------
     detections : vector[Detection]
         A cluster of detections.
-    min_neighbour_number : int
+    min_neighbor_number : int
         Minimum amount of intersecting detections in order for detection
         to be approved by the function.
     intersection_score_threshold : cnp.float32_t
@@ -172,7 +172,7 @@ cdef vector[Detection] _group_detections(vector[Detection] detections,
                                             clusters[best_cluster_nr],
                                             detections[current_detection_nr])
 
-    clusters = threshold_clusters(clusters, min_neighbour_number)
+    clusters = threshold_clusters(clusters, min_neighbor_number)
     return get_mean_detections(clusters)
 
 
@@ -650,7 +650,7 @@ cdef class Cascade:
 
     def detect_multi_scale(self, img, cnp.float32_t scale_factor,
                            cnp.float32_t step_ratio, min_size, max_size,
-                           min_neighbour_number=4,
+                           min_neighbor_number=4,
                            intersection_score_threshold=0.5):
         """Search for the object on multiple scales of input image.
 
@@ -675,7 +675,7 @@ cdef class Cascade:
             Minimum size of the search window.
         max_size : typle (int, int)
             Maximum size of the search window.
-        min_neighbour_number : int
+        min_neighbor_number : int
             Minimum amount of intersecting detections in order for detection
             to be approved by the function.
         intersection_score_threshold : cnp.float32_t
@@ -781,7 +781,7 @@ cdef class Cascade:
             openmp.omp_destroy_lock(&mylock)
 
         return list(_group_detections(output, intersection_score_threshold,
-                                      min_neighbour_number))
+                                      min_neighbor_number))
 
     def _load_xml(self, xml_file, eps=1e-5):
         """Load the parameters of cascade classifier into the class.

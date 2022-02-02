@@ -96,7 +96,7 @@ def _local_binary_pattern(double[:, ::1] image,
     image : (N, M) double array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of
+        Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
@@ -272,7 +272,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
 
 # Constant values that are used by `_multiblock_lbp` function.
-# Values represent offsets of neighbour rectangles relative to central one.
+# Values represent offsets of neighbor rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
     Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0],

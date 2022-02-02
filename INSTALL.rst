@@ -256,7 +256,7 @@ This directory contains the following files:
     ├── azure-pipelines.yml
     ├── benchmarks
     ├── CODE_OF_CONDUCT.md
-    ├── CONTRIBUTING.txt
+    ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
     ├── doc
     ├── INSTALL.rst
@@ -272,7 +272,6 @@ This directory contains the following files:
     ├── skimage
     ├── TODO.txt
     ├── tools
-    └── viewer_examples
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
@@ -381,13 +380,13 @@ Or tests from a specific file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py
+    pytest skimage/morphology/tests/test_gray.py
 
 Or a single test within that file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
 
 Use ``--doctest-modules`` to run doctests. For example, run all tests and all
 doctests using:
@@ -477,9 +476,6 @@ functionality is only available with the following installed:
 
 * `Astropy <https://www.astropy.org>`__
     Provides FITS I/O capability.
-
-* `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
-    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <https://pyamg.org/>`__
     The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
