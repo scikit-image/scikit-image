@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
-from skimage.morphology import binary, gray
+from skimage.morphology import binary, footprints, gray
 
 
 img = color.rgb2gray(data.astronaut())
@@ -55,6 +55,144 @@ def test_binary_opening():
     binary_res = binary.binary_opening(bw_img, footprint)
     gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
+
+
+def _get_decomp_test_data(function, ndim=2):
+    if function == 'binary_erosion':
+        img = np.ones((17, ) * ndim, dtype=np.uint8)
+        img[8, 8] = 0
+    elif function == 'binary_dilation':
+        img = np.zeros((17, ) * ndim, dtype=np.uint8)
+        img[8, 8] = 1
+    else:
+        img = data.binary_blobs(32, n_dim=ndim, seed=1)
+    return img
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("size", (3, 4, 11))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_square_decomposition(function, size, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.square(size, decomposition=None)
+    footprint = footprints.square(size, decomposition=decomposition)
+    img = _get_decomp_test_data(function)
+    func = getattr(binary, function)
+    expected = func(img, footprint=footprint_ndarray)
+    out = func(img, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("nrows", (3, 4, 11))
+@pytest.mark.parametrize("ncols", (3, 4, 11))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_rectangle_decomposition(function, nrows, ncols, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
+    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
+    img = _get_decomp_test_data(function)
+    func = getattr(binary, function)
+    expected = func(img, footprint=footprint_ndarray)
+    out = func(img, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
+@pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_octagon_decomposition(function, m, n, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    if m == 0 and n == 0:
+        with pytest.raises(ValueError):
+            footprints.octagon(m, n, decomposition=decomposition)
+    else:
+        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
+        footprint = footprints.octagon(m, n, decomposition=decomposition)
+        img = _get_decomp_test_data(function)
+        func = getattr(binary, function)
+        expected = func(img, footprint=footprint_ndarray)
+        out = func(img, footprint=footprint)
+        assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("radius", (1, 2, 5))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_diamond_decomposition(function, radius, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.diamond(radius, decomposition=None)
+    footprint = footprints.diamond(radius, decomposition=decomposition)
+    img = _get_decomp_test_data(function)
+    func = getattr(binary, function)
+    expected = func(img, footprint=footprint_ndarray)
+    out = func(img, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("size", (3, 4, 5))
+@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+def test_cube_decomposition(function, size, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.cube(size, decomposition=None)
+    footprint = footprints.cube(size, decomposition=decomposition)
+    img = _get_decomp_test_data(function, ndim=3)
+    func = getattr(binary, function)
+    expected = func(img, footprint=footprint_ndarray)
+    out = func(img, footprint=footprint)
+    assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize(
+    "function",
+    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+)
+@pytest.mark.parametrize("radius", (1, 2, 3))
+@pytest.mark.parametrize("decomposition", ['sequence'])
+def test_octahedron_decomposition(function, radius, decomposition):
+    """Validate footprint decomposition for various shapes.
+
+    comparison is made to the case without decomposition.
+    """
+    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
+    footprint = footprints.octahedron(radius, decomposition=decomposition)
+    img = _get_decomp_test_data(function, ndim=3)
+    func = getattr(binary, function)
+    expected = func(img, footprint=footprint_ndarray)
+    out = func(img, footprint=footprint)
+    assert_array_equal(expected, out)
 
 
 def test_footprint_overflow():
@@ -129,6 +267,7 @@ def test_3d_fallback_cube_footprint(function):
     new_image = function(image, cube)
     assert_array_equal(new_image, image)
 
+
 def test_2d_ndimage_equivalence():
     image = np.zeros((9, 9), np.uint16)
     image[2:-2, 2:-2] = 2**14
@@ -144,6 +283,7 @@ def test_2d_ndimage_equivalence():
 
     assert_array_equal(bin_opened, ndimage_opened)
     assert_array_equal(bin_closed, ndimage_closed)
+
 
 def test_binary_output_2d():
     image = np.zeros((9, 9), np.uint16)
@@ -164,6 +304,7 @@ def test_binary_output_2d():
 
     assert_equal(int_opened.dtype, np.uint8)
     assert_equal(int_closed.dtype, np.uint8)
+
 
 def test_binary_output_3d():
     image = np.zeros((9, 9, 9), np.uint16)
