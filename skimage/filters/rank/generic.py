@@ -651,7 +651,7 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     References
     ----------
-    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+    .. [1] Gonzalez, R. C. and Woods, R. E. "Digital Image Processing
            (3rd Edition)." Prentice-Hall Inc, 2006.
 
     """
