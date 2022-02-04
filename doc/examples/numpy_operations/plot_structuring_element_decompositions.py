@@ -41,6 +41,7 @@ from skimage.morphology import (ball, cube, diamond, disk, octagon, octahedron,
                                 rectangle, square)
 from skimage.morphology.footprints import footprint_from_sequence
 
+
 # Generate 2D and 3D structuring elements.
 footprint_dict = {
     "square(11) (separable)": (square(11, decomposition=None),
@@ -123,6 +124,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
     if approximate_decomposition:
         ax2.set_title(title1 + '\n(composite)', fontdict=fontdict)
         ax2.set_axis_off()
+
     for n, (fp, num_reps) in enumerate(footprint_sequence):
         npad = [((footprint.shape[d] - fp.shape[d]) // 2, ) * 2
                 for d in range(ndim)]
@@ -141,7 +143,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
         ax.set_xlabel(f'num_reps = {num_reps}')
     fig.tight_layout()
 
-    # draw a line separating the sequence elements from the composite
+    # draw dividing line between seqeuence element plots and composite plot
     line_pos = num_seq / num_subplots
     line = plt.Line2D([line_pos, line_pos], [0, 1], color="black")
     fig.add_artist(line)

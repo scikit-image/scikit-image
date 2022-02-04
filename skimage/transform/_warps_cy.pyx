@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from .._shared.interpolation cimport (nearest_neighbour_interpolation,
+from .._shared.interpolation cimport (nearest_neighbor_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)
@@ -163,7 +163,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
                              np_floats, np_floats, char, np_floats,
                              np_floats*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation[np_floats, np_floats,
+        interp_func = nearest_neighbor_interpolation[np_floats, np_floats,
                                                       np_floats]
     elif order == 1:
         interp_func = bilinear_interpolation[np_floats, np_floats, np_floats]

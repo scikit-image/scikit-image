@@ -248,9 +248,7 @@ if __name__ == "__main__":
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=False,
         zip_safe=False,  # the package can run out of an .egg file
-        entry_points={
-            'console_scripts': ['skivi = skimage.scripts.skivi:main'],
-        },
+        entry_points={},
         cmdclass=cmdclass,
         **extra
     )

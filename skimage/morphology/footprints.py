@@ -97,6 +97,82 @@ def footprint_from_sequence(footprints):
     return morphology.binary_dilation(imag, footprints)
 
 
+def _footprint_is_sequence(footprint):
+    if hasattr(footprint, '__array_interface__'):
+        return False
+
+    def _validate_sequence_element(t):
+        return (
+            isinstance(t, Sequence)
+            and len(t) == 2
+            and hasattr(t[0], '__array_interface__')
+            and isinstance(t[1], Integral)
+        )
+
+    if isinstance(footprint, Sequence):
+        if not all(_validate_sequence_element(t) for t in footprint):
+            raise ValueError(
+                "All elements of footprint sequence must be a 2-tuple where "
+                "the first element of the tuple is an ndarray and the second "
+                "is an integer indicating the number of iterations."
+            )
+    else:
+        raise ValueError("footprint must be either an ndarray or Sequence")
+    return True
+
+
+def _shape_from_sequence(footprints, require_odd_size=False):
+    """Determine the shape of composite footprint
+
+    In the future if we only want to support odd-sized square, we may want to
+    change this to require_odd_size
+    """
+    if not _footprint_is_sequence(footprints):
+        raise ValueError("expected a sequence of footprints")
+    ndim = footprints[0][0].ndim
+    shape = [0] * ndim
+
+    def _odd_size(size, require_odd_size):
+        if require_odd_size and size % 2 == 0:
+            raise ValueError(
+                "expected all footprint elements to have odd size"
+            )
+
+    for d in range(ndim):
+        fp, nreps = footprints[0]
+        _odd_size(fp.shape[d], require_odd_size)
+        shape[d] = fp.shape[d] + (nreps - 1) * (fp.shape[d] - 1)
+        for fp, nreps in footprints[1:]:
+            _odd_size(fp.shape[d], require_odd_size)
+            shape[d] += nreps * (fp.shape[d] - 1)
+    return tuple(shape)
+
+
+def footprint_from_sequence(footprints):
+    """Convert a footprint sequence into an equivalent ndarray.
+
+    Parameters
+    ----------
+    footprints : tuple of 2-tuples
+        A sequence of footprint tuples where the first element of each tuple
+        is an array corresponding to a footprint and the second element is the
+        number of times it is to be applied. Currently all footprints should
+        have odd size.
+
+    Returns
+    -------
+    footprint : ndarray
+        An single array equivalent to applying the sequence of `footprints`.
+    """
+    from skimage.morphology import binary_dilation
+
+    # Create a single pixel image of sufficient size and apply binary dilation.
+    shape = _shape_from_sequence(footprints)
+    imag = np.zeros(shape, dtype=bool)
+    imag[tuple(s // 2 for s in shape)] = 1
+    return binary_dilation(imag, footprints)
+
+
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
