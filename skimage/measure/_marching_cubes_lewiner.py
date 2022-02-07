@@ -4,7 +4,6 @@ import numpy as np
 
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
-from ._marching_cubes_classic import _marching_cubes_classic
 
 
 def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
@@ -43,11 +42,8 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    method: str, optional
-        One of 'lewiner', 'lorensen' or '_lorensen'. Specify which of
-        Lewiner et al. or Lorensen et al. method will be used. The
-        '_lorensen' flag correspond to an old implementation that will
-        be deprecated in version 0.19.
+    method: {'lewiner', 'lorensen'}, optional
+        Whether the method of Lewiner et al. or Lorensen et al. will be  used.
     mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on
         True elements. This will save computational time when interfaces
@@ -126,30 +122,17 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
            :DOI:`10.1145/37401.37422`
-
     """
+    use_classic = False
+    if method == 'lorensen':
+        use_classic = True
+    elif method != 'lewiner':
+        raise ValueError("method should be either 'lewiner' or 'lorensen'")
+    return _marching_cubes_lewiner(volume, level, spacing,
+                                   gradient_direction, step_size,
+                                   allow_degenerate, use_classic=use_classic,
+                                   mask=mask)
 
-    if method == 'lewiner':
-        return _marching_cubes_lewiner(volume, level, spacing,
-                                       gradient_direction, step_size,
-                                       allow_degenerate, use_classic=False,
-                                       mask=mask)
-    elif method == 'lorensen':
-        return _marching_cubes_lewiner(volume, level, spacing,
-                                       gradient_direction, step_size,
-                                       allow_degenerate, use_classic=True,
-                                       mask=mask)
-    elif method == '_lorensen':
-        if mask is not None:
-            raise NotImplementedError(
-                'Parameter `mask` is not implemented for method "_lorensen" '
-                'and will be ignored.'
-            )
-        return _marching_cubes_classic(volume, level, spacing,
-                                       gradient_direction)
-    else:
-        raise ValueError("method should be one of 'lewiner', 'lorensen' or "
-                         "'_lorensen'.")
 
 
 def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
@@ -272,3 +255,45 @@ def _get_mc_luts():
                 )
 
     return mcluts.THE_LUTS
+
+
+def mesh_surface_area(verts, faces):
+    """
+    Compute surface area, given vertices & triangular faces
+
+    Parameters
+    ----------
+    verts : (V, 3) array of floats
+        Array containing (x, y, z) coordinates for V unique mesh vertices.
+    faces : (F, 3) array of ints
+        List of length-3 lists of integers, referencing vertex coordinates as
+        provided in `verts`
+
+    Returns
+    -------
+    area : float
+        Surface area of mesh. Units now [coordinate units] ** 2.
+
+    Notes
+    -----
+    The arguments expected by this function are the first two outputs from
+    `skimage.measure.marching_cubes`. For unit correct output, ensure correct
+    `spacing` was passed to `skimage.measure.marching_cubes`.
+
+    This algorithm works properly only if the ``faces`` provided are all
+    triangles.
+
+    See Also
+    --------
+    skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
+
+    """
+    # Fancy indexing to define two vector arrays from triangle vertices
+    actual_verts = verts[faces]
+    a = actual_verts[:, 0, :] - actual_verts[:, 1, :]
+    b = actual_verts[:, 0, :] - actual_verts[:, 2, :]
+    del actual_verts
+
+    # Area of triangle in 3D = 1/2 * Euclidean norm of cross product
+    return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.
