@@ -249,9 +249,6 @@ if __name__ == "__main__":
         package_data={
             # distribute Cython source files in the wheel
             "": ["*.pyx", "*.pxd", "*.pxi", ""],
-            # distribute data required by the tests
-            "color": ["tests/data/*.npy"],
-            "registration": ["tests/data/*.png"],
             # tests dirs have an __init__.py so are automatically included
         },
         include_package_data=False,
