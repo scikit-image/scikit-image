@@ -63,7 +63,8 @@ def test_invalid_input():
     with pytest.raises(ValueError):
         marching_cubes(np.zeros((2, 2, 1)), 1, method='lorensen')
     with pytest.raises(ValueError):
-        marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2), method='lorensen')
+        marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2),
+                       method='lorensen')
     with pytest.raises(ValueError):
         marching_cubes(np.zeros((20, 20)), 0, method='lorensen')
 
