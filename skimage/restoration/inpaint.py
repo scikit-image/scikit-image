@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
-from scipy.ndimage.filters import laplace
+from scipy.ndimage import laplace
 
 import skimage
 from .._shared import utils
