@@ -480,7 +480,6 @@ cpdef votes2rings(cnp.uint32_t [:] votes,
                 rij = rij_nxt
         else:
             # smooth the R plane of the Hough space.
-            # TODO consider generating the gaussian kernel as a table a priori
             # (as a class attribute for many images analysis)
             ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
