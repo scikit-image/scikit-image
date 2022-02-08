@@ -230,7 +230,7 @@ class CENSURE(FeatureDetector):
 
         # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on
         # the filter_response to suppress points that are neither minima or
-        # maxima in 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray
+        # maxima in 3 x 3 x 3 neighborhood. We obtain a boolean ndarray
         # `feature_mask` containing all the minimas and maximas in
         # `filter_response` as True.
         # (3) Then we suppress all the points in the `feature_mask` for which
