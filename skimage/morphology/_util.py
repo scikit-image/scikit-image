@@ -207,7 +207,8 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     return raveled_offsets
 
 
-def _resolve_neighborhood(footprint, connectivity, ndim):
+def _resolve_neighborhood(footprint, connectivity, ndim,
+                          enforce_adjacency=True):
     """Validate or create a footprint (structuring element).
 
     Depending on the values of `connectivity` and `footprint` this function
@@ -229,6 +230,9 @@ def _resolve_neighborhood(footprint, connectivity, ndim):
         `footprint` is not None.
     ndim : int
         Number of dimensions `footprint` ought to have.
+    enforce_adjacency : bool
+        A boolean that determines whether footprint must only specify direct
+        neighbors.
 
     Returns
     -------
@@ -258,7 +262,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim):
                 "match"
             )
         # Must only specify direct neighbors
-        if any(s != 3 for s in footprint.shape):
+        if enforce_adjacency and any(s != 3 for s in footprint.shape):
             raise ValueError("dimension size in footprint is not 3")
 
     return footprint
