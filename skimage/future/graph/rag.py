@@ -403,7 +403,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
-        `scipy.ndimage.filters.generate_binary_structure`.
+        `scipy.ndimage.generate_binary_structure`.
 
     Examples
     --------
