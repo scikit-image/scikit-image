@@ -388,7 +388,7 @@ intersphinx_mapping = {
     'python': (_python_doc_base, None),
     'numpy': ('https://numpy.org/doc/stable',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/',
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
