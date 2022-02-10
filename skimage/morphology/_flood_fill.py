@@ -7,6 +7,7 @@ connected to a given seed point with a different value.
 import numpy as np
 
 from .._shared.utils import deprecate_kwarg
+from ..util import crop
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
                     _set_border_values,)
@@ -232,27 +233,29 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
 
     footprint = _resolve_neighborhood(
         footprint, connectivity, image.ndim, enforce_adjacency=False)
-    center = np.array(footprint.shape) // 2
-
-    # Compute pad count as the maximum offset to neighbors across all axes.
-    neighbor_indices = np.array(np.nonzero(footprint)).T
-    neighbor_coordinate_offsets = np.ravel(neighbor_indices - center)
-    pad_count = np.max(np.abs(neighbor_coordinate_offsets))
+    center = tuple(s // 2 for s in footprint.shape)
+    # Compute padding width as the maximum offset to neighbors on each axis.
+    # Generates a 2-tuple of (pad_start, pad_end) for each axis.
+    pad_width = [(np.max(np.abs(idx - c)),) * 2
+                 for idx, c in zip(np.nonzero(footprint), center)]
 
     # Must annotate borders
-    working_image = np.pad(image, pad_count, mode='constant',
+    working_image = np.pad(image, pad_width, mode='constant',
                            constant_values=image.min())
-
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index(
-        [i + pad_count for i in seed_point], working_image.shape, order=order)
+        [i + pad_start
+         for i, (pad_start, pad_end) in zip(seed_point, pad_width)],
+        working_image.shape,
+        order=order
+    )
     neighbor_offsets = _offsets_to_raveled_neighbors(
         working_image.shape, footprint, center=center,
         order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
-    flags = np.zeros(image.shape, dtype=np.uint8, order=order)
-    flags = np.pad(flags, pad_count, constant_values=2)
+    flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)
+    _set_border_values(flags, value=2, border_width=pad_width)
 
     try:
         if tolerance is not None:
@@ -289,4 +292,4 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
             raise
 
     # Output what the user requested; view does not create a new copy.
-    return flags[(slice(pad_count, -pad_count),) * image.ndim].view(bool)
+    return crop(flags, pad_width, copy=False).view(bool)
