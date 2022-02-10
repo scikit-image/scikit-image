@@ -121,15 +121,16 @@ def _raveled_offsets_and_distances(
                 rank=ndim, connectivity=connectivity
                 )
     if center is None:
-        center = np.array(footprint.shape) // 2
+        center = tuple(s // 2 for s in footprint.shape)
+
     if not footprint.ndim == ndim == len(center):
         raise ValueError(
-                "number of dimensions in image shape, footprint and its"
-                "center index does not match"
-                )
+            "number of dimensions in image shape, footprint and its"
+            "center index does not match")
 
-    footprint_indices = np.stack(np.nonzero(footprint), axis=-1)
-    offsets = footprint_indices - center
+    offsets = np.stack([(idx - c)
+                        for idx, c in zip(np.nonzero(footprint), center)],
+                       axis=-1)
 
     if order == 'F':
         offsets = offsets[:, ::-1]
@@ -268,7 +269,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim,
     return footprint
 
 
-def _set_border_values(image, value):
+def _set_border_values(image, value, border_width=1):
     """Set edge values along all axes to a constant value.
 
     Parameters
@@ -277,6 +278,11 @@ def _set_border_values(image, value):
         The array to modify inplace.
     value : scalar
         The value to use. Should be compatible with `image`'s dtype.
+    border_width : int or sequence of tuples
+        A sequence with one 2-tuple per axis where the first and second values
+        are the width of the border at the start and end of the axis,
+        respectively. If an int is provided, a uniform border width along all
+        axes is used.
 
     Examples
     --------
@@ -287,8 +293,39 @@ def _set_border_values(image, value):
            [1, 0, 0, 0, 1],
            [1, 0, 0, 0, 1],
            [1, 1, 1, 1, 1]])
+    >>> image = np.zeros((8, 8), dtype=int)
+    >>> _set_border_values(image, 1, border_width=((1, 1), (2, 3)))
+    >>> image
+    array([[1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 0, 0, 0, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1]])
     """
-    for axis in range(image.ndim):
-        # Index first and last element in each dimension
-        sl = (slice(None),) * axis + ((0, -1),) + (...,)
-        image[sl] = value
+    if np.isscalar(border_width):
+        border_width = ((border_width, border_width),) * image.ndim
+    elif len(border_width) != image.ndim:
+        raise ValueError('length of `border_width` must match image.ndim')
+    for axis, npad in enumerate(border_width):
+        if len(npad) != 2:
+            raise ValueError('each sequence in `border_width` must have '
+                             'length 2')
+        w_start, w_end = npad
+        if w_start == w_end == 0:
+            continue
+        elif w_start == w_end == 1:
+            # Index first and last element in the current dimension
+            sl = (slice(None),) * axis + ((0, -1),) + (...,)
+            image[sl] = value
+            continue
+        if w_start > 0:
+            # set first w_start entries along axis to value
+            sl = (slice(None),) * axis + (slice(0, w_start),) + (...,)
+            image[sl] = value
+        if w_end > 0:
+            # set last w_end entries along axis to value
+            sl = (slice(None),) * axis + (slice(-w_end, None),) + (...,)
+            image[sl] = value
