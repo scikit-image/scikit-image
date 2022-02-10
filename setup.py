@@ -247,6 +247,11 @@ if __name__ == "__main__":
         extras_require=extras_require,
         python_requires='>=3.7',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
+        package_data={
+            # distribute Cython source files in the wheel
+            "": ["*.pyx", "*.pxd", "*.pxi", ""],
+            # tests dirs have an __init__.py so are automatically included
+        },
         include_package_data=False,
         zip_safe=False,  # the package can run out of an .egg file
         entry_points={
