@@ -12,6 +12,11 @@ coverage:
         # Having this threshold set a little higher (0.1%) than that makes it 
         # a little more tolerant to fluctuations
         threshold: 0.1%
+    patch:
+      default:
+        threshold: 0.1%
+        # Only post a patch to PR
+        only_pulls: true
 
 # Disable PR comment
 comment: off
