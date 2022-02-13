@@ -554,7 +554,7 @@ def test_start_label_fix():
     img = filters.gaussian(img, sigma=1)
 
     start_label = 1
-    superp = slic(img, start_label=start_label, multichannel=False,
+    superp = slic(img, start_label=start_label, channel_axis=None,
                   n_segments=6, compactness=0.01, enforce_connectivity=True,
                   max_num_iter=10)
     assert superp.min() == start_label
