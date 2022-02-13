@@ -145,7 +145,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
         desc = [f'Deprecated in favor of `{new_arg}`.',
-                f'',
+                '',
                 f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg,
@@ -668,8 +668,8 @@ def _validate_interpolation_order(image_dtype, order):
     if image_dtype == bool and order != 0:
         raise ValueError(
             "Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type.")
+            "with bool data type. Please set order to 0 or explicitely "
+            "cast input image to another data type.")
 
     return order
 
@@ -753,6 +753,7 @@ def _supported_float_type(input_dtype, allow_complex=False):
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
     return image
+
 
 def is_binary_ndarray(mask):
     mask = np.asarray(mask)

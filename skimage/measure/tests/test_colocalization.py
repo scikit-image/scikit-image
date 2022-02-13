@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from skimage.measure import (pearson_corr_coeff, manders_coloc_coeff,
-                              manders_overlap_coeff, intersection_coeff)
+                             manders_overlap_coeff, intersection_coeff)
 
 
 def test_invalid_input():
@@ -17,7 +17,7 @@ def test_invalid_input():
         pearson_corr_coeff(img1, img2)
     with pytest.raises(ValueError):
         pearson_corr_coeff(img1, img1, mask)
-    with pytest.raises(Warning):###
+    with pytest.raises(Warning):
         pearson_corr_coeff(img1, img1, non_binary_mask)
     with pytest.raises(ValueError):
         manders_coloc_coeff(img1, mask)
