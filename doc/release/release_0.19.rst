@@ -3,7 +3,7 @@ scikit-image 0.19.2
 
 We're happy to announce the release of scikit-image v0.19.2! This is primarily
 a bug fix release, although there is one new gallery example related to
-detection of flourescence at the nuclear envelope.
+detection of fluorescence at the nuclear envelope of mammalian cells.
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
