@@ -1,3 +1,68 @@
+scikit-image 0.19.2
+===================
+
+We're happy to announce the release of scikit-image v0.19.2! This is primarily
+a bug fix release, although there is one new gallery example related to
+detection of flourescence at the nuclear envelope.
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+Pull Requests Included
+----------------------
+- fix mistake in tests.yml made during backport (gh-6129)
+- Backport PR #6145 on branch v0.19.x (Fix channel_axis handling in pyramid_gaussian and pyramid_laplace) (gh-6155)
+- Backport PR #6130 on branch v0.19.x (bump deprecated Azure windows environment) (gh-6131)
+- Backport PR #6148 on branch v0.19.x (deprecate n_iter_max (should be max_num_iter)) (gh-6156)
+- Backport PR #6152 on branch v0.19.x (specify python version used by mybinder.org for gallery demos) (gh-6157)
+- Backport PR #6139 on branch v0.19.x (fix phase_cross_correlation typo) (gh-6158)
+- Backport PR #6133 on branch v0.19.x (Update user warning message for viewer module.) (gh-6159)
+- Backport PR #6169 on branch v0.19.x (Fix unintended change to output dtype of match_histograms) (gh-6172)
+- Backport PR #6184 on branch v0.19.x (Fix SIFT wrong octave indices + typo) (gh-6186)
+- Backport PR #6191 on branch v0.19.x (Fix issue6190 - inconsistent default parameters in pyramids.py) (gh-6193)
+- Backport PR #6207 on branch v0.19.x (Always set params to nan when ProjectiveTransform.estimate fails) (gh-6210)
+- Backport PR #5262 on branch v0.19.x (Add textbook-like tutorial on measuring fluorescence at nuclear envelope.) (gh-6213)
+- Backport PR #6087 on branch v0.19.x (Add two datasets for use in upcoming scientific tutorials.) (gh-6215)
+- Backport PR #6214 on branch v0.19.x (EuclideanTransform.estimate should return False when NaNs are present) (gh-6221)
+- Backport PR #6219 on branch v0.19.x (Allow the output_shape argument to be any iterable for resize and resize_local_mean) (gh-6222)
+- Backport PR #6223 on branch v0.19.x (Update filename in testing instructions.) (gh-6225)
+- Backport PR #6231 on branch v0.19.x (Update imports/refs from deprecated scipy.ndimage.filters namespace) (gh-6233)
+- Backport PR #6229 on branch v0.19.x (Remove redundant testing on Appveyor) (gh-6234)
+- Backport PR #6183 on branch v0.19.x (Fix decorators warnings stacklevel) (gh-6238)
+- Backport PR #6239 on branch v0.19.x (DOC: fix SciPy intersphinx) (gh-6241)
+- Backport PR #6232 on branch v0.19.x (Include Cython sources via package_data) (gh-6244)
+- Backport PR #6227 on branch v0.19.x (Fix calculation of Z normal in marching cubes) (gh-6245)
+- Backport PR #6242 on branch v0.19.x (Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0`) (gh-6246)
+- Backport PR #6211 on branch v0.19.x (PiecewiseAffineTransform.estimate return should reflect underlying transforms) gh-6247
+
+8 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Chris Roat
+- Fabian Schneider
+- Gregory Lee
+- Hande Gözükan
+- Larry Bradley
+- Mark Harfouche
+- Miles Lucas
+- Riadh Fezzani
+
+8 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory Lee
+- Juan Nunez-Iglesias
+- Marianne Corvellec
+- Mark Harfouche
+- Riadh Fezzani
+- Robert Haase
+- Stefan van der Walt
+
+
 scikit-image 0.19.1
 ===================
 
