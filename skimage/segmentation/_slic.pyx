@@ -302,7 +302,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                         continue
 
                     # find the component size
-                    adjacent = 0
+                    adjacent = current_new_label
                     label = segments[z, y, x]
                     connected_segments[z, y, x] = current_new_label
                     current_segment_size = 1
