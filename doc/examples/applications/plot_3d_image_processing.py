@@ -47,6 +47,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 from scipy import ndimage as ndi
 
+import plotly
 import plotly.express as px
 from skimage import (
     exposure, util
@@ -332,6 +333,6 @@ fig.update_layout(
 )
 # Drop animation buttons
 fig['layout'].pop('updatemenus')
-fig.show()
+plotly.io.show(fig)
 
 plt.show()
