@@ -138,13 +138,13 @@ registry = {
     "data/diamond-matlab-output.npz": "02fca68907e2b252b501dfe977eef71ae39fadaaa3702ebdc855195422ae1cc2",
     "data/bw_text.png": "308c2b09f8975a69b212e103b18520e8cbb7a4eccfce0f757836cd371f1b9094",
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
-    "data/_blobs_3d_fiji_skeleton.tif": "5182a2a94f240528985b8d15ec2aebbd5ca3c6b9214beff1eb6099c431e12b7b",
+    "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
     "restoration/tests/astronaut_rl.npy":
         "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
-    "restoration/tests/camera_unsup.npy": "401e512f7becec46c3379f34dbd7956a02a4f2e68f802a8d5bd605d355588880",
-    "restoration/tests/camera_unsup2.npy": "cc4b31ea2a6ebe07bc7529174677b3e94eae4b7679fd822d3e721a9c8d4854d1",
+    "restoration/tests/camera_unsup.npy": "3de10a0b97267352b18886b25d66a967f9e1d78ada61050577d78586cab82baa",
+    "restoration/tests/camera_unsup2.npy": "29cdc60605eb528c5f014baa8564d7d1ba0bd4b3170a66522058cbe5aed0960b",
     "restoration/tests/camera_wiener.npy": "4505ea8b0d63d03250c6d756560d615751b76dd6ffc4a95972fa260c0c84633e",
     "registration/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
     "registration/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
@@ -160,6 +160,8 @@ registry = {
     "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
     "data/pivchallenge-B-B001_1.tif": "e95e09abbcecba723df283ac7d361766328abd943701a2ec2f345d4a2014da2a",
     "data/pivchallenge-B-B001_2.tif": "4ceb5407e4e333476a0f264c14b7a3f6c0e753fcdc99ee1c4b8196e5f823805e",
+    "data/protein_transport.tif": "a8e24e8d187f33e92ee28508d5615286c850ca75374af7e74e527d290e8b06ea",
+    "data/solidification.tif": "50ef9a52c621b7c0c506ad1fe1b8ee8a158a4d7c8e50ddfce1e273a422dca3f9",
 }
 
 registry_urls = {
@@ -173,6 +175,8 @@ registry_urls = {
     "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/master/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
     "data/pivchallenge-B-B001_1.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_1.tif",
     "data/pivchallenge-B-B001_2.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_2.tif",
+    "data/protein_transport.tif": "https://gitlab.com/scikit-image/data/-/raw/master/NPCsingleNucleus.tif",
+    "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/master/nickel_solidification.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
 }
 

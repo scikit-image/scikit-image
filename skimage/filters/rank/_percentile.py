@@ -22,8 +22,7 @@ References
 
 """
 
-from ..._shared.utils import check_nD
-
+from ..._shared.utils import check_nD, deprecate_kwarg
 from . import percentile_cy
 from .generic import _preprocess_input
 
@@ -33,19 +32,22 @@ __all__ = ['autolevel_percentile', 'gradient_percentile',
            'threshold_percentile']
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
+def _apply(func, image, footprint, out, mask, shift_x, shift_y, p0, p1,
            out_dtype=None):
     check_nD(image, 2)
-    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
-                                                    out_dtype)
+    image, footprint, out, mask, n_bins = _preprocess_input(
+        image, footprint, out, mask, out_dtype
+    )
 
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins, p0=p0, p1=p1)
 
     return out.reshape(out.shape[:2])
 
 
-def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def autolevel_percentile(image, footprint, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0, p1=1):
     """Return grayscale local autolevel of an image.
 
@@ -58,7 +60,7 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -66,9 +68,8 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -81,11 +82,13 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._autolevel,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
                         shift_y=False, p0=0, p1=1):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -95,7 +98,7 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -103,9 +106,8 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -118,11 +120,13 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._gradient,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
     """Return local mean of an image.
 
@@ -132,7 +136,7 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -140,9 +144,8 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -155,11 +158,13 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._mean,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def subtract_mean_percentile(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def subtract_mean_percentile(image, footprint, out=None, mask=None,
                              shift_x=False, shift_y=False, p0=0, p1=1):
     """Return image subtracted from its local mean.
 
@@ -169,7 +174,7 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -177,9 +182,8 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -192,11 +196,13 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
     """
 
     return _apply(percentile_cy._subtract_mean,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def enhance_contrast_percentile(image, selem, out=None, mask=None,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def enhance_contrast_percentile(image, footprint, out=None, mask=None,
                                 shift_x=False, shift_y=False, p0=0, p1=1):
     """Enhance contrast of an image.
 
@@ -210,7 +216,7 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -218,9 +224,8 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -233,12 +238,14 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
     """
 
     return _apply(percentile_cy._enhance_contrast,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
-               p0=0):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def percentile(image, footprint, out=None, mask=None, shift_x=False,
+               shift_y=False, p0=0):
     """Return local percentile of an image.
 
     Returns the value of the p0 lower percentile of the local grayvalue
@@ -250,7 +257,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -258,9 +265,8 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
@@ -272,16 +278,18 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
     """
 
     return _apply(percentile_cy._percentile,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=0.)
 
 
-def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
-    in the structuring element and the mask.
+    in the footprint and the mask.
 
     Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
@@ -289,7 +297,7 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -297,9 +305,8 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -312,11 +319,13 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._pop,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def sum_percentile(image, footprint, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local sum of pixels.
 
@@ -329,7 +338,7 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -337,9 +346,8 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0, p1 : float in [0, ..., 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
@@ -352,11 +360,13 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._sum,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def threshold_percentile(image, footprint, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
     """Local threshold of an image.
 
@@ -369,7 +379,7 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    selem : 2-D array
+    footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (same dtype as input)
         If None, a new array is allocated.
@@ -377,9 +387,8 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
-        Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element).
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
@@ -391,5 +400,5 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(percentile_cy._threshold,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=0)

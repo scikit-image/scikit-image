@@ -1,9 +1,9 @@
 import numpy as np
-from skimage.segmentation import find_boundaries, mark_boundaries
+import pytest
+from numpy.testing import assert_array_equal, assert_allclose
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_allclose
 from skimage._shared.utils import _supported_float_type
+from skimage.segmentation import find_boundaries, mark_boundaries
 
 
 white = (1, 1, 1)
@@ -41,7 +41,9 @@ def test_find_boundaries_bool():
     assert_array_equal(result, ref)
 
 
-@testing.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
 def test_mark_boundaries(dtype):
     image = np.zeros((10, 10), dtype=dtype)
     label_image = np.zeros((10, 10), dtype=np.uint8)
@@ -100,7 +102,7 @@ def test_mark_boundaries_bool():
     assert_array_equal(result, ref)
 
 
-@testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_mark_boundaries_subpixel(dtype):
     labels = np.array([[0, 0, 0, 0],
                        [0, 0, 5, 0],
@@ -125,3 +127,11 @@ def test_mark_boundaries_subpixel(dtype):
          [ 0.2 ,  0.52,  0.92,  1.  ,  1.  ,  1.  ,  0.54],
          [ 0.02,  0.35,  0.83,  0.9 ,  0.78,  0.81,  0.87]])
     assert_allclose(marked_proj, ref_result, atol=0.01)
+
+
+@pytest.mark.parametrize('mode', ['thick', 'inner', 'outer', 'subpixel'])
+def test_boundaries_constant_image(mode):
+    """A constant-valued image has not boundaries."""
+    ones = np.ones((8, 8), dtype=int)
+    b = find_boundaries(ones, mode=mode)
+    assert np.all(b == 0)

@@ -2,11 +2,12 @@ import math
 import unittest
 
 import numpy as np
+import pytest
 from numpy.testing import assert_equal
 from pytest import raises, warns
 
-from skimage.morphology import extrema
 from skimage._shared.testing import expected_warnings
+from skimage.morphology import extrema
 
 
 eps = 1e-12
@@ -19,7 +20,7 @@ def diff(a, b):
     return math.sqrt(t)
 
 
-class TestExtrema(unittest.TestCase):
+class TestExtrema():
 
     def test_saturated_arithmetic(self):
         """Adding/subtracting a constant and clipping"""
@@ -405,45 +406,47 @@ class TestLocalMaxima(unittest.TestCase):
             assert_equal(result, expected)
 
     def test_connectivity(self):
-        """Test results if selem is a scalar."""
-        # Connectivity 1: generates cross shaped structuring element
+        """Test results if footprint is a scalar."""
+        # Connectivity 1: generates cross shaped footprint
         result_conn1 = extrema.local_maxima(self.image, connectivity=1)
         assert result_conn1.dtype == bool
         assert_equal(result_conn1, self.expected_cross)
 
-        # Connectivity 2: generates square shaped structuring element
+        # Connectivity 2: generates square shaped footprint
         result_conn2 = extrema.local_maxima(self.image, connectivity=2)
         assert result_conn2.dtype == bool
         assert_equal(result_conn2, self.expected_default)
 
-        # Connectivity 3: generates square shaped structuring element
+        # Connectivity 3: generates square shaped footprint
         result_conn3 = extrema.local_maxima(self.image, connectivity=3)
         assert result_conn3.dtype == bool
         assert_equal(result_conn3, self.expected_default)
 
-    def test_selem(self):
-        """Test results if selem is given."""
-        selem_cross = np.array(
+    def test_footprint(self):
+        """Test results if footprint is given."""
+        footprint_cross = np.array(
             [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=bool)
-        result_selem_cross = extrema.local_maxima(
-            self.image, selem=selem_cross)
-        assert result_selem_cross.dtype == bool
-        assert_equal(result_selem_cross, self.expected_cross)
+        result_footprint_cross = extrema.local_maxima(
+            self.image, footprint=footprint_cross)
+        assert result_footprint_cross.dtype == bool
+        assert_equal(result_footprint_cross, self.expected_cross)
 
-        for selem in [
+        for footprint in [
             ((True,) * 3,) * 3,
             np.ones((3, 3), dtype=np.float64),
             np.ones((3, 3), dtype=np.uint8),
             np.ones((3, 3), dtype=bool),
         ]:
-            # Test different dtypes for selem which expects a boolean array but
-            # will accept and convert other types if possible
-            result_selem_square = extrema.local_maxima(self.image, selem=selem)
-            assert result_selem_square.dtype == bool
-            assert_equal(result_selem_square, self.expected_default)
+            # Test different dtypes for footprint which expects a boolean array
+            # but will accept and convert other types if possible
+            result_footprint_square = extrema.local_maxima(
+                self.image, footprint=footprint
+            )
+            assert result_footprint_square.dtype == bool
+            assert_equal(result_footprint_square, self.expected_default)
 
-        selem_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]], dtype=bool)
-        expected_selem_x = np.array(
+        footprint_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]], dtype=bool)
+        expected_footprint_x = np.array(
             [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
              [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -452,9 +455,10 @@ class TestLocalMaxima(unittest.TestCase):
              [0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]],
             dtype=bool
         )
-        result_selem_x = extrema.local_maxima(self.image, selem=selem_x)
-        assert result_selem_x.dtype == bool
-        assert_equal(result_selem_x, expected_selem_x)
+        result_footprint_x = extrema.local_maxima(self.image,
+                                                  footprint=footprint_x)
+        assert result_footprint_x.dtype == bool
+        assert_equal(result_footprint_x, expected_footprint_x)
 
     def test_indices(self):
         """Test output if indices of peaks are desired."""
@@ -590,18 +594,18 @@ class TestLocalMaxima(unittest.TestCase):
         # Mismatching number of dimensions
         with raises(ValueError, match="number of dimensions"):
             extrema.local_maxima(
-                self.image, selem=np.ones((3, 3, 3), dtype=bool))
+                self.image, footprint=np.ones((3, 3, 3), dtype=bool))
         with raises(ValueError, match="number of dimensions"):
             extrema.local_maxima(
-                self.image, selem=np.ones((3,), dtype=bool))
+                self.image, footprint=np.ones((3,), dtype=bool))
 
-        # All dimensions in selem must be of size 3
+        # All dimensions in footprint must be of size 3
         with raises(ValueError, match="dimension size"):
             extrema.local_maxima(
-                self.image, selem=np.ones((2, 3), dtype=bool))
+                self.image, footprint=np.ones((2, 3), dtype=bool))
         with raises(ValueError, match="dimension size"):
             extrema.local_maxima(
-                self.image, selem=np.ones((5, 5), dtype=bool))
+                self.image, footprint=np.ones((5, 5), dtype=bool))
 
         with raises(TypeError, match="float16 which is not supported"):
             extrema.local_maxima(np.empty(1, dtype=np.float16))
@@ -610,7 +614,7 @@ class TestLocalMaxima(unittest.TestCase):
         """Test output for arrays with dimension smaller 3.
 
         If any dimension of an array is smaller than 3 and `allow_borders` is
-        false a structuring element, which has at least 3 elements in each
+        false a footprint, which has at least 3 elements in each
         dimension, can't be applied. This is an implementation detail so
         `local_maxima` should still return valid output (see gh-3261).
 
@@ -634,5 +638,12 @@ class TestLocalMaxima(unittest.TestCase):
         assert result[1].dtype == np.intp
 
 
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+@pytest.mark.parametrize(
+    'function',
+    ['local_maxima', 'local_minima', 'h_minima', 'h_maxima']
+)
+def test_selem_kwarg_deprecation(function):
+    img = np.zeros((16, 16))
+    args = (20,) if function.startswith('h_') else ()
+    with expected_warnings(["`selem` is a deprecated argument name"]):
+        getattr(extrema, function)(img, *args, selem=np.ones((3, 3)))

@@ -1,7 +1,6 @@
 import numpy as np
 
 from ..._shared.testing import assert_equal, assert_almost_equal
-from ..._shared._warnings import expected_warnings
 from ..profile import profile_line
 
 image = np.arange(100).reshape((10, 10)).astype(float)

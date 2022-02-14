@@ -188,7 +188,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         else:
             # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
-            ml = ruge_stuben_solver(lap_sparse)
+            ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
@@ -274,7 +274,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     data : array_like
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
-        dimensional (multichannel=True) with the highest dimension denoting
+        dimensional with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
@@ -406,13 +406,13 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> np.random.seed(0)
-    >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
+    >>> rng = np.random.default_rng()
+    >>> a = np.zeros((10, 10)) + 0.2 * rng.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a, dtype=np.int32)
     >>> b[3, 3] = 1  # Marker for first phase
     >>> b[6, 6] = 2  # Marker for second phase
-    >>> random_walker(a, b)
+    >>> random_walker(a, b)  # doctest: +SKIP
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -428,8 +428,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # Parse input data
     if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
-            "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bf' and None".format(mode=mode))
+            f"{mode} is not a valid mode. Valid modes are 'cg_mg', "
+            f"'cg', 'cg_j', 'bf', and None")
 
     # Spacing kwarg checks
     if spacing is None:

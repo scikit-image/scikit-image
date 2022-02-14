@@ -45,7 +45,7 @@ plt.show()
 # the image, removing pixels on object borders. This continues until no
 # more pixels can be removed.  The image is correlated with a
 # mask that assigns each pixel a number in the range [0...255]
-# corresponding to each possible pattern of its 8 neighbouring
+# corresponding to each possible pattern of its 8 neighboring
 # pixels. A look up table is then used to assign the pixels a
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
@@ -164,7 +164,7 @@ plt.show()
 # different rules of removal can speed up skeletonization and result in
 # different final skeletons.
 #
-# The `thin` function also takes an optional `max_iter` keyword argument to
+# The `thin` function also takes an optional `max_num_iter` keyword argument to
 # limit the number of thinning iterations, and thus produce a relatively
 # thicker skeleton.
 
@@ -172,7 +172,7 @@ from skimage.morphology import skeletonize, thin
 
 skeleton = skeletonize(image)
 thinned = thin(image)
-thinned_partial = thin(image, max_iter=25)
+thinned_partial = thin(image, max_num_iter=25)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()

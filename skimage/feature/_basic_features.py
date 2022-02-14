@@ -2,7 +2,7 @@ from itertools import combinations_with_replacement
 import itertools
 import numpy as np
 from skimage import filters, feature
-from skimage import img_as_float32
+from skimage.util.dtype import img_as_float32
 from skimage._shared import utils
 from concurrent.futures import ThreadPoolExecutor
 
@@ -20,7 +20,7 @@ def _singlescale_basic_features_singlechannel(
     img, sigma, intensity=True, edges=True, texture=True
 ):
     results = ()
-    gaussian_filtered = filters.gaussian(img, sigma)
+    gaussian_filtered = filters.gaussian(img, sigma, preserve_range=False)
     if intensity:
         results += (gaussian_filtered,)
     if edges:
@@ -57,10 +57,10 @@ def _mutiscale_basic_features_singlechannel(
         at different scales are added to the feature set.
     sigma_min : float, optional
         Smallest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.
@@ -134,10 +134,10 @@ def multiscale_basic_features(
         at different scales are added to the feature set.
     sigma_min : float, optional
         Smallest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.

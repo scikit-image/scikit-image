@@ -8,11 +8,13 @@ IEEE Transactions on Image Processing (2012)
 and the author's original MATLAB implementation, available on this website:
 http://www.dirkpadfield.com/
 """
-
-import numpy as np
 from functools import partial
 
-from .._shared.fft import fftmodule, next_fast_len
+import numpy as np
+import scipy.fft as fftmodule
+from scipy.fft import next_fast_len
+
+from .._shared.utils import _supported_float_type
 
 
 def _masked_phase_cross_correlation(reference_image, moving_image,
@@ -75,8 +77,10 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
             raise ValueError(
                 "Image sizes must match their respective mask sizes.")
 
-    xcorr = cross_correlate_masked(moving_image, reference_image, moving_mask,
-                                   reference_mask, axes=(0, 1), mode='full',
+    xcorr = cross_correlate_masked(moving_image, reference_image,
+                                   moving_mask, reference_mask,
+                                   axes=tuple(range(moving_image.ndim)),
+                                   mode='full',
                                    overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
@@ -148,21 +152,29 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
-        raise ValueError("Correlation mode '{}' is not valid.".format(mode))
+        raise ValueError(f"Correlation mode '{mode}' is not valid.")
 
-    fixed_image = np.array(arr1, dtype=float)
+    fixed_image = np.asarray(arr1)
+    moving_image = np.asarray(arr2)
+    float_dtype = _supported_float_type(
+        [fixed_image.dtype, moving_image.dtype]
+    )
+    if float_dtype.kind == 'c':
+        raise ValueError("complex-valued arr1, arr2 are not supported")
+
+    fixed_image = fixed_image.astype(float_dtype)
     fixed_mask = np.array(m1, dtype=bool)
-    moving_image = np.array(arr2, dtype=float)
+    moving_image = moving_image.astype(float_dtype)
     moving_mask = np.array(m2, dtype=bool)
-    eps = np.finfo(float).eps
+    eps = np.finfo(float_dtype).eps
 
     # Array dimensions along non-transformation axes should be equal.
     all_axes = set(range(fixed_image.ndim))
     for axis in (all_axes - set(axes)):
         if fixed_image.shape[axis] != moving_image.shape[axis]:
             raise ValueError(
-                "Array shapes along non-transformation axes should be "
-                "equal, but dimensions along axis {a} are not".format(a=axis))
+                f'Array shapes along non-transformation axes should be '
+                f'equal, but dimensions along axis {axis} are not.')
 
     # Determine final size along transformation axes
     # Note that it might be faster to compute Fourier transform in a slightly
@@ -179,13 +191,16 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     # 7)
     fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axes])
 
-    # We use numpy.fft or the new scipy.fft because they allow leaving the
-    # transform axes unchanged which was not possible with scipy.fftpack's
+    # We use the new scipy.fft because they allow leaving the transform axes
+    # unchanged which was not possible with scipy.fftpack's
     # fftn/ifftn in older versions of SciPy.
     # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
     # results in arr_fft shape (4, 4, 7)
     fft = partial(fftmodule.fftn, s=fast_shape, axes=axes)
-    ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
+    _ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
+
+    def ifft(x):
+        return _ifft(x).real
 
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0
@@ -197,13 +212,12 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
 
     fixed_fft = fft(fixed_image)
     rotated_moving_fft = fft(rotated_moving_image)
-    fixed_mask_fft = fft(fixed_mask)
-    rotated_moving_mask_fft = fft(rotated_moving_mask)
+    fixed_mask_fft = fft(fixed_mask.astype(float_dtype))
+    rotated_moving_mask_fft = fft(rotated_moving_mask.astype(float_dtype))
 
     # Calculate overlap of masks at every point in the convolution.
     # Locations with high overlap should not be taken into account.
-    number_overlap_masked_px = np.real(
-        ifft(rotated_moving_mask_fft * fixed_mask_fft))
+    number_overlap_masked_px = ifft(rotated_moving_mask_fft * fixed_mask_fft)
     number_overlap_masked_px[:] = np.round(number_overlap_masked_px)
     number_overlap_masked_px[:] = np.fmax(number_overlap_masked_px, eps)
     masked_correlated_fixed_fft = ifft(rotated_moving_mask_fft * fixed_fft)
@@ -246,7 +260,9 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     tol = 1e3 * eps * np.max(np.abs(denom), axis=axes, keepdims=True)
     nonzero_indices = denom > tol
 
-    out = np.zeros_like(denom)
+    # explicitly set out dtype for compatibility with SciPy < 1.4, where
+    # fftmodule will be numpy.fft which always uses float64 dtype.
+    out = np.zeros_like(denom, dtype=float_dtype)
     out[nonzero_indices] = numerator[nonzero_indices] / denom[nonzero_indices]
     np.clip(out, a_min=-1, a_max=1, out=out)
 

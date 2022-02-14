@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared import utils
 
+
 def _match_cumulative_cdf(source, template):
     """
     Return modified source array so that the cumulative density function of
@@ -74,6 +75,11 @@ def match_histograms(image, reference, *, channel_axis=None,
                                                     reference[..., channel])
             matched[..., channel] = matched_channel
     else:
+        # _match_cumulative_cdf will always return float64 due to np.interp
         matched = _match_cumulative_cdf(image, reference)
 
+    if matched.dtype.kind == 'f':
+        # output a float32 result when the input is float16 or float32
+        out_dtype = utils._supported_float_type(image.dtype)
+        matched = matched.astype(out_dtype, copy=False)
     return matched

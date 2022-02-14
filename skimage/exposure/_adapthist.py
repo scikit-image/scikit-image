@@ -13,12 +13,15 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
+import math
 import numbers
+
 import numpy as np
-from ..util import img_as_float, img_as_uint
+
+from .._shared.utils import _supported_float_type
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
-
+from ..util import img_as_uint
 
 NR_OF_GRAY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
@@ -75,23 +78,23 @@ def equalize_adapthist(image, kernel_size=None,
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
 
+    float_dtype = _supported_float_type(image.dtype)
     image = img_as_uint(image)
     image = np.round(
         rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
-    ).astype(np.uint16)
+    ).astype(np.min_scalar_type(NR_OF_GRAY))
 
     if kernel_size is None:
-        kernel_size = tuple([image.shape[dim] // 8
-                             for dim in range(image.ndim)])
+        kernel_size = tuple([max(s // 8, 1) for s in image.shape])
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
-        ValueError('Incorrect value of `kernel_size`: {}'.format(kernel_size))
+        ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
 
     kernel_size = [int(k) for k in kernel_size]
 
     image = _clahe(image, kernel_size, clip_limit, nbins)
-    image = img_as_float(image)
+    image = image.astype(float_dtype, copy=False)
     return rescale_intensity(image)
 
 
@@ -137,7 +140,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
     # determine gray value bins
     bin_size = 1 + NR_OF_GRAY // nbins
-    lut = np.arange(NR_OF_GRAY)
+    lut = np.arange(NR_OF_GRAY, dtype=np.min_scalar_type(NR_OF_GRAY))
     lut //= bin_size
 
     image = lut[image]
@@ -153,18 +156,19 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     hist_blocks = image[tuple(hist_slices)].reshape(hist_blocks_shape)
     hist_blocks = np.transpose(hist_blocks, axes=hist_blocks_axis_order)
     hist_block_assembled_shape = hist_blocks.shape
-    hist_blocks = hist_blocks.reshape((np.product(ns_hist), -1))
+    hist_blocks = hist_blocks.reshape((math.prod(ns_hist), -1))
 
     # Calculate actual clip limit
+    kernel_elements = math.prod(kernel_size)
     if clip_limit > 0.0:
-        clim = int(np.clip(clip_limit * np.product(kernel_size), 1, None))
+        clim = int(np.clip(clip_limit * kernel_elements, 1, None))
     else:
         # largest possible value, i.e., do not clip (AHE)
-        clim = np.product(kernel_size)
+        clim = kernel_elements
 
     hist = np.apply_along_axis(np.bincount, -1, hist_blocks, minlength=nbins)
     hist = np.apply_along_axis(clip_histogram, -1, hist, clip_limit=clim)
-    hist = map_histogram(hist, 0, NR_OF_GRAY - 1, np.product(kernel_size))
+    hist = map_histogram(hist, 0, NR_OF_GRAY - 1, kernel_elements)
     hist = hist.reshape(hist_block_assembled_shape[:ndim] + (-1,))
 
     # duplicate leading mappings in each dim
@@ -185,8 +189,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     blocks = image.reshape(blocks_shape)
     blocks = np.transpose(blocks, axes=blocks_axis_order)
     blocks_flattened_shape = blocks.shape
-    blocks = np.reshape(blocks, (np.product(ns_proc),
-                                 np.product(blocks.shape[ndim:])))
+    blocks = np.reshape(blocks, (math.prod(ns_proc),
+                                 math.prod(blocks.shape[ndim:])))
 
     # calculate interpolation coefficients
     coeffs = np.meshgrid(*tuple([np.arange(k) / k
@@ -201,14 +205,14 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
         edge_maps = map_array[tuple([slice(e, e + n)
                                      for e, n in zip(edge, ns_proc)])]
-        edge_maps = edge_maps.reshape((np.product(ns_proc), -1))
+        edge_maps = edge_maps.reshape((math.prod(ns_proc), -1))
 
         # apply map
         edge_mapped = np.take_along_axis(edge_maps, blocks, axis=-1)
 
         # interpolate
-        edge_coeffs = np.product([[inv_coeffs, coeffs][e][d]
-                                  for d, e in enumerate(edge[::-1])], 0)
+        edge_coeffs = np.prod([[inv_coeffs, coeffs][e][d]
+                               for d, e in enumerate(edge[::-1])], 0)
 
         result += (edge_mapped * edge_coeffs).astype(result.dtype)
 

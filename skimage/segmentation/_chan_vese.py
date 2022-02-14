@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import distance_transform_edt as distance
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 
 
 def _cv_curvature(phi):
@@ -172,8 +172,10 @@ def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
     return res.astype(dtype, copy=False)
 
 
-def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
-              dt=0.5, init_level_set='checkerboard',
+@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
+              max_num_iter=500, dt=0.5, init_level_set='checkerboard',
               extended_output=False):
     """Chan-Vese segmentation algorithm.
 
@@ -202,7 +204,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         iterations normalized by the area of the image is below this
         value, the algorithm will assume that the solution was
         reached.
-    max_iter : uint, optional
+    max_num_iter : uint, optional
         Maximum number of iterations allowed before the algorithm
         interrupts itself.
     dt : float, optional
@@ -302,7 +304,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
 
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     phi = _cv_init_level_set(init_level_set, image.shape, dtype=float_dtype)
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
@@ -320,7 +322,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     phivar = tol + 1
     segmentation = phi > 0
 
-    while(phivar > tol and i < max_iter):
+    while(phivar > tol and i < max_num_iter):
         # Save old level set values
         oldphi = phi
 

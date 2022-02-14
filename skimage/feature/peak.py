@@ -17,7 +17,13 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
 
-    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm)
+    if np.isfinite(num_peaks):
+        max_out = int(num_peaks)
+    else:
+        max_out = None
+
+    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm,
+                           max_out=max_out)
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
@@ -136,11 +142,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     min_distance : int, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float, optional
+    threshold_abs : float or None, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
-    threshold_rel : float, optional
-        Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
     exclude_border : int, tuple of ints, or bool, optional
         If positive integer, `exclude_border` excludes peaks from within
         `exclude_border`-pixels of the border of the image.
@@ -368,25 +375,25 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
 
     # Sort the list of peaks by intensity, not left-right, so larger peaks
     # in Hough space cannot be arbitrarily suppressed by smaller neighbors
-    props = sorted(props, key=lambda x: x.max_intensity)[::-1]
+    props = sorted(props, key=lambda x: x.intensity_max)[::-1]
     coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     img_peaks = []
     ycoords_peaks = []
     xcoords_peaks = []
 
-    # relative coordinate grid for local neighbourhood suppression
+    # relative coordinate grid for local neighborhood suppression
     ycoords_ext, xcoords_ext = np.mgrid[-min_ydistance:min_ydistance + 1,
                                         -min_xdistance:min_xdistance + 1]
 
     for ycoords_idx, xcoords_idx in coords:
         accum = img_max[ycoords_idx, xcoords_idx]
         if accum > threshold:
-            # absolute coordinate grid for local neighbourhood suppression
+            # absolute coordinate grid for local neighborhood suppression
             ycoords_nh = ycoords_idx + ycoords_ext
             xcoords_nh = xcoords_idx + xcoords_ext
 
-            # no reflection for distance neighbourhood
+            # no reflection for distance neighborhood
             ycoords_in = np.logical_and(ycoords_nh > 0, ycoords_nh < rows)
             ycoords_nh = ycoords_nh[ycoords_in]
             xcoords_nh = xcoords_nh[ycoords_in]
@@ -401,7 +408,7 @@ def _prominent_peaks(image, min_xdistance=1, min_ydistance=1,
             ycoords_nh[xcoords_high] = rows - ycoords_nh[xcoords_high]
             xcoords_nh[xcoords_high] -= cols
 
-            # suppress neighbourhood
+            # suppress neighborhood
             img_max[ycoords_nh, xcoords_nh] = 0
 
             # add current feature to peaks

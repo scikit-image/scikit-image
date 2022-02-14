@@ -1,7 +1,9 @@
 import functools
 import numpy as np
+import pytest
 
 from skimage._shared.testing import assert_, expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
@@ -19,6 +21,7 @@ noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)
 
 _denoise_wavelet = functools.partial(denoise_wavelet, rescale_sigma=True)
 
+
 def test_invariant_denoise():
     denoised_img = _invariant_denoise(noisy_img, _denoise_wavelet)
 
@@ -27,15 +30,15 @@ def test_invariant_denoise():
     assert_(denoised_mse < original_mse)
 
 
-def test_invariant_denoise_color():
-
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_invariant_denoise_color(dtype):
     denoised_img_color = _invariant_denoise(
-        noisy_img_color, _denoise_wavelet,
+        noisy_img_color.astype(dtype), _denoise_wavelet,
         denoiser_kwargs=dict(channel_axis=-1))
-
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)
-    assert_(denoised_mse < original_mse)
+    assert denoised_mse < original_mse
+    assert denoised_img_color.dtype == _supported_float_type(dtype)
 
 
 def test_invariant_denoise_color_deprecated():
@@ -94,9 +97,3 @@ def test_input_image_not_modified():
                        denoise_parameters=parameter_ranges)
 
     assert_(np.all(noisy_img == input_image))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-
-    testing.run_module_suite()

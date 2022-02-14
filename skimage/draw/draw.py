@@ -1,7 +1,7 @@
-import warnings
 import numpy as np
 
 from .._shared._geometry import polygon_clip
+from .._shared.version_requirements import require
 from ._draw import (_coords_inside_image, _line, _line_aa,
                     _polygon, _ellipse_perimeter,
                     _circle_perimeter, _circle_perimeter_aa,
@@ -143,43 +143,6 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     return rr, cc
 
 
-def circle(r, c, radius, shape=None):
-    """Generate coordinates of pixels within circle.
-
-    Parameters
-    ----------
-    r, c : double
-        Center coordinate of disk.
-    radius : double
-        Radius of disk.
-    shape : tuple, optional
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for disks that exceed the image
-        size. If None, the full extent of the disk is used.  Must be at least
-        length 2. Only the first two values are used to determine the extent of
-        the input image.
-
-    Returns
-    -------
-    rr, cc : ndarray of int
-        Pixel coordinates of disk.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
-
-    Warns
-    -----
-    Deprecated:
-        .. versionadded:: 0.17
-
-            This function is deprecated and will be removed in scikit-image 0.19.
-            Please use the function named ``disk`` instead.
-    """
-    warnings.warn("`draw.circle` is deprecated in favor of `draw.disk`."
-                  "`draw.circle` will be removed in version 0.19",
-                  FutureWarning, stacklevel=2)
-    return disk((r, c), radius, shape=shape)
-
-
 def disk(center, radius, *, shape=None):
     """Generate coordinates of pixels within circle.
 
@@ -244,6 +207,7 @@ def disk(center, radius, *, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
+@require("matplotlib", ">=3.0.3")
 def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
@@ -368,9 +332,8 @@ def set_color(image, coords, color, alpha=1):
     color = np.array(color, ndmin=1, copy=False)
 
     if image.shape[-1] != color.shape[-1]:
-        raise ValueError('Color shape ({}) must match last '
-                         'image dimension ({}).'.format(color.shape[0],
-                                                        image.shape[-1]))
+        raise ValueError(f'Color shape ({color.shape[0]}) must match last '
+                          'image dimension ({image.shape[-1]}).')
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
@@ -866,6 +829,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     return coords
 
 
+@require("matplotlib", ">=3.0.3")
 def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     """Generate coordinates of pixels that are exactly around a rectangle.
 
