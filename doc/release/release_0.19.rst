@@ -40,7 +40,7 @@ Pull Requests Included
 - Backport PR #6242 on branch v0.19.x (Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0`) (gh-6246)
 - Backport PR #6211 on branch v0.19.x (PiecewiseAffineTransform.estimate return should reflect underlying transforms) gh-6247
 
-8 authors added to this release [alphabetical by first name or login]
+9 authors added to this release [alphabetical by first name or login]
 ---------------------------------------------------------------------
 - Chris Roat
 - Fabian Schneider
@@ -48,6 +48,7 @@ Pull Requests Included
 - Hande Gözükan
 - Larry Bradley
 - Mark Harfouche
+- Marianne Corvellec
 - Miles Lucas
 - Riadh Fezzani
 
