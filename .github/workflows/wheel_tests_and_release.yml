@@ -136,6 +136,7 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
+
       - name: Build wheels for CPython Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
@@ -150,13 +151,25 @@ jobs:
               # https://github.com/scipy/scipy/issues/14688
               # so being conservative, we just do the same here
               export MACOSX_DEPLOYMENT_TARGET=12.0
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
           else
               export MACOSX_DEPLOYMENT_TARGET=10.13
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-64/llvm-openmp-11.1.0-hda6cdc1_1.tar.bz2"
           fi
           echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
-          sudo tar -C / -xvjf libomp.tbz2 opt
+
+          # use conda to install llvm-openmp
+          # Note that we do NOT activate the conda environment, we just add the
+          # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
+          sudo conda create -n build $OPENMP_URL
+          PREFIX="/usr/local/miniconda/envs/build"
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
+          export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
+          export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -I$PREFIX/include"
+          export CXXFLAGS="$CXXFLAGS -I$PREFIX/include"
+          export LDFLAGS="$LDFLAGS -Wl,-S -Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -lomp"
+
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
@@ -164,13 +177,6 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_TEST_SKIP: "*-macosx_arm64"
-          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CC: /usr/bin/clang
-          CXX: /usr/bin/clang++
-          CPPFLAGS: "-Xpreprocessor -fopenmp"
-          CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
-          CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-S -Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
       - uses: actions/upload-artifact@v2
         with:
