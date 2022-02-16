@@ -39,6 +39,8 @@ Pull Requests Included
 - Backport PR #6227 on branch v0.19.x (Fix calculation of Z normal in marching cubes) (gh-6245)
 - Backport PR #6242 on branch v0.19.x (Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0`) (gh-6246)
 - Backport PR #6211 on branch v0.19.x (PiecewiseAffineTransform.estimate return should reflect underlying transforms) gh-6247
+- update MacOS libomp installation in wheel building script (gh-6249)
+
 
 9 authors added to this release [alphabetical by first name or login]
 ---------------------------------------------------------------------
@@ -47,8 +49,8 @@ Pull Requests Included
 - Gregory Lee
 - Hande Gözükan
 - Larry Bradley
-- Mark Harfouche
 - Marianne Corvellec
+- Mark Harfouche
 - Miles Lucas
 - Riadh Fezzani
 
