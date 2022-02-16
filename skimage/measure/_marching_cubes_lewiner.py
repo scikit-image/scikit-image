@@ -43,7 +43,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
     method: {'lewiner', 'lorensen'}, optional
-        Whether the method of Lewiner et al. or Lorensen et al. will be  used.
+        Whether the method of Lewiner et al. or Lorensen et al. will be used.
     mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on
         True elements. This will save computational time when interfaces
@@ -258,8 +258,7 @@ def _get_mc_luts():
 
 
 def mesh_surface_area(verts, faces):
-    """
-    Compute surface area, given vertices & triangular faces
+    """Compute surface area, given vertices and triangular faces.
 
     Parameters
     ----------
@@ -267,7 +266,7 @@ def mesh_surface_area(verts, faces):
         Array containing (x, y, z) coordinates for V unique mesh vertices.
     faces : (F, 3) array of ints
         List of length-3 lists of integers, referencing vertex coordinates as
-        provided in `verts`
+        provided in `verts`.
 
     Returns
     -------
@@ -286,7 +285,6 @@ def mesh_surface_area(verts, faces):
     See Also
     --------
     skimage.measure.marching_cubes
-    skimage.measure.marching_cubes_classic
 
     """
     # Fancy indexing to define two vector arrays from triangle vertices
