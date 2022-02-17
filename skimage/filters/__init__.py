@@ -6,6 +6,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
     submod_attrs={
         'lpi_filter': ['inverse', 'wiener', 'LPIFilter2D'],
         '_gaussian': ['gaussian', 'difference_of_gaussians'],
+        '_homomorphic': ['homomorphic'],
         'edges': ['sobel', 'sobel_h', 'sobel_v',
                   'scharr', 'scharr_h', 'scharr_v',
                   'prewitt', 'prewitt_h', 'prewitt_v',
