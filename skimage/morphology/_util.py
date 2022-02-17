@@ -265,6 +265,8 @@ def _resolve_neighborhood(footprint, connectivity, ndim,
         # Must only specify direct neighbors
         if enforce_adjacency and any(s != 3 for s in footprint.shape):
             raise ValueError("dimension size in footprint is not 3")
+        elif any((s % 2 != 1) for s in footprint.shape):
+            raise ValueError("footprint size must be odd along all dimensions")
 
     return footprint
 
