@@ -1,6 +1,6 @@
 """
 ===============================================================
-Explore and annotate image data interactively with with HoloViz
+Explore and annotate image data interactively with HoloViz
 ===============================================================
 
 In this tutorial, we build interactive tools and an application using `Panel <https://panel.holoviz.org>`_ and 
