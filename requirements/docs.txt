@@ -20,5 +20,5 @@ myst-parser
 ipywidgets
 plotly>=4.14.0
 kaleido
-panel==0.12.4
-holoviews==1.14.6
+panel>=0.12.4
+holoviews>=1.14.6
