@@ -1,13 +1,14 @@
 """
-===============================================================
+==========================================================
 Explore and annotate image data interactively with HoloViz
-===============================================================
+==========================================================
 
-In this tutorial, we build interactive tools and an application using `Panel <https://panel.holoviz.org>`_ and 
-`HoloViews <https://holoviews.org>`_. 
+In this tutorial, we build interactive tools and an application using
+`Panel <https://panel.holoviz.org>`_ and `HoloViews <https://holoviews.org>`_.
 
-We will build an application based on the Sobel algorithm to interactively find a great 
-color map for the visualization. We will add some nice features, like a download button, to make sharing your findings easier.
+We will build an application based on the Sobel algorithm to interactively
+find a great color map for the visualization. We will add some nice features,
+like a download button, to make sharing your findings easier.
 
 These techniques can make your analyses more interactive and, hence, powerful.
 
@@ -18,16 +19,15 @@ These techniques can make your analyses more interactive and, hence, powerful.
 
 
 You can develop using notebooks or .py files. You can use it with a very
-broad range of Pythons Viz. You can use the tools in a notebook, your editor/ IDE or
-deploy to a web server.
+broad range of Pythons viz. You can use the tools in a notebook, your 
+editor/ IDE or deploy to a web server.
 
 To run this example you would need to get some python packages
 installed. You can create an environment from scratch using.
 
 .. code:: bash
 
-   conda create -n scikit-image-demo -c conda-forge jupyterlab panel holoviews scikit-image selenium \
-   firefox geckodriver
+   conda create -n scikit-image-demo -c conda-forge jupyterlab panel holoviews scikit-image selenium firefox geckodriver
    conda activate scikit-image-demo
    jupyter serverextension enable panel.io.jupyter_server_extension
 """
@@ -83,9 +83,18 @@ hv.Image(edges, bounds=bounds).opts(
 # ===============================
 # Let us create a widget for selecting a color map.
 
-cmaps = [cmap for cmap in hv.plotting.list_cmaps() if (cmap.endswith("_r") and cmap.islower())]
+cmaps = [
+    cmap
+    for cmap in hv.plotting.list_cmaps()
+    if (cmap.endswith("_r") and cmap.islower())
+]
 cmap = pn.widgets.Select(
-    value="binary_r", options=cmaps, width=290, height=50, sizing_mode="fixed", name="Color Map"
+    value="binary_r",
+    options=cmaps,
+    width=290,
+    height=50,
+    sizing_mode="fixed",
+    name="Color Map",
 )
 cmap
 
@@ -93,7 +102,11 @@ cmap
 # Let us also define a *before* and an *after* image
 
 before_img = hv.Image(image, bounds=bounds).apply.opts(
-    cmap=cmap, responsive=True, title="Before", active_tools=["box_zoom"], tools=["hover"]
+    cmap=cmap,
+    responsive=True,
+    title="Before",
+    active_tools=["box_zoom"],
+    tools=["hover"],
 )
 after_img = hv.Image(edges, bounds=bounds).apply.opts(
     cmap=cmap,
@@ -107,7 +120,11 @@ after_img = hv.Image(edges, bounds=bounds).apply.opts(
 ################################
 # Finally we can layout the tool
 
-plots = pn.panel((before_img + after_img), sizing_mode="scale_both", aspect_ratio=aspect_ratio * 2)
+plots = pn.panel(
+    (before_img + after_img),
+    sizing_mode="scale_both",
+    aspect_ratio=aspect_ratio * 2,
+)
 layout = pn.Column(cmap, plots, sizing_mode="stretch_both")
 layout
 
@@ -116,7 +133,10 @@ layout
 # ============================
 
 download = pn.widgets.FileDownload(
-    filename="after.png", label="Download .png", button_type="success", sizing_mode="stretch_width"
+    filename="after.png",
+    label="Download .png",
+    button_type="success",
+    sizing_mode="stretch_width",
 )
 download
 
@@ -153,7 +173,8 @@ layout.append(download)
 #################################
 # Wrap it up as a web application
 # ===============================
-# We include the value of the color map in the url to make it easy to share a link with colleagues
+# We include the value of the color map in the url to make it easy to share
+# a link with colleagues
 
 if pn.state.location:
     pn.state.location.sync(cmap, {"value": "cmap"})
@@ -176,6 +197,6 @@ pn.template.FastListTemplate(
 # can also install the jupyterlab preview for hot reload inside Jupyter
 # Lab during development. See
 # https://blog.holoviz.org/panel_0.12.0.html#JupyterLab-previews
-# 
-# For more inspiration checkout `Panel <https://panel.holoviz.org>`_ and 
+#
+# For more inspiration checkout `Panel <https://panel.holoviz.org>`_ and
 # `awesome-panel.org <https://awesome-panel.org>`_
