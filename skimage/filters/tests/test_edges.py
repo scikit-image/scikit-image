@@ -531,8 +531,7 @@ MAX_SOBEL_0 = np.array([
      [0, 0, 0]],
     [[1, 1, 1],
      [1, 1, 1],
-     [1, 1, 1]],
-    ],
+     [1, 1, 1]]],
     dtype=float)
 
 # maximum Sobel 3D edge in magnitude
@@ -547,8 +546,7 @@ MAX_SOBEL_ND = np.array([
 
     [[1, 1, 0],
      [1, 1, 0],
-     [1, 1, 0]]
-    ],
+     [1, 1, 0]]],
     dtype=float)
 
 # maximum Scharr 3D edge in magnitude. This illustrates the better rotation
@@ -562,8 +560,7 @@ MAX_SCHARR_ND = np.array([
      [0, 1, 1]],
     [[0, 0, 1],
      [0, 1, 1],
-     [1, 1, 1]]
-    ],
+     [1, 1, 1]]],
     dtype=float)
 
 # maximum Farid 3D edge on axis 0
@@ -597,11 +594,8 @@ MAX_FARID_ND = np.array([
      [0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0],
-     [1, 1, 1, 1, 1]],
-    ],
+     [1, 1, 1, 1, 1]]],
     dtype=float)
-
-
 
 
 @pytest.mark.parametrize(
