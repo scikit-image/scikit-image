@@ -1,7 +1,7 @@
 import numpy as np
 
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, deprecate_kwarg
 from .brief_cy import _brief_loop
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
@@ -32,18 +32,18 @@ class BRIEF(DescriptorExtractor):
     mode : {'normal', 'uniform'}, optional
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
-    sample_seed : {None, int, `numpy.random.Generator`}, optional
-        If `sample_seed` is None the `numpy.random.Generator` singleton is
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is
         used.
-        If `sample_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `sample_seed`.
-        If `sample_seed` is already a ``Generator`` instance then that instance
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance
         is used.
 
         Seed for the random sampling of the decision pixel-pairs. From a square
         window with length `patch_size`, pixel pairs are sampled using the
         `mode` parameter to build the descriptors using intensity comparison.
-        The value of `sample_seed` must be the same for the images to be
+        The value of `seed` must be the same for the images to be
         matched while building the descriptors.
     sigma : float, optional
         Standard deviation of the Gaussian low-pass filter applied to the image
@@ -116,8 +116,10 @@ class BRIEF(DescriptorExtractor):
 
     """
 
+    @deprecate_kwarg({'sample_seed': 'seed'}, deprecated_version='0.20',
+                     removed_version='1.0')
     def __init__(self, descriptor_size=256, patch_size=49,
-                 mode='normal', sigma=1, sample_seed=1):
+                 mode='normal', sigma=1, seed=1):
 
         mode = mode.lower()
         if mode not in ('normal', 'uniform'):
@@ -128,10 +130,10 @@ class BRIEF(DescriptorExtractor):
         self.mode = mode
         self.sigma = sigma
 
-        if sample_seed is None:
-            self.sample_seed = np.random.SeedSequence().entropy
+        if seed is None:
+            self.seed = np.random.SeedSequence().entropy
         else:
-            self.sample_seed = sample_seed
+            self.seed = seed
 
         self.descriptors = None
         self.mask = None
@@ -149,7 +151,7 @@ class BRIEF(DescriptorExtractor):
         """
         check_nD(image, 2)
 
-        random = np.random.default_rng(self.sample_seed)
+        random = np.random.default_rng(self.seed)
 
         image = _prepare_grayscale_input_2D(image)
 
