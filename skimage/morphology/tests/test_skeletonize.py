@@ -163,7 +163,7 @@ class TestThin():
 class TestMedialAxis():
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
-        result = medial_axis(np.zeros((10, 10), bool))
+        result = medial_axis(np.zeros((10, 10), bool), seed=None)
         assert np.all(result == False)
 
     def test_00_01_zeros_masked(self):
@@ -232,3 +232,8 @@ class TestMedialAxis():
         image[:, 1:-1] = True
         result = medial_axis(image)
         assert np.all(result == image)
+
+    def test_deprecated_random_state(self):
+        '''Test skeletonize on an array of all zeros'''
+        with expected_warnings(['`random_state` is a deprecated argument']):
+            medial_axis(np.zeros((10, 10), bool), random_state=None)
