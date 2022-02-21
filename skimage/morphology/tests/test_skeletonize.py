@@ -8,8 +8,8 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.io import imread
 from skimage.morphology import medial_axis, skeletonize, thin
-from skimage.morphology._skeletonize import (_generate_thin_luts,
-                                             G123_LUT, G123P_LUT)
+from skimage.morphology._skeletonize import (G123_LUT, G123P_LUT,
+                                             _generate_thin_luts)
 
 
 class TestSkeletonize():
