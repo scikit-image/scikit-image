@@ -1,8 +1,9 @@
 import networkx as nx
 import numpy as np
-from . import _ncut
-from . import _ncut_cy
 from scipy.sparse import linalg
+
+from ..._shared.utils import deprecate_kwarg
+from . import _ncut, _ncut_cy
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -68,10 +69,12 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+                 removed_version='1.0')
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
                    max_edge=1.0,
                    *,
-                   random_state=None,
+                   seed=None,
                    ):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -98,15 +101,14 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
-        used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that
         instance is used.
 
-        The `random_state` is used for the starting point
+        The `seed` is used for the starting point
         of `scipy.sparse.linalg.eigsh`.
 
     Returns
@@ -129,14 +131,14 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    random_state = np.random.default_rng(random_state)
+    rng = np.random.default_rng(seed)
     if not in_place:
         rag = rag.copy()
 
     for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
-    _ncut_relabel(rag, thresh, num_cuts, random_state)
+    _ncut_relabel(rag, thresh, num_cuts, rng)
 
     map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
     # Mapping from old labels to new
@@ -243,7 +245,7 @@ def _label_all(rag, attr_name):
         d[attr_name] = new_label
 
 
-def _ncut_relabel(rag, thresh, num_cuts, random_state):
+def _ncut_relabel(rag, thresh, num_cuts, random_generator):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Recursively partition the graph into 2, until further subdivision
@@ -260,7 +262,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
-    random_state : `numpy.random.Generator`
+    random_generator : `numpy.random.Generator`
         Provides initial values for eigenvalue solver.
     """
     d, w = _ncut.DW_matrices(rag)
@@ -275,7 +277,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
         # Refer Shi & Malik 2001, Equation 7, Page 891
         A = d2 * (d - w) * d2
         # Initialize the vector to ensure reproducibility.
-        v0 = random_state.random(A.shape[0])
+        v0 = random_generator.random(A.shape[0])
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
                                      k=min(100, m - 2))
 
@@ -291,8 +293,8 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts, random_state)
-            _ncut_relabel(sub2, thresh, num_cuts, random_state)
+            _ncut_relabel(sub1, thresh, num_cuts, random_generator)
+            _ncut_relabel(sub2, thresh, num_cuts, random_generator)
             return
 
     # The N-cut wasn't small enough, or could not be computed.
