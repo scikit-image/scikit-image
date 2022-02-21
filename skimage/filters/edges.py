@@ -713,7 +713,7 @@ def laplace(image, ksize=3, mask=None):
 
 
 def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
-    """Find the edge magnitude using the Scharr transform.
+    """Find the edge magnitude using the Farid transform.
 
     Parameters
     ----------
@@ -741,7 +741,7 @@ def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     Returns
     -------
     output : array of float
-        The Scharr edge map.
+        The Farid edge map.
 
     See also
     --------
