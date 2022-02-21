@@ -1,9 +1,11 @@
 import math
+
 import numpy as np
 
-from . import (polygon as draw_polygon, disk as draw_disk,
-               ellipse as draw_ellipse)
 from .._shared.utils import deprecate_kwarg, deprecate_multichannel_kwarg, warn
+from . import disk as draw_disk
+from . import ellipse as draw_ellipse
+from . import polygon as draw_polygon
 
 
 def _generate_rectangle_mask(point, image, shape, random):
