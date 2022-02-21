@@ -6,6 +6,7 @@ import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
 from ._haar import haar_like_feature_wrapper
+from .._shared.utils import deprecate_kwarg
 from ..color import gray2rgb
 from ..draw import rectangle
 from ..util import img_as_float
@@ -218,11 +219,13 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         return haar_feature
 
 
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+                 removed_version='1.0')
 def draw_haar_like_feature(image, r, c, width, height,
                            feature_coord,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
-                           alpha=0.5, max_n_features=None, random_state=None):
+                           alpha=0.5, max_n_features=None, seed=None):
     """Visualization of Haar-like features.
 
     Parameters
@@ -256,16 +259,14 @@ def draw_haar_like_feature(image, r, c, width, height,
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is an int, a new ``Generator`` instance is used, seeded with
+        `random_state`.
+        If `seed` is already a ``Generator`` instance then that instance is
         used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
-        instance is used.
-
-        The random state is used when generating a set of
-        features smaller than the total number of available features.
+        The random seed is used when generating a set of features smaller than
+        the total number of available features.
 
     Returns
     -------
@@ -290,16 +291,16 @@ def draw_haar_like_feature(image, r, c, width, height,
             [0. , 0.5, 0. ]]])
 
     """
-    random_state = np.random.default_rng(random_state)
+    rng = np.random.default_rng(seed)
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
 
     if max_n_features is None:
         feature_coord_ = feature_coord
     else:
-        feature_coord_ = random_state.choice(feature_coord,
-                                             size=max_n_features,
-                                             replace=False)
+        feature_coord_ = rng.choice(feature_coord,
+                                    size=max_n_features,
+                                    replace=False)
 
     output = np.copy(image)
     if len(image.shape) < 3:
