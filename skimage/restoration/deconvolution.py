@@ -139,8 +139,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     return deconv
 
 
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+                 removed_version='1.0')
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
-                        clip=True, *, random_state=None):
+                        clip=True, *, seed=None):
     """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -165,13 +167,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is an int, a new ``Generator`` instance is used, seeded with
+        `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
         used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
-        instance is used.
 
         .. versionadded:: 0.19
 
@@ -283,7 +284,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         data_spectrum = uft.ufft2(image)
 
-    rng = np.random.default_rng(random_state)
+    rng = np.random.default_rng(seed)
 
     # Gibbs sampling
     for iteration in range(params['max_num_iter']):

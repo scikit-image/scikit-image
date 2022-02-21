@@ -77,7 +77,9 @@ def test_unsupervised_wiener(dtype):
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf,
-                                                     random_state=seed)
+                                                     seed=seed)
+    with expected_warnings(['`random_state` is a deprecated argument']):
+        restoration.unsupervised_wiener(data, psf, random_state=seed)
     float_type = _supported_float_type(dtype)
     assert deconvolved.dtype == float_type
 
@@ -96,7 +98,7 @@ def test_unsupervised_wiener(dtype):
             "max_num_iter": 200,
             "min_num_iter": 30,
         },
-        random_state=seed)[0]
+        seed=seed)[0]
     assert deconvolved2.real.dtype == float_type
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved2),
@@ -109,10 +111,12 @@ def test_unsupervised_wiener_deprecated_user_param():
     data = convolve2d(test_img, psf, 'same')
     otf = uft.ir2tf(psf, data.shape, is_real=False)
     _, laplacian = uft.laplacian(2, data.shape)
-    restoration.unsupervised_wiener(
-        data, otf, reg=laplacian, is_real=False,
-        user_params={"min_num_iter": 30}, random_state=5
-    )
+    with expected_warnings(["`max_iter` is a deprecated key",
+                            "`min_iter` is a deprecated key"]):
+        restoration.unsupervised_wiener(
+            data, otf, reg=laplacian, is_real=False,
+            user_params={"min_num_iter": 30}, seed=5
+        )
 
 
 def test_image_shape():
