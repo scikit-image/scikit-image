@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
 
-from skimage.draw import random_shapes
-
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+from skimage.draw import random_shapes
 
 
 def test_generates_color_images_with_correct_shape():
