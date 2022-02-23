@@ -1,11 +1,11 @@
 ## Support for scikit-image
 
 Welcome to scikit-image! We use GitHub for tracking bugs and feature requests.
-GitHub [Issues](https://github.com/scikit-image/scikit-image/issues)
-should be used for reporting bugs or performance regressions. We prefer use of
-GitHub [Discussions](https://github.com/scikit-image/scikit-image/discussions)
-rather than issues for feature requests. If you need support for using
-scikit-image, please feel free to reach out to the developers and the community
+When you report an [issue](https://github.com/scikit-image/scikit-image/issues),
+you may apply a label to it to specify its type: bug, feature request, performance,
+infrastructure, documentation, etc.
+If you need support for using
+scikit-image, please reach out to the developers and the community
 using the following resources.
 
 ### Support
