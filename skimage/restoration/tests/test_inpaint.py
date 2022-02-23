@@ -144,9 +144,10 @@ def test_invalid_input():
 
 
 @testing.parametrize('dtype', [np.uint8, np.float32, np.float64])
+@testing.parametrize('order', ['C', 'F'])
 @testing.parametrize('channel_axis', [None, -1])
 @testing.parametrize('split_into_regions', [False, True])
-def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
+def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     image_orig = data.astronaut()[:, :200]
     float_dtype = np.float32 if dtype == np.float32 else np.float64
     image_orig = image_orig.astype(float_dtype, copy=False)
@@ -187,6 +188,7 @@ def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
     image_orig = image_orig.astype(dtype, copy=False)
     image_defect = image_defect.astype(dtype, copy=False)
 
+    image_defect = np.asarray(image_defect, order=order)
     image_result = inpaint.inpaint_biharmonic(
         image_defect, mask, channel_axis=channel_axis,
         split_into_regions=split_into_regions

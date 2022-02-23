@@ -265,7 +265,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     mask = mask.astype(bool, copy=False)
     if not multichannel:
         image = image[..., np.newaxis]
-    out = np.copy(image)
+    out = np.copy(image, order='C')
 
     # Create biharmonic coefficients ndarray
     radius = 2
