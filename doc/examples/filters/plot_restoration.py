@@ -4,7 +4,7 @@ Image Deconvolution
 =====================
 
 In this example, we deconvolve a noisy version of an image using Wiener
-and unsupervised Wiener algorithms. This algorithms are based on
+and unsupervised Wiener algorithms. These algorithms are based on
 linear models that can't restore sharp edge as much as non-linear
 methods (like TV restoration) but are much faster.
 
@@ -12,7 +12,7 @@ Wiener filter
 -------------
 The inverse filter based on the PSF (Point Spread Function),
 the prior regularisation (penalisation of high frequency) and the
-tradeoff between the data and prior adequacy. The regularization
+tradeoff between the data and prior adequacy. The regularisation
 parameter must be hand tuned.
 
 Unsupervised Wiener
