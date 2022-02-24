@@ -11,13 +11,13 @@ methods (like TV restoration) but are much faster.
 Wiener filter
 -------------
 The inverse filter based on the PSF (Point Spread Function),
-the prior regularisation (penalisation of high frequency) and the
-tradeoff between the data and prior adequacy. The regularisation
+the prior regularization (penalisation of high frequency) and the
+tradeoff between the data and prior adequacy. The regularization
 parameter must be hand tuned.
 
 Unsupervised Wiener
 -------------------
-This algorithm has a self-tuned regularisation parameters based on
+This algorithm has a self-tuned regularization parameters based on
 data learning. This is not common and based on the following
 publication [1]_. The algorithm is based on an iterative Gibbs sampler that
 draw alternatively samples of posterior conditional law of the image,
