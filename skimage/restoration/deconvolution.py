@@ -86,7 +86,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     those coming from noise), and the regularization.
 
     These methods are then specific to a prior model. Consequently,
-    the application or the true image nature must corresponds to the
+    the application or the true image nature must correspond to the
     prior model. By default, the prior model (Laplacian) introduce
     image smoothness or pixel correlation. It can also be interpreted
     as high-frequency penalization to compensate the instability of
@@ -94,7 +94,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     amplification or "explosive" solution).
 
     Finally, the use of Fourier space implies a circulant property of
-    :math:`H`, see [Hunt].
+    :math:`H`, see [2]_.
 
     References
     ----------
@@ -105,7 +105,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508/document
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
@@ -228,7 +228,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     posterior law. The practical idea is to only draw highly probable
     images since they have the biggest contribution to the mean. At the
     opposite, the less probable images are drawn less often since
-    their contribution is low. Finally the empirical mean of these
+    their contribution is low. Finally, the empirical mean of these
     samples give us an estimation of the mean, and an exact
     computation with an infinite sample set.
 
@@ -241,7 +241,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508/document
     """
 
     if user_params is not None:
