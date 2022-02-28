@@ -1,15 +1,14 @@
 """
 Methods to characterize image textures.
 """
+import warnings
 
 import numpy as np
 
 from .._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
-from ._texture import (_glcm_loop,
-                       _local_binary_pattern,
-                       _multiblock_lbp)
+from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
 def graycomatrix(image, distances, angles, levels=None, symmetric=False,
@@ -339,6 +338,12 @@ def local_binary_pattern(image, P, R, method='default'):
         'nri_uniform': ord('N'),
         'var': ord('V')
     }
+    if np.issubdtype(image.dtype, np.floating):
+        warnings.warn(
+            "Applying `local_binary_pattern` to floating point images may "
+            "give unexpected results when small numerical differences between "
+            "adjacent pixels are present. It is recommended to use this "
+            "function with images having an integer dtype.")
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
