@@ -235,6 +235,7 @@ def test_fundamental_matrix_estimation():
     assert_almost_equal(tform.params, tform_ref, 6)
 
 
+
 def test_fundamental_matrix_residuals():
     essential_matrix_tform = EssentialMatrixTransform(
         rotation=np.eye(3), translation=np.array([1, 0, 0]))
@@ -245,11 +246,21 @@ def test_fundamental_matrix_residuals():
     assert_almost_equal(tform.residuals(src, dst)**2, [0, 0.5, 2])
 
 
-def test_fundamental_matrix_forward():
+@pytest.mark.parametrize('array_like_input', [False, True])
+def test_fundamental_matrix_forward(array_like_input):
+    if array_like_input:
+        rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        translation = (1, 0, 0)
+    else:
+        rotation = np.eye(3)
+        translation = np.array([1, 0, 0])
     essential_matrix_tform = EssentialMatrixTransform(
-        rotation=np.eye(3), translation=np.array([1, 0, 0]))
-    tform = FundamentalMatrixTransform()
-    tform.params = essential_matrix_tform.params
+        rotation=rotation, translation=translation)
+    if array_like_input:
+        params = [list(p) for p in essential_matrix_tform.params]
+    else:
+        params = essential_matrix_tform.params
+    tform = FundamentalMatrixTransform(matrix=params)
     src = np.array([[0, 0], [0, 1], [1, 1]])
     assert_almost_equal(tform(src), [[0, -1, 0], [0, -1, 1], [0, -1, 1]])
 
@@ -354,10 +365,15 @@ def test_projective_weighted_estimation():
     assert_almost_equal(tform1.params, tform2.params, decimal=3)
 
 
-def test_projective_init():
+@pytest.mark.parametrize('array_like_input', [False, True])
+def test_projective_init(array_like_input):
     tform = estimate_transform('projective', SRC, DST)
     # init with transformation matrix
-    tform2 = ProjectiveTransform(tform.params)
+    if array_like_input:
+        params = [list(p) for p in tform.params]
+    else:
+        params = tform.params
+    tform2 = ProjectiveTransform(params)
     assert_almost_equal(tform2.params, tform.params)
 
 
@@ -395,10 +411,15 @@ def test_polynomial_weighted_estimation():
     assert_almost_equal(tform1.params, tform2.params, decimal=4)
 
 
-def test_polynomial_init():
+@pytest.mark.parametrize('array_like_input', [False, True])
+def test_polynomial_init(array_like_input):
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     # init with transformation parameters
-    tform2 = PolynomialTransform(tform.params)
+    if array_like_input:
+        params = [list(p) for p in tform.params]
+    else:
+        params = tform.params
+    tform2 = PolynomialTransform(params)
     assert_almost_equal(tform2.params, tform.params)
 
 
@@ -630,22 +651,34 @@ def _assert_least_squares(tf, src, dst):
             assert new_ssq > baseline
 
 
-def test_estimate_affine_3d():
+@pytest.mark.parametrize('array_like_input', [False, True])
+def test_estimate_affine_3d(array_like_input):
     ndim = 3
     src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
-    matrix = np.array(
-        [[4.8, 0.1, 0.2, 25],
-         [0.0, 1.0, 0.1, 30],
-         [0.0, 0.0, 1.0, -2],
-         [0.0, 0.0, 0.0, 1.]]
-    )
+
+    matrix = [
+        [4.8, 0.1, 0.2, 25],
+        [0.0, 1.0, 0.1, 30],
+        [0.0, 0.0, 1.0, -2],
+        [0.0, 0.0, 0.0, 1.]
+    ]
+    if not array_like_input:
+        matrix = np.asarray(matrix)
+    else:
+        # list of lists for matrix and src coords
+        src = [list(c) for c in src]
+
     tf = AffineTransform(matrix=matrix)
     dst = tf(src)
     dst_noisy = dst + np.random.random((25, ndim))
+    if array_like_input:
+        # list of lists for destination coords
+        dst = [list(c) for c in dst]
     tf2 = AffineTransform(dimensionality=ndim)
     assert tf2.estimate(src, dst_noisy)
     # we check rot/scale/etc more tightly than translation because translation
     # estimation is on the 1 pixel scale
+    matrix = np.asarray(matrix)
     assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)
     assert_almost_equal(tf2.params[:, -1], matrix[:, -1], decimal=0)
     _assert_least_squares(tf2, src, dst_noisy)
