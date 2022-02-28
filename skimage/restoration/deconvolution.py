@@ -241,7 +241,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           https://hal.archives-ouvertes.fr/hal-00674508/document
+           https://hal.archives-ouvertes.fr/hal-00674508
     """
 
     if user_params is not None:
