@@ -117,6 +117,27 @@ def test_hough_line_peaks_ordered():
     assert hspace[0] > hspace[1]
 
 
+def test_hough_line_peaks_single_line():
+    # Regression test for gh-6187, gh-4129
+
+    # create an empty test image
+    img = np.zeros((100, 100), dtype=bool)
+    # draw a horizontal line into our test image
+    img[30, :] = 1
+
+    hough_space, angles, dist = transform.hough_line(img)
+
+    best_h_space, best_angles, best_dist = transform.hough_line_peaks(
+        hough_space, angles, dist
+    )
+    assert len(best_angles) == 1
+    assert len(best_dist) == 1
+    expected_angle = -np.pi / 2
+    expected_dist = -30
+    assert abs(best_angles[0] - expected_angle) < 0.01
+    assert abs(best_dist[0] - expected_dist) < 0.01
+
+
 def test_hough_line_peaks_dist():
     img = np.zeros((100, 100), dtype=bool)
     img[:, 30] = True
