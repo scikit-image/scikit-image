@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
+from skimage import data, transform
 from skimage._shared.testing import test_parallel
-from skimage import data
-from skimage import transform
-from skimage.draw import line, circle_perimeter, ellipse_perimeter
+from skimage.draw import circle_perimeter, ellipse_perimeter, line
+
 
 @test_parallel()
 def test_hough_line():
@@ -56,10 +56,10 @@ def test_probabilistic_hough():
         img, threshold=10, line_length=10, line_gap=1, theta=theta)
     # sort the lines according to the x-axis
     sorted_lines = []
-    for line in lines:
-        line = list(line)
-        line.sort(key=lambda x: x[0])
-        sorted_lines.append(line)
+    for ln in lines:
+        ln = list(ln)
+        ln.sort(key=lambda x: x[0])
+        sorted_lines.append(ln)
 
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
