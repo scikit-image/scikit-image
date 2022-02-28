@@ -105,7 +105,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           https://hal.archives-ouvertes.fr/hal-00674508/document
+           https://hal.archives-ouvertes.fr/hal-00674508
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
