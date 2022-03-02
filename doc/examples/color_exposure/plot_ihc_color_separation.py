@@ -24,19 +24,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.color import rgb2hed, hed2rgb
+from skimage.color import separate_stains, combine_stains, hd_from_rgb, rgb_from_hd
 
 # Example IHC image
 ihc_rgb = data.immunohistochemistry()
 
 # Separate the stains from the IHC image
-ihc_hed = rgb2hed(ihc_rgb)
+ihc_hd = separate_stains(ihc_rgb, hd_from_rgb)
 
 # Create an RGB image for each of the stains
-null = np.zeros_like(ihc_hed[:, :, 0])
-ihc_h = hed2rgb(np.stack((ihc_hed[:, :, 0], null, null), axis=-1))
-ihc_e = hed2rgb(np.stack((null, ihc_hed[:, :, 1], null), axis=-1))
-ihc_d = hed2rgb(np.stack((null, null, ihc_hed[:, :, 2]), axis=-1))
+null = np.zeros_like(ihc_hd[:, :, 0])
+ihc_h = combine_stains(np.stack((ihc_hd[:, :, 0], null), axis=-1), rgb_from_hd)
+ihc_d = combine_stains(np.stack((null, ihc_hd[:, :, 1]), axis=-1), rgb_from_hd)
 
 # Display
 fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True)
@@ -48,11 +47,8 @@ ax[0].set_title("Original image")
 ax[1].imshow(ihc_h)
 ax[1].set_title("Hematoxylin")
 
-ax[2].imshow(ihc_e)
-ax[2].set_title("Eosin")  # Note that there is no Eosin stain in this image
-
-ax[3].imshow(ihc_d)
-ax[3].set_title("DAB")
+ax[2].imshow(ihc_d)
+ax[2].set_title("DAB")
 
 for a in ax.ravel():
     a.axis('off')
@@ -66,10 +62,10 @@ fig.tight_layout()
 from skimage.exposure import rescale_intensity
 
 # Rescale hematoxylin and DAB channels and give them a fluorescence look
-h = rescale_intensity(ihc_hed[:, :, 0], out_range=(0, 1),
-                      in_range=(0, np.percentile(ihc_hed[:, :, 0], 99)))
-d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1),
-                      in_range=(0, np.percentile(ihc_hed[:, :, 2], 99)))
+h = rescale_intensity(ihc_hd[:, :, 0], out_range=(0, 1),
+                      in_range=(0, np.percentile(ihc_hd[:, :, 0], 99)))
+d = rescale_intensity(ihc_hd[:, :, 1], out_range=(0, 1),
+                      in_range=(0, np.percentile(ihc_hd[:, :, 1], 99)))
 
 # Cast the two channels into an RGB image, as the blue and green channels
 # respectively

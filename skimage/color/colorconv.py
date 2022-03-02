@@ -128,14 +128,14 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     )
 
 
-def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
+def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1, number_channels=3):
     """Check the shape of the array and convert it to
     floating point representation.
     """
     arr = np.asanyarray(arr)
 
-    if arr.shape[channel_axis] != 3:
-        msg = (f'the input array must have size 3 along `channel_axis`, '
+    if arr.shape[channel_axis] != number_channels:
+        msg = (f'the input array must have size {number_channels} along `channel_axis`, '
                f'got {arr.shape}')
         raise ValueError(msg)
 
@@ -538,88 +538,70 @@ def get_xyz_coords(illuminant, observer, dtype=float):
                          f'(`{illuminant}`, `{observer}`)')
 
 
-# Haematoxylin-Eosin-DAB colorspace
-# From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
-# "Quantification of histochemical staining by color deconvolution,"
-# Analytical and quantitative cytology and histology / the International
-# Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
-# pp. 291-9, Aug. 2001.
-rgb_from_hed = np.array([[0.65, 0.70, 0.29],
-                         [0.07, 0.99, 0.11],
-                         [0.27, 0.57, 0.78]])
-hed_from_rgb = linalg.inv(rgb_from_hed)
-
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
 # https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
 
+_hematoxylin = [0.650, 0.704, 0.286]
+_eosin = [0.092789, 0.954111, 0.283111]
+_DAB = [0.268, 0.570, 0.776]
+
+# Hematoxylin + Eosin
+rgb_from_he = np.array([_hematoxylin,
+                        _eosin])
+he_from_rgb = linalg.pinv(rgb_from_he)
+
 # Hematoxylin + DAB
-rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
-                         [0.268, 0.570, 0.776],
-                         [0.0, 0.0, 0.0]])
-rgb_from_hdx[2, :] = np.cross(rgb_from_hdx[0, :], rgb_from_hdx[1, :])
-hdx_from_rgb = linalg.inv(rgb_from_hdx)
+rgb_from_hd = np.array([_hematoxylin,
+                        _DAB])
+hd_from_rgb = linalg.pinv(rgb_from_hd)
 
 # Feulgen + Light Green
-rgb_from_fgx = np.array([[0.46420921, 0.83008335, 0.30827187],
-                         [0.94705542, 0.25373821, 0.19650764],
-                         [0.0, 0.0, 0.0]])
-rgb_from_fgx[2, :] = np.cross(rgb_from_fgx[0, :], rgb_from_fgx[1, :])
-fgx_from_rgb = linalg.inv(rgb_from_fgx)
+rgb_from_fg = np.array([[0.46420921, 0.83008335, 0.30827187],
+                        [0.94705542, 0.25373821, 0.19650764]])
+fg_from_rgb = linalg.pinv(rgb_from_fg)
 
 # Giemsa: Methyl Blue + Eosin
-rgb_from_bex = np.array([[0.834750233, 0.513556283, 0.196330403],
-                         [0.092789, 0.954111, 0.283111],
-                         [0.0, 0.0, 0.0]])
-rgb_from_bex[2, :] = np.cross(rgb_from_bex[0, :], rgb_from_bex[1, :])
-bex_from_rgb = linalg.inv(rgb_from_bex)
+rgb_from_be = np.array([[0.834750233, 0.513556283, 0.196330403],
+                        _eosin])
+be_from_rgb = linalg.pinv(rgb_from_be)
 
 # FastRed + FastBlue +  DAB
 rgb_from_rbd = np.array([[0.21393921, 0.85112669, 0.47794022],
                          [0.74890292, 0.60624161, 0.26731082],
-                         [0.268, 0.570, 0.776]])
-rbd_from_rgb = linalg.inv(rgb_from_rbd)
+                         _DAB])
+rbd_from_rgb = linalg.pinv(rgb_from_rbd)
 
 # Methyl Green + DAB
-rgb_from_gdx = np.array([[0.98003, 0.144316, 0.133146],
-                         [0.268, 0.570, 0.776],
-                         [0.0, 0.0, 0.0]])
-rgb_from_gdx[2, :] = np.cross(rgb_from_gdx[0, :], rgb_from_gdx[1, :])
-gdx_from_rgb = linalg.inv(rgb_from_gdx)
+rgb_from_gd = np.array([[0.98003, 0.144316, 0.133146],
+                        _DAB])
+gd_from_rgb = linalg.pinv(rgb_from_gd)
 
 # Hematoxylin + AEC
-rgb_from_hax = np.array([[0.650, 0.704, 0.286],
-                         [0.2743, 0.6796, 0.6803],
-                         [0.0, 0.0, 0.0]])
-rgb_from_hax[2, :] = np.cross(rgb_from_hax[0, :], rgb_from_hax[1, :])
-hax_from_rgb = linalg.inv(rgb_from_hax)
+rgb_from_ha = np.array([_hematoxylin,
+                        [0.2743, 0.6796, 0.6803]])
+ha_from_rgb = linalg.pinv(rgb_from_ha)
 
 # Blue matrix Anilline Blue + Red matrix Azocarmine + Orange matrix Orange-G
 rgb_from_bro = np.array([[0.853033, 0.508733, 0.112656],
                          [0.09289875, 0.8662008, 0.49098468],
                          [0.10732849, 0.36765403, 0.9237484]])
-bro_from_rgb = linalg.inv(rgb_from_bro)
+bro_from_rgb = linalg.pinv(rgb_from_bro)
 
 # Methyl Blue + Ponceau Fuchsin
-rgb_from_bpx = np.array([[0.7995107, 0.5913521, 0.10528667],
-                         [0.09997159, 0.73738605, 0.6680326],
-                         [0.0, 0.0, 0.0]])
-rgb_from_bpx[2, :] = np.cross(rgb_from_bpx[0, :], rgb_from_bpx[1, :])
-bpx_from_rgb = linalg.inv(rgb_from_bpx)
+rgb_from_bp = np.array([[0.7995107, 0.5913521, 0.10528667],
+                        [0.09997159, 0.73738605, 0.6680326]])
+bp_from_rgb = linalg.pinv(rgb_from_bp)
 
 # Alcian Blue + Hematoxylin
-rgb_from_ahx = np.array([[0.874622, 0.457711, 0.158256],
-                         [0.552556, 0.7544, 0.353744],
-                         [0.0, 0.0, 0.0]])
-rgb_from_ahx[2, :] = np.cross(rgb_from_ahx[0, :], rgb_from_ahx[1, :])
-ahx_from_rgb = linalg.inv(rgb_from_ahx)
+rgb_from_ah = np.array([_hematoxylin,
+                        [0.552556, 0.7544, 0.353744]])
+ah_from_rgb = linalg.pinv(rgb_from_ah)
 
 # Hematoxylin + PAS
-rgb_from_hpx = np.array([[0.644211, 0.716556, 0.266844],
-                         [0.175411, 0.972178, 0.154589],
-                         [0.0, 0.0, 0.0]])
-rgb_from_hpx[2, :] = np.cross(rgb_from_hpx[0, :], rgb_from_hpx[1, :])
-hpx_from_rgb = linalg.inv(rgb_from_hpx)
+rgb_from_hp = np.array([_hematoxylin,
+                        [0.175411, 0.972178, 0.154589]])
+hp_from_rgb = linalg.pinv(rgb_from_hp)
 
 # -------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -1418,93 +1400,6 @@ def luv2rgb(luv, *, channel_axis=-1):
 
 
 @channel_as_last_axis()
-def rgb2hed(rgb, *, channel_axis=-1):
-    """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
-
-    Parameters
-    ----------
-    rgb : (..., 3, ...) array_like
-        The image in RGB format. By default, the final dimension denotes
-        channels.
-    channel_axis : int, optional
-        This parameter indicates which axis of the array corresponds to
-        channels.
-
-        .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
-
-    Returns
-    -------
-    out : (..., 3, ...) ndarray
-        The image in HED format. Same dimensions as input.
-
-    Raises
-    ------
-    ValueError
-        If `rgb` is not at least 2-D with shape (..., 3, ...).
-
-    References
-    ----------
-    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
-           staining by color deconvolution.," Analytical and quantitative
-           cytology and histology / the International Academy of Cytology [and]
-           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.color import rgb2hed
-    >>> ihc = data.immunohistochemistry()
-    >>> ihc_hed = rgb2hed(ihc)
-    """
-    return separate_stains(rgb, hed_from_rgb)
-
-
-@channel_as_last_axis()
-def hed2rgb(hed, *, channel_axis=-1):
-    """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
-
-    Parameters
-    ----------
-    hed : (..., 3, ...) array_like
-        The image in the HED color space. By default, the final dimension
-        denotes channels.
-    channel_axis : int, optional
-        This parameter indicates which axis of the array corresponds to
-        channels.
-
-        .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
-
-    Returns
-    -------
-    out : (..., 3, ...) ndarray
-        The image in RGB. Same dimensions as input.
-
-    Raises
-    ------
-    ValueError
-        If `hed` is not at least 2-D with shape (..., 3, ...).
-
-    References
-    ----------
-    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
-           staining by color deconvolution.," Analytical and quantitative
-           cytology and histology / the International Academy of Cytology [and]
-           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
-
-    Examples
-    --------
-    >>> from skimage import data
-    >>> from skimage.color import rgb2hed, hed2rgb
-    >>> ihc = data.immunohistochemistry()
-    >>> ihc_hed = rgb2hed(ihc)
-    >>> ihc_rgb = hed2rgb(ihc_hed)
-    """
-    return combine_stains(hed, rgb_from_hed)
-
-
-@channel_as_last_axis()
 def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     """RGB to stain color space conversion.
 
@@ -1524,8 +1419,9 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., 3, ...) ndarray
-        The image in stain color space. Same dimensions as input.
+    out : (..., 2/3, ...) ndarray
+        The image in stain color space. Same dimensions as input, but
+        with two or three channels depending on the stain matrix.
 
     Raises
     ------
@@ -1537,18 +1433,17 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     Stain separation matrices available in the ``color`` module and their
     respective colorspace:
 
-    * ``hed_from_rgb``: Hematoxylin + Eosin + DAB
-    * ``hdx_from_rgb``: Hematoxylin + DAB
-    * ``fgx_from_rgb``: Feulgen + Light Green
-    * ``bex_from_rgb``: Giemsa stain : Methyl Blue + Eosin
+    * ``hd_from_rgb``: Hematoxylin + DAB
+    * ``fg_from_rgb``: Feulgen + Light Green
+    * ``be_from_rgb``: Giemsa stain : Methyl Blue + Eosin
     * ``rbd_from_rgb``: FastRed + FastBlue +  DAB
-    * ``gdx_from_rgb``: Methyl Green + DAB
-    * ``hax_from_rgb``: Hematoxylin + AEC
+    * ``gd_from_rgb``: Methyl Green + DAB
+    * ``ha_from_rgb``: Hematoxylin + AEC
     * ``bro_from_rgb``: Blue matrix Anilline Blue + Red matrix Azocarmine\
                         + Orange matrix Orange-G
-    * ``bpx_from_rgb``: Methyl Blue + Ponceau Fuchsin
-    * ``ahx_from_rgb``: Alcian Blue + Hematoxylin
-    * ``hpx_from_rgb``: Hematoxylin + PAS
+    * ``bp_from_rgb``: Methyl Blue + Ponceau Fuchsin
+    * ``ah_from_rgb``: Alcian Blue + Hematoxylin
+    * ``hp_from_rgb``: Hematoxylin + PAS
 
     This implementation borrows some ideas from DIPlib [2]_, e.g. the
     compensation using a small value to avoid log artifacts when
@@ -1565,9 +1460,9 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import separate_stains, hdx_from_rgb
+    >>> from skimage.color import separate_stains, hd_from_rgb
     >>> ihc = data.immunohistochemistry()
-    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
+    >>> ihc_hd = separate_stains(ihc, hd_from_rgb)
     """
     rgb = _prepare_colorarray(rgb, force_copy=True, channel_axis=-1)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
@@ -1586,9 +1481,9 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 
     Parameters
     ----------
-    stains : (..., 3, ...) array_like
-        The image in stain color space. By default, the final dimension denotes
-        channels.
+    stains : (..., 2/3, ...) array_like
+        The image in stain color space, with two or three channels.
+        By default, the final dimension denotes channels.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
     channel_axis : int, optional
@@ -1606,25 +1501,24 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     Raises
     ------
     ValueError
-        If `stains` is not at least 2-D with shape (..., 3, ...).
+        If `stains` is not at least 2-D with shape (..., 2/3, ...).
 
     Notes
     -----
     Stain combination matrices available in the ``color`` module and their
     respective colorspace:
 
-    * ``rgb_from_hed``: Hematoxylin + Eosin + DAB
-    * ``rgb_from_hdx``: Hematoxylin + DAB
-    * ``rgb_from_fgx``: Feulgen + Light Green
-    * ``rgb_from_bex``: Giemsa stain : Methyl Blue + Eosin
+    * ``rgb_from_hd``: Hematoxylin + DAB
+    * ``rgb_from_fg``: Feulgen + Light Green
+    * ``rgb_from_be``: Giemsa stain : Methyl Blue + Eosin
     * ``rgb_from_rbd``: FastRed + FastBlue +  DAB
-    * ``rgb_from_gdx``: Methyl Green + DAB
-    * ``rgb_from_hax``: Hematoxylin + AEC
+    * ``rgb_from_gd``: Methyl Green + DAB
+    * ``rgb_from_ha``: Hematoxylin + AEC
     * ``rgb_from_bro``: Blue matrix Anilline Blue + Red matrix Azocarmine\
                         + Orange matrix Orange-G
-    * ``rgb_from_bpx``: Methyl Blue + Ponceau Fuchsin
-    * ``rgb_from_ahx``: Alcian Blue + Hematoxylin
-    * ``rgb_from_hpx``: Hematoxylin + PAS
+    * ``rgb_from_bp``: Methyl Blue + Ponceau Fuchsin
+    * ``rgb_from_ah``: Alcian Blue + Hematoxylin
+    * ``rgb_from_hp``: Hematoxylin + PAS
 
     References
     ----------
@@ -1637,12 +1531,12 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     --------
     >>> from skimage import data
     >>> from skimage.color import (separate_stains, combine_stains,
-    ...                            hdx_from_rgb, rgb_from_hdx)
+    ...                            hd_from_rgb, rgb_from_hd)
     >>> ihc = data.immunohistochemistry()
-    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
-    >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
+    >>> ihc_hd = separate_stains(ihc, hd_from_rgb)
+    >>> ihc_rgb = combine_stains(ihc_hd, rgb_from_hd)
     """
-    stains = _prepare_colorarray(stains, channel_axis=-1)
+    stains = _prepare_colorarray(stains, channel_axis=-1, number_channels=conv_matrix.shape[0])
 
     # log_adjust here is used to compensate the sum within separate_stains().
     log_adjust = -np.log(1E-6)
