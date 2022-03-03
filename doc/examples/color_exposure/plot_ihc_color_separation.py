@@ -24,18 +24,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.color import separate_stains, combine_stains, hd_from_rgb, rgb_from_hd
+from skimage.color import separate_stains, combine_stains, stain_color_matrix
 
 # Example IHC image
 ihc_rgb = data.immunohistochemistry()
 
+# Set the clear glass to pure white, which we measured by looking at the whitest
+# region of the image.
+ihc_rgb = ihc_rgb / [236, 236, 234]
+
+# Stain color matrix
+m = stain_color_matrix(('Hematoxylin', 'DAB'))
+
 # Separate the stains from the IHC image
-ihc_hd = separate_stains(ihc_rgb, hd_from_rgb)
+ihc_hd = separate_stains(ihc_rgb, m)
 
 # Create an RGB image for each of the stains
 null = np.zeros_like(ihc_hd[:, :, 0])
-ihc_h = combine_stains(np.stack((ihc_hd[:, :, 0], null), axis=-1), rgb_from_hd)
-ihc_d = combine_stains(np.stack((null, ihc_hd[:, :, 1]), axis=-1), rgb_from_hd)
+ihc_h = combine_stains(np.stack((ihc_hd[:, :, 0], null), axis=-1), m)
+ihc_d = combine_stains(np.stack((null, ihc_hd[:, :, 1]), axis=-1), m)
 
 # Display
 fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True)
