@@ -1480,7 +1480,7 @@ def separate_stains(rgb, color_matrix, *, channel_axis=-1):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import separate_stains, hd_from_rgb
+    >>> from skimage.color import separate_stains, stain_color_matrix
     >>> ihc = data.immunohistochemistry()
     >>> m = stain_color_matrix(('Hematoxylin', 'DAB'))
     >>> ihc_hd = separate_stains(ihc, m)
@@ -1540,7 +1540,7 @@ def combine_stains(stains, color_matrix, *, channel_axis=-1):
     --------
     >>> from skimage import data
     >>> from skimage.color import (separate_stains, combine_stains,
-    ...                            hd_from_rgb, rgb_from_hd)
+    ...                            stain_color_matrix)
     >>> ihc = data.immunohistochemistry()
     >>> m = stain_color_matrix(('Hematoxylin', 'DAB'))
     >>> ihc_hd = separate_stains(ihc, m)
