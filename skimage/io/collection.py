@@ -186,12 +186,14 @@ class ImageCollection(object):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
+        elif isinstance(load_pattern, Sequence) and load_func is not None:
+            self._files = list(load_pattern)
         else:
             raise TypeError('Invalid pattern as input.')
-
-        self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
             from ._io import imread
