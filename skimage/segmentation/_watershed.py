@@ -121,6 +121,9 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     watershed_line : bool, optional
         If watershed_line is True, a one-pixel wide line separates the regions
         obtained by the watershed algorithm. The line has the label 0.
+        Note that the method used for adding the watershed line expects that
+        marker regions are not adjacent; the watershed line may not separate
+        borders between adjacent marker regions.
 
     Returns
     -------
