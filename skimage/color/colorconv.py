@@ -1335,7 +1335,7 @@ def luv2rgb(luv, *, channel_axis=-1):
 
 
 def stain_color_matrix(colors):
-    """Creates a stain color matrix for a combination of stains.
+    """Create a stain color matrix for a combination of stains.
 
     This routine knows some common stains, their colors are taken from
     other tools implementing stain unmixing, but will likely not exactly
@@ -1362,18 +1362,22 @@ def stain_color_matrix(colors):
         "PAS"
         "Ponceau Fuchsin"
 
-    See separate_stains() and combine_stains().
+    See Also
+    --------
+    separate_stains
+    combine_stains
 
     Parameters
     ----------
-    colors : iterable with 1 to 3 elements. Each element must be either a
+    colors : iterable with 1 to 3 elements
+        Each element must be either a
         string for a known stain name (see below) or an RGB triplet in the
         form of an iterable.
 
     Returns
     -------
     out : (..., 3) ndarray
-        The stain color matrix, an Nx3 matrix, where N is the length of the
+        The stain color matrix, of shape (N, 3), where N is the length of the
         input `colors`.
 
     Raises
@@ -1386,7 +1390,7 @@ def stain_color_matrix(colors):
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
     """
-    # Following matrices are adapted form the Java code written by G.Landini.
+    # Following matrices are adapted from the Java code written by G. Landini.
     # https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
     # Similar values can be found in CellProfiler:
     # https://github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/modules/unmixcolors.py
@@ -1416,7 +1420,7 @@ def stain_color_matrix(colors):
     for ii, val in enumerate(colors):
         if isinstance(val, str):
             if not val in stain_colors:
-                msg = (f'the input `colors` contains {val}, which I do not recognize as a stain')
+                msg = (f'the input `colors` contains {val}, which is not a known stain')
                 raise ValueError(msg)
             val = stain_colors[val]
         else:
@@ -1434,7 +1438,7 @@ def separate_stains(rgb, color_matrix, *, channel_axis=-1):
     """Unmix stains from an RGB brightfield image.
 
     It is important to pre-process the image to set the clear glass value
-    to white -- (1.0, 1.0, 1.0), or (255,255,255) for uint8 images.
+    to white -- (1.0, 1.0, 1.0), or (255, 255, 255) for uint8 images.
     The clear glass value is the pixel value in a point on the slide where
     there is no tissue and no stains.
 
@@ -1507,7 +1511,8 @@ def combine_stains(stains, color_matrix, *, channel_axis=-1):
         number of channels must match the size of `color_matrix`.
         By default, the final dimension denotes channels.
     color_matrix: ndarray
-        The stain color matrix as constructed with `stain_color_matrix()`.
+        The stain color matrix as constructed with
+        `skimage.color.stain_color_matrix`.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.
