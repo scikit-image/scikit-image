@@ -157,6 +157,23 @@ class ImageCollection(object):
       x = ic[0]  # calls vidread_step(video_file, step=3)
       x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
+    Alternatively, if a `load_func` is provided, and `load_pattern` is a
+    sequence, an ImageCollection of corresponding length will be created,
+    and the individual images are loaded by calling `load_func` with the
+    matching element of the `load_pattern` as its first argument. In this
+    case, the elements of the sequence do not need to be resolvable file
+    names (or strings at all). For example, to create an ImageCollection
+    containing 500 images from a video::
+
+      class vidread_random:
+          def __init__ (self, f):
+              self.vid = imageio.get_reader(f)
+          def __call__ (self, frameno):
+              return self.vid.get_data(frameno)
+      ic = ImageCollection (range(500), load_func=vidread_random('movie.mp4'))
+
+      ic # is an ImageCollection object of length 500
+
     Another use of ``load_func`` would be to convert all images to ``uint8``::
 
       def imread_convert(f):
