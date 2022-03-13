@@ -201,7 +201,7 @@ class ImageCollection(object):
     ...         self.vid = imageio.get_reader(f)
     ...     def __call__ (self, frameno):
     ...         return self.vid.get_data(frameno)
-    ... 
+    ...
     >>> filename = data_dir + '/no_time_for_that_tiny.gif'
     >>> ic = io.ImageCollection(range(24), load_func=multiread(filename))
     >>> len(ic)
