@@ -193,6 +193,19 @@ class ImageCollection(object):
     (200, 200)
 
     >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+
+    >>> import imageio
+    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
+    >>> class multiread:
+    ...     def __init__ (self, f):
+    ...         self.vid = imageio.get_reader(f)
+    ...     def __call__ (self, frameno):
+    ...         return self.vid.get_data(frameno)
+    ... 
+    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
+    >>> ic = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> len(ic)
+    24
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
