@@ -170,7 +170,7 @@ class ImageCollection(object):
               self.vid = imageio.get_reader(f)
           def __call__ (self, frameno):
               return self.vid.get_data(frameno)
-      ic = ImageCollection (range(500), load_func=vidread_random('movie.mp4'))
+      ic = ImageCollection(range(500), load_func=vidread_random('movie.mp4'))
 
       ic  # is an ImageCollection object of length 500
 
