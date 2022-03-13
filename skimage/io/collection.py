@@ -174,7 +174,7 @@ class ImageCollection(object):
 
       ic  # is an ImageCollection object of length 500
 
-    Another use of ``load_func`` would be to convert all images to ``uint8``::
+    Another use of `load_func` would be to convert all images to ``uint8``::
 
       def imread_convert(f):
           return imread(f).astype(np.uint8)
