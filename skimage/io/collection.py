@@ -172,7 +172,7 @@ class ImageCollection(object):
               return self.vid.get_data(frameno)
       ic = ImageCollection (range(500), load_func=vidread_random('movie.mp4'))
 
-      ic # is an ImageCollection object of length 500
+      ic  # is an ImageCollection object of length 500
 
     Another use of ``load_func`` would be to convert all images to ``uint8``::
 
