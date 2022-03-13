@@ -157,7 +157,7 @@ class ImageCollection(object):
       x = ic[0]  # calls vidread_step(video_file, step=3)
       x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
-    Alternatively, if a `load_func` is provided, and `load_pattern` is a
+    Alternatively, if a `load_func` is provided and `load_pattern` is a
     sequence, an ImageCollection of corresponding length will be created,
     and the individual images are loaded by calling `load_func` with the
     matching element of the `load_pattern` as its first argument. In this
