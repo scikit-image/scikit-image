@@ -159,21 +159,20 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
-    cdef double bin_size = accuracy * accuracy
+    cdef double bin_size = accuracy
 
-    cdef double max_b_squared
+    cdef double max_b
     if max_size is None:
         if img.shape[0] < img.shape[1]:
-            max_b_squared = np.round(0.5 * img.shape[0])
+            max_b = np.round(0.5 * img.shape[0])
         else:
-            max_b_squared = np.round(0.5 * img.shape[1])
-        max_b_squared *= max_b_squared
+            max_b = np.round(0.5 * img.shape[1])
     else:
-        max_b_squared = max_size * max_size
+        max_b = max_size
 
     cdef Py_ssize_t p1, p2, p3, p1x, p1y, p2x, p2y, p3x, p3y
     cdef double xc, yc, a, b, d, k, dx, dy
-    cdef double cos_tau_squared, b_squared, orientation
+    cdef double cos_tau_squared, orientation
 
     for p1 in range(num_pixels):
         p1x = pixels[1, p1]
@@ -187,7 +186,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
             dx = p1x - p2x
             dy = p1y - p2y
             a = 0.5 * sqrt(dx * dx + dy * dy)
-            if a > 0.5 * min_size:
+            if a >= min_size:
                 xc = 0.5 * (p1x + p2x)
                 yc = 0.5 * (p1y + p2y)
 
@@ -197,7 +196,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                     dx = p3x - xc
                     dy = p3y - yc
                     d = sqrt(dx * dx + dy * dy)
-                    if d > min_size:
+                    if (d <= a) and (d > 0):
                         dx = p3x - p1x
                         dy = p3y - p1y
                         cos_tau_squared = ((a*a + d*d - dx*dx - dy*dy)
@@ -206,28 +205,24 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                         # Consider b2 > 0 and avoid division by zero
                         k = a*a - d*d * cos_tau_squared
                         if k > 0 and cos_tau_squared < 1:
-                            b_squared = a*a * d*d * (1 - cos_tau_squared) / k
+                            b = sqrt(a*a * d*d * (1 - cos_tau_squared) / k)
                             # b2 range is limited to avoid histogram memory
                             # overflow
-                            if b_squared <= max_b_squared:
-                                acc.append(b_squared)
+                            if b <= max_b:
+                                acc.append(b)
 
                 if len(acc) > 0:
-                    bins = np.arange(0, np.max(acc) + bin_size, bin_size)
+                    bins = np.arange(np.floor(np.min(acc)), np.max(acc) + bin_size, bin_size)
                     hist, bin_edges = np.histogram(acc, bins=bins)
                     hist_max = np.max(hist)
                     if hist_max > threshold:
-                        orientation = atan2(p1x - p2x, p1y - p2y)
-                        b = sqrt(bin_edges[hist.argmax()])
+                        orientation = atan2(p1y - p2y, p1x - p2x)
+                        b = bin_edges[hist.argmax()] + (bin_size / 2)
                         # to keep ellipse_perimeter() convention
-                        if orientation != 0:
-                            orientation = M_PI - orientation
-                            # When orientation is not in [-pi:pi]
-                            # it would mean in ellipse_perimeter()
-                            # that a < b. But we keep a > b.
-                            if orientation > M_PI:
-                                orientation = orientation - M_PI / 2.
-                                a, b = b, a
+                        orientation += M_PI / 2
+                        # to keep orientation in [-pi/2 : pi/2]
+                        if orientation > M_PI/2:
+                            orientation -= M_PI
                         results.append((hist_max, # Accumulator
                                         yc, xc,
                                         a, b,
