@@ -183,6 +183,7 @@ class ImageCollection(object):
 
     Examples
     --------
+    >>> import imageio
     >>> import skimage.io as io
     >>> from skimage import data_dir
 
@@ -194,7 +195,6 @@ class ImageCollection(object):
 
     >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
 
-    >>> import imageio
     >>> class multiread:
     ...     def __init__ (self, f):
     ...         self.vid = imageio.get_reader(f)
