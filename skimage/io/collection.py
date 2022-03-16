@@ -159,7 +159,7 @@ class ImageCollection(object):
 
     Alternatively, if a `load_func` is provided and `load_pattern` is a
     sequence, an ImageCollection of corresponding length will be created,
-    and the individual images are loaded by calling `load_func` with the
+    and the individual images will be loaded by calling `load_func` with the
     matching element of the `load_pattern` as its first argument. In this
     case, the elements of the sequence do not need to be resolvable file
     names (or strings at all). For example, to create an ImageCollection
