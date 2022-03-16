@@ -195,7 +195,6 @@ class ImageCollection(object):
     >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
 
     >>> import imageio
-    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
     >>> class multiread:
     ...     def __init__ (self, f):
     ...         self.vid = imageio.get_reader(f)
