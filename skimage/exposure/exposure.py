@@ -613,6 +613,7 @@ def _adjust_gamma_u8(image, gamma, gain):
 
     """
     lut = 255 * gain * (np.linspace(0, 1, 256) ** gamma)
+    # Add 0.5 to round to neerest integer value
     lut = np.minimum(lut + 0.5, 255).astype('uint8')
     return lut[image]
 
