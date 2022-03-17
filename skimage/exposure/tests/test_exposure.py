@@ -684,7 +684,6 @@ def test_adjust_gamma_greater_one():
                          255] , dtype=np.uint8).reshape((16, 16))
 
     result = exposure.adjust_gamma(image, 2)
-    print(result.tolist())
     assert_array_equal(result, expected)
 
 
