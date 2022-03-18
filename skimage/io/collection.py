@@ -414,11 +414,6 @@ class MultiImage(ImageCollection):
         Whether to conserve memory by only caching the frames of a single
         image. Default is True.
 
-    Other parameters
-    ----------------
-    load_func : callable
-        ``imread`` by default.  See notes below.
-
     Notes
     -----
     The object that is returned can be used as a list of image-data objects,
@@ -433,10 +428,6 @@ class MultiImage(ImageCollection):
     For an animated GIF image, `MultiImage` in the current implementation
     will only read one frame, while `ImageCollection` by default will read
     all of them.
-
-    The current implementation of `MultiImage` is simply a small wrapper
-    around `ImageCollection` specifying an internal ``imread`` as the
-    ``load_func``.
 
     Examples
     --------
