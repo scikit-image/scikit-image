@@ -454,10 +454,11 @@ class MultiImage(ImageCollection):
                  **imread_kwargs):
         """Load a multi-img."""
         from imageio import mimread
+        load_func = lambda img: np.array(mimread(img))
 
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=lambda img: np.array(mimread(img)), **imread_kwargs)
+                                         load_func=load_func, **imread_kwargs)
 
     @property
     def filename(self):
