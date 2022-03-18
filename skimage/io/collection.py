@@ -22,6 +22,8 @@ if version.parse(pil_version) < version.parse('8.1.2'):
          stacklevel=2)
 
 from tifffile import TiffFile
+from imageio import imread as iio_imread
+from tifffile import imread as tif_imread
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -194,8 +196,6 @@ class ImageCollection(object):
         self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
-            from ._io import imread
-            self.load_func = imread
             self._numframes = self._find_images()
         else:
             self.load_func = load_func
@@ -228,6 +228,8 @@ class ImageCollection(object):
                 with open(fname, 'rb') as f:
                     img = TiffFile(f)
                     index += [(fname, i) for i in range(len(img.pages))]
+                self.load_func = tif_imread
+                self.load_func_kwarg = 'key'
             else:
                 try:
                     im = Image.open(fname)
@@ -244,6 +246,8 @@ class ImageCollection(object):
                     i += 1
                 if hasattr(im, 'fp') and im.fp:
                     im.fp.close()
+                self.load_func = iio_imread
+                self.load_func_kwarg = 'img_num'
         self._frame_index = index
         return len(index)
 
@@ -280,13 +284,14 @@ class ImageCollection(object):
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
                     if img_num is not None:
-                        kwargs['img_num'] = img_num
+                        kwargs[self.load_func_kwarg] = img_num
                     try:
                         self.data[idx] = self.load_func(fname, **kwargs)
-                    # Account for functions that do not accept an img_num kwarg
+                    # Account for functions that do not accept our kwarg
+                    # for accessing individual image frames
                     except TypeError as e:
-                        if "unexpected keyword argument 'img_num'" in str(e):
-                            del kwargs['img_num']
+                        if "unexpected keyword argument" in str(e):
+                            del kwargs[self.load_func_kwarg]
                             self.data[idx] = self.load_func(fname, **kwargs)
                         else:
                             raise
@@ -448,11 +453,11 @@ class MultiImage(ImageCollection):
     def __init__(self, filename, conserve_memory=True, dtype=None,
                  **imread_kwargs):
         """Load a multi-img."""
-        from ._io import imread
+        from imageio import mimread
 
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=imread, **imread_kwargs)
+                                         load_func=lambda img: np.array(mimread(img)), **imread_kwargs)
 
     @property
     def filename(self):
