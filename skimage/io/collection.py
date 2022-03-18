@@ -21,10 +21,6 @@ if version.parse(pil_version) < version.parse('8.1.2'):
          'We recommend to upgrade this library.',
          stacklevel=2)
 
-from tifffile import TiffFile
-from imageio import imread as iio_imread
-from tifffile import imread as tif_imread
-
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
            'imread_collection_wrapper']
@@ -196,6 +192,8 @@ class ImageCollection(object):
         self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
+            from imageio import imread as iio_imread
+            self.load_func = iio_imread
             self._numframes = self._find_images()
         else:
             self.load_func = load_func
@@ -224,30 +222,21 @@ class ImageCollection(object):
     def _find_images(self):
         index = []
         for fname in self._files:
-            if fname.lower().endswith(('.tiff', '.tif')):
-                with open(fname, 'rb') as f:
-                    img = TiffFile(f)
-                    index += [(fname, i) for i in range(len(img.pages))]
-                self.load_func = tif_imread
-                self.load_func_kwarg = 'key'
-            else:
+            try:
+                im = Image.open(fname)
+                im.seek(0)
+            except (IOError, OSError):
+                continue
+            i = 0
+            while True:
                 try:
-                    im = Image.open(fname)
-                    im.seek(0)
-                except (IOError, OSError):
-                    continue
-                i = 0
-                while True:
-                    try:
-                        im.seek(i)
-                    except EOFError:
-                        break
-                    index.append((fname, i))
-                    i += 1
-                if hasattr(im, 'fp') and im.fp:
-                    im.fp.close()
-                self.load_func = iio_imread
-                self.load_func_kwarg = 'img_num'
+                    im.seek(i)
+                except EOFError:
+                    break
+                index.append((fname, i))
+                i += 1
+            if hasattr(im, 'fp') and im.fp:
+                im.fp.close()
         self._frame_index = index
         return len(index)
 
@@ -284,14 +273,14 @@ class ImageCollection(object):
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
                     if img_num is not None:
-                        kwargs[self.load_func_kwarg] = img_num
+                        kwargs['img_num'] = img_num
                     try:
                         self.data[idx] = self.load_func(fname, **kwargs)
                     # Account for functions that do not accept our kwarg
                     # for accessing individual image frames
                     except TypeError as e:
                         if "unexpected keyword argument" in str(e):
-                            del kwargs[self.load_func_kwarg]
+                            del kwargs['img_num']
                             self.data[idx] = self.load_func(fname, **kwargs)
                         else:
                             raise
