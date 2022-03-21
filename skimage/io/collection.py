@@ -448,13 +448,17 @@ class MultiImage(ImageCollection):
     def __init__(self, filename, conserve_memory=True, dtype=None,
                  **imread_kwargs):
         """Load a multi-img."""
-        from imageio.v3 import mimread
-        load_func = lambda img: np.array(mimread(img))
+        from imageio.v2 import mimread
+        self._load_func = mimread
 
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=load_func, **imread_kwargs)
+                                         load_func=self._load_func_wrapper,
+                                         **imread_kwargs)
 
     @property
     def filename(self):
         return self._filename
+
+    def _load_func_wrapper(self, filename, **imread_kwargs):
+        return np.array(self._load_func(filename, **imread_kwargs))
