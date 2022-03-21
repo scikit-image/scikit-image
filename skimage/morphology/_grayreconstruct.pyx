@@ -16,11 +16,11 @@ cnp.import_array()
 @cython.boundscheck(False)
 def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
                                     negative_indices=False, mode='c'] aranks,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=cnp.int64_t, ndim=1,
                                     negative_indices=False, mode='c'] aprev,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=cnp.int64_t, ndim=1,
                                     negative_indices=False, mode='c'] anext,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=cnp.int64_t, ndim=1,
                                     negative_indices=False, mode='c'] astrides,
                         Py_ssize_t current_idx,
                         Py_ssize_t image_stride):
@@ -49,13 +49,13 @@ def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
     image_stride : int
         Stride between seed image and mask image in `aranks`.
     """
-    cdef unsigned int neighbor_rank, current_rank, mask_rank
-    cdef int i, neighbor_idx, current_link, nprev, nnext
-    cdef int nstrides = astrides.shape[0]
+    cdef size_t neighbor_rank, current_rank, mask_rank
+    cdef Py_ssize_t i, neighbor_idx, current_link, nprev, nnext
+    cdef Py_ssize_t nstrides = astrides.shape[0]
     cdef cnp.uint32_t *ranks = <cnp.uint32_t *>(aranks.data)
-    cdef cnp.int32_t *prev = <cnp.int32_t *>(aprev.data)
-    cdef cnp.int32_t *next = <cnp.int32_t *>(anext.data)
-    cdef cnp.int32_t *strides = <cnp.int32_t *>(astrides.data)
+    cdef cnp.int64_t *prev = <cnp.int64_t *>(aprev.data)
+    cdef cnp.int64_t *next = <cnp.int64_t *>(anext.data)
+    cdef cnp.int64_t *strides = <cnp.int64_t *>(astrides.data)
 
     with nogil:
         while current_idx != -1:

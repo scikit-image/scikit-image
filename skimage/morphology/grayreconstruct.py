@@ -183,18 +183,23 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     footprint_offsets = footprint_mgrid[:, footprint].transpose()
     nb_strides = np.array([np.sum(value_stride * footprint_offset)
                            for footprint_offset in footprint_offsets],
-                          np.int32)
+                          np.int64)
 
     images = images.flatten()
 
     # Erosion goes smallest to largest; dilation goes largest to smallest.
-    index_sorted = np.argsort(images).astype(np.int32)
+    index_sorted = np.argsort(images)
+    if index_sorted.max() > np.iinfo(np.uint32).max:
+        raise ValueError(
+            "Function 'filters._rank_order' currently uses 'uint32' dtype. "
+            "This will cause overflow with the current grid."
+        )
     if method == 'dilation':
         index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
-    prev = np.full(len(images), -1, np.int32)
-    next = np.full(len(images), -1, np.int32)
+    prev = np.full(len(images), -1, np.int64)
+    next = np.full(len(images), -1, np.int64)
     prev[index_sorted[1:]] = index_sorted[:-1]
     next[index_sorted[:-1]] = index_sorted[1:]
 
