@@ -397,7 +397,7 @@ def imread_collection_wrapper(imread):
 
 class MultiImage(ImageCollection):
 
-    """A class containing all frames from multi-frame TIFF images.
+    """A class containing all frames from multi-frame images.
 
     Parameters
     ----------
@@ -410,28 +410,26 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned can be used as a list of image-data objects,
-    where each entry in the list represents one image. In this regard it is
-    very similar to `ImageCollection`, but the two differ in the treatment
-    of multi-frame images.
+    `MultiImage` can be used as a list of image-data objects similar to
+    `ImageCollection`, but is intended for multi-frame images from which
+    it loads all frames into a single entry of the list.
 
-    For a TIFF image containing N frames of size WxH, `MultiImage` stores
-    all frames of that image as a single entry of shape `(N, W, H)` in the
-    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
-
-    For an animated GIF image, `MultiImage` in the current implementation
-    will only read one frame, while `ImageCollection` by default will read
-    all of them.
+    For a bitmap or grayscale image containing N frames of size WxH,
+    `MultiImage` stores all frames of that image as a single entry of
+    shape `(N, W, H)` in the list. `ImageCollection` instead creates N
+    entries of shape `(W, H)`. The behavior when loading color images is
+    analogous; `MultiImage` prefixes the array shape with the number of
+    frames.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> img = MultiImage(multipage_tiff)
-    >>> len(img) # img contains one file
+    >>> mi = MultiImage(multipage_tiff)
+    >>> len(mi) # mi contains one file
     1
-    >>> img[0].shape # this image contains two frames of size (15, 10)
+    >>> mi[0].shape # this image contains two frames of size (15, 10)
     (2, 15, 10)
 
     >>> ic = ImageCollection(multipage_tiff)
@@ -443,22 +441,34 @@ class MultiImage(ImageCollection):
     (15, 10)
     (15, 10)
 
+    >>> singlepage_pngs = [data_dir + '/brick.png', data_dir + '/color.png']
+    >>> png_mi = MultiImage(singlepage_pngs)
+    >>> len(png_mi) # two files
+    2
+    >>> png_mi[0].shape # the first file is of size (512, 512)
+    (1, 512, 512)
+    >>> png_ic = ImageCollection(singlepage_pngs)
+    >>> len(png_ic) # again, two files
+    2
+    >>> png_ic[0].shape
+    (512, 512)
     """
 
     def __init__(self, filename, conserve_memory=True, dtype=None,
                  **imread_kwargs):
         """Load a multi-img."""
-        from imageio.v2 import mimread
-        self._load_func = mimread
-
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=self._load_func_wrapper,
+                                         load_func=self._load_func,
                                          **imread_kwargs)
 
     @property
     def filename(self):
         return self._filename
 
-    def _load_func_wrapper(self, filename, **imread_kwargs):
-        return np.array(self._load_func(filename, **imread_kwargs))
+    def _load_func(self, filename, **imread_kwargs):
+        from imageio.v3 import imiter
+        imgdata = []
+        for img in imiter(filename,**imread_kwargs):
+            imgdata.append(img)
+        return np.array(imgdata)
