@@ -27,7 +27,7 @@ def imgs():
 def test_shapes(imgs):
     imgs = imgs[-1]
     assert imgs[0][0].shape == imgs[0][1].shape
-    assert imgs[0][0].shape == (10, 10, 3)
+    assert imgs[0][0].shape == (3, 10, 10)
 
 def test_len(imgs):
     assert len(imgs[0][0]) == len(imgs[1][0]) == 2
