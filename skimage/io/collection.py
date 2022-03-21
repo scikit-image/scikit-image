@@ -192,7 +192,7 @@ class ImageCollection(object):
         self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
-            from imageio import imread as iio_imread
+            from imageio.v3 import imread as iio_imread
             self.load_func = iio_imread
             self._numframes = self._find_images()
         else:
@@ -273,14 +273,14 @@ class ImageCollection(object):
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
                     if img_num is not None:
-                        kwargs['img_num'] = img_num
+                        kwargs['index'] = img_num
                     try:
                         self.data[idx] = self.load_func(fname, **kwargs)
                     # Account for functions that do not accept our kwarg
                     # for accessing individual image frames
                     except TypeError as e:
                         if "unexpected keyword argument" in str(e):
-                            del kwargs['img_num']
+                            del kwargs['index']
                             self.data[idx] = self.load_func(fname, **kwargs)
                         else:
                             raise
@@ -442,7 +442,7 @@ class MultiImage(ImageCollection):
     def __init__(self, filename, conserve_memory=True, dtype=None,
                  **imread_kwargs):
         """Load a multi-img."""
-        from imageio import mimread
+        from imageio.v3 import mimread
         load_func = lambda img: np.array(mimread(img))
 
         self._filename = filename
