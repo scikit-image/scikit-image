@@ -397,7 +397,7 @@ def imread_collection_wrapper(imread):
 
 class MultiImage(ImageCollection):
 
-    """A class containing all frames from multi-frame images.
+    """A class containing all frames from multi-frame TIFF images.
 
     Parameters
     ----------
@@ -405,35 +405,41 @@ class MultiImage(ImageCollection):
         Pattern glob or filenames to load. The path can be absolute or
         relative.
     conserve_memory : bool, optional
-        Whether to conserve memory by only caching a single frame. Default is
-        True.
-
-    Other parameters
-    ----------------
-    load_func : callable
-        ``imread`` by default.  See notes below.
+        Whether to conserve memory by only caching the frames of a single
+        image. Default is True.
 
     Notes
     -----
-    If ``conserve_memory=True`` the memory footprint can be reduced, however
-    the performance can be affected because frames have to be read from file
-    more often.
+    The object that is returned can be used as a list of image-data objects,
+    where each entry in the list represents one image. In this regard it is
+    very similar to `ImageCollection`, but the two differ in the treatment
+    of multi-frame images.
 
-    The last accessed frame is cached, all other frames will have to be read
-    from file.
+    For a TIFF image containing N frames of size WxH, `MultiImage` stores
+    all frames of that image as a single entry of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
 
-    The current implementation makes use of ``tifffile`` for Tiff files and
-    PIL otherwise.
+    For an animated GIF image, `MultiImage` in the current implementation
+    will only read one frame, while `ImageCollection` by default will read
+    all of them.
 
     Examples
     --------
     >>> from skimage import data_dir
 
-    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
-    >>> len(img) # doctest: +SKIP
+    >>> multipage_tiff = data_dir + '/multipage.tif'
+    >>> img = MultiImage(multipage_tiff)
+    >>> len(img) # img contains one file
+    1
+    >>> img[0].shape # this image contains two frames of size (15, 10)
+    (2, 15, 10)
+
+    >>> ic = ImageCollection(multipage_tiff)
+    >>> len(ic) # ic contains two images
     2
-    >>> for frame in img: # doctest: +SKIP
-    ...     print(frame.shape) # doctest: +SKIP
+    >>> for frame in ic:
+    ...     print (frame.shape)
+    ...
     (15, 10)
     (15, 10)
 
