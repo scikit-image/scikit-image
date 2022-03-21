@@ -148,7 +148,7 @@ def moments_coords_central(coords, center=None, order=3):
     return Mc
 
 
-def moments(image, order=3):
+def moments(image, order=3, *, spacing=None):
     """Calculate all raw image moments up to a certain order.
 
     The following properties can be calculated from raw image moments:
@@ -164,6 +164,8 @@ def moments(image, order=3):
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
+    spacing: tuple of float, shape (ndim, )
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
@@ -190,10 +192,10 @@ def moments(image, order=3):
     >>> centroid
     (14.5, 14.5)
     """
-    return moments_central(image, (0,) * image.ndim, order=order)
+    return moments_central(image, (0,) * image.ndim, order=order, spacing=spacing)
 
 
-def moments_central(image, center=None, order=3, **kwargs):
+def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     """Calculate all central image moments up to a certain order.
 
     The center coordinates (cr, cc) can be calculated from the raw moments as:
@@ -211,6 +213,8 @@ def moments_central(image, center=None, order=3, **kwargs):
         is not provided.
     order : int, optional
         The maximum order of moments computed.
+    spacing: tuple of float, shape (ndim, )
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
@@ -242,12 +246,16 @@ def moments_central(image, center=None, order=3, **kwargs):
     """
     if center is None:
         center = centroid(image)
+    if spacing is None:
+        spacing = np.ones(image.ndim)
     float_dtype = _supported_float_type(image.dtype)
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
-        delta = np.arange(dim_length, dtype=float_dtype) - center[dim]
+        delta = (
+                np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
+        )
         powers_of_delta = (
-            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+                delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
         )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
@@ -354,13 +362,15 @@ def moments_hu(nu):
     return _moments_cy.moments_hu(nu.astype(dtype, copy=False))
 
 
-def centroid(image):
+def centroid(image, *, spacing=None):
     """Return the (weighted) centroid of an image.
 
     Parameters
     ----------
     image : array
         The input image.
+    spacing: tuple of float, shape (ndim, )
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
@@ -375,14 +385,14 @@ def centroid(image):
     >>> centroid(image)
     array([13.16666667, 13.16666667])
     """
-    M = moments_central(image, center=(0,) * image.ndim, order=1)
+    M = moments_central(image, center=(0,) * image.ndim, order=1, spacing=spacing)
     center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
-                                                       # for each axis
+              # for each axis
               / M[(0,) * image.ndim])  # weighted sum of all points
     return center
 
 
-def inertia_tensor(image, mu=None):
+def inertia_tensor(image, mu=None, *, spacing=None):
     """Compute the inertia tensor of the input image.
 
     Parameters
@@ -396,6 +406,8 @@ def inertia_tensor(image, mu=None):
         (for example, `skimage.measure.regionprops`), then it is more
         efficient to pre-compute them and pass them to the inertia tensor
         call.
+    spacing: tuple of float, shape (ndim, )
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
@@ -410,7 +422,7 @@ def inertia_tensor(image, mu=None):
            Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
-        mu = moments_central(image, order=2)  # don't need higher-order moments
+        mu = moments_central(image, order=2, spacing=spacing)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
 
@@ -434,7 +446,7 @@ def inertia_tensor(image, mu=None):
     return result
 
 
-def inertia_tensor_eigvals(image, mu=None, T=None):
+def inertia_tensor_eigvals(image, mu=None, T=None, *, spacing=None):
     """Compute the eigenvalues of the inertia tensor of the image.
 
     The inertia tensor measures covariance of the image intensity along
@@ -451,6 +463,8 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     T : array, shape ``(image.ndim, image.ndim)``
         The pre-computed inertia tensor. If ``T`` is given, ``mu`` and
         ``image`` are ignored.
+    spacing: tuple of float, shape (ndim, )
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
@@ -465,7 +479,7 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     alternatively, one can provide the inertia tensor (``T``) directly.
     """
     if T is None:
-        T = inertia_tensor(image, mu)
+        T = inertia_tensor(image, mu, spacing=spacing)
     eigvals = np.linalg.eigvalsh(T)
     # Floating point precision problems could make a positive
     # semidefinite matrix have an eigenvalue that is very slightly
