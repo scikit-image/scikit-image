@@ -121,23 +121,6 @@ def search_line(lines, refline, start=0):
     return -1
 
 
-
-def getLutNames(prefix):
-    aa = []
-    for a in dir(luts):
-        if a.startswith(prefix): aa.append(a)
-
-    def sortkey(x):
-        fullnr = x.split(prefix)[1]
-        nr, us, subnr = fullnr.partition('_')
-        if len(nr) == 1:
-            nr = '0'+nr
-        return nr + us + subnr
-
-    return [a for a in sorted(aa, key=sortkey)]
-
-
-
 if __name__ == '__main__':
     import os
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
