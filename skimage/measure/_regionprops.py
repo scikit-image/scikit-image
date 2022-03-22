@@ -21,7 +21,7 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 # releases. For backwards compatibility, these older names will continue to
 # work, but will not be documented.
 PROPS = {
-    'Pixel Area': 'pixel_area',
+    'NumPixels': 'num_pixels',
     'Area': 'area',
     'BoundingBox': 'bbox',
     'BoundingBoxArea': 'area_bbox',
@@ -95,7 +95,7 @@ OBJECT_COLUMNS = {
 }
 
 COL_DTYPES = {
-    'pixel_area': float,
+    'num_pixels': int,
     'area': float,
     'area_bbox': float,
     'area_convex': float,
@@ -306,6 +306,7 @@ class RegionProperties:
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
         self._spacing = (spacing if spacing is not None else np.full(self._ndim, 1.))
+        self._pixel_area = np.product(self._spacing)
 
         self._extra_properties = {}
         if extra_properties is not None:
@@ -364,13 +365,13 @@ class RegionProperties:
 
     @property
     @_cached
-    def pixel_area(self):
-        return np.prod(self._spacing)
+    def num_pixels(self):
+        return np.sum(self.image)
 
     @property
     @_cached
     def area(self):
-        return np.sum(self.image) * self.pixel_area
+        return np.sum(self.image) * self._pixel_area
 
     @property
     def bbox(self):
@@ -385,7 +386,7 @@ class RegionProperties:
 
     @property
     def area_bbox(self):
-        return self.image.size * self.pixel_area
+        return self.image.size * self._pixel_area
 
     @property
     def centroid(self):
@@ -394,7 +395,7 @@ class RegionProperties:
     @property
     @_cached
     def area_convex(self):
-        return np.sum(self.image_convex) * self.pixel_area
+        return np.sum(self.image_convex) * self._pixel_area
 
     @property
     @_cached
@@ -446,7 +447,7 @@ class RegionProperties:
 
     @property
     def area_filled(self):
-        return np.sum(self.image_filled) * self.pixel_area
+        return np.sum(self.image_filled) * self._pixel_area
 
     @property
     @_cached
@@ -1078,8 +1079,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     -----
     The following properties can be accessed as attributes or keys:
 
-    **pixel_area** : float
-        Area covered by a single pixel.
+    **num_pixels** : int
+        Number of foreground pixels.
     **area** : float
         Area of the region i.e. number of pixels of the region scaled by pixel-area.
     **area_bbox** : float
