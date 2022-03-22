@@ -255,7 +255,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
                 np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
         )
         powers_of_delta = (
-                delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
         )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
@@ -387,7 +387,7 @@ def centroid(image, *, spacing=None):
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1, spacing=spacing)
     center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
-              # for each axis
+                                                       # for each axis
               / M[(0,) * image.ndim])  # weighted sum of all points
     return center
 

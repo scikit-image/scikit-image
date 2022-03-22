@@ -16,6 +16,7 @@ from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
+
 # All values in this PROPS dict correspond to current scikit-image property
 # names. The keys in this PROPS dict correspond to older names used in prior
 # releases. For backwards compatibility, these older names will continue to
@@ -228,7 +229,6 @@ def only2d(method):
             raise NotImplementedError('Property %s is not implemented for '
                                       '3D images' % method.__name__)
         return method(self, *args, **kwargs)
-
     return func2d
 
 
@@ -288,7 +288,7 @@ class RegionProperties:
             if not (
                     intensity_image.shape[:ndim] == label_image.shape
                     and intensity_image.ndim in [ndim, ndim + 1]
-            ):
+                    ):
                 raise ValueError('Label and intensity image shapes must match,'
                                  ' except for channel (last) axis.')
             multichannel = label_image.shape < intensity_image.shape
@@ -336,7 +336,7 @@ class RegionProperties:
                         multichannel_list = [func(self.image,
                                                   self.image_intensity[..., i])
                                              for i in range(
-                                self.image_intensity.shape[-1])]
+                            self.image_intensity.shape[-1])]
                         return np.stack(multichannel_list, axis=-1)
                     else:
                         return func(self.image, self.image_intensity)
@@ -1002,7 +1002,7 @@ def regionprops_table(label_image, intensity_image=None,
                           cache=cache, extra_properties=extra_properties, spacing=spacing)
     if extra_properties is not None:
         properties = (
-                list(properties) + [prop.__name__ for prop in extra_properties]
+            list(properties) + [prop.__name__ for prop in extra_properties]
         )
     if len(regions) == 0:
         ndim = label_image.ndim
@@ -1010,9 +1010,9 @@ def regionprops_table(label_image, intensity_image=None,
         label_image[(1,) * ndim] = 1
         if intensity_image is not None:
             intensity_image = np.zeros(
-                label_image.shape + intensity_image.shape[ndim:],
-                dtype=intensity_image.dtype
-            )
+                    label_image.shape + intensity_image.shape[ndim:],
+                    dtype=intensity_image.dtype
+                    )
         regions = regionprops(label_image, intensity_image=intensity_image,
                               cache=cache, extra_properties=extra_properties, spacing=spacing)
 
@@ -1285,14 +1285,14 @@ def regionprops(label_image, intensity_image=None, cache=True,
     if not np.issubdtype(label_image.dtype, np.integer):
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
-                'Non-integer image types are ambiguous: '
-                'use skimage.measure.label to label the connected'
-                'components of label_image,'
-                'or label_image.astype(np.uint8) to interpret'
-                'the True values as a single label.')
+                    'Non-integer image types are ambiguous: '
+                    'use skimage.measure.label to label the connected'
+                    'components of label_image,'
+                    'or label_image.astype(np.uint8) to interpret'
+                    'the True values as a single label.')
         else:
             raise TypeError(
-                'Non-integer label_image types are ambiguous')
+                    'Non-integer label_image types are ambiguous')
 
     if coordinates is not None:
         if coordinates == 'rc':
