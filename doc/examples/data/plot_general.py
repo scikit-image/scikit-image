@@ -48,7 +48,7 @@ plt.show()
 
 
 ############################################################################
-# Thumbnail image for the gallery
+# A thumbnail image for the gallery
 
 fig, axs = plt.subplots(nrows=3, ncols=2)
 # The next line sets the thumbnail for the last figure in the gallery
