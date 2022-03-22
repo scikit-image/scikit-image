@@ -33,6 +33,7 @@ PROPS = {
     # 'ConvexHull',
     'ConvexImage': 'image_convex',
     'convex_image': 'image_convex',
+    'Coordinates_Scaled': 'coords_scaled',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter_area',
@@ -107,6 +108,7 @@ COL_DTYPES = {
     'centroid_local': float,
     'centroid_weighted': float,
     'centroid_weighted_local': float,
+    'coords_scaled': object,
     'coords': object,
     'eccentricity': float,
     'equivalent_diameter_area': float,
@@ -390,7 +392,7 @@ class RegionProperties:
 
     @property
     def centroid(self):
-        return tuple(self.coords.mean(axis=0))
+        return tuple(self.coords_scaled.mean(axis=0))
 
     @property
     @_cached
@@ -404,10 +406,16 @@ class RegionProperties:
         return convex_hull_image(self.image)
 
     @property
-    def coords(self):
+    def coords_scaled(self):
         indices = np.nonzero(self.image)
         return np.vstack([(indices[i] + self.slice[i].start) * s
                           for i, s in zip(range(self._ndim), self._spacing)]).T
+
+    @property
+    def coords(self):
+        indices = np.nonzero(self.image)
+        return np.vstack([indices[i] + self.slice[i].start
+                          for i in range(self._ndim)]).T
 
     @property
     @only2d
@@ -1111,6 +1119,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid_weighted_local** : array
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
+    **coords_scaled** : (N, 2) ndarray
+        Coordinate list ``(row, col)``of the region scaled by ``spacing``.
     **coords** : (N, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float

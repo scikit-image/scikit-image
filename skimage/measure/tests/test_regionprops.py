@@ -337,19 +337,31 @@ def test_coordinates():
     sample[coords[:, 0], coords[:, 1]] = 1
     prop_coords = regionprops(sample)[0].coords
     assert_array_equal(prop_coords, coords)
+    prop_coords = regionprops(sample, spacing=(0.5, 1.2))[0].coords
+    assert_array_equal(prop_coords, coords)
+
+
+def test_coordinates_scaled():
+    sample = np.zeros((10, 10), dtype=np.int8)
+    coords = np.array([[3, 2], [3, 3], [3, 4]])
+    sample[coords[:, 0], coords[:, 1]] = 1
+
+    spacing = (1, 1)
+    prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
+    assert_array_equal(prop_coords, coords * np.array(spacing))
 
     spacing = (1, 0.5)
-    prop_coords = regionprops(sample, spacing=spacing)[0].coords
+    prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
     assert_array_equal(prop_coords, coords * np.array(spacing))
 
     sample = np.zeros((6, 6, 6), dtype=np.int8)
     coords = np.array([[1, 1, 1], [1, 2, 1], [1, 3, 1]])
     sample[coords[:, 0], coords[:, 1], coords[:, 2]] = 1
-    prop_coords = regionprops(sample)[0].coords
+    prop_coords = regionprops(sample)[0].coords_scaled
     assert_array_equal(prop_coords, coords)
 
     spacing = (0.2, 3, 2.3)
-    prop_coords = regionprops(sample, spacing=spacing)[0].coords
+    prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
     assert_array_equal(prop_coords, coords * np.array(spacing))
 
 
