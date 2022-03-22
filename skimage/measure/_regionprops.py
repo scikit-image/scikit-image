@@ -109,7 +109,7 @@ COL_DTYPES = {
     'centroid_local': float,
     'centroid_weighted': float,
     'centroid_weighted_local': float,
-    'coords_scaled': object,
+    'coords_scaled': float,
     'coords': object,
     'eccentricity': float,
     'equivalent_diameter_area': float,
