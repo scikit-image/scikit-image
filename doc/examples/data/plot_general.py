@@ -47,17 +47,12 @@ for name in images:
 plt.show()
 
 
-"""
-Thumbnail image for the gallery
-"""
-
-import matplotlib.pyplot as plt
-import numpy as np
-from skimage import data
-# The next line sets the thumbnail for the last figure in the gallery
-# sphinx_gallery_thumbnail_number = -1 
+############################################################################
+# Thumbnail image for the gallery
 
 fig, axs = plt.subplots(nrows=3, ncols=2)
+# The next line sets the thumbnail for the last figure in the gallery
+# sphinx_gallery_thumbnail_number = -1
 for ax in axs.flat:
     ax.axis("off")
 axs[0, 0].imshow(data.astronaut())
