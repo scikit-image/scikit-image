@@ -45,3 +45,28 @@ for name in images:
         plt.imshow(image)
 
 plt.show()
+
+
+"""
+Thumbnail image for the gallery
+"""
+
+import matplotlib.pyplot as plt
+import numpy as np
+from skimage import data
+# The next line sets the thumbnail for the last figure in the gallery
+# sphinx_gallery_thumbnail_number = -1 
+
+fig, axs = plt.subplots(nrows=3, ncols=2)
+for ax in axs.flat:
+    ax.axis("off")
+axs[0, 0].imshow(data.astronaut())
+axs[0, 1].imshow(data.binary_blobs(), cmap=plt.cm.gray)
+axs[1, 0].imshow(data.brick(), cmap=plt.cm.gray)
+axs[1, 1].imshow(data.colorwheel())
+axs[2, 0].imshow(data.camera(), cmap=plt.cm.gray)
+further_img = np.full((300, 300), 255)
+for xpos in [100, 150, 200]:
+    further_img[150 - 10 : 150 + 10, xpos - 10 : xpos + 10] = 0
+axs[2, 1].imshow(further_img, cmap=plt.cm.gray)
+plt.subplots_adjust(wspace=-0.7, hspace=0.1)
