@@ -105,6 +105,9 @@ def test_all_props_3d():
 
 
 def test_pixel_size():
+    pixel_area = regionprops(np.ones((10, 10), dtype=np.uint8))[0].pixel_area
+    assert pixel_area == 1
+
     pixel_area = regionprops(np.ones((10, 10), dtype=np.uint8), spacing=(2, 1))[0].pixel_area
     assert pixel_area == 2 * 1
 
