@@ -11,7 +11,7 @@ framework works with files, trained using Multi-block Local Binary Patterns
 Features (See `MB-LBP <plot_multiblock_local_binary_pattern.html>`_) and Gentle
 Adaboost with attentional cascade. So, the detection framework will also work
 with `xml files from OpenCV
-<https://github.com/Itseez/opencv/tree/master/data/lbpcascades>`_.  There you
+<https://github.com/opencv/opencv/tree/master/data/lbpcascades>`_.  There you
 can find files that were trained to detect cat faces, profile faces and other
 things.  But if you want to detect frontal faces, the respective file is
 already included in scikit-image.
@@ -43,7 +43,7 @@ computations and possibly decrease the amount of false detections. You can save
 a lot of time by increasing the ``min_size`` parameter, because the majority of
 time is spent on searching on the smallest scales.
 
-``min_neighbour_number`` and ``intersection_score_threshold`` parameters are
+``min_neighbor_number`` and ``intersection_score_threshold`` parameters are
 made to cluster the excessive detections of the same face and to filter out
 false detections.  True faces usually has a lot of dectections around them and
 false ones usually have single detection. First algorithm searches for
@@ -53,13 +53,13 @@ intersection score between them is larger then
 equation (intersection area) / (small rectangle ratio). The described
 intersection criteria was chosen over intersection over union to avoid a corner
 case when small rectangle inside of a big one have small intersection score.
-Then each cluster is thresholded using ``min_neighbour_number`` parameter which
+Then each cluster is thresholded using ``min_neighbor_number`` parameter which
 leaves the clusters that have a same or bigger number of detections in them.
 
 You should also take into account that false detections are inevitable and if
 you want to have a really precise detector, you will have to train it yourself
 using `OpenCV train cascade utility
-<https://docs.opencv.org/doc/user_guide/ug_traincascade.html>`_.
+<https://docs.opencv.org/2.4/doc/user_guide/ug_traincascade.html>`_.
 """
 
 from skimage import data

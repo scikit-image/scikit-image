@@ -26,16 +26,16 @@ def _sift_read(filelike, mode='SIFT'):
     Returns
     -------
     data : record array with fields
-      - row: int
-          row position of feature
-      - column: int
-          column position of feature
-      - scale: float
-          feature scale
-      - orientation: float
-          feature orientation
-      - data: array
-          feature values
+        - row: int
+            row position of feature
+        - column: int
+            column position of feature
+        - scale: float
+            feature scale
+        - orientation: float
+            feature orientation
+        - data: array
+            feature values
 
     """
     if isinstance(filelike, str):
@@ -60,7 +60,7 @@ def _sift_read(filelike, mode='SIFT'):
 
     data = np.fromfile(f, sep=' ')
     if data.size != nr_features * datatype.itemsize / np.dtype(float).itemsize:
-        raise IOError("Invalid {} feature file.".format(mode))
+        raise IOError(f'Invalid {mode} feature file.')
 
     # If `filelike` is passed to the function as filename - close the file
     if filelike_is_str:

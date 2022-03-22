@@ -1,9 +1,14 @@
+import os
 import numpy as np
-from skimage.transform import SimilarityTransform, warp
-from skimage.util.dtype import convert
+from skimage.transform import SimilarityTransform, warp, resize_local_mean
 import warnings
 import functools
 import inspect
+
+try:
+    from skimage.util.dtype import _convert as convert
+except ImportError:
+    from skimage.util.dtype import convert
 
 
 class WarpSuite:
@@ -48,3 +53,23 @@ class WarpSuite:
         transformations."""
         result = warp(self.image, self.tform, order=self.order,
                       preserve_range=True)
+
+
+class ResizeLocalMeanSuite:
+    params = ([np.float32, np.float64],
+              [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
+              [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
+              )
+    param_names = ['dtype', 'shape_in', 'shape_out']
+
+    timeout = 180
+
+    def setup(self, dtype, shape_in, shape_out):
+        if len(shape_in) != len(shape_out):
+            raise NotImplementedError(
+                "shape_in, shape_out must have same dimension"
+            )
+        self.image = np.zeros(shape_in, dtype=dtype)
+
+    def time_resize_local_mean(self, dtype, shape_in, shape_out):
+        resize_local_mean(self.image, shape_out)

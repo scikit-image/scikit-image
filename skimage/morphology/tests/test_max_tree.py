@@ -4,7 +4,6 @@ from skimage.morphology import max_tree_local_maxima, diameter_opening
 from skimage.morphology import diameter_closing
 from skimage.util import invert
 
-from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, TestCase
 
 eps = 1e-12
@@ -85,7 +84,7 @@ class TestMaxtree(TestCase):
             assert_array_equal(P, P_exp)
             assert_array_equal(S, S_exp)
 
-        img_float = img.astype(np.float)
+        img_float = img.astype(float)
         img_float = (img_float - 8) / 2.0
         for img_type in [np.float32, np.float64]:
             img_float = img_float.astype(img_type)
@@ -452,6 +451,3 @@ class TestMaxtree(TestCase):
         out_bin = out > 0
         assert_array_equal(local_maxima, out_bin)
         assert np.max(out) == 5
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

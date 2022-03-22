@@ -23,6 +23,7 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 import numpy as np
 cimport numpy as np
 import cython
+np.import_array()
 
 # Enable low level memory management
 from libc.stdlib cimport malloc, free
@@ -735,7 +736,7 @@ cdef class Cell:
                         v4*self.vg[4*3+0] + v5*self.vg[5*3+0] + v6*self.vg[6*3+0] + v7*self.vg[7*3+0] )
         self.v12_yg = ( v0*self.vg[0*3+1] + v1*self.vg[1*3+1] + v2*self.vg[2*3+1] + v3*self.vg[3*3+1] +
                         v4*self.vg[4*3+1] + v5*self.vg[5*3+1] + v6*self.vg[6*3+1] + v7*self.vg[7*3+1] )
-        self.v12_xg = ( v0*self.vg[0*3+2] + v1*self.vg[1*3+2] + v2*self.vg[2*3+2] + v3*self.vg[3*3+2] +
+        self.v12_zg = ( v0*self.vg[0*3+2] + v1*self.vg[1*3+2] + v2*self.vg[2*3+2] + v3*self.vg[3*3+2] +
                         v4*self.vg[4*3+2] + v5*self.vg[5*3+2] + v6*self.vg[6*3+2] + v7*self.vg[7*3+2] )
 
         # Set flag that this stuff is calculated
@@ -929,13 +930,18 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-
-def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0):
+def marching_cubes(float[:, :, :] im not None, double isovalue,
+                   LutProvider luts, int st=1, int classic=0,
+                   np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
-    This is the main entry to apply marching cubes.
+    Main entry to apply marching cubes.
+
+    Masked version of marching cubes. This function will check a
+    masking array (same size as im) to decide if the algorithm must be
+    computed for a given voxel. This adds a small overhead that
+    rapidly gets compensated by the fewer computed cubes
     Returns (vertices, faces, normals, values)
     """
-
     # Get dimemsnions
     cdef int Nx, Ny, Nz
     Nx, Ny, Nz = im.shape[2], im.shape[1], im.shape[0]
@@ -947,7 +953,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
     cdef int case, config, subconfig
-
+    cdef bint no_mask = mask is None
     # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
     # we have:  max_x = Nx_bound + st + st - 1
@@ -963,7 +969,6 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
         z_st = z + st
 
         cell.new_z_value()  # Indicate that we enter a new layer
-
         y = -st
         while y < Ny_bound:
             y += st
@@ -973,27 +978,27 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
             while x < Nx_bound:
                 x += st
                 x_st = x + st
+                if no_mask or mask[z_st, y_st, x_st]:
+                    # Initialize cell
+                    cell.set_cube(isovalue, x, y, z, st,
+                        im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
+                        im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
 
-                # Initialize cell
-                cell.set_cube(isovalue, x, y, z, st,
-                    im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
-                    im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
-
-                # Do classic!
-                if classic:
-                    # Determine number of vertices
-                    nt = 0
-                    while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                        nt += 1
-                    # Add triangles
-                    if nt > 0:
-                        cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                else:
-                    # Get case, if non-nul, enter the big switch
-                    case = luts.CASES.get2(cell.index, 0)
-                    if case > 0:
-                        config = luts.CASES.get2(cell.index, 1)
-                        the_big_switch(luts, cell, case, config)
+                    # Do classic!
+                    if classic:
+                        # Determine number of vertices
+                        nt = 0
+                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
+                            nt += 1
+                        # Add triangles
+                        if nt > 0:
+                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
+                    else:
+                        # Get case, if non-nul, enter the big switch
+                        case = luts.CASES.get2(cell.index, 0)
+                        if case > 0:
+                            config = luts.CASES.get2(cell.index, 1)
+                            the_big_switch(luts, cell, case, config)
 
     # Done
     return cell.get_vertices(), cell.get_faces(), cell.get_normals(), cell.get_values()

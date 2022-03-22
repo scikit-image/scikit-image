@@ -40,7 +40,7 @@ class ApiDocWriter(object):
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  ):
-        ''' Initialize package for parsing
+        r''' Initialize package for parsing
 
         Parameters
         ----------
@@ -211,9 +211,10 @@ class ApiDocWriter(object):
         submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
-            if obj_str not in mod.__dict__:
+            try:
+                obj = getattr(mod, obj_str)
+            except AttributeError:
                 continue
-            obj = mod.__dict__[obj_str]
 
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
@@ -317,6 +318,8 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
+            full_c = uri + '.' + c
+            ad += '\n.. include:: ' + full_c + '.examples\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -361,7 +364,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        r''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -445,8 +448,6 @@ class ApiDocWriter(object):
 
         Parameters
         ----------
-        path : string
-            Filename to write index to
         outdir : string
             Directory to which to write generated index file
         froot : string, optional
@@ -493,7 +494,7 @@ class ApiDocWriter(object):
             elif len(module_name) == 2:
                 module_name = module_name[1]
                 prefix = "\n  -"
-            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
+            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
         w('\n')
 
         subtitle = "Submodule Contents"

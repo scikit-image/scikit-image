@@ -22,7 +22,7 @@ plot2rst_paths : length-2 tuple, or list of tuples
 
 plot2rst_rcparams : dict
     Matplotlib configuration parameters. See
-    http://matplotlib.sourceforge.net/users/customizing.html for details.
+    https://matplotlib.org/tutorials/introductory/customizing.html for details.
 
 plot2rst_default_thumb : str
     Path (relative to doc root) of default thumbnail image.
@@ -393,11 +393,11 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     # Add sphinx roles to the examples, otherwise docutils
     # cannot compile the ReST for the notebook
     sphinx_roles = PythonDomain.roles.keys()
-    preamble = '\n'.join('.. role:: py:{0}(literal)\n'.format(role)
+    preamble = '\n'.join(f'.. role:: py:{role}(literal)\n'
                          for role in sphinx_roles)
 
     # Grab all references to inject them in cells where needed
-    ref_regexp = re.compile('\n(\.\. \[(\d+)\].*(?:\n[ ]{7,8}.*)+)')
+    ref_regexp = re.compile('\n(\\.\\. \\[(\\d+)\\].*(?:\n[ ]{7,8}.*)+)')
     math_role_regexp = re.compile(':math:`(.*?)`')
 
     text = '\n'.join((content for (cell_type, _, content) in blocks
@@ -437,7 +437,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
             # Remove reference links until we can figure out a better way to
             # preserve them
             for (reference, ref_id) in references:
-                ref_tag = '[{0}]_'.format(ref_id)
+                ref_tag = f'[{ref_id}]_'
                 if ref_tag in content:
                     content = content.replace(ref_tag, ref_tag[:-1])
 
@@ -624,4 +624,3 @@ def save_all_figures(image_path):
         plt.savefig(image_path.format(fig_num))
         figure_list.append(image_fmt_str.format(fig_num))
     return figure_list
-

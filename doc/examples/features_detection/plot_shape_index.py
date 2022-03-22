@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import ndimage as ndi
 from skimage.feature import shape_index
-from skimage.draw import circle
+from skimage.draw import disk
 
 
 def create_test_image(
@@ -52,36 +52,32 @@ def create_test_image(
     """
     Generate a test image with random noise, uneven illumination and spots.
     """
-    state = np.random.get_state()
-    np.random.seed(314159265)  # some digits of pi
-
-    image = np.random.normal(
+    rng = np.random.default_rng()
+    image = rng.normal(
         loc=0.25,
         scale=0.25,
         size=(image_size, image_size)
     )
 
     for _ in range(spot_count):
-        rr, cc = circle(
-            np.random.randint(image.shape[0]),
-            np.random.randint(image.shape[1]),
+        rr, cc = disk(
+            (rng.integers(image.shape[0]),
+             rng.integers(image.shape[1])),
             spot_radius,
             shape=image.shape
         )
         image[rr, cc] = 1
 
-    image *= np.random.normal(loc=1.0, scale=0.1, size=image.shape)
+    image *= rng.normal(loc=1.0, scale=0.1, size=image.shape)
 
     image *= ndi.zoom(
-        np.random.normal(
+        rng.normal(
             loc=1.0,
             scale=0.5,
             size=(cloud_noise_size, cloud_noise_size)
         ),
         image_size / cloud_noise_size
     )
-
-    np.random.set_state(state)
 
     return ndi.gaussian_filter(image, sigma=2.0)
 
@@ -159,7 +155,7 @@ ax3 = fig.add_subplot(1, 3, 3, sharex=ax1, sharey=ax1)
 
 ax3.imshow(s, cmap=plt.cm.gray)
 ax3.axis('off')
-ax3.set_title('Shape index, $\sigma=1$')
+ax3.set_title(r'Shape index, $\sigma=1$')
 
 fig.tight_layout()
 

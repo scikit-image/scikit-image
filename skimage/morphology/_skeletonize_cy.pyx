@@ -5,6 +5,8 @@
 
 import numpy as np
 cimport numpy as cnp
+cnp.import_array()
+
 
 def _fast_skeletonize(image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
@@ -36,7 +38,7 @@ def _fast_skeletonize(image):
     """
 
     # look up table - there is one entry for each of the 2^8=256 possible
-    # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
+    # combinations of 8 binary neighbors. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
     cdef int *lut = \
       [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
@@ -112,7 +114,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:nrows-1, 1:ncols-1].astype(np.bool)
+    return _skeleton[1:nrows-1, 1:ncols-1].astype(bool)
 
 
 """
@@ -159,7 +161,7 @@ def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
     the quench-line of the brushfire will be evaluated later than a
     point closer to the edge.
 
-    Note that the neighbourhood of a pixel may evolve before the loop
+    Note that the neighborhood of a pixel may evolve before the loop
     arrives at this pixel. This is why it is possible to compute the
     skeleton in only one pass, thanks to an adapted ordering of the
     pixels.

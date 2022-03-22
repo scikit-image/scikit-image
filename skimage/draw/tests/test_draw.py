@@ -1,11 +1,12 @@
 import numpy as np
+from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
+import pytest
+
 from skimage._shared.testing import test_parallel
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_equal
-from skimage._shared.testing import assert_almost_equal
+from skimage._shared._dependency_checks import has_mpl
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
-                          circle, circle_perimeter, circle_perimeter_aa,
+                          disk, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
                           _bezier_segment, bezier_curve, rectangle,
                           rectangle_perimeter)
@@ -31,7 +32,7 @@ def test_set_color_with_alpha():
     set_color(img, (rr, cc), 1, alpha=alpha)
 
     # Wrong dimensionality color
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         set_color(img, (rr, cc), (255, 0, 0), alpha=alpha)
 
     img = np.zeros((10, 10, 3))
@@ -143,12 +144,13 @@ def test_line_equal_aliasing_horizontally_vertically():
 
 def test_polygon_rectangle():
     img = np.zeros((10, 10), 'uint8')
+    poly = np.array(((1, 1), (4, 1), (4, 4), (1, 4), (1, 1)))
 
-    rr, cc = polygon((1, 4, 4, 1, 1), (1, 1, 4, 4, 1))
+    rr, cc = polygon(poly[:, 0], poly[:, 1])
     img[rr, cc] = 1
 
-    img_ = np.zeros((10, 10))
-    img_[1:4, 1:4] = 1
+    img_ = np.zeros((10, 10), 'uint8')
+    img_[1:5, 1:5] = 1
 
     assert_array_equal(img, img_)
 
@@ -161,16 +163,16 @@ def test_polygon_rectangle_angular():
     img[rr, cc] = 1
 
     img_ = np.array(
-        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-         [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-         [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-         [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [[0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+         [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+         [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+         [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+         [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+         [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], 'uint8'
     )
 
     assert_array_equal(img, img_)
@@ -185,15 +187,15 @@ def test_polygon_parallelogram():
 
     img_ = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-         [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-         [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-         [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+         [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+         [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+         [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+         [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], 'uint8'
     )
 
     assert_array_equal(img, img_)
@@ -212,10 +214,17 @@ def test_polygon_exceed():
     assert_array_equal(img, img_)
 
 
-def test_circle():
+def test_polygon_0d_input():
+    # Bug reported in #4938: 0d input causes segfault.
+    rr, cc = polygon(0, 1)
+
+    assert rr.size == cc.size == 1
+
+
+def test_disk():
     img = np.zeros((15, 15), 'uint8')
 
-    rr, cc = circle(7, 7, 6)
+    rr, cc = disk((7, 7), 6)
     img[rr, cc] = 1
 
     img_ = np.array(
@@ -855,6 +864,7 @@ def test_bezier_curve_shape():
     assert_array_equal(img, img_[shift:-shift, :])
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_polygon_perimeter():
     expected = np.array(
         [[1, 1, 1, 1],
@@ -876,10 +886,11 @@ def test_polygon_perimeter():
     out[rr, cc] = 1
     assert_array_equal(out, expected)
 
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         polygon_perimeter([0], [1], clip=True)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_polygon_perimeter_outside_image():
     rr, cc = polygon_perimeter([-1, -1, 3,  3],
                                [-1,  4, 4, -1], shape=(3, 4))
@@ -939,6 +950,7 @@ def test_rectangle_extent():
     assert_array_equal(img, expected_2)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_extent_negative():
     # These two tests should be done together.
     expected = np.array([[0, 0, 0, 0, 0, 0],
@@ -967,6 +979,7 @@ def test_rectangle_extent_negative():
     assert_array_equal(img, expected)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_perimiter():
     expected = np.array([[0, 0, 0, 0, 0, 0],
                          [0, 0, 1, 1, 1, 1],
@@ -995,6 +1008,7 @@ def test_rectangle_perimiter():
     assert_array_equal(img, expected)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_perimiter_clip_bottom_right():
     # clip=False
     expected = np.array([[0, 0, 0, 0, 0],
@@ -1023,6 +1037,7 @@ def test_rectangle_perimiter_clip_bottom_right():
     assert_array_equal(img, expected)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_perimiter_clip_top_left():
     # clip=False
     expected = np.array([[0, 0, 0, 1, 0],
@@ -1051,6 +1066,7 @@ def test_rectangle_perimiter_clip_top_left():
     assert_array_equal(img, expected)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_perimiter_clip_top_right():
     expected = np.array([[0, 1, 1, 1, 1],
                          [0, 1, 0, 0, 1],
@@ -1077,6 +1093,7 @@ def test_rectangle_perimiter_clip_top_right():
     assert_array_equal(img, expected)
 
 
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
 def test_rectangle_perimiter_clip_bottom_left():
     expected = np.array([[0, 0, 0, 0, 0],
                          [1, 1, 1, 0, 0],

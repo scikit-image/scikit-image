@@ -29,12 +29,12 @@ def all_warnings():
 
     >>> with warnings.catch_warnings():
     ...     warnings.simplefilter('once')
-    ...     foo()
+    ...     foo()                         # doctest: +SKIP
 
     We can now run ``foo()`` without a warning being raised:
 
     >>> from numpy.testing import assert_warns
-    >>> foo()
+    >>> foo()                             # doctest: +SKIP
 
     To catch the warning, we call in the help of ``all_warnings``:
 
@@ -83,7 +83,8 @@ def expected_warnings(matching):
     Examples
     --------
     >>> import numpy as np
-    >>> image = np.random.randint(0, 2**16, size=(100, 100), dtype=np.uint16)
+    >>> rng = np.random.default_rng()
+    >>> image = rng.integers(0, 2**16, size=(100, 100), dtype=np.uint16)
     >>> # rank filters are slow when bit-depth exceeds 10 bits
     >>> from skimage import filters
     >>> with expected_warnings(['Bad rank filter performance']):

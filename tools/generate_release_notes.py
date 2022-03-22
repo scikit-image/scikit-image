@@ -7,7 +7,7 @@ export GH_TOKEN=<your-gh-api-token>
 
 Then, for a major release:
 ```
-python /path/to/generate_release_notes.py v0.14.0 master --version 0.15.0
+python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
 ```
 
 For a minor release:
@@ -188,18 +188,18 @@ announcement_title = f'Announcement: scikit-image {args.version}'
 print(announcement_title)
 print('=' * len(announcement_title))
 
-print(f"""
+print(f'''
 We're happy to announce the release of scikit-image v{args.version}!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-""")
+''')
 
 print("""
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 """
 )
