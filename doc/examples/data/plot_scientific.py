@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
-
 from skimage import data
 
 matplotlib.rcParams['font.size'] = 18
