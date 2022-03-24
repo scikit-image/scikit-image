@@ -61,5 +61,5 @@ further_img = np.full((300, 300), 255)
 for xpos in [100, 150, 200]:
     further_img[150 - 10 : 150 + 10, xpos - 10 : xpos + 10] = 0
 axs[2, 2].imshow(further_img, cmap=plt.cm.gray)
-plt.subplots_adjust(wspace=-0.5, hspace=0.1)
+plt.subplots_adjust(wspace=-0.3, hspace=0.1)
 
