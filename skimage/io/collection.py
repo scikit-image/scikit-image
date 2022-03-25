@@ -6,20 +6,7 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
-from packaging import version
-
 import numpy as np
-from PIL import Image, __version__ as pil_version
-
-# Check CVE-2021-27921 and others
-if version.parse(pil_version) < version.parse('8.1.2'):
-    from warnings import warn
-    warn('Your installed pillow version is < 8.1.2. '
-         'Several security issues (CVE-2021-27921, '
-         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
-         'and more) have been fixed in pillow 8.1.2 or higher. '
-         'We recommend to upgrade this library.',
-         stacklevel=2)
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -220,23 +207,16 @@ class ImageCollection(object):
         return self._conserve_memory
 
     def _find_images(self):
+        from imageio.v3 import imiter
         index = []
         for fname in self._files:
             try:
-                im = Image.open(fname)
-                im.seek(0)
+                i = 0
+                for img in imiter(fname,**self.load_func_kwargs):
+                    index.append((fname, i))
+                    i += 1
             except (IOError, OSError):
                 continue
-            i = 0
-            while True:
-                try:
-                    im.seek(i)
-                except EOFError:
-                    break
-                index.append((fname, i))
-                i += 1
-            if hasattr(im, 'fp') and im.fp:
-                im.fp.close()
         self._frame_index = index
         return len(index)
 
