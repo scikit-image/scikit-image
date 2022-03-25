@@ -178,6 +178,7 @@ class ImageCollection(object):
 
         self._files = sorted(self._files, key=alphanumeric_key)
 
+        self.load_func_kwargs = load_func_kwargs
         if load_func is None:
             from imageio.v3 import imread as iio_imread
             self.load_func = iio_imread
@@ -195,7 +196,6 @@ class ImageCollection(object):
         self._conserve_memory = conserve_memory
         self._cached = None
 
-        self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
@@ -212,7 +212,7 @@ class ImageCollection(object):
         for fname in self._files:
             try:
                 i = 0
-                for img in imiter(fname,**self.load_func_kwargs):
+                for img in imiter(fname, **self.load_func_kwargs):
                     index.append((fname, i))
                     i += 1
             except (IOError, OSError):
