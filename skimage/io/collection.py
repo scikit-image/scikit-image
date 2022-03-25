@@ -449,6 +449,6 @@ class MultiImage(ImageCollection):
     def _load_func(self, filename, **imread_kwargs):
         from imageio.v3 import imiter
         imgdata = []
-        for img in imiter(filename,**imread_kwargs):
+        for img in imiter(filename, **imread_kwargs):
             imgdata.append(img)
         return np.array(imgdata)
