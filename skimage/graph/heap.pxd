@@ -6,7 +6,7 @@ value_of_fast()
 """
 
 # determine datatypes for heap
-ctypedef double VALUE_T
+ctypedef cnp.float64_t VALUE_T
 ctypedef Py_ssize_t REFERENCE_T
 ctypedef REFERENCE_T INDEX_T
 ctypedef unsigned char BOOL_T

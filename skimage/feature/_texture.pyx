@@ -86,7 +86,7 @@ cdef inline int _bit_rotate_right(int value, int length) nogil:
 
 
 def _local_binary_pattern(double[:, ::1] image,
-                          int P, float R, char method=b'D'):
+                          int P, cnp.float64_t R, char method=b'D'):
     """Gray scale and rotation invariant LBP (Local Binary Patterns).
 
     LBP is an invariant descriptor that can be used for texture classification.
@@ -332,10 +332,10 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
         int lbp_code = 0
 
     # Sum of intensity values of central rectangle.
-    cdef float central_rect_val = integrate(int_image, central_rect_r,
-                                            central_rect_c,
-                                            central_rect_r + r_shift,
-                                            central_rect_c + c_shift)
+    cdef np_floats central_rect_val = integrate(int_image, central_rect_r,
+                                                central_rect_c,
+                                                central_rect_r + r_shift,
+                                                central_rect_c + c_shift)
 
     for element_num in range(8):
 

@@ -137,11 +137,11 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef int dc_prime
 
     cdef int dr = abs(r0 - r1)
-    cdef float err = dc - dr
-    cdef float err_prime
+    cdef cnp.float64_t err = dc - dr
+    cdef cnp.float64_t err_prime
 
     cdef int c, r, sign_c, sign_r
-    cdef float ed
+    cdef cnp.float64_t ed
 
     if c0 < c1:
         sign_c = 1

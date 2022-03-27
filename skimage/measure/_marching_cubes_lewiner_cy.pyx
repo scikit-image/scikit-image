@@ -44,8 +44,8 @@ def remove_degenerate_faces(vertices, faces, *arrays):
     vertices_map1 = vertices_map0.copy()
     faces_ok = np.ones(len(faces), dtype=np.int32)
 
-    cdef float [:, :] vertices_ = vertices
-    cdef float [:] v1, v2, v3
+    cdef cnp.float32_t [:, :] vertices_ = vertices
+    cdef cnp.float32_t [:] v1, v2, v3
     cdef int [:, :]  faces_ = faces
 
     cdef int [:] vertices_map1_ = vertices_map1
@@ -169,9 +169,9 @@ cdef class Cell:
     cdef int *faceLayer2 # The actual second face layer
 
     # Stuff to store the output vertices
-    cdef float *_vertices
-    cdef float *_normals
-    cdef float *_values
+    cdef cnp.float32_t *_vertices
+    cdef cnp.float32_t *_normals
+    cdef cnp.float32_t *_values
     cdef int _vertexCount
     cdef int _vertexMaxCount
 
@@ -215,9 +215,9 @@ cdef class Cell:
         # Init vertices
         self._vertexCount = 0
         self._vertexMaxCount = 8
-        self._vertices = <float *>malloc(self._vertexMaxCount*3 * sizeof(float))
-        self._normals = <float *>malloc(self._vertexMaxCount*3 * sizeof(float))
-        self._values = <float *>malloc(self._vertexMaxCount * sizeof(float))
+        self._vertices = <cnp.float32_t *>malloc(self._vertexMaxCount*3 * sizeof(cnp.float32_t))
+        self._normals = <cnp.float32_t *>malloc(self._vertexMaxCount*3 * sizeof(cnp.float32_t))
+        self._values = <cnp.float32_t *>malloc(self._vertexMaxCount * sizeof(cnp.float32_t))
         # Clear normals and values
         cdef int i, j
         if self._values is not NULL and self._normals is not NULL:
@@ -248,9 +248,9 @@ cdef class Cell:
         """
         # Allocate new array
         cdef int newMaxCount = self._vertexMaxCount * 2
-        cdef float *newVertices = <float *>malloc(newMaxCount*3 * sizeof(float))
-        cdef float *newNormals = <float *>malloc(newMaxCount*3 * sizeof(float))
-        cdef float *newValues = <float *>malloc(newMaxCount * sizeof(float))
+        cdef cnp.float32_t *newVertices = <cnp.float32_t *>malloc(newMaxCount*3 * sizeof(cnp.float32_t))
+        cdef cnp.float32_t *newNormals = <cnp.float32_t *>malloc(newMaxCount*3 * sizeof(cnp.float32_t))
+        cdef cnp.float32_t *newValues = <cnp.float32_t *>malloc(newMaxCount * sizeof(cnp.float32_t))
         if newVertices is NULL or newNormals is NULL or newValues is NULL:
             free(newVertices)
             free(newNormals)
@@ -295,7 +295,8 @@ cdef class Cell:
 
     ## Adding results
 
-    cdef int add_vertex(self, float x, float y, float z):
+    cdef int add_vertex(self, cnp.float32_t x, cnp.float32_t y,
+                        cnp.float32_t z):
         """ Add a vertex to the result. Return index in vertex array.
         """
         # Check if array is large enough
@@ -309,7 +310,8 @@ cdef class Cell:
         return self._vertexCount -1
 
 
-    cdef void add_gradient(self, int vertexIndex, float gx, float gy, float gz):
+    cdef void add_gradient(self, int vertexIndex, cnp.float32_t gx,
+                           cnp.float32_t gy, cnp.float32_t gz):
         """ Add a gradient value to the vertex corresponding to the given index.
         """
         self._normals[vertexIndex*3+0] += gx
@@ -317,12 +319,14 @@ cdef class Cell:
         self._normals[vertexIndex*3+2] += gz
 
 
-    cdef void add_gradient_from_index(self, int vertexIndex, int i, float strength):
+    cdef void add_gradient_from_index(self, int vertexIndex, int i,
+                                      cnp.float32_t strength):
         """ Add a gradient value to the vertex corresponding to the given index.
         vertexIndex is the index in the large array of vertices that is returned.
         i is the index of the array of vertices 0-7 for the current cell.
         """
-        self.add_gradient(vertexIndex, self.vg[i*3+0] * strength, self.vg[i*3+1] * strength, self.vg[i*3+2] * strength)
+        self.add_gradient(vertexIndex, self.vg[i*3+0] * strength,
+                          self.vg[i*3+1] * strength, self.vg[i*3+2] * strength)
 
 
     cdef add_face(self, int index):
@@ -345,7 +349,7 @@ cdef class Cell:
         """ Get the final vertex array.
         """
         vertices = np.empty((self._vertexCount,3), np.float32)
-        cdef float [:, :] vertices_ = vertices
+        cdef cnp.float32_t [:, :] vertices_ = vertices
         cdef int i, j
         for i in range(self._vertexCount):
             for j in range(3):
@@ -357,7 +361,7 @@ cdef class Cell:
         The normals are normalized to unit length.
         """
         normals = np.empty((self._vertexCount,3), np.float32)
-        cdef float [:, :] normals_ = normals
+        cdef cnp.float32_t [:, :] normals_ = normals
 
         cdef int i, j
         cdef double length, dtmp
@@ -382,7 +386,7 @@ cdef class Cell:
 
     def get_values(self):
         values = np.empty((self._vertexCount,), np.float32)
-        cdef float [:] values_ = values
+        cdef cnp.float32_t [:] values_ = values
         cdef int i, j
         for i in range(self._vertexCount):
             values_[i] = self._values[i]
@@ -930,7 +934,7 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-def marching_cubes(float[:, :, :] im not None, double isovalue,
+def marching_cubes(cnp.float32_t[:, :, :] im not None, double isovalue,
                    LutProvider luts, int st=1, int classic=0,
                    np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
