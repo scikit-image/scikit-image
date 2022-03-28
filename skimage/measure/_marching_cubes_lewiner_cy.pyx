@@ -21,9 +21,9 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 
 # Cython specific imports
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 import cython
-np.import_array()
+cnp.import_array()
 
 # Enable low level memory management
 from libc.stdlib cimport malloc, free
@@ -936,7 +936,7 @@ cdef class LutProvider:
 
 def marching_cubes(cnp.float32_t[:, :, :] im not None, double isovalue,
                    LutProvider luts, int st=1, int classic=0,
-                   np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
+                   cnp.ndarray[cnp.npy_bool, ndim=3, cast=True] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
     Main entry to apply marching cubes.
 

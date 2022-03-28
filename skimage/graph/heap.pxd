@@ -4,6 +4,7 @@ other cython modules can "cimport heap" and thus use the
 C versions of pop(), push(), and value_of(): pop_fast(), push_fast() and
 value_of_fast()
 """
+cimport numpy as cnp
 
 # determine datatypes for heap
 ctypedef cnp.float64_t VALUE_T

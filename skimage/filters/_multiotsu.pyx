@@ -8,7 +8,7 @@ cimport numpy as cnp
 cimport cython
 cnp.import_array()
 
-def _get_multiotsu_thresh_indices_lut(cp.float32_t [::1] prob,
+def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
                                       Py_ssize_t thresh_count):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
