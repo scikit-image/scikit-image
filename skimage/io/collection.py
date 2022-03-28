@@ -180,9 +180,14 @@ class ImageCollection(object):
 
         self.load_func_kwargs = load_func_kwargs
         if load_func is None:
-            from imageio.v3 import imread as iio_imread
-            self.load_func = iio_imread
-            self._numframes = self._find_images()
+            try:
+                from imageio.v3 import imread as iio_imread
+                self.load_func = iio_imread
+                self._numframes = self._find_images()
+            except ModuleNotFoundError:
+                # only needed for older imagio compatibility
+                self.load_func = self._load_func_v2
+                self._numframes = self._find_images_v2()
         else:
             self.load_func = load_func
             self._numframes = len(self._files)
@@ -205,6 +210,31 @@ class ImageCollection(object):
     @property
     def conserve_memory(self):
         return self._conserve_memory
+
+    # only needed for older imagio compatibility
+    def _load_func_v2(self, fname, **kwargs):
+        from imageio import get_reader
+        if 'index' in kwargs:
+            img_num = kwargs['index']
+            del kwargs['index']
+        else:
+            img_num = 0
+        return get_reader(fname, **kwargs).get_data(img_num)
+
+    # only needed for older imagio compatibility
+    def _find_images_v2(self):
+        from imageio import get_reader
+        index = []
+        for fname in self._files:
+            try:
+                i = 0
+                for img in get_reader(fname, **self.load_func_kwargs):
+                    index.append((fname, i))
+                    i += 1
+            except (IOError, OSError):
+                continue
+        self._frame_index = index
+        return len(index)
 
     def _find_images(self):
         from imageio.v3 import imiter
@@ -438,17 +468,36 @@ class MultiImage(ImageCollection):
                  **imread_kwargs):
         """Load a multi-img."""
         self._filename = filename
+        try:
+            from imageio.v3 import imiter
+            load_func = self._load_func_v3
+        except ModuleNotFoundError:
+            # only needed for older imagio compatibility
+            from imageio import mimread
+            load_func = self._load_func_v2
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=self._load_func,
+                                         load_func=load_func,
                                          **imread_kwargs)
 
     @property
     def filename(self):
         return self._filename
 
-    def _load_func(self, filename, **imread_kwargs):
+    def _load_func_v3(self, filename, **imread_kwargs):
+        """Multi-img load_func using imageio v3 API."""
         from imageio.v3 import imiter
         imgdata = []
         for img in imiter(filename, **imread_kwargs):
             imgdata.append(img)
         return np.array(imgdata)
+
+    # only needed for older imagio compatibility
+    def _load_func_v2(self, filename, **imread_kwargs):
+        """Multi-img load_func using old-style imageio API."""
+        from imageio import mimread
+        try:
+            imgdata = np.array(mimread(filename, **imread_kwargs))
+        except RuntimeError:
+            from imageio import imread
+            imgdata = np.array([imread(filename, **imread_kwargs)])
+        return imgdata
