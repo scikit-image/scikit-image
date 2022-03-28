@@ -21,11 +21,11 @@ import numpy as np
 
 img = data.cells3d()[20:]
 
-upper_limit = np.percentile(img, q=99)
-img = np.clip(img, 0, 1.2 * upper_limit)
-
 # omit some slices that are partially empty
 img = img[5:26]
+
+upper_limit = 1.5 * np.percentile(img, q=99)
+img = np.clip(img, upper_limit)
 
 fig = px.imshow(
     img,
