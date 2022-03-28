@@ -36,7 +36,7 @@ def moments_coords(coords, order=3):
     --------
     >>> coords = np.array([[row, col]
     ...                    for row in range(13, 17)
-    ...                    for col in range(14, 18)], dtype=np.double)
+    ...                    for col in range(14, 18)], dtype=np.float64)
     >>> M = moments_coords(coords)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
     >>> centroid
@@ -183,7 +183,7 @@ def moments(image, order=3):
 
     Examples
     --------
-    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
@@ -230,7 +230,7 @@ def moments_central(image, center=None, order=3, **kwargs):
 
     Examples
     --------
-    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
@@ -287,7 +287,7 @@ def moments_normalized(mu, order=3):
 
     Examples
     --------
-    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 1
     >>> m = moments(image)
     >>> centroid = (m[0, 1] / m[0, 0], m[1, 0] / m[0, 0])
@@ -341,7 +341,7 @@ def moments_hu(nu):
 
     Examples
     --------
-    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 0.5
     >>> image[10:12, 10:12] = 1
     >>> mu = moments_central(image)
@@ -369,7 +369,7 @@ def centroid(image):
 
     Examples
     --------
-    >>> image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 0.5
     >>> image[10:12, 10:12] = 1
     >>> centroid(image)

@@ -128,11 +128,11 @@ def _umeyama(src, dst, estimate_scale):
     A = dst_demean.T @ src_demean / num
 
     # Eq. (39).
-    d = np.ones((dim,), dtype=np.double)
+    d = np.ones((dim,), dtype=np.float64)
     if np.linalg.det(A) < 0:
         d[dim - 1] = -1
 
-    T = np.eye(dim + 1, dtype=np.double)
+    T = np.eye(dim + 1, dtype=np.float64)
 
     U, S, V = np.linalg.svd(A)
 
@@ -1015,7 +1015,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         """
 
-        out = np.empty_like(coords, np.double)
+        out = np.empty_like(coords, np.float64)
 
         # determine triangle index for each coordinate
         simplex = self._tesselation.find_simplex(coords)
@@ -1050,7 +1050,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         """
 
-        out = np.empty_like(coords, np.double)
+        out = np.empty_like(coords, np.float64)
 
         # determine triangle index for each coordinate
         simplex = self._inverse_tesselation.find_simplex(coords)
