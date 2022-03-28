@@ -36,7 +36,7 @@ import cython
 from libc.stdlib cimport malloc, free
 
 cdef extern from "pyport.h":
-  double Py_HUGE_VAL
+  cnp.float64_t Py_HUGE_VAL
 
 cdef VALUE_T inf = Py_HUGE_VAL
 
@@ -671,7 +671,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         i = (1 << self.levels) - 1 + ir
         return self._values[i]
 
-    def push(self, double value, int reference):
+    def push(self, VALUE_T value, int reference):
         """push(value, reference)
 
         Append/update a value in the heap.
@@ -693,7 +693,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         if self.push_fast(value, reference) == -1:
             raise ValueError('reference outside of range [0, max_reference]')
 
-    def push_if_lower(self, double value, int reference):
+    def push_if_lower(self, VALUE_T value, int reference):
         """push_if_lower(value, reference)
 
         Append/update a value in the heap if the extant value is lower.

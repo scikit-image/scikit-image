@@ -9,15 +9,16 @@ cnp.import_array()
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
 
-cdef inline double _get_fraction(double from_value, double to_value,
-                                 double level):
+cdef inline cnp.float64_t _get_fraction(cnp.float64_t from_value,
+                                        cnp.float64_t to_value,
+                                        cnp.float64_t level):
     if (to_value == from_value):
         return 0
     return ((level - from_value) / (to_value - from_value))
 
 
-def _get_contour_segments(double[:, :] array,
-                          double level, bint vertex_connect_high,
+def _get_contour_segments(cnp.float64_t[:, :] array,
+                          cnp.float64_t level, bint vertex_connect_high,
                           cnp.uint8_t[:, :] mask):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
@@ -36,7 +37,7 @@ def _get_contour_segments(double[:, :] array,
     # never steps out of bounds). The square is represented by four pointers:
     # ul, ur, ll, and lr (for 'upper left', etc.). We also maintain the current
     # 2D coordinates for the position of the upper-left pointer. Note that we
-    # ensured that the array is of type 'double' and is C-contiguous (last
+    # ensured that the array is of type 'float64' and is C-contiguous (last
     # index varies the fastest).
     #
     # There are sixteen different possible square types, diagramed below.
@@ -70,7 +71,7 @@ def _get_contour_segments(double[:, :] array,
     cdef bint use_mask = mask is not None
     cdef unsigned char square_case = 0
     cdef tuple top, bottom, left, right
-    cdef double ul, ur, ll, lr
+    cdef cnp.float64_t ul, ur, ll, lr
     cdef Py_ssize_t r0, r1, c0, c1
 
     for r0 in range(array.shape[0] - 1):
