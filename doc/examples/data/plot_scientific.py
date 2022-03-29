@@ -40,7 +40,6 @@ for name in images:
 plt.show()
 
 
-
 ############################################################################
 # Thumbnail image for the gallery
 
