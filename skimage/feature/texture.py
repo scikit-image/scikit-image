@@ -9,7 +9,9 @@ from ..color import gray2rgb
 from ..util import img_as_float
 from ._texture import (_glcm_loop,
                        _local_binary_pattern,
-                       _multiblock_lbp)
+                       _multiblock_lbp,
+                       _glcm_norm,
+                       _coprop_weights)
 
 
 def graycomatrix(image, distances, angles, levels=None, symmetric=False,
@@ -110,8 +112,6 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     image = np.ascontiguousarray(image)
 
-    image_max = image.max()
-
     if np.issubdtype(image.dtype, np.floating):
         raise ValueError("Float images are not supported by graycomatrix. "
                          "Convert the image to an unsigned integer type.")
@@ -128,35 +128,24 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
     if levels is None:
         levels = 256
 
-    if image_max >= levels:
+    if image.max() >= levels:
         raise ValueError("The maximum grayscale value in the image should be "
                          "smaller than the number of levels.")
 
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
+    # count co-occurrences
     P = np.zeros((levels, levels, len(distances), len(angles)),
-                 dtype=np.uint32, order='C')
-
-    # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
-
-    # make each GLMC symmetric
-    if symmetric:
-        Pt = np.transpose(P, (1, 0, 2, 3))
-        P = P + Pt
-
-    # normalize each GLCM
-    if normed:
-        P = P.astype(np.float64)
-        glcm_sums = np.sum(P, axis=(0, 1), keepdims=True)
-        glcm_sums[glcm_sums == 0] = 1
-        P /= glcm_sums
+                 dtype=np.float64 if normed else np.uint32, order='C')
+    P_tot = np.zeros((len(distances), len(angles)),
+                     dtype=np.float64, order='C') if normed else None
+    _glcm_loop(image, distances, angles, levels, P, P_tot, symmetric, normed)
 
     return P
 
 
-def graycoprops(P, prop='contrast'):
+def graycoprops(P, prop='contrast', pre_normalized=False):
     """Calculate texture properties of a GLCM.
 
     Compute a feature of a gray level co-occurrence matrix to serve as
@@ -173,7 +162,8 @@ def graycoprops(P, prop='contrast'):
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
     Each GLCM is normalized to have a sum of 1 before the computation of
-    texture properties.
+    texture properties, unless pre_normalized = True when it is assumed to
+    already be so normalized.
 
     Parameters
     ----------
@@ -186,6 +176,10 @@ def graycoprops(P, prop='contrast'):
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
+    pre_normalized : boolean, optional
+        Flag if `P` is *already* normalised. Mirrors `normed` flag for
+        `graycomatrix`. If `True` a normalised input array is *assumed*
+        and *not* checked for.
 
     Returns
     -------
@@ -227,24 +221,14 @@ def graycoprops(P, prop='contrast'):
     if num_angle <= 0:
         raise ValueError('num_angle must be positive.')
 
-    # normalize each GLCM
-    P = P.astype(np.float64)
-    glcm_sums = np.sum(P, axis=(0, 1), keepdims=True)
-    glcm_sums[glcm_sums == 0] = 1
-    P /= glcm_sums
-
-    # create weights for specified property
-    I, J = np.ogrid[0:num_level, 0:num_level]
-    if prop == 'contrast':
-        weights = (I - J) ** 2
-    elif prop == 'dissimilarity':
-        weights = np.abs(I - J)
-    elif prop == 'homogeneity':
-        weights = 1. / (1. + (I - J) ** 2)
-    elif prop in ['ASM', 'energy', 'correlation']:
-        pass
-    else:
-        raise ValueError('%s is an invalid property' % (prop))
+    # Ensure P is float64 type and in row-major / C_CONTIGUOUS order
+    if P.dtype != np.float64 or not P.flags['C_CONTIGUOUS']:
+        P = P.astype(np.float64, order='C')
+    if prop in ['contrast', 'dissimilarity', 'homogeneity']:
+        return _coprop_weights(P, num_level, num_dist, num_angle, pre_normalized, prop)
+    elif not pre_normalized:
+        # normalize each GLCM
+        _glcm_norm(P, num_level, num_dist, num_angle)
 
     # compute property for each GLCM
     if prop == 'energy':
@@ -271,9 +255,8 @@ def graycoprops(P, prop='contrast'):
         # handle the standard case
         mask_1 = ~mask_0
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
-    elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
-        weights = weights.reshape((num_level, num_level, 1, 1))
-        results = np.sum(P * weights, axis=(0, 1))
+    else:
+        raise ValueError('%s is an invalid property' % prop)
 
     return results
 
@@ -417,21 +400,21 @@ def draw_multiblock_lbp(image, r, c, width, height,
     height : int
         Height of one of 9 equal rectangles that will be used to compute
         a feature.
-    lbp_code : int
+    lbp_code : int, optional
         The descriptor of feature to visualize. If not provided, the
         descriptor with 0 value will be used.
-    color_greater_block : tuple of 3 floats
+    color_greater_block : tuple of 3 floats, optional
         Floats specifying the color for the block that has greater
         intensity value. They should be in the range [0, 1].
         Corresponding values define (R, G, B) values. Default value
         is white (1, 1, 1).
-    color_greater_block : tuple of 3 floats
-        Floats specifying the color for the block that has greater intensity
+    color_less_block : tuple of 3 floats, optional
+        Floats specifying the color for the block that has lesser intensity
         value. They should be in the range [0, 1]. Corresponding values define
         (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
-    alpha : float
+    alpha : float, optional
         Value in the range [0, 1] that specifies opacity of visualization.
-        1 - fully transparent, 0 - opaque.
+        1 - fully transparent, 0 - opaque. Default value is 0.5.
 
     Returns
     -------

@@ -14,12 +14,34 @@ cdef extern from "numpy/npy_math.h":
 from .._shared.fused_numerics cimport np_anyint as any_int
 from .._shared.fused_numerics cimport np_real_numeric
 
+ctypedef fused uint32_or_float64:
+    cnp.uint32_t
+    cnp.float64_t
+
+ctypedef fused any_int_or_float:
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.float32_t
+    cnp.float64_t
+
 cnp.import_array()
+
 
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
-               cnp.uint32_t[:, :, :, ::1] out):
+               uint32_or_float64[:, :, :, ::1] out,
+               uint32_or_float64[:, ::1] out_total,
+               bint symmetric,
+               bint normed):
     """Perform co-occurrence matrix accumulation.
+
+    Cython helper / computation function for `greycomatrix`
 
     Parameters
     ----------
@@ -35,24 +57,40 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
         where levels indicate the number of gray-levels counted
         (typically 256 for an 8-bit image).
     out : ndarray
-        On input a 4D array of zeros, and on output it contains
-        the results of the GLCM computation.
-
+        On input a 4D array of zeros.
+        On output it contains the grey level co-occurrence matrix for `image`.
+        See `greycomatrix` for more details. This routine does most of the
+        numerical computation for `greycomatrix`.
+    out_total: ndarray
+        On input a 2D array of zeros.
+        On output, if `normed` is True, it contains the totals used to normalise
+        for each given offset. If `normed` is False, it will still contain zeros.
+    symmetric : boolean
+        If True, the output matrix `P[:, :, d, theta]` is symmetric.
+    normed:
+        If True, normalize `out` by dividing by the total number of
+        accumulated co-occurrences for the given offset. The elements
+        of the resulting matrix sum to 1.
     """
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col, start_row,\
-                   end_row, start_col, end_col, offset_row, offset_col
+                   end_row, start_col, end_col, offset_row, offset_col,\
+                   idx, jdx
         any_int i, j
         cnp.float64_t angle, distance
+        uint32_or_float64 total_increment = 2 if symmetric else 1
+        uint32_or_float64 symmetric_increment = 1 if symmetric else 0
+    num_dist = distances.shape[0]
+    num_angle = angles.shape[0]
 
     with nogil:
         rows = image.shape[0]
         cols = image.shape[1]
 
-        for a_idx in range(angles.shape[0]):
+        for a_idx in range(num_angle):
             angle = angles[a_idx]
-            for d_idx in range(distances.shape[0]):
+            for d_idx in range(num_dist):
                 distance = distances[d_idx]
                 offset_row = round(sin(angle) * distance)
                 offset_col = round(cos(angle) * distance)
@@ -69,6 +107,17 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                         j = image[row, col]
                         if 0 <= i < levels and 0 <= j < levels:
                             out[i, j, d_idx, a_idx] += 1
+                            out[j, i, d_idx, a_idx] += symmetric_increment
+                            if normed:
+                                out_total[d_idx, a_idx] += total_increment
+        if normed:
+            # normalize each GLCM
+            for d_idx in range(num_dist):
+                for a_idx in range(num_angle):
+                    if out_total[d_idx, a_idx] != 0:
+                        for idx in range(levels):
+                            for jdx in range(levels):
+                                out[idx, jdx, d_idx, a_idx] /= out_total[d_idx, a_idx]
 
 
 cdef inline int _bit_rotate_right(int value, int length) nogil:
@@ -355,3 +404,228 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
         lbp_code |= has_greater_value << (7 - element_num)
 
     return lbp_code
+
+
+def _glcm_norm(double[:, :, :, ::1] P,
+               Py_ssize_t num_level,
+               Py_ssize_t num_dist,
+               Py_ssize_t num_angle):
+    """Perform co-occurrence matrix normalisation.
+
+    Parameters
+    ----------
+    P : float64 array
+        Input array. `P` is the grey-level co-occurrence histogram
+        for which to compute the specified property. The value
+        `P[i, j, d, theta]` is the number of times that grey-level j
+        occurs at a distance d and at an angle theta from
+        grey-level i.
+    num_level: int
+    num_dist: int
+    num_angle: int
+        Input array P should be of shape
+        [num_level, num_level, num_dist, num_angle]
+    """
+
+    cdef:
+        Py_ssize_t a_idx, d_idx, idx, jdx
+        cnp.float64_t acc
+
+    with nogil:
+        # normalize each GLCM
+        for d_idx in range(num_dist):
+            for a_idx in range(num_angle):
+                acc = 0.0
+                for idx in range(num_level):
+                    for jdx in range(num_level):
+                        acc += P[idx, jdx, d_idx, a_idx]
+                if acc != 0.0:
+                    for idx in range(num_level):
+                        for jdx in range(num_level):
+                            P[idx, jdx, d_idx, a_idx] /= acc
+
+
+def _coprop_weights(cnp.float64_t[:, :, :, ::1] P,
+                    Py_ssize_t num_level,
+                    Py_ssize_t num_dist,
+                    Py_ssize_t num_angle,
+                    bint pre_normalized,
+                    str prop):
+    """Calculate property matrix of a GLCM for certain properties.
+
+    For `prop` in ['contrast', 'dissimilarity', 'homogeneity'], calculate
+    property of GLCM matrix P. Cython helper function for greycoprops.
+
+    Parameters
+    ----------
+    P : ndarray
+        Grey-level co-occurrence matrix, typically as output from `greycomatrix`.
+    num_level : int
+        The number of grey levels in the original image.
+    num_dist : int
+        Number of pixel pair distance offsets.
+    num_angle : int
+        Number of pixel pair angles.
+    pre_normalized : boolean
+        Flag if `P` is *already* normalised. Mirrors `normed` flag for `greycomatrix`.
+    prop : str
+        `prop` value from `greycoprops`. Should be one of 'contrast', 'dissimilarity' or 'homogeneity'.
+
+    Returns
+    -------
+    output : (num_dist, num_angle) ndarray
+        2-dimensional array. `results[d, a]` is the property 'prop' for
+        the d'th distance and the a'th angle.
+    """
+
+    cdef Py_ssize_t idx, jdx, a_idx, d_idx
+    cdef cnp.float64_t acc, weight, diff
+    cdef bint get_out
+    # The line below will cause an error if `prop` is inappropriate
+    cdef int i_prop = ['contrast', 'dissimilarity', 'homogeneity'].index(prop)
+    out = np.zeros((num_dist, num_angle), dtype=np.float64)
+    cdef double[:, ::1] out_view = out
+    weights = np.zeros((num_level, num_level), dtype=np.float64)
+    cdef double[:, ::1] weights_view = weights
+
+    with nogil:
+
+        for idx in range(num_level):
+            for jdx in range(num_level):
+                diff = idx - jdx
+                if i_prop == 2:
+                    # Reciprocal of actual weight to avoid an unnecessary extra division below
+                    weights_view[idx, jdx] = 1. + (diff * diff)
+                elif i_prop == 0:
+                    weights_view[idx, jdx] = diff * diff
+                else:
+                    weights_view[idx, jdx] = diff if diff > 0 else -diff
+        for d_idx in range(num_dist):
+            for a_idx in range(num_angle):
+
+                # Accumulate sum of elements of `P` for this `d_idx` / `a_idx`.
+                # If `pre_normalized` is True, acc is used only as a flag to indicate whether
+                # the weights need applying for this `d_idx` / `a_idx`, hence if / break blocks.
+                with gil:
+                    acc = _sum_for_all_levels(P, num_level, d_idx, a_idx, pre_normalized)
+
+                # If acc is zero, every value in P for current d_idx and a_idx is also zero, so there's
+                # nothing more to do. This assumes that every value in P is zero or positive.
+                # We could test for the latter, but it would slow things down
+                if acc != 0.0:
+                    if i_prop == 2: # homogeneity
+                        with gil:
+                            out_view[d_idx, a_idx] = _coprop_homogeneity(
+                                P, weights_view, num_level, d_idx, a_idx, acc, pre_normalized)
+                    else: # contrast or dissimilarity
+                        with gil:
+                            out_view[d_idx, a_idx] = _coprop_contrast_dissimilarity(
+                                P, weights_view, num_level, d_idx, a_idx, acc, pre_normalized)
+
+#                         if pre_normalized: # P is already normalised
+#                             for idx in range(num_level):
+#                                 for jdx in range(num_level):
+#                                     out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] / weights_view[idx, jdx]
+#                         else: # P not normalised
+#                             for idx in range(num_level):
+#                                 for jdx in range(num_level):
+#                                     out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] / (acc * weights_view[idx, jdx])
+#                    else: # contrast or dissimilarity
+#                        if pre_normalized: # P is already normalised
+#                            for idx in range(num_level):
+#                                for jdx in range(num_level):
+#                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx]
+#                        else: # P not normalised
+#                            for idx in range(num_level):
+#                                for jdx in range(num_level):
+#                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx] / acc
+    return out
+
+
+def _sum_for_all_levels(cnp.float64_t[:, :, :, ::1] P,
+                        Py_ssize_t num_level,
+                        Py_ssize_t d_idx,
+                        Py_ssize_t a_idx,
+                        bint pre_normalized):
+    """Accumulator helper function for _coprop_weights
+
+    Accumulate sum of elements of `P` for given `d_idx` and `a_idx`.
+    If `pre_normalized` is True, acc is used only as a flag to indicate
+    whether weights need applying for this `d_idx` an `a_idx` in
+    _coprop_weights.
+
+    Parameters
+    ----------
+    P : ndarray
+        Grey-level co-occurrence matrix, typically as output from `greycomatrix`.
+    num_level : int
+        The number of grey levels in the original image.
+    d_idx : int
+        Index of pixel pair distance offset to be considered.
+    a_idx : int
+        Index of pixel pair angle to be considered.
+    pre_normalized : boolean
+        Flag if `P` is *already* normalised. Mirrors `normed` flag for `greycomatrix`.
+    """
+
+    cdef Py_ssize_t idx, jdx
+    cdef cnp.float64_t acc
+    cdef bint finished
+
+    with nogil:
+        acc = 0.0
+        for idx in range(num_level):
+            for jdx in range(num_level):
+                acc += P[idx, jdx, d_idx, a_idx]
+                if pre_normalized and acc != 0:
+                    with gil:
+                        return acc
+    return acc
+
+def _coprop_homogeneity(cnp.float64_t[:, :, :, ::1] P,
+                        double[:, ::1] weights_view,
+                        Py_ssize_t num_level,
+                        Py_ssize_t d_idx,
+                        Py_ssize_t a_idx,
+                        cnp.float64_t acc,
+                        bint pre_normalized):
+
+    cdef Py_ssize_t idx, jdx
+    cdef cnp.float64_t out
+
+    with nogil:
+        out = 0.0
+        if pre_normalized: # P is already normalised
+            for idx in range(num_level):
+                for jdx in range(num_level):
+                    out += P[idx, jdx, d_idx, a_idx] / weights_view[idx, jdx]
+        else: # P not normalised
+            for idx in range(num_level):
+                for jdx in range(num_level):
+                    out += P[idx, jdx, d_idx, a_idx] / (acc * weights_view[idx, jdx])
+    return out
+
+
+
+def _coprop_contrast_dissimilarity(cnp.float64_t[:, :, :, ::1] P,
+                        double[:, ::1] weights_view,
+                        Py_ssize_t num_level,
+                        Py_ssize_t d_idx,
+                        Py_ssize_t a_idx,
+                        cnp.float64_t acc,
+                        bint pre_normalized):
+
+    cdef Py_ssize_t idx, jdx
+    cdef cnp.float64_t out
+
+    with nogil:
+        out = 0.0
+        if pre_normalized: # P is already normalised
+            for idx in range(num_level):
+                for jdx in range(num_level):
+                    out += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx]
+        else: # P not normalised
+            for idx in range(num_level):
+                for jdx in range(num_level):
+                    out += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx] / acc
+    return out

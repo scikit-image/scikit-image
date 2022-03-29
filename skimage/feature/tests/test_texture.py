@@ -151,16 +151,38 @@ class TestGLCM():
     def test_contrast(self):
         result = graycomatrix(self.image, [1, 2], [0], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
-        contrast = graycoprops(result, 'contrast')
-        np.testing.assert_almost_equal(contrast[0, 0], 0.585, decimal=3)
+        contrast = graycoprops(result, 'contrast', pre_normalized=True)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
+
+    def test_contrast_not_normed(self):
+        result = graycomatrix(self.image, [1, 2], [0], 4,
+                              normed=False, symmetric=True)
+        contrast = graycoprops(result, 'contrast', pre_normalized=False)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
+
+    def test_contrast_normed_true_false(self):
+        result = graycomatrix(self.image, [1, 2], [0], 4,
+                              normed=True, symmetric=True)
+        contrast = graycoprops(result, 'contrast', pre_normalized=False)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
 
     def test_dissimilarity(self):
         result = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
-        dissimilarity = graycoprops(result, 'dissimilarity')
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=True)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
+
+    def test_dissimilarity_not_normed(self):
+        result = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
+                              normed=False, symmetric=True)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=False)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
+
+    def test_dissimilarity_normed_true_false(self):
+        result = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
+                              normed=True, symmetric=True)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=False)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
 
     def test_greycomatrix_and_greycoprops_deprecations(self):
         expected = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
@@ -181,14 +203,25 @@ class TestGLCM():
     def test_dissimilarity_2(self):
         result = graycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
-        dissimilarity = graycoprops(result, 'dissimilarity')[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.665, decimal=3)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=True)[0, 0]
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
+
+    def test_dissimilarity_2_not_normed(self):
+        result = graycomatrix(self.image, [1, 3], [np.pi / 2], 4,
+                              normed=False, symmetric=True)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=False)[0, 0]
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
+
+    def test_dissimilarity_2_normed_true_false(self):
+        result = graycomatrix(self.image, [1, 3], [np.pi / 2], 4,
+                              normed=True, symmetric=True)
+        dissimilarity = graycoprops(result, 'dissimilarity', pre_normalized=False)[0, 0]
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
 
     def test_non_normalized_glcm(self):
         img = (np.random.random((100, 100)) * 8).astype(np.uint8)
         p = graycomatrix(img, [1, 2, 4, 5], [0, 0.25, 1, 1.5], levels=8)
-        np.testing.assert_(np.max(graycoprops(p, 'correlation')) < 1.0)
+        np.testing.assert_(np.max(graycoprops(p, 'correlation', pre_normalized=False)) < 1.0)
 
     def test_invalid_property(self):
         result = graycomatrix(self.image, [1], [0], 4)
@@ -198,19 +231,57 @@ class TestGLCM():
     def test_homogeneity(self):
         result = graycomatrix(self.image, [1], [0, 6], 4, normed=True,
                               symmetric=True)
-        homogeneity = graycoprops(result, 'homogeneity')[0, 0]
+        homogeneity = graycoprops(result, 'homogeneity', pre_normalized=True)[0, 0]
+        np.testing.assert_almost_equal(homogeneity, 0.80833333)
+
+    def test_homogeneity_not_normed(self):
+        result = graycomatrix(self.image, [1], [0, 6], 4, normed=False,
+                              symmetric=True)
+        homogeneity = graycoprops(result, 'homogeneity', pre_normalized=False)[0, 0]
+        np.testing.assert_almost_equal(homogeneity, 0.80833333)
+
+    def test_homogeneity_normed_true_false(self):
+        result = graycomatrix(self.image, [1], [0, 6], 4, normed=True,
+                              symmetric=True)
+        homogeneity = graycoprops(result, 'homogeneity', pre_normalized=False)[0, 0]
         np.testing.assert_almost_equal(homogeneity, 0.80833333)
 
     def test_energy(self):
         result = graycomatrix(self.image, [1], [0, 4], 4, normed=True,
                               symmetric=True)
-        energy = graycoprops(result, 'energy')[0, 0]
+        energy = graycoprops(result, 'energy', pre_normalized=True)[0, 0]
+        np.testing.assert_almost_equal(energy, 0.38188131)
+
+    def test_energy_not_normed(self):
+        result = graycomatrix(self.image, [1], [0, 4], 4, normed=False,
+                              symmetric=True)
+        energy = graycoprops(result, 'energy', pre_normalized=False)[0, 0]
+        np.testing.assert_almost_equal(energy, 0.38188131)
+
+    def test_energy_normed_true_false(self):
+        result = graycomatrix(self.image, [1], [0, 4], 4, normed=True,
+                              symmetric=True)
+        energy = graycoprops(result, 'energy', pre_normalized=False)[0, 0]
         np.testing.assert_almost_equal(energy, 0.38188131)
 
     def test_correlation(self):
         result = graycomatrix(self.image, [1, 2], [0], 4, normed=True,
                               symmetric=True)
-        energy = graycoprops(result, 'correlation')
+        energy = graycoprops(result, 'correlation', pre_normalized=True)
+        np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
+        np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
+
+    def test_correlation_not_normed(self):
+        result = graycomatrix(self.image, [1, 2], [0], 4, normed=False,
+                              symmetric=True)
+        energy = graycoprops(result, 'correlation', pre_normalized=False)
+        np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
+        np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
+
+    def test_correlation_normed_true_false(self):
+        result = graycomatrix(self.image, [1, 2], [0], 4, normed=True,
+                              symmetric=True)
+        energy = graycoprops(result, 'correlation', pre_normalized=False)
         np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
         np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
 
@@ -220,7 +291,15 @@ class TestGLCM():
                               symmetric=True)
         for prop in ['contrast', 'dissimilarity', 'homogeneity',
                      'energy', 'correlation', 'ASM']:
-            graycoprops(result, prop)
+            graycoprops(result, prop, pre_normalized=True)
+
+    def test_uniform_properties_normed_true_false(self):
+        im = np.ones((4, 4), dtype=np.uint8)
+        result = graycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=True,
+                              symmetric=True)
+        for prop in ['contrast', 'dissimilarity', 'homogeneity',
+                     'energy', 'correlation', 'ASM']:
+            graycoprops(result, prop, pre_normalized=False)
 
 
 class TestLBP():
