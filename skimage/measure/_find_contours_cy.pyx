@@ -7,7 +7,7 @@ cimport numpy as cnp
 cnp.import_array()
 
 cdef extern from "numpy/npy_math.h":
-    bint npy_isnan(double x)
+    bint npy_isnan(cnp.float64_t x)
 
 cdef inline cnp.float64_t _get_fraction(cnp.float64_t from_value,
                                         cnp.float64_t to_value,

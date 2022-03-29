@@ -937,7 +937,7 @@ cdef class LutProvider:
 def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
                    LutProvider luts, int st=1, int classic=0,
                    cnp.ndarray[cnp.npy_bool, ndim=3, cast=True] mask=None):
-    """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
+    """ marching_cubes(im, cnp.float64_t isovalue, LutProvider luts, int st=1, int classic=0)
     Main entry to apply marching cubes.
 
     Masked version of marching cubes. This function will check a
