@@ -25,7 +25,7 @@ img = data.cells3d()[20:]
 img = img[5:26]
 
 upper_limit = 1.5 * np.percentile(img, q=99)
-img = np.clip(img, upper_limit)
+img = np.clip(img, 0, upper_limit)
 
 fig = px.imshow(
     img,
