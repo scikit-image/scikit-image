@@ -8,6 +8,13 @@ from ..measure._label import label
 from ..util import unique_rows
 from .._shared.utils import warn
 
+try:
+    # Should be public API of scipy spatial once #15003 is released
+    # see https://github.com/scipy/scipy/pull/15003
+    from scipy.spatial import QhullError
+except ImportError:
+    from scipy.spatial.qhull import QhullError
+
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
 
@@ -16,6 +23,58 @@ def _offsets_diamond(ndim):
     for vertex, (axis, offset) in enumerate(product(range(ndim), (-0.5, 0.5))):
         offsets[vertex, axis] = offset
     return offsets
+
+
+def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
+    r"""Checks all the coordinates for inclusiveness in the convex hull.
+
+    Parameters
+    ----------
+    gridcoords : (M, N) ndarray
+        Coordinates of ``N`` points in ``M`` dimensions.
+    hull_equations : (M, N) ndarray
+        Hyperplane equations of the facets of the convex hull.
+    tolerance : float
+        Tolerance when determining whether a point is inside the hull. Due
+        to numerical floating point errors, a tolerance of 0 can result in
+        some points erroneously being classified as being outside the hull.
+
+    Returns
+    -------
+    coords_in_hull : ndarray of bool
+        Binary 1D ndarray representing points in n-dimensional space
+        with value ``True`` set for points inside the convex hull.
+
+    Notes
+    -----
+    Checking the inclusiveness of coordinates in a convex hull requires
+    intermediate calculations of dot products which are memory-intensive.
+    Thus, the convex hull equations are checked individually with all
+    coordinates to keep within the memory limit.
+
+    References
+    ----------
+    .. [1] https://github.com/scikit-image/scikit-image/issues/5019
+
+    """
+    ndim, n_coords = gridcoords.shape
+    n_hull_equations = hull_equations.shape[0]
+    coords_in_hull = np.ones(n_coords, dtype=bool)
+
+    # Pre-allocate arrays to cache intermediate results for reducing overheads
+    dot_array = np.empty(n_coords, dtype=np.float64)
+    test_ineq_temp = np.empty(n_coords, dtype=np.float64)
+    coords_single_ineq = np.empty(n_coords, dtype=bool)
+
+    # A point is in the hull if it satisfies all of the hull's inequalities
+    for idx in range(n_hull_equations):
+        # Tests a hyperplane equation on all coordinates of volume
+        np.dot(hull_equations[idx, :ndim], gridcoords, out=dot_array)
+        np.add(dot_array, hull_equations[idx, ndim:], out=test_ineq_temp)
+        np.less(test_ineq_temp, tolerance, out=coords_single_ineq)
+        coords_in_hull *= coords_single_ineq
+
+    return coords_in_hull
 
 
 def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
@@ -51,7 +110,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     if np.count_nonzero(image) == 0:
         warn("Input image is entirely zero, no valid convex hull. "
              "Returning empty image", UserWarning)
-        return np.zeros(image.shape, dtype=np.bool_)
+        return np.zeros(image.shape, dtype=bool)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
@@ -63,7 +122,13 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
             # when offsetting, we multiply number of vertices by 2 * ndim.
             # therefore, we reduce the number of coordinates by using a
             # convex hull on the original set, before offsetting.
-            hull0 = ConvexHull(coords)
+            try:
+                hull0 = ConvexHull(coords)
+            except QhullError as err:
+                warn(f"Failed to get convex hull image. "
+                     f"Returning empty image, see error message below:\n"
+                     f"{err}")
+                return np.zeros(image.shape, dtype=bool)
             coords = hull0.points[hull0.vertices]
 
     # Add a vertex for the middle of each pixel edge
@@ -76,7 +141,13 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     coords = unique_rows(coords)
 
     # Find the convex hull
-    hull = ConvexHull(coords)
+    try:
+        hull = ConvexHull(coords)
+    except QhullError as err:
+        warn(f"Failed to get convex hull image. "
+             f"Returning empty image, see error message below:\n"
+             f"{err}")
+        return np.zeros(image.shape, dtype=bool)
     vertices = hull.points[hull.vertices]
 
     # If 2D, use fast Cython function to locate convex hull pixels
@@ -85,9 +156,9 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
-        # A point is in the hull if it satisfies all of the hull's inequalities
-        coords_in_hull = np.all(hull.equations[:, :ndim].dot(gridcoords) +
-                                hull.equations[:, ndim:] < tolerance, axis=0)
+
+        coords_in_hull = _check_coords_in_hull(gridcoords,
+                                               hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
 
     return mask

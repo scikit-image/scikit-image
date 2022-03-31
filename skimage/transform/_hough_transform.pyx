@@ -279,7 +279,8 @@ def _hough_line(cnp.ndarray img,
     >>> img[35:45, 35:50] = 1
     >>> for i in range(90):
     ...     img[i, i] = 1
-    >>> img += np.random.random(img.shape) > 0.95
+    >>> rng = np.random.default_rng()
+    >>> img += rng.random(img.shape) > 0.95
 
     Apply the Hough transform:
 
@@ -300,11 +301,11 @@ def _hough_line(cnp.ndarray img,
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
     cdef Py_ssize_t max_distance, offset
 
-    max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                             img.shape[1] * img.shape[1]))
+    offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
+                                   img.shape[1] * img.shape[1]))
+    max_distance = 2 * offset + 1
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
-    offset = max_distance / 2
+    bins = np.linspace(-offset, offset, max_distance)
 
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
@@ -346,7 +347,13 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
-    seed : int, optional
+    seed : {None, int, `numpy.random.Generator`, optional}
+        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance then that instance is
+        used.
+
         Seed to initialize the random number generator.
 
     Returns
@@ -401,7 +408,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     mask[y_idxs, x_idxs] = 1
 
     count = len(x_idxs)
-    random_state = np.random.RandomState(seed)
+    random_state = np.random.default_rng(seed)
     random_ = np.arange(count, dtype=np.intp)
     random_state.shuffle(random_)
     cdef cnp.intp_t[::1] random = random_

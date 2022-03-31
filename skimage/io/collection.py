@@ -6,9 +6,20 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
+from packaging import version
 
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
+
+# Check CVE-2021-27921 and others
+if version.parse(pil_version) < version.parse('8.1.2'):
+    from warnings import warn
+    warn('Your installed pillow version is < 8.1.2. '
+         'Several security issues (CVE-2021-27921, '
+         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
+         'and more) have been fixed in pillow 8.1.2 or higher. '
+         'We recommend to upgrade this library.',
+         stacklevel=2)
 
 from tifffile import TiffFile
 
@@ -127,23 +138,24 @@ class ImageCollection(object):
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
     `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
-    ``load_func(file_pattern[5])`` to load the image.
+    ``load_func(load_pattern[5])`` to load the image.
 
-    Imagine, for example, an ImageCollection that loads every tenth
+    Imagine, for example, an ImageCollection that loads every third
     frame from a video file::
 
-      class AVILoader:
-          video_file = 'myvideo.avi'
+      video_file = 'no_time_for_that_tiny.gif'
 
-          def __call__(self, frame):
-              return video_read(self.video_file, frame)
+      def vidread_step(f, step):
+          vid = imageio.get_reader(f)
+          seq = [v for v in vid.iter_data()]
+          return seq[::step]
 
-      avi_load = AVILoader()
+      ic = ImageCollection(video_file, load_func=vidread_step, step=3)
 
-      frames = range(0, 1000, 10) # 0, 10, 20, ...
-      ic = ImageCollection(frames, load_func=avi_load)
+      ic  # is an ImageCollection object of length 1 because there is 1 file
 
-      x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
+      x = ic[0]  # calls vidread_step(video_file, step=3)
+      x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
     Another use of ``load_func`` would be to convert all images to ``uint8``::
 
@@ -151,10 +163,6 @@ class ImageCollection(object):
           return imread(f).astype(np.uint8)
 
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
-
-    For files with multiple images, the images will be flattened into a list
-    and added to the list of available images.  In this case, ``load_func``
-    should accept the keyword argument ``img_num``.
 
     Examples
     --------
@@ -178,14 +186,21 @@ class ImageCollection(object):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
         else:
             raise TypeError('Invalid pattern as input.')
+
+        self._files = sorted(self._files, key=alphanumeric_key)
+
+        if load_func is None:
+            from ._io import imread
+            self.load_func = imread
+            self._numframes = self._find_images()
+        else:
+            self.load_func = load_func
+            self._numframes = len(self._files)
+            self._frame_index = None
 
         if conserve_memory:
             memory_slots = 1
@@ -194,12 +209,6 @@ class ImageCollection(object):
 
         self._conserve_memory = conserve_memory
         self._cached = None
-
-        if load_func is None:
-            from ._io import imread
-            self.load_func = imread
-        else:
-            self.load_func = load_func
 
         self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
@@ -380,7 +389,7 @@ def imread_collection_wrapper(imread):
         load_pattern : str or list
             Pattern glob or filenames to load. The path can be absolute or
             relative.  Multiple patterns should be separated by a colon,
-            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            e.g. ``/tmp/work/*.png:/tmp/other/*.jpg``.  Also see
             implementation notes below.
         conserve_memory : bool, optional
             If True, never keep more than one in memory at a specific
@@ -393,37 +402,50 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-    """A class containing a single multi-frame image.
+
+    """A class containing all frames from multi-frame TIFF images.
 
     Parameters
     ----------
-    filename : str
-        The complete path to the image file.
+    load_pattern : str or list of str
+        Pattern glob or filenames to load. The path can be absolute or
+        relative.
     conserve_memory : bool, optional
-        Whether to conserve memory by only caching a single frame. Default is
-        True.
+        Whether to conserve memory by only caching the frames of a single
+        image. Default is True.
 
     Notes
     -----
-    If ``conserve_memory=True`` the memory footprint can be reduced, however
-    the performance can be affected because frames have to be read from file
-    more often.
+    The object that is returned can be used as a list of image-data objects,
+    where each entry in the list represents one image. In this regard it is
+    very similar to `ImageCollection`, but the two differ in the treatment
+    of multi-frame images.
 
-    The last accessed frame is cached, all other frames will have to be read
-    from file.
+    For a TIFF image containing N frames of size WxH, `MultiImage` stores
+    all frames of that image as a single entry of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
 
-    The current implementation makes use of ``tifffile`` for Tiff files and
-    PIL otherwise.
+    For an animated GIF image, `MultiImage` in the current implementation
+    will only read one frame, while `ImageCollection` by default will read
+    all of them.
 
     Examples
     --------
     >>> from skimage import data_dir
 
-    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
-    >>> len(img) # doctest: +SKIP
+    >>> multipage_tiff = data_dir + '/multipage.tif'
+    >>> img = MultiImage(multipage_tiff)
+    >>> len(img) # img contains one file
+    1
+    >>> img[0].shape # this image contains two frames of size (15, 10)
+    (2, 15, 10)
+
+    >>> ic = ImageCollection(multipage_tiff)
+    >>> len(ic) # ic contains two images
     2
-    >>> for frame in img: # doctest: +SKIP
-    ...     print(frame.shape) # doctest: +SKIP
+    >>> for frame in ic:
+    ...     print (frame.shape)
+    ...
     (15, 10)
     (15, 10)
 

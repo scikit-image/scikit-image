@@ -1,12 +1,11 @@
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _validate_interpolation_order
+from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
 
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=None, mode=None, cval=0.0,
+                 order=None, mode='reflect', cval=0.0,
                  *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
@@ -56,14 +55,14 @@ def profile_line(image, src, dst, linewidth=1,
     >>> profile_line(img, (2, 1), (2, 4))
     array([1., 1., 2., 2.])
     >>> profile_line(img, (1, 0), (1, 6), cval=4)
-    array([1., 1., 1., 2., 2., 2., 4.])
+    array([1., 1., 1., 2., 2., 2., 2.])
 
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     For example:
 
     >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
-    array([1., 1., 1., 2., 2., 2., 0.])
+    array([1., 1., 1., 2., 2., 2., 2.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
     array([1., 1., 1., 2., 2., 2.])
 
@@ -93,13 +92,7 @@ def profile_line(image, src, dst, linewidth=1,
     """
 
     order = _validate_interpolation_order(image.dtype, order)
-
-    if mode is None:
-        warn("Default out of bounds interpolation mode 'constant' is "
-             "deprecated. In version 0.19 it will be set to 'reflect'. "
-             "To avoid this warning, set `mode=` explicitly.",
-             FutureWarning, stacklevel=2)
-        mode = 'constant'
+    mode = _fix_ndimage_mode(mode)
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:

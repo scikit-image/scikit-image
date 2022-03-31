@@ -201,9 +201,9 @@ from skimage.util import img_as_ubyte
 img = img_as_ubyte(data.page())
 
 radius = 15
-selem = disk(radius)
+footprint = disk(radius)
 
-local_otsu = rank.otsu(img, selem)
+local_otsu = rank.otsu(img, footprint)
 threshold_global_otsu = threshold_otsu(img)
 global_otsu = img >= threshold_global_otsu
 

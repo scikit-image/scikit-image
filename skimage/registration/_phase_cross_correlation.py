@@ -4,7 +4,8 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-from .._shared.fft import fftmodule as fft
+from scipy.fft import fftn, ifftn, fftfreq
+
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -66,8 +67,10 @@ def _upsampled_dft(data, upsampled_region_size,
 
     for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
         kernel = ((np.arange(ups_size) - ax_offset)[:, None]
-                  * fft.fftfreq(n_items, upsample_factor))
+                  * fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
+        # use kernel with same precision as the data
+        kernel = kernel.astype(data.dtype, copy=False)
 
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
@@ -109,14 +112,15 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
 def phase_cross_correlation(reference_image, moving_image, *,
                             upsample_factor=1, space="real",
                             return_error=True, reference_mask=None,
-                            moving_mask=None, overlap_ratio=0.3):
+                            moving_mask=None, overlap_ratio=0.3,
+                            normalization="phase"):
     """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
     in a fraction of the computation time and with reduced memory requirements.
     It obtains an initial estimate of the cross-correlation peak by an FFT and
     then refines the shift estimation by upsampling the DFT only in a small
-    neighborhood of that estimate by means of a matrix-multiply DFT.
+    neighborhood of that estimate by means of a matrix-multiply DFT [1]_.
 
     Parameters
     ----------
@@ -156,7 +160,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
         maximum translation, while a higher `overlap_ratio` leads to greater
         robustness against spurious matches due to small overlap between
         masked images. Used only if one of ``reference_mask`` or
-        ``moving_mask`` is None.
+        ``moving_mask`` is not None.
+    normalization : {"phase", None}
+        The type of normalization to apply to the cross-correlation. This
+        parameter is unused when masks (`reference_mask` and `moving_mask`) are
+        supplied.
 
     Returns
     -------
@@ -171,20 +179,41 @@ def phase_cross_correlation(reference_image, moving_image, *,
         Global phase difference between the two images (should be
         zero if images are non-negative).
 
+    Notes
+    -----
+    The use of cross-correlation to estimate image translation has a long
+    history dating back to at least [2]_. The "phase correlation"
+    method (selected by ``normalization="phase"``) was first proposed in [3]_.
+    Publications [1]_ and [2]_ use an unnormalized cross-correlation
+    (``normalization=None``). Which form of normalization is better is
+    application-dependent. For example, the phase correlation method works
+    well in registering images under different illumination, but is not very
+    robust to noise. In a high noise scenario, the unnormalized method may be
+    preferable.
+
+    When masks are provided, a masked normalized cross-correlation algorithm is
+    used [5]_, [6]_.
+
     References
     ----------
     .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
            "Efficient subpixel image registration algorithms,"
            Optics Letters 33, 156-158 (2008). :DOI:`10.1364/OL.33.000156`
-    .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
+    .. [2] P. Anuta, Spatial registration of multispectral and multitemporal
+           digital imagery using fast Fourier transform techniques, IEEE Trans.
+           Geosci. Electron., vol. 8, no. 4, pp. 353–368, Oct. 1970.
+           :DOI:`10.1109/TGE.1970.271435`.
+    .. [3] C. D. Kuglin D. C. Hines. The phase correlation image alignment
+           method, Proceeding of IEEE International Conference on Cybernetics
+           and Society, pp. 163-165, New York, NY, USA, 1975, pp. 163–165.
+    .. [4] James R. Fienup, "Invariant error metrics for image reconstruction"
            Optics Letters 36, 8352-8357 (1997). :DOI:`10.1364/AO.36.008352`
-    .. [3] Dirk Padfield. Masked Object Registration in the Fourier Domain.
+    .. [5] Dirk Padfield. Masked Object Registration in the Fourier Domain.
            IEEE Transactions on Image Processing, vol. 21(5),
            pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
-    .. [4] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+    .. [6] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
-
     """
     if (reference_mask is not None) or (moving_mask is not None):
         return _masked_phase_cross_correlation(reference_image, moving_image,
@@ -201,61 +230,65 @@ def phase_cross_correlation(reference_image, moving_image, *,
         target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fft.fftn(reference_image)
-        target_freq = fft.fftn(moving_image)
+        src_freq = fftn(reference_image)
+        target_freq = fftn(moving_image)
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = fft.ifftn(image_product)
+    if normalization == "phase":
+        eps = np.finfo(image_product.real.dtype).eps
+        image_product /= np.maximum(np.abs(image_product), 100 * eps)
+    elif normalization is not None:
+        raise ValueError("normalization must be either phase or None")
+    cross_correlation = ifftn(image_product)
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
-    shifts = np.stack(maxima).astype(np.float64)
+    float_dtype = image_product.real.dtype
+
+    shifts = np.stack(maxima).astype(float_dtype, copy=False)
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
         if return_error:
-            src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
-            target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+            src_amp /= src_freq.size
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
+            target_amp /= target_freq.size
             CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
+        upsample_factor = np.array(upsample_factor, dtype=float_dtype)
         shifts = np.round(shifts * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
-        upsample_factor = np.array(upsample_factor, dtype=np.float64)
-        normalization = (src_freq.size * upsample_factor ** 2)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
                                            sample_region_offset).conj()
-        cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
         maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                                   cross_correlation.shape)
         CCmax = cross_correlation[maxima]
 
-        maxima = np.stack(maxima).astype(np.float64) - dftshift
+        maxima = np.stack(maxima).astype(float_dtype, copy=False)
+        maxima -= dftshift
 
-        shifts = shifts + maxima / upsample_factor
+        shifts += maxima / upsample_factor
 
         if return_error:
-            src_amp = _upsampled_dft(src_freq * src_freq.conj(),
-                                     1, upsample_factor)[0, 0]
-            src_amp /= normalization
-            target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                        1, upsample_factor)[0, 0]
-            target_amp /= normalization
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
 
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.
@@ -264,6 +297,16 @@ def phase_cross_correlation(reference_image, moving_image, *,
             shifts[dim] = 0
 
     if return_error:
+        # Redirect user to masked_phase_cross_correlation if NaNs are observed
+        if np.isnan(CCmax) or np.isnan(src_amp) or np.isnan(target_amp):
+            raise ValueError(
+                "NaN values found, please remove NaNs from your "
+                "input data or use the `reference_mask`/`moving_mask` "
+                "keywords, eg: "
+                "phase_cross_correlation(reference_image, moving_image, "
+                "reference_mask=~np.isnan(reference_image), "
+                "moving_mask=~np.isnan(moving_image))")
+
         return shifts, _compute_error(CCmax, src_amp, target_amp),\
             _compute_phasediff(CCmax)
     else:

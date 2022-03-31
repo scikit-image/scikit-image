@@ -29,10 +29,6 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # -- General configuration -----------------------------------------------------
 
-# Strip backslahes in function's signature
-# To be removed when numpydoc > 0.9.x
-strip_signature_backslash = True
-
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx_copybutton',
@@ -43,7 +39,8 @@ extensions = ['sphinx_copybutton',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery'
+              'sphinx_gallery.gen_gallery',
+              'myst_parser',
               ]
 
 autosummary_generate = True
@@ -75,6 +72,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
+# Changes to `root_doc` in newest versions of Sphinx (we're still on v2)
 master_doc = 'index'
 
 # General information about the project.
@@ -143,15 +141,20 @@ from packaging.version import parse
 v = parse(release)
 if v.release is None:
     raise ValueError(
-        'Ill-formed version: {!r}. Version should follow '
-        'PEP440'.format(version))
+        f'Ill-formed version: {version!r}. Version should follow '
+        f'PEP440')
 
 if v.is_devrelease:
-    binder_branch = 'master'
+    binder_branch = 'main'
 else:
     major, minor = v.release[:2]
-    binder_branch = 'v{}.{}.x'.format(major, minor)
+    binder_branch = f'v{major}.{minor}.x'
 
+# set plotly renderer to capture _repr_html_ for sphinx-gallery
+import plotly.io as pio
+pio.renderers.default = 'sphinx_gallery_png'
+from plotly.io._sg_scraper import plotly_sg_scraper
+image_scrapers = ('matplotlib', plotly_sg_scraper,)
 
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
@@ -161,6 +164,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
+    'image_scrapers': image_scrapers,
     # Default thumbnail size (400, 280)
     # Default CSS rescales (160, 112)
     # Size is decreased to reduce webpage loading time
@@ -184,7 +188,8 @@ sphinx_gallery_conf = {
         'repo': 'scikit-image',
         'branch': binder_branch,  # Can be any branch, tag, or commit hash
         'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': '../../.binder/requirements.txt',
+        'dependencies': ['../../.binder/requirements.txt',
+                         '../../.binder/runtime.txt'],
         # Optional keys
         'use_jupyter_lab': False
      },
@@ -192,6 +197,15 @@ sphinx_gallery_conf = {
     'remove_config_comments':True,
 }
 
+from sphinx_gallery.utils import _has_optipng
+if _has_optipng():
+    # This option requires optipng to compress images
+    # Optimization level between 0-7
+    # sphinx-gallery default: -o7
+    # optipng default: -o2
+    # We choose -o1 as it produces a sufficient optimization
+    # See #4800
+    sphinx_gallery_conf['compress_images'] = ('images', 'thumbnails', '-o1')
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -340,7 +354,6 @@ plot_basedir = os.path.join(curpath, "plots")
 plot_pre_code = """
 import numpy as np
 import matplotlib.pyplot as plt
-np.random.seed(0)
 
 import matplotlib
 matplotlib.rcParams.update({
@@ -369,18 +382,18 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
+_python_version_str = f'{sys.version_info.major}.{sys.version_info.minor}'
 _python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('https://docs.scipy.org/doc/numpy',
+    'numpy': ('https://numpy.org/doc/stable',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/',
               (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('http://scikit-learn.org/stable',
+    'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
-                   (None, 'https://matplotlib.org/objects.inv'))
+                   (None, './_intersphinx/matplotlib-objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
@@ -429,13 +442,13 @@ def linkcode_resolve(domain, info):
         linespec = ""
     else:
         stop_line = start_line + len(source) - 1
-        linespec = f"#L{start_line}-L{stop_line}"
+        linespec = f'#L{start_line}-L{stop_line}'
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "master/skimage/%s%s" % (fn, linespec))
+                "main/skimage/%s%s" % (fn, linespec))
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

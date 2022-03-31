@@ -46,8 +46,8 @@ cdef vector[vector[Rectangle]] _haar_like_feature_coord(
 
     for y in range(height):
         for x in range(width):
-            for dy in range(1, height):
-                for dx in range(1, width):
+            for dy in range(1, height + 1):
+                for dx in range(1, width + 1):
                     # type -> 2 rectangles split along x axis
                     if (feature_type == 0 and
                             (y + dy <= height and x + 2 * dx <= width)):

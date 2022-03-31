@@ -16,6 +16,7 @@ functions to characterize the tree components.
 import numpy as np
 cimport numpy as np
 cimport cython
+from .._shared.fused_numerics cimport np_real_numeric
 
 np.import_array()
 
@@ -26,18 +27,6 @@ ctypedef np.uint64_t DTYPE_UINT64_t
 ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 ctypedef np.uint8_t DTYPE_UINT8_t
-
-ctypedef fused dtype_t:
-    np.uint8_t
-    np.uint16_t
-    np.uint32_t
-    np.uint64_t
-    np.int8_t
-    np.int16_t
-    np.int32_t
-    np.int64_t
-    np.float32_t
-    np.float64_t
 
 
 cdef DTYPE_INT64_t find_root_rec(DTYPE_INT64_t[::1] parent,
@@ -92,7 +81,7 @@ cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
     return parent[index]
 
 
-cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
+cdef void canonize(np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
                    DTYPE_INT64_t[::1] sorted_indices):
     """Generate a max-tree for which every node's parent is a canonical node.
 
@@ -192,7 +181,7 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
     return 1
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(np_real_numeric[::1] image,
             DTYPE_INT64_t[::1] parent,
             DTYPE_INT64_t[::1] sorted_indices):
     """Compute the area of all max-tree components.
@@ -215,7 +204,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
 
 
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
-            dtype_t[::1] image,
+            np_real_numeric[::1] image,
             DTYPE_INT32_t[::1] shape,
             DTYPE_INT64_t[::1] parent,
             DTYPE_INT64_t[::1] sorted_indices):
@@ -251,7 +240,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
 # representation this is interesting if the max-tree representation has
 # already been calculated for other reasons. Otherwise, it is not the most
 # efficient method. If the parameter label is True, the minima are labeled.
-cpdef void _max_tree_local_maxima(dtype_t[::1] image,
+cpdef void _max_tree_local_maxima(np_real_numeric[::1] image,
                                   DTYPE_UINT64_t[::1] output,
                                   DTYPE_INT64_t[::1] parent,
                                   DTYPE_INT64_t[::1] sorted_indices
@@ -315,8 +304,8 @@ cpdef void _max_tree_local_maxima(dtype_t[::1] image,
 
 
 # direct filter (criteria based filter)
-cpdef void _direct_filter(dtype_t[::1] image,
-                          dtype_t[::1] output,
+cpdef void _direct_filter(np_real_numeric[::1] image,
+                          np_real_numeric[::1] output,
                           DTYPE_INT64_t[::1] parent,
                           DTYPE_INT64_t[::1] sorted_indices,
                           DTYPE_FLOAT64_t[::1] attribute,
@@ -392,7 +381,7 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
 # _max_tree is the main function. It allows to construct a max
 # tree representation of the image.
-cpdef void _max_tree(dtype_t[::1] image,
+cpdef void _max_tree(np_real_numeric[::1] image,
                      DTYPE_BOOL_t[::1] mask,
                      DTYPE_INT32_t[::1] structure,
                      DTYPE_INT32_t[::1] offset,

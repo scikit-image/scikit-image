@@ -134,6 +134,8 @@ def test_offsets():
                         [10,  0,  1,  2,  3,  4,  5,  6],
                         [10,  0,  1,  2,  3,  4,  5,  6],
                         [10,  0,  1,  2,  3,  4,  5,  6]])
+    assert hasattr(m, "offsets")
+    assert_array_equal(offsets, m.offsets)
 
 
 @parametrize("shape", [(100, 100), (5, 8, 13, 17)] * 5)

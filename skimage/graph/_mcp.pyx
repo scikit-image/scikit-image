@@ -390,7 +390,7 @@ cdef class MCP:
     cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost):
         """ int goal_reached(int index, float cumcost)
         This method is called each iteration after popping an index
-        from the heap, before examining the neighbours.
+        from the heap, before examining the neighbors.
 
         This method can be overloaded to modify the behavior of the MCP
         algorithm. An example might be to stop the algorithm when a
@@ -398,7 +398,7 @@ cdef class MCP:
         certain distance away from the seed point.
 
         This method should return 1 if the algorithm should not check
-        the current point's neighbours and 2 if the algorithm is now
+        the current point's neighbors and 2 if the algorithm is now
         done.
         """
         return 0
@@ -543,7 +543,7 @@ cdef class MCP:
             goal_reached = self.goal_reached(index, cumcost)
             if goal_reached > 0:
                 if goal_reached == 1:
-                    continue  # Skip neighbours
+                    continue  # Skip neighbors
                 else:
                     break  # Done completely
 
@@ -849,9 +849,9 @@ cdef class MCP_Connect(MCP):
         id2 : int
             The seed point id where the second neighbor originated from.
         pos1 : tuple
-            The index of of the first neighbour in the connection.
+            The index of of the first neighbor in the connection.
         pos2 : tuple
-            The index of of the second neighbour in the connection.
+            The index of of the second neighbor in the connection.
         cost1 : float
             The cumulative cost at `pos1`.
         cost2 : float

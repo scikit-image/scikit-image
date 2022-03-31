@@ -37,13 +37,13 @@ from scipy import ndimage as ndi
 image = data.camera()
 shift = (-22, 13)
 
-corrupted_pixels = np.random.choice([False, True], size=image.shape,
-                                    p=[0.25, 0.75])
+rng = np.random.default_rng()
+corrupted_pixels = rng.choice([False, True], size=image.shape, p=[0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
 offset_image *= corrupted_pixels
-print(f"Known offset (row, col): {shift}")
+print(f'Known offset (row, col): {shift}')
 
 # Determine what the mask is based on which pixels are invalid
 # In this case, we know what the mask should be since we corrupted
@@ -53,7 +53,7 @@ mask = corrupted_pixels
 detected_shift = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask)
 
-print(f"Detected pixel offset (row, col): {-detected_shift}")
+print(f'Detected pixel offset (row, col): {-detected_shift}')
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharex=True, sharey=True,
                                     figsize=(8, 3))
@@ -88,8 +88,8 @@ rr1, cc1 = draw.ellipse(259, 248, r_radius=125, c_radius=100,
 rr2, cc2 = draw.ellipse(300, 200, r_radius=110, c_radius=180,
                         shape=image.shape)
 
-mask1 = np.zeros_like(image, dtype=np.bool)
-mask2 = np.zeros_like(image, dtype=np.bool)
+mask1 = np.zeros_like(image, dtype=bool)
+mask2 = np.zeros_like(image, dtype=bool)
 mask1[rr1, cc1] = True
 mask2[rr2, cc2] = True
 
@@ -97,13 +97,13 @@ offset_image = ndi.shift(image, shift)
 image *= mask1
 offset_image *= mask2
 
-print(f"Known offset (row, col): {shift}")
+print(f'Known offset (row, col): {shift}')
 
 detected_shift = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask1,
                                          moving_mask=mask2)
 
-print(f"Detected pixel offset (row, col): {-detected_shift}")
+print(f'Detected pixel offset (row, col): {-detected_shift}')
 
 fig = plt.figure(figsize=(8,3))
 ax1 = plt.subplot(1, 2, 1)

@@ -2,12 +2,11 @@ import os
 
 import numpy as np
 from skimage.io import use_plugin, reset_plugins
-from skimage.io.collection import MultiImage, ImageCollection
+from skimage.io.collection import MultiImage
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose
 
-import pytest
 from pytest import fixture
 
 @fixture
@@ -20,39 +19,34 @@ def imgs():
             MultiImage(paths[0], conserve_memory=False),
             MultiImage(paths[1]),
             MultiImage(paths[1], conserve_memory=False),
-            ImageCollection(paths[0]),
-            ImageCollection(paths[1], conserve_memory=False),
-            ImageCollection(os.pathsep.join(paths))]
+            MultiImage(os.pathsep.join(paths))]
     yield imgs
 
     reset_plugins()
 
 def test_shapes(imgs):
-    img = imgs[-1]
-    imgs = img[:]
-    assert imgs[0].shape == imgs[1].shape
-    assert imgs[0].shape == (10, 10, 3)
+    imgs = imgs[-1]
+    assert imgs[0][0].shape == imgs[0][1].shape
+    assert imgs[0][0].shape == (10, 10, 3)
 
 def test_len(imgs):
-    assert len(imgs[0]) == len(imgs[1]) == 2
-    assert len(imgs[2]) == len(imgs[3]) == 24
-    assert len(imgs[4]) == 2
-    assert len(imgs[5]) == 24
-    assert len(imgs[6]) == 26, len(imgs[6])
+    assert len(imgs[0][0]) == len(imgs[1][0]) == 2
+    assert len(imgs[2][0]) == len(imgs[3][0]) == 24
+    assert len(imgs[-1]) == 2, len(imgs[-1])
 
 def test_slicing(imgs):
     img = imgs[-1]
-    assert type(img[:]) is ImageCollection
-    assert len(img[:]) == 26, len(img[:])
-    assert len(img[:1]) == 1
-    assert len(img[1:]) == 25
+    assert type(img[:]) is MultiImage
+    assert len(img[0][:]) + len(img[1][:]) == 26, len(img[:])
+    assert len(img[0][:1]) == 1
+    assert len(img[1][1:]) == 23
     assert_allclose(img[0], img[:1][0])
     assert_allclose(img[1], img[1:][0])
     assert_allclose(img[-1], img[::-1][0])
     assert_allclose(img[0], img[::-1][-1])
 
 def test_getitem(imgs):
-    for img in imgs:
+    for img in imgs[0]:
         num = len(img)
 
         for i in range(-num, num):
@@ -69,7 +63,7 @@ def test_getitem(imgs):
 
 def test_files_property(imgs):
     for img in imgs:
-        if isinstance(img, ImageCollection):
+        if isinstance(img, MultiImage):
             continue
 
         assert isinstance(img.filename, str)

@@ -8,9 +8,9 @@ example extracts a single coin from the ``skimage.data.coins`` image and uses
 histogram matching to attempt to locate it within the original image.
 
 First, a box-shaped region of the image containing the target coin is
-extracted and a histogram of its greyscale values is computed.
+extracted and a histogram of its grayscale values is computed.
 
-Next, for each pixel in the test image, a histogram of the greyscale values in
+Next, for each pixel in the test image, a histogram of the grayscale values in
 a region of the image surrounding the pixel is computed.
 ``skimage.filters.rank.windowed_histogram`` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
@@ -48,9 +48,9 @@ from skimage.filters import rank
 matplotlib.rcParams['font.size'] = 9
 
 
-def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
+def windowed_histogram_similarity(image, footprint, reference_hist, n_bins):
     # Compute normalized windowed histogram feature vector for each pixel
-    px_histograms = rank.windowed_histogram(image, selem, n_bins=n_bins)
+    px_histograms = rank.windowed_histogram(image, footprint, n_bins=n_bins)
 
     # Reshape coin histogram to (1,1,N) for broadcast when we want to use it in
     # arithmetic operations with the windowed histograms from the image
@@ -79,7 +79,7 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
 # Load the `skimage.data.coins` image
 img = img_as_ubyte(data.coins())
 
-# Quantize to 16 levels of greyscale; this way the output image will have a
+# Quantize to 16 levels of grayscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
 quantized_img = img // 16
 
@@ -96,10 +96,10 @@ coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 # Compute a disk shaped mask that will define the shape of our sliding window
 # Example coin is ~44px across, so make a disk 61px wide (2 * rad + 1) to be
 # big enough for other coins too.
-selem = disk(30)
+footprint = disk(30)
 
 # Compute the similarity across the complete image
-similarity = windowed_histogram_similarity(quantized_img, selem, coin_hist,
+similarity = windowed_histogram_similarity(quantized_img, footprint, coin_hist,
                                            coin_hist.shape[0])
 
 # Now try a rotated image
@@ -108,7 +108,7 @@ rotated_img = img_as_ubyte(transform.rotate(img, 45.0, resize=True))
 quantized_rotated_image = rotated_img // 16
 # Similarity on rotated image
 rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
-                                                   selem, coin_hist,
+                                                   footprint, coin_hist,
                                                    coin_hist.shape[0])
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))

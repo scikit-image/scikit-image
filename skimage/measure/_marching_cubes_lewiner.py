@@ -1,11 +1,9 @@
-import warnings
 import base64
 
 import numpy as np
 
 from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
-from ._marching_cubes_classic import _marching_cubes_classic
 
 
 def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
@@ -44,11 +42,8 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    method: str, optional
-        One of 'lewiner', 'lorensen' or '_lorensen'. Specify witch of
-        Lewiner et al. or Lorensen et al. method will be used. The
-        '_lorensen' flag correspond to an old implementation that will
-        be deprecated in version 0.19.
+    method: {'lewiner', 'lorensen'}, optional
+        Whether the method of Lewiner et al. or Lorensen et al. will be used.
     mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on
         True elements. This will save computational time when interfaces
@@ -60,7 +55,9 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     -------
     verts : (V, 3) array
         Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
+        matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
+        True, then the presence of degenerate triangles in the mesh can make
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
@@ -125,152 +122,17 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
            :DOI:`10.1145/37401.37422`
-
     """
+    use_classic = False
+    if method == 'lorensen':
+        use_classic = True
+    elif method != 'lewiner':
+        raise ValueError("method should be either 'lewiner' or 'lorensen'")
+    return _marching_cubes_lewiner(volume, level, spacing,
+                                   gradient_direction, step_size,
+                                   allow_degenerate, use_classic=use_classic,
+                                   mask=mask)
 
-    if method == 'lewiner':
-        return _marching_cubes_lewiner(volume, level, spacing,
-                                       gradient_direction, step_size,
-                                       allow_degenerate, use_classic=False,
-                                       mask=mask)
-    elif method == 'lorensen':
-        return _marching_cubes_lewiner(volume, level, spacing,
-                                       gradient_direction, step_size,
-                                       allow_degenerate, use_classic=True,
-                                       mask=mask)
-    elif method == '_lorensen':
-        if mask is not None:
-            raise NotImplementedError(
-                'Parameter `mask` is not implemented for method "_lorensen" '
-                'and will be ignored.'
-            )
-        return _marching_cubes_classic(volume, level, spacing,
-                                       gradient_direction)
-    else:
-        raise ValueError("method should be one of 'lewiner', 'lorensen' or "
-                         "'_lorensen'.")
-
-
-def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                           gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False, mask=None):
-    """
-    Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
-
-    In contrast to ``marching_cubes_classic()``, this algorithm is faster,
-    resolves ambiguities, and guarantees topologically correct results.
-    Therefore, this algorithm generally a better choice, unless there
-    is a specific need for the classic algorithm.
-
-    Parameters
-    ----------
-    volume : (M, N, P) array
-        Input data volume to find isosurfaces. Will internally be
-        converted to float32 if necessary.
-    level : float
-        Contour value to search for isosurfaces in `volume`. If not
-        given or None, the average of the min and max of vol is used.
-    spacing : length-3 tuple of floats
-        Voxel spacing in spatial dimensions corresponding to numpy array
-        indexing dimensions (M, N, P) as in `volume`.
-    gradient_direction : string
-        Controls if the mesh was generated from an isosurface with gradient
-        descent toward objects of interest (the default), or the opposite,
-        considering the *left-hand* rule.
-        The two options are:
-        * descent : Object was greater than exterior
-        * ascent : Exterior was greater than object
-    step_size : int
-        Step size in voxels. Default 1. Larger steps yield faster but
-        coarser results. The result will always be topologically correct
-        though.
-    allow_degenerate : bool
-        Whether to allow degenerate (i.e. zero-area) triangles in the
-        end-result. Default True. If False, degenerate triangles are
-        removed, at the cost of making the algorithm slower.
-    use_classic : bool
-        If given and True, the classic marching cubes by Lorensen (1987)
-        is used. This option is included for reference purposes. Note
-        that this algorithm has ambiguities and is not guaranteed to
-        produce a topologically correct result. The results with using
-        this option are *not* generally the same as the
-        ``marching_cubes_classic()`` function.
-    mask : (M, N, P) array
-        Boolean array. The marching cube algorithm will be computed only on
-        True elements. This will save computational time when interfaces
-        are located within certain region of the volume M, N, P-e.g. the top
-        half of the cube-and also allow to compute finite surfaces-i.e. open
-        surfaces that do not end at the border of the cube.
-
-    Returns
-    -------
-    verts : (V, 3) array
-        Spatial coordinates for V unique mesh vertices. Coordinate order
-        matches input `volume` (M, N, P).
-    faces : (F, 3) array
-        Define triangular faces via referencing vertex indices from ``verts``.
-        This algorithm specifically outputs triangles, so each face has
-        exactly three indices.
-    normals : (V, 3) array
-        The normal direction at each vertex, as calculated from the
-        data.
-    values : (V, ) array
-        Gives a measure for the maximum value of the data in the local region
-        near each vertex. This can be used by visualization tools to apply
-        a colormap to the mesh.
-
-    Notes
-    -----
-    The algorithm [1] is an improved version of Chernyaev's Marching
-    Cubes 33 algorithm. It is an efficient algorithm that relies on
-    heavy use of lookup tables to handle the many different cases,
-    keeping the algorithm relatively easy. This implementation is
-    written in Cython, ported from Lewiner's C++ implementation.
-
-    To quantify the area of an isosurface generated by this algorithm, pass
-    verts and faces to `skimage.measure.mesh_surface_area`.
-
-    Regarding visualization of algorithm output, to contour a volume
-    named `myvolume` about the level 0.0, using the ``mayavi`` package::
-
-      >>> from mayavi import mlab # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
-      >>> mlab.triangular_mesh([vert[0] for vert in verts],
-      ...                      [vert[1] for vert in verts],
-      ...                      [vert[2] for vert in verts],
-      ...                      faces) # doctest: +SKIP
-      >>> mlab.show() # doctest: +SKIP
-
-    Similarly using the ``visvis`` package::
-
-      >>> import visvis as vv # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes_lewiner(myvolume, 0.0) # doctest: +SKIP
-      >>> vv.mesh(np.fliplr(verts), faces, normals, values) # doctest: +SKIP
-      >>> vv.use().Run() # doctest: +SKIP
-
-    References
-    ----------
-    .. [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan
-           Tavares. Efficient implementation of Marching Cubes' cases with
-           topological guarantees. Journal of Graphics Tools 8(2)
-           pp. 1-15 (december 2003).
-           :DOI:`10.1080/10867651.2003.10487582`
-
-    See Also
-    --------
-    skimage.measure.marching_cubes
-    skimage.measure.mesh_surface_area
-
-    """
-
-    # Deprecate the function in favor of marching_cubes
-    warnings.warn("marching_cubes_lewiner is deprecated in favor of "
-                  "marching_cubes. marching_cubes_lewiner will "
-                  "be removed in version 0.19",
-                  FutureWarning, stacklevel=2)
-
-    return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                                   step_size, allow_degenerate, use_classic, mask)
 
 
 def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
@@ -393,3 +255,43 @@ def _get_mc_luts():
                 )
 
     return mcluts.THE_LUTS
+
+
+def mesh_surface_area(verts, faces):
+    """Compute surface area, given vertices and triangular faces.
+
+    Parameters
+    ----------
+    verts : (V, 3) array of floats
+        Array containing (x, y, z) coordinates for V unique mesh vertices.
+    faces : (F, 3) array of ints
+        List of length-3 lists of integers, referencing vertex coordinates as
+        provided in `verts`.
+
+    Returns
+    -------
+    area : float
+        Surface area of mesh. Units now [coordinate units] ** 2.
+
+    Notes
+    -----
+    The arguments expected by this function are the first two outputs from
+    `skimage.measure.marching_cubes`. For unit correct output, ensure correct
+    `spacing` was passed to `skimage.measure.marching_cubes`.
+
+    This algorithm works properly only if the ``faces`` provided are all
+    triangles.
+
+    See Also
+    --------
+    skimage.measure.marching_cubes
+
+    """
+    # Fancy indexing to define two vector arrays from triangle vertices
+    actual_verts = verts[faces]
+    a = actual_verts[:, 0, :] - actual_verts[:, 1, :]
+    b = actual_verts[:, 0, :] - actual_verts[:, 2, :]
+    del actual_verts
+
+    # Area of triangle in 3D = 1/2 * Euclidean norm of cross product
+    return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.

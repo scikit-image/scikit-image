@@ -18,12 +18,15 @@ __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
 _integer_types = (np.byte, np.ubyte,          # 8 bits
                   np.short, np.ushort,        # 16 bits
                   np.intc, np.uintc,          # 16 or 32 or 64 bits
-                  np.int_, np.uint,           # 32 or 64 bits
+                  int, np.int_, np.uint,      # 32 or 64 bits
                   np.longlong, np.ulonglong)  # 64 bits
 _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
                    for t in _integer_types}
-dtype_range = {np.bool_: (False, True),
+dtype_range = {bool: (False, True),
+               np.bool_: (False, True),
                np.bool8: (False, True),
+               float: (-1, 1),
+               np.float_: (-1, 1),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
                np.float64: (-1, 1)}
@@ -127,12 +130,12 @@ def _scale(a, n, m, copy=True):
     if n > m and a.max() < 2 ** m:
         mnew = int(np.ceil(m / 2) * 2)
         if mnew > m:
-            dtype = "int{}".format(mnew)
+            dtype = f'int{mnew}'
         else:
-            dtype = "uint{}".format(mnew)
+            dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
-        warn("Downcasting {} to {} without scaling because max "
-             "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
+        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
+             f'value {a.max()} fits in {dtype}',
              stacklevel=3)
         return a.astype(_dtype_bits(kind, m))
     elif n == m:
@@ -202,7 +205,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
 
-    .. versionchanged :: 0.15
+    .. versionchanged:: 0.15
         ``_convert`` no longer warns about possible precision or sign
         information loss. See discussions on these warnings at:
         https://github.com/scikit-image/scikit-image/issues/2602
@@ -249,8 +252,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError("Can not convert from {} to {}."
-                         .format(dtypeobj_in, dtypeobj_out))
+        raise ValueError(f'Cannot convert from {dtypeobj_in} to '
+                         f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min
@@ -318,6 +321,16 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
+        elif kind_in == 'i':
+            # From DirectX conversions:
+            # The most negative value maps to -1.0f
+            # Every other value is converted to a float (call it c)
+            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+
+            image = np.multiply(image, 1. / imax_in,
+                                dtype=computation_type)
+            np.maximum(image, -1.0, out=image)
+
         else:
             image = np.add(image, 0.5, dtype=computation_type)
             image *= 2 / (imax_in - imin_in)
@@ -354,7 +367,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
 
 def convert(image, dtype, force_copy=False, uniform=False):
     warn("The use of this function is discouraged as its behavior may change "
-         "dramatically in scikit-image 1.0. This function will be removed"
+         "dramatically in scikit-image 1.0. This function will be removed "
          "in scikit-image 1.0.", FutureWarning, stacklevel=2)
     return _convert(image=image, dtype=dtype,
                     force_copy=force_copy, uniform=uniform)
@@ -491,7 +504,7 @@ def img_as_int(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of uint16
+    out : ndarray of int16
         Output image.
 
     Notes
@@ -549,4 +562,4 @@ def img_as_bool(image, force_copy=False):
     half is False. All negative values (if present) are False.
 
     """
-    return _convert(image, np.bool_, force_copy)
+    return _convert(image, bool, force_copy)

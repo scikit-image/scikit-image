@@ -68,12 +68,13 @@ def _validate_inputs(image, markers, mask, connectivity):
         mask = np.asanyarray(mask, dtype=bool)
         n_pixels = np.sum(mask)
         if mask.shape != image.shape:
-            message = ("`mask` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(mask.shape, image.shape))
+            message = (f'`mask` (shape {mask.shape}) must have same shape '
+                       f'as `image` (shape {image.shape})')
             raise ValueError(message)
     if markers is None:
         markers_bool = local_minima(image, connectivity=connectivity) * mask
-        markers = ndi.label(markers_bool)[0]
+        footprint = ndi.generate_binary_structure(markers_bool.ndim, connectivity)
+        markers = ndi.label(markers_bool, structure=footprint)[0]
     elif not isinstance(markers, (np.ndarray, list, tuple)):
         # not array-like, assume int
         # given int, assume that number of markers *within mask*.
@@ -83,8 +84,8 @@ def _validate_inputs(image, markers, mask, connectivity):
     else:
         markers = np.asanyarray(markers) * mask
         if markers.shape != image.shape:
-            message = ("`markers` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(markers.shape, image.shape))
+            message = (f'`markers` (shape {markers.shape}) must have same '
+                       f'shape as `image` (shape {image.shape})')
             raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
@@ -97,7 +98,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Parameters
     ----------
-    image : ndarray (2-D, 3-D, ...) of integers
+    image : ndarray (2-D, 3-D, ...)
         Data array where the lowest value points are labeled first.
     markers : int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
@@ -120,6 +121,9 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     watershed_line : bool, optional
         If watershed_line is True, a one-pixel wide line separates the regions
         obtained by the watershed algorithm. The line has the label 0.
+        Note that the method used for adding this line expects that
+        marker regions are not adjacent; the watershed line may not catch
+        borders between adjacent marker regions.
 
     Returns
     -------
@@ -188,10 +192,11 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     >>> from scipy import ndimage as ndi
     >>> distance = ndi.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
-    >>> local_maxi = peak_local_max(distance, labels=image,
-    ...                             footprint=np.ones((3, 3)),
-    ...                             indices=False)
-    >>> markers = ndi.label(local_maxi)[0]
+    >>> max_coords = peak_local_max(distance, labels=image,
+    ...                             footprint=np.ones((3, 3)))
+    >>> local_maxima = np.zeros_like(image, dtype=bool)
+    >>> local_maxima[tuple(max_coords.T)] = True
+    >>> markers = ndi.label(local_maxima)[0]
 
     Finally, we run the watershed on the image and markers:
 

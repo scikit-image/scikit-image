@@ -11,9 +11,9 @@ Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 """
 import numpy as np
 
+from .._shared.utils import deprecate_kwarg, warn
 from ..util import dtype_limits, invert, crop
-from .._shared.utils import warn
-from . import greyreconstruct, _util
+from . import grayreconstruct, _util
 from ._extrema_cy import _local_maxima
 
 
@@ -45,18 +45,23 @@ def _subtract_constant_clip(image, const_value):
     return(result)
 
 
-def h_maxima(image, h, selem=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def h_maxima(image, h, footprint=None):
     """Determine all maxima of the image with height >= h.
 
     The local maxima are defined as connected sets of pixels with equal
-    grey level strictly greater than the grey level of all pixels in direct
+    gray level strictly greater than the gray level of all pixels in direct
     neighborhood of the set.
 
     A local maximum M of height h is a local maximum for which
-    there is at least one path joining M with a higher maximum on which the
-    minimal value is f(M) - h (i.e. the values along the path are not
-    decreasing by more than h with respect to the maximum's value) and no
-    path for which the minimal value is greater.
+    there is at least one path joining M with an equal or higher local maximum
+    on which the minimal value is f(M) - h (i.e. the values along the path
+    are not decreasing by more than h with respect to the maximum's value)
+    and no path to an equal or higher local maximum for which the minimal
+    value is greater.
+
+    The global maxima of the image are also found by this function.
 
     Parameters
     ----------
@@ -64,7 +69,7 @@ def h_maxima(image, h, selem=None):
         The input image for which the maxima are to be calculated.
     h : unsigned integer
         The minimal height of all extracted maxima.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
         Default is the ball of radius 1 according to the maximum norm
         (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
@@ -72,11 +77,11 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The maxima of height >= h. The resulting image is a binary image, where
-       pixels belonging to the selected maxima take value 1, the others
-       take value 0.
+        The local maxima of height >= h and the global maxima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined maxima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_minima
     skimage.morphology.extrema.local_maxima
@@ -100,7 +105,7 @@ def h_maxima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 40; f[2:4,7:9] = 60; f[7:9,2:4] = 80; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all maxima with a height of at least 40:
 
@@ -137,7 +142,7 @@ def h_maxima(image, h, selem=None):
                  'floating point. To silence this warning, '
                  'ensure image and h have same data type.',
                  stacklevel=2)
-            image = image.astype(np.float_)
+            image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
@@ -164,24 +169,30 @@ def h_maxima(image, h, selem=None):
     else:
         shifted_img = _subtract_constant_clip(image, h)
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
-                                             method='dilation', selem=selem)
+    rec_img = grayreconstruct.reconstruction(shifted_img, image,
+                                             method='dilation',
+                                             footprint=footprint)
     residue_img = image - rec_img
     return (residue_img >= h).astype(np.uint8)
 
 
-def h_minima(image, h, selem=None):
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def h_minima(image, h, footprint=None):
     """Determine all minima of the image with depth >= h.
 
     The local minima are defined as connected sets of pixels with equal
-    grey level strictly smaller than the grey levels of all pixels in direct
+    gray level strictly smaller than the gray levels of all pixels in direct
     neighborhood of the set.
 
     A local minimum M of depth h is a local minimum for which
-    there is at least one path joining M with a deeper minimum on which the
-    maximal value is f(M) + h (i.e. the values along the path are not
-    increasing by more than h with respect to the minimum's value) and no
-    path for which the maximal value is smaller.
+    there is at least one path joining M with an equal or lower local minimum
+    on which the maximal value is f(M) + h (i.e. the values along the path
+    are not increasing by more than h with respect to the minimum's value)
+    and no path to an equal or lower local minimum for which the maximal
+    value is smaller.
+
+    The global minima of the image are also found by this function.
 
     Parameters
     ----------
@@ -189,7 +200,7 @@ def h_minima(image, h, selem=None):
         The input image for which the minima are to be calculated.
     h : unsigned integer
         The minimal depth of all extracted minima.
-    selem : ndarray, optional
+    footprint : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
         Default is the ball of radius 1 according to the maximum norm
         (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
@@ -197,11 +208,11 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The minima of depth >= h. The resulting image is a binary image, where
-       pixels belonging to the selected minima take value 1, the other pixels
-       take value 0.
+        The local minima of depth >= h and the global minima.
+        The resulting image is a binary image, where pixels belonging to
+        the determined minima take value 1, the others take value 0.
 
-    See also
+    See Also
     --------
     skimage.morphology.extrema.h_maxima
     skimage.morphology.extrema.local_maxima
@@ -225,7 +236,7 @@ def h_minima(image, h, selem=None):
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
     >>> f[2:4,2:4] = 160; f[2:4,7:9] = 140; f[7:9,2:4] = 120; f[7:9,7:9] = 100
-    >>> f = f.astype(np.int)
+    >>> f = f.astype(int)
 
     We can calculate all minima with a depth of at least 40:
 
@@ -243,7 +254,7 @@ def h_minima(image, h, selem=None):
                  'floating point. To silence this warning, '
                  'ensure image and h have same data type.',
                  stacklevel=2)
-            image = image.astype(np.float_)
+            image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
@@ -257,13 +268,16 @@ def h_minima(image, h, selem=None):
     else:
         shifted_img = _add_constant_clip(image, h)
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
-                                             method='erosion', selem=selem)
+    rec_img = grayreconstruct.reconstruction(shifted_img, image,
+                                             method='erosion',
+                                             footprint=footprint)
     residue_img = rec_img - image
     return (residue_img >= h).astype(np.uint8)
 
 
-def local_maxima(image, selem=None, connectivity=None, indices=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def local_maxima(image, footprint=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local maxima of n-dimensional array.
 
@@ -275,17 +289,17 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     ----------
     image : ndarray
         An n-dimensional array.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `selem` nor `connectivity` are given, all adjacent pixels are
-        considered as part of the neighborhood.
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        `footprint` is not None.
     indices : bool, optional
         If True, the output will be a tuple of one-dimensional arrays
         representing the indices of local maxima in each dimension. If False,
@@ -377,12 +391,12 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
             # Make sure that output is a tuple of 1 empty array per dimension
             return np.nonzero(image)
         else:
-            return np.zeros(image.shape, dtype=np.bool)
+            return np.zeros(image.shape, dtype=bool)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
         # from the image border
-        image = _util._fast_pad(image, image.min())
+        image = np.pad(image, 1, mode='constant', constant_values=image.min())
 
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
@@ -391,16 +405,17 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
 
     if any(s < 3 for s in image.shape):
         # Warn and skip if any dimension is smaller than 3
-        # -> no maxima can exist & structuring element can't be applied
+        # -> no maxima can exist & footprint can't be applied
         warn(
             "maxima can't exist for an image with any dimension smaller 3 "
             "if borders aren't allowed",
             stacklevel=3
         )
     else:
-        selem = _util._resolve_neighborhood(selem, connectivity, image.ndim)
+        footprint = _util._resolve_neighborhood(footprint, connectivity,
+                                                image.ndim)
         neighbor_offsets = _util._offsets_to_raveled_neighbors(
-            image.shape, selem, center=((1,) * image.ndim)
+            image.shape, footprint, center=((1,) * image.ndim)
         )
 
         try:
@@ -423,10 +438,12 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     if indices:
         return np.nonzero(flags)
     else:
-        return flags.view(np.bool)
+        return flags.view(bool)
 
 
-def local_minima(image, selem=None, connectivity=None, indices=False,
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
+def local_minima(image, footprint=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local minima of n-dimensional array.
 
@@ -438,17 +455,17 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     ----------
     image : ndarray
         An n-dimensional array.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `selem` nor `connectivity` are given, all adjacent pixels are
-        considered as part of the neighborhood.
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        `footprint` is not None.
     indices : bool, optional
         If True, the output will be a tuple of one-dimensional arrays
         representing the indices of local minima in each dimension. If False,
@@ -529,7 +546,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     """
     return local_maxima(
         image=invert(image),
-        selem=selem,
+        footprint=footprint,
         connectivity=connectivity,
         indices=indices,
         allow_borders=allow_borders

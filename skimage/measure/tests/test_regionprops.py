@@ -1,17 +1,21 @@
 import math
 
 import numpy as np
-from numpy import array
+import pytest
+import scipy.ndimage as ndi
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_almost_equal, assert_array_equal,
+                           assert_equal)
 
+from skimage import data, draw, transform
 from skimage._shared._warnings import expected_warnings
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
+                                          _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
-                                          regionprops_table, OBJECT_COLUMNS,
-                                          COL_DTYPES)
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
-                                     assert_array_almost_equal, assert_equal)
-
+                                          euler_number, perimeter,
+                                          perimeter_crofton, regionprops,
+                                          regionprops_table)
+from skimage.segmentation import slic
 
 SAMPLE = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
@@ -27,6 +31,7 @@ SAMPLE = np.array(
 )
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
+INTENSITY_FLOAT_SAMPLE = INTENSITY_SAMPLE.copy().astype(np.float64) / 10.0
 
 SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
 SAMPLE_MULTIPLE[3:5, 7:8] = 2
@@ -42,7 +47,16 @@ def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
         try:
+            # access legacy name via dict
             assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+
+            # skip property access tests for old CamelCase names
+            # (we intentionally do not provide properties for these)
+            if prop.lower() == prop:
+                # access legacy name via attribute
+                assert_almost_equal(getattr(region, prop),
+                                    getattr(region, PROPS[prop]))
+
         except TypeError:  # the `slice` property causes this
             pass
 
@@ -52,29 +66,36 @@ def test_all_props_3d():
     for prop in PROPS:
         try:
             assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+
+            # skip property access tests for old CamelCase names
+            # (we intentionally do not provide properties for these)
+            if prop.lower() == prop:
+                assert_almost_equal(getattr(region, prop),
+                                    getattr(region, PROPS[prop]))
+
         except (NotImplementedError, TypeError):
             pass
 
 
 def test_dtype():
-    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.float))
-    with testing.raises(TypeError):
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=float))
+    with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
-    with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.bool))
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=bool))
 
 
 def test_ndim():
-    regionprops(np.zeros((10, 10), dtype=np.int))
-    regionprops(np.zeros((10, 10, 1), dtype=np.int))
-    regionprops(np.zeros((10, 10, 10), dtype=np.int))
-    regionprops(np.zeros((1, 1), dtype=np.int))
-    regionprops(np.zeros((1, 1, 1), dtype=np.int))
-    with testing.raises(TypeError):
-        regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=int))
+    regionprops(np.zeros((10, 10, 1), dtype=int))
+    regionprops(np.zeros((10, 10, 10), dtype=int))
+    regionprops(np.zeros((1, 1), dtype=int))
+    regionprops(np.zeros((1, 1, 1), dtype=int))
+    with pytest.raises(TypeError):
+        regionprops(np.zeros((10, 10, 10, 2), dtype=int))
 
 
 def test_feret_diameter_max():
@@ -117,9 +138,9 @@ def test_bbox():
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 
-def test_bbox_area():
+def test_area_bbox():
     padded = np.pad(SAMPLE, 5, mode='constant')
-    bbox_area = regionprops(padded)[0].bbox_area
+    bbox_area = regionprops(padded)[0].area_bbox
     assert_array_almost_equal(bbox_area, SAMPLE.size)
 
 
@@ -148,15 +169,13 @@ def test_centroid_3d():
     assert_array_almost_equal(centroid, (1.66666667, 1.55555556, 1.55555556))
 
 
-def test_convex_area():
-    area = regionprops(SAMPLE)[0].convex_area
-    # determined with MATLAB
-    assert area == 124
+def test_area_convex():
+    area = regionprops(SAMPLE)[0].area_convex
+    assert area == 125
 
 
-def test_convex_image():
-    img = regionprops(SAMPLE)[0].convex_image
-    # determined with MATLAB
+def test_image_convex():
+    img = regionprops(SAMPLE)[0].image_convex
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -166,7 +185,7 @@ def test_convex_image():
          [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-         [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
          [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
     )
     assert_array_equal(img, ref)
@@ -198,26 +217,48 @@ def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
     assert_almost_equal(eps, 0.814629313427)
 
-    img = np.zeros((5, 5), dtype=np.int)
+    img = np.zeros((5, 5), dtype=int)
     img[2, 2] = 1
     eps = regionprops(img)[0].eccentricity
     assert_almost_equal(eps, 0)
 
 
-def test_equiv_diameter():
-    diameter = regionprops(SAMPLE)[0].equivalent_diameter
+def test_equivalent_diameter_area():
+    diameter = regionprops(SAMPLE)[0].equivalent_diameter_area
     # determined with MATLAB
     assert_almost_equal(diameter, 9.57461472963)
 
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 1
+    assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == 0
+    assert en == -1
+
+    en = euler_number(SAMPLE, 1)
+    assert en == 2
+
+    en = euler_number(SAMPLE_mod, 1)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 1)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 3)
+    assert en == 1
+
+    # for convex body, Euler number is 1
+    SAMPLE_3D_2 = np.zeros((100, 100, 100))
+    SAMPLE_3D_2[40:60, 40:60, 40:60] = 1
+    en = euler_number(SAMPLE_3D_2, 3)
+    assert en == 1
+
+    SAMPLE_3D_2[45:55, 45:55, 45:55] = 0
+    en = euler_number(SAMPLE_3D_2, 3)
+    assert en == 2
 
 
 def test_extent():
@@ -228,13 +269,13 @@ def test_extent():
 def test_moments_hu():
     hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
-         3.27117627e-01,
-         2.63869194e-02,
-         2.35390060e-02,
-         1.23151193e-03,
-         1.38882330e-06,
-         -2.72586158e-05,
-         -6.48350653e-06
+        3.27117627e-01,
+        2.63869194e-02,
+        2.35390060e-02,
+        1.23151193e-03,
+        1.38882330e-06,
+        -2.72586158e-05,
+        -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -256,48 +297,48 @@ def test_label():
     assert_array_equal(label, 1)
 
 
-def test_filled_area():
-    area = regionprops(SAMPLE)[0].filled_area
+def test_area_filled():
+    area = regionprops(SAMPLE)[0].area_filled
     assert area == np.sum(SAMPLE)
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    area = regionprops(SAMPLE_mod)[0].filled_area
+    area = regionprops(SAMPLE_mod)[0].area_filled
     assert area == np.sum(SAMPLE)
 
 
-def test_filled_image():
-    img = regionprops(SAMPLE)[0].filled_image
+def test_image_filled():
+    img = regionprops(SAMPLE)[0].image_filled
     assert_array_equal(img, SAMPLE)
 
 
-def test_major_axis_length():
-    length = regionprops(SAMPLE)[0].major_axis_length
+def test_axis_major_length():
+    length = regionprops(SAMPLE)[0].axis_major_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 16.7924234999)
 
 
-def test_max_intensity():
+def test_intensity_max():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                            )[0].max_intensity
+                            )[0].intensity_max
     assert_almost_equal(intensity, 2)
 
 
-def test_mean_intensity():
+def test_intensity_mean():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                            )[0].mean_intensity
+                            )[0].intensity_mean
     assert_almost_equal(intensity, 1.02777777777777)
 
 
-def test_min_intensity():
+def test_intensity_min():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                            )[0].min_intensity
+                            )[0].intensity_min
     assert_almost_equal(intensity, 1)
 
 
-def test_minor_axis_length():
-    length = regionprops(SAMPLE)[0].minor_axis_length
+def test_axis_minor_length():
+    length = regionprops(SAMPLE)[0].axis_minor_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 9.739302807263)
@@ -350,19 +391,27 @@ def test_perimeter():
     per = regionprops(SAMPLE)[0].perimeter
     assert_almost_equal(per, 55.2487373415)
 
-    per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    with expected_warnings(["`neighbourhood` is a deprecated argument name"]):
+        per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 46.8284271247)
+
+
+def test_perimeter_crofton():
+    per = regionprops(SAMPLE)[0].perimeter_crofton
+    assert_almost_equal(per, 61.0800637973)
+
+    per = perimeter_crofton(SAMPLE.astype('double'), directions=2)
+    assert_almost_equal(per, 64.4026493985)
 
 
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
-    # determined with MATLAB
-    assert_almost_equal(solidity, 0.580645161290323)
+    assert_almost_equal(solidity, 0.576)
 
 
-def test_weighted_moments_central():
+def test_moments_weighted_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_central
+                      )[0].moments_weighted_central
     ref = np.array(
         [[7.4000000000e+01, 3.7303493627e-14, 1.2602837838e+03,
           -7.6561796932e+02],
@@ -377,15 +426,15 @@ def test_weighted_moments_central():
     assert_array_almost_equal(wmu, ref)
 
 
-def test_weighted_centroid():
+def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                           )[0].weighted_centroid
+                           )[0].centroid_weighted
     assert_array_almost_equal(centroid, (5.540540540540, 9.445945945945))
 
 
-def test_weighted_moments_hu():
+def test_moments_weighted_hu():
     whu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_hu
+                      )[0].moments_weighted_hu
     ref = np.array([
         3.1750587329e-01,
         2.1417517159e-02,
@@ -398,9 +447,9 @@ def test_weighted_moments_hu():
     assert_array_almost_equal(whu, ref)
 
 
-def test_weighted_moments():
+def test_moments_weighted():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                     )[0].weighted_moments
+                     )[0].moments_weighted
     ref = np.array(
         [[7.4000000e+01, 6.9900000e+02, 7.8630000e+03, 9.7317000e+04],
          [4.1000000e+02, 3.7850000e+03, 4.4063000e+04, 5.7256700e+05],
@@ -410,20 +459,20 @@ def test_weighted_moments():
     assert_array_almost_equal(wm, ref)
 
 
-def test_weighted_moments_normalized():
+def test_moments_weighted_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_normalized
+                      )[0].moments_weighted_normalized
     ref = np.array(
-        [[       np.nan,        np.nan, 0.2301467830, -0.0162529732],
-         [       np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
-         [ 0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
+        [[np.nan,        np.nan, 0.2301467830, -0.0162529732],
+         [np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
+         [0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
          [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
 
 
 def test_label_sequence():
-    a = np.empty((2, 2), dtype=np.int)
+    a = np.empty((2, 2), dtype=int)
     a[:, :] = 2
     ps = regionprops(a)
     assert len(ps) == 1
@@ -431,7 +480,7 @@ def test_label_sequence():
 
 
 def test_pure_background():
-    a = np.zeros((2, 2), dtype=np.int)
+    a = np.zeros((2, 2), dtype=int)
     ps = regionprops(a)
     assert len(ps) == 0
 
@@ -440,20 +489,20 @@ def test_invalid():
     ps = regionprops(SAMPLE)
 
     def get_intensity_image():
-        ps[0].intensity_image
+        ps[0].image_intensity
 
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         get_intensity_image()
 
 
 def test_invalid_size():
     wrong_intensity_sample = np.array([[1], [1]])
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
 
 def test_equals():
-    arr = np.zeros((100, 100), dtype=np.int)
+    arr = np.zeros((100, 100), dtype=int)
     arr[0:25, 0:25] = 1
     arr[50:99, 50:99] = 2
 
@@ -481,16 +530,16 @@ def test_iterate_all_props():
 def test_cache():
     SAMPLE_mod = SAMPLE.copy()
     region = regionprops(SAMPLE_mod)[0]
-    f0 = region.filled_image
+    f0 = region.image_filled
     region._label_image[:10] = 1
-    f1 = region.filled_image
+    f1 = region.image_filled
 
     # Changed underlying image, but cache keeps result the same
     assert_array_equal(f0, f1)
 
     # Now invalidate cache
     region._cache_active = False
-    f1 = region.filled_image
+    f1 = region.image_filled
 
     assert np.any(f0 != f1)
 
@@ -510,7 +559,7 @@ def test_docstrings_and_props():
     nr_props = len(props)
     if has_docstrings:
         assert_equal(nr_docs_parsed, nr_props)
-        ds = docs['weighted_moments_normalized']
+        ds = docs['moments_weighted_normalized']
         assert 'iteration' not in ds
         assert len(ds.split('\n')) > 3
     else:
@@ -520,29 +569,61 @@ def test_docstrings_and_props():
 def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions)
-    assert out == {'label': array([1]),
-                   'bbox-0': array([0]), 'bbox-1': array([0]),
-                   'bbox-2': array([10]), 'bbox-3': array([18])}
+    assert out == {'label': np.array([1]),
+                   'bbox-0': np.array([0]), 'bbox-1': np.array([0]),
+                   'bbox-2': np.array([10]), 'bbox-3': np.array([18])}
 
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([72]),
-                   'bbox+0': array([0]), 'bbox+1': array([0]),
-                   'bbox+2': array([10]), 'bbox+3': array([18])}
+    assert out == {'label': np.array([1]), 'area': np.array([72]),
+                   'bbox+0': np.array([0]), 'bbox+1': np.array([0]),
+                   'bbox+2': np.array([10]), 'bbox+3': np.array([18])}
 
 
 def test_regionprops_table():
     out = regionprops_table(SAMPLE)
-    assert out == {'label': array([1]),
-                   'bbox-0': array([0]), 'bbox-1': array([0]),
-                   'bbox-2': array([10]), 'bbox-3': array([18])}
+    assert out == {'label': np.array([1]),
+                   'bbox-0': np.array([0]), 'bbox-1': np.array([0]),
+                   'bbox-2': np.array([10]), 'bbox-3': np.array([18])}
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([72]),
-                   'bbox+0': array([0]), 'bbox+1': array([0]),
-                   'bbox+2': array([10]), 'bbox+3': array([18])}
+    assert out == {'label': np.array([1]), 'area': np.array([72]),
+                   'bbox+0': np.array([0]), 'bbox+1': np.array([0]),
+                   'bbox+2': np.array([10]), 'bbox+3': np.array([18])}
+
+
+def test_regionprops_table_deprecated_vector_property():
+    out = regionprops_table(SAMPLE, properties=('local_centroid',))
+    for key in out.keys():
+        # key reflects the deprecated name, not its new (centroid_local) value
+        assert key.startswith('local_centroid')
+
+
+def test_regionprops_table_deprecated_scalar_property():
+    out = regionprops_table(SAMPLE, properties=('bbox_area',))
+    assert list(out.keys()) == ['bbox_area']
+
+
+def test_regionprops_table_equal_to_original():
+    regions = regionprops(SAMPLE, INTENSITY_FLOAT_SAMPLE)
+    out_table = regionprops_table(SAMPLE, INTENSITY_FLOAT_SAMPLE,
+                                  properties=COL_DTYPES.keys())
+
+    for prop, dtype in COL_DTYPES.items():
+        for i, reg in enumerate(regions):
+            rp = reg[prop]
+            if np.isscalar(rp) or \
+                    prop in OBJECT_COLUMNS or \
+                    dtype is np.object_:
+                assert_array_equal(rp, out_table[prop][i])
+            else:
+                shape = rp.shape if isinstance(rp, np.ndarray) else (len(rp),)
+                for ind in np.ndindex(shape):
+                    modified_prop = "-".join(map(str, (prop,) + ind))
+                    loc = ind if len(ind) > 1 else ind[0]
+                    assert_equal(rp[loc], out_table[modified_prop][i])
 
 
 def test_regionprops_table_no_regions():
@@ -556,12 +637,6 @@ def test_regionprops_table_no_regions():
     assert len(out['bbox+1']) == 0
     assert len(out['bbox+2']) == 0
     assert len(out['bbox+3']) == 0
-
-
-def test_props_dict_complete():
-    region = regionprops(SAMPLE)[0]
-    properties = [s for s in dir(region) if not s.startswith('_')]
-    assert set(properties) == set(PROPS.values())
 
 
 def test_column_dtypes_complete():
@@ -596,9 +671,9 @@ def test_column_dtypes_correct():
 
 def test_deprecated_coords_argument():
     with expected_warnings(['coordinates keyword argument']):
-        region = regionprops(SAMPLE, coordinates='rc')
-    with testing.raises(ValueError):
-        region = regionprops(SAMPLE, coordinates='xy')
+        regionprops(SAMPLE, coordinates='rc')
+    with pytest.raises(ValueError):
+        regionprops(SAMPLE, coordinates='xy')
 
 
 def pixelcount(regionmask):
@@ -606,11 +681,11 @@ def pixelcount(regionmask):
     return np.sum(regionmask)
 
 
-def median_intensity(regionmask, intensity_image):
-    return np.median(intensity_image[regionmask])
+def intensity_median(regionmask, image_intensity):
+    return np.median(image_intensity[regionmask])
 
 
-def too_many_args(regionmask, intensity_image, superfluous):
+def too_many_args(regionmask, image_intensity, superfluous):
     return 1
 
 
@@ -625,22 +700,22 @@ def test_extra_properties():
 
 def test_extra_properties_intensity():
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
-                         extra_properties=(median_intensity,)
+                         extra_properties=(intensity_median,)
                          )[0]
-    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
 
 
 def test_extra_properties_no_intensity_provided():
-    with testing.raises(AttributeError):
-        region = regionprops(SAMPLE, extra_properties=(median_intensity,))[0]
-        _ = region.median_intensity
+    with pytest.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(intensity_median,))[0]
+        _ = region.intensity_median
 
 
 def test_extra_properties_nr_args():
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(too_few_args,))[0]
         _ = region.too_few_args
-    with testing.raises(AttributeError):
+    with pytest.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(too_many_args,))[0]
         _ = region.too_many_args
 
@@ -648,9 +723,9 @@ def test_extra_properties_nr_args():
 def test_extra_properties_mixed():
     # mixed properties, with and without intensity
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
-                         extra_properties=(median_intensity, pixelcount)
+                         extra_properties=(intensity_median, pixelcount)
                          )[0]
-    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
     assert region.pixelcount == np.sum(SAMPLE == 1)
 
 
@@ -658,7 +733,70 @@ def test_extra_properties_table():
     out = regionprops_table(SAMPLE_MULTIPLE,
                             intensity_image=INTENSITY_SAMPLE_MULTIPLE,
                             properties=('label',),
-                            extra_properties=(median_intensity, pixelcount)
+                            extra_properties=(intensity_median, pixelcount)
                             )
-    assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
-    assert_array_equal(out['pixelcount'], array([10, 2]))
+    assert_array_almost_equal(out['intensity_median'], np.array([2., 4.]))
+    assert_array_equal(out['pixelcount'], np.array([10, 2]))
+
+
+def test_multichannel():
+    """Test that computing multichannel properties works."""
+    astro = data.astronaut()[::4, ::4]
+    astro_green = astro[..., 1]
+    labels = slic(astro.astype(float), start_label=1)
+
+    segment_idx = np.max(labels) // 2
+    region = regionprops(labels,
+                         astro_green,
+                         extra_properties=[intensity_median]
+                         )[segment_idx]
+    region_multi = regionprops(labels,
+                               astro,
+                               extra_properties=[intensity_median]
+                               )[segment_idx]
+
+    for prop in list(PROPS.keys()) + ["intensity_median"]:
+        p = region[prop]
+        p_multi = region_multi[prop]
+        if np.shape(p) == np.shape(p_multi):
+            # property does not depend on multiple channels
+            assert_array_equal(p, p_multi)
+        else:
+            # property uses multiple channels, returns props stacked along
+            # final axis
+            assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12,
+                            atol=1e-12)
+
+
+def test_3d_ellipsoid_axis_lengths():
+    """Verify that estimated axis lengths are correct.
+
+    Uses an ellipsoid at an arbitrary position and orientation.
+    """
+    # generate a centered ellipsoid with non-uniform half-lengths (radii)
+    half_lengths = (20, 10, 50)
+    e = draw.ellipsoid(*half_lengths).astype(int)
+
+    # Pad by asymmetric amounts so the ellipse isn't centered. Also, pad enough
+    # that the rotated ellipse will still be within the original volume.
+    e = np.pad(e, pad_width=[(30, 18), (30, 12), (40, 20)], mode='constant')
+
+    # apply rotations to the ellipsoid
+    R = transform.EuclideanTransform(rotation=[0.2, 0.3, 0.4],
+                                     dimensionality=3)
+    e = ndi.affine_transform(e, R.params)
+
+    # Compute regionprops
+    rp = regionprops(e)[0]
+
+    # estimate principal axis lengths via the inertia tensor eigenvalues
+    evs = rp.inertia_tensor_eigvals
+    axis_lengths = _inertia_eigvals_to_axes_lengths_3D(evs)
+    expected_lengths = sorted([2 * h for h in half_lengths], reverse=True)
+    for ax_len_expected, ax_len in zip(expected_lengths, axis_lengths):
+        # verify accuracy to within 1%
+        assert abs(ax_len - ax_len_expected) < 0.01 * ax_len_expected
+
+    # verify that the axis length regionprops also agree
+    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-7
+    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-7

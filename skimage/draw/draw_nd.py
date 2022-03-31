@@ -55,7 +55,7 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     """Draw a single-pixel thick line in n dimensions.
 
     The line produced will be ndim-connected. That is, two subsequent
-    pixels in the line will be either direct or diagonal neighbours in
+    pixels in the line will be either direct or diagonal neighbors in
     n dimensions.
 
     Parameters
@@ -99,10 +99,12 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     npoints = int(np.ceil(np.max(np.abs(stop - start))))
     if endpoint:
         npoints += 1
-    coords = []
-    for dim in range(len(start)):
-        dimcoords = np.linspace(start[dim], stop[dim], npoints, endpoint)
-        if integer:
-            dimcoords = _round_safe(dimcoords).astype(int)
-        coords.append(dimcoords)
+
+    coords = np.linspace(start, stop, num=npoints, endpoint=endpoint).T
+    if integer:
+        for dim in range(len(start)):
+            coords[dim, :] = _round_safe(coords[dim, :])
+
+        coords = coords.astype(int)
+
     return tuple(coords)

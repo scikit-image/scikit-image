@@ -22,13 +22,11 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import (
-    color, feature, filters, io, measure, morphology, segmentation, util
+    color, feature, filters, measure, morphology, segmentation, util
 )
-from skimage.data import image_fetcher
+from skimage.data import human_mitosis
 
-
-path = image_fetcher.fetch('data/mitosis.tif')
-image = io.imread(path)
+image = human_mitosis()
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
@@ -42,7 +40,7 @@ plt.show()
 # `mitosis <https://en.wikipedia.org/wiki/Mitosis>`_ (cell division).
 
 #####################################################################
-# Another way of visualizing a greyscale image is contour plotting:
+# Another way of visualizing a grayscale image is contour plotting:
 
 fig, ax = plt.subplots(figsize=(5, 5))
 qcs = ax.contour(image, origin='image')
@@ -132,7 +130,7 @@ plt.show()
 # too low to separate those very bright areas corresponding to dividing nuclei
 # from relatively bright pixels otherwise present in many nuclei. On the other
 # hand, we want a smoother image, removing small spurious objects and,
-# possibly, merging clusters of neighbouring objects (some could correspond to
+# possibly, merging clusters of neighboring objects (some could correspond to
 # two nuclei emerging from one cell division). In a way, the segmentation
 # challenge we are facing with dividing nuclei is the opposite of that with
 # (touching) cells.
@@ -174,10 +172,10 @@ print(cleaned_dividing.max())
 
 distance = ndi.distance_transform_edt(cells)
 
-local_maxi = feature.peak_local_max(distance, indices=False,
-                                    min_distance=7)
-
-markers = measure.label(local_maxi)
+local_max_coords = feature.peak_local_max(distance, min_distance=7)
+local_max_mask = np.zeros(distance.shape, dtype=bool)
+local_max_mask[tuple(local_max_coords.T)] = True
+markers = measure.label(local_max_mask)
 
 segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
 

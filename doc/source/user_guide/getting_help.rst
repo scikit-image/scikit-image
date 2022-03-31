@@ -19,7 +19,7 @@ closer to one's image processing applications.
 Users are warmly encouraged to report on their use of ``skimage`` on the
 :ref:`mailing_list`, in order to propose more examples in the future.
 Contributing examples to the gallery can be done on github (see
-:ref:`howto_contribute`).
+:doc:`../contribute`).
 
 Search field
 ------------

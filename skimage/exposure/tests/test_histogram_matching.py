@@ -1,13 +1,12 @@
 import numpy as np
-
-from skimage.exposure import histogram_matching
-from skimage import exposure
-from skimage import data
-
-from skimage._shared.testing import assert_array_almost_equal, \
-    assert_almost_equal
-
 import pytest
+from numpy.testing import (assert_almost_equal, assert_array_almost_equal)
+
+from skimage import data
+from skimage import exposure
+from skimage._shared.testing import expected_warnings
+from skimage._shared.utils import _supported_float_type
+from skimage.exposure import histogram_matching
 
 
 @pytest.mark.parametrize('array, template, expected_array', [
@@ -35,14 +34,13 @@ class TestMatchHistogram:
         """Assert that pdf of matched image is close to the reference's pdf for
         all channels and all values of matched"""
 
-        # when
-        matched = exposure.match_histograms(image, reference,
-                                            multichannel=multichannel)
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            matched = exposure.match_histograms(image, reference,
+                                                multichannel=multichannel)
 
         matched_pdf = self._calculate_image_empirical_pdf(matched)
         reference_pdf = self._calculate_image_empirical_pdf(reference)
 
-        # then
         for channel in range(len(matched_pdf)):
             reference_values, reference_quantiles = reference_pdf[channel]
             matched_values, matched_quantiles = matched_pdf[channel]
@@ -54,6 +52,41 @@ class TestMatchHistogram:
                 assert_almost_equal(matched_quantiles[i],
                                     reference_quantiles[closest_id],
                                     decimal=1)
+
+    @pytest.mark.parametrize('channel_axis', (0, 1, -1))
+    def test_match_histograms_channel_axis(self, channel_axis):
+        """Assert that pdf of matched image is close to the reference's pdf for
+        all channels and all values of matched"""
+
+        image = np.moveaxis(self.image_rgb, -1, channel_axis)
+        reference = np.moveaxis(self.template_rgb, -1, channel_axis)
+        matched = exposure.match_histograms(image, reference,
+                                            channel_axis=channel_axis)
+        assert matched.dtype == image.dtype
+        matched = np.moveaxis(matched, channel_axis, -1)
+        reference = np.moveaxis(reference, channel_axis, -1)
+        matched_pdf = self._calculate_image_empirical_pdf(matched)
+        reference_pdf = self._calculate_image_empirical_pdf(reference)
+
+        for channel in range(len(matched_pdf)):
+            reference_values, reference_quantiles = reference_pdf[channel]
+            matched_values, matched_quantiles = matched_pdf[channel]
+
+            for i, matched_value in enumerate(matched_values):
+                closest_id = (
+                    np.abs(reference_values - matched_value)
+                ).argmin()
+                assert_almost_equal(matched_quantiles[i],
+                                    reference_quantiles[closest_id],
+                                    decimal=1)
+
+    @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+    def test_match_histograms_float_dtype(self, dtype):
+        """float16 or float32 inputs give float32 output"""
+        image = self.image_rgb.astype(dtype, copy=False)
+        reference = self.template_rgb.astype(dtype, copy=False)
+        matched = exposure.match_histograms(image, reference)
+        assert matched.dtype == _supported_float_type(dtype)
 
     @pytest.mark.parametrize('image, reference', [
         (image_rgb, template_rgb[:, :, 0]),
@@ -80,4 +113,4 @@ class TestMatchHistogram:
 
             channels_pdf.append((channel_values, channel_quantiles))
 
-        return np.asarray(channels_pdf)
+        return np.asarray(channels_pdf, dtype=object)

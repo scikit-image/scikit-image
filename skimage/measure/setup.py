@@ -14,7 +14,6 @@ def configuration(parent_package='', top_path=None):
     cython(['_ccomp.pyx',
             '_find_contours_cy.pyx',
             '_moments_cy.pyx',
-            '_marching_cubes_classic_cy.pyx',
             '_marching_cubes_lewiner_cy.pyx',
             '_pnpoly.pyx'], working_path=base_path)
 
@@ -23,9 +22,6 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_find_contours_cy', sources=['_find_contours_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments_cy', sources=['_moments_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_marching_cubes_classic_cy',
-                         sources=['_marching_cubes_classic_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_marching_cubes_lewiner_cy',
                          sources=['_marching_cubes_lewiner_cy.c'],

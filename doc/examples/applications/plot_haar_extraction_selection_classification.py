@@ -73,7 +73,7 @@ feature_types = ['type-2-x', 'type-2-y']
 X = delayed(extract_feature_image(img, feature_types) for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_full_feature_comp = time() - t_start
 
 # Label images (100 faces and 100 non-faces)
@@ -130,8 +130,8 @@ cdf_feature_importances /= cdf_feature_importances[-1]  # divide by max value
 sig_feature_count = np.count_nonzero(cdf_feature_importances < 0.7)
 sig_feature_percent = round(sig_feature_count /
                             len(cdf_feature_importances) * 100, 1)
-print(('{} features, or {}%, account for 70% of branch points in the '
-       'random forest.').format(sig_feature_count, sig_feature_percent))
+print((f'{sig_feature_count} features, or {sig_feature_percent}%, '
+       f'account for 70% of branch points in the random forest.'))
 
 # Select the determined number of most informative features
 feature_coord_sel = feature_coord[idx_sorted[:sig_feature_count]]
@@ -145,7 +145,7 @@ X = delayed(extract_feature_image(img, feature_type_sel, feature_coord_sel)
             for img in images)
 # Compute the result
 t_start = time()
-X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='single-threaded'))
 time_subs_feature_comp = time() - t_start
 
 y = np.array([1] * 100 + [0] * 100)
@@ -162,13 +162,13 @@ time_subs_train = time() - t_start
 
 auc_subs_features = roc_auc_score(y_test, clf.predict_proba(X_test)[:, 1])
 
-summary = (('Computing the full feature set took {:.3f}s, plus {:.3f}s '
-            'training, for an AUC of {:.2f}. Computing the restricted '
-            'feature set took {:.3f}s, plus {:.3f}s training, '
-            'for an AUC of {:.2f}.')
-           .format(time_full_feature_comp, time_full_train,
-                   auc_full_features, time_subs_feature_comp,
-                   time_subs_train, auc_subs_features))
+summary = ((f'Computing the full feature set took '
+            f'{time_full_feature_comp:.3f}s, '
+            f'plus {time_full_train:.3f}s training, '
+            f'for an AUC of {auc_full_features:.2f}. '
+            f'Computing the restricted feature set took '
+            f'{time_subs_feature_comp:.3f}s, plus {time_subs_train:.3f}s '
+            f'training, for an AUC of {auc_subs_features:.2f}.'))
 
 print(summary)
 plt.show()
