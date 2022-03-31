@@ -596,13 +596,13 @@ def test_moments_normalized():
     spacing = (3, 3)
     nu = regionprops(SAMPLE, spacing=spacing)[0].moments_normalized
 
-    # Rescaled values from above.
-    assert_almost_equal(nu[0, 2], 0.24301268861454037 * 3 ** 2)
-    assert_almost_equal(nu[0, 3], -0.017278118992041805 * 3 ** 3)
-    assert_almost_equal(nu[1, 1], -0.016846707818929982 * 3 ** 2)
-    assert_almost_equal(nu[1, 2], 0.045473992910668816 * 3 ** 3)
-    assert_almost_equal(nu[2, 0], 0.08410493827160502 * 3 ** 2)
-    assert_almost_equal(nu[2, 1], -0.002899800614433943 * 3 ** 3)
+    # Normalized moments are scale invariant.
+    assert_almost_equal(nu[0, 2], 0.24301268861454037)
+    assert_almost_equal(nu[0, 3], -0.017278118992041805)
+    assert_almost_equal(nu[1, 1], -0.016846707818929982)
+    assert_almost_equal(nu[1, 2], 0.045473992910668816)
+    assert_almost_equal(nu[2, 0], 0.08410493827160502)
+    assert_almost_equal(nu[2, 1], -0.002899800614433943)
 
 
 def test_orientation():
@@ -835,20 +835,20 @@ def test_moments_weighted_normalized():
     spacing = (3, 3)
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].moments_weighted_normalized
 
-    # Rescaled values from above.
-    assert_almost_equal(wnu[0, 2], 0.2301467830 * 3 ** 2)
-    assert_almost_equal(wnu[0, 3], -0.0162529732 * 3 ** 3)
-    assert_almost_equal(wnu[1, 1], -0.0160405109 * 3 ** 2)
-    assert_almost_equal(wnu[1, 2], 0.0457932622 * 3 ** 3)
-    assert_almost_equal(wnu[1, 3], -0.0104598869 * 3 ** 4)
-    assert_almost_equal(wnu[2, 0], 0.0873590903 * 3 ** 2)
-    assert_almost_equal(wnu[2, 1], -0.0031421072 * 3 ** 3)
-    assert_almost_equal(wnu[2, 2], 0.0165315478 * 3 ** 4)
-    assert_almost_equal(wnu[2, 3], -0.0028544152 * 3 ** 5)
-    assert_almost_equal(wnu[3, 0], -0.0161217406 * 3 ** 3)
-    assert_almost_equal(wnu[3, 1], -0.0031376984 * 3 ** 4)
-    assert_almost_equal(wnu[3, 2], 0.0043903193 * 3 ** 5)
-    assert_almost_equal(wnu[3, 3], -0.0011057191 * 3 ** 6)
+    # Normalized moments are scale invariant
+    assert_almost_equal(wnu[0, 2], 0.2301467830)
+    assert_almost_equal(wnu[0, 3], -0.0162529732)
+    assert_almost_equal(wnu[1, 1], -0.0160405109)
+    assert_almost_equal(wnu[1, 2], 0.0457932622)
+    assert_almost_equal(wnu[1, 3], -0.0104598869)
+    assert_almost_equal(wnu[2, 0], 0.0873590903)
+    assert_almost_equal(wnu[2, 1], -0.0031421072)
+    assert_almost_equal(wnu[2, 2], 0.0165315478)
+    assert_almost_equal(wnu[2, 3], -0.0028544152)
+    assert_almost_equal(wnu[3, 0], -0.0161217406)
+    assert_almost_equal(wnu[3, 1], -0.0031376984)
+    assert_almost_equal(wnu[3, 2], 0.0043903193)
+    assert_almost_equal(wnu[3, 3], -0.0011057191)
 
 
 def test_label_sequence():

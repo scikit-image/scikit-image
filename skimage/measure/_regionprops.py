@@ -567,7 +567,8 @@ class RegionProperties:
     @property
     @_cached
     def moments_normalized(self):
-        return _moments.moments_normalized(self.moments_central, 3)
+        return _moments.moments_normalized(self.moments_central, 3,
+                                           spacing=self._spacing)
 
     @property
     @only2d
@@ -669,13 +670,16 @@ class RegionProperties:
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
-                [_moments.moments_normalized(mu[..., i], order=3)
+                [_moments.moments_normalized(mu[..., i], order=3,
+                                             spacing=self._spacing)
                  for i in range(nchannels)],
                 axis=-1,
             )
         else:
-            return _moments.moments_normalized(mu, order=3)
-        return _moments.moments_normalized(self.moments_weighted_central, 3)
+            return _moments.moments_normalized(mu, order=3,
+                                               spacing=self._spacing)
+        return _moments.moments_normalized(self.moments_weighted_central, 3,
+                                           spacing=self._spacing)
 
     def __iter__(self):
         props = PROP_VALS

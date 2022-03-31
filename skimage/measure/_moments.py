@@ -263,7 +263,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     return calc
 
 
-def moments_normalized(mu, order=3):
+def moments_normalized(mu, order=3, spacing=None):
     """Calculate all normalized central image moments up to a certain order.
 
     Note that normalized central moments are translation and scale invariant
@@ -308,13 +308,16 @@ def moments_normalized(mu, order=3):
     """
     if np.any(np.array(mu.shape) <= order):
         raise ValueError("Shape of image moments must be >= `order`")
+    if spacing is None:
+        spacing = np.ones(mu.ndim)
     nu = np.zeros_like(mu)
     mu0 = mu.ravel()[0]
+    scale = min(spacing)
     for powers in itertools.product(range(order + 1), repeat=mu.ndim):
         if sum(powers) < 2:
             nu[powers] = np.nan
         else:
-            nu[powers] = mu[powers] / (mu0 ** (sum(powers) / nu.ndim + 1))
+            nu[powers] = (mu[powers] / scale ** sum(powers)) / (mu0 ** (sum(powers) / nu.ndim + 1))
     return nu
 
 
