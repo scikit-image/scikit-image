@@ -1,8 +1,7 @@
 import numpy as np
 
-from ..util.dtype import dtype_range, dtype_limits
 from .._shared import utils
-
+from ..util.dtype import dtype_limits, dtype_range
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
            'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
@@ -350,7 +349,58 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256, mask=None):
+def _equalize_hist_uint(image, mask=None, lut_max=255):
+    """Histogram equalization preserving unsigned integer dtype.
+
+    Parameters
+    ----------
+    image : unsigned integer ndarray
+        Image array.
+    mask : ndarray of bools or 0s and 1s, optional
+        Array of same shape as `image`. Only points at which mask == True
+        are used for the equalization, which is applied to the whole image.
+    lut_max : int, optional
+        The maximum integer value to use for the bincount histogram.
+
+    Returns
+    -------
+    out : unsigned integer ndarray
+        Image array after histogram equalization. The output histogram will
+        cover the range [0, lut_max]
+
+    Notes
+    -----
+    The range and rounding behavior here, match the variant given in [1]_.
+    Empirically, this seems to also match the behavior of OpenCV.
+
+    References
+    ----------
+    ..[1] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
+
+    """
+    if image.dtype.kind != 'u':
+        raise ValueError("image must have an unsigned integer dtype")
+    if lut_max > np.iinfo(image.dtype).max:
+        raise ValueError(
+            f'specified LUT maximum exceeds the integer range of the image '
+            f'dtype ({image.dtype})'
+        )
+    if mask is not None:
+        hist = np.bincount(image[mask])
+    else:
+        hist = np.bincount(image.reshape(-1))
+    cdf = hist.cumsum()
+
+    # make sure first bin corresponds to 0 in the lookup table
+    first_nonzero = np.flatnonzero(cdf)[0]
+    cdf[first_nonzero:] -= cdf[first_nonzero]
+
+    # normalize so last bin corresponds to lut_max
+    lookup_table = np.around(cdf * (lut_max / cdf[-1])).astype(np.uint8)
+    return lookup_table[image]
+
+
+def equalize_hist(image, nbins=256, mask=None, *, method='float'):
     """Return image after histogram equalization.
 
     Parameters
@@ -364,6 +414,11 @@ def equalize_hist(image, nbins=256, mask=None):
     mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
+    method : {'float', 'uint8'}
+        Selects the histogram normalization method to use (see Notes). Mode
+        'uint8' uses a faster implementation that is specific to unsigned 8-bit
+        integer inputs. When mode is 'uint8', the output will be of dtype
+        np.uint8 with values in the range [0, 255].
 
     Returns
     -------
@@ -372,16 +427,27 @@ def equalize_hist(image, nbins=256, mask=None):
 
     Notes
     -----
-    This function is adapted from [1]_ with the author's permission.
+    The `method='float'` implementation is adapted from [1]_ with the author's
+    permission. The `method='uint8'` implementation follows a standard
+    approach as described in [2]_.
 
     References
     ----------
     .. [1] http://www.janeriksolem.net/histogram-equalization-with-python-and.html
-    .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
+    .. [2] https://en.wikipedia.org/wiki/Histogram_equalization#Examples
 
     """
     if mask is not None:
-        mask = np.array(mask, dtype=bool)
+        mask = np.asarray(mask, dtype=bool)
+    if method == 'uint8':
+        if image.dtype != np.uint8:
+            raise ValueError(
+                "method 'uint8' requires image to have np.uint8 dtype"
+            )
+        return _equalize_hist_uint(image, mask)
+    elif method != 'float':
+        raise ValueError("method must be 'uint8' or 'float'")
+    if mask is not None:
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)
     else:
         cdf, bin_centers = cumulative_distribution(image, nbins)
@@ -825,7 +891,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
         return not ((image.max() == 1) and (image.min() == 0))
 
     if image.ndim == 3:
-        from ..color import rgb2gray, rgba2rgb  # avoid circular import
+        from ..color.colorconv import rgb2gray, rgba2rgb  # no circular import
 
         if image.shape[2] == 4:
             image = rgba2rgb(image)

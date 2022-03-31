@@ -2,24 +2,20 @@ import warnings
 
 import numpy as np
 import pytest
-from numpy.testing import (assert_allclose,
-                           assert_almost_equal,
-                           assert_array_almost_equal,
-                           assert_array_equal,
+from numpy.testing import (assert_allclose, assert_almost_equal,
+                           assert_array_almost_equal, assert_array_equal,
                            assert_equal)
 
-from skimage import data
-from skimage import exposure
-from skimage import util
+from skimage import data, exposure, util
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.exposure.exposure import intensity_range
 from skimage.util.dtype import dtype_range
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
-
 
 # Test integer histograms
 # =======================
+
 
 def test_wrong_source_range():
     im = np.array([-1, 100], dtype=np.int8)
@@ -171,6 +167,47 @@ def test_equalize_uint8_approx():
     img_eq0 = exposure.equalize_hist(test_img_int)
     img_eq1 = exposure.equalize_hist(test_img_int, nbins=3)
     assert_allclose(img_eq0, img_eq1)
+
+
+@pytest.mark.parametrize('image_type', ['camera', 'camera2', 'rand_uniform',
+                                        'randn'])
+def test_equalize_method_uint8(image_type):
+    """Check integer bins used for uint8 images."""
+    if image_type == 'camera':
+        img = test_img_int
+    elif image_type == 'camera2':
+        # camera with compressed range of uint8 values
+        img = test_img_int.astype(float) / 5. + 100
+        img = img.astype(np.uint8)
+    elif image_type == 'rand_uniform':
+        # uniformly distributed uint8 values
+        rng = np.random.default_rng(0)
+        img = rng.integers(0, 256, (256, 256), dtype=np.uint8)
+    elif image_type == 'randn':
+        # non-uniformly distributed uint8 values
+        rng = np.random.default_rng(0)
+        img = rng.standard_normal((256, 256))
+        img = img - img.min()
+        img = 255 * img / img.max()
+        img = img.astype(np.uint8)
+    img_eq = exposure.equalize_hist(img, method='uint8')
+    assert img_eq.dtype == np.uint8
+    assert img_eq.min() == 0
+    assert img_eq.max() == 255
+
+    cdf, bin_edges = exposure.cumulative_distribution(img_eq)
+    check_cdf_slope(cdf)
+
+
+def test_equalize_method_uint8_errors():
+
+    # invalid dtype for uint8 mode
+    with pytest.raises(ValueError):
+        exposure.equalize_hist(test_img, method='uint8')
+
+    # invalid mode
+    with pytest.raises(ValueError):
+        exposure.equalize_hist(test_img_int, method='invalid')
 
 
 def test_equalize_ubyte():
