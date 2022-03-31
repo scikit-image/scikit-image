@@ -8,6 +8,7 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_equal, assert_raises)
 
 from skimage import data, draw, transform
+from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
@@ -458,6 +459,9 @@ def test_moments_hu():
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
 
+    with testing.raises(NotImplementedError):
+        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
+
 
 def test_image():
     img = regionprops(SAMPLE)[0].image
@@ -645,6 +649,9 @@ def test_perimeter():
         per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 46.8284271247)
 
+    with testing.raises(NotImplementedError):
+        per = regionprops(SAMPLE, spacing=(2, 1))[0].perimeter
+
 
 def test_perimeter_crofton():
     per = regionprops(SAMPLE)[0].perimeter_crofton
@@ -655,6 +662,9 @@ def test_perimeter_crofton():
 
     per = perimeter_crofton(SAMPLE.astype('double'), directions=2)
     assert_almost_equal(per, 64.4026493985)
+
+    with testing.raises(NotImplementedError):
+        per = regionprops(SAMPLE, spacing=(2, 1))[0].perimeter_crofton
 
 
 def test_solidity():
@@ -766,6 +776,9 @@ def test_moments_weighted_hu():
         -6.7936409056e-06
     ])
     assert_array_almost_equal(whu, ref)
+
+    with testing.raises(NotImplementedError):
+        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
 
 
 def test_moments_weighted():
