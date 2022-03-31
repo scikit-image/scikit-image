@@ -24,6 +24,18 @@ def test_moments():
     assert_almost_equal(m[1, 0] / m[0, 0], 14.5)
     assert_almost_equal(m[0, 1] / m[0, 0], 14.5)
 
+def test_moments_spacing():
+    spacing = (1.4, 2)
+    image = np.zeros((20, 20), dtype=np.double)
+    image[14, 14] = 1
+    image[15, 15] = 1
+    image[14, 15] = 0.5
+    image[15, 14] = 0.5
+    m = moments(image, spacing=spacing)
+    assert_equal(m[0, 0], 3)
+    assert_almost_equal(m[1, 0] / m[0, 0], 14.5 * spacing[0])
+    assert_almost_equal(m[0, 1] / m[0, 0], 14.5 * spacing[1])
+
 
 def test_moments_central():
     image = np.zeros((20, 20), dtype=np.double)
