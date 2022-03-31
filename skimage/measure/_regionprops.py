@@ -22,7 +22,6 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 # releases. For backwards compatibility, these older names will continue to
 # work, but will not be documented.
 PROPS = {
-    'NumPixels': 'num_pixels',
     'Area': 'area',
     'BoundingBox': 'bbox',
     'BoundingBoxArea': 'area_bbox',
@@ -34,7 +33,6 @@ PROPS = {
     # 'ConvexHull',
     'ConvexImage': 'image_convex',
     'convex_image': 'image_convex',
-    'Coordinates_Scaled': 'coords_scaled',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter_area',
@@ -97,7 +95,6 @@ OBJECT_COLUMNS = {
 }
 
 COL_DTYPES = {
-    'num_pixels': int,
     'area': float,
     'area_bbox': float,
     'area_convex': float,
@@ -109,7 +106,6 @@ COL_DTYPES = {
     'centroid_local': float,
     'centroid_weighted': float,
     'centroid_weighted_local': float,
-    'coords_scaled': float,
     'coords': object,
     'eccentricity': float,
     'equivalent_diameter_area': float,
