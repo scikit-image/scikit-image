@@ -154,6 +154,30 @@ def test_moments_normalized():
     assert_almost_equal(nu, nu2, decimal=1)
 
 
+def test_moments_normalized_spacing():
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+    mu = moments_central(image)
+    nu = moments_normalized(mu)
+
+    # scale up via spacing
+    spacing = (3, 3)
+    mu2 = moments_central(image, spacing=spacing)
+    nu2 = moments_normalized(mu2, spacing=spacing)
+    assert_almost_equal(nu, nu2)
+
+    # anisotropic spacing
+    spacing = (1, 2)
+    mu = moments_central(image, spacing=spacing)
+    nu = moments_normalized(mu, spacing=spacing)
+
+    # scale up via spacing
+    spacing = (2, 4)
+    mu2 = moments_central(image, spacing=spacing)
+    nu2 = moments_normalized(mu2, spacing=spacing)
+    assert_almost_equal(nu, nu2)
+
+
 def test_moments_normalized_3d():
     image = draw.ellipsoid(1, 1, 10)
     mu_image = moments_central(image)
