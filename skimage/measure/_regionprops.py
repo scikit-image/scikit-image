@@ -556,7 +556,7 @@ class RegionProperties:
     @property
     @only2d
     def moments_hu(self):
-        if not (np.array(self._spacing) == np.array([1, 1])).all():
+        if any(s != 1.0 for s in self._spacing):
             raise NotImplementedError('`moments_hu` supports spacing = (1, 1) only')
         return _moments.moments_hu(self.moments_normalized)
 
