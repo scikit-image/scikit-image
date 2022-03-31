@@ -48,6 +48,33 @@ def test_moments_central():
     assert_equal(mu, mu2)
 
 
+def test_moments_central_spacing():
+    spacing = (2, 1)
+    image = np.zeros((20, 20), dtype=np.double)
+    image[14, 14] = 1
+    image[15, 15] = 1
+    image[14, 15] = 0.5
+    image[15, 14] = 0.5
+    mu = moments_central(image, (14.5 * spacing[0], 14.5 * spacing[1]),
+                         spacing=spacing)
+
+    # check for proper centroid computation
+    mu_calc_centroid = moments_central(image, spacing=spacing)
+    assert_equal(mu, mu_calc_centroid)
+
+    # shift image by dx=2, dy=2
+    image2 = np.zeros((20, 20), dtype=np.double)
+    image2[16, 16] = 1
+    image2[17, 17] = 1
+    image2[16, 17] = 0.5
+    image2[17, 16] = 0.5
+    mu2 = moments_central(image2,
+                          ((14.5 + 2) * spacing[0], (14.5 + 2) * spacing[1]),
+                          spacing=spacing)
+    # central moments must be translation invariant
+    assert_equal(mu, mu2)
+
+
 def test_moments_coords():
     image = np.zeros((20, 20), dtype=np.double)
     image[13:17, 13:17] = 1

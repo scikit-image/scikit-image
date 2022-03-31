@@ -245,7 +245,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
            [ 0.,  0.,  0.,  0.]])
     """
     if center is None:
-        center = centroid(image)
+        center = centroid(image, spacing=spacing)
     if spacing is None:
         spacing = np.ones(image.ndim)
     float_dtype = _supported_float_type(image.dtype)
