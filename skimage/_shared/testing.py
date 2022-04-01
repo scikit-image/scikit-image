@@ -279,6 +279,12 @@ def setup_test():
             category=RuntimeWarning
         )
 
+        warnings.filterwarnings(
+            'default',
+            message='\n\nThe scipy.sparse array containers',
+            category=DeprecationWarning
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
