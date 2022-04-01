@@ -6,16 +6,15 @@ import pytest
 from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
                            assert_equal)
 
-from skimage.transform._geometric import (_affine_matrix_from_vector,
+from skimage.transform import (AffineTransform, EssentialMatrixTransform,
+                               EuclideanTransform, FundamentalMatrixTransform,
+                               PiecewiseAffineTransform, PolynomialTransform,
+                               ProjectiveTransform, SimilarityTransform,
+                               estimate_transform, matrix_transform)
+from skimage.transform._geometric import (GeometricTransform,
+                                          _affine_matrix_from_vector,
                                           _center_and_normalize_points,
-                                          _euler_rotation_matrix,
-                                          GeometricTransform)
-from skimage.transform import (estimate_transform, matrix_transform,
-                               EuclideanTransform, SimilarityTransform,
-                               AffineTransform, FundamentalMatrixTransform,
-                               EssentialMatrixTransform, ProjectiveTransform,
-                               PolynomialTransform, PiecewiseAffineTransform)
-
+                                          _euler_rotation_matrix)
 
 SRC = np.array([
     [-12.3705, -10.5075],
@@ -205,7 +204,8 @@ def test_affine_init():
     assert_almost_equal(tform2.translation, translation)
 
     # scalar vs. tuple scale arguments
-    assert_almost_equal(AffineTransform(scale=0.5).scale, AffineTransform(scale=(0.5, 0.5)).scale)
+    assert_almost_equal(AffineTransform(scale=0.5).scale,
+                        AffineTransform(scale=(0.5, 0.5)).scale)
 
 
 def test_piecewise_affine():
@@ -233,7 +233,6 @@ def test_fundamental_matrix_estimation():
                           [-0.0717941, 0.0451643, 0.0216073],
                           [0.248062, -0.429478, 0.0221019]])
     assert_almost_equal(tform.params, tform_ref, 6)
-
 
 
 def test_fundamental_matrix_residuals():
@@ -494,6 +493,7 @@ def test_geometric_tform():
         # Ensure dst coords are finite numeric values
         assert(np.isfinite(dst).all())
 
+
 def test_invalid_input():
     with pytest.raises(ValueError):
         ProjectiveTransform(np.zeros((2, 3)))
@@ -598,13 +598,12 @@ def test_degenerate():
 
 def test_normalize_degenerate_points():
     """Return nan matrix *of appropriate size* when point is repeated."""
-    pts = np.array([[73.42834308, 94.2977623 ],] * 3)
+    pts = np.array([[73.42834308, 94.2977623]] * 3)
     mat, pts_tf = _center_and_normalize_points(pts)
     assert np.all(np.isnan(mat))
     assert np.all(np.isnan(pts_tf))
     assert mat.shape == (3, 3)
     assert pts_tf.shape == pts.shape
-
 
 
 def test_projective_repr():
@@ -661,7 +660,7 @@ def test_estimate_affine_3d(array_like_input):
         [0.0, 0.0, 1.0, -2],
         [0.0, 0.0, 0.0, 1.]
     ])
-    
+
     if array_like_input:
         # list of lists for matrix and src coords
         src = [list(c) for c in src]
