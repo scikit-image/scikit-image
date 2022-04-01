@@ -655,18 +655,17 @@ def _assert_least_squares(tf, src, dst):
 def test_estimate_affine_3d(array_like_input):
     ndim = 3
     src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
-
-    matrix = [
+    matrix = np.array([
         [4.8, 0.1, 0.2, 25],
         [0.0, 1.0, 0.1, 30],
         [0.0, 0.0, 1.0, -2],
         [0.0, 0.0, 0.0, 1.]
-    ]
-    if not array_like_input:
-        matrix = np.asarray(matrix)
-    else:
+    ])
+    
+    if array_like_input:
         # list of lists for matrix and src coords
         src = [list(c) for c in src]
+        matrix = [list(c) for c in matrix]
 
     tf = AffineTransform(matrix=matrix)
     dst = tf(src)
