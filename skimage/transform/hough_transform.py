@@ -1,9 +1,8 @@
 import numpy as np
 from scipy.spatial import cKDTree
-from ._hough_transform import (_hough_circle,
-                               _hough_ellipse,
-                               _hough_line,
-                               _probabilistic_hough_line as _prob_hough_line)
+
+from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
+from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -63,7 +62,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                                min_ydistance=min_distance,
                                threshold=threshold,
                                num_peaks=num_peaks)
-    if a.any():
+    if a.size > 0:
         return (h, angles[a], dists[d])
     else:
         return (h, np.array([]), np.array([]))
@@ -267,8 +266,9 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     if theta is None:
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
-    return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta, seed=seed)
+    return _prob_hough_line(image, threshold=threshold,
+                            line_length=line_length, line_gap=line_gap,
+                            theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
