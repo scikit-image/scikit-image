@@ -172,7 +172,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
         If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used, seeded with
         `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
+        If `seed` is already a ``Generator`` instance, then that instance is
         used.
 
         .. versionadded:: 0.19
