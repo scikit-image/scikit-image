@@ -357,11 +357,11 @@ def random_shapes(image_shape,
     num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is
+        If `seed` is None, the `numpy.random.Generator` singleton is
         used.
         If `seed` is an int, a new ``Generator`` instance is used,
         seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance
+        If `seed` is already a ``Generator`` instance, then that instance
         is used.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.

@@ -260,10 +260,10 @@ def draw_haar_like_feature(image, r, c, width, height,
         The maximum number of features to be returned.
         By default, all features are returned.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used, seeded with
-        `random_state`.
-        If `seed` is already a ``Generator`` instance then that instance is
+        `seed`.
+        If `seed` is already a ``Generator`` instance, then that instance is
         used.
         The random seed is used when generating a set of features smaller than
         the total number of available features.

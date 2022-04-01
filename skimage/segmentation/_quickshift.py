@@ -12,7 +12,7 @@ from ._quickshift_cy import _quickshift_cython
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, seed=42,
                *, channel_axis=-1):
-    """Segments image using quickshift clustering in Color-(x,y) space.
+    """Segment image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
     algorithm.

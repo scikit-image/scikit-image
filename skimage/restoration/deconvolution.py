@@ -169,7 +169,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used, seeded with
         `seed`.
         If `seed` is already a ``Generator`` instance then that instance is

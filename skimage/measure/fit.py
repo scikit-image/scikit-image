@@ -703,10 +703,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         such as 0.99, e is the current fraction of inliers w.r.t. the
         total number of samples, and m is the min_samples value.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used, seeded with
         `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
+        If `seed` is already a ``Generator`` instance, then that instance is
         used.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation

@@ -375,10 +375,10 @@ def medial_axis(image, mask=None, return_distance=False, *, seed=None):
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used, seeded with
         `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
+        If `seed` is already a ``Generator`` instance, then that instance is
         used.
 
         .. versionadded:: 0.19
