@@ -33,8 +33,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
         Two-tailed p-value.
 
     Notes
-    -------
-
+    -----
     Pearson's Correlation Coefficient (PCC) measures the linear correlation
     between the pixel intensities of the two images. Its value ranges from -1
     for perfect linear anti-correlation and +1 for perfect linear correlation.
@@ -68,7 +67,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
     PCC is sensitive to these measures [3]_ [4]_.
 
     References
-    -------
+    ----------
     .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html  # noqa
     .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html  # noqa
     .. [3] Dunn, K. W., Kamocka, M. M., & McDonald, J. H. (2011). A practical
@@ -117,7 +116,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
         Manders' colocalization coefficient.
 
     Notes
-    -------
+    -----
     Manders' Colocalization Coefficient (MCC) is the fraction of total
     intensity of a certain channel (channel A) that is within the segmented
     region of a second channel (channel B) [1]_. It ranges from 0 for no
@@ -200,7 +199,7 @@ def manders_overlap_coeff(image0, image1, mask=None):
         images.
 
     Notes
-    -------
+    -----
     Manders' Overlap Coefficient (MOC) is given by the equation [1]_:
 
     .. math::
