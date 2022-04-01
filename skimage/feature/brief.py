@@ -33,11 +33,11 @@ class BRIEF(DescriptorExtractor):
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is
+        If `seed` is None, the `numpy.random.Generator` singleton is
         used.
         If `seed` is an int, a new ``Generator`` instance is used,
         seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance
+        If `seed` is already a ``Generator`` instance, then that instance
         is used.
 
         Seed for the random sampling of the decision pixel-pairs. From a square

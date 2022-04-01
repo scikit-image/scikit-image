@@ -102,10 +102,10 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         an edge between identical regions. This is used to put self
         edges in the RAG.
     seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
+        If `seed` is None, the `numpy.random.Generator` singleton is used.
         If `seed` is an int, a new ``Generator`` instance is used,
         seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that
+        If `seed` is already a ``Generator`` instance, then that
         instance is used.
 
         The `seed` is used for the starting point

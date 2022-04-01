@@ -234,6 +234,6 @@ class TestMedialAxis():
         assert np.all(result == image)
 
     def test_deprecated_random_state(self):
-        '''Test skeletonize on an array of all zeros'''
+        """Test medial_axis on an array of all zeros."""
         with expected_warnings(['`random_state` is a deprecated argument']):
             medial_axis(np.zeros((10, 10), bool), random_state=None)
