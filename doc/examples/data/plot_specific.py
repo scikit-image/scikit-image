@@ -55,23 +55,19 @@ plt.show()
 
 fig, axes = plt.subplots(4, 5, figsize=(20, 20))
 ax = axes.ravel()
-lfs_images = data.lfw_subset()
+lfw_images = data.lfw_subset()
 for i in range(20):
-    ax[i].imshow(lfs_images[90 + i], cmap=plt.cm.gray)
+    ax[i].imshow(lfw_images[90 + i], cmap=plt.cm.gray)
     ax[i].axis("off")
 fig.tight_layout()
 plt.show()
 
 
-######################################################################
-# Thumbnail image for the gallery
-
-# sphinx_gallery_thumbnail_number = -1
 from matplotlib.offsetbox import AnchoredText
 
-ax1 = plt.subplot(2, 2, 1)
-ax1.imshow(cylce_images[0])
-ax1.add_artist(
+ax0 = plt.subplot(2, 2, 1)
+ax0.imshow(cylce_images[0])
+ax0.add_artist(
     AnchoredText(
         "Stereo",
         prop=dict(size=20),
@@ -80,9 +76,9 @@ ax1.add_artist(
         loc="upper left",
     )
 )
-ax2 = plt.subplot(2, 2, 2)
-ax2.imshow(vortex_images[0])
-ax2.add_artist(
+ax1 = plt.subplot(2, 2, 2)
+ax1.imshow(vortex_images[0])
+ax1.add_artist(
     AnchoredText(
         "PIV",
         prop=dict(size=20),
@@ -92,15 +88,15 @@ ax2.add_artist(
     )
 )
 
-ax3 = plt.subplot(2, 4, 5)
-ax3.imshow(lfs_images[90 + 1], cmap="gray")
-ax4 = plt.subplot(2, 4, 6)
-ax4.imshow(lfs_images[90 + 2], cmap="gray")
-ax5 = plt.subplot(2, 4, 7)
-ax5.imshow(lfs_images[90 + 3], cmap="gray")
-ax6 = plt.subplot(2, 4, 8)
-ax6.imshow(lfs_images[90 + 4], cmap="gray")
-for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
+ax2 = plt.subplot(2, 4, 5)
+ax2.imshow(lfw_images[90 + 1], cmap="gray")
+ax3 = plt.subplot(2, 4, 6)
+ax3.imshow(lfw_images[90 + 2], cmap="gray")
+ax4 = plt.subplot(2, 4, 7)
+ax4.imshow(lfw_images[90 + 3], cmap="gray")
+ax5 = plt.subplot(2, 4, 8)
+ax5.imshow(lfw_images[90 + 4], cmap="gray")
+for ax in [ax0, ax1, ax2, ax3, ax4, ax5]:
     ax.axis("off")
 plt.tight_layout()
 plt.show()
