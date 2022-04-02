@@ -10,13 +10,12 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared import utils
-from .._shared.utils import _supported_float_type, convert_to_float, warn
+from .._shared.utils import _supported_float_type, warn
 
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=False, truncate=4.0, *,
-             channel_axis=None):
+             multichannel=None, truncate=4.0, *, channel_axis=None):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -45,6 +44,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
         This argument is deprecated: specify `channel_axis` instead.
+<<<<<<< HEAD
     preserve_range : bool, optional
         If True, keep the original range of values. Otherwise, the input
         ``image`` is converted according to the conventions of
@@ -53,6 +53,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
         For more information, see:
         https://scikit-image.org/docs/dev/user_guide/data_types.html
+=======
+>>>>>>> 7e53d42aa... remove preserve_range from gaussian
     truncate : float, optional
         Truncate the filter at this many standard deviations.
     channel_axis : int or None, optional
@@ -128,7 +130,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) == image.ndim - 1:
             sigma = list(sigma)
             sigma.insert(channel_axis % image.ndim, 0)
-    image = convert_to_float(image, preserve_range)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
