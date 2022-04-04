@@ -523,7 +523,7 @@ def test_axis_major_length():
         0].axis_minor_length
     assert abs(length_wo_spacing - target_length) > 0.1
     length = regionprops(img[:, ::2], spacing=(1, 2))[0].axis_major_length
-    assert_almost_equal(length, target_length, decimal=1)
+    assert_almost_equal(length, target_length, decimal=0)
 
 
 def test_intensity_max():
