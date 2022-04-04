@@ -243,7 +243,9 @@ class CENSURE(FeatureDetector):
 
         num_scales = self.max_scale - self.min_scale
 
-        image = np.ascontiguousarray(_prepare_grayscale_input_2D(image))
+        image = np.ascontiguousarray(
+            _prepare_grayscale_input_2D(image, normalize_int_range=True)
+        )
 
         # Generating all the scales
         filter_response = _filter_image(image, self.min_scale, self.max_scale,

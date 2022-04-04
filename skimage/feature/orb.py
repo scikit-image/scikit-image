@@ -131,7 +131,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
         self.descriptors = None
 
     def _build_pyramid(self, image):
-        image = _prepare_grayscale_input_2D(image)
+        image = _prepare_grayscale_input_2D(image, normalize_int_range=True)
         return list(pyramid_gaussian(image, self.n_scales - 1,
                                      self.downscale, channel_axis=None))
 

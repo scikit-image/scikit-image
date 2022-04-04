@@ -138,18 +138,20 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
                 '-', color=color)
 
 
-def _prepare_grayscale_input_2D(image):
+def _prepare_grayscale_input_2D(image, normalize_int_range=False):
     image = np.squeeze(image)
     check_nD(image, 2)
-    image = rescale_to_float(image)
+    if normalize_int_range:
+        image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 
 
-def _prepare_grayscale_input_nD(image):
+def _prepare_grayscale_input_nD(image, normalize_int_range=False):
     image = np.squeeze(image)
     check_nD(image, range(2, 6))
-    image = rescale_to_float(image)
+    if normalize_int_range:
+        image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 

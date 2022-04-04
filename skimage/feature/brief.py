@@ -151,7 +151,7 @@ class BRIEF(DescriptorExtractor):
 
         random = np.random.default_rng(self.sample_seed)
 
-        image = _prepare_grayscale_input_2D(image)
+        image = _prepare_grayscale_input_2D(image, normalize_int_range=False)
 
         # Gaussian low-pass filtering to alleviate noise sensitivity
         image = np.ascontiguousarray(

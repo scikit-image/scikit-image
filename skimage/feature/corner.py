@@ -115,7 +115,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
             raise ValueError('sigma must have as many elements as image '
                              'has axes')
 
-    image = _prepare_grayscale_input_nD(image)
+    image = _prepare_grayscale_input_nD(image, normalize_int_range=True)
 
     derivatives = _compute_derivatives(image, mode=mode, cval=cval)
 
@@ -783,7 +783,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [8, 8]])
 
     """
-    image = _prepare_grayscale_input_2D(image)
+    image = _prepare_grayscale_input_2D(image, normalize_int_range=True)
 
     image = np.ascontiguousarray(image)
     response = _corner_fast(image, n, threshold)
