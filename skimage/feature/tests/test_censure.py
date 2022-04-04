@@ -1,13 +1,14 @@
 import numpy as np
-from skimage._shared.testing import assert_array_equal
+from numpy.testing import assert_array_equal
+
+from skimage import rescale_as_float
+from skimage._shared import testing
+from skimage._shared.testing import test_parallel
 from skimage.data import moon
 from skimage.feature import CENSURE
-from skimage._shared.testing import test_parallel
-from skimage._shared import testing
 from skimage.transform import rescale
 
-
-img = moon()
+img = rescale_as_float(moon())
 np.random.seed(0)
 
 
