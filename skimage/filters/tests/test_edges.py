@@ -33,16 +33,19 @@ def test_roberts_diagonal1(dtype):
     ['farid', 'laplace', 'prewitt', 'roberts', 'scharr', 'sobel']
 )
 def test_int_rescaling(function_name):
-    """Basic test that uint8 inputs get rescaled from [0, 255] to [0, 1.]
+    """Basic test that uint8 inputs are not rescaled from [0, 255] to [0, 1.]
 
     The output of any of these filters should be within roughly a factor of
-    two of the input range. For integer inputs, rescaling to floats in
-    [0.0, 1.0] should occur, so just verify outputs are not > 2.0.
+    two of the input range.
     """
     img = data.coins()[:128, :128]
     func = getattr(filters, function_name)
     filtered = func(img)
-    assert filtered.max() <= 2.0
+    fmax = filtered.max()
+    # ensure that img wasn't rescaled to [0, 1] internally
+    assert fmax >= 10.0
+    # assert that maximum value is not greater than expected possible range
+    assert fmax <= 2.0 * img.max()
 
 
 def test_roberts_diagonal2():
