@@ -44,7 +44,8 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
         This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of ``rescale_to_float``.
+        image is converted according to the conventions of
+        `rescale_to_float``.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.

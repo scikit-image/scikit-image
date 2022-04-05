@@ -238,7 +238,8 @@ def imsave(fname, arr, format_str=None, **kwargs):
     -----
     Use the Python Imaging Library.
     See PIL docs [1]_ for a list of other supported formats.
-    All images besides single channel PNGs are converted using `rescale_to_uint8`.
+    All images besides single channel PNGs are converted using
+    `rescale_to_uint8`.
     Single Channel PNGs have the following behavior:
     - Integer values in [0, 255] and Boolean types -> rescale_to_uint8
     - Floating point and other integers -> rescale_to_uint16

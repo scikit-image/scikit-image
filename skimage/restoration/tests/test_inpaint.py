@@ -196,5 +196,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     assert image_result.dtype == float_dtype
 
     nrmse_defect = normalized_root_mse(image_orig, image_defect)
-    nrmse_result = normalized_root_mse(rescale_to_float(image_orig), image_result)
+    nrmse_result = normalized_root_mse(
+        rescale_to_float(image_orig), image_result
+    )
     assert nrmse_result < 0.2 * nrmse_defect

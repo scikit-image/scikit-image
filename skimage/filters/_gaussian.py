@@ -86,7 +86,8 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     used when approximating the inverted Laplacian of Gaussian, which is used
     in edge and blob detection.
 
-    Input image is converted according to the conventions of ``rescale_to_float``.
+    Input image is converted according to the conventions of
+    ``rescale_to_float``.
 
     Except for sigma values, all parameters are used for both filters.
 

@@ -223,7 +223,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
 
-
     image = np.atleast_3d(rescale_to_float(image))
     image = np.ascontiguousarray(image)
 
@@ -702,7 +701,8 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
                                         rescale_sigma):
     """If the ``image`` is rescaled, also rescale ``sigma`` consistently.
 
-    Images that are not floating point will be rescaled via ``rescale_to_float``.
+    Images that are not floating point will be rescaled via
+    ``rescale_to_float``.
     Half-precision images will be promoted to single precision.
     """
     if multichannel:

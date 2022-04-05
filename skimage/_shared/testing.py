@@ -21,7 +21,8 @@ import warnings
 
 from .. import data, io
 from ..data._fetchers import _fetch
-from ..util import rescale_to_uint, rescale_to_float, rescale_to_int, rescale_to_ubyte
+from ..util import (rescale_to_uint, rescale_to_float, rescale_to_int,
+                    rescale_to_ubyte)
 from ._warnings import expected_warnings
 
 

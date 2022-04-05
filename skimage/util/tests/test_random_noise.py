@@ -158,7 +158,8 @@ def test_poisson():
 def test_clip_poisson():
     seed = 42
     data = camera()  # 512x512 grayscale uint8
-    data_signed = rescale_to_float(data) * 2. - 1.  # Same image, on range [-1, 1]
+    # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2. - 1.
 
     # Signed and unsigned, clipped
     cam_poisson = random_noise(data, mode='poisson', seed=seed, clip=True)
@@ -178,7 +179,8 @@ def test_clip_poisson():
 def test_clip_gaussian():
     seed = 42
     data = camera()  # 512x512 grayscale uint8
-    data_signed = rescale_to_float(data) * 2. - 1.  # Same image, on range [-1, 1]
+    # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2. - 1.
 
     # Signed and unsigned, clipped
     cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=True)
@@ -198,7 +200,8 @@ def test_clip_gaussian():
 def test_clip_speckle():
     seed = 42
     data = camera()  # 512x512 grayscale uint8
-    data_signed = rescale_to_float(data) * 2. - 1.  # Same image, on range [-1, 1]
+    # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2. - 1.
 
     # Signed and unsigned, clipped
     cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=True)

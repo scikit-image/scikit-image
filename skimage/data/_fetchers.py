@@ -532,7 +532,7 @@ def grass():
     >>> with open('grass_orig.jpg', 'bw') as f:
     ...     f.write(r.content)
     >>> grass_orig = imageio.imread('grass_orig.jpg')
-    >>> grass = skimage.rescale_to_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> grass = skimage.rescale_to_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))  # noqa
     >>> imageio.imwrite('grass.png', grass)
     """
     return _load("data/grass.png", as_gray=True)
@@ -587,7 +587,7 @@ def gravel():
     >>> from skimage.transform import resize
     >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
     >>> gravel = resize(gravel_orig, (1024, 1024))
-    >>> gravel = skimage.rescale_to_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> gravel = skimage.rescale_to_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))  # noqa
     >>> imageio.imwrite('gravel.png', gravel)
     """
     return _load("data/gravel.png", as_gray=True)
