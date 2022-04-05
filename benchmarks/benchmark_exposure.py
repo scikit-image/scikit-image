@@ -2,7 +2,7 @@
 # https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage.transform import rescale
 from skimage import exposure
 
@@ -11,7 +11,7 @@ class ExposureSuite:
     """Benchmark for exposure routines in scikit-image."""
     def setup(self):
         self.image_u8 = data.moon()
-        self.image = img_as_float(self.image_u8)
+        self.image = rescale_to_float(self.image_u8)
         self.image = rescale(self.image, 2.0, anti_aliasing=False)
         # for Contrast stretching
         self.p2, self.p98 = np.percentile(self.image, (2, 98))
