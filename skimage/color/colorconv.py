@@ -142,9 +142,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1,
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.rescale_as_float32 if rescale else dtype.img_as_float32
+        _func = dtype.rescale_to_float32 if rescale else dtype.img_as_float32
     else:
-        _func = dtype.rescale_as_float64 if rescale else dtype.img_as_float64
+        _func = dtype.rescale_to_float64 if rescale else dtype.img_as_float64
     return _func(arr, force_copy=force_copy)
 
 

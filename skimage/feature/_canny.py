@@ -15,7 +15,7 @@ Original author: Lee Kamentsky
 import numpy as np
 import scipy.ndimage as ndi
 
-from ..util.dtype import dtype_limits, rescale_as_float
+from ..util.dtype import dtype_limits, rescale_to_float
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
 from ..filters._gaussian import gaussian
@@ -66,7 +66,7 @@ def _preprocess(image, mask, sigma, mode, cval):
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval)
     if mask is None:
         # Smooth the masked image
-        image = rescale_as_float(image)
+        image = rescale_to_float(image)
         smoothed_image = gaussian(image, **gaussian_kwargs)
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0

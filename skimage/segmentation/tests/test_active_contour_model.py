@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal, assert_allclose
 
-from skimage import data, rescale_as_float
+from skimage import data, rescale_to_float
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -12,7 +12,7 @@ from skimage.segmentation import active_contour
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_periodic_reference(dtype):
-    img = rescale_as_float(data.astronaut())
+    img = rescale_to_float(data.astronaut())
     img = rgb2gray(img)
     s = np.linspace(0, 2*np.pi, 400)
     r = 100 + 100*np.sin(s)
@@ -30,7 +30,7 @@ def test_periodic_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_fixed_reference(dtype):
-    img = rescale_as_float(data.text())
+    img = rescale_to_float(data.text())
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
@@ -46,7 +46,7 @@ def test_fixed_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_free_reference(dtype):
-    img = rescale_as_float(data.text())
+    img = rescale_to_float(data.text())
     r = np.linspace(70, 40, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
@@ -62,7 +62,7 @@ def test_free_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_RGB(dtype):
-    img = gaussian(rescale_as_float(data.text()), 1)
+    img = gaussian(rescale_to_float(data.text()), 1)
     imgR = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgG = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgRGB = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
