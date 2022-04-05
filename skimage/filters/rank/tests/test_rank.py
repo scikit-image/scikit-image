@@ -645,7 +645,7 @@ class TestRank():
         # make sure output is of dtype double
         with expected_warnings(['Bad rank filter performance']):
             out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
-        assert out.dtype == np.double
+        assert out.dtype == np.float64
 
     def test_footprint_dtypes(self):
 

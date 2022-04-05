@@ -476,7 +476,7 @@ class RegionProperties:
         return self._intensity_image[self.slice] * image
 
     def _image_intensity_double(self):
-        return self.image_intensity.astype(np.double, copy=False)
+        return self.image_intensity.astype(np.float64, copy=False)
 
     @property
     def centroid_local(self):
@@ -492,7 +492,7 @@ class RegionProperties:
     @property
     def intensity_max(self):
         vals = self.image_intensity[self.image]
-        return np.max(vals, axis=0).astype(np.double, copy=False)
+        return np.max(vals, axis=0).astype(np.float64, copy=False)
 
     @property
     def intensity_mean(self):
@@ -501,7 +501,7 @@ class RegionProperties:
     @property
     def intensity_min(self):
         vals = self.image_intensity[self.image]
-        return np.min(vals, axis=0).astype(np.double, copy=False)
+        return np.min(vals, axis=0).astype(np.float64, copy=False)
 
     @property
     def axis_major_length(self):

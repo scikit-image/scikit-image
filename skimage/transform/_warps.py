@@ -199,7 +199,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
             # take into account that 0th pixel is at position (0.5, 0.5)
             dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
             dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5

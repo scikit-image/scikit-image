@@ -83,7 +83,7 @@ def test_dtype():
     with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=float))
     with pytest.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.double))
+        regionprops(np.zeros((10, 10), dtype=np.float64))
     with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=bool))
 

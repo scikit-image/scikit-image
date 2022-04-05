@@ -360,7 +360,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.nodes[n].update({'labels': [n],
                                'pixel count': 0,
                                'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
+                                                       dtype=np.float64)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]

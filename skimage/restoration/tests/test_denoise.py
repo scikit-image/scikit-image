@@ -318,7 +318,7 @@ def test_denoise_bilateral_pad():
     assert_array_equal(condition_padding, 0)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.double])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_denoise_bilateral_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
@@ -330,7 +330,7 @@ def test_denoise_bilateral_types(dtype):
                                   sigma_spatial=10, channel_axis=None)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.double])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_denoise_bregman_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
