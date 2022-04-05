@@ -1,4 +1,4 @@
-__all__ = ['python_to_notebook', 'Notebook']
+__all__ = ['Notebook']
 
 import json
 import copy
