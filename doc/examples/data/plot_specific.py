@@ -20,9 +20,9 @@ matplotlib.rcParams["font.size"] = 18
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 ax = axes.ravel()
 
-cylce_images = data.stereo_motorcycle()
-ax[0].imshow(cylce_images[0])
-ax[1].imshow(cylce_images[1])
+cycle_images = data.stereo_motorcycle()
+ax[0].imshow(cycle_images[0])
+ax[1].imshow(cycle_images[1])
 
 fig.tight_layout()
 plt.show()
@@ -63,11 +63,20 @@ fig.tight_layout()
 plt.show()
 
 
+######################################################################
+# Thumbnail image for the gallery
+
+# sphinx_gallery_thumbnail_number = -1
+
+
 from matplotlib.offsetbox import AnchoredText
 
-ax0 = plt.subplot(2, 2, 1)
-ax0.imshow(cylce_images[0])
-ax0.add_artist(
+# Create a gridspec with two images in the first and 4 in the second row
+fig, axd = plt.subplot_mosaic(
+    [["stereo", "stereo", "piv", "piv"], ["lfw0", "lfw1", "lfw2", "lfw3"]],
+)
+axd["stereo"].imshow(cycle_images[0])
+axd["stereo"].add_artist(
     AnchoredText(
         "Stereo",
         prop=dict(size=20),
@@ -76,9 +85,8 @@ ax0.add_artist(
         loc="upper left",
     )
 )
-ax1 = plt.subplot(2, 2, 2)
-ax1.imshow(vortex_images[0])
-ax1.add_artist(
+axd["piv"].imshow(vortex_images[0])
+axd["piv"].add_artist(
     AnchoredText(
         "PIV",
         prop=dict(size=20),
@@ -87,16 +95,12 @@ ax1.add_artist(
         loc="upper left",
     )
 )
+axd["lfw0"].imshow(lfw_images[91], cmap="gray")
+axd["lfw1"].imshow(lfw_images[92], cmap="gray")
+axd["lfw2"].imshow(lfw_images[93], cmap="gray")
+axd["lfw3"].imshow(lfw_images[94], cmap="gray")
 
-ax2 = plt.subplot(2, 4, 5)
-ax2.imshow(lfw_images[90 + 1], cmap="gray")
-ax3 = plt.subplot(2, 4, 6)
-ax3.imshow(lfw_images[90 + 2], cmap="gray")
-ax4 = plt.subplot(2, 4, 7)
-ax4.imshow(lfw_images[90 + 3], cmap="gray")
-ax5 = plt.subplot(2, 4, 8)
-ax5.imshow(lfw_images[90 + 4], cmap="gray")
-for ax in [ax0, ax1, ax2, ax3, ax4, ax5]:
+for ax in axd.values():
     ax.axis("off")
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
