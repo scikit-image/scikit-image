@@ -23,13 +23,13 @@ scikit-image currently provides two forms of automated decomposition. For the
 cases of ``square``, ``rectangle`` and ``cube`` footprints, there is an option
 for a "separable" decomposition (size > 1 along only one axis at a time).
 
-For some other symmetric convex shapes such as ``diamond``, ``octahedron`` and
-``octagon`` there is no separable decomposition, but it is possible to provide
-a "sequence" decomposition based on a series of small footprints of shape
-``(3,) * ndim``.
+There is no separable decomposition into 1D operations for some other symmetric
+convex shapes, e.g., ``diamond``, ``octahedron`` and ``octagon``. However, it
+is possible to provide a "sequence" decomposition based on a series of small
+footprints of shape ``(3,) * ndim``.
 
-For simplicity of implementation, all decompositions shown below use only odd-sized
-footprints with their origin located at the center of the footprint.
+For simplicity of implementation, all decompositions shown below use only
+odd-sized footprints with their origin located at the center of the footprint.
 """
 
 import numpy as np
