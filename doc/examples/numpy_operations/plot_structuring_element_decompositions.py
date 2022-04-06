@@ -11,10 +11,10 @@ associative and distributive property that often allows decomposition into
 an equivalent series of smaller footprints. Most often this is done to provide
 a performance benefit.
 
-As a concrete example, dilation with a square footprint of size (15, 15) is
-equivalent to dilation with a rectangle of size (15, 1) followed by another
-dilation with a rectangle of size (1, 15). It is also equivalent to 7
-consecutive dilations with a square footprint of size (3, 3).
+As a concrete example, dilation with a square footprint of shape (15, 15) is
+equivalent to dilation with a rectangle of shape (15, 1) followed by another
+dilation with a rectangle of shape (1, 15). It is also equivalent to 7
+consecutive dilations with a square footprint of shape (3, 3).
 
 There are many possible decompositions and which one performs best may be
 architecture-dependent.
