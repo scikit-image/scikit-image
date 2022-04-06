@@ -9,15 +9,15 @@ from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
 
 cdef extern from "numpy/npy_math.h":
-    double NAN "NPY_NAN"
+    cnp.float64_t NAN "NPY_NAN"
 
 from .._shared.fused_numerics cimport np_anyint as any_int
 from .._shared.fused_numerics cimport np_real_numeric
 
 cnp.import_array()
 
-def _glcm_loop(any_int[:, ::1] image, double[:] distances,
-               double[:] angles, Py_ssize_t levels,
+def _glcm_loop(any_int[:, ::1] image, cnp.float64_t[:] distances,
+               cnp.float64_t[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
 
@@ -85,18 +85,18 @@ cdef inline int _bit_rotate_right(int value, int length) nogil:
     return (value >> 1) | ((value & 1) << (length - 1))
 
 
-def _local_binary_pattern(double[:, ::1] image,
-                          int P, float R, char method=b'D'):
+def _local_binary_pattern(cnp.float64_t[:, ::1] image,
+                          int P, cnp.float64_t R, char method=b'D'):
     """Gray scale and rotation invariant LBP (Local Binary Patterns).
 
     LBP is an invariant descriptor that can be used for texture classification.
 
     Parameters
     ----------
-    image : (N, M) double array
+    image : (N, M) cnp.float64_t array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of
+        Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
@@ -118,35 +118,35 @@ def _local_binary_pattern(double[:, ::1] image,
     # texture weights
     cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
-    rr = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cc = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cdef double[::1] rp = np.round(rr, 5)
-    cdef double[::1] cp = np.round(cc, 5)
+    rr = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.float64) / P)
+    cc = R * np.cos(2 * np.pi * np.arange(P, dtype=np.float64) / P)
+    cdef cnp.float64_t[::1] rp = np.round(rr, 5)
+    cdef cnp.float64_t[::1] cp = np.round(cc, 5)
 
     # pre-allocate arrays for computation
-    cdef double[::1] texture = np.zeros(P, dtype=np.double)
+    cdef cnp.float64_t[::1] texture = np.zeros(P, dtype=np.float64)
     cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
     cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
-    cdef double[:, ::1] output = np.zeros(output_shape, dtype=np.double)
+    cdef cnp.float64_t[:, ::1] output = np.zeros(output_shape, dtype=np.float64)
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
-    cdef double lbp
+    cdef cnp.float64_t lbp
     cdef Py_ssize_t r, c, changes, i
     cdef Py_ssize_t rot_index, n_ones
     cdef cnp.int8_t first_zero, first_one
 
     # To compute the variance features
-    cdef double sum_, var_, texture_i
+    cdef cnp.float64_t sum_, var_, texture_i
 
     with nogil:
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
                 for i in range(P):
-                    bilinear_interpolation[cnp.float64_t, double, double](
+                    bilinear_interpolation[cnp.float64_t, cnp.float64_t, cnp.float64_t](
                             &image[0, 0], rows, cols, r + rp[i], c + cp[i],
                             b'C', 0, &texture[i])
                 # signed / thresholded texture
@@ -272,7 +272,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
 
 # Constant values that are used by `_multiblock_lbp` function.
-# Values represent offsets of neighbour rectangles relative to central one.
+# Values represent offsets of neighbor rectangles relative to central one.
 # It has order starting from top left and going clockwise.
 cdef:
     Py_ssize_t[::1] mlbp_r_offsets = np.asarray([-1, -1, -1, 0, 1, 1, 1, 0],
@@ -332,10 +332,10 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
         int lbp_code = 0
 
     # Sum of intensity values of central rectangle.
-    cdef float central_rect_val = integrate(int_image, central_rect_r,
-                                            central_rect_c,
-                                            central_rect_r + r_shift,
-                                            central_rect_c + c_shift)
+    cdef np_floats central_rect_val = integrate(int_image, central_rect_r,
+                                                central_rect_c,
+                                                central_rect_r + r_shift,
+                                                central_rect_c + c_shift)
 
     for element_num in range(8):
 

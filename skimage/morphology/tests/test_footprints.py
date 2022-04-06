@@ -149,7 +149,7 @@ class TestSElem():
 
 
 @pytest.mark.parametrize(
-    'function, args, supports_decomposition',
+    'function, args, supports_sequence_decomposition',
     [
         (footprints.disk, (3,), True),
         (footprints.ball, (3,), True),
@@ -164,12 +164,13 @@ class TestSElem():
     ]
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.float64])
-def test_footprint_dtype(function, args, supports_decomposition, dtype):
+def test_footprint_dtype(function, args, supports_sequence_decomposition,
+                         dtype):
     # make sure footprint dtype matches what was requested
     footprint = function(*args, dtype=dtype)
     assert footprint.dtype == dtype
 
-    if supports_decomposition:
+    if supports_sequence_decomposition:
         sequence = function(*args, dtype=dtype, decomposition='sequence')
         assert all([fp_tuple[0].dtype == dtype for fp_tuple in sequence])
 

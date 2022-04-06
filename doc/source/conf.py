@@ -188,7 +188,8 @@ sphinx_gallery_conf = {
         'repo': 'scikit-image',
         'branch': binder_branch,  # Can be any branch, tag, or commit hash
         'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': '../../.binder/requirements.txt',
+        'dependencies': ['../../.binder/requirements.txt',
+                         '../../.binder/runtime.txt'],
         # Optional keys
         'use_jupyter_lab': False
      },
@@ -387,7 +388,7 @@ intersphinx_mapping = {
     'python': (_python_doc_base, None),
     'numpy': ('https://numpy.org/doc/stable',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/',
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),

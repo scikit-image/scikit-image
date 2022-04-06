@@ -28,7 +28,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     ----------
     image: ndarray
         Image to be resized.
-    output_shape: tuple or ndarray
+    output_shape: iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved.
 
@@ -52,6 +52,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     equal to output_shape_length.
 
     """
+    output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
     if output_ndim > image.ndim:
@@ -81,7 +82,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     ----------
     image : ndarray
         Input image.
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved. In case the
         number of input channels does not equal the number of output channels a
@@ -201,7 +202,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
             # take into account that 0th pixel is at position (0.5, 0.5)
             dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
             dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
@@ -1212,7 +1213,7 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     image : ndarray
         Input image. If this is a multichannel image, the axis corresponding
         to channels should be specified using `channel_axis`
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image. When `channel_axis` is not None,
         the `channel_axis` should either be omitted from `output_shape` or the
         ``output_shape[channel_axis]`` must match

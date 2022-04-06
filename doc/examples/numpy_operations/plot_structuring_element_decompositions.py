@@ -1,7 +1,7 @@
 """
-=======================================================
+================================================
 Decompose flat footprints (structuring elements)
-=======================================================
+================================================
 
 Many footprints (structuring elements) can be decomposed into an equivalent
 series of smaller structuring elements. The term "flat" refers to footprints
@@ -40,6 +40,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from skimage.morphology import (ball, cube, diamond, disk, ellipse, octagon,
                                 octahedron, rectangle, square)
 from skimage.morphology.footprints import footprint_from_sequence
+
 
 # Generate 2D and 3D structuring elements.
 footprint_dict = {
@@ -134,6 +135,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
     if approximate_decomposition:
         ax2.set_title(title1 + '\n(composite)', fontdict=fontdict)
         ax2.set_axis_off()
+
     for n, (fp, num_reps) in enumerate(footprint_sequence):
         npad = [((footprint.shape[d] - fp.shape[d]) // 2, ) * 2
                 for d in range(ndim)]

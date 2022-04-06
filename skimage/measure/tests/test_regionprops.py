@@ -83,7 +83,7 @@ def test_dtype():
     with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=float))
     with pytest.raises(TypeError):
-        regionprops(np.zeros((10, 10), dtype=np.double))
+        regionprops(np.zeros((10, 10), dtype=np.float64))
     with pytest.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=bool))
 
@@ -391,7 +391,8 @@ def test_perimeter():
     per = regionprops(SAMPLE)[0].perimeter
     assert_almost_equal(per, 55.2487373415)
 
-    per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    with expected_warnings(["`neighbourhood` is a deprecated argument name"]):
+        per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 46.8284271247)
 
 

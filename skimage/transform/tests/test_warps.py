@@ -36,7 +36,7 @@ def test_stackcopy():
 
 
 def test_warp_tform():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
     theta = - np.pi / 2
     tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
@@ -49,9 +49,9 @@ def test_warp_tform():
 
 
 def test_warp_callable():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
-    refx = np.zeros((5, 5), dtype=np.double)
+    refx = np.zeros((5, 5), dtype=np.float64)
     refx[1, 1] = 1
 
     def shift(xy):
@@ -63,9 +63,9 @@ def test_warp_callable():
 
 @test_parallel()
 def test_warp_matrix():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
-    refx = np.zeros((5, 5), dtype=np.double)
+    refx = np.zeros((5, 5), dtype=np.float64)
     refx[1, 1] = 1
 
     matrix = np.array([[1, 0, 1], [0, 1, 1], [0, 0, 1]])
@@ -81,10 +81,10 @@ def test_warp_nd():
     for dim in range(2, 8):
         shape = dim * (5,)
 
-        x = np.zeros(shape, dtype=np.double)
+        x = np.zeros(shape, dtype=np.float64)
         x_c = dim * (2,)
         x[x_c] = 1
-        refx = np.zeros(shape, dtype=np.double)
+        refx = np.zeros(shape, dtype=np.float64)
         refx_c = dim * (1,)
         refx[refx_c] = 1
 
@@ -97,7 +97,7 @@ def test_warp_nd():
 
 
 def test_warp_clip():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
 
     outx = rescale(x, 3, order=3, clip=False, anti_aliasing=False,
@@ -111,7 +111,7 @@ def test_warp_clip():
 
 
 def test_homography():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     theta = -np.pi / 2
     M = np.array([[np.cos(theta), - np.sin(theta), 0],
@@ -134,7 +134,7 @@ def test_rotate(dtype):
 
 
 def test_rotate_resize():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
 
     x45 = rotate(x, 45, resize=False)
     assert x45.shape == (10, 10)
@@ -145,9 +145,9 @@ def test_rotate_resize():
 
 
 def test_rotate_center():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
     x[4, 4] = 1
-    refx = np.zeros((10, 10), dtype=np.double)
+    refx = np.zeros((10, 10), dtype=np.float64)
     refx[2, 5] = 1
     x20 = rotate(x, 20, order=0, center=(0, 0))
     assert_array_almost_equal(x20, refx)
@@ -156,10 +156,10 @@ def test_rotate_center():
 
 
 def test_rotate_resize_center():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
     x[0, 0] = 1
 
-    ref_x45 = np.zeros((14, 14), dtype=np.double)
+    ref_x45 = np.zeros((14, 14), dtype=np.float64)
     ref_x45[6, 0] = 1
     ref_x45[7, 0] = 1
 
@@ -171,13 +171,13 @@ def test_rotate_resize_center():
 
 
 def test_rotate_resize_90():
-    x90 = rotate(np.zeros((470, 230), dtype=np.double), 90, resize=True)
+    x90 = rotate(np.zeros((470, 230), dtype=np.float64), 90, resize=True)
     assert x90.shape == (230, 470)
 
 
 def test_rescale():
     # same scale factor
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10))
@@ -185,7 +185,7 @@ def test_rescale():
     assert_array_almost_equal(scaled, ref)
 
     # different scale factors
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
 
     scaled = rescale(x, (2, 1), order=0, anti_aliasing=False, mode='constant')
@@ -206,7 +206,7 @@ def test_rescale_invalid_scale():
 
 def test_rescale_multichannel():
     # 1D + channels
-    x = np.zeros((8, 3), dtype=np.double)
+    x = np.zeros((8, 3), dtype=np.float64)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
     assert scaled.shape == (16, 3)
@@ -216,7 +216,7 @@ def test_rescale_multichannel():
     assert scaled.shape == (16, 6)
 
     # 2D + channels
-    x = np.zeros((8, 8, 3), dtype=np.double)
+    x = np.zeros((8, 8, 3), dtype=np.float64)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
     assert scaled.shape == (16, 16, 3)
@@ -226,7 +226,7 @@ def test_rescale_multichannel():
     assert scaled.shape == (16, 16, 6)
 
     # 3D + channels
-    x = np.zeros((8, 8, 8, 3), dtype=np.double)
+    x = np.zeros((8, 8, 8, 3), dtype=np.float64)
     scaled = rescale(x, 2, order=0, channel_axis=-1, anti_aliasing=False,
                      mode='constant')
     assert scaled.shape == (16, 16, 16, 3)
@@ -237,7 +237,7 @@ def test_rescale_multichannel():
 
 
 def test_rescale_multichannel_deprecated_multiscale():
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    x = np.zeros((5, 5, 3), dtype=np.float64)
     with expected_warnings(["`multichannel` is a deprecated argument"]):
         scaled = rescale(x, (2, 1), order=0, multichannel=True,
                          anti_aliasing=False, mode='constant')
@@ -252,7 +252,7 @@ def test_rescale_multichannel_deprecated_multiscale():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_rescale_channel_axis_multiscale(channel_axis):
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    x = np.zeros((5, 5, 3), dtype=np.float64)
     x = np.moveaxis(x, -1, channel_axis)
     scaled = rescale(x, scale=(2, 1), order=0, channel_axis=channel_axis,
                      anti_aliasing=False, mode='constant')
@@ -261,17 +261,17 @@ def test_rescale_channel_axis_multiscale(channel_axis):
 
 
 def test_rescale_multichannel_defaults():
-    x = np.zeros((8, 3), dtype=np.double)
+    x = np.zeros((8, 3), dtype=np.float64)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert scaled.shape == (16, 6)
 
-    x = np.zeros((8, 8, 3), dtype=np.double)
+    x = np.zeros((8, 8, 3), dtype=np.float64)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert scaled.shape == (16, 16, 6)
 
 
 def test_resize2d():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     resized = resize(x, (10, 10), order=0, anti_aliasing=False,
                      mode='constant')
@@ -282,7 +282,7 @@ def test_resize2d():
 
 def test_resize3d_keep():
     # keep 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    x = np.zeros((5, 5, 3), dtype=np.float64)
     x[1, 1, :] = 1
     resized = resize(x, (10, 10), order=0, anti_aliasing=False,
                      mode='constant')
@@ -299,7 +299,7 @@ def test_resize3d_keep():
 
 def test_resize3d_resize():
     # resize 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    x = np.zeros((5, 5, 3), dtype=np.float64)
     x[1, 1, :] = 1
     resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
                      mode='constant')
@@ -310,7 +310,7 @@ def test_resize3d_resize():
 
 def test_resize3d_2din_3dout():
     # 3D output with 2D input
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
                      mode='constant')
@@ -321,7 +321,7 @@ def test_resize3d_2din_3dout():
 
 def test_resize2d_4d():
     # resize with extra output dimensions
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     out_shape = (10, 10, 1, 1)
     resized = resize(x, out_shape, order=0, anti_aliasing=False,
@@ -345,7 +345,7 @@ def test_resize_nd():
 
 def test_resize3d_bilinear():
     # bilinear 3rd dimension
-    x = np.zeros((5, 5, 2), dtype=np.double)
+    x = np.zeros((5, 5, 2), dtype=np.float64)
     x[1, 1, 0] = 0
     x[1, 1, 1] = 1
     resized = resize(x, (10, 10, 1), order=1, mode='constant',
@@ -366,8 +366,8 @@ def test_resize_dtype():
 
     assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
     assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
-    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
-    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.float64
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.float64
     assert resize(x_b, (10, 10), preserve_range=False).dtype == bool
     assert resize(x_b, (10, 10), preserve_range=True).dtype == bool
     assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
@@ -380,7 +380,7 @@ def test_resize_dtype():
 @pytest.mark.parametrize('dtype', [np.float64, np.uint8])
 def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     # test if clip as expected
-    if dtype == np.uint8 and (preserve_range or order==0):
+    if dtype == np.uint8 and (preserve_range or order == 0):
         expected_max = 255
     else:
         expected_max = 1.0
@@ -462,7 +462,7 @@ def test_downsize(dtype):
 
 
 def test_downsize_anti_aliasing():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
     x[2, 2] = 1
     scaled = resize(x, (5, 5), order=1, anti_aliasing=True, mode='constant')
     assert scaled.shape == (5, 5)
@@ -489,7 +489,7 @@ def test_downsize_anti_aliasing():
 
 
 def test_downsize_anti_aliasing_invalid_stddev():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
     with pytest.raises(ValueError):
         resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1,
                mode='constant')
@@ -517,7 +517,7 @@ def test_downscale(dtype):
 
 
 def test_downscale_anti_aliasing():
-    x = np.zeros((10, 10), dtype=np.double)
+    x = np.zeros((10, 10), dtype=np.float64)
     x[2, 2] = 1
     scaled = rescale(x, 0.5, order=1, anti_aliasing=True,
                      channel_axis=None, mode='constant')
@@ -565,7 +565,7 @@ def test_invalid():
 def test_inverse():
     tform = SimilarityTransform(scale=0.5, rotation=0.1)
     inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform.params))
-    image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
+    image = np.arange(10 * 10).reshape(10, 10).astype(np.float64)
     assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
@@ -788,7 +788,7 @@ def test_nonzero_order_warp_dtype(dtype, order):
 
 
 def test_resize_local_mean2d():
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     resized = resize_local_mean(x, (10, 10))
     ref = np.zeros((10, 10))
@@ -800,7 +800,7 @@ def test_resize_local_mean2d():
 def test_resize_local_mean3d_keep(channel_axis):
     # keep 3rd dimension
     nch = 3
-    x = np.zeros((5, 5, nch), dtype=np.double)
+    x = np.zeros((5, 5, nch), dtype=np.float64)
     x[1, 1, :] = 1
     # move channels to expected dimension
     x = np.moveaxis(x, -1, channel_axis)
@@ -827,7 +827,7 @@ def test_resize_local_mean3d_keep(channel_axis):
 
 def test_resize_local_mean3d_resize():
     # resize 3rd dimension
-    x = np.zeros((5, 5, 3), dtype=np.double)
+    x = np.zeros((5, 5, 3), dtype=np.float64)
     x[1, 1, :] = 1
     resized = resize_local_mean(x, (10, 10, 1))
     ref = np.zeros((10, 10, 1))
@@ -841,7 +841,7 @@ def test_resize_local_mean3d_resize():
 
 def test_resize_local_mean3d_2din_3dout():
     # 3D output with 2D input
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     resized = resize_local_mean(x, (10, 10, 1))
     ref = np.zeros((10, 10, 1))
@@ -851,7 +851,7 @@ def test_resize_local_mean3d_2din_3dout():
 
 def test_resize_local_mean2d_4d():
     # resize with extra output dimensions
-    x = np.zeros((5, 5), dtype=np.double)
+    x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
     out_shape = (10, 10, 1, 1)
     resized = resize_local_mean(x, out_shape)
@@ -872,7 +872,7 @@ def test_resize_local_mean_nd(dim):
 
 
 def test_resize_local_mean3d():
-    x = np.zeros((5, 5, 2), dtype=np.double)
+    x = np.zeros((5, 5, 2), dtype=np.float64)
     x[1, 1, 0] = 0
     x[1, 1, 1] = 1
     resized = resize_local_mean(x, (10, 10, 1))
@@ -900,14 +900,22 @@ def test_resize_local_mean_dtype():
     assert resize_local_mean(x, (10, 10),
                              preserve_range=True).dtype == x.dtype
     assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=False).dtype == np.double
+                             preserve_range=False).dtype == np.float64
     assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=True).dtype == np.double
+                             preserve_range=True).dtype == np.float64
     assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=False).dtype == np.double
+                             preserve_range=False).dtype == np.float64
     assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=True).dtype == np.double
+                             preserve_range=True).dtype == np.float64
     assert resize_local_mean(x_f32, (10, 10),
                              preserve_range=False).dtype == x_f32.dtype
     assert resize_local_mean(x_f32, (10, 10),
                              preserve_range=True).dtype == x_f32.dtype
+
+
+@pytest.mark.parametrize("_type", [tuple, np.asarray, list])
+def test_output_shape_arg_type(_type):
+    img = np.random.rand(3, 3)
+    output_shape = _type([5, 5])
+
+    assert resize(img, output_shape).shape == tuple(output_shape)
