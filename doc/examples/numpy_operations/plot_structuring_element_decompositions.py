@@ -1,34 +1,34 @@
 """
 =======================================================
-Decomposition of flat footprints (structuring elements)
+Decompose flat footprints (structuring elements)
 =======================================================
 
 Many footprints (structuring elements) can be decomposed into an equivalent
-series of smaller structuring elements. The term "flat" refers to a footprints
-that only contains values of 0 or 1 (i.e. all methods in
+series of smaller structuring elements. The term "flat" refers to footprints
+that only contain values of 0 or 1 (i.e., all methods in
 ``skimage.morphology.footprints``). Binary dilation operations have an
-associative and distributive property such that often allows decomposition into
+associative and distributive property that often allows decomposition into
 an equivalent series of smaller footprints. Most often this is done to provide
 a performance benefit.
 
 As a concrete example, dilation with a square footprint of size (15, 15) is
-equivalent to dilation with a rectangle of size (15, 1) followed by a
+equivalent to dilation with a rectangle of size (15, 1) followed by another
 dilation with a rectangle of size (1, 15). It is also equivalent to 7
-consecutive dilations with a shape (3, 3) square.
+consecutive dilations with a square footprint of size (3, 3).
 
 There are many possible decompositions and which one performs best may be
 architecture-dependent.
 
 scikit-image currently provides two forms of automated decomposition. For the
 cases of ``square``, ``rectangle`` and ``cube`` footprints, there is an option
-for a "separable" decomposition (size > 1 along only 1 axis at a time).
+for a "separable" decomposition (size > 1 along only one axis at a time).
 
 For some other symmetric convex shapes such as ``diamond``, ``octahedron`` and
 ``octagon`` there is no separable decomposition, but it is possible to provide
 a "sequence" decomposition based on a series of small footprints of shape
 ``(3,) * ndim``.
 
-For simplicity of implementation, all decompositions use only odd-sized
+For simplicity of implementation, all decompositions shown below use only odd-sized
 footprints with their origin located at the center of the footprint.
 """
 
