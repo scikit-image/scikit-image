@@ -40,7 +40,7 @@ def _fast_skeletonize(image):
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbors. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
-    cdef int *lut = \
+    cdef cnp.uint8_t *lut = \
       [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
        0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
@@ -54,15 +54,17 @@ def _fast_skeletonize(image):
        0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
        0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
 
-    cdef int pixel_removed, first_pass, neighbors
+    cdef int pixel_removed, neighbors
+    cdef bool first_pass
 
     # indices for fast iteration
     cdef Py_ssize_t row, col, nrows = image.shape[0]+2, ncols = image.shape[1]+2
+    nrows, ncols
 
     # we copy over the image into a larger version with a single pixel border
     # this removes the need to handle border cases below
     _skeleton = np.zeros((nrows, ncols), dtype=np.uint8)
-    _skeleton[1:nrows-1, 1:ncols-1] = image > 0
+    _skeleton[1:-1, 1:-1] = image > 0
 
     _cleaned_skeleton = _skeleton.copy()
 
@@ -80,8 +82,8 @@ def _fast_skeletonize(image):
         while pixel_removed:
             pixel_removed = False
 
-            # there are two phases, in the first phase, pixels labeled (see below)
-            # 1 and 3 are removed, in the second 2 and 3
+            # there are two phases, in the first phase, pixels labeled
+            # (see below) 1 and 3 are removed, in the second 2 and 3
 
             # nogil can't iterate through `(True, False)` because it is a Python
             # tuple. Use the fact that 0 is Falsy, and 1 is truthy in C
@@ -93,10 +95,13 @@ def _fast_skeletonize(image):
                     for col in range(1, ncols-1):
                         # all set pixels ...
                         if skeleton[row, col]:
-                            # are correlated with a kernel (coefficients spread around here ...)
-                            # to apply a unique number to every possible neighborhood ...
+                            # are correlated with a kernel
+                            # (coefficients spread around here ...)
+                            # to apply a unique number to every
+                            # possible neighborhood ...
 
-                            # which is used with the lut to find the "connectivity type"
+                            # which is used with the lut to find the
+                            # "connectivity type"
 
                             neighbors = lut[  1*skeleton[row - 1, col - 1] +   2*skeleton[row - 1, col] +\
                                               4*skeleton[row - 1, col + 1] +   8*skeleton[row, col + 1] +\
