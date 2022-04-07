@@ -160,13 +160,8 @@ def skeletonize_2d(image):
 
     """
 
-    # convert to unsigned int (this should work for boolean values)
-    image = image.astype(np.uint8)
-
-    # check some properties of the input image:
-    #  - 2D
     if image.ndim != 2:
-        raise ValueError('Skeletonize requires a 2D array')
+        raise ValueError("Zhang's skeletonize method requires a 2D array")
 
     return _fast_skeletonize(image)
 
