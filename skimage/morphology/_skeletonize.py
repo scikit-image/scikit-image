@@ -22,7 +22,7 @@ def skeletonize(image, *, method=None):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
+        An image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
