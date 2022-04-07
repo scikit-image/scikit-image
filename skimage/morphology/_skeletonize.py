@@ -165,11 +165,8 @@ def skeletonize_2d(image):
 
     # check some properties of the input image:
     #  - 2D
-    #  - binary image with only 0's and 1's
     if image.ndim != 2:
         raise ValueError('Skeletonize requires a 2D array')
-    if not np.all(np.in1d(image.flat, (0, 1))):
-        raise ValueError('Image contains values other than 0 and 1')
 
     return _fast_skeletonize(image)
 
