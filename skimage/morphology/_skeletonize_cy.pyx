@@ -54,8 +54,7 @@ def _fast_skeletonize(image):
         0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
         0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
 
-    cdef cnp.uint8_t pixel_removed, neighbors
-    cdef bool first_pass
+    cdef cnp.uint8_t first_pass, pixel_removed, neighbors
 
     # indices for fast iteration
     cdef Py_ssize_t row, col, nrows, ncols, pass_num
@@ -129,7 +128,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:nrows-1, 1:ncols-1].astype(bool)
+    return _skeleton[1:-1, 1:-1].astype(bool)
 
 
 """
