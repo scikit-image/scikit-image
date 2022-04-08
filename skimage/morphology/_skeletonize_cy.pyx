@@ -116,9 +116,11 @@ def _fast_skeletonize(image):
                                             64 * skeleton[row + 1, col - 1] +
                                             128 * skeleton[row, col - 1]]
 
-                            if ((neighbors == 1 and first_pass) or
-                                    (neighbors == 2 and not first_pass) or
-                                    (neighbors == 3)):
+                            if (neighbors == 0):
+                                continue
+                            elif ((neighbors == 3) or
+                                  (neighbors == 1 and first_pass) or
+                                  (neighbors == 2 and not first_pass)):
                                 # Remove the pixel
                                 cleaned_skeleton[row, col] = 0
                                 pixel_removed = True
