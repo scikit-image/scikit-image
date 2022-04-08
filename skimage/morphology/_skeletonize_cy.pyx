@@ -40,26 +40,28 @@ def _fast_skeletonize(image):
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbors. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
-    cdef cnp.uint8_t *lut = \
-      [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
-       0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
-       0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
-       0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
-       1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
-       0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
+    cdef cnp.uint8_t *lut = [
+        0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
+        0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
+        0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
+        0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
+        1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
+        0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
 
-    cdef int pixel_removed, neighbors
+    cdef cnp.uint8_t pixel_removed, neighbors
     cdef bool first_pass
 
     # indices for fast iteration
-    cdef Py_ssize_t row, col, nrows = image.shape[0]+2, ncols = image.shape[1]+2
-    nrows, ncols
+    cdef Py_ssize_t row, col, nrows, ncols, pass_num
+    nrows, ncols = image.shape
+    nrows += 2
+    ncols += 2
 
     # we copy over the image into a larger version with a single pixel border
     # this removes the need to handle border cases below
@@ -67,6 +69,7 @@ def _fast_skeletonize(image):
     _skeleton[1:-1, 1:-1] = image > 0
 
     _cleaned_skeleton = _skeleton.copy()
+
 
     # cdef'd numpy-arrays for fast, typed access
     cdef cnp.uint8_t [:, ::1] skeleton, cleaned_skeleton
@@ -94,6 +97,7 @@ def _fast_skeletonize(image):
                 for row in range(1, nrows-1):
                     for col in range(1, ncols-1):
                         # all set pixels ...
+
                         if skeleton[row, col]:
                             # are correlated with a kernel
                             # (coefficients spread around here ...)
@@ -103,15 +107,19 @@ def _fast_skeletonize(image):
                             # which is used with the lut to find the
                             # "connectivity type"
 
-                            neighbors = lut[  1*skeleton[row - 1, col - 1] +   2*skeleton[row - 1, col] +\
-                                              4*skeleton[row - 1, col + 1] +   8*skeleton[row, col + 1] +\
-                                             16*skeleton[row + 1, col + 1] +  32*skeleton[row + 1, col] +\
-                                             64*skeleton[row + 1, col - 1] + 128*skeleton[row, col - 1]]
+                            neighbors = lut[skeleton[row - 1, col - 1] +
+                                            2 * skeleton[row - 1, col] +
+                                            4 * skeleton[row - 1, col + 1] +
+                                            8 * skeleton[row, col + 1] +
+                                            16 * skeleton[row + 1, col + 1] +
+                                            32 * skeleton[row + 1, col] +
+                                            64 * skeleton[row + 1, col - 1] +
+                                            128 * skeleton[row, col - 1]]
 
-                            # if the condition is met, the pixel is removed (unset)
                             if ((neighbors == 1 and first_pass) or
                                     (neighbors == 2 and not first_pass) or
                                     (neighbors == 3)):
+                                # Remove the pixel
                                 cleaned_skeleton[row, col] = 0
                                 pixel_removed = True
 
