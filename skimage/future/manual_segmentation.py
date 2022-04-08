@@ -101,7 +101,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         if event.inaxes is None or event.inaxes is undo_pos:
             return
         # Do not record click events when toolbar is active
-        if fig.canvas.manager.toolbar._active is not None:
+        if ax.get_navigate_mode():
             return
 
         if event.button == LEFT_CLICK:  # Select vertex
