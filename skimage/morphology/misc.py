@@ -260,9 +260,9 @@ def remove_near_objects(
     *,
     priority=None,
     p_norm=2,
-    selem=None,
+    footprint=None,
     connectivity=None,
-    in_place=False,
+    out=None,
 ):
     """Remove objects until a minimal distance is ensured.
 
@@ -285,25 +285,26 @@ def remove_near_objects(
     p_norm : int or float, optional
         The Minkowski p-norm used to calculate the distance between objects.
         Defaults to 2 which corresponds to the Euclidean distance.
-    selem : ndarray, optional
-        A structuring element used to determine the neighborhood of each
-        evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If
-        neither `selem` nor `connectivity` are given, all adjacent pixels are
-        considered as part of the neighborhood.
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
-    in_place : bool, optional
-        Whether to modify `image` in place or return a new array.
+        `footprint` is not None.
+    out : ndarray, optional
+        Array of the same shape and dtype as `image`, into which the output is
+        placed. By default, a new array is created.
 
     Returns
     -------
     out : ndarray
-        Array of the same shape as `image` with objects violating the distance
-        condition removed.
+        Array of the same shape as `image` for which objects that violate the
+        `minimal_distance` condition were removed.
 
     See Also
     --------
@@ -353,28 +354,28 @@ def remove_near_objects(
         raise ValueError(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
-    if not in_place:
-        image = np.array(image, order="C", copy=True)
-    if image.size == 0:
+    if out is None:
+        out = np.array(image, order="C", copy=True)
+    if out.size == 0:
         # _offsets_to_raveled_neighbors doesn't support emtpy images
-        return image
+        return out
 
-    selem = _resolve_neighborhood(selem, connectivity, image.ndim)
+    footprint = _resolve_neighborhood(footprint, connectivity, out.ndim)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        image.shape, selem, center=((1,) * image.ndim)
+        out.shape, footprint, center=((1,) * out.ndim)
     )
 
     # Label objects, only samples where labels != 0 are evaluated
-    labels = np.empty_like(image, dtype=np.intp)
-    ndi.label(image, selem, output=labels)
+    labels = np.empty_like(out, dtype=np.intp)
+    ndi.label(out, footprint, output=labels)
 
     if priority is None:
         bins = np.bincount(labels.ravel())
         priority = bins[labels.ravel()]  # Replace label id with bin count
-    elif image.shape != priority.shape:
+    elif out.shape != priority.shape:
         raise ValueError(
             "priority must have same shape as image: "
-            f"{priority.shape} != {image.shape}"
+            f"{priority.shape} != {out.shape}"
         )
     else:
         priority = priority.ravel()
@@ -382,47 +383,47 @@ def remove_near_objects(
     # Safely ignore points that don't lie on an objects surface
     # This reduces the size of the KDTree and the number of points that
     # need to be evaluated
-    labels[ndi.binary_erosion(labels, structure=selem)] = 0
+    labels[ndi.binary_erosion(labels, structure=footprint)] = 0
 
     labels = labels.ravel()
     raveled_indices = np.nonzero(labels)[0]
     if raveled_indices.size == 0:
         # required, cKDTree doesn't support empty input for earlier versions
         # https://github.com/scipy/scipy/pull/10457
-        return image
+        return out
 
     # Use stable sort to make sorting behavior more transparent in the likely
     # event that objects have the same priority
     sort = np.argsort(priority[raveled_indices], kind="mergesort")[::-1]
     raveled_indices = raveled_indices[sort]
 
-    indices = np.unravel_index(raveled_indices, image.shape)
+    indices = np.unravel_index(raveled_indices, out.shape)
     kdtree = cKDTree(
         # `data` is cast to C-order in cKDTree
         data=np.asarray(indices, dtype=np.float64, order="F").transpose(),
         balanced_tree=True,
     )
 
-    if np.can_cast(image, bool, casting="no"):
+    if np.can_cast(out, bool, casting="no"):
         # Cython doesn't support boolean memoryviews yet
         # https://github.com/cython/cython/issues/2204
         # and we use np.uint8_t as a workaround
-        image = image.view(np.uint8)
+        out = out.view(np.uint8)
         image_is_bool = True
     else:
         image_is_bool = False
 
     _remove_near_objects(
-        image=image.ravel(),
+        image=out.reshape(-1),
         labels=labels,
         raveled_indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
         kdtree=kdtree,
         minimal_distance=minimal_distance,
         p_norm=p_norm,
-        shape=image.shape,
+        shape=out.shape,
     )
 
     if image_is_bool:
-        image = image.base  # Restore original dtype
-    return image
+        out = out.base  # Restore original dtype
+    return out
