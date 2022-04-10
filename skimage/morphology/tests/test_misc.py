@@ -347,6 +347,9 @@ class Test_remove_near_objects:
         remove_near_objects(image, minimal_distance=2, out=image)
         assert_array_equal(image, desired)
 
+        image_fortran = np.array(image, order="F", copy=True)
+        remove_near_objects(image, minimal_distance=2, out=image_fortran)
+        assert_array_equal(image_fortran, desired)
 
     @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
     def test_negative_minimal_distance(self, minimal_distance):
@@ -423,3 +426,8 @@ class Test_remove_near_objects:
         priority = np.ones((10, 9))
         with pytest.raises(ValueError, match="priority.*shape"):
             remove_near_objects(image, minimal_distance=3, priority=priority)
+
+    def test_noncontiguous(self):
+        image = np.zeros(12)[::2]
+        with pytest.raises(ValueError, match="ndarray is not C-contiguous"):
+            remove_near_objects(image, minimal_distance=2, out=image)

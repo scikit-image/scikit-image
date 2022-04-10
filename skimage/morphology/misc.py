@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 from .._shared.utils import warn, remove_arg
 from .footprints import _default_footprint
-from ._util import _resolve_neighborhood, _offsets_to_raveled_neighbors
+from ._util import _resolve_neighborhood, _raveled_offsets_and_distances
 from ._near_objects_cy import _remove_near_objects
 
 
@@ -298,7 +298,8 @@ def remove_near_objects(
         `footprint` is not None.
     out : ndarray, optional
         Array of the same shape and dtype as `image`, into which the output is
-        placed. By default, a new array is created.
+        placed. Its memory layout must be C-contiguous. By default, a new array
+        is created.
 
     Returns
     -------
@@ -395,17 +396,12 @@ def remove_near_objects(
         balanced_tree=True,
     )
 
-    if np.can_cast(out, bool, casting="no"):
-        # Cython doesn't support boolean memoryviews yet
-        # https://github.com/cython/cython/issues/2204
-        # and we use np.uint8_t as a workaround
-        out = out.view(np.uint8)
-        image_is_bool = True
-    else:
-        image_is_bool = False
+    # Raise error if raveling is not possible without copying
+    out_raveled = out.view()
+    out_raveled.shape = (out.size,)
 
     _remove_near_objects(
-        image=out.reshape(-1),
+        image=out_raveled,
         labels=labels,
         raveled_indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
@@ -414,7 +410,4 @@ def remove_near_objects(
         p_norm=p_norm,
         shape=out.shape,
     )
-
-    if image_is_bool:
-        out = out.base  # Restore original dtype
     return out
