@@ -355,14 +355,11 @@ def remove_near_objects(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
     if out is None:
-        out = np.array(image, order="C", copy=True)
-    if out.size == 0:
-        # _offsets_to_raveled_neighbors doesn't support emtpy images
-        return out
+        out = image.copy(order="C")
 
     footprint = _resolve_neighborhood(footprint, connectivity, out.ndim)
-    neighbor_offsets = _offsets_to_raveled_neighbors(
-        out.shape, footprint, center=((1,) * out.ndim)
+    neighbor_offsets, _ = _raveled_offsets_and_distances(
+        out.shape, footprint=footprint, center=((1,) * out.ndim)
     )
 
     # Label objects, only samples where labels != 0 are evaluated
@@ -384,13 +381,8 @@ def remove_near_objects(
     # This reduces the size of the KDTree and the number of points that
     # need to be evaluated
     labels[ndi.binary_erosion(labels, structure=footprint)] = 0
-
-    labels = labels.ravel()
+    labels = labels.reshape(-1)
     raveled_indices = np.nonzero(labels)[0]
-    if raveled_indices.size == 0:
-        # required, cKDTree doesn't support empty input for earlier versions
-        # https://github.com/scipy/scipy/pull/10457
-        return out
 
     # Use stable sort to make sorting behavior more transparent in the likely
     # event that objects have the same priority
@@ -399,8 +391,7 @@ def remove_near_objects(
 
     indices = np.unravel_index(raveled_indices, out.shape)
     kdtree = cKDTree(
-        # `data` is cast to C-order in cKDTree
-        data=np.asarray(indices, dtype=np.float64, order="F").transpose(),
+        data=np.asarray(indices, dtype=np.float64).transpose(),
         balanced_tree=True,
     )
 
