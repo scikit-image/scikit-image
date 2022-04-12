@@ -739,6 +739,10 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
         if not preserve_cval:
             cval = min_val
 
+        # If cval is the default value, cast it to the same type as min_val
+        if cval == 0.:
+            cval = min_val.dtype.type(cval)
+
         np.clip(output_image, min(min_val, cval), max(max_val, cval),
                 out=output_image)
 
