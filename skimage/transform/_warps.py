@@ -717,20 +717,30 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
 
     """
     if clip:
-        min_val = np.nanmin(input_image)
-        max_val = np.nanmax(input_image)
+        min_val = np.min(input_image)
+        if np.isnan(min_val):
+            # NaNs detected, use NaN-safe min/max
+            min_func = np.nanmin
+            max_func = np.nanmax
+            min_val = min_func(input_image)
+        else:
+            min_func = np.min
+            max_func = np.max
+        max_val = max_func(input_image)
 
-        # Check if cval has been used such that it expands the effective input range
+        # Check if cval has been used such that it expands the effective input
+        # range
         preserve_cval = (mode == 'constant'
                          and not np.isnan(cval)
                          and not min_val <= cval <= max_val
-                         and np.nanmin(output_image) <= cval <= np.nanmax(output_image))
+                         and min_func(output_image) <= cval <= max_func(output_image))
 
-        # Otherwise, set cval to be within the input range for clipping purposes
+        # Otherwise, set cval within the input range for clipping purposes
         if not preserve_cval:
             cval = min_val
 
-        np.clip(output_image, np.min([min_val, cval]), np.max([max_val, cval]), out=output_image)
+        np.clip(output_image, min(min_val, cval), max(max_val, cval),
+                out=output_image)
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
