@@ -110,6 +110,41 @@ def test_warp_clip():
     assert_array_almost_equal(outx.max(), 1)
 
 
+@pytest.mark.parametrize('order', [0, 1, 3])
+def test_warp_clip_image_containing_nans(order):
+    # Test that clipping works as intended on an image with NaNs
+    # Orders 2, 4, and 5 do not produce good output when the input image has
+    # NaNs, so those orders are not tested
+
+    x = np.ones((15, 15), dtype=np.float64)
+    x[7, 7] = np.nan
+
+    outx = rotate(x, 45, order=order, cval=2, resize=True, clip=True)
+
+    assert_array_almost_equal(np.nanmin(outx), 1)
+    assert_array_almost_equal(np.nanmax(outx), 2)
+
+
+@pytest.mark.parametrize('order', range(6))
+def test_warp_clip_cval_outside_input_range(order):
+    # Test that clipping behavior considers cval part of the input range
+
+    x = np.ones((15, 15), dtype=np.float64)
+
+    # Specify a cval that is outside the input range to check clipping
+    outx = rotate(x, 45, order=order, cval=2, resize=True, clip=True)
+
+    # The corners should be cval for all interpolation orders
+    assert_array_almost_equal([outx[0, 0], outx[0, -1],
+                               outx[-1, 0], outx[-1, -1]], 2)
+
+    # For all interpolation orders other than nearest-neighbor, the clipped
+    # output should have some pixels with values between the input (1) and
+    # cval (2) (i.e., clipping should not set them to 1)
+    if order > 0:
+        assert np.sum(np.less(1, outx) * np.less(outx, 2)) > 0
+
+
 def test_homography():
     x = np.zeros((5, 5), dtype=np.float64)
     x[1, 1] = 1
