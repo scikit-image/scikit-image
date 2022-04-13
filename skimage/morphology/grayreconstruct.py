@@ -138,7 +138,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     if footprint is None:
         footprint = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        footprint = footprint.astype(bool)
+        footprint = footprint.astype(bool, copy=True)
 
     if offset is None:
         if not all([d % 2 == 1 for d in footprint.shape]):
@@ -172,6 +172,15 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     images[(0, *inside_slices)] = seed
     images[(1, *inside_slices)] = mask
 
+    # determine whether image is large enough to require 64-bit integers
+    isize = images.size
+    if isize > np.iinfo(np.uint32).max:
+        signed_int_dtype = np.int64
+        unsigned_int_dtype = np.uint64
+    else:
+        signed_int_dtype = np.int32
+        unsigned_int_dtype = np.uint32
+
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
     value_stride = np.array(images.strides[1:]) // images.dtype.itemsize
@@ -181,16 +190,8 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     footprint_offsets = footprint_mgrid[:, footprint].transpose()
     nb_strides = np.array([np.sum(value_stride * footprint_offset)
                            for footprint_offset in footprint_offsets],
-                          np.int32)
-
+                          signed_int_dtype)
     images = images.reshape(-1)
-    isize = images.size
-    if isize > np.iinfo(np.uint32).max:
-        signed_int_dtype = np.int64
-        unsigned_int_dtype = np.uint64
-    else:
-        signed_int_dtype = np.int32
-        unsigned_int_dtype = np.uint32
 
     # Erosion goes smallest to largest; dilation goes largest to smallest.
     index_sorted = np.argsort(images).astype(signed_int_dtype, copy=False)
