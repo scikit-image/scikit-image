@@ -13,7 +13,8 @@ import numpy as np
 
 from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..filters._rank_order import rank_order
-from ._grayreconstruct_pythran import reconstruction_loop
+from ._grayreconstruct import reconstruction_loop
+# from ._grayreconstruct_pythran import reconstruction_loop
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
@@ -175,7 +176,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     # determine whether image is large enough to require 64-bit integers
     isize = images.size
     # use -isize so we get a signed dtype rather than an unsigned one
-    signed_int_dtype = np.min_scalar_type(-isize)
+    signed_int_dtype = np.result_type(np.min_scalar_type(-isize), np.int32)
     # the corresponding unsigned type has same char, but uppercase
     unsigned_int_dtype = np.dtype(signed_int_dtype.char.upper())
 
@@ -210,6 +211,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         value_map = -value_map
 
     start = index_sorted[0]
+    value_rank = value_rank.astype(unsigned_int_dtype, copy=False)
     reconstruction_loop(value_rank, prev, next, nb_strides, start,
                         image_stride)
 
