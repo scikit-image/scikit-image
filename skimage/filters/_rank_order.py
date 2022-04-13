@@ -45,13 +45,17 @@ def rank_order(image):
     >>> rank_order(b)
     (array([0, 1, 2, 1], dtype=uint32), array([-1. ,  2.5,  3.1]))
     """
-    flat_image = image.ravel()
-    sort_order = flat_image.argsort().astype(np.uint32)
+    flat_image = image.reshape(-1)
+    if flat_image.size > np.iinfo(np.uint32).max:
+        unsigned_dtype = np.uint64
+    else:
+        unsigned_dtype = np.uint32
+    sort_order = flat_image.argsort().astype(unsigned_dtype, copy=False)
     flat_image = flat_image[sort_order]
     sort_rank = np.zeros_like(sort_order)
     is_different = flat_image[:-1] != flat_image[1:]
     np.cumsum(is_different, out=sort_rank[1:], dtype=sort_rank.dtype)
-    original_values = np.zeros((sort_rank[-1] + 1,), image.dtype)
+    original_values = np.zeros((int(sort_rank[-1]) + 1,), image.dtype)
     original_values[0] = flat_image[0]
     original_values[1:] = flat_image[1:][is_different]
     int_image = np.zeros_like(sort_order)
