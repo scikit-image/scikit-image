@@ -12,6 +12,7 @@ import pytest
 from numpy.testing import assert_array_almost_equal
 
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.morphology.grayreconstruct import reconstruction
 
 
@@ -73,12 +74,15 @@ def test_zero_image_one_mask():
     assert_array_almost_equal(result, 0)
 
 
-def test_fill_hole():
+@pytest.mark.parametrize('dtype', [np.uint8, np.float32, np.float64])
+def test_fill_hole(dtype):
     """Test reconstruction by erosion, which should fill holes in mask."""
-    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
-    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0], dtype=dtype)
+    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0], dtype=dtype)
     result = reconstruction(seed, mask, method='erosion')
-    assert_array_almost_equal(result, np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0]))
+    assert result.dtype == _supported_float_type(mask.dtype)
+    expected = np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0], dtype=dtype)
+    assert_array_almost_equal(result, expected)
 
 
 def test_invalid_seed():

@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 
-from .._shared.utils import deprecate_kwarg
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..filters._rank_order import rank_order
 from ._grayreconstruct_pythran import reconstruction_loop
 
@@ -167,7 +167,8 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
                          "or 'dilation'. Got '%s'." % method)
-    images = np.full(dims, pad_value, dtype='float64')
+    float_dtype = _supported_float_type(mask.dtype)
+    images = np.full(dims, pad_value, dtype=float_dtype)
     images[(0, *inside_slices)] = seed
     images[(1, *inside_slices)] = mask
 
@@ -183,23 +184,22 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
                           np.int32)
 
     images = images.reshape(-1)
-
-    # Erosion goes smallest to largest; dilation goes largest to smallest.
-    index_sorted = np.argsort(images)
-    if index_sorted.size > np.iinfo(np.uint32).max:
+    isize = images.size
+    if isize > np.iinfo(np.uint32).max:
         signed_int_dtype = np.int64
         unsigned_int_dtype = np.uint64
     else:
         signed_int_dtype = np.int32
         unsigned_int_dtype = np.uint32
-    index_sorted = index_sorted.astype(signed_int_dtype, copy=False)
 
+    # Erosion goes smallest to largest; dilation goes largest to smallest.
+    index_sorted = np.argsort(images).astype(signed_int_dtype, copy=False)
     if method == 'dilation':
         index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
-    prev = np.full(len(images), -1, signed_int_dtype)
-    next = np.full(len(images), -1, signed_int_dtype)
+    prev = np.full(isize, -1, signed_int_dtype)
+    next = np.full(isize, -1, signed_int_dtype)
     prev[index_sorted[1:]] = index_sorted[:-1]
     next[index_sorted[:-1]] = index_sorted[1:]
 
