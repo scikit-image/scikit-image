@@ -164,7 +164,12 @@ Backward compatibility
 
 This proposal breaks backward compatibility in numerous places in the library.
 However, it does so in a new namespace, so that this proposal does not raise
-backward compatibilty concerns for our users.
+backward compatibilty concerns for our users. That said, the authors will
+attempt to limit the number of backward incompatible changes to those likely to
+substantially improve the overall user experience. It is anticipated that
+porting `skimage` code to `skimage2` will be a straightforward process
+and we will publish a user guide for making the transition by the time of
+the `skimage2` release.
 
 Alternatives
 ------------
