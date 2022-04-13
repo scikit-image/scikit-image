@@ -182,7 +182,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
                            for footprint_offset in footprint_offsets],
                           np.int32)
 
-    images = images.flatten()
+    images = images.reshape(-1)
 
     # Erosion goes smallest to largest; dilation goes largest to smallest.
     index_sorted = np.argsort(images)
