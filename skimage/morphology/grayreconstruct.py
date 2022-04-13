@@ -13,6 +13,7 @@ import numpy as np
 
 from .._shared.utils import deprecate_kwarg
 from ..filters._rank_order import rank_order
+from ._grayreconstruct_pythran import reconstruction_loop
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
@@ -133,10 +134,6 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     elif method == 'erosion' and np.any(seed < mask):
         raise ValueError("Intensity of seed image must be greater than that "
                          "of the mask image for reconstruction by erosion.")
-    try:
-        from ._grayreconstruct import reconstruction_loop
-    except ImportError:
-        raise ImportError("_grayreconstruct extension not available.")
 
     if footprint is None:
         footprint = np.ones([3] * seed.ndim, dtype=bool)
@@ -188,13 +185,21 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     images = images.flatten()
 
     # Erosion goes smallest to largest; dilation goes largest to smallest.
-    index_sorted = np.argsort(images).astype(np.int32)
+    index_sorted = np.argsort(images)
+    if index_sorted.size > np.iinfo(np.uint32).max:
+        signed_int_dtype = np.int64
+        unsigned_int_dtype = np.uint64
+    else:
+        signed_int_dtype = np.int32
+        unsigned_int_dtype = np.uint32
+    index_sorted = index_sorted.astype(signed_int_dtype, copy=False)
+
     if method == 'dilation':
         index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
-    prev = np.full(len(images), -1, np.int32)
-    next = np.full(len(images), -1, np.int32)
+    prev = np.full(len(images), -1, signed_int_dtype)
+    next = np.full(len(images), -1, signed_int_dtype)
     prev[index_sorted[1:]] = index_sorted[:-1]
     next[index_sorted[:-1]] = index_sorted[1:]
 
