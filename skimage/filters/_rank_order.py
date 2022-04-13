@@ -22,13 +22,15 @@ def rank_order(image):
 
     Returns
     -------
-    labels : ndarray of type np.uint32, of shape image.shape
+    labels : ndarray of unsigned integers, of shape image.shape
         New array where each pixel has the rank-order value of the
         corresponding pixel in ``image``. Pixel values are between 0 and
         n - 1, where n is the number of distinct unique values in
-        ``image``.
+        ``image``. The dtype of this array will be determined by
+        ``np.min_scalar_type(image.size)``.
     original_values : 1-D ndarray
-        Unique original values of ``image``
+        Unique original values of ``image``. This will have the same dtype as
+        ``image``.
 
     Examples
     --------
@@ -40,16 +42,13 @@ def rank_order(image):
     >>> rank_order(a)
     (array([[0, 1, 2],
            [1, 1, 0],
-           [2, 0, 0]], dtype=uint32), array([1, 4, 5]))
+           [2, 0, 0]], dtype=uint8), array([1, 4, 5]))
     >>> b = np.array([-1., 2.5, 3.1, 2.5])
     >>> rank_order(b)
-    (array([0, 1, 2, 1], dtype=uint32), array([-1. ,  2.5,  3.1]))
+    (array([0, 1, 2, 1], dtype=uint8), array([-1. ,  2.5,  3.1]))
     """
     flat_image = image.reshape(-1)
-    if flat_image.size > np.iinfo(np.uint32).max:
-        unsigned_dtype = np.uint64
-    else:
-        unsigned_dtype = np.uint32
+    unsigned_dtype = np.min_scalar_type(flat_image.size)
     sort_order = flat_image.argsort().astype(unsigned_dtype, copy=False)
     flat_image = flat_image[sort_order]
     sort_rank = np.zeros_like(sort_order)

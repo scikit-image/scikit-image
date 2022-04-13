@@ -14,6 +14,8 @@ Updated by Gregory Lee (April, 2022)
 
 """
 
+#pythran export reconstruction_loop(uint8[:], int8[:], int8[:], int8[:], int, int)
+#pythran export reconstruction_loop(uint16[:], int16[:], int16[:], int16[:], int, int)
 #pythran export reconstruction_loop(uint32[:], int32[:], int32[:], int32[:], int, int)
 #pythran export reconstruction_loop(uint64[:], int64[:], int64[:], int64[:], int, int)
 def reconstruction_loop(ranks, prev, next, strides, current_idx, image_stride):

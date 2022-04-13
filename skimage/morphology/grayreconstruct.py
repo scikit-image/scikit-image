@@ -174,12 +174,10 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
 
     # determine whether image is large enough to require 64-bit integers
     isize = images.size
-    if isize > np.iinfo(np.uint32).max:
-        signed_int_dtype = np.int64
-        unsigned_int_dtype = np.uint64
-    else:
-        signed_int_dtype = np.int32
-        unsigned_int_dtype = np.uint32
+    # use -isize so we get a signed dtype rather than an unsigned one
+    signed_int_dtype = np.min_scalar_type(-isize)
+    # the corresponding unsigned type has same char, but uppercase
+    unsigned_int_dtype = np.dtype(signed_int_dtype.char.upper())
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
