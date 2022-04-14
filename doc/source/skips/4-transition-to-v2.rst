@@ -30,8 +30,9 @@ disruptive. Given the rejection of `SKIP-3 <skip_3_transition_v1>_`, this
 document proposes an alternative pathway to create a new API. The new pathway
 involves the following steps:
 
-- Any pending deprecations up to v0.20 and v0.21 are finalised (the new API
-  suggested by deprecation messages in v0.19 becomes the only API).
+- Any pending deprecations that were sheduled for v0.20 and v0.21 are 
+  finalised (the new API suggested by deprecation messages in v0.19 becomes
+  the only API).
 - This is released as 1.0.
 - At this point, main changes the package and import names to skimage2, and the
   API is free to evolve.
