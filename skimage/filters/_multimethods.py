@@ -5,7 +5,6 @@ import numpy as np
 from numpy import dtype, ndarray
 from uarray import generate_multimethod, Dispatchable
 from uarray import all_of_type, create_multimethod
-from unumpy import mark_dtype
 
 from skimage._backend import _mark_output, _mark_scalar_or_array
 from . import _api
@@ -385,10 +384,10 @@ def _image_kwarg_mask_arg_replacer(args, kwargs, dispatchables):
     return self_method(*args, **kwargs)
 
 
-@create_skimage_filters(_image_kwarg_mask_arg_replacer)
+@create_skimage_filters(_image_mask_arg_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def farid(image, *, mask=None):
+def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     return (image, mask)
 
 

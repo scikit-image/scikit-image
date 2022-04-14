@@ -5,7 +5,6 @@ import numpy as np
 from numpy import dtype, ndarray
 from uarray import generate_multimethod, Dispatchable
 from uarray import all_of_type, create_multimethod
-from unumpy import mark_dtype
 
 from skimage._backend import _mark_output, scalar_or_array
 from . import _api
@@ -395,7 +394,7 @@ def convex_hull_object(image, *, connectivity=2):
 @create_skimage_morphology(_width_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def cube(width, dtype='uint8'):
+def cube(width, dtype='uint8', *, decomposition=None):
     return (Dispatchable(dtype, np.dtype),)
 
 
@@ -432,7 +431,7 @@ def diameter_opening(
 @create_skimage_morphology(_radius_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def diamond(radius, dtype='uint8'):
+def diamond(radius, dtype='uint8', *, decomposition=None):
     return (Dispatchable(dtype, np.dtype),)
 
 
@@ -542,14 +541,14 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
 @create_skimage_morphology(_m_n_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def octagon(m, n, dtype='uint8'):
+def octagon(m, n, dtype='uint8', *, decomposition=None):
     return (Dispatchable(dtype, np.dtype),)
 
 
 @create_skimage_morphology(_radius_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def octahedron(radius, dtype='uint8'):
+def octahedron(radius, dtype='uint8', *, decomposition=None):
     return (Dispatchable(dtype, np.dtype),)
 
 
@@ -570,7 +569,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
 @create_skimage_morphology(_nrows_ncols_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def rectangle(nrows, ncols, dtype='uint8'):
+def rectangle(nrows, ncols, dtype='uint8', *, decomposition=None):
     return Dispatchable(dtype, np.dtype)
 
 
@@ -613,7 +612,7 @@ def skeletonize_3d(image):
 @create_skimage_morphology(_width_kw_dtype_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def square(width, dtype='uint8'):
+def square(width, dtype='uint8', *, decomposition=None):
     return Dispatchable(dtype, np.dtype)
 
 

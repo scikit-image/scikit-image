@@ -278,25 +278,3 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size is None
     else:
         assert size == x.shape[channel_axis]
-
-
-def test_decorator_warnings():
-    """Assert that warning message issued by decorator points to
-    expected file and line number.
-    """
-
-    with pytest.warns(FutureWarning) as record:
-        pyramid_gaussian(None, multichannel=True)
-        expected_lineno = inspect.currentframe().f_lineno - 1
-
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__
-
-    img = np.random.rand(100, 100, 3)
-
-    with pytest.warns(FutureWarning) as record:
-        hog(img, multichannel=True)
-        expected_lineno = inspect.currentframe().f_lineno - 1
-
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__

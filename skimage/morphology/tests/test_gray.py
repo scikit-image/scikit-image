@@ -298,9 +298,9 @@ def test_square_decomposition(cam_image, function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(size, decomposition=None)
-    footprint = footprints.square(size, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.square(size, decomposition=None)
+    footprint = morphology.square(size, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -319,9 +319,9 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols,
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
-    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.rectangle(nrows, ncols, decomposition=None)
+    footprint = morphology.rectangle(nrows, ncols, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -338,9 +338,9 @@ def test_diamond_decomposition(cam_image, function, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(radius, decomposition=None)
-    footprint = footprints.square(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.square(radius, decomposition=None)
+    footprint = morphology.square(radius, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -360,11 +360,11 @@ def test_octagon_decomposition(cam_image, function, m, n, decomposition):
     """
     if m == 0 and n == 0:
         with pytest.raises(ValueError):
-            footprints.octagon(m, n, decomposition=decomposition)
+            morphology.octagon(m, n, decomposition=decomposition)
     else:
-        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
-        footprint = footprints.octagon(m, n, decomposition=decomposition)
-        func = getattr(gray, function)
+        footprint_ndarray = morphology.octagon(m, n, decomposition=None)
+        footprint = morphology.octagon(m, n, decomposition=decomposition)
+        func = getattr(morphology, function)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
@@ -381,9 +381,9 @@ def test_cube_decomposition(cell3d_image, function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.cube(size, decomposition=None)
-    footprint = footprints.cube(size, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.cube(size, decomposition=None)
+    footprint = morphology.cube(size, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -401,9 +401,9 @@ def test_octahedron_decomposition(cell3d_image, function, radius,
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
-    footprint = footprints.octahedron(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.octahedron(radius, decomposition=None)
+    footprint = morphology.octahedron(radius, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)

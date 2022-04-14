@@ -138,15 +138,6 @@ def test_richardson_lucy():
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
-def test_richardson_lucy_deprecated_iterations_kwarg():
-    psf = np.ones((5, 5)) / 25
-    data = convolve2d(test_img, psf, 'same')
-    np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    with expected_warnings(["`iterations` is a deprecated argument"]):
-        restoration.richardson_lucy(data, psf, iterations=5)
-
-
 @pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('dtype_psf', [np.float32, np.float64])
 def test_richardson_lucy_filtered(dtype_image, dtype_psf):

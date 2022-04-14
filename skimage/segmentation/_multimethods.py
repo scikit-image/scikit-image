@@ -9,7 +9,6 @@ from uarray import (
     create_multimethod,
     generate_multimethod,
 )
-from unumpy import mark_dtype
 
 from skimage._backend import _mark_output, _mark_scalar_or_array
 

@@ -5,7 +5,6 @@ import numpy as np
 from numpy import dtype, ndarray
 from uarray import generate_multimethod, Dispatchable
 from uarray import all_of_type, create_multimethod
-from unumpy import mark_dtype
 
 from .._backend import _mark_output, _mark_scalar_or_array
 from .filters import gaussian as _gaussian

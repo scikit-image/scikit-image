@@ -2,7 +2,7 @@ from .._shared import lazy
 
 __getattr__, __dir__, __all__ = lazy.attach(
     'skimage.filters',
-    submodules={},
+    submodules={''},
     submod_attrs={
         'lpi_filter': ['forward', 'inverse', 'wiener', 'LPIFilter2D'],
         '_gaussian': ['difference_of_gaussians', 'gaussian'],

@@ -9,7 +9,6 @@ from uarray import (
     create_multimethod,
     generate_multimethod,
 )
-from unumpy import mark_dtype
 
 from skimage._backend import _mark_output, _mark_scalar_or_array
 
@@ -278,7 +277,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
 @create_skimage_measure(_image_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def centroid(image):
+def centroid(image, *, spacing=None):
     return (image,)
 
 
@@ -315,14 +314,14 @@ def grid_points_in_poly(shape, verts):
 @create_skimage_measure(_image_kw_mu_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def inertia_tensor(image, mu=None):
+def inertia_tensor(image, mu=None, *, spacing=None):
     return (image, mu)
 
 
 @create_skimage_measure(_image_kw_mu_T_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def inertia_tensor_eigvals(image, mu=None, T=None):
+def inertia_tensor_eigvals(image, mu=None, T=None, *, spacing=None):
     return (image, mu, T)
 
 
@@ -362,14 +361,14 @@ def mesh_surface_area(verts, faces):
 @create_skimage_measure(_image_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def moments(image, order=3):
+def moments(image, order=3, *, spacing=None):
     return (image,)
 
 
 @create_skimage_measure(_image_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def moments_central(image, center=None, order=3, **kwargs):
+def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     return (image,)
 
 
@@ -397,7 +396,7 @@ def moments_hu(nu):
 @create_skimage_measure(_mu_replacer)
 @all_of_type(ndarray)
 @_get_docs
-def moments_normalized(mu, order=3):
+def moments_normalized(mu, order=3, *, spacing=None):
     return (mu,)
 
 
@@ -471,6 +470,7 @@ def regionprops(
     coordinates=None,
     *,
     extra_properties=None,
+    spacing=None,
 ):
     return (label_image, intensity_image)
 
@@ -486,6 +486,7 @@ def regionprops_table(
     cache=True,
     separator='-',
     extra_properties=None,
+    spacing=None,
 ):
     return (label_image, intensity_image)
 

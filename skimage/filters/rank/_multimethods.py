@@ -5,7 +5,6 @@ import numpy as np
 from numpy import dtype, ndarray
 from uarray import generate_multimethod, Dispatchable
 from uarray import all_of_type, create_multimethod
-from unumpy import mark_dtype
 
 from . import _api
 from skimage._backend import scalar_or_array
