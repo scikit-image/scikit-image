@@ -34,8 +34,8 @@ involves the following steps:
   finalised (the new API suggested by deprecation messages in v0.19 becomes
   the only API).
 - This is released as 1.0.
-- At this point, main changes the package and import names to skimage2, and the
-  API is free to evolve.
+- At this point, the branch `main` changes the package and import names to 
+  `skimage2`, and the API is free to evolve.
 
 Further motivation for the API changes is explained below, and largely
 duplicated from `SKIP-3 <skip_3_transition_v1>_`.
