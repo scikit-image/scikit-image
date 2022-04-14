@@ -125,6 +125,21 @@ def test_warp_clip_image_containing_nans(order):
     assert_array_almost_equal(np.nanmax(outx), 2)
 
 
+@pytest.mark.parametrize('order', [0, 1, 3])
+def test_warp_clip_cval_is_nan(order):
+    # Test that clipping works as intended when cval is NaN
+    # Orders 2, 4, and 5 do not produce good output when cval is NaN, so those
+    # orders are not tested
+
+    x = np.ones((15, 15), dtype=np.float64)
+    x[5:-5, 5:-5] = 2
+
+    outx = rotate(x, 45, order=order, cval=np.nan, resize=True, clip=True)
+
+    assert_array_almost_equal(np.nanmin(outx), 1)
+    assert_array_almost_equal(np.nanmax(outx), 2)
+
+
 @pytest.mark.parametrize('order', range(6))
 def test_warp_clip_cval_outside_input_range(order):
     # Test that clipping behavior considers cval part of the input range
@@ -143,6 +158,22 @@ def test_warp_clip_cval_outside_input_range(order):
     # cval (2) (i.e., clipping should not set them to 1)
     if order > 0:
         assert np.sum(np.less(1, outx) * np.less(outx, 2)) > 0
+
+
+@pytest.mark.parametrize('order', range(6))
+def test_warp_clip_cval_not_used(order):
+    # Test that clipping does not consider cval part of the input range if it
+    # is not used in the output image
+
+    x = np.ones((15, 15), dtype=np.float64)
+
+    # The output image from rescale() will not have pixels that use cval,
+    # although the internal warp() call will use cval for interpolation.
+    # Without any clipping, there would be pixels with values > 1
+    outx = rescale(x, 2, mode='constant', order=order, cval=2, clip=True)
+
+    # With clipping, all pixels should have values = 1
+    assert_array_almost_equal(outx, 1)
 
 
 def test_homography():

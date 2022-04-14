@@ -731,7 +731,6 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
         # Check if cval has been used such that it expands the effective input
         # range
         preserve_cval = (mode == 'constant'
-                         and not np.isnan(cval)
                          and not min_val <= cval <= max_val
                          and min_func(output_image) <= cval <= max_func(output_image))
 
