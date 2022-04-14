@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
-from scipy.ndimage.filters import laplace
+from scipy.ndimage import laplace
 
 import skimage
 from .._shared import utils
@@ -265,7 +265,7 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
     mask = mask.astype(bool, copy=False)
     if not multichannel:
         image = image[..., np.newaxis]
-    out = np.copy(image)
+    out = np.copy(image, order='C')
 
     # Create biharmonic coefficients ndarray
     radius = 2

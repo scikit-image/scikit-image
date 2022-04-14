@@ -136,7 +136,7 @@ def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
     cdef signed char bins[16]
     cdef np_floats circle_intensities[16]
 
-    cdef double curr_response
+    cdef cnp.float64_t curr_response
 
     with nogil:
         for i in range(3, rows - 3):

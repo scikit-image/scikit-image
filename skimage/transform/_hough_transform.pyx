@@ -62,13 +62,13 @@ def _hough_circle(cnp.ndarray img,
         y = y + offset
 
     cdef Py_ssize_t i, p, c, num_circle_pixels, tx, ty
-    cdef double incr
+    cdef cnp.float64_t incr
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] circle_x, circle_y
 
-    cdef cnp.ndarray[ndim=3, dtype=cnp.double_t] acc = \
+    cdef cnp.ndarray[ndim=3, dtype=cnp.float64_t] acc = \
          np.zeros((radius.size,
                    img.shape[0] + 2 * offset,
-                   img.shape[1] + 2 * offset), dtype=np.double)
+                   img.shape[1] + 2 * offset), dtype=np.float64)
 
     for i, rad in enumerate(radius):
         # Store in memory the circle of given radius
@@ -99,8 +99,9 @@ def _hough_circle(cnp.ndarray img,
     return acc
 
 
-def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
-                   Py_ssize_t min_size=4, max_size=None):
+def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
+                   cnp.float64_t accuracy=1, Py_ssize_t min_size=4,
+                   max_size=None):
     """Perform an elliptical Hough transform.
 
     Parameters
@@ -109,7 +110,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
         Input image with nonzero values representing edges.
     threshold: int, optional (default 4)
         Accumulator threshold value.
-    accuracy : double, optional (default 1)
+    accuracy : float64, optional (default 1)
         Bin size on the minor axis used in the accumulator.
     min_size : int, optional (default 4)
         Minimal major axis length.
@@ -159,9 +160,9 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
-    cdef double bin_size = accuracy * accuracy
+    cdef cnp.float64_t bin_size = accuracy * accuracy
 
-    cdef double max_b_squared
+    cdef cnp.float64_t max_b_squared
     if max_size is None:
         if img.shape[0] < img.shape[1]:
             max_b_squared = np.round(0.5 * img.shape[0])
@@ -172,8 +173,8 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
         max_b_squared = max_size * max_size
 
     cdef Py_ssize_t p1, p2, p3, p1x, p1y, p2x, p2y, p3x, p3y
-    cdef double xc, yc, a, b, d, k, dx, dy
-    cdef double cos_tau_squared, b_squared, orientation
+    cdef cnp.float64_t xc, yc, a, b, d, k, dx, dy
+    cdef cnp.float64_t cos_tau_squared, b_squared, orientation
 
     for p1 in range(num_pixels):
         p1x = pixels[1, p1]
@@ -235,22 +236,22 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
                     acc = []
 
     return np.array(results, dtype=[('accumulator', np.intp),
-                                    ('yc', np.double),
-                                    ('xc', np.double),
-                                    ('a', np.double),
-                                    ('b', np.double),
-                                    ('orientation', np.double)])
+                                    ('yc', np.float64),
+                                    ('xc', np.float64),
+                                    ('a', np.float64),
+                                    ('b', np.float64),
+                                    ('orientation', np.float64)])
 
 
 def _hough_line(cnp.ndarray img,
-                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
+                cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta):
     """Perform a straight line Hough transform.
 
     Parameters
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    theta : 1D ndarray of double
+    theta : 1D ndarray of float64
         Angles at which to compute the transform, in radians.
 
     Returns
@@ -290,15 +291,15 @@ def _hough_line(cnp.ndarray img,
 
     """
     # Compute the array of angles and their sine and cosine
-    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta
-    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] ctheta
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] stheta
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
 
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint64_t] accum
-    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] bins
     cdef Py_ssize_t max_distance, offset
 
     offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
@@ -329,7 +330,7 @@ def _hough_line(cnp.ndarray img,
 
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
-                              cnp.ndarray[ndim=1, dtype=cnp.double_t] theta,
+                              cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
                               seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
@@ -345,7 +346,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : 1D ndarray, dtype=double
+    theta : 1D ndarray, dtype='float64'
         Angles at which to compute the transform, in radians.
     seed : {None, int, `numpy.random.Generator`, optional}
         If `seed` is None the `numpy.random.Generator` singleton is used.
@@ -379,7 +380,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     if not line_end:
         raise MemoryError('could not allocate line_end')
     cdef Py_ssize_t max_distance, offset, num_indexes, index
-    cdef double a, b
+    cdef cnp.float64_t a, b
     cdef Py_ssize_t nidxs, i, j, k, x, y, px, py, accum_idx, max_theta
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
@@ -397,8 +398,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t nthetas = theta.shape[0]
 
     # compute sine and cosine of angles
-    cdef cnp.double_t[::1] ctheta = np.cos(theta)
-    cdef cnp.double_t[::1] stheta = np.sin(theta)
+    cdef cnp.float64_t[::1] ctheta = np.cos(theta)
+    cdef cnp.float64_t[::1] stheta = np.sin(theta)
 
     # find the nonzero indexes
     cdef cnp.intp_t[:] y_idxs, x_idxs

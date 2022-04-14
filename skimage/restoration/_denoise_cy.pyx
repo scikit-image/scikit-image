@@ -19,10 +19,10 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) nogi
         return value2
 
 
-def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
-                       Py_ssize_t win_size, double sigma_color,
-                       double sigma_spatial, Py_ssize_t bins, mode,
-                       double cval, np_floats[::1] color_lut,
+def _denoise_bilateral(np_floats[:, :, ::1] image, cnp.float64_t max_value,
+                       Py_ssize_t win_size, cnp.float64_t sigma_color,
+                       cnp.float64_t sigma_spatial, Py_ssize_t bins, mode,
+                       cnp.float64_t cval, np_floats[::1] color_lut,
                        np_floats[::1] range_lut, np_floats[::1] empty_dims,
                        np_floats[:, :, ::1] out):
     cdef:
@@ -97,7 +97,7 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
 
 
 def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
-                        int max_num_iter, double eps,
+                        int max_num_iter, cnp.float64_t eps,
                         char isotropic, np_floats[:, :, ::1] out):
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -120,7 +120,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         np_floats ux, uy, uprev, unew, bxx, byy, dxx, dyy, s, tx, ty
         int i = 0
         np_floats lam = 2 * weight
-        double rmse = DBL_MAX
+        cnp.float64_t rmse = DBL_MAX
         np_floats norm = (weight + 4 * lam)
 
         Py_ssize_t out_rows, out_cols
@@ -172,7 +172,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
 
                         # update root mean square error
                         tx = unew - uprev
-                        rmse += <double>(tx * tx)
+                        rmse += <cnp.float64_t>(tx * tx)
 
                         bxx = bx[r, c, k]
                         byy = by[r, c, k]

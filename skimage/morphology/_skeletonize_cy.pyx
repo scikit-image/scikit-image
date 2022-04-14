@@ -62,7 +62,7 @@ def _fast_skeletonize(image):
     # we copy over the image into a larger version with a single pixel border
     # this removes the need to handle border cases below
     _skeleton = np.zeros((nrows, ncols), dtype=np.uint8)
-    _skeleton[1:nrows-1, 1:ncols-1] = image > 0
+    _skeleton[1:nrows-1, 1:ncols-1] = image
 
     _cleaned_skeleton = _skeleton.copy()
 

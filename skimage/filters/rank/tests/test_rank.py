@@ -118,6 +118,13 @@ class TestRank():
 
         check()
 
+    @pytest.mark.parametrize('filter', all_rank_filters)
+    def test_rank_filter_footprint_sequence_unsupported(self, filter):
+        footprint_sequence = morphology.diamond(3, decomposition="sequence")
+        with pytest.raises(ValueError):
+            getattr(rank, filter)(self.image.astype(np.uint8),
+                                  footprint_sequence)
+
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize(
         'filter', ['equalize', 'otsu', 'autolevel', 'gradient',
@@ -632,7 +639,7 @@ class TestRank():
         # make sure output is of dtype double
         with expected_warnings(['Bad rank filter performance']):
             out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
-        assert out.dtype == np.double
+        assert out.dtype == np.float64
 
     def test_footprint_dtypes(self):
 

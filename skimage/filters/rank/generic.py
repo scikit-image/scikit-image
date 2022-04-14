@@ -52,6 +52,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..._shared.utils import check_nD, warn
+from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
 from . import generic_cy
 
@@ -109,6 +110,11 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
                    f'silence this warning.')
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
+
+    if _footprint_is_sequence(footprint):
+        raise ValueError(
+            "footprint sequences are not currently supported by rank filters"
+        )
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
@@ -633,8 +639,8 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     References
     ----------
-    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)."
-           Prentice-Hall Inc, 2006.
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+           (3rd Edition)." Prentice-Hall Inc, 2006.
 
     """
 
@@ -1146,6 +1152,10 @@ def noise_filter(image, footprint, out=None, mask=None,
     """
 
     np_image = np.asanyarray(image)
+    if _footprint_is_sequence(footprint):
+        raise ValueError(
+            "footprint sequences are not currently supported by rank filters"
+        )
     if np_image.ndim == 2:
         # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
@@ -1223,12 +1233,13 @@ def entropy(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
-                                       out_dtype=np.double)
+                                       out_dtype=np.float64)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z, out_dtype=np.double)
+                                          shift_z=shift_z,
+                                          out_dtype=np.float64)
 
 
 def otsu(image, footprint, out=None, mask=None,
@@ -1338,7 +1349,7 @@ def windowed_histogram(image, footprint, out=None, mask=None,
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y,
-                                   out_dtype=np.double,
+                                   out_dtype=np.float64,
                                    pixel_size=n_bins)
 
 
