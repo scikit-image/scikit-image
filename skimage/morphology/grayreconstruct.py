@@ -14,7 +14,6 @@ import numpy as np
 from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
-# from ._grayreconstruct_pythran import reconstruction_loop
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",

@@ -2,7 +2,6 @@
 
 import os
 from skimage._build import cython
-import pythran, logging
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -38,15 +37,6 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-
-    # pythran submodules
-    pythran.config.logger.setLevel(logging.INFO)
-    ext = pythran.dist.PythranExtension(
-        'skimage.feature._grayreconstruct_pythran',
-        sources=["skimage/morphology/_grayreconstruct_pythran.py"],
-        config=['compiler.blas=none'])
-    config.ext_modules.append(ext)
-
     return config
 
 
