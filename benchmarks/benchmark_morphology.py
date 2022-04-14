@@ -174,7 +174,7 @@ class GrayReconstruction(object):
         rvals = rng.integers(1, 255, size=shape).astype(dtype=dtype)
 
         roi1 = tuple(slice(s // 4, s // 2) for s in rvals.shape)
-        roi2 = tuple(slice(s // 2 + 1, (3*s) // 4) for s in rvals.shape)
+        roi2 = tuple(slice(s // 2 + 1, (3 * s) // 4) for s in rvals.shape)
         seed = np.full(rvals.shape, 1, dtype=dtype)
         seed[roi1] = rvals[roi1]
         seed[roi2] = rvals[roi2]
@@ -202,7 +202,7 @@ class GrayReconstruction(object):
 
         References
         ----------
-        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory  # noqa
         """
         pass
 
