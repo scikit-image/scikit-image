@@ -69,7 +69,6 @@ def _fast_skeletonize(image):
 
     _cleaned_skeleton = _skeleton.copy()
 
-
     # cdef'd numpy-arrays for fast, typed access
     cdef cnp.uint8_t [:, ::1] skeleton, cleaned_skeleton
 
