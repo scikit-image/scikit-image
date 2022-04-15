@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 
 from .._shared.utils import _supported_float_type, warn
-from ..util import img_as_float
+from ..util import rescale_to_float32, rescale_to_float64
 from . import rgb_colors
 from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
 
@@ -196,7 +196,11 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
             warn("Negative intensities in `image` are not supported")
 
         float_dtype = _supported_float_type(image.dtype)
-        image = img_as_float(image).astype(float_dtype, copy=False)
+        if image.dtype.kind != 'f':
+            if float_dtype == np.float32:
+                image = rescale_to_float32(image)
+            else:
+                image = rescale_to_float64(image)
         if image.ndim > label.ndim:
             hsv = rgb2hsv(image)
             hsv[..., 1] *= saturation

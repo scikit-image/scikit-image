@@ -128,7 +128,8 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     )
 
 
-def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
+def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1,
+                        rescale=True):
     """Check the shape of the array and convert it to
     floating point representation.
     """
@@ -141,9 +142,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = dtype.rescale_to_float32 if rescale else dtype.img_as_float32
     else:
-        _func = dtype.img_as_float64
+        _func = dtype.rescale_to_float64 if rescale else dtype.img_as_float64
     return _func(arr, force_copy=force_copy)
 
 
@@ -204,9 +205,9 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        arr = dtype.img_as_float32(arr)
+        arr = dtype.rescale_to_float32(arr)
     else:
-        arr = dtype.img_as_float64(arr)
+        arr = dtype.rescale_to_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -1767,9 +1768,9 @@ def _prepare_lab_array(arr, force_copy=True):
         raise ValueError('Input array has less than 3 color channels')
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = dtype.rescale_to_float32
     else:
-        _func = dtype.img_as_float64
+        _func = dtype.rescale_to_float64
     return _func(arr, force_copy=force_copy)
 
 

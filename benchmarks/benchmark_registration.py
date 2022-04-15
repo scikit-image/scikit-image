@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage.color import rgb2gray
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 
 # guard against import of a non-existant registration module in older skimage
 try:
@@ -52,7 +52,7 @@ class PhaseCrossCorrelationRegistration:
         if phase_cross_correlation is None:
             raise NotImplementedError("phase_cross_correlation unavailable")
         shifts = (-2.3, 1.7, 5.4, -3.2)[:ndims]
-        phantom = img_as_float(
+        phantom = rescale_to_float(
             data.binary_blobs(length=image_size, n_dim=ndims))
         self.reference_image = np.fft.fftn(phantom).astype(dtype, copy=False)
         self.shifted_image = ndi.fourier_shift(self.reference_image, shifts)

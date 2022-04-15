@@ -1,24 +1,21 @@
 import numpy as np
 
-from ..util.dtype import img_as_float
 from .._shared import utils
 from .._shared.filters import gaussian
 
 
-def _unsharp_mask_single_channel(image, radius, amount, vrange):
+def _unsharp_mask_single_channel(image, radius, amount):
     """Single channel implementation of the unsharp masking filter."""
 
     blurred = gaussian(image, sigma=radius, mode='reflect')
 
     result = image + (image - blurred) * amount
-    if vrange is not None:
-        return np.clip(result, vrange[0], vrange[1], out=result)
     return result
 
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=3)
 def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
-                 preserve_range=False, *, channel_axis=None):
+                 *, channel_axis=None):
     """Unsharp masking filter.
 
     The sharp details are identified as the difference between the original
@@ -42,10 +39,6 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
         If True, the last ``image`` dimension is considered as a color channel,
         otherwise as spatial. Color channels are processed individually.
         This argument is deprecated: specify `channel_axis` instead.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of ``img_as_float``.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -91,28 +84,20 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
            [100, 100, 100, 100, 100],
            [100, 100, 100, 100, 100]], dtype=uint8)
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[0.39, 0.39, 0.39, 0.39, 0.39],
-           [0.39, 0.39, 0.38, 0.39, 0.39],
-           [0.39, 0.38, 0.53, 0.38, 0.39],
-           [0.39, 0.39, 0.38, 0.39, 0.39],
-           [0.39, 0.39, 0.39, 0.39, 0.39]])
+    array([[100.  , 100.  ,  99.99, 100.  , 100.  ],
+           [100.  ,  99.55,  96.65,  99.55, 100.  ],
+           [ 99.99,  96.65, 135.25,  96.65,  99.99],
+           [100.  ,  99.55,  96.65,  99.55, 100.  ],
+           [100.  , 100.  ,  99.99, 100.  , 100.  ]])
 
     >>> array = np.ones(shape=(5,5), dtype=np.int8)*100
     >>> array[2,2] = 127
-    >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[0.79, 0.79, 0.79, 0.79, 0.79],
-           [0.79, 0.78, 0.75, 0.78, 0.79],
-           [0.79, 0.75, 1.  , 0.75, 0.79],
-           [0.79, 0.78, 0.75, 0.78, 0.79],
-           [0.79, 0.79, 0.79, 0.79, 0.79]])
-
-    >>> np.around(unsharp_mask(array, radius=0.5, amount=2, preserve_range=True), 2)
+    >>> np.around(unsharp_mask(array, radius=0.5, amount=2), 2)
     array([[100.  , 100.  ,  99.99, 100.  , 100.  ],
            [100.  ,  99.39,  95.48,  99.39, 100.  ],
            [ 99.99,  95.48, 147.59,  95.48,  99.99],
            [100.  ,  99.39,  95.48,  99.39, 100.  ],
            [100.  , 100.  ,  99.99, 100.  , 100.  ]])
-
 
     References
     ----------
@@ -123,24 +108,14 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
             https://en.wikipedia.org/wiki/Unsharp_masking
 
     """
-    vrange = None  # Range for valid values; used for clipping.
     float_dtype = utils._supported_float_type(image.dtype)
-    if preserve_range:
-        fimg = image.astype(float_dtype, copy=False)
-    else:
-        fimg = img_as_float(image).astype(float_dtype, copy=False)
-        negative = np.any(fimg < 0)
-        if negative:
-            vrange = [-1., 1.]
-        else:
-            vrange = [0., 1.]
+    fimg = image.astype(float_dtype, copy=False)
 
     if channel_axis is not None:
         result = np.empty_like(fimg, dtype=float_dtype)
         for channel in range(image.shape[channel_axis]):
             sl = utils.slice_at_axis(channel, channel_axis)
-            result[sl] = _unsharp_mask_single_channel(
-                fimg[sl], radius, amount, vrange)
+            result[sl] = _unsharp_mask_single_channel(fimg[sl], radius, amount)
         return result
     else:
-        return _unsharp_mask_single_channel(fimg, radius, amount, vrange)
+        return _unsharp_mask_single_channel(fimg, radius, amount)

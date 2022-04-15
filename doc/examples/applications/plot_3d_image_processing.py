@@ -51,7 +51,7 @@ from skimage.data import cells3d
 # Load and display 3D images
 # ==========================
 
-data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
+data = util.rescale_to_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')

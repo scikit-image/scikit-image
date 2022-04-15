@@ -20,7 +20,7 @@ from skimage.transform._warps import (_stackcopy,
 from skimage.transform._geometric import (AffineTransform,
                                           ProjectiveTransform,
                                           SimilarityTransform)
-from skimage.util.dtype import img_as_float, _convert
+from skimage.util.dtype import rescale_to_float, _convert
 
 
 np.random.seed(0)
@@ -245,7 +245,7 @@ def test_rescale_multichannel_deprecated_multiscale():
 
     # repeat prior test, but check for positional multichannel _warnings
     with expected_warnings(["Providing the `multichannel` argument"]):
-        scaled = rescale(x, (2, 1), 0, 'constant', 0, True, False, True,
+        scaled = rescale(x, (2, 1), 0, 'constant', 0, True, True,
                          anti_aliasing=False)
     assert scaled.shape == (10, 5, 3)
 
@@ -364,38 +364,27 @@ def test_resize_dtype():
     x_u8 = x.astype(np.uint8)
     x_b = x.astype(bool)
 
-    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
-    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
-    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.float64
-    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.float64
-    assert resize(x_b, (10, 10), preserve_range=False).dtype == bool
-    assert resize(x_b, (10, 10), preserve_range=True).dtype == bool
-    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
-    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+    assert resize(x, (10, 10)).dtype == x.dtype
+    assert resize(x_u8, (10, 10)).dtype == np.double
+    assert resize(x_b, (10, 10)).dtype == bool
+    assert resize(x_f32, (10, 10)).dtype == x_f32.dtype
 
 
 @pytest.mark.parametrize('order', [0, 1])
-@pytest.mark.parametrize('preserve_range', [True, False])
 @pytest.mark.parametrize('anti_aliasing', [True, False])
 @pytest.mark.parametrize('dtype', [np.float64, np.uint8])
-def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
-    # test if clip as expected
-    if dtype == np.uint8 and (preserve_range or order == 0):
-        expected_max = 255
-    else:
-        expected_max = 1.0
+def test_resize_clip(order, anti_aliasing, dtype):
     x = np.ones((5, 5), dtype=dtype)
     if dtype == np.uint8:
         x *= 255
-    resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
-                     anti_aliasing=anti_aliasing)
+    resized = resize(x, (3, 3), order=order, anti_aliasing=anti_aliasing)
 
-    assert resized.max() == expected_max
+    assert resized.max() == x.max()
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
-    image = img_as_float(checkerboard()).astype(dtype, copy=False)
+    image = rescale_to_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -425,7 +414,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(astronaut()))
+    img = rescale_to_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -581,19 +570,14 @@ def test_slow_warp_nonint_oshape():
 
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
-    out = rescale(image, 2, preserve_range=False, clip=True, order=0,
-                  mode='constant', channel_axis=None, anti_aliasing=False)
+
+    kwargs = dict(clip=True, order=0, mode='constant',
+                  channel_axis=None, anti_aliasing=False)
+    out = rescale(image, 2, **kwargs)
     assert out.min() == 0
     assert out.max() == 2
 
-    out = rescale(image, 2, preserve_range=True, clip=True, order=0,
-                  mode='constant', channel_axis=None, anti_aliasing=False)
-    assert out.min() == 0
-    assert out.max() == 2
-
-    out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                  mode='constant', channel_axis=None, anti_aliasing=False,
-                  clip=True, order=0)
+    out = rescale(image.astype(np.uint8), 2, **kwargs)
     assert out.min() == 0
     assert out.max() == 2
 
@@ -895,22 +879,10 @@ def test_resize_local_mean_dtype():
     x_u8 = x.astype(np.uint8)
     x_b = x.astype(bool)
 
-    assert resize_local_mean(x, (10, 10),
-                             preserve_range=False).dtype == x.dtype
-    assert resize_local_mean(x, (10, 10),
-                             preserve_range=True).dtype == x.dtype
-    assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=False).dtype == np.float64
-    assert resize_local_mean(x_u8, (10, 10),
-                             preserve_range=True).dtype == np.float64
-    assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=False).dtype == np.float64
-    assert resize_local_mean(x_b, (10, 10),
-                             preserve_range=True).dtype == np.float64
-    assert resize_local_mean(x_f32, (10, 10),
-                             preserve_range=False).dtype == x_f32.dtype
-    assert resize_local_mean(x_f32, (10, 10),
-                             preserve_range=True).dtype == x_f32.dtype
+    assert resize_local_mean(x, (10, 10)).dtype == x.dtype
+    assert resize_local_mean(x_u8, (10, 10)).dtype == np.double
+    assert resize_local_mean(x_b, (10, 10)).dtype == np.double
+    assert resize_local_mean(x_f32, (10, 10)).dtype == x_f32.dtype
 
 
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])

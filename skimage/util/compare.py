@@ -1,6 +1,8 @@
-import numpy as np
-from ..util import img_as_float
 from itertools import product
+
+import numpy as np
+
+from .._shared.utils import _supported_float_type
 
 
 def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
@@ -36,8 +38,9 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 
-    img1 = img_as_float(image1)
-    img2 = img_as_float(image2)
+    float_dtype = _supported_float_type([image1.dtype, image2.dtype])
+    img1 = image1.astype(float_dtype, copy=False)
+    img2 = image2.astype(float_dtype, copy=False)
 
     if method == 'diff':
         comparison = np.abs(img2 - img1)

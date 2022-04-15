@@ -666,7 +666,7 @@ def convert_to_float(image, preserve_range):
         Input image.
     preserve_range : bool
         Determines if the range of the image should be kept or transformed
-        using img_as_float. Also see
+        using rescale_to_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Notes
@@ -687,8 +687,8 @@ def convert_to_float(image, preserve_range):
         if image.dtype.char not in 'df':
             image = image.astype(float)
     else:
-        from ..util.dtype import img_as_float
-        image = img_as_float(image)
+        from ..util.dtype import rescale_to_float
+        image = rescale_to_float(image)
     return image
 
 

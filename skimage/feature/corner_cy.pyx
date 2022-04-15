@@ -8,7 +8,7 @@ from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
 from .._shared.fused_numerics cimport np_floats
-from ..util import img_as_float64
+from ..util import rescale_to_float64
 
 cnp.import_array()
 

@@ -12,7 +12,7 @@ from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
 
-test_img = util.img_as_float(camera())
+test_img = util.rescale_to_float(camera())
 
 
 def _get_rtol_atol(dtype):
@@ -113,7 +113,7 @@ def test_image_shape():
     point[2, 2] = 1.
     psf = filters.gaussian(point, sigma=1., mode='reflect')
     # image shape: (45, 45), as reported in #1172
-    image = util.img_as_float(camera()[65:165, 215:315])  # just the face
+    image = util.rescale_to_float(camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]

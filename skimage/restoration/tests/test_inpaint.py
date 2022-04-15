@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage._shared import testing
 from skimage._shared.testing import assert_allclose, expected_warnings
 from skimage._shared.utils import _supported_float_type
@@ -36,7 +36,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
 
 @testing.parametrize('channel_axis', [0, 1, -1])
 def test_inpaint_biharmonic_2d_color(channel_axis):
-    img = img_as_float(data.astronaut()[:64, :64])
+    img = rescale_to_float(data.astronaut()[:64, :64])
 
     mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
@@ -74,7 +74,7 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
 
 
 def test_inpaint_biharmonic_2d_color_deprecated():
-    img = img_as_float(data.astronaut()[:64, :64])
+    img = rescale_to_float(data.astronaut()[:64, :64])
 
     mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
@@ -196,5 +196,5 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     assert image_result.dtype == float_dtype
 
     nrmse_defect = normalized_root_mse(image_orig, image_defect)
-    nrmse_result = normalized_root_mse(img_as_float(image_orig), image_result)
+    nrmse_result = normalized_root_mse(image_orig, image_result)
     assert nrmse_result < 0.2 * nrmse_defect

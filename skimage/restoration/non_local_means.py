@@ -1,7 +1,7 @@
 import numpy as np
 
 from .._shared import utils
-from .._shared.utils import convert_to_float
+from .._shared.utils import _supported_float_type
 from ._nl_means_denoising import (_nl_means_denoising_2d,
                                   _nl_means_denoising_3d,
                                   _fast_nl_means_denoising_2d,
@@ -13,7 +13,7 @@ from ._nl_means_denoising import (_nl_means_denoising_2d,
 @utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
-                     preserve_range=False, channel_axis=None):
+                     channel_axis=None):
     """Perform non-local means denoising on 2D-4D grayscale or RGB images.
 
     Parameters
@@ -44,10 +44,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         The standard deviation of the (Gaussian) noise.  If provided, a more
         robust computation of patch weights is computed that takes the expected
         noise variance into account (see Notes below).
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -156,9 +152,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
             "Non-local means denoising is only implemented for 2D, "
             "3D or 4D grayscale or multichannel images.")
 
-    image = convert_to_float(image, preserve_range)
-    if not image.flags.c_contiguous:
-        image = np.ascontiguousarray(image)
+    image = np.asarray(image)
+    float_dtype = _supported_float_type(image.dtype)
+    # note: Cython code requires C-contiguous order
+    image = np.asarray(image, dtype=float_dtype, order='C')
 
     kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if ndim_no_channel == 2:

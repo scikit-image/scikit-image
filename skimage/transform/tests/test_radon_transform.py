@@ -64,14 +64,13 @@ def test_iradon_bias_circular_phantom():
     assert roi_err < tol
 
 
-def check_radon_center(shape, circle, dtype, preserve_range):
+def check_radon_center(shape, circle, dtype):
     # Create a test image with only a single non-zero pixel at the origin
     image = np.zeros(shape, dtype=dtype)
     image[(shape[0] // 2, shape[1] // 2)] = 1.
     # Calculate the sinogram
     theta = np.linspace(0., 180., max(shape), endpoint=False)
-    sinogram = radon(image, theta=theta, circle=circle,
-                     preserve_range=preserve_range)
+    sinogram = radon(image, theta=theta, circle=circle)
     assert sinogram.dtype == _supported_float_type(sinogram.dtype)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
@@ -84,17 +83,15 @@ def check_radon_center(shape, circle, dtype, preserve_range):
 @pytest.mark.parametrize(
     "dtype", [np.float64, np.float32, np.float16, np.uint8, bool]
 )
-@pytest.mark.parametrize("preserve_range", [False, True])
-def test_radon_center(shape, circle, dtype, preserve_range):
-    check_radon_center(shape, circle, dtype, preserve_range)
+def test_radon_center(shape, circle, dtype):
+    check_radon_center(shape, circle, dtype)
 
 
 @pytest.mark.parametrize("shape", [(32, 16), (33, 17)])
 @pytest.mark.parametrize("circle", [False])
 @pytest.mark.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
-@pytest.mark.parametrize("preserve_range", [False, True])
-def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
-    check_radon_center(shape, circle, dtype, preserve_range)
+def test_radon_center_rectangular(shape, circle, dtype):
+    check_radon_center(shape, circle, dtype)
 
 
 def check_iradon_center(size, theta, circle):
@@ -445,19 +442,15 @@ def test_iradon_sart():
         assert delta < 0.022 * error_factor
 
 
-@pytest.mark.parametrize("preserve_range", [True, False])
-def test_iradon_dtype(preserve_range):
+def test_iradon_dtype():
     sinogram = np.zeros((16, 1), dtype=int)
     sinogram[8, 0] = 1.
     sinogram64 = sinogram.astype('float64')
     sinogram32 = sinogram.astype('float32')
 
-    assert iradon(sinogram, theta=[0],
-                  preserve_range=preserve_range).dtype == 'float64'
-    assert iradon(sinogram64, theta=[0],
-                  preserve_range=preserve_range).dtype == sinogram64.dtype
-    assert iradon(sinogram32, theta=[0],
-                  preserve_range=preserve_range).dtype == sinogram32.dtype
+    assert iradon(sinogram, theta=[0]).dtype == 'float64'
+    assert iradon(sinogram64, theta=[0]).dtype == sinogram64.dtype
+    assert iradon(sinogram32, theta=[0]).dtype == sinogram32.dtype
 
 
 def test_radon_dtype():

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 from .._shared.utils import _supported_float_type, deprecate_kwarg
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ..filters import sobel
 
 
@@ -85,7 +85,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian(img, 2, preserve_range=False)
+    >>> img = gaussian(img, 2)
 
     Initialize spline:
 
@@ -97,7 +97,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> snake = active_contour(img, init, w_edge=0, w_line=1, coordinates='rc')  # doctest: +SKIP
     >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)  # doctest: +SKIP
     >>> int(np.mean(dist))  # doctest: +SKIP
-    25
+    26
 
     """
     if coordinates != 'rc':
@@ -113,9 +113,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         raise ValueError("Invalid boundary condition.\n" +
                          "Should be one of: "+", ".join(valid_bcs)+'.')
 
-    img = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
-    img = img.astype(float_dtype, copy=False)
+    img = image.astype(float_dtype, copy=False)
 
     RGB = img.ndim == 3
 

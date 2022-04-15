@@ -14,7 +14,7 @@ A good overview of the algorithm is given on `Steve Eddin's blog
 import matplotlib.pyplot as plt
 
 from skimage.morphology import convex_hull_image
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage.util import invert
 
 # The original image is inverted as the object must be white.
@@ -40,7 +40,7 @@ plt.show()
 # We prepare a second plot to show the difference.
 #
 
-chull_diff = img_as_float(chull.copy())
+chull_diff = rescale_to_float(chull.copy())
 chull_diff[image] = 2
 
 fig, ax = plt.subplots()

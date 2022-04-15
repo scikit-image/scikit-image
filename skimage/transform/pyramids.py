@@ -4,7 +4,7 @@ import numpy as np
 
 from .._shared import utils
 from .._shared.filters import gaussian
-from .._shared.utils import convert_to_float
+from .._shared.utils import _supported_float_type
 from ..transform import resize
 
 
@@ -32,7 +32,7 @@ def _check_factor(factor):
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
-                   preserve_range=False, *, channel_axis=None):
+                   *, channel_axis=None):
     """Smooth and then downsample image.
 
     Parameters
@@ -57,10 +57,6 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -81,7 +77,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     """
     _check_factor(downscale)
 
-    image = convert_to_float(image, preserve_range)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim
         out_shape = tuple(
@@ -105,7 +102,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
-                   preserve_range=False, *, channel_axis=None):
+                   *, channel_axis=None):
     """Upsample and then smooth image.
 
     Parameters
@@ -130,10 +127,6 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -153,7 +146,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     """
     _check_factor(upscale)
-    image = convert_to_float(image, preserve_range)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim
         out_shape = tuple(
@@ -177,7 +171,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                      mode='reflect', cval=0, multichannel=False,
-                     preserve_range=False, *, channel_axis=None):
+                     *, channel_axis=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -213,10 +207,6 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -238,7 +228,8 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = convert_to_float(image, preserve_range)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     layer = 0
     current_shape = image.shape
@@ -268,7 +259,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                       mode='reflect', cval=0, multichannel=False,
-                      preserve_range=False, *, channel_axis=None):
+                      *, channel_axis=None):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
@@ -307,10 +298,6 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -333,7 +320,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = convert_to_float(image, preserve_range)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution

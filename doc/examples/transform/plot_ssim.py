@@ -24,12 +24,12 @@ but with very different mean structural similarity indices.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error
 
 
-img = img_as_float(data.camera())
+img = rescale_to_float(data.camera())
 rows, cols = img.shape
 
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())

@@ -42,19 +42,14 @@ def test_pyramid_reduce_gray():
     out1 = pyramids.pyramid_reduce(image_gray, downscale=2,
                                    channel_axis=None)
     assert_array_equal(out1.shape, (rows / 2, cols / 2))
-    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
-    out2 = pyramids.pyramid_reduce(image_gray, downscale=2,
-                                   channel_axis=None, preserve_range=True)
-    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
+    assert_almost_equal(out1.ptp() / image_gray.ptp(), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_gray_defaults():
     rows, cols = image_gray.shape
     out1 = pyramids.pyramid_reduce(image_gray)
     assert_array_equal(out1.shape, (rows / 2, cols / 2))
-    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
-    out2 = pyramids.pyramid_reduce(image_gray, preserve_range=True)
-    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
+    assert_almost_equal(out1.ptp() / image_gray.ptp(), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_nd():

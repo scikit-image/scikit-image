@@ -142,7 +142,7 @@ plt.show()
 higher_threshold = 125
 dividing = image > higher_threshold
 
-smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
+smoother_dividing = filters.rank.mean(util.rescale_to_ubyte(dividing),
                                       morphology.disk(4))
 
 binary_smoother_dividing = smoother_dividing > 20

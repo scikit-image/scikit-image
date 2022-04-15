@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import transform
-from skimage import img_as_float
+from skimage import rescale_to_float
 
 ######################################################################
 # Euclidean (rigid) transformation
@@ -54,7 +54,7 @@ print(tform.params)
 # Therefore, we need to use the inverse of ``tform``, rather than ``tform``
 # directly.
 
-img = img_as_float(data.chelsea())
+img = rescale_to_float(data.chelsea())
 tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)

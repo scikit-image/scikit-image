@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 
 from skimage import io, draw
 from skimage.data import binary_blobs
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 from skimage.morphology import skeletonize, skeletonize_3d
 
 from skimage._shared import testing
@@ -73,7 +73,7 @@ def test_dtype_conv():
 
     orig = img.copy()
     res = skeletonize(img, method='lee')
-    img_max = img_as_ubyte(img).max()
+    img_max = rescale_to_ubyte(img).max()
 
     assert_equal(res.dtype, np.uint8)
     assert_equal(img, orig)  # operation does not clobber the original

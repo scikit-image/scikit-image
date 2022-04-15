@@ -7,7 +7,7 @@ import pywt
 from numpy.testing import (assert_array_almost_equal, assert_array_equal,
                            assert_warns)
 
-from skimage import color, data, img_as_float, restoration
+from skimage import color, data, rescale_to_float, restoration
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
@@ -24,9 +24,9 @@ else:
 np.random.seed(1234)
 
 
-astro = img_as_float(data.astronaut()[:128, :128])
+astro = rescale_to_float(data.astronaut()[:128, :128])
 astro_gray = color.rgb2gray(astro)
-checkerboard_gray = img_as_float(data.checkerboard())
+checkerboard_gray = rescale_to_float(data.checkerboard())
 checkerboard = color.gray2rgb(checkerboard_gray)
 # versions with one odd-sized dimension
 astro_gray_odd = astro_gray[:, :-1]
@@ -124,7 +124,7 @@ def test_denoise_tv_chambolle_float_result_range():
                                                           weight=0.1)
     # test if the value range of output float data is within [0.0:1.0]
     assert denoised_int_astro.dtype == float
-    assert np.max(denoised_int_astro) <= 1.0
+    assert np.max(denoised_int_astro) <= 255.0
     assert np.min(denoised_int_astro) >= 0.0
 
 
@@ -137,9 +137,11 @@ def test_denoise_tv_chambolle_3d():
     mask += 20 * np.random.rand(*mask.shape)
     mask[mask < 0] = 0
     mask[mask > 255] = 255
-    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.1)
+    weight = 0.1  * mask.max()
+    res = restoration.denoise_tv_chambolle(mask.astype(np.uint8),
+                                           weight=weight)
     assert res.dtype == float
-    assert res.std() * 255 < mask.std()
+    assert res.std() < mask.std()
 
 
 def test_denoise_tv_chambolle_1d():
@@ -147,17 +149,19 @@ def test_denoise_tv_chambolle_1d():
     x = 125 + 100*np.sin(np.linspace(0, 8*np.pi, 1000))
     x += 20 * np.random.rand(x.size)
     x = np.clip(x, 0, 255)
-    res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.1)
+    weight = 0.1  * x.max()
+    res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=weight)
     assert res.dtype == float
-    assert res.std() * 255 < x.std()
+    assert res.std() < x.std()
 
 
 def test_denoise_tv_chambolle_4d():
     """ TV denoising for a 4D input."""
     im = 255 * np.random.rand(8, 8, 8, 8)
-    res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
+    res = restoration.denoise_tv_chambolle(im.astype(np.uint8),
+                                           weight=0.1 * 255)
     assert res.dtype == float
-    assert res.std() * 255 < im.std()
+    assert res.std() < im.std()
 
 
 def test_denoise_tv_chambolle_weighting():
@@ -200,7 +204,7 @@ def test_denoise_tv_bregman_float_result_range():
     denoised_int_astro = restoration.denoise_tv_bregman(int_astro, weight=60.0)
     # test if the value range of output float data is within [0.0:1.0]
     assert denoised_int_astro.dtype == float
-    assert np.max(denoised_int_astro) <= 1.0
+    assert np.max(denoised_int_astro) <= 255.0
     assert np.min(denoised_int_astro) >= 0.0
 
 
@@ -304,7 +308,7 @@ def test_denoise_bilateral_2d():
 def test_denoise_bilateral_pad():
     """This test checks if the bilateral filter is returning an image
     correctly padded."""
-    img = img_as_float(data.chelsea())[100:200, 100:200]
+    img = rescale_to_float(data.chelsea())[100:200, 100:200]
     img_bil = restoration.denoise_bilateral(img, sigma_color=0.1,
                                             sigma_spatial=10,
                                             channel_axis=-1)
@@ -800,7 +804,7 @@ def test_wavelet_denoising_deprecated():
 )
 def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                    estimate_sigma):
-    """Test cases for images without prescaling via img_as_float."""
+    """Test cases for images without prescaling via rescale_to_float."""
     rstate = np.random.default_rng(1234)
 
     if case == '1d':
@@ -814,7 +818,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     # add noise and clip to original signal range
     sigma = 25.
     noisy = x + sigma * rstate.standard_normal(x.shape)
-    noisy = np.clip(noisy, x.min(), x.max())
+    noisy = np.clip(noisy, 0, 255)
     noisy = noisy.astype(x.dtype)
 
     channel_axis = -1 if x.shape[-1] == 3 else None
@@ -844,29 +848,22 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     assert denoised.dtype == _supported_float_type(noisy)
 
     data_range = x.max() - x.min()
-    psnr_noisy = peak_signal_noise_ratio(x, noisy, data_range=data_range)
-    clipped = np.dtype(dtype).kind != 'f'
-    if not clipped:
-        psnr_denoised = peak_signal_noise_ratio(x, denoised,
-                                                data_range=data_range)
 
-        # output's max value is not substantially smaller than x's
-        assert denoised.max() > 0.9 * x.max()
-    else:
-        # have to compare to x_as_float in integer input cases
-        x_as_float = img_as_float(x)
-        f_data_range = x_as_float.max() - x_as_float.min()
-        psnr_denoised = peak_signal_noise_ratio(x_as_float, denoised,
-                                                data_range=f_data_range)
-
-        # output has been clipped to expected range
-        assert denoised.max() <= 1.0
-        if np.dtype(dtype).kind == 'u':
-            assert denoised.min() >= 0
-        else:
-            assert denoised.min() >= -1
-
+    xf = x.astype(noisy.dtype)
+    psnr_noisy = peak_signal_noise_ratio(xf, noisy, data_range=data_range)
+    psnr_denoised = peak_signal_noise_ratio(xf, denoised,
+                                            data_range=data_range)
     assert psnr_denoised > psnr_noisy
+
+    # output's max value is not substantially smaller than the noisy image's
+    assert denoised.max() >= 0.9 * noisy.max()
+
+    # PSNR is still improved after clipping to the original data range
+    denoised_clipped = np.clip(denoised, noisy.min(), noisy.max())
+    psnr_denoised_clipped = peak_signal_noise_ratio(
+        xf, denoised_clipped, data_range=data_range
+    )
+    assert psnr_denoised_clipped > psnr_noisy
 
 
 def test_wavelet_threshold():

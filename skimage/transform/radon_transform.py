@@ -13,7 +13,7 @@ from functools import partial
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, *, preserve_range=False):
+def radon(image, theta=None, circle=True):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -30,10 +30,6 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -61,7 +57,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
     if theta is None:
         theta = np.arange(180)
 
-    image = convert_to_float(image, preserve_range)
+    image = convert_to_float(image, True)
 
     if circle:
         shape_min = min(image.shape)
@@ -174,8 +170,7 @@ def _get_fourier_filter(size, filter_name):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter_name="ramp", interpolation="linear", circle=True,
-           preserve_range=True):
+           filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -205,10 +200,6 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -255,7 +246,7 @@ def iradon(radon_image, theta=None, output_size=None,
     if filter_name not in filter_types:
         raise ValueError("Unknown filter: %s" % filter_name)
 
-    radon_image = convert_to_float(radon_image, preserve_range)
+    radon_image = convert_to_float(radon_image, True)
     dtype = radon_image.dtype
 
     img_shape = radon_image.shape[0]

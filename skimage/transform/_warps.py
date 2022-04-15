@@ -9,7 +9,7 @@ from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float, _to_ndimage_mode,
+                             _supported_float_type, _to_ndimage_mode,
                              _validate_interpolation_order,
                              channel_as_last_axis,
                              deprecate_multichannel_kwarg)
@@ -70,7 +70,7 @@ def _preprocess_resize_output_shape(image, output_shape):
 
 
 def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
-           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
+           anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size N-dimensional images. Note
@@ -109,10 +109,6 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to downsampling. It is crucial to filter when downsampling
@@ -159,7 +155,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     factors = np.divide(input_shape, output_shape)
     order = _validate_interpolation_order(input_type, order)
     if order > 0:
-        image = convert_to_float(image, preserve_range)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
 
     # Save input value range for clip
     img_bounds = np.array([image.min(), image.max()]) if clip else None
@@ -217,8 +214,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
         # clip outside of warp to clip w.r.t input values, not filtered values.
         out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=False,
-                   preserve_range=preserve_range)
+                   mode=mode, cval=cval, clip=False)
 
     else:  # n-dimensional interpolation
 
@@ -238,11 +234,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg(multichannel_position=7)
+@deprecate_multichannel_kwarg(multichannel_position=6)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=False,
-            anti_aliasing=None, anti_aliasing_sigma=None, *,
-            channel_axis=None):
+            multichannel=False, anti_aliasing=None,
+            anti_aliasing_sigma=None, *, channel_axis=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale N-dimensional images.
@@ -279,11 +274,6 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. This argument is deprecated:
@@ -339,13 +329,12 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         output_shape[-1] = orig_shape[-1]
 
     return resize(image, output_shape, order=order, mode=mode, cval=cval,
-                  clip=clip, preserve_range=preserve_range,
-                  anti_aliasing=anti_aliasing,
+                  clip=clip, anti_aliasing=anti_aliasing,
                   anti_aliasing_sigma=anti_aliasing_sigma)
 
 
 def rotate(image, angle, resize=False, center=None, order=None,
-           mode='constant', cval=0, clip=True, preserve_range=False):
+           mode='constant', cval=0, clip=True):
     """Rotate image by a certain angle around its center.
 
     Parameters
@@ -385,11 +374,6 @@ def rotate(image, angle, resize=False, center=None, order=None,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Notes
     -----
@@ -455,7 +439,7 @@ def rotate(image, angle, resize=False, center=None, order=None,
     tform.params[2] = (0, 0, 1)
 
     return warp(image, tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
+                mode=mode, cval=cval, clip=clip)
 
 
 def downscale_local_mean(image, factors, cval=0, clip=True):
@@ -525,8 +509,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=None, mode='reflect', cval=0, clip=True,
-          preserve_range=False):
+          output_shape=None, order=None, mode='reflect', cval=0, clip=True):
     """Perform a swirl transformation.
 
     Parameters
@@ -568,11 +551,6 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     """
     if center is None:
@@ -585,7 +563,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 
     return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape, order=order, mode=mode, cval=cval,
-                clip=clip, preserve_range=preserve_range)
+                clip=clip)
 
 
 def _stackcopy(a, b):
@@ -733,7 +711,7 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
-         mode='constant', cval=0., clip=True, preserve_range=False):
+         mode='constant', cval=0., clip=True):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -798,11 +776,6 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -882,9 +855,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
     order = _validate_interpolation_order(image.dtype, order)
 
     if order > 0:
-        image = convert_to_float(image, preserve_range)
-        if image.dtype == np.float16:
-            image = image.astype(np.float32)
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
 
     input_shape = np.array(image.shape)
 
@@ -1205,7 +1177,7 @@ def _local_mean_weights(old_size, new_size, grid_mode, dtype):
 
 
 def resize_local_mean(image, output_shape, grid_mode=True,
-                      preserve_range=False, *, channel_axis=None):
+                      *, channel_axis=None):
     """Resize an array with the local mean / bilinear scaling.
 
     Parameters
@@ -1236,11 +1208,6 @@ def resize_local_mean(image, output_shape, grid_mode=True,
 
         The starting point of the arrow in the diagram above corresponds to
         coordinate location 0 in each mode.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -1305,8 +1272,8 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     else:
         resized, output_shape = _preprocess_resize_output_shape(image,
                                                                 output_shape)
-    resized = convert_to_float(resized, preserve_range)
-    dtype = resized.dtype
+    dtype = _supported_float_type(resized.dtype)
+    resized = resized.astype(dtype, copy=False)
 
     for axis, (old_size, new_size) in enumerate(zip(image.shape,
                                                     output_shape)):

@@ -15,9 +15,9 @@ Original author: Lee Kamentsky
 import numpy as np
 import scipy.ndimage as ndi
 
-from ..util.dtype import dtype_limits
+from ..util.dtype import dtype_limits, rescale_to_float
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..filters._gaussian import gaussian
 
 
@@ -63,10 +63,10 @@ def _preprocess(image, mask, sigma, mode, cval):
     pixels.
     """
 
-    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
-                           preserve_range=False)
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval)
     if mask is None:
         # Smooth the masked image
+        image = rescale_to_float(image)
         smoothed_image = gaussian(image, **gaussian_kwargs)
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
@@ -75,14 +75,15 @@ def _preprocess(image, mask, sigma, mode, cval):
         eroded_mask[:, -1:] = 0
         return smoothed_image, eroded_mask
 
-    masked_image = np.zeros_like(image)
+    float_dtype = _supported_float_type(image.dtype)
+    masked_image = np.zeros_like(image, dtype=float_dtype)
     masked_image[mask] = image[mask]
 
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
     bleed_over = (
-        gaussian(mask.astype(float), **gaussian_kwargs) + np.finfo(float).eps
+        gaussian(mask, **gaussian_kwargs) + np.finfo(float).eps
     )
 
     # Smooth the masked image

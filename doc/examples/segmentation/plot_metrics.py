@@ -23,7 +23,7 @@ from skimage.metrics import (adapted_rand_error,
                               variation_of_information)
 from skimage.filters import sobel
 from skimage.measure import label
-from skimage.util import img_as_float
+from skimage.util import rescale_to_float
 from skimage.feature import canny
 from skimage.morphology import remove_small_objects
 from skimage.segmentation import (morphological_geodesic_active_contour,
@@ -73,7 +73,7 @@ im_test2 = ndi.label(remove_small_objects(fill_coins, 21))[0]
 # merged into one segment. We will see the corresponding effect on the
 # segmentation metrics.
 
-image = img_as_float(image)
+image = rescale_to_float(image)
 gradient = inverse_gaussian_gradient(image)
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1

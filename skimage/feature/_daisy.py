@@ -4,9 +4,8 @@ import numpy as np
 from numpy import arctan2, exp, pi, sqrt
 
 from .. import draw
-from ..util.dtype import img_as_float
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..color import gray2rgb
 
 
@@ -101,8 +100,8 @@ def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,
 
     check_nD(image, 2, 'img')
 
-    image = img_as_float(image)
-    float_dtype = image.dtype
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     # Validate parameters.
     if sigmas is not None and ring_radii is not None \
@@ -184,6 +183,7 @@ def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 descs[:, :, i:i + orientations] /= norms[:, :, np.newaxis]
 
     if visualize:
+        image = image / float(image.max())
         descs_img = gray2rgb(image)
         for i in range(descs.shape[0]):
             for j in range(descs.shape[1]):

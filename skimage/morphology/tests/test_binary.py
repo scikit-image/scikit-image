@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 
 from skimage import data, color, morphology
 from skimage._shared._warnings import expected_warnings
-from skimage.util import img_as_bool
+from skimage.util import rescale_to_bool
 from skimage.morphology import binary, footprints, gray
 
 
@@ -16,7 +16,7 @@ bw_img = img > 100 / 255.
 def test_non_square_image():
     footprint = morphology.square(3)
     binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
+    gray_res = rescale_to_bool(gray.erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
 
 
@@ -32,28 +32,28 @@ def test_selem_kwarg_deprecation(function):
 def test_binary_erosion():
     footprint = morphology.square(3)
     binary_res = binary.binary_erosion(bw_img, footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img, footprint))
+    gray_res = rescale_to_bool(gray.erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
     footprint = morphology.square(3)
     binary_res = binary.binary_dilation(bw_img, footprint)
-    gray_res = img_as_bool(gray.dilation(bw_img, footprint))
+    gray_res = rescale_to_bool(gray.dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
     footprint = morphology.square(3)
     binary_res = binary.binary_closing(bw_img, footprint)
-    gray_res = img_as_bool(gray.closing(bw_img, footprint))
+    gray_res = rescale_to_bool(gray.closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
     footprint = morphology.square(3)
     binary_res = binary.binary_opening(bw_img, footprint)
-    gray_res = img_as_bool(gray.opening(bw_img, footprint))
+    gray_res = rescale_to_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
@@ -200,7 +200,7 @@ def test_footprint_overflow():
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
     binary_res = binary.binary_erosion(img, footprint)
-    gray_res = img_as_bool(gray.erosion(img, footprint))
+    gray_res = rescale_to_bool(gray.erosion(img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
