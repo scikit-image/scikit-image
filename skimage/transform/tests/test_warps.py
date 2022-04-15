@@ -166,14 +166,18 @@ def test_warp_clip_cval_not_used(order):
     # is not used in the output image
 
     x = np.ones((15, 15), dtype=np.float64)
+    x[5:-5, 5:-5] = 2
 
-    # The output image from rescale() will not have pixels that use cval,
-    # although the internal warp() call will use cval for interpolation.
-    # Without any clipping, there would be pixels with values > 1
-    outx = rescale(x, 2, mode='constant', order=order, cval=2, clip=True)
+    # Transform the image by stretching it out by one pixel on each side so
+    # that cval will not actually be used
+    transform = AffineTransform(scale=15/(15+2), translation=(1, 1))
+    outx = warp(x, transform, mode='constant', order=order, cval=0, clip=True)
 
-    # With clipping, all pixels should have values = 1
-    assert_array_almost_equal(outx, 1)
+    # At higher orders of interpolation, the transformed image has overshoots
+    # beyond the input range that should be clipped to the range 1 to 2.  Even
+    # though cval=0, the minimum value of the clipped output image should be
+    # 1 and not affected by the unused cval.
+    assert_array_almost_equal(outx.min(), 1)
 
 
 def test_homography():
