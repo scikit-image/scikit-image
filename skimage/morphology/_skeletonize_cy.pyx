@@ -8,7 +8,8 @@ cimport numpy as cnp
 cnp.import_array()
 
 
-def _fast_skeletonize(image):
+# def _fast_skeletonize(cnp.uint8_t [:, ::1] image):
+def _fast_skeletonize(cnp.uint8_t [:, ::1] image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
     Iteratively, pixels meeting removal criteria are removed,
     till only the skeleton remains (that is, no further removable pixel
@@ -64,22 +65,16 @@ def _fast_skeletonize(image):
 
     # indices for fast iteration
     cdef Py_ssize_t row, col, nrows, ncols, pass_num
-    nrows, ncols = image.shape
+    nrows, ncols = image.shape[:2]
     nrows += 2
     ncols += 2
 
-    # we copy over the image into a larger version with a single pixel border
+    # Copy over the image into a larger version with a single pixel border
     # this removes the need to handle border cases below
-    _skeleton = np.zeros((nrows, ncols), dtype=np.uint8)
-    _skeleton[1:-1, 1:-1] = image
-
-    _cleaned_skeleton = _skeleton.copy()
-
-    # cdef'd numpy-arrays for fast, typed access
-    cdef cnp.uint8_t [:, ::1] skeleton, cleaned_skeleton
-
-    skeleton = _skeleton
-    cleaned_skeleton = _cleaned_skeleton
+    cdef cnp.uint8_t [:, ::1] skeleton = np.zeros((nrows, ncols),
+                                                  dtype=np.uint8)
+    skeleton[1:-1, 1:-1] = image
+    cdef cnp.uint8_t [:, ::1] cleaned_skeleton = skeleton.copy()
 
     pixel_removed = True
 
@@ -133,7 +128,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:-1, 1:-1].astype(bool)
+    return skeleton.base[1:-1, 1:-1].astype(bool)
 
 
 """
