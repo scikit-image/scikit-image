@@ -147,7 +147,8 @@ def test_warp_clip_cval_outside_input_range(order):
     x = np.ones((15, 15), dtype=np.float64)
 
     # Specify a cval that is outside the input range to check clipping
-    outx = rotate(x, 45, order=order, cval=2, resize=True, clip=True)
+    with expected_warnings(['Bi-quadratic.*bug'] if order == 2 else None):
+        outx = rotate(x, 45, order=order, cval=2, resize=True, clip=True)
 
     # The corners should be cval for all interpolation orders
     assert_array_almost_equal([outx[0, 0], outx[0, -1],
@@ -171,7 +172,9 @@ def test_warp_clip_cval_not_used(order):
     # Transform the image by stretching it out by one pixel on each side so
     # that cval will not actually be used
     transform = AffineTransform(scale=15/(15+2), translation=(1, 1))
-    outx = warp(x, transform, mode='constant', order=order, cval=0, clip=True)
+    with expected_warnings(['Bi-quadratic.*bug'] if order == 2 else None):
+        outx = warp(x, transform, mode='constant', order=order, cval=0,
+                    clip=True)
 
     # At higher orders of interpolation, the transformed image has overshoots
     # beyond the input range that should be clipped to the range 1 to 2.  Even
