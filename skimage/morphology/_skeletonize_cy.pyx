@@ -8,7 +8,6 @@ cimport numpy as cnp
 cnp.import_array()
 
 
-# def _fast_skeletonize(cnp.uint8_t [:, ::1] image):
 def _fast_skeletonize(cnp.uint8_t [:, ::1] image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
     Iteratively, pixels meeting removal criteria are removed,
