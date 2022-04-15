@@ -1,4 +1,3 @@
-from . import _api
 from ._multimethods import (adjust_gamma, adjust_log, adjust_sigmoid,
                             cumulative_distribution, equalize_adapthist,
                             equalize_hist, histogram, is_low_contrast,

@@ -6,9 +6,9 @@ from numpy import dtype, ndarray
 from uarray import generate_multimethod, Dispatchable
 from uarray import all_of_type, create_multimethod
 
-from skimage._backend import _mark_output, _mark_scalar_or_array
-from . import _api
+from .._backend import _mark_output, _mark_scalar_or_array
 from .._shared.multimethods import gaussian
+from . import _api
 
 __all__ = [
     "gaussian",

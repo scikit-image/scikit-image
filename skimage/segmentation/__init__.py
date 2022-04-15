@@ -1,5 +1,4 @@
 from ..morphology import flood, flood_fill
-from . import _api
 from ._multimethods import (active_contour, chan_vese, checkerboard_level_set,
                             clear_border, disk_level_set, expand_labels,
                             felzenszwalb, find_boundaries,

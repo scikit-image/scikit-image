@@ -1,3 +1,4 @@
+from . import _api
 from ._multimethods import (autolevel, autolevel_percentile, enhance_contrast,
                             enhance_contrast_percentile, entropy, equalize,
                             geometric_mean, gradient, gradient_percentile,

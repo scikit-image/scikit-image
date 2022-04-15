@@ -1,4 +1,3 @@
-from . import _api
 from ._multimethods import (approximate_polygon, block_reduce, blur_effect,
                             centroid, euler_number, find_contours,
                             grid_points_in_poly, inertia_tensor,

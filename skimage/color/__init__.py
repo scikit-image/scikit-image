@@ -1,4 +1,3 @@
-from . import _api
 from ._multimethods import (combine_stains, convert_colorspace, deltaE_cie76,
                             deltaE_ciede94, deltaE_ciede2000, deltaE_cmc,
                             gray2rgb, gray2rgba, hed2rgb, hsv2rgb, lab2lch,

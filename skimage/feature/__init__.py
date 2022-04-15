@@ -1,4 +1,3 @@
-from . import _api
 from ._cascade import Cascade
 from ._multimethods import (blob_dog, blob_doh, blob_log, canny, corner_fast,
                             corner_foerstner, corner_harris,

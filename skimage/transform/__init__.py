@@ -1,4 +1,3 @@
-from . import _api
 from ._geometric import (AffineTransform, EssentialMatrixTransform,
                          EuclideanTransform, FundamentalMatrixTransform,
                          PiecewiseAffineTransform, PolynomialTransform,

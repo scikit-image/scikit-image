@@ -55,9 +55,9 @@ import numpy as np
 from scipy import linalg
 
 
-from .. import img_as_float32, img_as_float64
 from .._shared.utils import (_supported_float_type, channel_as_last_axis,
                              identity, reshape_nd, slice_at_axis)
+from ..util import img_as_float32, img_as_float64
 
 
 def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):

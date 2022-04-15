@@ -1,4 +1,3 @@
-from . import _api
 from ._multimethods import (adapted_rand_error, contingency_table,
                             hausdorff_distance, hausdorff_pair,
                             mean_squared_error, normalized_mutual_information,
