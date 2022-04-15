@@ -410,8 +410,7 @@ def rescale_to_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _img_as_float(image, force_copy, preserve_range=False,
-                         dtype=np.float32)
+    return _convert(image, np.float32, force_copy)
 
 
 def rescale_to_float64(image, force_copy=False):
@@ -437,8 +436,7 @@ def rescale_to_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _img_as_float(image, force_copy, preserve_range=False,
-                         dtype=np.float64)
+    return _convert(image, np.float64, force_copy)
 
 
 def rescale_to_float(image, force_copy=False):
@@ -467,33 +465,7 @@ def rescale_to_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _img_as_float(image, force_copy, preserve_range=False)
-
-
-def _img_as_float(image, force_copy=False, *, preserve_range=True, dtype=None):
-
-    if image.dtype == np.float16:
-        return image.astype(np.float32)
-    if preserve_range:
-        # Convert image to double only if it is not single or double
-        # precision float
-        if dtype is not None and np.dtype(dtype).char not in 'df':
-            raise ValueError(
-                "dtype must be be either np.float32 or np.float64"
-            )
-        if image.dtype.char not in 'df':
-            dtype = float if dtype is None else dtype
-            image = image.astype(dtype)
-        elif dtype is not None:
-            image = image.astype(dtype, copy=force_copy)
-        elif force_copy:
-            image = image.copy()
-    else:
-        if dtype is None:
-            return _convert(image, np.floating, force_copy)
-        else:
-            return _convert(image, dtype, force_copy)
-    return image
+    return _convert(image, np.floating, force_copy)
 
 
 def rescale_to_uint(image, force_copy=False):
