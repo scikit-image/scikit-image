@@ -734,16 +734,14 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
                          and not min_val <= cval <= max_val
                          and min_func(output_image) <= cval <= max_func(output_image))
 
-        # Otherwise, set cval within the input range for clipping purposes
-        if not preserve_cval:
-            cval = min_val
+        # expand min/max range to account for cval
+        if preserve_cval:
+            # cast cval to the same dtype as the input image
+            cval = input_image.dtype.type(cval)
+            min_val = min(min_val, cval)
+            max_val = max(max_val, cval)
 
-        # If cval is the default value, cast it to the same type as min_val
-        if cval == 0.:
-            cval = min_val.dtype.type(cval)
-
-        np.clip(output_image, min(min_val, cval), max(max_val, cval),
-                out=output_image)
+        np.clip(output_image, min_val, max_val, out=output_image)
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
