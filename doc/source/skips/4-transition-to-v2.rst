@@ -252,7 +252,7 @@ conda-forge and elsewhere. The following arguments were given in favor of this:
 The following arguments were made against naming the package ``skimage2``:
 
 - According to the "Principle of least astonishment", ``scikit-image2`` might be
-  considered the least surprising evolution of the import name.
+  considered the least surprising evolution of the package name.
 - It breaks with the convention that is followed by other scikits including
   scikit-image. (It was pointed out that this convention has not been true for
   some time and introducing a version number in the name is a precedent anyway.)
