@@ -5,6 +5,7 @@ SKIP 4 — Transitioning to scikit-image 2.0
 ==========================================
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
+:Author: Lars Grüter
 :Status: Draft
 :Type: Standards Track
 :Created: 2022-04-08
@@ -219,6 +220,55 @@ Another possibility is to reject backwards incompatible API changes outright,
 except in extreme cases. The core team feels that this is essentially
 equivalent to pinning the library at 0.19.
 
+"scikit-image2" as the new package name
+.......................................
+
+The authors acknowledge that the new names should be chosen with care to keep
+the disruption to scikit-image's user base and community as small as possible.
+However, to protect users without upper version constraints from accidentally
+upgrading to the new API, the package name ``scikit-image`` must be changed.
+Changing the import name ``skimage`` is similarly advantageous because it allows
+using both APIs in the same environment.
+
+This document suggests just ``skimage2`` as the single new name for
+scikit-image's API version 2.0, both for the import name and the name on PyPI,
+conda-forge and elsewhere. The following arguments were given in favor of this:
+
+- Only one new name is introduced with the project thereby keeping the number of
+  associated names as low as possible.
+- With this change, the import and package name match.
+- Users might be confused whether they should install ``scikit-image2`` or
+  ``scikit-image-2``. It was felt that ``skimage2`` avoids this confusion.
+- Users who know what ``skimage`` is and see ``skimage2`` in an install
+  instruction somewhere, will likely be able to infer that it is a newer version
+  of the package.
+- It is unlikely that users will be aware of the new API 2.0 but not of the new
+  package name. A proposed release of scikit-image 1.1 might point users to
+  ``skimage2`` during the installation and update process and thereby clearly
+  communicate the successors name.
+
+The following arguments were made against naming the package ``skimage2``:
+
+- According to the "Principle of least astonishment", ``scikit-image2`` might be
+  considered the least surprising evolution of the import name.
+- It breaks with the convention that is followed by other scikits including
+  scikit-image. (It was pointed out that this convention has not been true for
+  some time and introducing a version number in the name is a precedent anyway.)
+
+To judge the merit of such arguments one should also look at how other projects
+dealt with similar problems. However, there is not much precedent in the
+scientific ecosystem.
+
+- Jinja - a templating engine written in Python - has used the package and
+  import name ``jinja2`` for some time now. There was an attempt to briefly
+  revert back to the ``jinja`` name, however, it was ultimately felt that it was
+  not worth the time and effort [8]_.
+- Within Python 2.x itself, an added version number "2" was used to distinguish
+  ``urllib`` and ``urllib2`` by import name. Both of these were split and merged
+  across several ``urllib.`` submodules in Python 3. There is also ``urllib3``
+  which is a separate 3rd party package [9]_.
+- See also the section "New package naming" in `SKIP-3 <skip_3_transition_v1>_`.
+
 Discussion
 ----------
 
@@ -246,6 +296,8 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 .. [5] https://github.com/scipy/scipy/pull/12862
 .. [6] https://semver.org/
 .. [7] https://github.com/scikit-image/scikit-image/issues/5439
+.. [8] https://github.com/pallets/jinja/issues/1131
+.. [9] https://urllib3.readthedocs.io/en/stable/
 
 Copyright
 ---------
