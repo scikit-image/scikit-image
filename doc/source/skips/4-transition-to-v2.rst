@@ -156,6 +156,8 @@ The details of the proposal are as follows:
   number to 2.0-dev.
 - There will be *no* scikit-image package on PyPI with version 2.0. Users who
   ``pip install scikit-image`` will always get the 1.0 version of the package.
+  To install scikit-image 2.0, users will need to ``pip install skimage2``,
+  ``conda install skimage2``, or similar.
 - After consensus has been reached on the new API, skimage2 will be released.
 - scikit-image 1.0.x will receive critical bug fixes for an unspecified period
   of time, depending on the severity of the bug and the amount of effort
