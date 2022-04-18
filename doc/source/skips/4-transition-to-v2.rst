@@ -262,19 +262,8 @@ The following arguments were made against naming the package ``skimage2``:
   scikit-image. (It was pointed out that this convention has not been true for
   some time and introducing a version number in the name is a precedent anyway.)
 
-To judge the merit of such arguments one should also look at how other projects
-dealt with similar problems. However, there is not much precedent in the
-scientific ecosystem.
-
-- Jinja - a templating engine written in Python - has used the package and
-  import name ``jinja2`` for some time now. There was an attempt to briefly
-  revert back to the ``jinja`` name, however, it was ultimately felt that it was
-  not worth the time and effort [8]_.
-- Within Python 2.x itself, an added version number "2" was used to distinguish
-  ``urllib`` and ``urllib2`` by import name. Both of these were split and merged
-  across several ``urllib.`` submodules in Python 3. There is also ``urllib3``
-  which is a separate 3rd party package [9]_.
-- See also the section "New package naming" in `SKIP-3 <skip_3_transition_v1>_`.
+The earlier section "Related Work" describes how other projects dealt with
+similar problems.
 
 Discussion
 ----------
@@ -303,8 +292,6 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 .. [5] https://github.com/scipy/scipy/pull/12862
 .. [6] https://semver.org/
 .. [7] https://github.com/scikit-image/scikit-image/issues/5439
-.. [8] https://github.com/pallets/jinja/issues/1131
-.. [9] https://urllib3.readthedocs.io/en/stable/
 
 Copyright
 ---------
