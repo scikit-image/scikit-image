@@ -154,14 +154,18 @@ The details of the proposal are as follows:
 - After 1.0, the main branch will be changed to (a) change the import name to
   skimage2, (b) change the package name to skimage2, and (c) change the version
   number to 2.0-dev.
-- There will be *no* scikit-image package on PyPI with version 2.0. Users who
-  ``pip install scikit-image`` will always get the 1.0 version of the package.
+- There will be *no* "scikit-image" package on PyPI with version 2.0. Users who
+  ``pip install scikit-image`` will always get the 1.x version of the package.
   To install scikit-image 2.0, users will need to ``pip install skimage2``,
   ``conda install skimage2``, or similar.
 - After consensus has been reached on the new API, skimage2 will be released.
-- scikit-image 1.0.x will receive critical bug fixes for an unspecified period
-  of time, depending on the severity of the bug and the amount of effort
-  involved.
+- Following the release of skimage2, a release of scikit-image 1.1 is made. This
+  release is identical to 1.0 (including bugfixes) but will advise users to
+  either (a) upgrade to skimage2 or (b) pin the package to ``scikit-image<1.1`
+  to avoid the warning.
+- scikit-image 1.0.x and 1.1.x will receive critical bug fixes for an
+  unspecified period of time, depending on the severity of the bug and the
+  amount of effort involved.
 
 Backward compatibility
 ----------------------
@@ -173,7 +177,8 @@ attempt to limit the number of backward incompatible changes to those likely to
 substantially improve the overall user experience. It is anticipated that
 porting `skimage` code to `skimage2` will be a straightforward process
 and we will publish a user guide for making the transition by the time of
-the `skimage2` release.
+the `skimage2` release. Users will be notified about these resources - among
+other things - by a warning in scikit-image 1.1.
 
 Alternatives
 ------------
