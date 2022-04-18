@@ -31,7 +31,7 @@ disruptive. Given the rejection of `SKIP-3 <skip_3_transition_v1>_`, this
 document proposes an alternative pathway to create a new API. The new pathway
 involves the following steps:
 
-- Any pending deprecations that were sheduled for v0.20 and v0.21 are 
+- Any pending deprecations that were scheduled for v0.20 and v0.21 are
   finalised (the new API suggested by deprecation messages in v0.19 becomes
   the only API).
 - This is released as 1.0.
@@ -168,7 +168,7 @@ Backward compatibility
 
 This proposal breaks backward compatibility in numerous places in the library.
 However, it does so in a new namespace, so that this proposal does not raise
-backward compatibilty concerns for our users. That said, the authors will
+backward compatibility concerns for our users. That said, the authors will
 attempt to limit the number of backward incompatible changes to those likely to
 substantially improve the overall user experience. It is anticipated that
 porting `skimage` code to `skimage2` will be a straightforward process
