@@ -161,7 +161,7 @@ The details of the proposal are as follows:
 - After consensus has been reached on the new API, skimage2 will be released.
 - Following the release of skimage2, a release of scikit-image 1.1 is made. This
   release is identical to 1.0 (including bugfixes) but will advise users to
-  either (a) upgrade to skimage2 or (b) pin the package to ``scikit-image<1.1`
+  either (a) upgrade to skimage2 or (b) pin the package to ``scikit-image<1.1``
   to avoid the warning.
 - scikit-image 1.0.x and 1.1.x will receive critical bug fixes for an
   unspecified period of time, depending on the severity of the bug and the
