@@ -16,7 +16,9 @@ from skimage.restoration._denoise import _wavelet_threshold
 try:
     import dask  # noqa
 except ImportError:
-    DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
+    DASK_NOT_INSTALLED_WARNING = (
+        'The optional dask dependency is not installed'
+    )
 else:
     DASK_NOT_INSTALLED_WARNING = None
 
@@ -1090,7 +1092,6 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
                  rescale_sigma=rescale_sigma)
 
 
-
 @pytest.mark.parametrize('channel_axis', [-1, None])
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
@@ -1182,7 +1183,7 @@ def test_cycle_spinning_num_workers():
     # Repeat dn_cc1 computation, but without channel_axis specified to
     # verify that the default behavior is channel_axis=None
     dn_cc1_ = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                    func_kw=func_kw, num_workers=1)
+                                     func_kw=func_kw, num_workers=1)
     assert_array_equal(dn_cc1, dn_cc1_)
 
     with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
