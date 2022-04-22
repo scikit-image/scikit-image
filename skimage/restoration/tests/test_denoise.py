@@ -1178,6 +1178,13 @@ def test_cycle_spinning_num_workers():
     dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                     func_kw=func_kw, channel_axis=None,
                                     num_workers=1)
+
+    # Repeat dn_cc1 computation, but without channel_axis specified to
+    # verify that the default behavior is channel_axis=None
+    dn_cc1_ = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, num_workers=1)
+    assert_array_equal(dn_cc1, dn_cc1_)
+
     with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, channel_axis=None,
