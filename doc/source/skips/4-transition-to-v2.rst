@@ -9,8 +9,8 @@ SKIP 4 — Transitioning to scikit-image 2.0
 :Status: Draft
 :Type: Standards Track
 :Created: 2022-04-08
-:Resolved: 
-:Resolution: 
+:Resolved: <null>
+:Resolution: <null>
 :Version effective: None
 
 Abstract
