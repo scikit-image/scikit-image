@@ -12,11 +12,10 @@ def _match_cumulative_cdf(source, template):
         src_lookup = source.reshape(-1)
         src_counts = np.bincount(src_lookup)
         tmpl_counts = np.bincount(template.reshape(-1))
-        tmpl_values = np.arange(len(tmpl_counts))
 
-        tmpl_values_exist = tmpl_counts > 0
-        tmpl_counts = tmpl_counts[tmpl_values_exist]
-        tmpl_values = tmpl_values[tmpl_values_exist]
+        # omit values where the count was 0
+        tmpl_values = np.nonzero(tmpl_counts)[0]
+        tmpl_counts = tmpl_counts[tmpl_values]
     else:
         src_values, src_lookup, src_counts = np.unique(source.reshape(-1),
                                                        return_inverse=True,
