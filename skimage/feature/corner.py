@@ -1,3 +1,4 @@
+import functools
 import math
 from itertools import combinations_with_replacement
 
@@ -132,7 +133,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
 
 def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
                                   order='rc'):
-    """Compute the Hessian matrix using convolutions with Gaussian derivatives.
+    r"""Compute the Hessian via convolutions with Gaussian derivatives.
 
     In 2D, the Hessian matrix is defined as:
         H = [Hrr Hrc]
@@ -169,76 +170,64 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
         Upper-diagonal elements of the hessian matrix for each pixel in the
         input image. In 2D, this will be a three element list containing [Hrr,
         Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
+
+    Notes
+    -----
+    The distributive property of derivatives and convolutions allows us to
+    restate the derivative of an image, I, smoothed with a Gaussian kernel, G,
+    as the convolution of the image with the derivative of G.
+
+    .. math::
+
+        \frac{\partial }{\partial x_i}(I * G) =
+        I * \left( \frac{\partial }{\partial x_i} G \right)
+
+    This function uses this property to compute the second order derivatives
+    that make up the Hessian matrix.
     """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
-    H_elems = []
-    idx = np.arange(image.ndim)
-    # The derivative of an image I convolved with a Gaussian G is
-    #       (d/dx_i)[I*G]
-    # where * indicates a convolution. The distributive property
-    # of derivatives and convolutions allows us to restate this as
-    #        I * dG/dx_i
-    # that is, the convolution of I with the derivative of a Gaussian.
-    # We need to call scipy.ndimage.gaussian_filter with the argument
-    # "order" which indicates the derivative order in the respective
-    # directions, where 0 = just Gaussian smoothing
-    #                   1 = convolve with first derivative of Gaussian
-    #                   etc.
-    # so supplying order=[2, 0] computes the 2nd Gaussian derivative in
-    # the first direction, and just smoothes the field in the second
-    # direction. That corresponds to the lower-right element of the
-    # Hessian matrix, Hcc. This is why below we will call the array
-    # deriv_step{1/2}[::-1] thus in reverse order, because the image
-    # will be in coordinates [(z,)y,x], but we need the Hessian in
-    # order [d^2/dx^2, d^2/(dx*dy), ...], so in reverse order.
     if np.isscalar(sigma):
         sigma = (sigma,) * image.ndim
-    # For small values of sigma, the scipy Gaussian filter
-    # suffers from aliasing and edge artifacts, given that
-    # the filter will approximate a sinc or sinc derivative
-    # which only goes to 0 very slowly (order 1/n^2). Thus,
-    # we will use a much larger truncate value to reduce any
-    # edge artifacts.
+
+    # This function uses `scipy.ndimage.gaussian_filter` with the order
+    # argument to compute convolutions. For example, specifying
+    # ``order=[1, 0]`` would apply convolution with a first-order derivative of
+    # the Gaussian along the first axis and simple Gaussian smoothing along the
+    # second.
+
+    # For small sigma, the SciPy Gaussian filter suffers from aliasing and edge
+    # artifacts, given that the filter will approximate a sinc or sinc
+    # derivative which only goes to 0 very slowly (order 1/n**2). Thus, we use
+    # a much larger truncate value to reduce any edge artifacts.
     truncate = 8 if all(s > 1 for s in sigma) else 100
     sq1_2 = 1 / math.sqrt(2)
     sigma_scaled = tuple(sq1_2 * s for s in sigma)
     common_kwargs = dict(sigma=sigma_scaled, mode=mode, cval=cval,
                          truncate=truncate)
+    gaussian_ = functools.partial(ndi.gaussian_filter, **common_kwargs)
 
-    for deriv_dirs in combinations_with_replacement(idx, 2):
-        # E.g., for idx=[0, 1] we get deriv_dirs=[0, 0]; [0, 1]; [1, 1]
+    # Apply two successive first order Gaussian derivative operations, as
+    # detailed in:
+    # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct  # noqa
 
-        deriv_step1 = (idx == deriv_dirs[0]).astype(int)
-        deriv_step2 = (idx == deriv_dirs[1]).astype(int)
-        # E.g., for deriv_dirs=[0, 0] we get deriv_step1=[1, 0]
-        #                                and deriv_step2=[1, 0]
-        #       for deriv_dirs=[0, 1] we get deriv_step1=[1, 0]
-        #                                and deriv_step2=[0, 1]
-        #       etc., expressing the two successive derivative
-        #             operations in the Hessian
+    # 1.) First order along one axis while smoothing (order=0) along the other
+    ndim = image.ndim
 
-        if order == 'rc':
-            deriv_step1 = deriv_step1[::-1]
-            deriv_step2 = deriv_step2[::-1]
-            # For, e.g., deriv_order=[2, 0], we want the second
-            # derivative in the "horizontal"/"row" direction, and
-            # just Gaussian smoothing in the "vertical"/"column"
-            # direction. To do that on an array, we need to
-            # differentiate as [0, 2], because the first direction
-            # is the vertical direction, and the second the horizontal
-            # direction. Hence, we reverse the list order.
-            
-        # Apply two successive Gaussian filter operations, as per detailed in
-        # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
-        H_elems.append(
-            ndi.gaussian_filter(
-                ndi.gaussian_filter(image, order=deriv_step1, **common_kwargs),
-                order=deriv_step2, **common_kwargs)
-        )
+    # orders in 2D = ([1, 0], [0, 1])
+    #        in 3D = ([1, 0, 0], [0, 1, 0], [0, 0, 1])
+    #        etc.
+    orders = tuple([0] * d + [1] + [0]*(ndim - d - 1) for d in range(ndim))
+    gradients = [gaussian_(image, order=orders[d]) for d in range(ndim)]
 
+    # 2.) apply the derivative along another axis as well
+    axes = range(ndim)
+    if order == 'rc':
+        axes = reversed(axes)
+    H_elems = [gaussian_(gradients[ax0], order=orders[ax1])
+               for ax0, ax1 in combinations_with_replacement(axes, 2)]
     return H_elems
 
 
