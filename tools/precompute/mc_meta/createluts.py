@@ -121,23 +121,6 @@ def search_line(lines, refline, start=0):
     return -1
 
 
-
-def getLutNames(prefix):
-    aa = []
-    for a in dir(luts):
-        if a.startswith(prefix): aa.append(a)
-
-    def sortkey(x):
-        fullnr = x.split(prefix)[1]
-        nr, us, subnr = fullnr.partition('_')
-        if len(nr) == 1:
-            nr = '0'+nr
-        return nr + us + subnr
-
-    return [a for a in sorted(aa, key=sortkey)]
-
-
-
 if __name__ == '__main__':
     import os
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
@@ -146,6 +129,8 @@ if __name__ == '__main__':
         f.write('# -*- coding: utf-8 -*-\n')
         f.write(
             '# This file was auto-generated from `mc_meta/LookUpTable.h` by\n'
-            '# `mc_meta/createluts.py`.\n\n'
+            '# `mc_meta/createluts.py`. The `mc_meta` scripts are not\n'
+            '# distributed with scikit-image, but are available in the\n'
+            '# respository under tools/precompute/mc_meta.\n\n'
         )
         f.write(create_luts(fname))
