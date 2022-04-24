@@ -9,19 +9,20 @@ def _match_cumulative_cdf(source, template):
     its values matches the cumulative density function of the template.
     """
     if source.dtype.kind == 'u':
-        src_lookup = source.ravel()
+        src_lookup = source.reshape(-1)
         src_counts = np.bincount(src_lookup)
-        tmpl_counts = np.bincount(template.ravel())
+        tmpl_counts = np.bincount(template.reshape(-1))
         tmpl_values = np.arange(len(tmpl_counts))
-        
+
         tmpl_values_exist = tmpl_counts > 0
         tmpl_counts = tmpl_counts[tmpl_values_exist]
         tmpl_values = tmpl_values[tmpl_values_exist]
     else:
-        src_values, src_lookup, src_counts = np.unique(source.ravel(),
+        src_values, src_lookup, src_counts = np.unique(source.reshape(-1),
                                                        return_inverse=True,
                                                        return_counts=True)
-        tmpl_values, tmpl_counts = np.unique(template.ravel(), return_counts=True)
+        tmpl_values, tmpl_counts = np.unique(template.reshape(-1),
+                                             return_counts=True)
 
     # calculate normalized quantiles for each array
     src_quantiles = np.cumsum(src_counts) / source.size
