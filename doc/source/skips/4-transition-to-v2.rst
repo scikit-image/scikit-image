@@ -9,15 +9,15 @@ SKIP 4 — Transitioning to scikit-image 2.0
 :Status: Draft
 :Type: Standards Track
 :Created: 2022-04-08
-:Resolved: 
-:Resolution: 
+:Resolved: <null>
+:Resolution: <null>
 :Version effective: None
 
 Abstract
 --------
 
-scikit-image is preparing to release version 1.0. This `was seen
-<skip_3_transition_v1>_` as an opportunity to clean up the API, including
+scikit-image is preparing to release version 1.0. This :ref:`was seen
+<skip_3_transition_v1>` as an opportunity to clean up the API, including
 backwards incompatible changes. Some of these changes involve changing return
 values without changing function signatures, which can ordinarily only be done
 by adding an otherwise useless keyword argument (such as
@@ -27,7 +27,7 @@ time period.
 
 Despite being in beta and in a 0.x series of releases, scikit-image is used
 extremely broadly, and any backwards incompatible changes are likely to be
-disruptive. Given the rejection of `SKIP-3 <skip_3_transition_v1>_`, this
+disruptive. Given the rejection of :ref:`SKIP-3 <skip_3_transition_v1>`, this
 document proposes an alternative pathway to create a new API. The new pathway
 involves the following steps:
 
@@ -39,7 +39,7 @@ involves the following steps:
   ``skimage2``, and the API is free to evolve.
 
 Further motivation for the API changes is explained below, and largely
-duplicated from `SKIP-3 <skip_3_transition_v1>_`.
+duplicated from :ref:`SKIP-3 <skip_3_transition_v1>`.
 
 Motivation and Scope
 --------------------
@@ -186,7 +186,7 @@ Alternatives
 Releasing the new API in the same package using semantic versioning
 ...................................................................
 
-This is `SKIP-3 <skip_3_transition_v1>_`, which was rejected after discussion
+This is :ref:`SKIP-3 <skip_3_transition_v1>`, which was rejected after discussion
 with the community.
 
 Continuous deprecation over multiple versions
@@ -268,7 +268,7 @@ similar problems.
 Discussion
 ----------
 
-This SKIP is the result of discussion of `SKIP-3 <skip_3_transition_v1>_`. See
+This SKIP is the result of discussion of :ref:`SKIP-3 <skip_3_transition_v1>`. See
 the "Resolution" section of that document for further background on the
 motivation for this SKIP.
 
