@@ -133,7 +133,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
 
 def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
                                   order='rc'):
-    r"""Compute the Hessian via convolutions with Gaussian derivatives.
+    """Compute the Hessian via convolutions with Gaussian derivatives.
 
     In 2D, the Hessian matrix is defined as:
         H = [Hrr Hrc]
@@ -171,19 +171,6 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
         input image. In 2D, this will be a three element list containing [Hrr,
         Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
 
-    Notes
-    -----
-    The distributive property of derivatives and convolutions allows us to
-    restate the derivative of an image, I, smoothed with a Gaussian kernel, G,
-    as the convolution of the image with the derivative of G.
-
-    .. math::
-
-        \frac{\partial }{\partial x_i}(I * G) =
-        I * \left( \frac{\partial }{\partial x_i} G \right)
-
-    This function uses this property to compute the second order derivatives
-    that make up the Hessian matrix.
     """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
@@ -233,7 +220,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
                    use_gaussian_derivatives=None):
-    """Compute the Hessian matrix.
+    r"""Compute the Hessian matrix.
 
     In 2D, the Hessian matrix is defined as::
 
@@ -273,6 +260,24 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
         input image. In 2D, this will be a three element list containing [Hrr,
         Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
 
+
+    Notes
+    -----
+    The distributive property of derivatives and convolutions allows us to
+    restate the derivative of an image, I, smoothed with a Gaussian kernel, G,
+    as the convolution of the image with the derivative of G.
+
+    .. math::
+
+        \frac{\partial }{\partial x_i}(I * G) =
+        I * \left( \frac{\partial }{\partial x_i} G \right)
+
+    When ``use_gaussian_derivatives`` is ``True``, this property is used to
+    compute the second order derivatives that make up the Hessian matrix.
+
+    When ``use_gaussian_derivatives`` is ``False``, simple finite differences
+    on a Gaussian-smoothed image are used instead.
+
     Examples
     --------
     >>> from skimage.feature import hessian_matrix
@@ -286,6 +291,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
            [ 0.,  0.,  0.,  0.,  0.],
            [ 0., -1.,  0.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
+
     """
 
     image = img_as_float(image)
