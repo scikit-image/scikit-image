@@ -1,3 +1,55 @@
+Announcement: scikit-image 0.19.3
+=================================
+
+We're happy to announce the release of scikit-image v0.19.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+
+Bugs Fixed
+----------
+- Update ``skimage.future.manual_polygon_segmentation`` to work with Matplotlib 3.5.
+- Update ``skimage.io.imread`` to avoid warnings when using ``imageio``>=2.16.2.
+- Revert unintentional change to default multichannel behavior introduced in v0.19.0 for ``skimage.restoration.cycle_spin`` (now defaults to single channel again)
+- Fix corner case with an optimal angle of 0 degrees in hough_line_peaks
+- Fixed the gallery example involving registration with log-polar transformations
+- Update test suite for compatibility with the most recent ``tifffile`` release.
+
+
+Pull Requests Included
+----------------------
+- Backport PR #6306 on branch v0.19.x (Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304)) (#6312)
+- Backport PR #6271 on branch v0.19.x (hough_line_peaks fix for corner case with optimal angle=0) (#6313)
+- Backport PR #6261 on branch v0.19.x (Ignore sparse matrix deprecation warning) (#6316)
+- backport PR 6328: Fix issue with newer versions of matplotlib in manual segmentation (#6334)
+- Backport PR #6343 on branch v0.19.x (avoid warnings about change to v3 API from imageio) (#6344)
+- Backport PR #6355 on branch v0.19.x (remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough`) (#6357)
+- Backport PR #6352 on branch v0.19.x (Fix channel_axis default for cycle_spin) (#6358)
+- Backport PR #6348 on branch v0.19.x (Fix smoothed image computation when mask is None in canny) (#6359)
+
+5 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Bartłomiej Śmietanka
+- Dave Mellert
+- Gregory Lee
+- Mark Harfouche
+- Riadh Fezzani
+
+5 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory Lee
+- Juan Nunez-Iglesias
+- Lars Grüter
+- Riadh Fezzani
+
+
 scikit-image 0.19.2
 ===================
 
