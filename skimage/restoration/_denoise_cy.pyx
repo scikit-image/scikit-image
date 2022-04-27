@@ -45,9 +45,9 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, cnp.float64_t max_value,
     else:
         csigma_color = sigma_color
 
-    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+    if mode not in ('constant', 'wrap', 'mirror', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
-                         "`edge`, `wrap`, `symmetric` or `reflect`.")
+                         "`nearest`, `wrap`, `symmetric` or `mirror`.")
     cdef char cmode = ord(mode[0].upper())
 
     dist_scale = bins / dims / max_value
