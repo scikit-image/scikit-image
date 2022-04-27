@@ -164,7 +164,7 @@ def test_rotate_resize_center():
     ref_x45[7, 0] = 1
 
     x45 = rotate(x, 45, resize=True, center=(3, 3), order=0,
-                 mode='reflect')
+                 mode='mirror')
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)
     assert_array_equal(x45, ref_x45)
@@ -336,7 +336,7 @@ def test_resize_nd():
         shape = 2 + np.arange(dim) * 2
         x = np.ones(shape)
         out_shape = np.asarray(shape) * 1.5
-        resized = resize(x, out_shape, order=0, mode='reflect',
+        resized = resize(x, out_shape, order=0, mode='mirror',
                          anti_aliasing=False)
         expected_shape = 1.5 * shape
         assert_array_equal(resized.shape, expected_shape)
@@ -398,7 +398,7 @@ def test_swirl(dtype):
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
-    swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
+    swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'mirror'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
         swirled = swirl(image, strength=10, **swirl_params)
@@ -474,11 +474,11 @@ def test_downsize_anti_aliasing():
     out_size = (5, 5)
     resize(x, out_size, order=1, mode='constant',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='edge',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='symmetric',
+    resize(x, out_size, order=1, mode='nearest',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
     resize(x, out_size, order=1, mode='reflect',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='mirror',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
     resize(x, out_size, order=1, mode='wrap',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
@@ -495,9 +495,9 @@ def test_downsize_anti_aliasing_invalid_stddev():
                mode='constant')
     with expected_warnings(["Anti-aliasing standard deviation greater"]):
         resize(x, (5, 15), order=0, anti_aliasing=True,
-               anti_aliasing_sigma=(1, 1), mode="reflect")
+               anti_aliasing_sigma=(1, 1), mode="mirror")
         resize(x, (5, 15), order=0, anti_aliasing=True,
-               anti_aliasing_sigma=(0, 1), mode="reflect")
+               anti_aliasing_sigma=(0, 1), mode="mirror")
 
 
 @pytest.mark.parametrize(
