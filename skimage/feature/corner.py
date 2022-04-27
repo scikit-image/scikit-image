@@ -22,7 +22,8 @@ def _compute_derivatives(image, mode='constant', cval=0):
     image : ndarray
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -63,7 +64,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
         each element is used for the Gaussian kernel applied along its
         respective axis.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -150,7 +152,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
         Standard deviation used for the Gaussian kernel, which is used as
         weighting function for the auto-correlation matrix.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -409,7 +412,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
         Standard deviation used for the Gaussian kernel, which is used for
         smoothing the input data before Hessian eigen value calculation.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -464,7 +468,8 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     image : (M, N) ndarray
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.

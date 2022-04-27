@@ -34,7 +34,8 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
-        'constant'. Default is 'nearest'.
+        'constant'. Default is 'nearest'. Modes match the behaviour of
+        :func:`scipy.ndimage.convolve`.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0

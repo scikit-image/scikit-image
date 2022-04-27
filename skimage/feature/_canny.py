@@ -228,7 +228,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
         The ``mode`` parameter determines how the array borders are
         handled during Gaussian filtering, where ``cval`` is the value when
-        mode is equal to 'constant'.
+        mode is equal to 'constant'. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Value to fill past edges of input if `mode` is 'constant'.
 
