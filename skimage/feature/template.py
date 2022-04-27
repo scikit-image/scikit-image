@@ -55,7 +55,7 @@ def match_template(image, template, pad_input=False, mode='constant',
         and an `(m, n)` template, and matches correspond to origin
         (top-left corner) of the template.
     mode : see `numpy.pad`, optional
-        Padding mode.
+        Padding mode used internally by :func:`numpy.pad`.
     constant_values : see `numpy.pad`, optional
         Constant values used in conjunction with ``mode='constant'``.
 
