@@ -102,7 +102,9 @@ def resize(image, output_shape, order=None, mode='mirror', cval=0, clip=True,
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -165,6 +167,11 @@ def resize(image, output_shape, order=None, mode='mirror', cval=0, clip=True,
     # Save input value range for clip
     img_bounds = np.array([image.min(), image.max()]) if clip else None
 
+    if mode == 'constant':
+        # scipy.ndimage's 'grid-constant' is like _warp_fast's 'constant'
+        ndi_mode = 'grid-constant'
+    else:
+        ndi_mode = mode
     if anti_aliasing:
         if anti_aliasing_sigma is None:
             anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
@@ -178,12 +185,12 @@ def resize(image, output_shape, order=None, mode='mirror', cval=0, clip=True,
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
-                                    cval=cval, mode=mode)
+                                    cval=cval, mode=ndi_mode)
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
         zoom_factors = [1 / f for f in factors]
-        out = ndi.zoom(image, zoom_factors, order=order, mode=mode,
+        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
@@ -229,7 +236,7 @@ def resize(image, output_shape, order=None, mode='mirror', cval=0, clip=True,
                                          indexing='ij'))
 
         out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=mode, cval=cval)
+                                  mode=ndi_mode, cval=cval)
 
     _clip_warp_output(img_bounds, out, mode, cval, clip)
 
@@ -271,7 +278,9 @@ def rescale(image, scale, order=None, mode='mirror', cval=0, clip=True,
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -378,7 +387,9 @@ def rotate(image, angle, resize=False, center=None, order=None,
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -561,7 +572,9 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -708,7 +721,9 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -793,7 +808,9 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
     mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of
-        :func:`scipy.ndimage.zoom`.
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -938,6 +955,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
                 'reflect': 'symmetric',
                 'symmetric': 'reflect'
             }
+
             np_mode = np_mode_translation_dict.get(mode, mode)
             if image.ndim == 2:
                 warped = _warp_fast[ctype](image, matrix,
@@ -955,7 +973,11 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
 
     if warped is None:
         # use ndi.map_coordinates
-
+        if mode == 'constant':
+            # scipy.ndimage's 'grid-constant' is like _warp_fast's 'constant'
+            ndi_mode = 'grid-constant'
+        else:
+            ndi_mode = mode
         if (isinstance(inverse_map, np.ndarray) and
                 inverse_map.shape == (3, 3)):
             # inverse_map is a transformation matrix as numpy array,
@@ -991,7 +1013,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         prefilter = order > 1
 
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
-                                     mode=mode, order=order, cval=cval)
+                                     mode=ndi_mode, order=order, cval=cval)
 
     _clip_warp_output(image, warped, mode, cval, clip)
 

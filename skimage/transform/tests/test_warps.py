@@ -483,7 +483,7 @@ def test_downsize_anti_aliasing():
     resize(x, out_size, order=1, mode='wrap',
            anti_aliasing=True, anti_aliasing_sigma=sigma)
 
-    with pytest.raises(ValueError):  # Unknown mode, or cannot translate mode
+    with pytest.raises(RuntimeError):  # Unknown mode, or cannot translate mode
         resize(x, out_size, order=1, mode='non-existent',
                anti_aliasing=True, anti_aliasing_sigma=sigma)
 
