@@ -35,7 +35,7 @@ Pull Requests Included
 
 5 authors added to this release [alphabetical by first name or login]
 ---------------------------------------------------------------------
-Bartłomiej Śmietanka
+- Bartłomiej Śmietanka
 - Dave Mellert
 - Gregory Lee
 - Mark Harfouche
