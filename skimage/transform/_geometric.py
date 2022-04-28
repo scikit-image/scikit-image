@@ -1408,7 +1408,8 @@ class SimilarityTransform(EuclideanTransform):
         elif self.dimensionality == 3:
             return np.cbrt(np.linalg.det(self.params))
         else:
-            raise NotImplementedError('Scale is only implemented for 2D and 3D.')
+            raise NotImplementedError(
+                'Scale is only implemented for 2D and 3D.')
 
 
 class PolynomialTransform(GeometricTransform):
