@@ -32,12 +32,14 @@ Pull Requests Included
 - Backport PR #6355 on branch v0.19.x (remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough`) (#6357)
 - Backport PR #6352 on branch v0.19.x (Fix channel_axis default for cycle_spin) (#6358)
 - Backport PR #6348 on branch v0.19.x (Fix smoothed image computation when mask is None in canny) (#6359)
+- Backport PR #6361 on branch v0.19.x (Document support for Path objects in io functions) #6363
 
-5 authors added to this release [alphabetical by first name or login]
+6 authors added to this release [alphabetical by first name or login]
 ---------------------------------------------------------------------
 - Bartłomiej Śmietanka
 - Dave Mellert
 - Gregory Lee
+- johnthagen (johnthagen)
 - Mark Harfouche
 - Riadh Fezzani
 
