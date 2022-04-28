@@ -166,12 +166,12 @@ def _umeyama(src, dst, estimate_scale):
 def _rotation_matrix_to_euler_angles(R):
     """
     Converts rotation matrix to euler angles.
-    
+
     Parameters
     ----------
     R: (3, 3) array
         Rotation matrix
-    
+
     Returns
     -------
     euler_angles: (roll, pitch, yaw)
@@ -1284,7 +1284,7 @@ class EuclideanTransform(ProjectiveTransform):
             return _rotation_matrix_to_euler_angles(self.params[:3, :3])
         else:
             raise NotImplementedError(
-                'The rotation property is only implemented for 2D and 3D transforms.'
+                'Rotation only implemented for 2D and 3D transforms.'
             )
 
     @property
