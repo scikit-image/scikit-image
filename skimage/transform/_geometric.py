@@ -163,6 +163,35 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
+def rotation_matrix_to_euler_angles(R):
+    """
+    Converts rotation matrix to euler angles.
+    
+    Parameters
+    ----------
+    R: (3, 3) array
+        Rotation matrix
+    
+    Returns
+    -------
+    euler_angles: (roll, pitch, yaw)
+        Euler angles in radians
+
+    """
+    sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(R[2, 1], R[2, 2])
+        y = math.atan2(-R[2, 0], sy)
+        z = math.atan2(R[1, 0], R[0, 0])
+    else:
+        x = math.atan2(-R[1, 2], R[1, 1])
+        y = math.atan2(-R[2, 0], sy)
+        z = 0
+
+    return np.array([x, y, z])
+
+
 class GeometricTransform(object):
     """Base class for geometric transformations.
 
@@ -1249,17 +1278,24 @@ class EuclideanTransform(ProjectiveTransform):
 
     @property
     def rotation(self):
-        return math.atan2(self.params[1, 0], self.params[1, 1])
+        if self.dimensionality == 2:
+            return math.atan2(self.params[1, 0], self.params[1, 1])
+        elif self.dimensionality == 3:
+            return rotation_matrix_to_euler_angles(self.params[:3, :3])
+        else:
+            raise NotImplementedError(
+                'The rotation property is only implemented for 2D and 3D transforms.'
+            )
 
     @property
     def translation(self):
-        return self.params[0:2, 2]
+        return self.params[0:self.dimensionality, self.dimensionality]
 
 
 class SimilarityTransform(EuclideanTransform):
-    """2D similarity transformation.
+    """Similarity transformation.
 
-    Has the following form::
+    2D Has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1347,9 +1383,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, dim) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, dim) array
             Destination coordinates.
 
         Returns
@@ -1366,8 +1402,13 @@ class SimilarityTransform(EuclideanTransform):
 
     @property
     def scale(self):
-        # det = scale**(# of dimensions), therefore scale = det**(1/2)
-        return np.sqrt(np.linalg.det(self.params))
+        # det = scale**(# of dimensions), therefore scale = det**(1/ndim)
+        if self.dimensionality == 2:
+            return np.sqrt(np.linalg.det(self.params))
+        elif self.dimensionality == 3:
+            return np.cbrt(np.linalg.det(self.params))
+        else:
+            raise NotImplementedError('Scale is only implemented for 2D and 3D.')
 
 
 class PolynomialTransform(GeometricTransform):
