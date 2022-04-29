@@ -1267,7 +1267,7 @@ class EuclideanTransform(ProjectiveTransform):
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
-    2D Has the following form::
+    Has the following form in 2D::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1355,9 +1355,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, dim) array
+        src : (N, ndim) array
             Source coordinates.
-        dst : (N, dim) array
+        dst : (N, ndim) array
             Destination coordinates.
 
         Returns
