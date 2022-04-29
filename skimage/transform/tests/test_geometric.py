@@ -149,7 +149,7 @@ def test_3d_similarity_estimation():
     # Random transformation for testing
     angles = np.random.random((3,)) * 2 * np.pi - np.pi
     scale = np.random.randint(0, 20)
-    rotation_matrix = _euler_rotation_matrix(angles)*scale
+    rotation_matrix = _euler_rotation_matrix(angles) * scale
     translation_vector = np.random.random((3,))
     dst_points = []
     for pt in src_points:
