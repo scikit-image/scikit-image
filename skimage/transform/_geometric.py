@@ -163,35 +163,6 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-def _rotation_matrix_to_euler_angles(R):
-    """
-    Converts rotation matrix to euler angles.
-
-    Parameters
-    ----------
-    R: (3, 3) array
-        Rotation matrix
-
-    Returns
-    -------
-    euler_angles: (roll, pitch, yaw)
-        Euler angles in radians
-
-    """
-    sy = math.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
-    singular = sy < 1e-6
-    if not singular:
-        x = math.atan2(R[2, 1], R[2, 2])
-        y = math.atan2(-R[2, 0], sy)
-        z = math.atan2(R[1, 0], R[0, 0])
-    else:
-        x = math.atan2(-R[1, 2], R[1, 1])
-        y = math.atan2(-R[2, 0], sy)
-        z = 0
-
-    return np.array([x, y, z])
-
-
 class GeometricTransform(object):
     """Base class for geometric transformations.
 
@@ -1281,7 +1252,8 @@ class EuclideanTransform(ProjectiveTransform):
         if self.dimensionality == 2:
             return math.atan2(self.params[1, 0], self.params[1, 1])
         elif self.dimensionality == 3:
-            return _rotation_matrix_to_euler_angles(self.params[:3, :3])
+            # Returning 3D Euler rotation matrix
+            return self.params[:3, :3]
         else:
             raise NotImplementedError(
                 'Rotation only implemented for 2D and 3D transforms.'

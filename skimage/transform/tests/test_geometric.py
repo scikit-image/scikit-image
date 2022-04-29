@@ -71,6 +71,31 @@ def test_euclidean_estimation():
     assert_almost_equal(tform3.params, tform2.params)
 
 
+def test_3d_euclidean_estimation():
+    src_points = np.random.rand(1000, 3)
+
+    # Random transformation for testing
+    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    rotation_matrix = _euler_rotation_matrix(angles)
+    translation_vector = np.random.random((3,))
+    dst_points = []
+    for pt in src_points:
+        pt_r = pt.reshape(3, 1)
+        dst = np.matmul(rotation_matrix, pt_r) + \
+            translation_vector.reshape(3, 1)
+        dst = dst.reshape(3)
+        dst_points.append(dst)
+
+    dst_points = np.array(dst_points)
+    # estimating the transformation
+    tform = EuclideanTransform(dimensionality=3)
+    assert tform.estimate(src_points, dst_points)
+    estimated_rotation = tform.rotation
+    estimated_translation = tform.translation
+    assert_almost_equal(estimated_rotation, rotation_matrix)
+    assert_almost_equal(estimated_translation, translation_vector)
+
+
 def test_euclidean_init():
     # init with implicit parameters
     rotation = 1
@@ -116,6 +141,34 @@ def test_similarity_estimation():
     tform3 = SimilarityTransform()
     assert tform3.estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
+
+
+def test_3d_similarity_estimation():
+    src_points = np.random.rand(1000, 3)
+
+    # Random transformation for testing
+    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    scale = np.random.randint(0, 20)
+    rotation_matrix = _euler_rotation_matrix(angles)*scale
+    translation_vector = np.random.random((3,))
+    dst_points = []
+    for pt in src_points:
+        pt_r = pt.reshape(3, 1)
+        dst = np.matmul(rotation_matrix, pt_r) + \
+            translation_vector.reshape(3, 1)
+        dst = dst.reshape(3)
+        dst_points.append(dst)
+
+    dst_points = np.array(dst_points)
+    # estimating the transformation
+    tform = SimilarityTransform(dimensionality=3)
+    assert tform.estimate(src_points, dst_points)
+    estimated_rotation = tform.rotation
+    estimated_translation = tform.translation
+    estimated_scale = tform.scale
+    assert_almost_equal(estimated_translation, translation_vector)
+    assert_almost_equal(estimated_scale, scale)
+    assert_almost_equal(estimated_rotation, rotation_matrix)
 
 
 def test_similarity_init():
