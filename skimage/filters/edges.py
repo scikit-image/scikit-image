@@ -36,9 +36,9 @@ VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 # 2D-only filter weights
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
-                               [0, -1]], dtype=np.double)
+                               [0, -1]], dtype=np.float64)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
-                               [-1, 0]], dtype=np.double)
+                               [-1, 0]], dtype=np.float64)
 
 # These filter weights can be found in Farid & Simoncelli (2004),
 # Table 1 (3rd and 4th row). Additional decimal places were computed

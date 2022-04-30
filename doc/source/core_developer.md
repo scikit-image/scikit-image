@@ -214,7 +214,7 @@ Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
-<skimage-core@python.org>. As of this writing, there is no hard-and-fast
+<skimage-core@discuss.scientific-python.org>. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have: been
 part of the project for at least six months, contributed
 significant changes of their own, contributed to the discussion and

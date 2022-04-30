@@ -56,7 +56,7 @@ cdef np_floats cell_hog(np_floats[:, ::1] magnitude,
         The total HOG value.
     """
     cdef int cell_column, cell_row, cell_row_index, cell_column_index
-    cdef float total = 0.
+    cdef cnp.float32_t total = 0.
 
     for cell_row in range(range_rows_start, range_rows_stop):
         cell_row_index = row_index + cell_row
