@@ -157,12 +157,12 @@ class ImageCollection(object):
       x = ic[0]  # calls vidread_step(video_file, step=3)
       x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
-    Alternatively, if a `load_func` is provided and `load_pattern` is a
-    sequence, an ImageCollection of corresponding length will be created,
+    Alternatively, if `load_func` is provided and `load_pattern` is a
+    sequence, an `ImageCollection` of corresponding length will be created,
     and the individual images will be loaded by calling `load_func` with the
     matching element of the `load_pattern` as its first argument. In this
     case, the elements of the sequence do not need to be resolvable file
-    names (or strings at all). For example, to create an ImageCollection
+    names (or strings at all). For example, to create an `ImageCollection`
     containing 500 images from a video::
 
       class vidread_random:
@@ -193,7 +193,7 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    >>> image_col = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
 
     >>> class multiread:
     ...     def __init__ (self, f):
@@ -202,8 +202,8 @@ class ImageCollection(object):
     ...         return self.vid.get_data(frameno)
     ...
     >>> filename = data_dir + '/no_time_for_that_tiny.gif'
-    >>> ic = io.ImageCollection(range(24), load_func=multiread(filename))
-    >>> len(ic)
+    >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> len(image_col)
     24
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
