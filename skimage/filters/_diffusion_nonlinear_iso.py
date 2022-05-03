@@ -17,13 +17,14 @@ def diffusion_nonlinear_iso(
         Input image.
     time_step : scalar
         Time increment in each diffusion iteration.
+        Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
         Default is 0.25.
     num_iters : scalar
         Number of diffusion iterations.
         Default is 20.
     scheme : {'explicit', 'aos'}, optional
         The computational scheme of the diffusion process.
-        'explicit'
+        'explicit' basic explicit finite difference scheme.
         'aos' stands for additive operator splitting [1].
         Default is 'aos'.
     sigma : scalar
@@ -44,12 +45,9 @@ def diffusion_nonlinear_iso(
     .. [1] Weickert, Joachim. Anisotropic diffusion in image processing.
         Vol. 1. Stuttgart: Teubner, 1998.
     Notes
-    .. [2] Weickert, Joachim. "A review of nonlinear diffusion filtering." International
-    conference on scale-space theories in computer vision. Springer, Berlin, Heidelberg, 1997.
 
     Examples
     --------
-
     Apply a Nonlinear Isotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
@@ -70,6 +68,11 @@ def diffusion_nonlinear_iso(
 
     if 2 > len(image.shape) > 3:
         raise RuntimeError('Nonsupported image type')
+
+    if (scheme == 'explicit') and (time_step > 0.25):
+        time_step = 0.25
+        raise Warning(
+            'time_step bigger that 0.25 is unstable for explicit scheme. Time_step has been set to 0.25.')
 
     border = 1
     type = image.dtype

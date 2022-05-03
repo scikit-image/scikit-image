@@ -7,6 +7,8 @@ from numpy.testing import assert_equal
 import pytest
 from skimage import data
 
+from skimage.filters import gaussian
+
 
 def Crop(img, border_x, border_y):
     return img[border_x: - border_x, border_y: - border_y]
@@ -14,6 +16,39 @@ def Crop(img, border_x, border_y):
 
 camera_crop = Crop(data.camera(), 200, 200)  # image 117 x 117 pxls
 cat_color = data.chelsea()[80: - 120, 120: - 190]  # image 100 x 141 x 3
+
+
+def getAverageRelativeDifference(a, b):
+    return np.mean(np.abs(a-b)) / np.mean([np.mean(a), np.mean(b)])
+
+
+"""
+Implementation of diffusion filters - linear diffusion, 
+nonlinear isotropic diffusion and nonlinear anisotropic diffusion.
+
+Linear diffusion corresponds to a gaussian filter
+and is present only for theoretical and consistency purposes. 
+
+Nonlinear isotropic diffusion contains implementation of different diffusivity
+types : Perona-Malik, Charbonniere, exponencial.
+
+Nonlinear anisotropic diffusion has two modes ('eed', 'ced'), which correspond to 
+Edge Enhancing Diffusion and Coherence Enhancing Diffusion.
+
+All of the diffusion filters are computed by one of two schemes ('explicit', 'aos').
+"""
+
+
+@ pytest.mark.parametrize('time_step', [0.25, 0.1])
+@ pytest.mark.parametrize('num_iters', [12, 25])
+@ pytest.mark.parametrize('scheme', ['aos', 'explicit'])
+def test_gauss_lindiff_equal(time_step, num_iters, scheme):
+    limit_diff = 0.02
+    sigma = np.sqrt(2*num_iters*time_step)
+    img1 = 255*gaussian(camera_crop, sigma)
+    img2 = diffusion_linear(camera_crop, time_step=time_step,
+                            num_iters=num_iters, scheme=scheme)
+    assert getAverageRelativeDifference(img1, img2) < limit_diff
 
 
 @ pytest.mark.parametrize('scheme', ['aos', 'explicit'])
@@ -73,7 +108,7 @@ def test_dtype(image, dtype, scheme):
 
 @ pytest.mark.parametrize('image', [camera_crop, cat_color])
 @ pytest.mark.parametrize('scheme', ['aos', 'explicit'])
-def test_size(image, scheme):
+def test_shape(image, scheme):
     in_shape = image.shape
     assert_equal(diffusion_linear(
         image, num_iters=2, scheme=scheme).shape, in_shape)
@@ -106,10 +141,6 @@ def test_parameter_validity(scheme, mode):
     with pytest.raises(ValueError):
         diffusion_linear(
             camera_crop, time_step=-1, num_iters=-1, scheme='explicit', alpha=0)
-
-
-def getAverageRelativeDifference(a, b):
-    return np.mean(np.abs(a-b)) / np.mean([np.mean(a), np.mean(b)])
 
 
 @ pytest.mark.parametrize('diffusivity_type', ['perona-malik', 'charbonnier', 'exponencial'])

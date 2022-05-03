@@ -9,6 +9,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
                               scheme='aos', sigma_eed=2.5, sigma_ced=0.5, rho=6, alpha=0.01):
     """
     Calculates the nonlinear anisotropic diffusion of an image.
+    Namely Edge Enhancing Diffusion[2] and Coherence Enhancing Diffusion [3].
 
     Parameters
     ----------
@@ -20,13 +21,14 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
         Default is 'eed'.
     time_step : scalar, optional
         Time increment in each diffusion iteration.
+        Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
         Default is 0.25.
     num_iters : scalar
         Number of diffusion iterations.
         Default is 20.
     scheme : {'explicit', 'aos'}, optional
         The computational scheme of the diffusion process.
-        'explicit'
+        'explicit' basic explicit finite difference scheme.
         'aos' stands for additive operator splitting [1].
         Default is 'aos'.
     sigma_eed : scalar, optional
@@ -58,9 +60,11 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
     .. [1] Weickert, Joachim. Anisotropic diffusion in image processing.
     Vol. 1. Stuttgart: Teubner, 1998.
     Notes
-    .. [2] Weickert, Joachim. "A review of nonlinear diffusion filtering."
-    International conference on scale-space theories in computer vision.
-    Springer, Berlin, Heidelberg, 1997.
+    .. [2] Perona, P., Shiota, T., Malik, J. (1994). Anisotropic Diffusion.
+    In: ter Haar Romeny, B.M. (eds) Geometry-Driven Diffusion in Computer Vision.
+    Computational Imaging and Vision, vol 1. Springer, Dordrecht.
+    .. [3] Weickert, Joachim. "Coherence-enhancing diffusion filtering." 
+    International journal of computer vision 31.2 (1999): 111-127.
 
     Examples
     --------
@@ -90,6 +94,11 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
 
     if 2 > len(image.shape) > 3:
         raise RuntimeError('Nonsupported image type')
+
+    if (scheme == 'explicit') and (time_step > 0.25):
+        time_step = 0.25
+        raise Warning(
+            'time_step bigger that 0.25 is unstable for explicit scheme. Time_step has been set to 0.25.')
 
     type = image.dtype
     img = image.astype(np.float64).copy()

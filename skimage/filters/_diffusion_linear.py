@@ -3,9 +3,12 @@ from .._shared.diffusion_utils import (linear_step,
                                        aniso_diff_step_AOS, slice_border)
 
 
-def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', sigma=2.5, alpha=0.01):
+def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', alpha=0.01):
     """
     Calculates the linear diffusion of an image.
+    This diffusion filter corresponds to a Gaussian filter with sigma = sqrt(2 * time_step * num_iters).
+    Gaussian filter achieves the same result more efficiently.
+    This function exists only for the purpose of consistency with nonlinear diffusion filters. 
 
     Parameters
     ----------
@@ -13,19 +16,16 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', sigma=2.
         Input image.
     time_step : scalar
         Time increment in each diffusion iteration.
+        Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
         Default is 0.25.
     num_iters : scalar
         Number of diffusion iterations.
         Default is 20.
     scheme : {'explicit', 'aos'}, optional
         The computational scheme of the diffusion process.
-        'explicit'
+        'explicit' basic explicit finite difference scheme.
         'aos' stands for additive operator splitting [1].
         Default is 'aos'.
-    sigma : scalar
-        The standard deviation of the Gaussian filter that is applied to image
-        in each diffusion iteration.
-        Default is 2.5.
     alpha : scalar
         The parameter that determines a treshold contrast for edges.
         Default is 0.01.
@@ -46,8 +46,7 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', sigma=2.
 
     >>> from skimage.filters._diffusion_linear import diffusion_linear
     >>> from skimage.data import camera
-    >>> filtered_image = diffusion_linear(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=5, alpha=0.01)
-
+    >>> filtered_image = diffusion_linear(camera(), time_step=0.25, num_iters=40, scheme='explicit', alpha=0.01)
     >>> filtered_image2 = diffusion_linear(camera())
     """
     if alpha <= 0:
@@ -60,7 +59,12 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', sigma=2.
         raise ValueError('invalid num_iters')
 
     if 2 > len(image.shape) > 3:
-        raise RuntimeError('Nonsupported image type')
+        raise RuntimeError('Unsupported image type')
+
+    if (scheme == 'explicit') and (time_step > 0.25):
+        time_step = 0.25
+        raise Warning(
+            'time_step bigger that 0.25 is unstable for explicit scheme. Time_step has been set to 0.25.')
 
     border = 1
     type = image.dtype
@@ -71,17 +75,17 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos', sigma=2.
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_linear_grey(
-                img[:, :, i], time_step, num_iters, scheme, sigma, alpha)
+                img[:, :, i], time_step, num_iters, scheme, alpha)
     else:
         img = np.pad(img, pad_width=border, mode='edge')
         img = diffusion_linear_grey(
-            img, time_step, num_iters, scheme, sigma, alpha)
+            img, time_step, num_iters, scheme, alpha)
 
     img = slice_border(img, border)  # remove border
     return img.astype(type)
 
 
-def diffusion_linear_grey(image, time_step, num_iters, scheme, sigma, alpha):
+def diffusion_linear_grey(image, time_step, num_iters, scheme, alpha):
     if scheme == 'aos':
         ones = np.ones(image.shape)
         zeros = np.zeros(image.shape)
