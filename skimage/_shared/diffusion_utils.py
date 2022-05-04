@@ -75,14 +75,14 @@ def linear_step(image, out_image, tau):
 
 
 @jit(nopython=True)
-def get_diffusivity(gradX, gradY, alpha, type):
+def get_diffusivity(gradX, gradY, lmbd, type):
     gradMag = np.sqrt(np.power(gradX, 2) + np.power(gradY, 2))
     if type == 'perona-malik':
-        return 1 / (1 + (np.power(gradMag, 2) / np.power(alpha, 2)))
+        return 1 / (1 + (np.power(gradMag, 2) / np.power(lmbd, 2)))
     elif type == 'charbonnier':
-        return 1 / np.square(1 + (np.power(gradMag, 2) / np.power(alpha, 2)))
+        return 1 / np.square(1 + (np.power(gradMag, 2) / np.power(lmbd, 2)))
     elif type == 'exponencial':
-        return np.exp(-np.power(gradMag, 2) / 2 * np.power(alpha, 2))
+        return np.exp(-np.power(gradMag, 2) / 2 * np.power(lmbd, 2))
     else:
         raise ValueError('invalid diffusivity type')
 

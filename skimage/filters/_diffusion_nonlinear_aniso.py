@@ -6,10 +6,10 @@ from numba import jit
 
 
 def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
-                              scheme='aos', sigma_eed=2.5, sigma_ced=0.5, rho=6, alpha=0.01):
+                              scheme='aos', sigma_eed=2.5, sigma_ced=0.5, rho=6, lmbd=2.):
     """
     Calculates the nonlinear anisotropic diffusion of an image.
-    Namely Edge Enhancing Diffusion[2] and Coherence Enhancing Diffusion [3].
+    Namely Edge Enhancing Diffusion[1] and Coherence Enhancing Diffusion [2].
 
     Parameters
     ----------
@@ -46,24 +46,27 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
         The standard deviation of the Gaussian filter that is applied
         in order to smooth structure tensor in each diffusion iteration.
         Default is 6.
-    alpha : scalar, optional
-        The parameter that determines a treshold contrast for edges.
-        Default is 0.01.
+    lmbd : scalar, optional
+        Used only for Edge Enhancing Diffusion.
+        Lambda parameter that determines a treshold contrast for edges.
+        Default is 2.0.
 
     Returns
     -------
     filtered_image : ndarray
         Filtered image
+    
+    Notes
+    ----------
+    Time of diffusion is defined as time_step * num_iters. The bigger the time_step is,
+    the lower the num_iters parameter has to be and the faster the computation is.
 
     References
     ----------
     .. [1] Weickert, Joachim. Anisotropic diffusion in image processing.
     Vol. 1. Stuttgart: Teubner, 1998.
     Notes
-    .. [2] Perona, P., Shiota, T., Malik, J. (1994). Anisotropic Diffusion.
-    In: ter Haar Romeny, B.M. (eds) Geometry-Driven Diffusion in Computer Vision.
-    Computational Imaging and Vision, vol 1. Springer, Dordrecht.
-    .. [3] Weickert, Joachim. "Coherence-enhancing diffusion filtering." 
+    .. [2] Weickert, Joachim. "Coherence-enhancing diffusion filtering." 
     International journal of computer vision 31.2 (1999): 111-127.
 
     Examples
@@ -75,16 +78,16 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
 
     Apply Edge Enhancing Diffusion 
     >>> filtered_image_eed = diffusion_nonlinear_aniso(camera(), mode='eed', time_step=0.25, num_iters=40,
-                              scheme='explicit', sigma_eed=2.0, sigma_ced=1.0, rho=1.0, alpha=0.01)
+                              scheme='explicit', sigma_eed=2.0, lmbd=0.01)
     >>> filtered_image_eed_2 = diffusion_nonlinear_aniso(camera())
 
     Apply Coherence Enhancing Diffusion
     >>> filtered_image_ced = diffusion_nonlinear_aniso(camera(), mode='ced', time_step=0.25, num_iters=40,
-                              scheme='aos', sigma_eed=1.0, sigma_ced=0.5, rho=6.0, alpha=0.01)
+                              scheme='aos', sigma_ced=0.5, rho=6.0)
     >>> filtered_image_ced_2 = diffusion_nonlinear_aniso(camera(), mode='ced')
     """
-    if alpha <= 0:
-        raise ValueError('invalid alpha')
+    if lmbd <= 0:
+        raise ValueError('invalid lambda value')
 
     if time_step <= 0:
         raise ValueError('invalid time_step')
@@ -92,13 +95,19 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
     if num_iters < 0:
         raise ValueError('invalid num_iters')
 
-    if 2 > len(image.shape) > 3:
+    if (len(image.shape) > 3) or (len(image.shape) < 2):
         raise RuntimeError('Nonsupported image type')
 
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
-        raise Warning(
-            'time_step bigger that 0.25 is unstable for explicit scheme. Time_step has been set to 0.25.')
+        raise ValueError(
+            'time_step bigger that 0.25 is unstable for explicit scheme.')
+
+    if (scheme!='explicit') and (scheme!='aos'):
+        raise ValueError('invalid scheme')
+
+    if (mode!='eed') and (mode != 'ced'):
+        raise ValueError('invalid mode')
 
     type = image.dtype
     img = image.astype(np.float64).copy()
@@ -109,28 +118,27 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_nonlinear_aniso_grey(
-                img[:, :, i], mode, time_step, num_iters, scheme, sigma_eed, sigma_ced, rho, alpha, border)
+                img[:, :, i], mode, time_step, num_iters, scheme, sigma_eed, sigma_ced, rho, lmbd, border)
     else:
         img = np.pad(img, pad_width=border, mode='edge')
         img = diffusion_nonlinear_aniso_grey(
             img, mode, time_step, num_iters,
-            scheme, sigma_eed, sigma_ced, rho, alpha, border)
+            scheme, sigma_eed, sigma_ced, rho, lmbd, border)
 
     img = slice_border(img, border)
     return img.astype(type)
 
 
-def diffusion_nonlinear_aniso_grey(image, mode, time_step, num_iters, scheme, sigma_eed, sigma_ced, rho, alpha, border):
+def diffusion_nonlinear_aniso_grey(image, mode, time_step, num_iters, scheme, sigma_eed, sigma_ced, rho, lmbd, border):
+    alpha = 0.01
     if mode == 'eed':
         image = diffusion_nonlinear_aniso_eed(
-            src=image, num_iter=num_iters, tau=time_step, alpha=alpha,
+            src=image, num_iter=num_iters, tau=time_step, lmbd=lmbd,
             sig=sigma_eed, scheme=scheme, border=border)
     elif mode == 'ced':
         image = diffusion_nonlinear_aniso_ced(
             src=image, num_iter=num_iters, tau=time_step, alpha=alpha,
             sig=sigma_ced, rho=rho, scheme=scheme, border=border)
-    else:
-        raise ValueError('invalid mode')
     return image
 
 
@@ -189,7 +197,7 @@ def ced_tensor(Da, Db, Dc, alpha):
 
             # set eigen values
             mi1 = alpha
-            if coherence < 2.22045e-16:  # in ref impl coherence is ^2
+            if coherence < 2.22045e-16:  
                 mi2 = alpha
             else:
                 mi2 = alpha + (1 - alpha) * np.exp(-3.31488 / coherence)
@@ -219,12 +227,10 @@ def diffusion_nonlinear_aniso_ced(src, num_iter, tau, alpha, sig, rho, scheme, b
             aniso_diff_step_AOS(tmp, Dc,  Db, Da, src, tau)
         elif scheme == 'explicit':
             nonlinear_aniso_step(tmp, src, Da, Db, Dc, tau, border)
-        else:
-            raise ValueError('invalid scheme')
     return src
 
 
-def diffusion_nonlinear_aniso_eed(src, num_iter, tau, alpha, sig, scheme, border):
+def diffusion_nonlinear_aniso_eed(src, num_iter, tau, lmbd, sig, scheme, border):
     Da = Db = Dc = np.zeros(src.shape).astype(np.float64)
     for i in range(num_iter):
         tmp = src.copy()
@@ -235,11 +241,9 @@ def diffusion_nonlinear_aniso_eed(src, num_iter, tau, alpha, sig, scheme, border
         Db = np.multiply(gradX, gradY).astype(np.float64)
         Dc = np.multiply(gradY, gradY).astype(np.float64)
 
-        eed_tensor(Dc, Db, Da, alpha)
+        eed_tensor(Dc, Db, Da, lmbd)
         if scheme == 'aos':
             aniso_diff_step_AOS(tmp, Dc, Db, Da, src, tau)
         elif scheme == 'explicit':
             nonlinear_aniso_step(tmp, src, Da, Db, Dc, tau, border)
-        else:
-            raise ValueError('invalid scheme')
     return src

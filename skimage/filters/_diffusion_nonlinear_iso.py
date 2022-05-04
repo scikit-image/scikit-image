@@ -7,7 +7,7 @@ from .._shared.diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
 
 def diffusion_nonlinear_iso(
         image, diffusivity_type='perona-malik', time_step=0.25, num_iters=20,
-        scheme='aos', sigma=0.1, alpha=2.):
+        scheme='aos', sigma=0.1, lmbd=2.):
     """
     Calculates the nonlinear isotropic diffusion of an image.
 
@@ -15,11 +15,14 @@ def diffusion_nonlinear_iso(
     ----------
     image : array_like
         Input image.
-    time_step : scalar
+    time_step : scalar, optional
         Time increment in each diffusion iteration.
         Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
         Default is 0.25.
-    num_iters : scalar
+    diffusivity_type : {'perona-malik', 'charbonnier', 'exponencial'}, optional
+        Type of diffusivity. The diffusivity term in the diffusion equation is set according to the chosen diffusivity type.
+        Default is 'perona-malik'
+    num_iters : scalar, optional
         Number of diffusion iterations.
         Default is 20.
     scheme : {'explicit', 'aos'}, optional
@@ -31,8 +34,8 @@ def diffusion_nonlinear_iso(
         The standard deviation of the Gaussian filter that is applied to image
         in each diffusion iteration before the gradient estimation.
         Default is 0.1.
-    alpha : scalar
-        The parameter that determines a treshold contrast for edges.
+    lmbd : scalar, optional 
+        Lambda parameter that determines a treshold contrast for edges.
         Default is 2.0.
 
     Returns
@@ -53,26 +56,29 @@ def diffusion_nonlinear_iso(
     >>> from skimage.data import camera
     >>> from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
 
-    >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=0.1, alpha=2.)
+    >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=0.1, lmbd=2.)
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
 
-    if alpha <= 0:
-        raise ValueError('invalid alpha')
+    if lmbd <= 0:
+        raise ValueError('invalid lambda parameter.')
 
     if time_step <= 0:
-        raise ValueError('invalid time_step')
+        raise ValueError('invalid time_step.')
 
     if num_iters < 0:
-        raise ValueError('invalid num_iters')
+        raise ValueError('invalid num_iters.')
 
-    if 2 > len(image.shape) > 3:
-        raise RuntimeError('Nonsupported image type')
+    if (len(image.shape) > 3) or (len(image.shape) < 2):
+        raise RuntimeError('Nonsupported image type.')
 
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
-        raise Warning(
-            'time_step bigger that 0.25 is unstable for explicit scheme. Time_step has been set to 0.25.')
+        raise ValueError(
+            'time_step bigger that 0.25 is unstable for explicit scheme.')
+    
+    if (scheme!='explicit') and (scheme!='aos'):
+        raise ValueError('invalid scheme')
 
     border = 1
     type = image.dtype
@@ -83,19 +89,19 @@ def diffusion_nonlinear_iso(
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_nonlinear_iso_grey(
                 img[:, :, i], diffusivity_type, time_step, num_iters,
-                scheme, sigma, alpha)
+                scheme, sigma, lmbd)
     elif len(img.shape) == 2:
         img = np.pad(img, pad_width=border, mode='edge')  # add Neumann border
         img = diffusion_nonlinear_iso_grey(
             img, diffusivity_type, time_step, num_iters,
-            scheme, sigma, alpha)
+            scheme, sigma, lmbd)
 
     img = slice_border(img, border)  # remove border
     return img.astype(type)
 
 
 def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
-                                 scheme, sigma, alpha):
+                                 scheme, sigma, lmbd):
     if scheme == 'aos':
         diffusion = np.ones(image.shape)
         zeros = np.zeros(image.shape)
@@ -106,20 +112,17 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
 
         if scheme == 'explicit':
             nonlinear_iso_step(tmp, image, time_step, gradX,
-                               gradY, alpha, diffusivity_type)
+                               gradY, lmbd, diffusivity_type)
         elif scheme == 'aos':
             get_diffusivity_tensor(diffusion, gradX, gradY,
-                                   alpha, diffusivity_type)
+                                   lmbd, diffusivity_type)
             aniso_diff_step_AOS(tmp, diffusion,  zeros,
                                 diffusion, image, time_step)
-        else:
-            raise ValueError('invalid scheme')
-
     return image
 
 
 @jit(nopython=True)
-def get_diffusivity_tensor(out, gradX, gradY, alpha, type):
+def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):
-            out[i, j] = get_diffusivity(gradX[i, j], gradY[i, j], alpha, type)
+            out[i, j] = get_diffusivity(gradX[i, j], gradY[i, j], lmbd, type)
