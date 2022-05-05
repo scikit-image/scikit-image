@@ -1,9 +1,10 @@
 import numpy as np
 from .._shared.diffusion_utils import (linear_step,
                                        aniso_diff_step_AOS, slice_border)
+from skimage import data, img_as_float
 
 
-def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
+def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     """
     Calculates the result of linear diffusion equation for an input image
     at time num_iters * time_step.
@@ -12,7 +13,7 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
     See skimage.filters.gaussian. This function exists for the purpose
     of consistency.
     with nonlinear diffusion filters.
-
+  
     Parameters
     ----------
     image : array_like
@@ -39,6 +40,14 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
     filtered_image : ndarray
         Filtered image
 
+    Notes
+    ----------
+    Time of diffusion is defined as time_step * num_iters. The bigger
+    the time_step is, the lower the num_iters parameter has to be
+    and the faster the computation is. However, for explicit scheme
+    the maximal stable value of time_step is 0.25. If bigger value is
+    set by the user, time_step will be automaticaly set to 0.25.
+    
     References
     ----------
     .. [1] Weickert, Joachim. Anisotropic diffusion in image processing.
@@ -64,15 +73,16 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
 
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
-        raise ValueError(
-            'time_step bigger that 0.25 is unstable for explicit scheme.')
+        print('time_step bigger than 0.25 is unstable for explicit scheme.\
+               Time step has been set to 0.25.')
 
     if (scheme != 'explicit') and (scheme != 'aos'):
         raise ValueError('invalid scheme')
 
     border = 1
     type = image.dtype
-    img = image.astype(np.float64).copy()
+    #img = image.astype(np.float64).copy()
+    img = img_as_float(image)*255 #  due to precision error
     # add Neumann border
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,
@@ -86,8 +96,7 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
             img, time_step, num_iters, scheme)
 
     img = slice_border(img, border)  # remove border
-    return img.astype(type)
-
+    return img / 255
 
 def diffusion_linear_grey(image, time_step, num_iters, scheme):
     if scheme == 'aos':

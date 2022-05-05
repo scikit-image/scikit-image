@@ -1,13 +1,14 @@
 import numpy as np
-# from numba import jit
+from numba import jit
 from .._shared.filters import gaussian
 from .._shared.diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
                                        slice_border, get_diffusivity)
+from skimage import img_as_float
 
 
 def diffusion_nonlinear_iso(
-        image, diffusivity_type='perona-malik', time_step=0.25, num_iters=20,
-        scheme='aos', sigma=0.1, lmbd=2.):
+        image, diffusivity_type='perona-malik', time_step=1., num_iters=20,
+        scheme='aos', sigma=1.0, lmbd=2.):
     """
     Calculates the nonlinear isotropic diffusion of an image.
 
@@ -45,6 +46,14 @@ def diffusion_nonlinear_iso(
     filtered_image : ndarray
         Filtered image
 
+    Notes
+    ----------
+    Time of diffusion is defined as time_step * num_iters. The bigger
+    the time_step is, the lower the num_iters parameter has to be
+    and the faster the computation is. However, for explicit scheme
+    the maximal stable value of time_step is 0.25. If bigger value is
+    set by the user, time_step will be automaticaly set to 0.25.
+
     References
     ----------
     .. [1] Weickert, Joachim. Anisotropic diffusion in image processing.
@@ -61,6 +70,7 @@ def diffusion_nonlinear_iso(
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
 
+####TODO jit!!! 
     if lmbd <= 0:
         raise ValueError('invalid lambda parameter.')
 
@@ -75,15 +85,16 @@ def diffusion_nonlinear_iso(
 
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
-        raise ValueError(
-            'time_step bigger that 0.25 is unstable for explicit scheme.')
+        print('time_step bigger than 0.25 is unstable for explicit scheme.\
+               Time step has been set to 0.25.')
 
     if (scheme != 'explicit') and (scheme != 'aos'):
         raise ValueError('invalid scheme')
 
     border = 1
     type = image.dtype
-    img = image.astype(np.float64).copy()
+    #img = image.astype(np.float64).copy()
+    img = img_as_float(image)*255 #  due to precision error
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')  # add Neumann border
@@ -98,7 +109,7 @@ def diffusion_nonlinear_iso(
             scheme, sigma, lmbd)
 
     img = slice_border(img, border)  # remove border
-    return img.astype(type)
+    return img / 255
 
 
 def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
@@ -121,8 +132,9 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
                                 diffusion, image, time_step)
     return image
 
+####TODO jit!!! 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):

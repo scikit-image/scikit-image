@@ -2,10 +2,11 @@ import numpy as np
 from .._shared.filters import gaussian
 from .._shared.diffusion_utils import (nonlinear_aniso_step,
                                        aniso_diff_step_AOS, slice_border)
-# from numba import jit
+from numba import jit
+from skimage import data, img_as_float
 
 
-def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
+def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
                               scheme='aos', sigma_eed=2.5, sigma_ced=0.5,
                               rho=6, lmbd=2.):
     """
@@ -62,7 +63,9 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
     ----------
     Time of diffusion is defined as time_step * num_iters. The bigger
     the time_step is, the lower the num_iters parameter has to be
-    and the faster the computation is.
+    and the faster the computation is. However, for explicit scheme
+    the maximal stable value of time_step is 0.25. If bigger value is
+    set by the user, time_step will be automaticaly set to 0.25.
 
     References
     ----------
@@ -101,9 +104,8 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
 
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
-        raise ValueError(
-            'time_step bigger that 0.25 is unstable for explicit scheme.')
-
+        print('time_step bigger than 0.25 is unstable for explicit scheme.\
+               Time step has been set to 0.25.')
     if (scheme != 'explicit') and (scheme != 'aos'):
         raise ValueError('invalid scheme')
 
@@ -111,7 +113,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
         raise ValueError('invalid mode')
 
     type = image.dtype
-    img = image.astype(np.float64).copy()
+    img = img_as_float(image)*255 #  due to precision error
     border = 1
     # add Neumann border
     if len(img.shape) == 3:  # color image
@@ -128,7 +130,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
             scheme, sigma_eed, sigma_ced, rho, lmbd, border)
 
     img = slice_border(img, border)
-    return img.astype(type)
+    return img /255
 
 
 def diffusion_nonlinear_aniso_grey(
@@ -146,7 +148,7 @@ def diffusion_nonlinear_aniso_grey(
     return image
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def eed_tensor(Da, Db, Dc, lmbd):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
@@ -178,7 +180,7 @@ def eed_tensor(Da, Db, Dc, lmbd):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def ced_tensor(Da, Db, Dc, alpha):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
@@ -237,15 +239,15 @@ def diffusion_nonlinear_aniso_ced(
 
 def diffusion_nonlinear_aniso_eed(
                 src, num_iter, tau, lmbd, sig, scheme, border):
-    Da = Db = Dc = np.zeros(src.shape).astype(np.float64)
+    Da = Db = Dc = np.zeros(src.shape)
     for i in range(num_iter):
         tmp = src.copy()
 
         gradX, gradY = np.gradient(
-            gaussian(image=src, sigma=sig).astype(np.float64))
-        Da = np.multiply(gradX, gradX).astype(np.float64)
-        Db = np.multiply(gradX, gradY).astype(np.float64)
-        Dc = np.multiply(gradY, gradY).astype(np.float64)
+            gaussian(image=src, sigma=sig))
+        Da = np.multiply(gradX, gradX)
+        Db = np.multiply(gradX, gradY)
+        Dc = np.multiply(gradY, gradY)
 
         eed_tensor(Dc, Db, Da, lmbd)
         if scheme == 'aos':
