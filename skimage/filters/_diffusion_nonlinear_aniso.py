@@ -77,20 +77,14 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
     Apply a Nonlinear Anisotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
-    >>> from skimage.filters._diffusion_nonlinear_aniso
-    import diffusion_nonlinear_aniso
+    >>> from skimage.filters._diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
 
     Apply Edge Enhancing Diffusion
-    >>> filtered_image_eed = diffusion_nonlinear_aniso(camera(),
-    mode='eed', time_step=0.25, num_iters=40,
-
-                              scheme='explicit', sigma_eed=2.0, lmbd=0.01)
+    >>> filtered_image_eed = diffusion_nonlinear_aniso(camera(), mode='eed', time_step=0.25, num_iters=40, scheme='explicit', sigma_eed=2.0, lmbd=0.01)
     >>> filtered_image_eed_2 = diffusion_nonlinear_aniso(camera())
 
     Apply Coherence Enhancing Diffusion
-    >>> filtered_image_ced = diffusion_nonlinear_aniso(camera(), mode='ced',
-    time_step=0.25, num_iters=40,
-                              scheme='aos', sigma_ced=0.5, rho=6.0)
+    >>> filtered_image_ced = diffusion_nonlinear_aniso(camera(), mode='ced', time_step=0.25, num_iters=40, scheme='aos', sigma_ced=0.5, rho=6.0)
     >>> filtered_image_ced_2 = diffusion_nonlinear_aniso(camera(), mode='ced')
     """
     if lmbd <= 0:

@@ -50,8 +50,7 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
 
     >>> from skimage.filters._diffusion_linear import diffusion_linear
     >>> from skimage.data import camera
-    >>> filtered_image = diffusion_linear(camera(), time_step=0.25,
-    num_iters=40, scheme='explicit')
+    >>> filtered_image = diffusion_linear(camera(), time_step=0.25, num_iters=40, scheme='explicit')
     >>> filtered_image2 = diffusion_linear(camera())
     """
     if time_step <= 0:
