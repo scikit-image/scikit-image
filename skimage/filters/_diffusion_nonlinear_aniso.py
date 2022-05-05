@@ -2,7 +2,7 @@ import numpy as np
 from .._shared.filters import gaussian
 from .._shared.diffusion_utils import (nonlinear_aniso_step,
                                        aniso_diff_step_AOS, slice_border)
-from numba import jit
+# from numba import jit
 
 
 def diffusion_nonlinear_aniso(image, mode='eed', time_step=0.25, num_iters=20,
@@ -152,7 +152,7 @@ def diffusion_nonlinear_aniso_grey(
     return image
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def eed_tensor(Da, Db, Dc, lmbd):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
@@ -184,7 +184,7 @@ def eed_tensor(Da, Db, Dc, lmbd):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def ced_tensor(Da, Db, Dc, alpha):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
