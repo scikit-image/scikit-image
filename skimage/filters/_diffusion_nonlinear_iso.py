@@ -56,8 +56,7 @@ def diffusion_nonlinear_iso(
     Apply a Nonlinear Isotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
-    >>> from skimage.filters._diffusion_nonlinear_iso
-
+    >>> from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
     >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=0.1, lmbd=2.)
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
