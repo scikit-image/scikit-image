@@ -5,9 +5,13 @@ from .._shared.diffusion_utils import (linear_step,
 
 def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
     """
-    Calculates the result of linear diffusion equation for an input image at time num_iters * time_step.
-    In theory, it corresponds to a Gaussian filter with sigma = sqrt(2 * time_step * num_iters).
-    See skimage.filters.gaussian. This function exists for the purpose of consistency with nonlinear diffusion filters. 
+    Calculates the result of linear diffusion equation for an input image
+    at time num_iters * time_step.
+    In theory, it corresponds to a Gaussian filter with
+    sigma = sqrt(2 * time_step * num_iters).
+    See skimage.filters.gaussian. This function exists for the purpose
+    of consistency.
+    with nonlinear diffusion filters.
 
     Parameters
     ----------
@@ -15,7 +19,8 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
         Input image.
     time_step : scalar
         Time increment in each diffusion iteration.
-        Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
+        Maximum value for explicit scheme is 0.25, as this is the limit value
+        where algorithm is still stable.
         Default is 0.25.
     num_iters : scalar
         Number of diffusion iterations.
@@ -45,7 +50,8 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
 
     >>> from skimage.filters._diffusion_linear import diffusion_linear
     >>> from skimage.data import camera
-    >>> filtered_image = diffusion_linear(camera(), time_step=0.25, num_iters=40, scheme='explicit')
+    >>> filtered_image = diffusion_linear(camera(), time_step=0.25,
+    num_iters=40, scheme='explicit')
     >>> filtered_image2 = diffusion_linear(camera())
     """
     if time_step <= 0:
@@ -61,8 +67,8 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
         time_step = 0.25
         raise ValueError(
             'time_step bigger that 0.25 is unstable for explicit scheme.')
-    
-    if (scheme!='explicit') and (scheme!='aos'):
+
+    if (scheme != 'explicit') and (scheme != 'aos'):
         raise ValueError('invalid scheme')
 
     border = 1
@@ -75,7 +81,7 @@ def diffusion_linear(image, time_step=0.25, num_iters=20, scheme='aos'):
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_linear_grey(
                 img[:, :, i], time_step, num_iters, scheme)
-    else: #greyscale image
+    else:  # greyscale image
         img = np.pad(img, pad_width=border, mode='edge')
         img = diffusion_linear_grey(
             img, time_step, num_iters, scheme)

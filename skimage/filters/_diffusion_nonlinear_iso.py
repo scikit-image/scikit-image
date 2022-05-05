@@ -17,10 +17,12 @@ def diffusion_nonlinear_iso(
         Input image.
     time_step : scalar, optional
         Time increment in each diffusion iteration.
-        Maximum value for explicit scheme is 0.25, as this is the limit value where algorithm is still stable. 
+        Maximum value for explicit scheme is 0.25, as this is the limit
+        value where algorithm is still stable.
         Default is 0.25.
-    diffusivity_type : {'perona-malik', 'charbonnier', 'exponencial'}, optional
-        Type of diffusivity. The diffusivity term in the diffusion equation is set according to the chosen diffusivity type.
+    diffusivity_type : {'perona-malik', 'charbonnier', 'exponential'}, optional
+        Type of diffusivity. The diffusivity term in the diffusion equation
+        is set according to the chosen diffusivity type.
         Default is 'perona-malik'
     num_iters : scalar, optional
         Number of diffusion iterations.
@@ -34,7 +36,7 @@ def diffusion_nonlinear_iso(
         The standard deviation of the Gaussian filter that is applied to image
         in each diffusion iteration before the gradient estimation.
         Default is 0.1.
-    lmbd : scalar, optional 
+    lmbd : scalar, optional
         Lambda parameter that determines a treshold contrast for edges.
         Default is 2.0.
 
@@ -54,9 +56,11 @@ def diffusion_nonlinear_iso(
     Apply a Nonlinear Isotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
-    >>> from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
+    >>> from skimage.filters._diffusion_nonlinear_iso
+    import diffusion_nonlinear_iso
 
-    >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=0.1, lmbd=2.)
+    >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25,
+    num_iters=40, scheme='explicit', sigma=0.1, lmbd=2.)
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
 
@@ -76,8 +80,8 @@ def diffusion_nonlinear_iso(
         time_step = 0.25
         raise ValueError(
             'time_step bigger that 0.25 is unstable for explicit scheme.')
-    
-    if (scheme!='explicit') and (scheme!='aos'):
+
+    if (scheme != 'explicit') and (scheme != 'aos'):
         raise ValueError('invalid scheme')
 
     border = 1
