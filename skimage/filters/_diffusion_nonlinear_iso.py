@@ -1,5 +1,5 @@
 import numpy as np
-from numba import jit
+# from numba import jit
 from .._shared.filters import gaussian
 from .._shared.diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
                                        slice_border, get_diffusivity)
@@ -134,7 +134,7 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
 
 ####TODO jit!!! 
 
-@jit(nopython=True)
+##@jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):
