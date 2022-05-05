@@ -360,7 +360,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     Returns
     -------
     lines : list
-      List of lines identified, lines in format ((x0, y0), (x1, y0)),
+      List of lines identified, lines in format ((x0, y0), (x1, y1)),
       indicating line start and end.
 
     References
