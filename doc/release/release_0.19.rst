@@ -39,7 +39,7 @@ Pull Requests Included
 - Bartłomiej Śmietanka
 - Dave Mellert
 - Gregory Lee
-- johnthagen (johnthagen)
+John Hagen
 - Mark Harfouche
 - Riadh Fezzani
 
