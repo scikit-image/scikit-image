@@ -58,7 +58,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     # Compute the image histogram for better performances
     nbins = 256  # Default in threshold functions
-    hist = histogram(image.ravel(), nbins, source_range='image')
+    hist = histogram(image.reshape(-1), nbins, source_range='image')
 
     # Handle default value
     methods = methods or {}
@@ -66,7 +66,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True)
-    ax = ax.ravel()
+    ax = ax.reshape(-1)
 
     ax[0].imshow(image, cmap=plt.cm.gray)
     ax[0].set_title('Original')
@@ -304,7 +304,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
             counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
-                image.ravel(), nbins, source_range='image', normalize=normalize
+            image.reshape(-1), nbins, source_range='image', normalize=normalize
             )
     return counts.astype('float32', copy=False), bin_centers
 
@@ -357,7 +357,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     # Check if the image has more than one intensity value; if not, return that
     # value
     if image is not None:
-        first_pixel = image.ravel()[0]
+        first_pixel = image.reshape(-1)[0]
         if np.all(image == first_pixel):
             return first_pixel
 
@@ -923,7 +923,8 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.reshape(-1), nbins,
+                                  source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
