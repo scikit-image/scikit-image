@@ -80,7 +80,7 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
         raise ValueError('invalid scheme')
 
     border = 1
-    img = img_as_float(image)*255  # due to precision error
+    img = img_as_float(image) * 255  # due to precision error
     #  add Neumann border
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,

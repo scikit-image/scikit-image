@@ -112,7 +112,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
     if (mode != 'eed') and (mode != 'ced'):
         raise ValueError('invalid mode')
 
-    img = img_as_float(image)*255  # due to precision error
+    img = img_as_float(image) * 255  # due to precision error
     border = 1
     # add Neumann border
     if len(img.shape) == 3:  # color image
@@ -230,7 +230,7 @@ def diffusion_nonlinear_aniso_ced(
 
         ced_tensor(Dc, Db, Da, alpha)
         if scheme == 'aos':
-            aniso_diff_step_AOS(tmp, Dc,  Db, Da, src, tau)
+            aniso_diff_step_AOS(tmp, Dc, Db, Da, src, tau)
         elif scheme == 'explicit':
             nonlinear_aniso_step(tmp, src, Da, Db, Dc, tau, border)
     return src

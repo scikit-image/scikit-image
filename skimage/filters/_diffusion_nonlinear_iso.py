@@ -91,7 +91,7 @@ def diffusion_nonlinear_iso(
         raise ValueError('invalid scheme')
 
     border = 1
-    img = img_as_float(image)*255  # due to precision error
+    img = img_as_float(image) * 255  # due to precision error
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')  # add Neumann border
@@ -125,7 +125,7 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
         elif scheme == 'aos':
             get_diffusivity_tensor(diffusion, gradX, gradY,
                                    lmbd, diffusivity_type)
-            aniso_diff_step_AOS(tmp, diffusion,  zeros,
+            aniso_diff_step_AOS(tmp, diffusion, zeros,
                                 diffusion, image, time_step)
     return image
 

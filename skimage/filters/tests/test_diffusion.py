@@ -19,7 +19,7 @@ cat_color = data.chelsea()[80: - 120, 120: - 190]  # image 100 x 141 x 3
 
 
 def getAvgRelDiff(a, b):  # get average relavitve difference of two images
-    return np.mean(np.abs(a-b)) / np.mean([np.mean(a), np.mean(b)])
+    return np.mean(np.abs(a - b)) / np.mean([np.mean(a), np.mean(b)])
 
 
 @pytest.mark.parametrize('time_step', [0.25, 0.1])
@@ -27,7 +27,7 @@ def getAvgRelDiff(a, b):  # get average relavitve difference of two images
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
 def test_gauss_lindiff_equal(time_step, num_iters, scheme):
     limit_diff = 0.02
-    sigma = np.sqrt(2*num_iters*time_step)
+    sigma = np.sqrt(2 * num_iters * time_step)
     img1 = gaussian(camera_crop, sigma)
     img2 = diffusion_linear(camera_crop, time_step=time_step,
                             num_iters=num_iters, scheme=scheme)
@@ -56,7 +56,7 @@ def test_min_max(scheme):
 def getRelativeDifference(a, b):
     a = a.astype(np.float64)
     b = b.astype(np.float64)
-    return abs(a-b) / abs(max(a, b))
+    return abs(a - b) / abs(max(a, b))
 
 
 @pytest.mark.parametrize('diffusivity_type', ['perona-malik', 'charbonnier',
