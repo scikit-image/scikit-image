@@ -930,7 +930,7 @@ def threshold_triangle(image, nbins=256):
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
-    arg_low_level, arg_high_level = np.where(hist > 0)[0][[0, -1]]
+    arg_low_level, arg_high_level = np.flatnonzero(hist)[[0, -1]]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
@@ -1291,7 +1291,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
                f'It cannot be thresholded in {classes} classes.')
         raise ValueError(msg)
     elif nvalues == classes:
-        thresh_idx = np.where(prob > 0)[0][:-1]
+        thresh_idx = np.flatnonzero(prob)[:-1]
     else:
         # Get threshold indices
         try:
