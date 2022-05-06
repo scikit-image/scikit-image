@@ -430,7 +430,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
         return bin_centers[0]
 
     # Calculate probability mass function
-    pmf = counts.astype(np.float32, copy=False) / counts.sum()
+    pmf = counts.astype('float32', copy=False) / counts.sum()
     P1 = np.cumsum(pmf)  # Cumulative normalized histogram
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
@@ -511,7 +511,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
         else:
             return bin_centers[0]
 
-    counts = counts.astype(np.float32, copy=False)
+    counts = counts.astype('float32', copy=False)
 
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
@@ -729,7 +729,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1),
                                       source_range='image')
-        hist = hist.astype(float, copy=False)
+        hist = hist.astype('float32', copy=False)
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
@@ -837,7 +837,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
-    smooth_hist = counts.astype(np.float64, copy=False)
+    smooth_hist = counts.astype('float32', copy=False)
 
     for counter in range(max_num_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
@@ -1011,7 +1011,6 @@ def _mean_std(image, w):
     integral = integral_image(padded, dtype=np.float64)
     padded *= padded
     integral_sq = integral_image(padded, dtype=np.float64)
-
 
     # Create lists of non-zero kernel indices and values
     kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
