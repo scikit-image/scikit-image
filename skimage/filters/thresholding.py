@@ -430,7 +430,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
         return bin_centers[0]
 
     # Calculate probability mass function
-    pmf = counts.astype(np.float32) / counts.sum()
+    pmf = counts.astype(np.float32, copy=False) / counts.sum()
     P1 = np.cumsum(pmf)  # Cumulative normalized histogram
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
@@ -511,7 +511,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
         else:
             return bin_centers[0]
 
-    counts = counts.astype(np.float32)
+    counts = counts.astype(np.float32, copy=False)
 
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
@@ -729,7 +729,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1),
                                       source_range='image')
-        hist = hist.astype(float)
+        hist = hist.astype(float, copy=False)
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
