@@ -306,7 +306,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
         counts, bin_centers = histogram(
                 image.ravel(), nbins, source_range='image', normalize=normalize
             )
-    return counts.astype(float), bin_centers
+    return counts.astype('float32', copy=False), bin_centers
 
 
 def threshold_otsu(image=None, nbins=256, *, hist=None):
@@ -1282,7 +1282,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = _validate_image_histogram(image, hist, nbins,
                                                   normalize=True)
-    prob = prob.astype('float32')
+    prob = prob.astype('float32', copy=False)
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
