@@ -70,7 +70,6 @@ def diffusion_nonlinear_iso(
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
 
-####TODO jit!!! 
     if lmbd <= 0:
         raise ValueError('invalid lambda parameter.')
 
@@ -92,9 +91,7 @@ def diffusion_nonlinear_iso(
         raise ValueError('invalid scheme')
 
     border = 1
-    type = image.dtype
-    #img = image.astype(np.float64).copy()
-    img = img_as_float(image)*255 #  due to precision error
+    img = img_as_float(image)*255  # due to precision error
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')  # add Neumann border
@@ -132,9 +129,8 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
                                 diffusion, image, time_step)
     return image
 
-####TODO jit!!! 
 
-##@jit(nopython=True)
+# @jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):

@@ -3,7 +3,7 @@ from .._shared.filters import gaussian
 from .._shared.diffusion_utils import (nonlinear_aniso_step,
                                        aniso_diff_step_AOS, slice_border)
 # from numba import jit
-from skimage import data, img_as_float
+from skimage import img_as_float
 
 
 def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
@@ -112,8 +112,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
     if (mode != 'eed') and (mode != 'ced'):
         raise ValueError('invalid mode')
 
-    type = image.dtype
-    img = img_as_float(image)*255 #  due to precision error
+    img = img_as_float(image)*255  # due to precision error
     border = 1
     # add Neumann border
     if len(img.shape) == 3:  # color image
@@ -130,7 +129,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
             scheme, sigma_eed, sigma_ced, rho, lmbd, border)
 
     img = slice_border(img, border)
-    return img /255
+    return img / 255
 
 
 def diffusion_nonlinear_aniso_grey(
@@ -148,7 +147,7 @@ def diffusion_nonlinear_aniso_grey(
     return image
 
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def eed_tensor(Da, Db, Dc, lmbd):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
@@ -180,7 +179,7 @@ def eed_tensor(Da, Db, Dc, lmbd):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def ced_tensor(Da, Db, Dc, alpha):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
