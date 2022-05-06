@@ -7,6 +7,7 @@ from numpy.testing import assert_equal
 import pytest
 from skimage import data, img_as_float
 from skimage.filters import gaussian
+from skimage.util.dtype import img_as_bool, img_as_uint
 
 
 def Crop(img, border_x, border_y):
@@ -51,6 +52,7 @@ def test_min_max(scheme):
     assert in_min <= np.min(ced) + limit_diff
     assert in_max >= np.max(ced) - limit_diff
 
+
 def getRelativeDifference(a, b):
     a = a.astype(np.float64)
     b = b.astype(np.float64)
@@ -75,21 +77,16 @@ def test_sum(scheme, diffusivity_type):
         diffusion_nonlinear_aniso(cam, mode='ced',
                                   scheme=scheme))) < limit_diff
 
-#TODO
-# @pytest.mark.parametrize('image', [camera_crop, cat_color])
-# @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
-# @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64,
-#                          np.uint8, np.uint16, np.uint32])
-# def test_dtype(image, dtype, scheme):
-#     img = image.astype(dtype)
-#     assert_equal(diffusion_linear(
-#         img, num_iters=2, scheme=scheme).dtype, dtype)
-#     assert_equal(diffusion_nonlinear_iso(
-#         img, num_iters=2, scheme=scheme).dtype, dtype)
-#     assert_equal(diffusion_nonlinear_aniso(
-#         img, mode="eed", num_iters=2, scheme=scheme).dtype, dtype)
-#     assert_equal(diffusion_nonlinear_aniso(
-#         img, mode="ced", num_iters=2, scheme=scheme).dtype, dtype)
+
+@pytest.mark.parametrize('scheme', ['aos', 'explicit'])
+@pytest.mark.parametrize('image', [img_as_bool(camera_crop),
+                                   img_as_float(camera_crop),
+                                   img_as_uint(camera_crop)])
+def test_dtype(scheme, image):
+    diffusion_linear(image, num_iters=2, scheme=scheme)
+    diffusion_nonlinear_iso(image, num_iters=2, scheme=scheme)
+    diffusion_nonlinear_aniso(image, mode="eed", num_iters=2, scheme=scheme)
+    diffusion_nonlinear_aniso(image, mode="ced", num_iters=2, scheme=scheme)
 
 
 @pytest.mark.parametrize('image', [camera_crop, cat_color])
@@ -159,26 +156,28 @@ def test_parameter_validity():
         diffusion_nonlinear_aniso(
             camera_crop, mode='cd')
 
-#TODO 
-# @pytest.mark.parametrize('diff_type', ['perona-malik',
-#                          'charbonnier', 'exponential'])
-# def test_explicit_aos_equal(diff_type):
-#     limit_diff = 0.03  # 3% average relative difference
-#     time_step = 0.25  # maximal time_step stable for 'explicit'
-#     cam = camera_crop
-#     assert getAvgRelDiff(diffusion_linear(cam, scheme='explicit'),
-#                          diffusion_linear(cam, scheme='aos')) < limit_diff
-#     assert getAvgRelDiff(diffusion_nonlinear_iso(cam,
-#                          diffusivity_type=diff_type, time_step=time_step,
-#                           scheme='explicit'),
-#                          diffusion_nonlinear_iso(cam,
-#                          diffusivity_type=diff_type, time_step=time_step,
-#                          scheme='aos')) < limit_diff
-#     assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='eed',
-#                          time_step=time_step, scheme='explicit'),
-#                          diffusion_nonlinear_aniso(cam, mode='eed',
-#                          time_step=time_step, scheme='aos')) < limit_diff
-#     assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='ced',
-#                          time_step=time_step, scheme='explicit'),
-#                          diffusion_nonlinear_aniso(cam, mode='ced', 
-#                          time_step=time_step, scheme='aos')) < limit_diff
+
+@pytest.mark.parametrize('diff_type', ['perona-malik',
+                         'charbonnier', 'exponential'])
+def test_explicit_aos_equal(diff_type):
+    limit_diff = 0.03  # 3% average relative difference
+    time_step = 0.25  # maximal time_step stable for 'explicit'
+    cam = camera_crop
+    assert getAvgRelDiff(diffusion_linear(cam, time_step=time_step,
+                         scheme='explicit'),
+                         diffusion_linear(cam, time_step=time_step,
+                         scheme='aos')) < limit_diff
+    assert getAvgRelDiff(diffusion_nonlinear_iso(cam,
+                         diffusivity_type=diff_type, time_step=time_step,
+                         scheme='explicit'),
+                         diffusion_nonlinear_iso(cam,
+                         diffusivity_type=diff_type, time_step=time_step,
+                         scheme='aos')) < limit_diff
+    assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='eed',
+                         time_step=time_step, scheme='explicit'),
+                         diffusion_nonlinear_aniso(cam, mode='eed',
+                         time_step=time_step, scheme='aos')) < limit_diff
+    assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='ced',
+                         time_step=time_step, scheme='explicit'),
+                         diffusion_nonlinear_aniso(cam, mode='ced',
+                         time_step=time_step, scheme='aos')) < limit_diff
