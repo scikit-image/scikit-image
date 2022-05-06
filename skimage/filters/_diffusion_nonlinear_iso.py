@@ -20,7 +20,7 @@ def diffusion_nonlinear_iso(
         Time increment in each diffusion iteration.
         Maximum value for explicit scheme is 0.25, as this is the limit
         value where algorithm is still stable.
-        Default is 0.25.
+        Default is 1.0.
     diffusivity_type : {'perona-malik', 'charbonnier', 'exponential'}, optional
         Type of diffusivity. The diffusivity term in the diffusion equation
         is set according to the chosen diffusivity type.
@@ -33,10 +33,10 @@ def diffusion_nonlinear_iso(
         'explicit' basic explicit finite difference scheme.
         'aos' stands for additive operator splitting [1].
         Default is 'aos'.
-    sigma : scalar
+    sigma : scalar, optional
         The standard deviation of the Gaussian filter that is applied to image
         in each diffusion iteration before the gradient estimation.
-        Default is 0.1.
+        Default is 1.0.
     lmbd : scalar, optional
         Lambda parameter that determines a treshold contrast for edges.
         Default is 2.0.

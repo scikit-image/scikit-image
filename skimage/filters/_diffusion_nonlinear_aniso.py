@@ -25,10 +25,10 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
         Time increment in each diffusion iteration.
         Maximum value for explicit scheme is 0.25, as this is the limit
         value where algorithm is still stable.
-        Default is 0.25.
-    num_iters : scalar
+        Default is 1.0.
+    num_iters : scalar, optional
         Number of diffusion iterations.
-        Default is 20.
+        Default is 10.
     scheme : {'explicit', 'aos'}, optional
         The computational scheme of the diffusion process.
         'explicit' basic explicit finite difference scheme.

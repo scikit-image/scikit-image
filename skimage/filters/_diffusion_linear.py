@@ -18,22 +18,19 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     ----------
     image : array_like
         Input image.
-    time_step : scalar
+    time_step : scalar, optional
         Time increment in each diffusion iteration.
         Maximum value for explicit scheme is 0.25, as this is the limit value
         where algorithm is still stable.
-        Default is 0.25.
-    num_iters : scalar
+        Default is 2.0
+    num_iters : scalar, optional
         Number of diffusion iterations.
-        Default is 20.
+        Default is 3.
     scheme : {'explicit', 'aos'}, optional
         The computational scheme of the diffusion process.
         'explicit' basic explicit finite difference scheme.
         'aos' stands for additive operator splitting [1].
         Default is 'aos'.
-    alpha : scalar
-        The parameter that determines a treshold contrast for edges.
-        Default is 0.01.
 
     Returns
     -------
