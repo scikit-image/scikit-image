@@ -2,13 +2,12 @@ import numpy as np
 from skimage.filters.diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
 from skimage.filters.diffusion_linear import diffusion_linear
 from skimage.filters.diffusion_nonlinear_iso import diffusion_nonlinear_iso
-
+from skimage.metrics import structural_similarity as ssim
 from numpy.testing import assert_equal
 import pytest
 from skimage import data, img_as_float
 from skimage.filters import gaussian
 from skimage.util.dtype import img_as_bool, img_as_uint
-
 
 def Crop(img, border_x, border_y):
     return img[border_x: - border_x, border_y: - border_y]
@@ -17,19 +16,17 @@ def Crop(img, border_x, border_y):
 camera_crop = Crop(data.camera(), 200, 200)  # image 117 x 117 pxls
 cat_color = data.chelsea()[80: - 120, 120: - 190]  # image 100 x 141 x 3
 
-def getAvgRelDiff(a, b):  # get average relavitve difference of two images
-    return np.mean(np.abs(a - b)) / np.mean([np.mean(a), np.mean(b)])
 
 @pytest.mark.parametrize('time_step', [0.25, 0.1])
 @pytest.mark.parametrize('num_iters', [12, 25])
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
 def test_gauss_lindiff_equal(time_step, num_iters, scheme):
-    limit_diff = 0.02
+    limit_diff = 0.99
     sigma = np.sqrt(2 * num_iters * time_step)
     img1 = gaussian(camera_crop, sigma)
     img2 = diffusion_linear(camera_crop, time_step=time_step,
                             num_iters=num_iters, scheme=scheme)
-    assert getAvgRelDiff(img1, img2) < limit_diff
+    assert ssim(img1, img2) > limit_diff
 
 
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
@@ -158,24 +155,24 @@ def test_parameter_validity():
 @pytest.mark.parametrize('diff_type', ['perona-malik',
                          'charbonnier', 'exponential'])
 def test_explicit_aos_equal(diff_type):
-    limit_diff = 0.03  # 3% average relative difference
+    limit_diff = 0.99
     time_step = 0.25  # maximal time_step stable for 'explicit'
     cam = camera_crop
-    assert getAvgRelDiff(diffusion_linear(cam, time_step=time_step,
+    assert ssim(diffusion_linear(cam, time_step=time_step,
                          scheme='explicit'),
                          diffusion_linear(cam, time_step=time_step,
-                         scheme='aos')) < limit_diff
-    assert getAvgRelDiff(diffusion_nonlinear_iso(cam,
+                         scheme='aos')) > limit_diff
+    assert ssim(diffusion_nonlinear_iso(cam,
                          diffusivity_type=diff_type, time_step=time_step,
                          scheme='explicit'),
                          diffusion_nonlinear_iso(cam,
                          diffusivity_type=diff_type, time_step=time_step,
-                         scheme='aos')) < limit_diff
-    assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='eed',
+                         scheme='aos')) > limit_diff
+    assert ssim(diffusion_nonlinear_aniso(cam, mode='eed',
                          time_step=time_step, scheme='explicit'),
                          diffusion_nonlinear_aniso(cam, mode='eed',
-                         time_step=time_step, scheme='aos')) < limit_diff
-    assert getAvgRelDiff(diffusion_nonlinear_aniso(cam, mode='ced',
+                         time_step=time_step, scheme='aos')) > limit_diff
+    assert ssim(diffusion_nonlinear_aniso(cam, mode='ced',
                          time_step=time_step, scheme='explicit'),
                          diffusion_nonlinear_aniso(cam, mode='ced',
-                         time_step=time_step, scheme='aos')) < limit_diff
+                         time_step=time_step, scheme='aos')) > limit_diff
