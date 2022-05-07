@@ -37,9 +37,9 @@ across edges. The output image has enhanced coherent, flow-like structures.
 
 """
 import matplotlib.pyplot as plt
-from skimage.filters._diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
-from skimage.filters._diffusion_linear import diffusion_linear
-from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
+from skimage.filters.diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
+from skimage.filters.diffusion_linear import diffusion_linear
+from skimage.filters.diffusion_nonlinear_iso import diffusion_nonlinear_iso
 from skimage.util import random_noise
 from skimage import data
 
