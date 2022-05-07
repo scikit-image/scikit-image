@@ -53,7 +53,7 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     --------
     Apply a Linear Diffusion filter to an image
 
-    >>> from skimage.filters._diffusion_linear import diffusion_linear
+    >>> from skimage.filters.diffusion_linear import diffusion_linear
     >>> from skimage.data import camera
     >>> filtered_image = diffusion_linear(camera(), time_step=0.25, num_iters=40, scheme='explicit')
     >>> filtered_image2 = diffusion_linear(camera())

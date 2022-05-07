@@ -2,7 +2,7 @@ import numpy as np
 from .._shared.filters import gaussian
 from skimage import img_as_float
 from ._diffusion_utils import slice_border
-# from numba import jit
+#from numba import jit
 from ._diffusion_utils import aniso_diff_step_AOS
 from ._diffusion_utils_pythran import nonlinear_aniso_step
 
@@ -80,7 +80,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
     Apply a Nonlinear Anisotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
-    >>> from skimage.filters._diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
+    >>> from skimage.filters.diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
 
     Apply Edge Enhancing Diffusion
     >>> filtered_image_eed = diffusion_nonlinear_aniso(camera(), mode='eed', time_step=0.25, num_iters=40, scheme='explicit', sigma_eed=2.0, lmbd=0.01)
@@ -148,7 +148,7 @@ def diffusion_nonlinear_aniso_grey(
 
 
 
-#  @jit(nopython=True)
+#@jit(nopython=True)
 def eed_tensor(Da, Db, Dc, lmbd):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
@@ -180,7 +180,7 @@ def eed_tensor(Da, Db, Dc, lmbd):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-#  @jit(nopython=True)
+#@jit(nopython=True)
 def ced_tensor(Da, Db, Dc, alpha):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):

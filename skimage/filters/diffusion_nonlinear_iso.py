@@ -1,5 +1,5 @@
 import numpy as np
-# from numba import jit
+#from numba import jit
 from .._shared.filters import gaussian
 from ._diffusion_utils import get_diffusivity
 from skimage import img_as_float
@@ -67,7 +67,7 @@ def diffusion_nonlinear_iso(
     Apply a Nonlinear Isotropic Diffusion filter to an image
 
     >>> from skimage.data import camera
-    >>> from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
+    >>> from skimage.filters.diffusion_nonlinear_iso import diffusion_nonlinear_iso
     >>> filtered_image = diffusion_nonlinear_iso(camera(), time_step=0.25, num_iters=40, scheme='explicit', sigma=0.1, lmbd=2.)
     >>> filtered_image2 = diffusion_nonlinear_iso(camera())
     """
@@ -132,7 +132,7 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
     return image
 
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):
