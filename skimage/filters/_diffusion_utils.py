@@ -1,8 +1,7 @@
 import numpy as np
-# from numba import jit
 
 
-# @jit(nopython=True)
+#pythran export nonlinear_aniso_step(float64[:,:], float64[:,:], float64[:,:], float64[:,:],float64[:,:], float or int, uint8)
 def nonlinear_aniso_step(src, dest, a, b, c, tau, border):
     for i in range(border, src.shape[0] - border - 1):
         for j in range(border, src.shape[1] - border - 1):
@@ -22,7 +21,7 @@ def nonlinear_aniso_step(src, dest, a, b, c, tau, border):
                 ((abs(b[i + 1, j - 1]) - b[i + 1, j - 1]) / 4.0 + (abs(b[i, j]) - b[i, j]) / 4.0))
 
 
-# @jit(nopython=True)
+#pythran export nonlinear_iso_step(float64[:,:], float64[:,:], float or int, float64[:,:], float64[:,:], float, str)
 def nonlinear_iso_step(image, out_image, tau, gradX, gradY, alpha, type):
     h1 = h2 = 1
     for i in range(1, image.shape[0] - 1):
@@ -39,7 +38,7 @@ def nonlinear_iso_step(image, out_image, tau, gradX, gradY, alpha, type):
                         2 / np.power(h2, 2)) - (tau * (diff_ij + get_diffusivity(gradX[i, j - 1], gradY[i, j - 1], alpha, type)) / 2 / np.power(h2, 2))) * image[i, j]
 
 
-# @jit(nopython=True)
+#pythran export linear_step(float64[:,:], float64[:,:], float or int)
 def linear_step(image, out_image, tau):
     h1 = h2 = 1
     for i in range(1, image.shape[0] - 1):
@@ -50,7 +49,6 @@ def linear_step(image, out_image, tau):
                        - 1]) / np.power(h2, 2))
 
 
-# @jit(nopython=True)
 def get_diffusivity(gradX, gradY, lmbd, type):
     gradMag = np.sqrt(
         np.power(gradX, 2) + np.power(gradY, 2))
@@ -64,13 +62,9 @@ def get_diffusivity(gradX, gradY, lmbd, type):
         raise ValueError(
             'invalid diffusivity type')
 
-
-# @jit(nopython=True)
 def slice_border(img, slice_val):
     return img[slice_val: - slice_val, slice_val: - slice_val]
 
-
-# @jit(nopython=True)
 def prepare_diagonals(Diag, UDiag, LDiag, data, data_i, n, tau, shift, sx):
     UDiag[0] = -tau * (data[get_coord(data_i, sx)] +
                        data[get_coord(data_i + shift, sx)])
@@ -90,8 +84,6 @@ def prepare_diagonals(Diag, UDiag, LDiag, data, data_i, n, tau, shift, sx):
     Diag[n - 1] = 1 - \
         UDiag[n - 2]
 
-
-# @jit(nopython=True)
 def add_and_avg(src, dst, dst_i, n, step, coef, sx):
     """
     Add values from one buffer to the other one and multiply
@@ -104,8 +96,6 @@ def add_and_avg(src, dst, dst_i, n, step, coef, sx):
             dst_i, sx)] *= coef
         dst_i += step
 
-
-# @jit(nopython=True)
 def aniso_diff_step_AOS(img, Da, Db, Dc, out, tau):
     # number of cols
     sx = img.shape[1]
@@ -206,13 +196,10 @@ def aniso_diff_step_AOS(img, Da, Db, Dc, out, tau):
         add_and_avg(solution, out,
                     out_i, sy, sx, 0.5, sx)
 
-
-# @jit(nopython=True)
 def get_coord(n, sizeX):
     return (n // sizeX, n % sizeX)
 
-
-# @jit(nopython=True)
+#pythran export tridiagonal_matrix_solver(float64[], float64[], float64[], float64[],float64[], int)
 def tridiagonal_matrix_solver(diag_a, diag_b, diag_c, d, x, n):
     """
     Solve a tridiagonal system of linear equations using the Thomas algorithm.

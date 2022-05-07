@@ -34,13 +34,11 @@ def configuration(parent_package='', top_path=None):
         'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
 
-
     ext = pythran.dist.PythranExtension(
-        'skimage.filters._diffusion_eed',
-        sources=["skimage/filters/_diffusion_nonlinear_aniso.py"],
+        'skimage.filters._diffusion_utils_pythran',
+        sources=["skimage/filters/_diffusion_utils.py"],
         config=['compiler.blas=none'])
     config.ext_modules.append(ext)
-
 
     return config
 

@@ -1,9 +1,11 @@
 import numpy as np
 # from numba import jit
 from .._shared.filters import gaussian
-from ._diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
-                                       slice_border, get_diffusivity)
+from ._diffusion_utils import get_diffusivity
 from skimage import img_as_float
+from ._diffusion_utils import slice_border
+from ._diffusion_utils_pythran import nonlinear_iso_step
+from ._diffusion_utils import aniso_diff_step_AOS
 
 
 def diffusion_nonlinear_iso(
@@ -97,7 +99,7 @@ def diffusion_nonlinear_iso(
                      border), (0, 0)), mode='edge')  # add Neumann border
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_nonlinear_iso_grey(
-                img[:, :, i], diffusivity_type, time_step, num_iters,
+                np.squeeze(img[:, :, i].copy()), diffusivity_type, time_step, num_iters,
                 scheme, sigma, lmbd)
     elif len(img.shape) == 2:
         img = np.pad(img, pad_width=border, mode='edge')  # add Neumann border

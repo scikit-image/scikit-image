@@ -1,7 +1,7 @@
 import numpy as np
-from skimage.filters._diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
-from skimage.filters._diffusion_linear import diffusion_linear
-from skimage.filters._diffusion_nonlinear_iso import diffusion_nonlinear_iso
+from skimage.filters.diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
+from skimage.filters.diffusion_linear import diffusion_linear
+from skimage.filters.diffusion_nonlinear_iso import diffusion_nonlinear_iso
 
 from numpy.testing import assert_equal
 import pytest
@@ -17,10 +17,8 @@ def Crop(img, border_x, border_y):
 camera_crop = Crop(data.camera(), 200, 200)  # image 117 x 117 pxls
 cat_color = data.chelsea()[80: - 120, 120: - 190]  # image 100 x 141 x 3
 
-
 def getAvgRelDiff(a, b):  # get average relavitve difference of two images
     return np.mean(np.abs(a - b)) / np.mean([np.mean(a), np.mean(b)])
-
 
 @pytest.mark.parametrize('time_step', [0.25, 0.1])
 @pytest.mark.parametrize('num_iters', [12, 25])

@@ -1,8 +1,7 @@
 import numpy as np
-from .._shared.diffusion_utils import (linear_step,
-                                       aniso_diff_step_AOS, slice_border)
 from skimage import img_as_float
-
+from ._diffusion_utils import (slice_border, aniso_diff_step_AOS)
+from ._diffusion_utils_pythran import (linear_step)
 
 def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     """
@@ -84,12 +83,11 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_linear_grey(
-                img[:, :, i], time_step, num_iters, scheme)
+                np.squeeze(img[:,:,i].copy()), time_step, num_iters, scheme)
     else:  # greyscale image
         img = np.pad(img, pad_width=border, mode='edge')
         img = diffusion_linear_grey(
             img, time_step, num_iters, scheme)
-
     img = slice_border(img, border)  # remove border
     return img / 255
 
