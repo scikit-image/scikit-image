@@ -1,6 +1,6 @@
 import numpy as np
 from .._shared.filters import gaussian
-from .._shared.diffusion_utils import (nonlinear_aniso_step,
+from ._diffusion_utils import (nonlinear_aniso_step,
                                        aniso_diff_step_AOS, slice_border)
 # from numba import jit
 from skimage import img_as_float

@@ -2,6 +2,7 @@
 
 import os
 from skimage._build import cython
+import pythran
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -32,6 +33,14 @@ def configuration(parent_package='', top_path=None):
     config.add_extension(
         'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
+
+
+    ext = pythran.dist.PythranExtension(
+        'skimage.filters._diffusion_eed',
+        sources=["skimage/filters/_diffusion_nonlinear_aniso.py"],
+        config=['compiler.blas=none'])
+    config.ext_modules.append(ext)
+
 
     return config
 

@@ -1,7 +1,7 @@
 import numpy as np
 # from numba import jit
 from .._shared.filters import gaussian
-from .._shared.diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
+from ._diffusion_utils import (nonlinear_iso_step, aniso_diff_step_AOS,
                                        slice_border, get_diffusivity)
 from skimage import img_as_float
 
