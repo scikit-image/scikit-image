@@ -9,6 +9,7 @@ from skimage import data, img_as_float
 from skimage.filters import gaussian
 from skimage.util.dtype import img_as_bool, img_as_uint
 
+
 def Crop(img, border_x, border_y):
     return img[border_x: - border_x, border_y: - border_y]
 
@@ -31,7 +32,7 @@ def test_gauss_lindiff_equal(time_step, num_iters, scheme):
 
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
 def test_min_max(scheme):
-    limit_diff = 1
+    limit_diff = 1/255
     lin = diffusion_linear(camera_crop, scheme=scheme)
     iso = diffusion_nonlinear_iso(camera_crop, scheme=scheme)
     eed = diffusion_nonlinear_aniso(camera_crop, mode='eed', scheme=scheme)
@@ -57,7 +58,7 @@ def getRelativeDifference(a, b):
 @pytest.mark.parametrize('diffusivity_type', ['perona-malik', 'charbonnier',
                          'exponential'])
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
-def test_sum(scheme, diffusivity_type):
+def test_avg_intensity(scheme, diffusivity_type):
     # change in average grey value is expected to be less than 0.2%
     limit_diff = 0.002
     cam = camera_crop.astype(np.float64)
@@ -159,20 +160,26 @@ def test_explicit_aos_equal(diff_type):
     time_step = 0.25  # maximal time_step stable for 'explicit'
     cam = camera_crop
     assert ssim(diffusion_linear(cam, time_step=time_step,
-                         scheme='explicit'),
-                         diffusion_linear(cam, time_step=time_step,
-                         scheme='aos')) > limit_diff
+                                 scheme='explicit'),
+                diffusion_linear(cam, time_step=time_step,
+                                 scheme='aos')) > limit_diff
     assert ssim(diffusion_nonlinear_iso(cam,
-                         diffusivity_type=diff_type, time_step=time_step,
-                         scheme='explicit'),
-                         diffusion_nonlinear_iso(cam,
-                         diffusivity_type=diff_type, time_step=time_step,
-                         scheme='aos')) > limit_diff
+                                        diffusivity_type=diff_type,
+                                        time_step=time_step,
+                                        scheme='explicit'),
+                diffusion_nonlinear_iso(cam,
+                                        diffusivity_type=diff_type,
+                                        time_step=time_step,
+                                        scheme='aos')) > limit_diff
     assert ssim(diffusion_nonlinear_aniso(cam, mode='eed',
-                         time_step=time_step, scheme='explicit'),
-                         diffusion_nonlinear_aniso(cam, mode='eed',
-                         time_step=time_step, scheme='aos')) > limit_diff
+                                          time_step=time_step,
+                                          scheme='explicit'),
+                diffusion_nonlinear_aniso(cam, mode='eed',
+                                          time_step=time_step,
+                                          scheme='aos')) > limit_diff
     assert ssim(diffusion_nonlinear_aniso(cam, mode='ced',
-                         time_step=time_step, scheme='explicit'),
-                         diffusion_nonlinear_aniso(cam, mode='ced',
-                         time_step=time_step, scheme='aos')) > limit_diff
+                                          time_step=time_step,
+                                          scheme='explicit'),
+                diffusion_nonlinear_aniso(cam, mode='ced',
+                                          time_step=time_step,
+                                          scheme='aos')) > limit_diff
