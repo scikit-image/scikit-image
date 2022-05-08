@@ -1289,7 +1289,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
         msg = (f'After discretization into bins, the input image has '
                f'only {nvalues} different values. It cannot be thresholded '
                f'in {classes} classes. If there are more unique values '
-               f'before discretization, try increasing the number of bins.')
+               f'before discretization, try increasing the number of bins (`nbins`).')
         raise ValueError(msg)
     elif nvalues == classes:
         thresh_idx = np.flatnonzero(prob)[:-1]
