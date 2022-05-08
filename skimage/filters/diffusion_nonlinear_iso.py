@@ -1,8 +1,8 @@
 import numpy as np
-#from numba import jit
+# from numba import jit
 from .._shared.filters import gaussian
 from ._diffusion_utils import get_diffusivity
-from skimage import img_as_float
+from skimage import img_as_float64
 from ._diffusion_utils import slice_border
 from ._diffusion_utils_pythran import nonlinear_iso_step
 from ._diffusion_utils import aniso_diff_step_AOS
@@ -93,14 +93,14 @@ def diffusion_nonlinear_iso(
         raise ValueError('invalid scheme')
 
     border = 1
-    img = img_as_float(image) * 255  # due to precision error
+    img = img_as_float64(image) * 255  # due to precision error
     if len(img.shape) == 3:  # color image
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')  # add Neumann border
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_nonlinear_iso_grey(
-                np.squeeze(img[:, :, i].copy()), diffusivity_type, time_step, num_iters,
-                scheme, sigma, lmbd)
+                np.squeeze(img[:, :, i].copy()), diffusivity_type, time_step,
+                num_iters, scheme, sigma, lmbd)
     elif len(img.shape) == 2:
         img = np.pad(img, pad_width=border, mode='edge')  # add Neumann border
         img = diffusion_nonlinear_iso_grey(
@@ -114,8 +114,8 @@ def diffusion_nonlinear_iso(
 def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
                                  scheme, sigma, lmbd):
     if scheme == 'aos':
-        diffusion = np.ones(image.shape)
-        zeros = np.zeros(image.shape)
+        diffusion = img_as_float64(np.ones(image.shape))
+        zeros = img_as_float64(np.zeros(image.shape))
     for i in range(num_iters):
         tmp = image.copy()
 
@@ -132,7 +132,7 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
     return image
 
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):

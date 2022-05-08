@@ -3,6 +3,7 @@ from skimage import img_as_float
 from ._diffusion_utils import (slice_border, aniso_diff_step_AOS)
 from ._diffusion_utils_pythran import (linear_step)
 
+
 def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     """
     Calculates the result of linear diffusion equation for an input image
@@ -83,7 +84,7 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
             img[:, :, i] = diffusion_linear_grey(
-                np.squeeze(img[:,:,i].copy()), time_step, num_iters, scheme)
+                np.squeeze(img[:, :, i].copy()), time_step, num_iters, scheme)
     else:  # greyscale image
         img = np.pad(img, pad_width=border, mode='edge')
         img = diffusion_linear_grey(
