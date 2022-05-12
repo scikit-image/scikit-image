@@ -1204,7 +1204,7 @@ def apply_hysteresis_threshold(image, low, high):
     return thresholded
 
 
-def threshold_multiotsu(image, classes=3, nbins=256, *, hist=None,
+def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None,
                         bin_width_stage1=None):
     r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
     following Otsu's method for multiple classes.

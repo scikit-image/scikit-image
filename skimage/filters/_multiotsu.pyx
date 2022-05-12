@@ -60,7 +60,7 @@ def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
 
 
 cdef _get_multiotsu_thresh_indices_lut2(
-        float [::1] prob, Py_ssize_t thresh_count, int bin_width,
+        cnp.float32_t [::1] prob, Py_ssize_t thresh_count, int bin_width,
         Py_ssize_t [::1] thresh_indices_stage1):
     """Internal implementation of _get_multiotsu_thresh_indices_lut."""
 
@@ -337,7 +337,7 @@ def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
 
 
 def _get_multiotsu_thresh_indices2(
-        float [::1] prob, Py_ssize_t thresh_count,
+        cnp.float32_t [::1] prob, Py_ssize_t thresh_count,
         int bin_width, Py_ssize_t [::1] thresh_indices_stage1):
     """Internal implementation for _get_multiotsu_thresh_indices2."""
     cdef Py_ssize_t nbins = prob.shape[0]
