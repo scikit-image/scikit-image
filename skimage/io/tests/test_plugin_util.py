@@ -3,8 +3,6 @@ from skimage.io._plugins.util import prepare_for_display, WindowManager
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, TestCase
-from skimage._shared._warnings import expected_warnings
-
 
 np.random.seed(0)
 

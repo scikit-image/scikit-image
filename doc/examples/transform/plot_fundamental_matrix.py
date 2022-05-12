@@ -45,18 +45,22 @@ descriptors_right = descriptor_extractor.descriptors
 matches = match_descriptors(descriptors_left, descriptors_right,
                             cross_check=True)
 
+print(f'Number of matches: {matches.shape[0]}')
+
 # Estimate the epipolar geometry between the left and right image.
+random_seed = 9
+rng = np.random.default_rng(random_seed)
 
 model, inliers = ransac((keypoints_left[matches[:, 0]],
                          keypoints_right[matches[:, 1]]),
                         FundamentalMatrixTransform, min_samples=8,
-                        residual_threshold=1, max_trials=5000)
+                        residual_threshold=1, max_trials=5000,
+                        random_state=rng)
 
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]
 inlier_keypoints_right = keypoints_right[matches[inliers, 1]]
 
-print(f"Number of matches: {matches.shape[0]}")
-print(f"Number of inliers: {inliers.sum()}")
+print(f'Number of inliers: {inliers.sum()}')
 
 # Compare estimated sparse disparities to the dense ground-truth disparities.
 

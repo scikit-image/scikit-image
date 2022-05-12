@@ -8,10 +8,29 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import deprecate_kwarg
 from ..util import crop
+from .footprints import _footprint_is_sequence, _shape_from_sequence
 from .misc import default_footprint
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
+
+
+def _iterate_gray_func(gray_func, image, footprints, out):
+    """Helper to call `binary_func` for each footprint in a sequence.
+
+    binary_func is a binary morphology function that accepts "structure",
+    "output" and "iterations" keyword arguments
+    (e.g. `scipy.ndimage.binary_erosion`).
+    """
+    fp, num_iter = footprints[0]
+    gray_func(image, footprint=fp, output=out)
+    for _ in range(1, num_iter):
+        gray_func(out.copy(), footprint=fp, output=out)
+    for fp, num_iter in footprints[1:]:
+        # Note: out.copy() because the computation cannot be in-place!
+        for _ in range(num_iter):
+            gray_func(out.copy(), footprint=fp, output=out)
+    return out
 
 
 def _shift_footprint(footprint, shift_x, shift_y):
@@ -110,7 +129,13 @@ def pad_for_eccentric_footprints(func):
         padding = False
         if out is None:
             out = np.empty_like(image)
-        for axis_len in footprint.shape:
+        if _footprint_is_sequence(footprint):
+            # Note: in practice none of our built-in footprint sequences will
+            #       require padding (all are symmetric and have odd sizes)
+            footprint_shape = _shape_from_sequence(footprint)
+        else:
+            footprint_shape = footprint.shape
+        for axis_len in footprint_shape:
             if axis_len % 2 == 0:
                 axis_pad_width = axis_len - 1
                 padding = True
@@ -132,7 +157,8 @@ def pad_for_eccentric_footprints(func):
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological erosion of an image.
 
@@ -146,7 +172,10 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -184,36 +213,47 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = np.array(footprint)
-    footprint = _shift_footprint(footprint, shift_x, shift_y)
     if out is None:
         out = np.empty_like(image)
+
+    if _footprint_is_sequence(footprint):
+        footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
+                           for fp, n in footprint)
+        return _iterate_gray_func(ndi.grey_erosion, image, footprints, out)
+
+    footprint = np.array(footprint)
+    footprint = _shift_footprint(footprint, shift_x, shift_y)
     ndi.grey_erosion(image, footprint=footprint, output=out)
     return out
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     """Return grayscale morphological dilation of an image.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets the value of a pixel to the maximum over all
+    pixel values within a local neighborhood centered about it. The values
+    where the footprint is 1 define this neighborhood.
+    Dilation enlarges bright regions and shrinks dark regions.
 
     Parameters
     ----------
     image : ndarray
         Image array.
     footprint : ndarray, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        The neighborhood expressed as an array of 1's and 0's.
+        If None, it will be a cross-shaped footprint (connectivity=1). This can
+        also be a sequence of 2-tuples where the first element of each 2-tuple
+        is a footprint and the second element as an integer describing the
+        number of times it should be iterated.
     out : ndarray, optional
-        The array to store the result of the morphology. If None, is
+        The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        Shift footprint about center point. This only affects
-        eccentric footprints (i.e. footprint with even numbered
+        Shift footprint about center point. This only affects 2D
+        eccentric footprints (i.e., footprints with even-numbered
         sides).
 
     Returns
@@ -245,6 +285,17 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if out is None:
+        out = np.empty_like(image)
+
+    if _footprint_is_sequence(footprint):
+        # shift and invert (see comment below) each footprint
+        footprints = tuple(
+            (_invert_footprint(_shift_footprint(fp, shift_x, shift_y)), n)
+            for fp, n in footprint
+        )
+        return _iterate_gray_func(ndi.grey_dilation, image, footprints, out)
+
     footprint = np.array(footprint)
     footprint = _shift_footprint(footprint, shift_x, shift_y)
     # Inside ndi.grey_dilation, the footprint is inverted,
@@ -253,13 +304,13 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     # footprint before passing it to `ndi.grey_dilation`.
     # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
     footprint = _invert_footprint(footprint)
-    if out is None:
-        out = np.empty_like(image)
+
     ndi.grey_dilation(image, footprint=footprint, output=out)
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def opening(image, footprint=None, out=None):
@@ -276,7 +327,10 @@ def opening(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -310,7 +364,8 @@ def opening(image, footprint=None, out=None):
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 @default_footprint
 @pad_for_eccentric_footprints
 def closing(image, footprint=None, out=None):
@@ -327,7 +382,10 @@ def closing(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -361,8 +419,26 @@ def closing(image, footprint=None, out=None):
     return out
 
 
+def _white_tophat_seqence(image, footprints, out):
+    """Return white top hat for a sequence of footprints.
+
+    Like SciPy's implementation, but with ``ndi.grey_erosion`` and
+    ``ndi.grey_dilation`` wrapped with ``_iterate_gray_func``.
+    """
+    tmp = _iterate_gray_func(ndi.grey_erosion, image, footprints, out)
+    tmp = _iterate_gray_func(ndi.grey_dilation, tmp.copy(), footprints, out)
+    if tmp is None:
+        tmp = out
+    if image.dtype == np.bool_ and tmp.dtype == np.bool_:
+        np.bitwise_xor(image, tmp, out=tmp)
+    else:
+        np.subtract(image, tmp, out=tmp)
+    return tmp
+
+
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def white_tophat(image, footprint=None, out=None):
     """Return white top hat of an image.
 
@@ -376,7 +452,10 @@ def white_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -412,7 +491,6 @@ def white_tophat(image, footprint=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = np.array(footprint)
     if out is image:
         opened = opening(image, footprint)
         if np.issubdtype(opened.dtype, bool):
@@ -431,12 +509,16 @@ def white_tophat(image, footprint=None, out=None):
         out_ = out.view(dtype=np.uint8)
     else:
         out_ = out
+    if _footprint_is_sequence(footprint):
+        return _white_tophat_seqence(image_, footprint, out_)
+    footprint = np.array(footprint)
     out_ = ndi.white_tophat(image_, footprint=footprint, output=out_)
     return out
 
 
 @default_footprint
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def black_tophat(image, footprint=None, out=None):
     """Return black top hat of an image.
 
@@ -451,7 +533,10 @@ def black_tophat(image, footprint=None, out=None):
         Image array.
     footprint : ndarray, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1).
+        If None, use cross-shaped footprint (connectivity=1). This can also
+        be a sequence of 2-tuples where the first element of each 2-tuple is a
+        footprint and the second element as an integer describing the number of
+        times it should be iterated.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.

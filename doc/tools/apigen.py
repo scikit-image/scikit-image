@@ -211,9 +211,10 @@ class ApiDocWriter(object):
         submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
-            if obj_str not in mod.__dict__:
+            try:
+                obj = getattr(mod, obj_str)
+            except AttributeError:
                 continue
-            obj = mod.__dict__[obj_str]
 
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
@@ -493,7 +494,7 @@ class ApiDocWriter(object):
             elif len(module_name) == 2:
                 module_name = module_name[1]
                 prefix = "\n  -"
-            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
+            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
         w('\n')
 
         subtitle = "Submodule Contents"

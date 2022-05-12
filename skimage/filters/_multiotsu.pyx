@@ -9,10 +9,9 @@ cimport cython
 cnp.import_array()
 
 
-def _get_multiotsu_thresh_indices_lut(
-    float [::1] prob, Py_ssize_t thresh_count,
-    int bin_width=1, thresh_indices_stage1=None
-):
+def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
+                                      Py_ssize_t thresh_count, int bin_width=1,
+                                      thresh_indices_stage1=None):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
 
@@ -69,10 +68,10 @@ cdef _get_multiotsu_thresh_indices_lut2(
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef float [::1] var_btwcls = np.zeros((nbins * (nbins + 1)) / 2,
-                                           dtype=np.float32)
-    cdef float [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
-    cdef float [::1] first_moment = np.empty(nbins, dtype=np.float32)
+    cdef cnp.float32_t [::1] var_btwcls = np.zeros((nbins * (nbins + 1)) / 2,
+                                                   dtype=np.float32)
+    cdef cnp.float32_t [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
+    cdef cnp.float32_t [::1] first_moment = np.empty(nbins, dtype=np.float32)
 
     with nogil:
         _set_var_btwcls_lut(prob, nbins, var_btwcls, zeroth_moment,
@@ -88,11 +87,11 @@ cdef _get_multiotsu_thresh_indices_lut2(
     return py_thresh_indices
 
 
-cdef void _set_var_btwcls_lut(float [::1] prob,
+cdef void _set_var_btwcls_lut(cnp.float32_t [::1] prob,
                               Py_ssize_t nbins,
-                              float [::1] var_btwcls,
-                              float [::1] zeroth_moment,
-                              float [::1] first_moment) nogil:
+                              cnp.float32_t [::1] var_btwcls,
+                              cnp.float32_t [::1] zeroth_moment,
+                              cnp.float32_t [::1] first_moment) nogil:
     """Builds the lookup table containing the variance between classes.
 
     The variance between classes are stored in
@@ -134,7 +133,7 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
            :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t i, j, idx
-    cdef float zeroth_moment_ij, first_moment_ij
+    cdef cnp.float32_t zeroth_moment_ij, first_moment_ij
 
     zeroth_moment[0] = prob[0]
     first_moment[0] = prob[0]
@@ -155,8 +154,9 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
             idx += 1
 
 
-cdef float _get_var_btwclas_lut(float [::1] var_btwcls, Py_ssize_t i,
-                                Py_ssize_t j, Py_ssize_t nbins) nogil:
+cdef cnp.float32_t _get_var_btwclas_lut(cnp.float32_t [::1] var_btwcls,
+                                        Py_ssize_t i, Py_ssize_t j,
+                                        Py_ssize_t nbins) nogil:
     """Returns the variance between classes stored in compressed upper
     triangular matrix form at the desired 2D indices.
 
@@ -179,13 +179,12 @@ cdef float _get_var_btwclas_lut(float [::1] var_btwcls, Py_ssize_t i,
     return var_btwcls[idx]
 
 
-cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
-                                   Py_ssize_t thresh_idx, Py_ssize_t nbins,
-                                   Py_ssize_t thresh_count, float sigma_max,
-                                   Py_ssize_t[::1] current_indices,
-                                   Py_ssize_t[::1] thresh_indices,
-                                   int bin_width,
-                                   Py_ssize_t[::1] thresh_indices_stage1) nogil:
+cdef cnp.float32_t  _set_thresh_indices_lut(
+        cnp.float32_t [::1] var_btwcls, Py_ssize_t hist_idx,
+        Py_ssize_t thresh_idx, Py_ssize_t nbins, Py_ssize_t thresh_count,
+        cnp.float32_t sigma_max, Py_ssize_t[::1] current_indices,
+        Py_ssize_t[::1] thresh_indices, int bin_width,
+        Py_ssize_t[::1] thresh_indices_stage1) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -241,7 +240,7 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
            2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
     """
     cdef cnp.intp_t idx, idx_start, idx_stop
-    cdef float sigma
+    cdef cnp.float32_t sigma
 
     if thresh_idx < thresh_count:
         if bin_width == 1:
@@ -286,9 +285,9 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
     return sigma_max
 
 
-
-def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count,
-                                  int bin_width=1, thresh_indices_stage1=None):
+def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
+                                  Py_ssize_t thresh_count, int bin_width=1,
+                                  thresh_indices_stage1=None):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
 
@@ -345,8 +344,8 @@ def _get_multiotsu_thresh_indices2(
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef float [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
-    cdef float [::1] first_moment = np.empty(nbins, dtype=np.float32)
+    cdef cnp.float32_t [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
+    cdef cnp.float32_t [::1] first_moment = np.empty(nbins, dtype=np.float32)
 
     with nogil:
         _set_moments_lut_first_row(prob, nbins, zeroth_moment, first_moment)
@@ -361,10 +360,10 @@ def _get_multiotsu_thresh_indices2(
     return py_thresh_indices
 
 
-cdef void _set_moments_lut_first_row(float [::1] prob,
+cdef void _set_moments_lut_first_row(cnp.float32_t [::1] prob,
                                      Py_ssize_t nbins,
-                                     float [::1] zeroth_moment,
-                                     float [::1] first_moment) nogil:
+                                     cnp.float32_t [::1] zeroth_moment,
+                                     cnp.float32_t [::1] first_moment) nogil:
     """Builds the first rows of the zeroth and first moments lookup table
     necessary to the computation of the variance between class.
 
@@ -398,9 +397,9 @@ cdef void _set_moments_lut_first_row(float [::1] prob,
         first_moment[i] = first_moment[i - 1] + i * prob[i]
 
 
-cdef float _get_var_btwclas(float [::1] zeroth_moment,
-                            float [::1] first_moment,
-                            Py_ssize_t i, Py_ssize_t j) nogil:
+cdef cnp.float32_t _get_var_btwclas(cnp.float32_t [::1] zeroth_moment,
+                                    cnp.float32_t [::1] first_moment,
+                                    Py_ssize_t i, Py_ssize_t j) nogil:
     """Computes the variance between two classes.
 
     Parameters
@@ -420,7 +419,7 @@ cdef float _get_var_btwclas(float [::1] zeroth_moment,
         The variance between the classes i and j.
     """
 
-    cdef float zeroth_moment_ij, first_moment_ij
+    cdef cnp.float32_t zeroth_moment_ij, first_moment_ij
 
     if i == 0:
         if zeroth_moment[i] > 0:
@@ -433,15 +432,12 @@ cdef float _get_var_btwclas(float [::1] zeroth_moment,
     return 0
 
 
-cdef float _set_thresh_indices(float[::1] zeroth_moment,
-                               float[::1] first_moment,
-                               Py_ssize_t hist_idx,
-                               Py_ssize_t thresh_idx, Py_ssize_t nbins,
-                               Py_ssize_t thresh_count, float sigma_max,
-                               Py_ssize_t[::1] current_indices,
-                               Py_ssize_t[::1] thresh_indices,
-                               int bin_width,
-                               Py_ssize_t[::1] thresh_indices_stage1) nogil:
+cdef cnp.float32_t _set_thresh_indices(
+        cnp.float32_t[::1] zeroth_moment, cnp.float32_t[::1] first_moment,
+        Py_ssize_t hist_idx, Py_ssize_t thresh_idx, Py_ssize_t nbins,
+        Py_ssize_t thresh_count, cnp.float32_t sigma_max,
+        Py_ssize_t[::1] current_indices, Py_ssize_t[::1] thresh_indices,
+        int bin_width, Py_ssize_t[::1] thresh_indices_stage1) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -494,7 +490,7 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
            2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
     """
     cdef cnp.intp_t idx, idx_start, idx_stop
-    cdef float sigma
+    cdef cnp.float32_t sigma
 
     if thresh_idx < thresh_count:
         if bin_width == 1:

@@ -121,6 +121,9 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     watershed_line : bool, optional
         If watershed_line is True, a one-pixel wide line separates the regions
         obtained by the watershed algorithm. The line has the label 0.
+        Note that the method used for adding this line expects that
+        marker regions are not adjacent; the watershed line may not catch
+        borders between adjacent marker regions.
 
     Returns
     -------
@@ -189,10 +192,11 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     >>> from scipy import ndimage as ndi
     >>> distance = ndi.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
-    >>> local_maxi = peak_local_max(distance, labels=image,
-    ...                             footprint=np.ones((3, 3)),
-    ...                             indices=False)
-    >>> markers = ndi.label(local_maxi)[0]
+    >>> max_coords = peak_local_max(distance, labels=image,
+    ...                             footprint=np.ones((3, 3)))
+    >>> local_maxima = np.zeros_like(image, dtype=bool)
+    >>> local_maxima[tuple(max_coords.T)] = True
+    >>> markers = ndi.label(local_maxima)[0]
 
     Finally, we run the watershed on the image and markers:
 

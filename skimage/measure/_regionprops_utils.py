@@ -1,6 +1,7 @@
 from math import sqrt
 import numpy as np
 from scipy import ndimage as ndi
+from .._shared.utils import deprecate_kwarg
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -90,7 +91,7 @@ def euler_number(image, connectivity=None):
     4-connected, then background is 8-connected, and conversely.
 
     The computation of the Euler characteristic is based on an integral
-    geometry formula in discretized space. In practice, a neighbourhood
+    geometry formula in discretized space. In practice, a neighborhood
     configuration is constructed, and a LUT is applied for each
     configuration. The coefficients used are the ones of Ohser et al.
 
@@ -183,16 +184,19 @@ def euler_number(image, connectivity=None):
         return int(0.125 * coefs @ h)
 
 
-def perimeter(image, neighbourhood=4):
+@deprecate_kwarg(kwarg_mapping={'neighbourhood': 'neighborhood'},
+                 removed_version="1.2",
+                 deprecated_version="0.19.2")
+def perimeter(image, neighborhood=4):
     """Calculate total perimeter of all objects in binary image.
 
     Parameters
     ----------
     image : (N, M) ndarray
         2D binary image.
-    neighbourhood : 4 or 8, optional
+    neighborhood : 4 or 8, optional
         Neighborhood connectivity for border pixel determination. It is used to
-        compute the contour. A higher neighbourhood widens the border on which
+        compute the contour. A higher neighborhood widens the border on which
         the perimeter is computed.
 
     Returns
@@ -213,16 +217,16 @@ def perimeter(image, neighbourhood=4):
     >>> # coins image (binary)
     >>> img_coins = data.coins() > 110
     >>> # total perimeter of all objects in the image
-    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    >>> perimeter(img_coins, neighborhood=4)  # doctest: +ELLIPSIS
     7796.867...
-    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    >>> perimeter(img_coins, neighborhood=8)  # doctest: +ELLIPSIS
     8806.268...
 
     """
     if image.ndim != 2:
         raise NotImplementedError('`perimeter` supports 2D images only')
 
-    if neighbourhood == 4:
+    if neighborhood == 4:
         strel = STREL_4
     else:
         strel = STREL_8
@@ -230,7 +234,7 @@ def perimeter(image, neighbourhood=4):
     eroded_image = ndi.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    perimeter_weights = np.zeros(50, dtype=np.double)
+    perimeter_weights = np.zeros(50, dtype=np.float64)
     perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2

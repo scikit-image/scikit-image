@@ -1,10 +1,12 @@
+import pathlib
+
 import numpy as np
 
-from ..io.manage_plugins import call_plugin
-from ..color.colorconv import rgb2gray, rgba2rgb
-from .util import file_or_url_context
-from ..exposure import is_low_contrast
 from .._shared.utils import warn
+from ..exposure import is_low_contrast
+from ..color.colorconv import rgb2gray, rgba2rgb
+from ..io.manage_plugins import call_plugin
+from .util import file_or_url_context
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',
@@ -16,7 +18,7 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
 
     Parameters
     ----------
-    fname : string
+    fname : str or pathlib.Path
         Image file name, e.g. ``test.jpg`` or URL.
     as_gray : bool, optional
         If True, convert color images to gray-scale (64-bit floats).
@@ -40,6 +42,9 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
+    if isinstance(fname, pathlib.Path):
+        fname = str(fname.resolve())
+
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
@@ -98,7 +103,7 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
 
     Parameters
     ----------
-    fname : str
+    fname : str or pathlib.Path
         Target filename.
     arr : ndarray of shape (M,N) or (M,N,3) or (M,N,4)
         Image data.
@@ -123,6 +128,8 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     and largest file size (default 75).  This is only available when using
     the PIL and imageio plugins.
     """
+    if isinstance(fname, pathlib.Path):
+        fname = str(fname.resolve())
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'

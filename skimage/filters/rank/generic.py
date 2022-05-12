@@ -8,9 +8,9 @@ similar to the method described in [1]_. A histogram is built using a moving
 window in order to limit redundant computation. The moving window follows a
 snake-like path:
 
-...------------------------\
-/--------------------------/
-\--------------------------...
+...------------------------↘
+↙--------------------------↙
+↘--------------------------...
 
 The local histogram is updated at each pixel as the footprint window
 moves by, i.e. only those pixels entering and leaving the footprint
@@ -48,12 +48,11 @@ References
 
 """
 
-import warnings
-
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..._shared.utils import check_nD, deprecate_kwarg, warn
+from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
 from . import generic_cy
 
@@ -111,6 +110,11 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
                    f'silence this warning.')
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
+
+    if _footprint_is_sequence(footprint):
+        raise ValueError(
+            "footprint sequences are not currently supported by rank filters"
+        )
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
@@ -335,7 +339,8 @@ def _apply_vector_per_pixel(func, image, footprint, out, mask, shift_x,
     return out
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def autolevel(image, footprint, out=None, mask=None,
               shift_x=False, shift_y=False, shift_z=False):
     """Auto-level image using local histogram.
@@ -389,7 +394,8 @@ def autolevel(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def equalize(image, footprint, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
@@ -440,7 +446,8 @@ def equalize(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def gradient(image, footprint, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
@@ -491,7 +498,8 @@ def gradient(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def maximum(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Return local maximum of an image.
@@ -551,7 +559,8 @@ def maximum(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def mean(image, footprint, out=None, mask=None,
          shift_x=False, shift_y=False, shift_z=False):
     """Return local mean of an image.
@@ -602,7 +611,8 @@ def mean(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def geometric_mean(image, footprint, out=None, mask=None,
                    shift_x=False, shift_y=False, shift_z=False):
     """Return local geometric mean of an image.
@@ -641,8 +651,8 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     References
     ----------
-    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing (3rd Edition)."
-           Prentice-Hall Inc, 2006.
+    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+           (3rd Edition)." Prentice-Hall Inc, 2006.
 
     """
 
@@ -658,7 +668,8 @@ def geometric_mean(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def subtract_mean(image, footprint, out=None, mask=None,
                   shift_x=False, shift_y=False, shift_z=False):
     """Return image subtracted from its local mean.
@@ -717,7 +728,8 @@ def subtract_mean(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def median(image, footprint=None, out=None, mask=None,
            shift_x=False, shift_y=False, shift_z=False):
     """Return local median of an image.
@@ -776,7 +788,8 @@ def median(image, footprint=None, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def minimum(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Return local minimum of an image.
@@ -836,7 +849,8 @@ def minimum(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def modal(image, footprint, out=None, mask=None,
           shift_x=False, shift_y=False, shift_z=False):
     """Return local mode of an image.
@@ -889,7 +903,8 @@ def modal(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def enhance_contrast(image, footprint, out=None, mask=None,
                      shift_x=False, shift_y=False, shift_z=False):
     """Enhance contrast of an image.
@@ -944,7 +959,8 @@ def enhance_contrast(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def pop(image, footprint, out=None, mask=None,
         shift_x=False, shift_y=False, shift_z=False):
     """Return the local number (population) of pixels.
@@ -1002,7 +1018,8 @@ def pop(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def sum(image, footprint, out=None, mask=None,
         shift_x=False, shift_y=False, shift_z=False):
     """Return the local sum of pixels.
@@ -1060,7 +1077,8 @@ def sum(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def threshold(image, footprint, out=None, mask=None,
               shift_x=False, shift_y=False, shift_z=False):
     """Local threshold of an image.
@@ -1118,7 +1136,8 @@ def threshold(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def noise_filter(image, footprint, out=None, mask=None,
                  shift_x=False, shift_y=False, shift_z=False):
     """Noise feature.
@@ -1163,6 +1182,10 @@ def noise_filter(image, footprint, out=None, mask=None,
     """
 
     np_image = np.asanyarray(image)
+    if _footprint_is_sequence(footprint):
+        raise ValueError(
+            "footprint sequences are not currently supported by rank filters"
+        )
     if np_image.ndim == 2:
         # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
@@ -1189,7 +1212,8 @@ def noise_filter(image, footprint, out=None, mask=None,
                                           shift_y=shift_y, shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def entropy(image, footprint, out=None, mask=None,
             shift_x=False, shift_y=False, shift_z=False):
     """Local entropy.
@@ -1241,15 +1265,17 @@ def entropy(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
-                                       out_dtype=np.double)
+                                       out_dtype=np.float64)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z, out_dtype=np.double)
+                                          shift_z=shift_z,
+                                          out_dtype=np.float64)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def otsu(image, footprint, out=None, mask=None,
          shift_x=False, shift_y=False, shift_z=False):
     """Local Otsu's threshold value for each pixel.
@@ -1306,7 +1332,8 @@ def otsu(image, footprint, out=None, mask=None,
                                           shift_z=shift_z)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def windowed_histogram(image, footprint, out=None, mask=None,
                        shift_x=False, shift_y=False, n_bins=None):
     """Normalized sliding window histogram
@@ -1358,15 +1385,15 @@ def windowed_histogram(image, footprint, out=None, mask=None,
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y,
-                                   out_dtype=np.double,
+                                   out_dtype=np.float64,
                                    pixel_size=n_bins)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0")
+@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def majority(image, footprint, *, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
-    """Majority filter assign to each pixel the most occuring value within
-    its neighborhood.
+    """Assign to each pixel the most common value within its neighborhood.
 
     Parameters
     ----------

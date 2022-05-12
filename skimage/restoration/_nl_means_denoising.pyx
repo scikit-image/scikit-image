@@ -31,7 +31,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
     s : Py_ssize_t
         Linear size of the patches.
     var_diff : np_floats
-        The double of the expected noise variance.
+        The cnp.float64_t of the expected noise variance.
     n_channels : Py_ssize_t
         The number of channels.
 
@@ -111,7 +111,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
 
 
 def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
-                           Py_ssize_t d, double h, double var):
+                           Py_ssize_t d, cnp.float64_t h, cnp.float64_t var):
     """
     Perform non-local means denoising on 2-D RGB image
 
@@ -215,7 +215,7 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
 
 def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                            Py_ssize_t s, Py_ssize_t d,
-                           double h, double var):
+                           cnp.float64_t h, cnp.float64_t var):
     """
     Perform non-local means denoising on 3-D array
 
@@ -313,10 +313,11 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
 #-------------- Accelerated algorithm of Froment 2015 ------------------
 
 
-cdef inline double _integral_to_distance_2d(double [:, ::] integral,
-                                            Py_ssize_t row, Py_ssize_t col,
-                                            Py_ssize_t offset,
-                                            double h2s2) nogil:
+cdef inline cnp.float64_t _integral_to_distance_2d(cnp.float64_t [:, ::] integral,
+                                                   Py_ssize_t row,
+                                                   Py_ssize_t col,
+                                                   Py_ssize_t offset,
+                                                   cnp.float64_t h2s2) nogil:
     """
     Parameters
     ----------
@@ -349,17 +350,19 @@ cdef inline double _integral_to_distance_2d(double [:, ::] integral,
     .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
-    cdef double distance = (integral[row + offset, col + offset] +
-                            integral[row - offset, col - offset] -
-                            integral[row - offset, col + offset] -
-                            integral[row + offset, col - offset])
+    cdef cnp.float64_t distance = (integral[row + offset, col + offset] +
+                                   integral[row - offset, col - offset] -
+                                   integral[row - offset, col + offset] -
+                                   integral[row + offset, col - offset])
     return max(distance, 0.0) / h2s2
 
 
-cdef inline double _integral_to_distance_3d(double[:, :, ::] integral,
-                                            Py_ssize_t pln, Py_ssize_t row,
-                                            Py_ssize_t col, Py_ssize_t offset,
-                                            double s_cube_h_square) nogil:
+cdef inline cnp.float64_t _integral_to_distance_3d(cnp.float64_t[:, :, ::] integral,
+                                                   Py_ssize_t pln,
+                                                   Py_ssize_t row,
+                                                   Py_ssize_t col,
+                                                   Py_ssize_t offset,
+                                                   cnp.float64_t s_cube_h_square) nogil:
     """
     Parameters
     ----------
@@ -392,7 +395,7 @@ cdef inline double _integral_to_distance_3d(double[:, :, ::] integral,
     .. [2] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
-    cdef double distance = (
+    cdef cnp.float64_t distance = (
         integral[pln + offset, row + offset, col + offset] -
         integral[pln - offset, row - offset, col - offset] +
         integral[pln - offset, row - offset, col + offset] +
@@ -404,11 +407,13 @@ cdef inline double _integral_to_distance_3d(double[:, :, ::] integral,
     return max(distance, 0.0) / (s_cube_h_square)
 
 
-cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
-                                            Py_ssize_t time, Py_ssize_t pln,
-                                            Py_ssize_t row, Py_ssize_t col,
-                                            Py_ssize_t offset,
-                                            double s4_h_square) nogil:
+cdef inline cnp.float64_t _integral_to_distance_4d(cnp.float64_t [:, :, :, ::] integral,
+                                                   Py_ssize_t time,
+                                                   Py_ssize_t pln,
+                                                   Py_ssize_t row,
+                                                   Py_ssize_t col,
+                                                   Py_ssize_t offset,
+                                                   cnp.float64_t s4_h_square) nogil:
     """
     Parameters
     ----------
@@ -445,7 +450,7 @@ cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
     .. [3] Tapia, E. A note on the computation of high-dimensional integral
            images. Pattern Recognition Letters, 2011, Vol. 32, pp.197-201.
     """
-    cdef double distance
+    cdef cnp.float64_t distance
     distance = (
         integral[time - offset, pln - offset, row - offset, col - offset] -
         integral[time - offset, pln - offset, row - offset, col + offset] -
@@ -466,12 +471,12 @@ cdef inline double _integral_to_distance_4d(double [:, :, :, ::] integral,
     return max(distance, 0.0) / s4_h_square
 
 
-cdef inline void _integral_image_2d(double [:, :, ::] padded,
-                                    double [:, ::] integral,
+cdef inline void _integral_image_2d(cnp.float64_t [:, :, ::] padded,
+                                    cnp.float64_t [:, ::] integral,
                                     Py_ssize_t t_row, Py_ssize_t t_col,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
-                                    double var_diff) nogil:
+                                    cnp.float64_t var_diff) nogil:
     """ Compute the integral of the squared difference between an image
     ``padded`` and the same image shifted by ``(t_row, t_col)``.
 
@@ -489,7 +494,7 @@ cdef inline void _integral_image_2d(double [:, :, ::] padded,
     n_row : Py_ssize_t
     n_col : Py_ssize_t
     n_channels : Py_ssize_t
-    var_diff : double
+    var_diff : cnp.float64_t
         The double of the expected noise variance.  If non-zero, this
         is used to reduce the apparent patch distances by the expected
         distance due to the noise.
@@ -504,7 +509,7 @@ cdef inline void _integral_image_2d(double [:, :, ::] padded,
     cdef Py_ssize_t row, col, channel
     cdef Py_ssize_t row_start = max(1, -t_row)
     cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
-    cdef double t, distance
+    cdef cnp.float64_t t, distance
 
     for row in range(row_start, row_end):
         for col in range(1, n_col - t_col):
@@ -520,13 +525,13 @@ cdef inline void _integral_image_2d(double [:, :, ::] padded,
                                   integral[row - 1, col - 1])
 
 
-cdef inline void _integral_image_3d(double [:, :, :, ::] padded,
-                                    double [:, :, ::] integral,
+cdef inline void _integral_image_3d(cnp.float64_t [:, :, :, ::] padded,
+                                    cnp.float64_t [:, :, ::] integral,
                                     Py_ssize_t t_pln, Py_ssize_t t_row,
                                     Py_ssize_t t_col, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
-                                    double var_diff) nogil:
+                                    cnp.float64_t var_diff) nogil:
     """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 
@@ -564,7 +569,7 @@ cdef inline void _integral_image_3d(double [:, :, :, ::] padded,
     cdef Py_ssize_t pln_end = min(n_pln, n_pln - t_pln)
     cdef Py_ssize_t row_start = max(1, -t_row)
     cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
-    cdef double t, distance
+    cdef cnp.float64_t t, distance
 
     for pln in range(pln_start, pln_end):
         for row in range(row_start, row_end):
@@ -587,12 +592,12 @@ cdef inline void _integral_image_3d(double [:, :, :, ::] padded,
                     integral[pln - 1, row, col - 1])
 
 
-cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
-                                    double [:, :, :, ::] integral,
+cdef inline void _integral_image_4d(cnp.float64_t [:, :, :, :, ::] padded,
+                                    cnp.float64_t [:, :, :, ::] integral,
                                     Py_ssize_t t_time, Py_ssize_t t_pln, Py_ssize_t t_row,
                                     Py_ssize_t t_col, Py_ssize_t n_time, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col, Py_ssize_t n_channels,
-                                    double var_diff) nogil:
+                                    cnp.float64_t var_diff) nogil:
     """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 
@@ -615,7 +620,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
     n_pln : Py_ssize_t
     n_row : Py_ssize_t
     n_col : Py_ssize_t
-    var_diff : double
+    var_diff : cnp.float64_t
         The double of the expected noise variance. If non-zero, this
         is used to reduce the apparent patch distances by the expected
         distance due to the noise.
@@ -634,7 +639,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
     cdef Py_ssize_t pln_end = min(n_pln, n_pln - t_pln)
     cdef Py_ssize_t row_start = max(1, -t_row)
     cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
-    cdef double t, distance
+    cdef cnp.float64_t t, distance
 
     for time in range(time_start, time_end):
         for pln in range(pln_start, pln_end):
@@ -673,7 +678,7 @@ cdef inline void _integral_image_4d(double [:, :, :, :, ::] padded,
 
 def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                                 Py_ssize_t s, Py_ssize_t d,
-                                double h, double var):
+                                cnp.float64_t h, cnp.float64_t var):
     """Perform fast non-local means denoising on 2-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
 
@@ -685,10 +690,10 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
         Size of patches used for denoising.
     d : Py_ssize_t, optional
         Maximal distance in pixels where to search patches used for denoising.
-    h : double, optional
+    h : cnp.float64_t, optional
         Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
-    var : double
+    var : cnp.float64_t
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
 
@@ -708,7 +713,7 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
-    cdef double DISTANCE_CUTOFF = 5.0
+    cdef cnp.float64_t DISTANCE_CUTOFF = 5.0
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
 
@@ -724,13 +729,13 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
     cdef Py_ssize_t offset = s / 2
     cdef Py_ssize_t pad_size = offset + d + 1
 
-    cdef double [:, :, ::1] padded = np.ascontiguousarray(
+    cdef cnp.float64_t [:, :, ::1] padded = np.ascontiguousarray(
         np.pad(image, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)),
                mode='reflect').astype(np.float64))
-    cdef double [:, ::1] weights = np.zeros_like(padded[..., 0])
-    cdef double [:, ::1] integral = np.zeros_like(weights)
-    cdef double [:, :, ::1] result = np.zeros_like(padded)
-    cdef double distance, h2s2, weight, alpha
+    cdef cnp.float64_t [:, ::1] weights = np.zeros_like(padded[..., 0])
+    cdef cnp.float64_t [:, ::1] integral = np.zeros_like(weights)
+    cdef cnp.float64_t [:, :, ::1] result = np.zeros_like(padded)
+    cdef cnp.float64_t distance, h2s2, weight, alpha
 
     n_row, n_col, n_channels = padded.shape[0], padded.shape[1], padded.shape[2]
     h2s2 = n_channels * h * h * s * s
@@ -741,16 +746,14 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
         # With t2 >= 0, reference patch is always on the left of test patch
         # Iterate over shifts along the row axis
         for t_row in range(-d, d + 1):
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t_row != 0:
-                alpha = 0.5
-            else:
-                alpha = 1.0
             row_start = max(offset, offset - t_row)
             row_end = min(n_row - offset, n_row - offset - t_row)
             # Iterate over shifts along the column axis
             for t_col in range(0, d + 1):
+                # alpha is to account for patches on the same column
+                # distance is computed twice in this case
+                alpha = 0.5 if t_col == 0 else 1
+
                 # Compute integral image of the squared difference between
                 # padded and the same image shifted by (t_row, t_col)
                 _integral_image_2d(padded, integral, t_row, t_col,
@@ -779,7 +782,6 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                                 padded[row_shift, col_shift, channel]
                             result[row_shift, col_shift, channel] += \
                                 weight * padded[row, col, channel]
-                alpha = 1
 
         # Normalize pixel values using sum of weights of contributing patches
         for row in range(pad_size, n_row - pad_size):
@@ -795,8 +797,8 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
 
 
 def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
-                                Py_ssize_t s=5, Py_ssize_t d=7, double h=0.1,
-                                double var=0.):
+                                Py_ssize_t s=5, Py_ssize_t d=7,
+                                cnp.float64_t h=0.1, cnp.float64_t var=0.):
     """Perform fast non-local means denoising on 3-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
 
@@ -808,10 +810,10 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
         Size of patches used for denoising.
     d : Py_ssize_t, optional
         Maximal distance in pixels where to search patches used for denoising.
-    h : double, optional
+    h : cnp.float64_t, optional
         cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
-    var : double
+    var : cnp.float64_t
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
 
@@ -831,7 +833,7 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
-    cdef double DISTANCE_CUTOFF = 5.0
+    cdef cnp.float64_t DISTANCE_CUTOFF = 5.0
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
 
@@ -844,7 +846,7 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef Py_ssize_t pad_size = offset + d + 1
-    cdef double [:, :, :, ::1] padded = np.ascontiguousarray(
+    cdef cnp.float64_t [:, :, :, ::1] padded = np.ascontiguousarray(
         np.pad(image,
                ((pad_size, pad_size),
                 (pad_size, pad_size),
@@ -852,17 +854,17 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
                 (0, 0)),
                mode='reflect'),
         dtype=np.float64)
-    cdef double [:, :, ::1] weights = np.zeros_like(padded[..., 0])
-    cdef double [:, :, ::1] integral = np.zeros_like(padded[..., 0])
-    cdef double [:, :, :, ::1] result = np.zeros_like(padded)
+    cdef cnp.float64_t [:, :, ::1] weights = np.zeros_like(padded[..., 0])
+    cdef cnp.float64_t [:, :, ::1] integral = np.zeros_like(padded[..., 0])
+    cdef cnp.float64_t [:, :, :, ::1] result = np.zeros_like(padded)
 
     cdef Py_ssize_t n_pln, n_row, n_col, t_pln, t_row, t_col, \
              pln, row, col, channel, n_channels
     cdef Py_ssize_t pln_dist_min, pln_dist_max, row_dist_min, row_dist_max, \
              col_dist_min, col_dist_max
-    cdef double weight, distance, alpha
+    cdef cnp.float64_t weight, distance, alpha
     n_pln, n_row, n_col, n_channels = padded.shape[0], padded.shape[1], padded.shape[2], padded.shape[3]
-    cdef double s_cube_h_square = n_channels * h * h * s * s * s
+    cdef cnp.float64_t s_cube_h_square = n_channels * h * h * s * s * s
 
 
     var *= 2
@@ -874,22 +876,16 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
         for t_pln in range(-d, d + 1):
             pln_dist_min = max(offset, offset - t_pln)
             pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
-                    # alpha is to account for patches on the same column
-                    # distance is computed twice in this case
-            if t_pln == 0:
-                alpha = 1.0
-            else:
-                alpha = 0.5
             # Iterate over shifts along the row axis
             for t_row in range(-d, d + 1):
                 row_dist_min = max(offset, offset - t_row)
                 row_dist_max = min(n_row - offset, n_row - offset - t_row)
-                if t_row == 0:
-                    alpha = 1.0
-                else:
-                    alpha = 0.5
                 # Iterate over shifts along the column axis
                 for t_col in range(0, d + 1):
+                    # alpha is to account for patches on the same column
+                    # distance is computed twice in this case
+                    alpha = 0.5 if t_col == 0 else 1
+
                     col_dist_min = offset
                     col_dist_max = n_col - offset - t_col
 
@@ -927,7 +923,6 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
                                     result[pln + t_pln, row + t_row,
                                            col + t_col, channel] += weight * \
                                                                     padded[pln, row, col, channel]
-                    alpha = 1.0
 
         # Normalize pixel values using sum of weights of contributing patches
         for pln in range(offset, n_pln - offset):
@@ -947,8 +942,8 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=4] image,
 
 
 def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
-                                Py_ssize_t s=3, Py_ssize_t d=3, double h=0.1,
-                                double var=0.):
+                                Py_ssize_t s=3, Py_ssize_t d=3,
+                                cnp.float64_t h=0.1, cnp.float64_t var=0.):
     """
     Perform fast non-local means denoising on 3-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
@@ -961,10 +956,10 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
         Size of patches used for denoising.
     d : tuple of Py_ssize_t, optional
         Maximal distance in pixels along each axis to search for patches used for denoising.
-    h : double, optional
+    h : cnp.float64_t, optional
         Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
-    var : double
+    var : cnp.float64_t
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
 
@@ -984,7 +979,7 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
           Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
     """
 
-    cdef double DISTANCE_CUTOFF = 5.0
+    cdef cnp.float64_t DISTANCE_CUTOFF = 5.0
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
 
@@ -997,7 +992,7 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
     # Image padding: we need to account for patch size, possible shift,
     # + 1 for the boundary effects in finite differences
     cdef Py_ssize_t pad_size = offset + d + 1
-    cdef double [:, :, :, :, ::1] padded = np.ascontiguousarray(
+    cdef cnp.float64_t [:, :, :, :, ::1] padded = np.ascontiguousarray(
         np.pad(image,
                ((pad_size, pad_size),
                 (pad_size, pad_size),
@@ -1006,17 +1001,17 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
                 (0, 0)),
                mode='reflect'),
         dtype=np.float64)
-    cdef double [:, :, :, :, ::1] result = np.zeros_like(padded)
-    cdef double [:, :, :, ::1] weights = np.zeros_like(padded[..., 0])
-    cdef double [:, :, :, ::1] integral = np.zeros_like(padded[..., 0])
+    cdef cnp.float64_t [:, :, :, :, ::1] result = np.zeros_like(padded)
+    cdef cnp.float64_t [:, :, :, ::1] weights = np.zeros_like(padded[..., 0])
+    cdef cnp.float64_t [:, :, :, ::1] integral = np.zeros_like(padded[..., 0])
     cdef Py_ssize_t n_pln, n_row, n_col, t_pln, t_row, t_col, \
              pln, row, col, channel, n_channels, t_time, n_time, time
     cdef Py_ssize_t time_dist_min, time_dist_max, pln_dist_min, pln_dist_max, \
              row_dist_min, row_dist_max, col_dist_min, col_dist_max,
     cdef Py_ssize_t d_row, d_col, d_pln, d_time
-    cdef double weight, distance, alpha
+    cdef cnp.float64_t weight, distance, alpha
     n_time, n_pln, n_row, n_col, n_channels = padded.shape[0], padded.shape[1], padded.shape[2], padded.shape[3], padded.shape[4]
-    cdef double s4_h_square = n_channels * h * h * s * s * s * s
+    cdef cnp.float64_t s4_h_square = n_channels * h * h * s * s * s * s
 
     # Outer loops on patch shifts
     # With t2 >= 0, reference patch is always on the left of test patch
@@ -1026,29 +1021,19 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
         for t_time in range(-d, d + 1):
             time_dist_min = max(offset, offset - t_time)
             time_dist_max = min(n_time - offset, n_time - offset - t_time)
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t_time == 0:
-                alpha = 1.0
-            else:
-                alpha = 0.5
             for t_pln in range(-d, d + 1):
                 pln_dist_min = max(offset, offset - t_pln)
                 pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
-                if t_pln == 0:
-                    alpha = 1.0
-                else:
-                    alpha = 0.5
                 # Iterate over shifts along the row axis
                 for t_row in range(-d, d + 1):
                     row_dist_min = max(offset, offset - t_row)
                     row_dist_max = min(n_row - offset, n_row - offset - t_row)
-                    if t_row == 0:
-                        alpha = 1.0
-                    else:
-                        alpha = 0.5
                     # Iterate over shifts along the column axis
                     for t_col in range(0, d + 1):
+                        # alpha is to account for patches on the same column
+                        # distance is computed twice in this case
+                        alpha = 0.5 if t_col == 0 else 1
+
                         col_dist_min = offset
                         col_dist_max = n_col - offset - t_col
 
@@ -1093,7 +1078,6 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
                                                    channel] += weight * \
                                                        padded[time, pln, row,
                                                               col, channel]
-                        alpha = 1.0
 
         # Normalize pixel values using sum of weights of contributing patches
         for time in range(offset, n_time - offset):

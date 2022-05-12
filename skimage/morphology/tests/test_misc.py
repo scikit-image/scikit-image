@@ -41,7 +41,15 @@ def test_in_place():
 def test_out(in_dtype, out_dtype):
     image = test_image.astype(in_dtype, copy=True)
     expected_out = np.empty_like(test_image, dtype=out_dtype)
-    out = remove_small_objects(image, min_size=6, out=expected_out)
+
+    if out_dtype != bool:
+        # object with only 1 label will warn on non-bool output dtype
+        exp_warn = ["Only one label was provided"]
+    else:
+        exp_warn = []
+
+    with expected_warnings(exp_warn):
+        out = remove_small_objects(image, min_size=6, out=expected_out)
 
     assert out is expected_out
 

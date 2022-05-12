@@ -38,7 +38,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
 def test_inpaint_biharmonic_2d_color(channel_axis):
     img = img_as_float(data.astronaut()[:64, :64])
 
-    mask = np.zeros(img.shape[:2], dtype=np.bool)
+    mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
     img_defect = img * ~mask[..., np.newaxis]
     mse_defect = mean_squared_error(img, img_defect)
@@ -47,33 +47,6 @@ def test_inpaint_biharmonic_2d_color(channel_axis):
     img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
                                               channel_axis=channel_axis)
     img_restored = np.moveaxis(img_restored, channel_axis, -1)
-    mse_restored = mean_squared_error(img, img_restored)
-
-    assert mse_restored < 0.01 * mse_defect
-
-
-def test_inpaint_biharmonic_2d_color_deprecated():
-    img = img_as_float(data.astronaut()[:64, :64])
-
-    mask = np.zeros(img.shape[:2], dtype=np.bool)
-    mask[8:16, :16] = 1
-    img_defect = img * ~mask[..., np.newaxis]
-    mse_defect = mean_squared_error(img, img_defect)
-
-    # providing multichannel argument positionally also warns
-    channel_warning = "`multichannel` is a deprecated argument"
-    matrix_warning = "the matrix subclass is not the recommended way"
-    with expected_warnings([channel_warning + '|' + matrix_warning]):
-        img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
-                                                  multichannel=True)
-    mse_restored = mean_squared_error(img, img_restored)
-
-    assert mse_restored < 0.01 * mse_defect
-
-    # providing multichannel argument positionally also warns
-    channel_warning = "Providing the `multichannel` argument"
-    with expected_warnings([channel_warning + '|' + matrix_warning]):
-        img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
     mse_restored = mean_squared_error(img, img_restored)
 
     assert mse_restored < 0.01 * mse_defect
@@ -100,24 +73,6 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
     assert_allclose(ref, out, rtol=1e-5)
 
 
-@testing.parametrize('channel_axis', [0, 1, -1])
-def test_inpaint_biharmonic_2d_color(channel_axis):
-    img = img_as_float(data.astronaut()[:64, :64])
-
-    mask = np.zeros(img.shape[:2], dtype=bool)
-    mask[8:16, :16] = 1
-    img_defect = img * ~mask[..., np.newaxis]
-    mse_defect = mean_squared_error(img, img_defect)
-
-    img_defect = np.moveaxis(img_defect, -1, channel_axis)
-    img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
-                                              channel_axis=channel_axis)
-    img_restored = np.moveaxis(img_restored, channel_axis, -1)
-    mse_restored = mean_squared_error(img, img_restored)
-
-    assert mse_restored < 0.01 * mse_defect
-
-
 def test_inpaint_biharmonic_2d_color_deprecated():
     img = img_as_float(data.astronaut()[:64, :64])
 
@@ -138,7 +93,6 @@ def test_inpaint_biharmonic_2d_color_deprecated():
 
     # providing multichannel argument positionally also warns
     channel_warning = "Providing the `multichannel` argument"
-    matrix_warning = "the matrix subclass is not the recommended way"
     with expected_warnings([channel_warning + '|' + matrix_warning]):
         img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
     mse_restored = mean_squared_error(img, img_restored)
@@ -190,9 +144,10 @@ def test_invalid_input():
 
 
 @testing.parametrize('dtype', [np.uint8, np.float32, np.float64])
+@testing.parametrize('order', ['C', 'F'])
 @testing.parametrize('channel_axis', [None, -1])
 @testing.parametrize('split_into_regions', [False, True])
-def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
+def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     image_orig = data.astronaut()[:, :200]
     float_dtype = np.float32 if dtype == np.float32 else np.float64
     image_orig = image_orig.astype(float_dtype, copy=False)
@@ -212,11 +167,11 @@ def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
     mask[365:368, 60:130] = 1
 
     # add randomly positioned small point-like defects
-    rstate = np.random.RandomState(0)
+    rstate = np.random.default_rng(0)
     for radius in [0, 2, 4]:
         # larger defects are less common
         thresh = 3.25 + 0.25 * radius  # larger defects less commmon
-        tmp_mask = rstate.randn(*image_orig.shape[:-1]) > thresh
+        tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
         if radius > 0:
             tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
         mask[tmp_mask] = 1
@@ -233,6 +188,7 @@ def test_inpaint_nrmse(dtype, channel_axis, split_into_regions):
     image_orig = image_orig.astype(dtype, copy=False)
     image_defect = image_defect.astype(dtype, copy=False)
 
+    image_defect = np.asarray(image_defect, order=order)
     image_result = inpaint.inpaint_biharmonic(
         image_defect, mask, channel_axis=channel_axis,
         split_into_regions=split_into_regions

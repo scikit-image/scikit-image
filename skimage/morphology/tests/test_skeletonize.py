@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
 
-from skimage import data, draw
+from skimage import draw
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.io import imread
@@ -27,19 +27,6 @@ class TestSkeletonize():
         im = np.zeros((5, 5, 5))
         with pytest.raises(ValueError):
             skeletonize(im, method='zhang')
-
-    def test_skeletonize_not_binary(self):
-        im = np.zeros((5, 5))
-        im[0, 0] = 1
-        im[0, 1] = 2
-        with pytest.raises(ValueError):
-            skeletonize(im)
-
-    def test_skeletonize_unexpected_value(self):
-        im = np.zeros((5, 5))
-        im[0, 0] = 2
-        with pytest.raises(ValueError):
-            skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
@@ -69,7 +56,7 @@ class TestSkeletonize():
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbours(self):
+    def test_skeletonize_num_neighbors(self):
         # an empty image
         image = np.zeros((300, 300))
 

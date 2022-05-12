@@ -1,15 +1,14 @@
 import numpy as np
-from scipy.ndimage import gaussian_filter
-from skimage import img_as_float
+
+from ..util.dtype import img_as_float
 from .._shared import utils
+from .._shared.filters import gaussian
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):
     """Single channel implementation of the unsharp masking filter."""
 
-    blurred = gaussian_filter(image,
-                              sigma=radius,
-                              mode='reflect')
+    blurred = gaussian(image, sigma=radius, mode='reflect')
 
     result = image + (image - blurred) * amount
     if vrange is not None:
@@ -17,7 +16,6 @@ def _unsharp_mask_single_channel(image, radius, amount, vrange):
     return result
 
 
-@utils.channel_as_last_axis()
 @utils.deprecate_multichannel_kwarg(multichannel_position=3)
 def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
                  preserve_range=False, *, channel_axis=None):
@@ -126,10 +124,11 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
 
     """
     vrange = None  # Range for valid values; used for clipping.
+    float_dtype = utils._supported_float_type(image.dtype)
     if preserve_range:
-        fimg = image.astype(float)
+        fimg = image.astype(float_dtype, copy=False)
     else:
-        fimg = img_as_float(image)
+        fimg = img_as_float(image).astype(float_dtype, copy=False)
         negative = np.any(fimg < 0)
         if negative:
             vrange = [-1., 1.]
@@ -137,10 +136,11 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
             vrange = [0., 1.]
 
     if channel_axis is not None:
-        result = np.empty_like(fimg, dtype=float)
-        for channel in range(image.shape[-1]):
-            result[..., channel] = _unsharp_mask_single_channel(
-                fimg[..., channel], radius, amount, vrange)
+        result = np.empty_like(fimg, dtype=float_dtype)
+        for channel in range(image.shape[channel_axis]):
+            sl = utils.slice_at_axis(channel, channel_axis)
+            result[sl] = _unsharp_mask_single_channel(
+                fimg[sl], radius, amount, vrange)
         return result
     else:
         return _unsharp_mask_single_channel(fimg, radius, amount, vrange)

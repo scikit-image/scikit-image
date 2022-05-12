@@ -1,12 +1,9 @@
-import os
-
 import numpy as np
 import pytest
+from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_almost_equal, fetch)
 from skimage._shared.utils import _supported_float_type
 from skimage.metrics import structural_similarity
 
@@ -56,18 +53,16 @@ def test_structural_similarity_image():
 @pytest.mark.parametrize('seed', [1, 2, 3, 5, 8, 13])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structural_similarity_grad(seed, dtype):
-    N = 30
+    N = 60
     # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
     #       And when testing tests in parallel. Therefore, we choose a few
     #       seeds that are known to work.
     #       The likely cause of this failure is that we are setting a hard
     #       threshold on the value of the gradient. Often the computed gradient
     #       is only slightly larger than what was measured.
-    # X = np.random.rand(N, N) * 255
-    # Y = np.random.rand(N, N) * 255
-    rnd = np.random.RandomState(seed)
-    X = rnd.rand(N, N).astype(dtype, copy=False) * 255
-    Y = rnd.rand(N, N).astype(dtype, copy=False) * 255
+    rnd = np.random.default_rng(seed)
+    X = rnd.random((N, N)).astype(dtype, copy=False) * 255
+    Y = rnd.random((N, N)).astype(dtype, copy=False) * 255
 
     f = structural_similarity(X, Y, data_range=255)
     g = structural_similarity(X, Y, data_range=255, gradient=True)
@@ -248,8 +243,8 @@ def test_structural_similarity_small_image(dtype):
 
 def test_invalid_input():
     # size mismatch
-    X = np.zeros((9, 9), dtype=np.double)
-    Y = np.zeros((8, 8), dtype=np.double)
+    X = np.zeros((9, 9), dtype=np.float64)
+    Y = np.zeros((8, 8), dtype=np.float64)
     with pytest.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent

@@ -135,6 +135,13 @@ speak up in case they are not fine with the current state of the pull request.
 Another exceptional situation is one where the first approving review happened
 a long time ago and many changes have taken place in the meantime.
 
+When squashing commits GitHub concatenates all commit messages.
+Please edit the resulting message so that it gives a concise, tidy
+overview of changes. For example, you may want to grab the
+description from the PR itself, and delete lines such as "pep8 fix",
+"apply review comments", etc. Please retain all Co-authored-by
+entries.
+
 Closing issues and pull requests
 --------------------------------
 
@@ -193,12 +200,12 @@ resources such as:
    should read both.)
 -  The scikit-image [tag on StackOverflow][so_tag]
 -  The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
--  Our [mailing list][ml]
+-  Our [developer forum][ml]
 -  Our [chat room](https://skimage.zulipchat.com/)
 
 [numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
-[ml]: https://mail.python.org/mailman3/lists/scikit-image.python.org/
+[ml]: https://discuss.scientific-python.org/c/contributor/skimage
 
 You are not required to monitor all of the social resources.
 
@@ -207,7 +214,7 @@ Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
-<skimage-core@python.org>. As of this writing, there is no hard-and-fast
+<skimage-core@discuss.scientific-python.org>. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have: been
 part of the project for at least six months, contributed
 significant changes of their own, contributed to the discussion and

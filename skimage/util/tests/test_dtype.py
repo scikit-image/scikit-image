@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 import itertools
 from skimage import (img_as_float, img_as_float32, img_as_float64,
@@ -149,7 +147,7 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, float, np.double, np.single, np.float32,
+float_dtype_list = [float, float, np.float64, np.single, np.float32,
                     np.float64, 'float32', 'float64']
 
 

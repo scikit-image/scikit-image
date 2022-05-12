@@ -6,6 +6,7 @@ from numpy.testing import (assert_array_almost_equal,
                            assert_array_equal, assert_no_warnings,
                            assert_warns)
 
+from skimage._shared.testing import expected_warnings
 from skimage.color.colorconv import hsv2rgb, rgb2hsv
 from skimage.color.colorlabel import label2rgb
 
@@ -219,6 +220,59 @@ def test_avg_with_2d_image():
     assert_no_warnings(label2rgb, labels, image=img, bg_label=0, kind='avg')
 
 
+@pytest.mark.parametrize('image_type', ['rgb', 'gray', None])
+def test_label2rgb_nd(image_type):
+    # validate 1D and 3D cases by testing their output relative to the 2D case
+    shape = (10, 10)
+    if image_type == 'rgb':
+        img = np.random.randint(0, 255, shape + (3,), dtype=np.uint8)
+    elif image_type == 'gray':
+        img = np.random.randint(0, 255, shape, dtype=np.uint8)
+    else:
+        img = None
+
+    # add a couple of rectangular labels
+    labels = np.zeros(shape, dtype=np.int64)
+    # Note: Have to choose labels here so that the 1D slice below also contains
+    #       both label values. Otherwise the labeled colors will not match.
+    labels[2:-2, 1:3] = 1
+    labels[3:-3, 6:9] = 2
+
+    # label in the 2D case (correct 2D output is tested in other funcitons)
+    labeled_2d = label2rgb(labels, image=img, bg_label=0)
+
+    # labeling a single line gives an equivalent result
+    image_1d = img[5] if image_type is not None else None
+    labeled_1d = label2rgb(labels[5], image=image_1d, bg_label=0)
+    expected = labeled_2d[5]
+    assert_array_equal(labeled_1d, expected)
+
+    # Labeling a 3D stack of duplicates gives the same result in each plane
+    image_3d = np.stack((img, ) * 4) if image_type is not None else None
+    labels_3d = np.stack((labels,) * 4)
+    labeled_3d = label2rgb(labels_3d, image=image_3d, bg_label=0)
+    for labeled_plane in labeled_3d:
+        assert_array_equal(labeled_plane, labeled_2d)
+
+
+def test_label2rgb_shape_errors():
+    img = np.random.randint(0, 255, (10, 10, 3), dtype=np.uint8)
+    labels = np.zeros((10, 10), dtype=np.int64)
+    labels[2:5, 2:5] = 1
+
+    # mismatched 2D shape
+    with pytest.raises(ValueError):
+        label2rgb(labels, img[1:])
+
+    # too many axes in img
+    with pytest.raises(ValueError):
+        label2rgb(labels, img[..., np.newaxis])
+
+    # too many channels along the last axis
+    with pytest.raises(ValueError):
+        label2rgb(labels, np.concatenate((img, img), axis=-1))
+
+
 def test_overlay_full_saturation():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
@@ -249,12 +303,12 @@ def test_overlay_custom_saturation():
     assert_array_almost_equal(saturaded_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
 
-@pytest.mark.filterwarnings("error")
 def test_saturation_warning():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
-    with pytest.raises(UserWarning):
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=2)
+    with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img,
                   bg_label=0, saturation=-1)

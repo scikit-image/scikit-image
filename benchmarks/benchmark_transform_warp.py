@@ -57,14 +57,18 @@ class WarpSuite:
 
 class ResizeLocalMeanSuite:
     params = ([np.float32, np.float64],
-              [(512, 512), (2048, 2048), (192, 192, 192)],
-              [(512, 512), (2048, 2048), (192, 192, 192)],
+              [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
+              [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
               )
     param_names = ['dtype', 'shape_in', 'shape_out']
 
     timeout = 180
 
     def setup(self, dtype, shape_in, shape_out):
+        if len(shape_in) != len(shape_out):
+            raise NotImplementedError(
+                "shape_in, shape_out must have same dimension"
+            )
         self.image = np.zeros(shape_in, dtype=dtype)
 
     def time_resize_local_mean(self, dtype, shape_in, shape_out):

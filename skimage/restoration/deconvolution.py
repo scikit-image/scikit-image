@@ -60,7 +60,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     >>> img = convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
     >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
-    >>> deconvolved_img = restoration.wiener(img, psf, 1100)
+    >>> deconvolved_img = restoration.wiener(img, psf, 0.1)
 
     Notes
     -----
@@ -86,7 +86,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     those coming from noise), and the regularization.
 
     These methods are then specific to a prior model. Consequently,
-    the application or the true image nature must corresponds to the
+    the application or the true image nature must correspond to the
     prior model. By default, the prior model (Laplacian) introduce
     image smoothness or pixel correlation. It can also be interpreted
     as high-frequency penalization to compensate the instability of
@@ -94,7 +94,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     amplification or "explosive" solution).
 
     Finally, the use of Fourier space implies a circulant property of
-    :math:`H`, see [Hunt].
+    :math:`H`, see [2]_.
 
     References
     ----------
@@ -105,7 +105,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
@@ -132,13 +132,6 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
                              shape=image.shape)
     else:
         deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
-
-    # TODO: can remove astype call below once minimum SciPy >= 1.4
-    if deconv.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    deconv = deconv.astype(deconv_type, copy=False)
 
     if clip:
         deconv[deconv > 1] = 1
@@ -235,7 +228,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     posterior law. The practical idea is to only draw highly probable
     images since they have the biggest contribution to the mean. At the
     opposite, the less probable images are drawn less often since
-    their contribution is low. Finally the empirical mean of these
+    their contribution is low. Finally, the empirical mean of these
     samples give us an estimation of the mean, and an exact
     computation with an infinite sample set.
 
@@ -248,16 +241,16 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508
     """
 
     if user_params is not None:
         for s in ('max', 'min'):
             if (s + '_iter') in user_params:
                 warning_msg = (
-                    f"`{s}_iter` is a deprecated key for `user_params`."
-                    "It will be removed in version 1.0. "
-                    f"Use `{s}_num_iter` instead."
+                    f'`{s}_iter` is a deprecated key for `user_params`. '
+                    f'It will be removed in version 1.0. '
+                    f'Use `{s}_num_iter` instead.'
                 )
                 warnings.warn(warning_msg, FutureWarning)
                 user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
@@ -366,13 +359,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         x_postmean = uft.uifft2(x_postmean)
 
-    # TODO: remove astype call below once minimum SciPy >= 1.4
-    if x_postmean.dtype.kind == 'c':
-        deconv_type = np.promote_types(float_type, np.complex64)
-    else:
-        deconv_type = float_type
-    x_postmean = x_postmean.astype(deconv_type, copy=False)
-
     if clip:
         x_postmean[x_postmean > 1] = 1
         x_postmean[x_postmean < -1] = -1
@@ -380,7 +366,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0")
+@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0",
+                 deprecated_version="0.19")
 def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 
@@ -426,12 +413,13 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     im_deconv = np.full(image.shape, 0.5, dtype=float_type)
     psf_mirror = np.flip(psf)
 
+    # Small regularization parameter used to avoid 0 divisions
+    eps = 1e-12
+
     for _ in range(num_iter):
-        conv = convolve(im_deconv, psf, mode='same')
+        conv = convolve(im_deconv, psf, mode='same') + eps
         if filter_epsilon:
-            with np.errstate(invalid='ignore'):
-                relative_blur = np.where(conv < filter_epsilon, 0,
-                                         image / conv)
+            relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
         else:
             relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')

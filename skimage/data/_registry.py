@@ -160,20 +160,24 @@ registry = {
     "data/skin.jpg": "8759fe080509712163453f4b17106582b8513e73b0788d80160abf840e272075",
     "data/pivchallenge-B-B001_1.tif": "e95e09abbcecba723df283ac7d361766328abd943701a2ec2f345d4a2014da2a",
     "data/pivchallenge-B-B001_2.tif": "4ceb5407e4e333476a0f264c14b7a3f6c0e753fcdc99ee1c4b8196e5f823805e",
+    "data/protein_transport.tif": "a8e24e8d187f33e92ee28508d5615286c850ca75374af7e74e527d290e8b06ea",
+    "data/solidification.tif": "50ef9a52c621b7c0c506ad1fe1b8ee8a158a4d7c8e50ddfce1e273a422dca3f9",
 }
 
 registry_urls = {
-    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/master/brain.tiff",
-    "data/cells3d.tif": "https://gitlab.com/scikit-image/data/-/raw/master/cells3d.tif",
-    "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/master/eagle.png",
-    "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/master/kidney-tissue-fluorescence.tif",
-    "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/master/lily-of-the-valley-fluorescence.tif",
-    "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
-    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/master/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
-    "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/master/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
-    "data/pivchallenge-B-B001_1.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_1.tif",
-    "data/pivchallenge-B-B001_2.tif": "https://gitlab.com/scikit-image/data/-/raw/master/pivchallenge/B/B001_2.tif",
-    "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
+    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/brain.tiff",
+    "data/cells3d.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/cells3d.tif",
+    "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/eagle.png",
+    "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/kidney-tissue-fluorescence.tif",
+    "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/lily-of-the-valley-fluorescence.tif",
+    "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/AS_09125_050116030001_D03f00d0.tif",
+    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
+    "data/skin.jpg": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG",
+    "data/pivchallenge-B-B001_1.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/pivchallenge/B/B001_1.tif",
+    "data/pivchallenge-B-B001_2.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/pivchallenge/B/B001_2.tif",
+    "data/protein_transport.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/NPCsingleNucleus.tif",
+    "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
+    "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
 }
 
 legacy_registry = {

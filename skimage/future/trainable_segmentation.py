@@ -65,7 +65,7 @@ class TrainableSegmenter(object):
             label 0 to unlabeled pixels to be segmented.
         """
         self.compute_features(image)
-        clf = fit_segmenter(labels, self.features, self.clf)
+        fit_segmenter(labels, self.features, self.clf)
 
     def predict(self, image):
         """Segment new image using trained internal classifier.
@@ -156,5 +156,7 @@ def predict_segmenter(features, clf):
                 err.args[0] + '\n' +
                 "Maybe you did not use the same type of features for training the classifier."
                 )
+        else:
+            raise err
     output = predicted_labels.reshape(sh[:-1])
     return output

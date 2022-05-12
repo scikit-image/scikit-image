@@ -13,9 +13,9 @@ from warnings import warn
 
 import numpy as np
 
-from ..util import img_as_float, invert
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+from ..util import img_as_float, invert
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -138,7 +138,11 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     """
 
     # Convert image to float
+    float_dtype = _supported_float_type(image.dtype)
+    # rescales integer images to [-1, 1]
     image = img_as_float(image)
+    # make sure float16 gets promoted to float32
+    image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
     hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
@@ -224,13 +228,16 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     if alpha is None:
         alpha = 1.0 / ndim
 
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+
     # Invert image to detect dark ridges on bright background
     if black_ridges:
         image = invert(image)
 
     # Generate empty (n+1)D arrays for storing auxiliary images filtered at
     # different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
+    filtered_array = np.zeros(sigmas.shape + image.shape, float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -323,9 +330,11 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     if not black_ridges:
         image = invert(image)
 
+    float_dtype = _supported_float_type(image.dtype)
+
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
+    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -440,10 +449,12 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     if black_ridges:
         image = invert(image)
 
+    float_dtype = _supported_float_type(image.dtype)
+
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape)
-    lambdas_array = np.zeros_like(filtered_array)
+    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
+    lambdas_array = np.zeros_like(filtered_array, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
