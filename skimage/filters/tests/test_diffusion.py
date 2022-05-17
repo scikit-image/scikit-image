@@ -58,18 +58,19 @@ def getRelativeDifference(a, b):
 @pytest.mark.parametrize('diffusivity_type', ['perona-malik', 'charbonnier',
                          'exponential'])
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
-def test_avg_intensity(scheme, diffusivity_type):
+def test_avg_intensity(diffusivity_type, scheme):
     # change in average grey value is expected to be less than 0.2%
     limit_diff = 0.002
+    sum_cam = np.sum(cam)
     cam = camera_crop.astype(np.float64)
-    assert getRelativeDifference(np.sum(cam), np.sum(
+    assert getRelativeDifference(sum_cam, np.sum(
         diffusion_linear(cam, scheme=scheme))) < limit_diff
-    assert getRelativeDifference(np.sum(cam), np.sum(
+    assert getRelativeDifference(sum_cam, np.sum(
         diffusion_nonlinear_iso(cam, diffusivity_type=diffusivity_type,
                                 scheme=scheme))) < limit_diff
-    assert getRelativeDifference(np.sum(cam), np.sum(
+    assert getRelativeDifference(sum_cam, np.sum(
         diffusion_nonlinear_aniso(cam, scheme=scheme))) < limit_diff
-    assert getRelativeDifference(np.sum(cam), np.sum(
+    assert getRelativeDifference(sum_cam, np.sum(
         diffusion_nonlinear_aniso(cam, mode='ced',
                                   scheme=scheme))) < limit_diff
 
