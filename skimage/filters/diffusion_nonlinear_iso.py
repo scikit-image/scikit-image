@@ -98,12 +98,12 @@ def diffusion_nonlinear_iso(
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')  # add Neumann border
         for i in range(img.shape[2]):
-            img[:, :, i] = diffusion_nonlinear_iso_grey(
+            img[:, :, i] = _diffusion_nonlinear_iso_grey(
                 np.squeeze(img[:, :, i].copy()), diffusivity_type, time_step,
                 num_iters, scheme, sigma, lmbd)
     elif len(img.shape) == 2:
         img = np.pad(img, pad_width=border, mode='edge')  # add Neumann border
-        img = diffusion_nonlinear_iso_grey(
+        img = _diffusion_nonlinear_iso_grey(
             img, diffusivity_type, time_step, num_iters,
             scheme, sigma, lmbd)
 
@@ -111,7 +111,7 @@ def diffusion_nonlinear_iso(
     return img / 255
 
 
-def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
+def _diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
                                  scheme, sigma, lmbd):
     if scheme == 'aos':
         diffusion = img_as_float64(np.ones(image.shape))
@@ -125,14 +125,14 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
             nonlinear_iso_step(tmp, image, time_step, gradX,
                                gradY, lmbd, diffusivity_type)
         elif scheme == 'aos':
-            get_diffusivity_tensor(diffusion, gradX, gradY,
+            _get_diffusivity_tensor(diffusion, gradX, gradY,
                                    lmbd, diffusivity_type)
             aniso_diff_step_AOS(tmp, diffusion, zeros,
                                 diffusion, image, time_step)
     return image
 
 
-def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
+def _get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):
             out[i, j] = get_diffusivity(gradX[i, j], gradY[i, j], lmbd, type)

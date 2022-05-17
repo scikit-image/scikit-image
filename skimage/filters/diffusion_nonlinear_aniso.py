@@ -123,12 +123,12 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
-            img[:, :, i] = diffusion_nonlinear_aniso_grey(
+            img[:, :, i] = _diffusion_nonlinear_aniso_grey(
                 np.squeeze(img[:, :, i].copy()), mode, time_step, num_iters,
                 scheme, sigma_eed, sigma_ced, rho, lmbd, border)
     else:
         img = np.pad(img, pad_width=border, mode='edge')
-        img = diffusion_nonlinear_aniso_grey(
+        img = _diffusion_nonlinear_aniso_grey(
             img, mode, time_step, num_iters,
             scheme, sigma_eed, sigma_ced, rho, lmbd, border)
 
@@ -136,22 +136,22 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
     return img / 255
 
 
-def diffusion_nonlinear_aniso_grey(
+def _diffusion_nonlinear_aniso_grey(
             image, mode, time_step, num_iters, scheme,
             sigma_eed, sigma_ced, rho, lmbd, border):
     alpha = 0.01
     if mode == 'eed':
-        image = diffusion_nonlinear_aniso_eed(
+        image = _diffusion_nonlinear_aniso_eed(
             src=image, num_iter=num_iters, tau=time_step, lmbd=lmbd,
             sig=sigma_eed, scheme=scheme, border=border)
     elif mode == 'ced':
-        image = diffusion_nonlinear_aniso_ced(
+        image = _diffusion_nonlinear_aniso_ced(
             src=image, num_iter=num_iters, tau=time_step, alpha=alpha,
             sig=sigma_ced, rho=rho, scheme=scheme, border=border)
     return image
 
 
-def eed_tensor(Da, Db, Dc, lmbd):
+def _eed_tensor(Da, Db, Dc, lmbd):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
             J = np.array([
@@ -182,7 +182,7 @@ def eed_tensor(Da, Db, Dc, lmbd):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-def ced_tensor(Da, Db, Dc, alpha):
+def _ced_tensor(Da, Db, Dc, alpha):
     for i in range(Da.shape[0]):
         for j in range(Da.shape[1]):
 
@@ -214,7 +214,7 @@ def ced_tensor(Da, Db, Dc, alpha):
             Dc[i, j] = mi1 * ev1[1] * ev1[1] + mi2 * ev2[1] * ev2[1]
 
 
-def diffusion_nonlinear_aniso_ced(
+def _diffusion_nonlinear_aniso_ced(
                 src, num_iter, tau, alpha, sig, rho, scheme, border):
     Da = Db = Dc = np.zeros(src.shape).astype(np.float64)
 
@@ -230,7 +230,7 @@ def diffusion_nonlinear_aniso_ced(
         Dc = gaussian(image=np.multiply(gradY, gradY),
                       sigma=rho)
 
-        ced_tensor(Dc, Db, Da, alpha)
+        _ced_tensor(Dc, Db, Da, alpha)
         if scheme == 'aos':
             aniso_diff_step_AOS(tmp, Dc, Db, Da, src, tau)
         elif scheme == 'explicit':
@@ -238,7 +238,7 @@ def diffusion_nonlinear_aniso_ced(
     return src
 
 
-def diffusion_nonlinear_aniso_eed(
+def _diffusion_nonlinear_aniso_eed(
                 src, num_iter, tau, lmbd, sig, scheme, border):
     Da = Db = Dc = np.zeros(src.shape)
     for i in range(num_iter):
@@ -250,7 +250,7 @@ def diffusion_nonlinear_aniso_eed(
         Db = np.multiply(gradX, gradY)
         Dc = np.multiply(gradY, gradY)
 
-        eed_tensor(Dc, Db, Da, lmbd)
+        _eed_tensor(Dc, Db, Da, lmbd)
         if scheme == 'aos':
             aniso_diff_step_AOS(tmp, Dc, Db, Da, src, tau)
         elif scheme == 'explicit':

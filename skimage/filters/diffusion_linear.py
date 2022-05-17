@@ -85,17 +85,17 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
         img = np.pad(img, pad_width=((border, border), (border,
                      border), (0, 0)), mode='edge')
         for i in range(img.shape[2]):
-            img[:, :, i] = diffusion_linear_grey(
+            img[:, :, i] = _diffusion_linear_grey(
                 np.squeeze(img[:, :, i].copy()), time_step, num_iters, scheme)
     else:  # greyscale image
         img = np.pad(img, pad_width=border, mode='edge')
-        img = diffusion_linear_grey(
+        img = _diffusion_linear_grey(
             img, time_step, num_iters, scheme)
     img = slice_border(img, border)  # remove border
     return img / 255
 
 
-def diffusion_linear_grey(image, time_step, num_iters, scheme):
+def _diffusion_linear_grey(image, time_step, num_iters, scheme):
     if scheme == 'aos':
         ones = np.ones(image.shape)
         zeros = np.zeros(image.shape)
