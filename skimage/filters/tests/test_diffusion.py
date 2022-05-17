@@ -48,6 +48,7 @@ def test_min_max(scheme):
     assert in_min <= np.min(ced) + limit_diff
     assert in_max >= np.max(ced) - limit_diff
 
+
 def getRelativeDifference(a, b):
     a = a.astype(np.float64)
     b = b.astype(np.float64)
