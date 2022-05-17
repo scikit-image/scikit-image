@@ -1,7 +1,7 @@
 import numpy as np
-from skimage.filters import diffusion_linear
-from skimage.filters import diffusion_nonlinear_iso
-from skimage.filters import diffusion_nonlinear_aniso
+from skimage.filters.diffusion_linear import diffusion_linear
+from skimage.filters.diffusion_nonlinear_iso import diffusion_nonlinear_iso
+from skimage.filters.diffusion_nonlinear_aniso import diffusion_nonlinear_aniso
 from skimage.metrics import structural_similarity as ssim
 from numpy.testing import assert_equal
 import pytest
