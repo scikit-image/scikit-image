@@ -17,7 +17,7 @@ def _mask_from_vertices(vertices, shape, label):
     return mask
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def _draw_polygon(ax, vertices, alpha=0.4):
     from matplotlib.patches import Polygon
     from matplotlib.collections import PatchCollection
@@ -30,7 +30,7 @@ def _draw_polygon(ax, vertices, alpha=0.4):
     return polygon_object
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on polygon selections made with the mouse.
 
@@ -145,7 +145,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on freeform selections made with the mouse.
 
