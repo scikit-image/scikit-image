@@ -94,7 +94,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
