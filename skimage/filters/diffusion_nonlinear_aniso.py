@@ -11,7 +11,7 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
                               rho=6, lmbd=2.):
     """
     Calculate the nonlinear anisotropic diffusion of an image.
-    
+
     Namely Edge Enhancing Diffusion[1] and Coherence Enhancing Diffusion [2].
 
     Parameters
@@ -103,14 +103,17 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
     if (len(image.shape) > 3) or (len(image.shape) < 2):
         raise RuntimeError('Nonsupported image type')
 
+    scheme = scheme.lower()
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
         print('time_step bigger than 0.25 is unstable for explicit scheme.\
                Time step has been set to 0.25.')
-    if (scheme != 'explicit') and (scheme != 'aos'):
+    
+    if scheme not in {"explicit", "aos"}:
         raise ValueError('invalid scheme')
 
-    if (mode != 'eed') and (mode != 'ced'):
+    mode = mode.lower()
+    if mode not in {"eed", "ced"}:
         raise ValueError('invalid mode')
 
     img = img_as_float(image) * 255  # due to precision error

@@ -83,12 +83,13 @@ def diffusion_nonlinear_iso(
     if (len(image.shape) > 3) or (len(image.shape) < 2):
         raise RuntimeError('Nonsupported image type.')
 
+    scheme = scheme.lower()
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
         print('time_step bigger than 0.25 is unstable for explicit scheme.\
                Time step has been set to 0.25.')
 
-    if (scheme != 'explicit') and (scheme != 'aos'):
+    if scheme not in {"explicit", "aos"}:
         raise ValueError('invalid scheme')
 
     border = 1

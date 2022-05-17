@@ -9,12 +9,6 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     Calculate the result of linear diffusion equation for an input image
     at time num_iters * time_step.
 
-    In theory, linear diffusion corresponds to a Gaussian filter with
-    sigma = sqrt(2 * time_step * num_iters).
-    See skimage.filters.gaussian.
-    This function exists for the purpose of consistency with nonlinear
-    diffusion filters.
-
     Parameters
     ----------
     image : array_like
@@ -40,6 +34,12 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
 
     Notes
     ----------
+    In theory, linear diffusion corresponds to a Gaussian filter with
+    sigma = sqrt(2 * time_step * num_iters).
+    See skimage.filters.gaussian.
+    This function exists for the purpose of consistency with nonlinear
+    diffusion filters.
+
     Time of diffusion is defined as time_step * num_iters. The bigger
     the time_step is, the lower the num_iters parameter has to be
     and the faster the computation is. However, for explicit scheme
@@ -69,12 +69,13 @@ def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     if (len(image.shape) > 3) or (len(image.shape) < 2):
         raise RuntimeError('Unsupported image type')
 
+    scheme = scheme.lower()
     if (scheme == 'explicit') and (time_step > 0.25):
         time_step = 0.25
         print('time_step bigger than 0.25 is unstable for explicit scheme.\
                Time step has been set to 0.25.')
 
-    if (scheme != 'explicit') and (scheme != 'aos'):
+    if scheme not in {"explicit", "aos"}:
         raise ValueError('invalid scheme')
 
     border = 1
