@@ -11,7 +11,7 @@ def diffusion_nonlinear_iso(
         image, diffusivity_type='perona-malik', time_step=1., num_iters=20,
         scheme='aos', sigma=1.0, lmbd=2.):
     """
-    Calculates the nonlinear isotropic diffusion of an image.
+    Calculate the nonlinear isotropic diffusion of an image.
 
     Parameters
     ----------

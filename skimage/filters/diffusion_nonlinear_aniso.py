@@ -10,7 +10,8 @@ def diffusion_nonlinear_aniso(image, mode='eed', time_step=1., num_iters=10,
                               scheme='aos', sigma_eed=2.5, sigma_ced=0.5,
                               rho=6, lmbd=2.):
     """
-    Calculates the nonlinear anisotropic diffusion of an image.
+    Calculate the nonlinear anisotropic diffusion of an image.
+    
     Namely Edge Enhancing Diffusion[1] and Coherence Enhancing Diffusion [2].
 
     Parameters

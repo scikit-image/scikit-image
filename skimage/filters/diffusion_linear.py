@@ -6,13 +6,14 @@ from ._diffusion_utils_pythran import (linear_step)
 
 def diffusion_linear(image, time_step=2., num_iters=3, scheme='aos'):
     """
-    Calculates the result of linear diffusion equation for an input image
+    Calculate the result of linear diffusion equation for an input image
     at time num_iters * time_step.
-    In theory, it corresponds to a Gaussian filter with
+
+    In theory, linear diffusion corresponds to a Gaussian filter with
     sigma = sqrt(2 * time_step * num_iters).
-    See skimage.filters.gaussian. This function exists for the purpose
-    of consistency.
-    with nonlinear diffusion filters.
+    See skimage.filters.gaussian.
+    This function exists for the purpose of consistency with nonlinear
+    diffusion filters.
 
     Parameters
     ----------
