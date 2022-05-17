@@ -33,7 +33,6 @@ def test_gauss_lindiff_equal(time_step, num_iters, scheme):
 @pytest.mark.parametrize('scheme', ['aos', 'explicit'])
 def test_min_max(scheme):
     limit_diff = 1/255
-    print("OK")
     lin = diffusion_linear(camera_crop, scheme=scheme)
     iso = diffusion_nonlinear_iso(camera_crop, scheme=scheme)
     eed = diffusion_nonlinear_aniso(camera_crop, mode='eed', scheme=scheme)
@@ -48,9 +47,7 @@ def test_min_max(scheme):
     assert in_max >= np.max(eed) - limit_diff
     assert in_min <= np.min(ced) + limit_diff
     assert in_max >= np.max(ced) - limit_diff
-    print("OK")
 
-test_min_max('aos')
 def getRelativeDifference(a, b):
     a = a.astype(np.float64)
     b = b.astype(np.float64)
