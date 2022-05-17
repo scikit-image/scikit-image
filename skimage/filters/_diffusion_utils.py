@@ -1,6 +1,4 @@
 import numpy as np
-# from numba import jit
-
 
 # pythran export nonlinear_aniso_step(float64[:,:], float64[:,:], float64[:,:], float64[:,:],float64[:,:], float or int, uint8)
 def nonlinear_aniso_step(src, dest, a, b, c, tau, border):
@@ -50,7 +48,6 @@ def linear_step(image, out_image, tau):
                        - 1]) / np.power(h2, 2))
 
 
-# @ jit(nopython=True)
 def get_diffusivity(gradX, gradY, lmbd, type):
     gradMag = np.sqrt(
         np.power(gradX, 2) + np.power(gradY, 2))
@@ -69,7 +66,6 @@ def slice_border(img, slice_val):
     return img[slice_val: - slice_val, slice_val: - slice_val]
 
 
-# @jit(nopython=True)
 def prepare_diagonals(Diag, UDiag, LDiag, data, data_i, n, tau, shift, sx):
     UDiag[0] = -tau * (data[get_coord(data_i, sx)] +
                        data[get_coord(data_i + shift, sx)])
@@ -90,7 +86,6 @@ def prepare_diagonals(Diag, UDiag, LDiag, data, data_i, n, tau, shift, sx):
         UDiag[n - 2]
 
 
-# @jit(nopython=True)
 def add_and_avg(src, dst, dst_i, n, step, coef, sx):
     """
     Add values from one buffer to the other one and multiply
@@ -104,7 +99,6 @@ def add_and_avg(src, dst, dst_i, n, step, coef, sx):
         dst_i += step
 
 
-# @jit(nopython=True)
 def aniso_diff_step_AOS(img, Da, Db, Dc, out, tau):
     # number of cols
     sx = img.shape[1]
@@ -206,12 +200,10 @@ def aniso_diff_step_AOS(img, Da, Db, Dc, out, tau):
                     out_i, sy, sx, 0.5, sx)
 
 
-# @ jit(nopython=True)
 def get_coord(n, sizeX):
     return (n // sizeX, n % sizeX)
 
 
-# @ jit(nopython=True)
 # pythran export tridiagonal_matrix_solver(float64[], float64[], float64[], float64[],float64[], int)
 def tridiagonal_matrix_solver(diag_a, diag_b, diag_c, d, x, n):
     """

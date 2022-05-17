@@ -1,5 +1,4 @@
 import numpy as np
-# from numba import jit
 from .._shared.filters import gaussian
 from ._diffusion_utils import get_diffusivity
 from skimage import img_as_float64
@@ -132,7 +131,6 @@ def diffusion_nonlinear_iso_grey(image, diffusivity_type, time_step, num_iters,
     return image
 
 
-# @jit(nopython=True)
 def get_diffusivity_tensor(out, gradX, gradY, lmbd, type):
     for i in range(gradX.shape[0]):
         for j in range(gradX.shape[1]):
