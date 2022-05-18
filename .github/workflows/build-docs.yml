@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: 3.9
       - name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
           DEPLOY_KEY: ${{ secrets.DOC_DEPLOY_KEY_PRIVATE }}
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
       - name: Store docs as artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: docs
           path: doc/build/html
