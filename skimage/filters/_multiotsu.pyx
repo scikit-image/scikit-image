@@ -8,8 +8,10 @@ cimport numpy as cnp
 cimport cython
 cnp.import_array()
 
+
 def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
-                                      Py_ssize_t thresh_count):
+                                      Py_ssize_t thresh_count, int bin_width=1,
+                                      thresh_indices_stage1=None):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
 
@@ -23,7 +25,13 @@ def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
         Value occurence probabilities.
     thresh_count : int
         The desired number of thresholds (classes-1).
-
+    bin_width : int, optional
+        If bin_width=1, an exhaustive search using the method of [1]_ is
+        performed. If bin_width > 1, it is assumed that a 2nd stage refinement
+        search is being done for the method of [2]_.
+    thresh_indices_stage1 : ndarray, optional
+        The approximate thresholds from stage one of the two stage algorithm in
+        [2]_. Unused when bin_width = 1.
 
     Returns
     -------
@@ -37,8 +45,24 @@ def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
            Engineering 17 (5): 713-727, 2001. Available at:
            <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
+    .. [2] Huang, D-Y., Lin, T-W, and Hu, W-C. "Automatic multilevel
+           thresholding based on two-stage Otsu's method with cluster
+           determination by valley estimation". International Journal of
+           Innovative Computing, Information and Control 7 (10): 5631-5644,
+           2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
 
     """
+    if bin_width == 1:
+        # pass empty array for unused parameter
+        thresh_indices_stage1 = np.asarray([], np.intp)
+    return _get_multiotsu_thresh_indices_lut2(prob, thresh_count, bin_width,
+                                              thresh_indices_stage1)
+
+
+cdef _get_multiotsu_thresh_indices_lut2(
+        cnp.float32_t [::1] prob, Py_ssize_t thresh_count, int bin_width,
+        Py_ssize_t [::1] thresh_indices_stage1):
+    """Internal implementation of _get_multiotsu_thresh_indices_lut."""
 
     cdef Py_ssize_t nbins = prob.shape[0]
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
@@ -56,7 +80,9 @@ def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
                                 thresh_idx=0, nbins=nbins,
                                 thresh_count=thresh_count, sigma_max=0,
                                 current_indices=current_indices,
-                                thresh_indices=thresh_indices)
+                                thresh_indices=thresh_indices,
+                                bin_width=bin_width,
+                                thresh_indices_stage1=thresh_indices_stage1)
 
     return py_thresh_indices
 
@@ -153,11 +179,12 @@ cdef cnp.float32_t _get_var_btwclas_lut(cnp.float32_t [::1] var_btwcls,
     return var_btwcls[idx]
 
 
-cdef cnp.float32_t _set_thresh_indices_lut(
-        cnp.float32_t[::1] var_btwcls, Py_ssize_t hist_idx,
+cdef cnp.float32_t  _set_thresh_indices_lut(
+        cnp.float32_t [::1] var_btwcls, Py_ssize_t hist_idx,
         Py_ssize_t thresh_idx, Py_ssize_t nbins, Py_ssize_t thresh_count,
         cnp.float32_t sigma_max, Py_ssize_t[::1] current_indices,
-        Py_ssize_t[::1] thresh_indices) nogil:
+        Py_ssize_t[::1] thresh_indices, int bin_width,
+        Py_ssize_t[::1] thresh_indices_stage1) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -206,21 +233,40 @@ cdef cnp.float32_t _set_thresh_indices_lut(
            Engineering 17 (5): 713-727, 2001. Available at:
            <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
+    .. [2] Huang, D-Y., Lin, T-W, and Hu, W-C. "Automatic multilevel
+           thresholding based on two-stage Otsu's method with cluster
+           determination by valley estimation". International Journal of
+           Innovative Computing, Information and Control 7 (10): 5631-5644,
+           2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
     """
-    cdef cnp.intp_t idx
+    cdef cnp.intp_t idx, idx_start, idx_stop
     cdef cnp.float32_t sigma
 
     if thresh_idx < thresh_count:
-
-        for idx in range(hist_idx, nbins - thresh_count + thresh_idx):
+        if bin_width == 1:
+            # Limits used by the single-stage algorithm of Liao et. al or the
+            # first stage of Huang et. al.
+            idx_start = hist_idx
+            idx_stop = nbins - thresh_count + thresh_idx
+        else:
+            # limits used by the 2nd stage of Huang et. al.
+            idx_start = max(hist_idx,
+                            thresh_indices_stage1[thresh_idx])
+            idx_stop = min(thresh_indices_stage1[thresh_idx] + 2 * bin_width,
+                           nbins - thresh_count + thresh_idx)
+        for idx in range(idx_start, idx_stop):
             current_indices[thresh_idx] = idx
-            sigma_max = _set_thresh_indices_lut(var_btwcls, hist_idx=idx + 1,
-                                                thresh_idx=thresh_idx + 1,
-                                                nbins=nbins,
-                                                thresh_count=thresh_count,
-                                                sigma_max=sigma_max,
-                                                current_indices=current_indices,
-                                                thresh_indices=thresh_indices)
+            sigma_max = _set_thresh_indices_lut(
+                var_btwcls, hist_idx=idx + 1,
+                thresh_idx=thresh_idx + 1,
+                nbins=nbins,
+                thresh_count=thresh_count,
+                sigma_max=sigma_max,
+                current_indices=current_indices,
+                thresh_indices=thresh_indices,
+                bin_width=bin_width,
+                thresh_indices_stage1=thresh_indices_stage1
+            )
 
     else:
 
@@ -240,7 +286,8 @@ cdef cnp.float32_t _set_thresh_indices_lut(
 
 
 def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
-                                  Py_ssize_t thresh_count):
+                                  Py_ssize_t thresh_count, int bin_width=1,
+                                  thresh_indices_stage1=None):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
 
@@ -252,15 +299,47 @@ def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
     prob : array
         Value occurence probabilities.
     thresh_count : int
-        The desired number of threshold.
+        The desired number of thresholds (classes-1).
+    bin_width : int, optional
+        If bin_width=1, an exhaustive search using the method of [1]_ is
+        performed. If bin_width > 1, it is assumed that a 2nd stage refinement
+        search is being done for the method of [2]_.
+    thresh_indices_stage1 : ndarray, optional
+        The approximate thresholds from stage one of the two stage algorithm in
+        [2]_. Unused when bin_width = 1.
 
     Returns
     -------
-    py_thresh_indices : array
+    py_thresh_indices : ndarray
         The indices of the desired thresholds.
 
-    """
+    References
+    ----------
+    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
+           multilevel thresholding", Journal of Information Science and
+           Engineering 17 (5): 713-727, 2001. Available at:
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           :DOI:`10.6688/JISE.2001.17.5.1`
+    .. [2] Huang, D-Y., Lin, T-W, and Hu, W-C. "Automatic multilevel
+           thresholding based on two-stage Otsu's method with cluster
+           determination by valley estimation". International Journal of
+           Innovative Computing, Information and Control 7 (10): 5631-5644,
+           2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
 
+
+
+    """
+    if bin_width == 1:
+        # set unused parameter to an empty array
+        thresh_indices_stage1 = np.asarray([], np.intp)
+    return _get_multiotsu_thresh_indices2(prob, thresh_count, bin_width,
+                                          thresh_indices_stage1)
+
+
+def _get_multiotsu_thresh_indices2(
+        cnp.float32_t [::1] prob, Py_ssize_t thresh_count,
+        int bin_width, Py_ssize_t [::1] thresh_indices_stage1):
+    """Internal implementation for _get_multiotsu_thresh_indices2."""
     cdef Py_ssize_t nbins = prob.shape[0]
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
@@ -274,7 +353,9 @@ def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
                             thresh_idx=0, nbins=nbins,
                             thresh_count=thresh_count, sigma_max=0,
                             current_indices=current_indices,
-                            thresh_indices=thresh_indices)
+                            thresh_indices=thresh_indices,
+                            bin_width=bin_width,
+                            thresh_indices_stage1=thresh_indices_stage1)
 
     return py_thresh_indices
 
@@ -351,14 +432,12 @@ cdef cnp.float32_t _get_var_btwclas(cnp.float32_t [::1] zeroth_moment,
     return 0
 
 
-cdef cnp.float32_t _set_thresh_indices(cnp.float32_t[::1] zeroth_moment,
-                                       cnp.float32_t[::1] first_moment,
-                                       Py_ssize_t hist_idx,
-                                       Py_ssize_t thresh_idx, Py_ssize_t nbins,
-                                       Py_ssize_t thresh_count,
-                                       cnp.float32_t sigma_max,
-                                       Py_ssize_t[::1] current_indices,
-                                       Py_ssize_t[::1] thresh_indices) nogil:
+cdef cnp.float32_t _set_thresh_indices(
+        cnp.float32_t[::1] zeroth_moment, cnp.float32_t[::1] first_moment,
+        Py_ssize_t hist_idx, Py_ssize_t thresh_idx, Py_ssize_t nbins,
+        Py_ssize_t thresh_count, cnp.float32_t sigma_max,
+        Py_ssize_t[::1] current_indices, Py_ssize_t[::1] thresh_indices,
+        int bin_width, Py_ssize_t[::1] thresh_indices_stage1) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -404,23 +483,41 @@ cdef cnp.float32_t _set_thresh_indices(cnp.float32_t[::1] zeroth_moment,
            Engineering 17 (5): 713-727, 2001. Available at:
            <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
+    .. [2] Huang, D-Y., Lin, T-W, and Hu, W-C. "Automatic multilevel
+           thresholding based on two-stage Otsu's method with cluster
+           determination by valley estimation". International Journal of
+           Innovative Computing, Information and Control 7 (10): 5631-5644,
+           2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
     """
-    cdef cnp.intp_t idx
+    cdef cnp.intp_t idx, idx_start, idx_stop
     cdef cnp.float32_t sigma
 
     if thresh_idx < thresh_count:
-
-        for idx in range(hist_idx, nbins - thresh_count + thresh_idx):
+        if bin_width == 1:
+            # Limits used by the single-stage algorithm of Liao et. al or the
+            # first stage of Huang et. al.
+            idx_start = hist_idx
+            idx_stop = nbins - thresh_count + thresh_idx
+        else:
+            # limits used by the 2nd stage of Huang et. al.
+            idx_start = max(hist_idx,
+                            thresh_indices_stage1[thresh_idx])
+            idx_stop = min(thresh_indices_stage1[thresh_idx] + 2 * bin_width,
+                           nbins - thresh_count + thresh_idx)
+        for idx in range(idx_start, idx_stop):
             current_indices[thresh_idx] = idx
-            sigma_max = _set_thresh_indices(zeroth_moment,
-                                            first_moment,
-                                            hist_idx=idx + 1,
-                                            thresh_idx=thresh_idx + 1,
-                                            nbins=nbins,
-                                            thresh_count=thresh_count,
-                                            sigma_max=sigma_max,
-                                            current_indices=current_indices,
-                                            thresh_indices=thresh_indices)
+            sigma_max = _set_thresh_indices(
+                zeroth_moment,
+                first_moment,
+                hist_idx=idx + 1,
+                thresh_idx=thresh_idx + 1,
+                nbins=nbins,
+                thresh_count=thresh_count,
+                sigma_max=sigma_max,
+                current_indices=current_indices,
+                thresh_indices=thresh_indices,
+                bin_width=bin_width,
+                thresh_indices_stage1=thresh_indices_stage1)
 
     else:
 

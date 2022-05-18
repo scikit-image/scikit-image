@@ -8,7 +8,8 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
+from .._shared.utils import (_supported_float_type, deprecate_kwarg,
+                             safe_as_int, warn)
 from .._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
@@ -1203,8 +1204,9 @@ def apply_hysteresis_threshold(image, low, high):
     return thresholded
 
 
-def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
-    r"""Generate `classes`-1 threshold values to divide gray levels in `image`,
+def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None,
+                        bin_width_stage1=None):
+    r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
     following Otsu's method for multiple classes.
 
     The threshold values are chosen to maximize the total sum of pairwise
@@ -1228,6 +1230,12 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
         Histogram from which to determine the threshold, and optionally a
         corresponding array of bin center intensities. If no hist provided,
         this function will compute it from the image (see notes).
+    bin_width_stage1 : int, optional
+        This is a non-negative integer. If > 1, the two-stage algorithm of [3]_
+        is used, where the bin width in the first stage is wider by a factor
+        of `bin_width_stage1`. Defaults to `bin_width_stage1 = 8` except for
+        cases with only 2 classes or `nbins <= 16`, when a single stage
+        algorithm is used instead.
 
     Returns
     -------
@@ -1264,6 +1272,11 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:
            <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
+    .. [3] Huang, D-Y., Lin, T-W, and Hu, W-C. "Automatic multilevel
+           thresholding based on two-stage Otsu's method with cluster
+           determination by valley estimation". International Journal of
+           Innovative Computing, Information and Control 7 (10): 5631-5644,
+           2011. Available at: http://www.ijicic.org/ijicic-10-05033.pdf
 
     Examples
     --------
@@ -1283,8 +1296,18 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     prob, bin_centers = _validate_image_histogram(image, hist, nbins,
                                                   normalize=True)
     prob = prob.astype('float32')
-
     nvalues = np.count_nonzero(prob)
+    if bin_width_stage1 is None:
+        if classes < 3 or len(prob) <= 16:
+            bin_width_stage1 = 1
+        else:
+
+            bin_width_stage1 = 8
+    else:
+        bin_width_stage1 = safe_as_int(bin_width_stage1)
+        if bin_width_stage1 < 1:
+            raise ValueError("bin_width_stage1 must be a positive integer")
+
     if nvalues < classes:
         msg = (f'The input image has only {nvalues} different values. '
                f'It cannot be thresholded in {classes} classes.')
@@ -1292,14 +1315,51 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     elif nvalues == classes:
         thresh_idx = np.where(prob > 0)[0][:-1]
     else:
-        # Get threshold indices
+        # stage 1: exhaustive search over wider bins
+        if bin_width_stage1 == 1:
+            prob1 = prob
+        else:
+            # sum probabilities over bin_width_stage1 bins to get a downsampled
+            # probability array
+            if prob.size % bin_width_stage1 != 0:
+                b = bin_width_stage1
+                npad = b * math.ceil(prob.size / b) - prob.size
+                prob = np.pad(prob, (0, npad), mode='constant')
+            prob1 = prob.reshape((-1, bin_width_stage1)).sum(-1)
+            prob1 = np.ascontiguousarray(prob1)
+
+        nvalues1 = np.count_nonzero(prob1)
+        if nvalues1 < classes:
+            msg = ("The input image has only {} different values in the "
+                   "downsampled histogram. Try reducing bin_width_stage1.")
+            raise ValueError(msg.format(nvalues1))
+        elif nvalues1 == classes:
+            thresh_idx1 = np.where(prob1 > 0)[0][:-1]
+        else:
+            # Get threshold indices
+            prob1 = np.ascontiguousarray(prob1)
+            try:
+                thresh_idx1 = _get_multiotsu_thresh_indices_lut(prob1,
+                                                                classes - 1)
+            except MemoryError:
+                # Don't use LUT if the number of bins is too large (if the
+                # image is uint16 for example): in this case, the
+                # allocated memory is too large.
+                thresh_idx1 = _get_multiotsu_thresh_indices(prob1, classes - 1)
+
+        if bin_width_stage1 == 1:
+            return bin_centers[thresh_idx1]
+
+        # stage 2: refine indices using the full set of bins
+        thresh_idx1 = thresh_idx1 * bin_width_stage1
         try:
-            thresh_idx = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
+            thresh_idx = _get_multiotsu_thresh_indices_lut(
+                prob, classes - 1, bin_width_stage1, thresh_idx1
+            )
         except MemoryError:
-            # Don't use LUT if the number of bins is too large (if the
-            # image is uint16 for example): in this case, the
-            # allocated memory is too large.
-            thresh_idx = _get_multiotsu_thresh_indices(prob, classes - 1)
+            thresh_idx = _get_multiotsu_thresh_indices(
+                prob, classes - 1, bin_width_stage1, thresh_idx1
+            )
 
     thresh = bin_centers[thresh_idx]
 

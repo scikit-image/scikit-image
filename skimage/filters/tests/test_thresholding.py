@@ -710,6 +710,21 @@ def test_multiotsu_output():
     assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
 
 
+@pytest.mark.parametrize('classes', [3, 4])
+@pytest.mark.parametrize('bin_width_stage1', [2, 3, 4, 5, 6, 7, 8, 16, None])
+@pytest.mark.parametrize('dtype', [np.uint8, np.float32])
+def test_multiotsu_bin_widths(classes, bin_width_stage1, dtype):
+    # rstate = np.random.RandomState(5)
+    img = np.random.rand(64, 64)
+    if np.dtype(dtype).kind in 'iu':
+        img = 255 * img
+    img = img.astype(dtype)
+    expected = threshold_multiotsu(img, classes, bin_width_stage1=1)
+    # two-stage result should exactly match the bin_width=1 case.
+    res = threshold_multiotsu(img, classes, bin_width_stage1=bin_width_stage1)
+    assert_almost_equal(res, expected)
+
+
 def test_multiotsu_astro_image():
     img = util.img_as_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
