@@ -51,8 +51,9 @@ cpdef _nonmaximum_suppression_bilinear(
         Py_ssize_t rows = magnitude.shape[0]
         Py_ssize_t cols = magnitude.shape[1]
         np_floats[:, ::1] out = np.empty((rows, cols), dtype=dtype)
-        np_floats abs_isobel, abs_jsobel, w, neigh1, neigh2, m
-        bint is_up, is_down, is_left, is_right, c_minus, c_plus
+        np_floats abs_isobel, abs_jsobel, w, m
+        np_floats neigh1_1, neigh1_2, neigh2_1, neigh2_2
+        bint is_up, is_down, is_left, is_right, c_minus, c_plus, cond1, cond2
 
     if low_threshold == 0:
         # increment by epsilon so `m >= low_threshold` is False anywhere m == 0
@@ -72,50 +73,41 @@ cpdef _nonmaximum_suppression_bilinear(
                 is_left = (jsobel[x, y] <= 0)
                 is_right = 1 - is_left
 
-                if (is_up and is_right) or (is_down and is_left):
+                cond1 = (is_up and is_right) or (is_down and is_left)
+                cond2 = (is_down and is_right) or (is_up and is_left)
+                if cond1 or cond2:
                     abs_isobel = fabs(isobel[x, y])
                     abs_jsobel = fabs(jsobel[x, y])
-                    if abs_isobel > abs_jsobel:
-                        w = abs_jsobel / abs_isobel
-                        neigh1 = magnitude[x + 1, y]
-                        neigh2 = magnitude[x + 1, y + 1]
-                        c_plus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        neigh1 = magnitude[x - 1, y]
-                        neigh2 = magnitude[x - 1, y - 1]
-                        c_minus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        if c_plus and c_minus:
-                            out[x, y] = m
-                    elif abs_isobel <= abs_jsobel:
-                        w = abs_isobel / abs_jsobel
-                        neigh1 = magnitude[x, y + 1]
-                        neigh2 = magnitude[x + 1, y + 1]
-                        c_plus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        neigh1 = magnitude[x, y - 1]
-                        neigh2 = magnitude[x - 1, y - 1]
-                        c_minus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        if c_plus and c_minus:
-                            out[x, y] = m
-                elif (is_down and is_right) or (is_up and is_left):
-                    abs_isobel = fabs(isobel[x, y])
-                    abs_jsobel = fabs(jsobel[x, y])
-                    if abs_isobel < abs_jsobel:
-                        w = abs_isobel / abs_jsobel
-                        neigh1 = magnitude[x, y + 1]
-                        neigh2 = magnitude[x - 1, y + 1]
-                        c_plus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        neigh1 = magnitude[x, y - 1]
-                        neigh2 = magnitude[x + 1, y - 1]
-                        c_minus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        if c_plus and c_minus:
-                            out[x, y] = m
-                    elif abs_isobel >= abs_jsobel:
-                        w = abs_jsobel / abs_isobel
-                        neigh1 = magnitude[x - 1, y]
-                        neigh2 = magnitude[x - 1, y + 1]
-                        c_plus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        neigh1 = magnitude[x + 1, y]
-                        neigh2 = magnitude[x + 1, y - 1]
-                        c_minus = (neigh2 * w + neigh1 * (1.0 - w)) <= m
-                        if c_plus and c_minus:
+                    if cond1:
+                        if abs_isobel > abs_jsobel:
+                            w = abs_jsobel / abs_isobel
+                            neigh1_1 = magnitude[x + 1, y]
+                            neigh1_2 = magnitude[x + 1, y + 1]
+                            neigh2_1 = magnitude[x - 1, y]
+                            neigh2_2 = magnitude[x - 1, y - 1]
+                        elif abs_isobel <= abs_jsobel:
+                            w = abs_isobel / abs_jsobel
+                            neigh1_1 = magnitude[x, y + 1]
+                            neigh1_2 = magnitude[x + 1, y + 1]
+                            neigh2_1 = magnitude[x, y - 1]
+                            neigh2_2 = magnitude[x - 1, y - 1]
+                    elif cond2:
+                        if abs_isobel < abs_jsobel:
+                            w = abs_isobel / abs_jsobel
+                            neigh1_1 = magnitude[x, y + 1]
+                            neigh1_2 = magnitude[x - 1, y + 1]
+                            neigh2_1 = magnitude[x, y - 1]
+                            neigh2_2 = magnitude[x + 1, y - 1]
+                        elif abs_isobel >= abs_jsobel:
+                            w = abs_jsobel / abs_isobel
+                            neigh1_1 = magnitude[x - 1, y]
+                            neigh1_2 = magnitude[x - 1, y + 1]
+                            neigh2_1 = magnitude[x + 1, y]
+                            neigh2_2 = magnitude[x + 1, y - 1]
+                    # linear interpolation
+                    c_plus = (neigh1_2 * w + neigh1_1 * (1.0 - w)) <= m
+                    if c_plus:
+                        c_minus = (neigh2_2 * w + neigh2_1 * (1.0 - w)) <= m
+                        if c_minus:
                             out[x, y] = m
     return np.asarray(out)
