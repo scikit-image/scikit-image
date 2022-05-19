@@ -61,9 +61,6 @@ cpdef _nonmaximum_suppression_bilinear(
     with nogil:
         for x in range(magnitude.shape[0]):
             for y in range(magnitude.shape[1]):
-                abs_isobel = fabs(isobel[x, y])
-                abs_jsobel = fabs(jsobel[x, y])
-
                 out[x, y] = 0
                 m = magnitude[x, y]
                 if not (eroded_mask[x, y] and (m >= low_threshold)):
@@ -76,6 +73,8 @@ cpdef _nonmaximum_suppression_bilinear(
                 is_right = 1 - is_left
 
                 if (is_up and is_right) or (is_down and is_left):
+                    abs_isobel = fabs(isobel[x, y])
+                    abs_jsobel = fabs(jsobel[x, y])
                     if abs_isobel > abs_jsobel:
                         w = abs_jsobel / abs_isobel
                         neigh1 = magnitude[x + 1, y]
@@ -97,6 +96,8 @@ cpdef _nonmaximum_suppression_bilinear(
                         if c_plus and c_minus:
                             out[x, y] = m
                 elif (is_down and is_right) or (is_up and is_left):
+                    abs_isobel = fabs(isobel[x, y])
+                    abs_jsobel = fabs(jsobel[x, y])
                     if abs_isobel < abs_jsobel:
                         w = abs_isobel / abs_jsobel
                         neigh1 = magnitude[x, y + 1]
