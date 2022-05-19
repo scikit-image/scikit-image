@@ -17,7 +17,7 @@ import scipy.ndimage as ndi
 
 from ..util.dtype import dtype_limits
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..filters._gaussian import gaussian
 from ._canny_cy import _nonmaximum_suppression_bilinear
 
@@ -63,12 +63,14 @@ def _preprocess(image, mask, sigma, mode, cval):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
-
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
                            preserve_range=False)
+    compute_bleedover = (mode == 'constant' or mask is not None)
+    float_type = _supported_float_type(image.dtype)
     if mask is None:
-        mask = np.ones(image.shape)
-        masked_image = image.copy()
+        if compute_bleedover:
+            mask = np.ones(image.shape, dtype=float_type)
+        masked_image = image
 
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
@@ -86,11 +88,12 @@ def _preprocess(image, mask, sigma, mode, cval):
         s = ndi.generate_binary_structure(2, 2)
         eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
 
-    # Compute the fractional contribution of masked pixels by applying
-    # the function to the mask (which gets you the fraction of the
-    # pixel data that's due to significant points)
-    bleed_over = gaussian(mask.astype(float, copy=False),
-                          **gaussian_kwargs) + np.finfo(float).eps
+    if compute_bleedover:
+        # Compute the fractional contribution of masked pixels by applying
+        # the function to the mask (which gets you the fraction of the
+        # pixel data that's due to significant points)
+        bleed_over = gaussian(mask.astype(float_type, copy=False),
+                              **gaussian_kwargs) + np.finfo(float_type).eps
 
     # Smooth the masked image
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
@@ -98,7 +101,8 @@ def _preprocess(image, mask, sigma, mode, cval):
     # Lower the result by the bleed-over fraction, so you can
     # recalibrate by dividing by the function on the mask to recover
     # the effect of smoothing from just the significant pixels.
-    smoothed_image /= bleed_over
+    if compute_bleedover:
+        smoothed_image /= bleed_over
 
     return smoothed_image, eroded_mask
 
@@ -220,7 +224,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
-    magnitude = np.hypot(isobel, jsobel)
+    magnitude = isobel * isobel
+    magnitude += jsobel * jsobel
+    np.sqrt(magnitude, out=magnitude)
 
     if use_quantiles:
         low_threshold, high_threshold = np.percentile(magnitude,
