@@ -85,7 +85,7 @@ cpdef _nonmaximum_suppression_bilinear(
                             neigh1_2 = magnitude[x + 1, y + 1]
                             neigh2_1 = magnitude[x - 1, y]
                             neigh2_2 = magnitude[x - 1, y - 1]
-                        elif abs_isobel <= abs_jsobel:
+                        else:
                             w = abs_isobel / abs_jsobel
                             neigh1_1 = magnitude[x, y + 1]
                             neigh1_2 = magnitude[x + 1, y + 1]
@@ -98,7 +98,7 @@ cpdef _nonmaximum_suppression_bilinear(
                             neigh1_2 = magnitude[x - 1, y + 1]
                             neigh2_1 = magnitude[x, y - 1]
                             neigh2_2 = magnitude[x + 1, y - 1]
-                        elif abs_isobel >= abs_jsobel:
+                        else:
                             w = abs_jsobel / abs_isobel
                             neigh1_1 = magnitude[x - 1, y]
                             neigh1_2 = magnitude[x - 1, y + 1]
