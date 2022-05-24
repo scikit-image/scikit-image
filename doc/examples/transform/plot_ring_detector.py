@@ -93,20 +93,20 @@ image_gradient_magnitude = ndimage.gaussian_gradient_magnitude(image, sigma)
 
 
 # Helper function to plot the rings
-def plot_rings(xyr, minrad=1, ring_colour='g',
-               ring_style=[None, 'dotted', 'dashed'][0], lw=1, txt_colour='r'):
+def plot_rings(xyr, minrad=1, ring_color='g',
+               ring_style=[None, 'dotted', 'dashed'][0], lw=1, txt_color='r'):
     """
     given a 3-column array of (x,y) for ring centres & a radius, plots the
     rings
     """
     for c in xyr:
         if c[-1] > minrad:
-            circle = plt.Circle(c[:2][::-1], c[-1], ec=ring_colour, fill=False,
+            circle = plt.Circle(c[:2][::-1], c[-1], ec=ring_color, fill=False,
                                 lw=lw, ls=ring_style)
             plt.gca().add_patch(circle)
             i, j, r = c
-            if txt_colour:
-                plt.text(j, i, '.', fontsize=20, color=txt_colour)
+            if txt_color:
+                plt.text(j, i, '.', fontsize=20, color=txt_color)
     plt.draw()
 
 
@@ -123,7 +123,7 @@ ridge_hough.img_preprocess()
 ridge_hough.rings_detection()
 cht_rings = ridge_hough.output['rings_subpxl']
 plt.matshow(image, cmap=plt.cm.gray)
-plot_rings(cht_rings, ring_colour='r')
+plot_rings(cht_rings, ring_color='r')
 plt.grid(True)
 
 # Show the Gradient Magnitude Field
