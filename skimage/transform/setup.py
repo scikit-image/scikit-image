@@ -15,7 +15,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_hough_transform.pyx',
             '_warps_cy.pyx',
             '_radon_transform.pyx',
-            '_ring_detector.pyx'], working_path=base_path)
+            '_hough_transform_ridge.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
