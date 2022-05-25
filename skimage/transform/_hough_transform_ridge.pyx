@@ -142,27 +142,27 @@ cpdef inline INDX_t [:, :] vote4(int Rmin, int x0, int y0, int Rmax, int x1,
     """
     cdef:
         int dx
-        int dr
-        int sx, sr, d, i, dx2, dr2
+        int delta_r
+        int sx, sr, d, i, dx2, delta_r2
         INDX_t [:, :] coords
 
-    dr = Rmax - Rmin
+    delta_r = Rmax - Rmin
     sr = 1
 
-    dr2 = 2 * dr
+    delta_r2 = 2 * delta_r
 
     ## fill x
     dx = abs(x1 - x0)
     sx = 1 if x0<x1 else -1
 
     dx2 = 2 * dx
-    d = dx2 - dr
+    d = dx2 - delta_r
 
-    for i in range(dr+1):
+    for i in range(delta_r+1):
         coords[i,0] = x0
         while d >= 0:
             x0 = x0 + sx
-            d = d - dr2
+            d = d - delta_r2
         d = d + dx2
 
     ## fill y
@@ -170,13 +170,13 @@ cpdef inline INDX_t [:, :] vote4(int Rmin, int x0, int y0, int Rmax, int x1,
     sx = 1 if y0 < y1 else -1
 
     dx2 = 2 * dx
-    d = dx2 - dr
+    d = dx2 - delta_r
 
-    for i in range(dr+1):
+    for i in range(delta_r+1):
         coords[i, 1] = y0
         while d >= 0:
             y0 = y0 + sx
-            d = d - dr2
+            d = d - delta_r2
         d = d + dx2
 
     return coords
@@ -762,15 +762,15 @@ cpdef get_circles(double [:, :, :] sparse_3d_Hough, cnp.uint32_t [:] voted4,
     return rings[:ring_counter,...]
 
 
-cpdef get_ring_mask(r, dr):
+cpdef get_ring_mask(r, delta_r):
     """
     returns the pixel coordinates of a circle of radius are, centres at the
     origin, assuming:
-                     (r - dr)**2 <= i**2 + j**2 <= (r + dr)**2
+                     (r - delta_r)**2 <= i**2 + j**2 <= (r + delta_r)**2
     """
     # generate_mask not considering the borders yet
-    y,x = np.ogrid[-r-dr: r+dr+1, -r-dr: r+dr+1]
-    ring_mask = abs(x**2+y**2-r**2-dr**2)<=2*r*dr
+    y,x = np.ogrid[-r-delta_r: r+delta_r+1, -r-delta_r: r+delta_r+1]
+    ring_mask = abs(x**2+y**2-r**2-delta_r**2)<=2*r*delta_r
     return ring_mask
 
 
@@ -811,7 +811,7 @@ cpdef _aux_subpxl_circles(cnp.uint32_t [:, :] rings, directed_ridges,
     ###   sub-pxl correction (if requested)   ###
     #
     # (i)  for each local max of the 3D Hough space get the ridges pxls within
-    #   the annulus of thickness dr
+    #   the annulus of thickness delta_r
     # (ii) fitEllipse (possibly conditioned on the number of ridge pxls scaled
     #   by the radius)
     # (iii) append to sub-pxl circles (possibly conditioned on eccentricity
@@ -933,7 +933,6 @@ cpdef _aux_directed_ridge_detector(double [:,:] Lrr,
     return directed_ridges
 
 
-
 def ring_detector_preproc(image, sigma):
     """Blurs the image, calculates its second derivatives and its least
     principal curvature.
@@ -979,7 +978,7 @@ def rings_detection(self):
                              ht_out['directed_ridges'],
                              self.img.shape[0], self.img.shape[1],
                              self.params['Rmin'], self.params['Rmax'],
-                             self.params['dr'],
+                             self.params['delta_r'],
                              #self.params['eccentricity'] ## opencv dependency
                                  )
     self.output = {'rings' : np.asarray(rings),
@@ -995,44 +994,3 @@ def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
             derivatives['Lcc'], derivatives['Lrc'],
             derivatives['principal_curv'], curv_thresh)
     return
-
-
-def hough_transform_ridge(sigma=1.8, curv_thresh=-25, radii=[7, 85],
-                          hough_thresh=[3, 0.33 * 2 * M_PI], dr=3):
-    """
-    Perform a circle Hough transform, direction aided, based on the ridge
-    binary image.
-
-    Parameters
-    ----------
-    sigma : float
-        Binarizing parameter, related to GX1920 full resolution; 10ms exp,
-        gain13.
-    curv_thresh : float
-    radii : list
-        Minimum and maximum radii for the Hough transform.
-    hough_thresh : list
-        Thresholds for the Hough transform: vote_thresh and circle_thresh.
-    dr : float
-        Half-thickness of the ring to fit to an ellipse.
-
-    References
-    ----------
-    [1] Afik, E. Robust and highly performant ring detection algorithm for 3d
-        particle tracking using 2d microscope imaging. Sci. Rep. 5,
-        13584; doi: 10.1038/srep13584 (2015).
-    """
-
-    #ridge_hough = RidgeHoughTransform(image)
-    #ridge_hough.params['sigma'] = sigma
-    #ridge_hough.params['Rmin'] = r_min
-    #ridge_hough.params['Rmax'] = r_max
-    #ridge_hough.params['curv_thresh'] = curv_thresh
-    #ridge_hough.params['circle_thresh'] = circle_thresh
-    #ridge_hough.params['vote_thresh'] = vote_thresh
-    #ridge_hough.params['dr'] = dr
-    #ridge_hough.img_preprocess()
-    #ridge_hough.rings_detection()
-    #detected_rings = ridge_hough.output['rings']
-
-    return detected_rings
