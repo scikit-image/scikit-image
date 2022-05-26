@@ -1,7 +1,6 @@
 import numpy as np
 
 from .._shared import utils
-from .. import exposure
 
 __all__ = ['montage']
 
@@ -94,6 +93,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     >>> arr_out_nonsquare.shape
     (2, 6)
     """
+    from ..exposure import rescale_intensity  # avoid circular import
 
     if channel_axis is not None:
         arr_in = np.asarray(arr_in)

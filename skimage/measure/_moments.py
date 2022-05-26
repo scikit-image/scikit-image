@@ -263,7 +263,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     return calc
 
 
-def moments_normalized(mu, order=3, spacing=None):
+def moments_normalized(mu, order=3, *, spacing=None):
     """Calculate all normalized central image moments up to a certain order.
 
     Note that normalized central moments are translation and scale invariant

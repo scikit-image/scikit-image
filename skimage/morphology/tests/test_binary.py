@@ -6,7 +6,6 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
-from skimage.morphology import binary, footprints, gray
 
 
 img = color.rgb2gray(data.astronaut())
@@ -15,45 +14,36 @@ bw_img = img > 100 / 255.
 
 def test_non_square_image():
     footprint = morphology.square(3)
-    binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
+    binary_res = morphology.binary_erosion(bw_img[:100, :200], footprint)
+    gray_res = img_as_bool(morphology.erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
-
-
-@pytest.mark.parametrize(
-    'function',
-    ['binary_erosion', 'binary_dilation', 'binary_closing', 'binary_opening']
-)
-def test_selem_kwarg_deprecation(function):
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(binary, function)(bw_img, selem=morphology.square(3))
 
 
 def test_binary_erosion():
     footprint = morphology.square(3)
-    binary_res = binary.binary_erosion(bw_img, footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img, footprint))
+    binary_res = morphology.binary_erosion(bw_img, footprint)
+    gray_res = img_as_bool(morphology.erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
     footprint = morphology.square(3)
-    binary_res = binary.binary_dilation(bw_img, footprint)
-    gray_res = img_as_bool(gray.dilation(bw_img, footprint))
+    binary_res = morphology.binary_dilation(bw_img, footprint)
+    gray_res = img_as_bool(morphology.dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
     footprint = morphology.square(3)
-    binary_res = binary.binary_closing(bw_img, footprint)
-    gray_res = img_as_bool(gray.closing(bw_img, footprint))
+    binary_res = morphology.binary_closing(bw_img, footprint)
+    gray_res = img_as_bool(morphology.closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_opening():
     footprint = morphology.square(3)
-    binary_res = binary.binary_opening(bw_img, footprint)
-    gray_res = img_as_bool(gray.opening(bw_img, footprint))
+    binary_res = morphology.binary_opening(bw_img, footprint)
+    gray_res = img_as_bool(morphology.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
@@ -80,10 +70,10 @@ def test_square_decomposition(function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(size, decomposition=None)
-    footprint = footprints.square(size, decomposition=decomposition)
+    footprint_ndarray = morphology.square(size, decomposition=None)
+    footprint = morphology.square(size, decomposition=decomposition)
     img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -101,10 +91,10 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
-    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
+    footprint_ndarray = morphology.rectangle(nrows, ncols, decomposition=None)
+    footprint = morphology.rectangle(nrows, ncols, decomposition=decomposition)
     img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -124,12 +114,12 @@ def test_octagon_decomposition(function, m, n, decomposition):
     """
     if m == 0 and n == 0:
         with pytest.raises(ValueError):
-            footprints.octagon(m, n, decomposition=decomposition)
+            morphology.octagon(m, n, decomposition=decomposition)
     else:
-        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
-        footprint = footprints.octagon(m, n, decomposition=decomposition)
+        footprint_ndarray = morphology.octagon(m, n, decomposition=None)
+        footprint = morphology.octagon(m, n, decomposition=decomposition)
         img = _get_decomp_test_data(function)
-        func = getattr(binary, function)
+        func = getattr(morphology, function)
         expected = func(img, footprint=footprint_ndarray)
         out = func(img, footprint=footprint)
         assert_array_equal(expected, out)
@@ -146,10 +136,10 @@ def test_diamond_decomposition(function, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.diamond(radius, decomposition=None)
-    footprint = footprints.diamond(radius, decomposition=decomposition)
+    footprint_ndarray = morphology.diamond(radius, decomposition=None)
+    footprint = morphology.diamond(radius, decomposition=decomposition)
     img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -166,10 +156,10 @@ def test_cube_decomposition(function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.cube(size, decomposition=None)
-    footprint = footprints.cube(size, decomposition=decomposition)
+    footprint_ndarray = morphology.cube(size, decomposition=None)
+    footprint = morphology.cube(size, decomposition=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -186,10 +176,10 @@ def test_octahedron_decomposition(function, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
-    footprint = footprints.octahedron(radius, decomposition=decomposition)
+    footprint_ndarray = morphology.octahedron(radius, decomposition=None)
+    footprint = morphology.octahedron(radius, decomposition=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -199,13 +189,13 @@ def test_footprint_overflow():
     footprint = np.ones((17, 17), dtype=np.uint8)
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
-    binary_res = binary.binary_erosion(img, footprint)
-    gray_res = img_as_bool(gray.erosion(img, footprint))
+    binary_res = morphology.binary_erosion(img, footprint)
+    gray_res = img_as_bool(morphology.erosion(img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_out_argument():
-    for func in (binary.binary_erosion, binary.binary_dilation):
+    for func in (morphology.binary_erosion, morphology.binary_dilation):
         footprint = np.ones((3, 3), dtype=np.uint8)
         img = np.ones((10, 10))
         out = np.zeros_like(img)
@@ -215,8 +205,8 @@ def test_out_argument():
         assert_array_equal(out, func(img, footprint))
 
 
-binary_functions = [binary.binary_erosion, binary.binary_dilation,
-                    binary.binary_opening, binary.binary_closing]
+binary_functions = [morphology.binary_erosion, morphology.binary_dilation,
+                    morphology.binary_opening, morphology.binary_closing]
 
 
 @pytest.mark.parametrize("function", binary_functions)
@@ -245,7 +235,7 @@ def test_3d_fallback_default_footprint():
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    opened = binary.binary_opening(image)
+    opened = morphology.binary_opening(image)
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
@@ -253,7 +243,7 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
+binary_3d_fallback_functions = [morphology.binary_opening, morphology.binary_closing]
 
 
 @pytest.mark.parametrize("function", binary_3d_fallback_functions)
@@ -274,8 +264,8 @@ def test_2d_ndimage_equivalence():
     image[3:-3, 3:-3] = 2**15
     image[4, 4] = 2**16-1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    bin_opened = morphology.binary_opening(image)
+    bin_closed = morphology.binary_closing(image)
 
     footprint = ndi.generate_binary_structure(2, 1)
     ndimage_opened = ndi.binary_opening(image, structure=footprint)
@@ -291,13 +281,13 @@ def test_binary_output_2d():
     image[3:-3, 3:-3] = 2**15
     image[4, 4] = 2**16-1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    bin_opened = morphology.binary_opening(image)
+    bin_closed = morphology.binary_closing(image)
 
     int_opened = np.empty_like(image, dtype=np.uint8)
     int_closed = np.empty_like(image, dtype=np.uint8)
-    binary.binary_opening(image, out=int_opened)
-    binary.binary_closing(image, out=int_closed)
+    morphology.binary_opening(image, out=int_opened)
+    morphology.binary_closing(image, out=int_closed)
 
     assert_equal(bin_opened.dtype, bool)
     assert_equal(bin_closed.dtype, bool)
@@ -312,13 +302,13 @@ def test_binary_output_3d():
     image[3:-3, 3:-3, 3:-3] = 2**15
     image[4, 4, 4] = 2**16-1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    bin_opened = morphology.binary_opening(image)
+    bin_closed = morphology.binary_closing(image)
 
     int_opened = np.empty_like(image, dtype=np.uint8)
     int_closed = np.empty_like(image, dtype=np.uint8)
-    binary.binary_opening(image, out=int_opened)
-    binary.binary_closing(image, out=int_closed)
+    morphology.binary_opening(image, out=int_opened)
+    morphology.binary_closing(image, out=int_closed)
 
     assert_equal(bin_opened.dtype, bool)
     assert_equal(bin_closed.dtype, bool)

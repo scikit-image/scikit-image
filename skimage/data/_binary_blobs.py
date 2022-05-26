@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
 
 
 def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,

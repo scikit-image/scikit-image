@@ -1,10 +1,13 @@
-from itertools import combinations_with_replacement
 import itertools
-import numpy as np
-from skimage import filters, feature
-from skimage.util.dtype import img_as_float32
-from skimage._shared import utils
 from concurrent.futures import ThreadPoolExecutor
+from itertools import combinations_with_replacement
+
+import numpy as np
+
+from .._shared import utils
+from ..util.dtype import img_as_float32
+from .corner import hessian_matrix_eigvals
+from skimage import filters
 
 
 def _texture_filter(gaussian_filtered):
@@ -12,13 +15,14 @@ def _texture_filter(gaussian_filtered):
         np.gradient(np.gradient(gaussian_filtered)[ax0], axis=ax1)
         for ax0, ax1 in combinations_with_replacement(range(gaussian_filtered.ndim), 2)
     ]
-    eigvals = feature.hessian_matrix_eigvals(H_elems)
+    eigvals = hessian_matrix_eigvals(H_elems)
     return eigvals
 
 
 def _singlescale_basic_features_singlechannel(
     img, sigma, intensity=True, edges=True, texture=True
 ):
+
     results = ()
     gaussian_filtered = filters.gaussian(img, sigma, preserve_range=False)
     if intensity:

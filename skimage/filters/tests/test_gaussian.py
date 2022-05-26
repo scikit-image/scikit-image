@@ -81,21 +81,6 @@ def test_multichannel(channel_axis):
                        gaussian_rgb_a.mean(axis=spatial_axes))
 
 
-def test_deprecated_multichannel():
-    a = np.zeros((5, 5, 3))
-    a[1, 1] = np.arange(1, 4)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect',
-                                  multichannel=True)
-    # Check that the mean value is conserved in each channel
-    # (color channels are not mixed together)
-    assert np.allclose(a.mean(axis=(0, 1)), gaussian_rgb_a.mean(axis=(0, 1)))
-
-    # check positional multichannel argument warning
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        gaussian_rgb_a = gaussian(a, 1, None, 'reflect', 0, True)
-
-
 def test_preserve_range():
     """Test preserve_range parameter."""
     ones = np.ones((2, 2), dtype=np.int64)
@@ -178,9 +163,6 @@ def test_dog_invalid_sigma_dims():
         difference_of_gaussians(image, (1, 2))
     with pytest.raises(ValueError):
         difference_of_gaussians(image, 1, (3, 4))
-    with pytest.raises(ValueError):
-        with expected_warnings(["`multichannel` is a deprecated argument"]):
-            difference_of_gaussians(image, (1, 2, 3), multichannel=True)
     with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 2, 3), channel_axis=-1)
 

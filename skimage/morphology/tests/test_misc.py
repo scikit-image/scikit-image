@@ -28,14 +28,6 @@ def test_two_connectivity():
     assert_array_equal(observed, expected)
 
 
-def test_in_place():
-    image = test_image.copy()
-    with expected_warnings(["in_place argument is deprecated"]):
-        observed = remove_small_objects(image, min_size=6, in_place=True)
-    assert_equal(observed is image, True,
-                 "remove_small_objects in_place argument failed.")
-
-
 @pytest.mark.parametrize("in_dtype", [bool, int, np.int32])
 @pytest.mark.parametrize("out_dtype", [bool, int, np.int32])
 def test_out(in_dtype, out_dtype):
@@ -135,14 +127,6 @@ def test_two_connectivity_holes():
     observed = remove_small_holes(test_holes_image, area_threshold=3,
                                   connectivity=2)
     assert_array_equal(observed, expected)
-
-
-def test_in_place_holes():
-    image = test_holes_image.copy()
-    with expected_warnings(["in_place argument is deprecated"]):
-        observed = remove_small_holes(image, area_threshold=3, in_place=True)
-    assert_equal(observed is image, True,
-                 "remove_small_holes in_place argument failed.")
 
 
 def test_out_remove_small_holes():

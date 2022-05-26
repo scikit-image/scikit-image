@@ -267,37 +267,6 @@ def test_multispectral_2d(dtype, channel_axis):
     return data, multi_labels, single_labels, labels
 
 
-def test_multispectral_2d_deprecated():
-    lx, ly = 70, 100
-    data, labels = make_2d_syntheticdata(lx, ly)
-    data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-
-    # checking for multichannel kwarg warning
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "`multichannel` is a deprecated argument",
-                            NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
-        multi_labels = random_walker(data, labels, mode='cg',
-                                     multichannel=True)
-    assert data[..., 0].shape == labels.shape
-
-    # checking for positional multichannel warning
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "Providing the `multichannel` argument",
-                            NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
-        multi_labels = random_walker(data, labels, 130, 'cg', 1.e-3, True,
-                                     True)
-    assert data[..., 0].shape == labels.shape
-
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
-        single_labels = random_walker(data[..., 0], labels, mode='cg')
-    assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
-    assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
-
-
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_multispectral_3d(dtype):
     n = 30

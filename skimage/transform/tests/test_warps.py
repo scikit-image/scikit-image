@@ -236,20 +236,6 @@ def test_rescale_multichannel():
     assert scaled.shape == (16, 16, 16, 6)
 
 
-def test_rescale_multichannel_deprecated_multiscale():
-    x = np.zeros((5, 5, 3), dtype=np.float64)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        scaled = rescale(x, (2, 1), order=0, multichannel=True,
-                         anti_aliasing=False, mode='constant')
-    assert scaled.shape == (10, 5, 3)
-
-    # repeat prior test, but check for positional multichannel _warnings
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        scaled = rescale(x, (2, 1), 0, 'constant', 0, True, False, True,
-                         anti_aliasing=False)
-    assert scaled.shape == (10, 5, 3)
-
-
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_rescale_channel_axis_multiscale(channel_axis):
     x = np.zeros((5, 5, 3), dtype=np.float64)

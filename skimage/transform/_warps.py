@@ -11,8 +11,7 @@ from ..measure import block_reduce
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
                              _validate_interpolation_order,
-                             channel_as_last_axis,
-                             deprecate_multichannel_kwarg)
+                             channel_as_last_axis)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -238,11 +237,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=False,
-            anti_aliasing=None, anti_aliasing_sigma=None, *,
-            channel_axis=None):
+            preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None,
+            *, channel_axis=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale N-dimensional images.
@@ -284,10 +281,6 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         image is converted according to the conventions of `img_as_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
@@ -1050,10 +1043,8 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg()
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
-               scaling='linear', multichannel=False, channel_axis=None,
-               **kwargs):
+               scaling='linear', channel_axis=None, **kwargs):
     """Remap image to polar or log-polar coordinates space.
 
     Parameters
@@ -1072,11 +1063,6 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     scaling : {'linear', 'log'}, optional
         Specify whether the image warp is polar or log-polar. Defaults to
         'linear'.
-    multichannel : bool, optional
-        Whether the image is a 3-D array in which the third axis is to be
-        interpreted as multiple channels. If set to `False` (default), only 2-D
-        arrays are accepted. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

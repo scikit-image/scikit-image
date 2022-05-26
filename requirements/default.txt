@@ -6,3 +6,5 @@ imageio>=2.4.1
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
 packaging>=20.0
+# TODO: get this version up on PyPI. (currently 0.6.0 is the newest available)
+uarray>=0.8.2

@@ -3,7 +3,6 @@ import itertools
 import numpy as np
 
 from .._shared.utils import _supported_float_type, warn
-from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
 
@@ -171,6 +170,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    from ..util import img_as_float
+
     if not 0 <= saturation <= 1:
         warn(f'saturation must be in range [0, 1], got {saturation}')
 

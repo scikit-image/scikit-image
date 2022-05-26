@@ -57,7 +57,7 @@ from scipy import linalg
 
 from .._shared.utils import (_supported_float_type, channel_as_last_axis,
                              identity, reshape_nd, slice_at_axis)
-from ..util import dtype, dtype_limits
+from ..util import img_as_float32, img_as_float64
 
 
 def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
@@ -141,9 +141,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = img_as_float32
     else:
-        _func = dtype.img_as_float64
+        _func = img_as_float64
     return _func(arr, force_copy=force_copy)
 
 
@@ -204,9 +204,9 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        arr = dtype.img_as_float32(arr)
+        arr = img_as_float32(arr)
     else:
-        arr = dtype.img_as_float64(arr)
+        arr = img_as_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -901,6 +901,7 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         RGBA image. A new dimension of length 4 is added to input
         image shape.
     """
+    from ..util import dtype_limits
 
     arr = np.asarray(image)
 
@@ -1767,9 +1768,9 @@ def _prepare_lab_array(arr, force_copy=True):
         raise ValueError('Input array has less than 3 color channels')
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = img_as_float32
     else:
-        _func = dtype.img_as_float64
+        _func = img_as_float64
     return _func(arr, force_copy=force_copy)
 
 

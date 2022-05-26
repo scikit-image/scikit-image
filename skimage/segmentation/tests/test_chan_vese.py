@@ -82,12 +82,6 @@ def test_chan_vese_gap_closing():
     assert_array_equal(result, ref)
 
 
-def test_chan_vese_max_iter_deprecation():
-    img = np.zeros((20, 20))
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        chan_vese(img, max_iter=10)
-
-
 def test_chan_vese_incorrect_level_set():
     img = np.zeros((10, 10))
     ls = np.zeros((10, 9))

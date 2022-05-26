@@ -3,10 +3,9 @@ import pytest
 from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
-from skimage import color, data, transform
+from skimage import color, data, morphology, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
-from skimage.morphology import gray, footprints
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -33,10 +32,10 @@ class TestMorphology():
     #   np.savez_compressed('gray_morph_output.npz', **output)
 
     def _build_expected_output(self):
-        funcs = (gray.erosion, gray.dilation, gray.opening, gray.closing,
-                 gray.white_tophat, gray.black_tophat)
-        footprints_2D = (footprints.square, footprints.diamond,
-                         footprints.disk, footprints.star)
+        funcs = (morphology.erosion, morphology.dilation, morphology.opening, morphology.closing,
+                 morphology.white_tophat, morphology.black_tophat)
+        footprints_2D = (morphology.square, morphology.diamond,
+                         morphology.disk, morphology.star)
 
         image = img_as_ubyte(transform.downscale_local_mean(
             color.rgb2gray(data.coffee()), (20, 20)))
@@ -61,63 +60,63 @@ class TestEccentricStructuringElements():
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
         self.white_pixel = 255 - self.black_pixel
-        self.footprints = [footprints.square(2), footprints.rectangle(2, 2),
-                           footprints.rectangle(2, 1),
-                           footprints.rectangle(1, 2)]
+        self.footprints = [morphology.square(2), morphology.rectangle(2, 2),
+                           morphology.rectangle(2, 1),
+                           morphology.rectangle(1, 2)]
 
     def test_dilate_erode_symmetry(self):
         for s in self.footprints:
-            c = gray.erosion(self.black_pixel, s)
-            d = gray.dilation(self.white_pixel, s)
+            c = morphology.erosion(self.black_pixel, s)
+            d = morphology.dilation(self.white_pixel, s)
             assert np.all(c == (255 - d))
 
     def test_open_black_pixel(self):
         for s in self.footprints:
-            gray_open = gray.opening(self.black_pixel, s)
+            gray_open = morphology.opening(self.black_pixel, s)
             assert np.all(gray_open == self.black_pixel)
 
     def test_close_white_pixel(self):
         for s in self.footprints:
-            gray_close = gray.closing(self.white_pixel, s)
+            gray_close = morphology.closing(self.white_pixel, s)
             assert np.all(gray_close == self.white_pixel)
 
     def test_open_white_pixel(self):
         for s in self.footprints:
-            assert np.all(gray.opening(self.white_pixel, s) == 0)
+            assert np.all(morphology.opening(self.white_pixel, s) == 0)
 
     def test_close_black_pixel(self):
         for s in self.footprints:
-            assert np.all(gray.closing(self.black_pixel, s) == 255)
+            assert np.all(morphology.closing(self.black_pixel, s) == 255)
 
     def test_white_tophat_white_pixel(self):
         for s in self.footprints:
-            tophat = gray.white_tophat(self.white_pixel, s)
+            tophat = morphology.white_tophat(self.white_pixel, s)
             assert np.all(tophat == self.white_pixel)
 
     def test_black_tophat_black_pixel(self):
         for s in self.footprints:
-            tophat = gray.black_tophat(self.black_pixel, s)
+            tophat = morphology.black_tophat(self.black_pixel, s)
             assert np.all(tophat == (255 - self.black_pixel))
 
     def test_white_tophat_black_pixel(self):
         for s in self.footprints:
-            tophat = gray.white_tophat(self.black_pixel, s)
+            tophat = morphology.white_tophat(self.black_pixel, s)
             assert np.all(tophat == 0)
 
     def test_black_tophat_white_pixel(self):
         for s in self.footprints:
-            tophat = gray.black_tophat(self.white_pixel, s)
+            tophat = morphology.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
 
-gray_functions = [gray.erosion, gray.dilation,
-                  gray.opening, gray.closing,
-                  gray.white_tophat, gray.black_tophat]
+gray_functions = [morphology.erosion, morphology.dilation,
+                  morphology.opening, morphology.closing,
+                  morphology.white_tophat, morphology.black_tophat]
 
 
 @pytest.mark.parametrize("function", gray_functions)
 def test_default_footprint(function):
-    strel = footprints.diamond(radius=1)
+    strel = morphology.diamond(radius=1)
     image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -141,7 +140,7 @@ def test_3d_fallback_default_footprint():
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    opened = gray.opening(image)
+    opened = morphology.opening(image)
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
@@ -149,7 +148,7 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-gray_3d_fallback_functions = [gray.closing, gray.opening]
+gray_3d_fallback_functions = [morphology.closing, morphology.opening]
 
 
 @pytest.mark.parametrize("function", gray_3d_fallback_functions)
@@ -171,7 +170,7 @@ def test_3d_fallback_white_tophat():
     image[4, 3:5, 3:5] = 1
 
     with expected_warnings([r'operator.*deprecated|\A\Z']):
-        new_image = gray.white_tophat(image)
+        new_image = morphology.white_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings([r'operator.*deprecated|\A\Z']):
         image_expected = ndi.white_tophat(
@@ -186,7 +185,7 @@ def test_3d_fallback_black_tophat():
     image[4, 3:5, 3:5] = 0
 
     with expected_warnings([r'operator.*deprecated|\A\Z']):
-        new_image = gray.black_tophat(image)
+        new_image = morphology.black_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings([r'operator.*deprecated|\A\Z']):
         image_expected = ndi.black_tophat(
@@ -200,8 +199,8 @@ def test_2d_ndimage_equivalence():
     image[3:-3, 3:-3] = 196
     image[4, 4] = 255
 
-    opened = gray.opening(image)
-    closed = gray.closing(image)
+    opened = morphology.opening(image)
+    closed = morphology.closing(image)
 
     footprint = ndi.generate_binary_structure(2, 1)
     ndimage_opened = ndi.grey_opening(image, footprint=footprint)
@@ -244,19 +243,19 @@ closed = np.array([[ 0.72,  0.72,  0.72,  0.54,  0.54],
 
 
 def test_float():
-    assert_allclose(gray.erosion(im), eroded)
-    assert_allclose(gray.dilation(im), dilated)
-    assert_allclose(gray.opening(im), opened)
-    assert_allclose(gray.closing(im), closed)
+    assert_allclose(morphology.erosion(im), eroded)
+    assert_allclose(morphology.dilation(im), dilated)
+    assert_allclose(morphology.opening(im), opened)
+    assert_allclose(morphology.closing(im), closed)
 
 
 def test_uint16():
     im16, eroded16, dilated16, opened16, closed16 = (
         map(img_as_uint, [im, eroded, dilated, opened, closed]))
-    assert_allclose(gray.erosion(im16), eroded16)
-    assert_allclose(gray.dilation(im16), dilated16)
-    assert_allclose(gray.opening(im16), opened16)
-    assert_allclose(gray.closing(im16), closed16)
+    assert_allclose(morphology.erosion(im16), eroded16)
+    assert_allclose(morphology.dilation(im16), dilated16)
+    assert_allclose(morphology.opening(im16), opened16)
+    assert_allclose(morphology.closing(im16), closed16)
 
 
 def test_discontiguous_out_array():
@@ -275,32 +274,17 @@ def test_discontiguous_out_array():
                                  [2, 0, 2, 0, 1],
                                  [0, 0, 0, 0, 0],
                                  [3, 0, 1, 0, 1]], np.uint8)
-    gray.dilation(image, out=out_array)
+    morphology.dilation(image, out=out_array)
     assert_array_equal(out_array_big, expected_dilation)
-    gray.erosion(image, out=out_array)
+    morphology.erosion(image, out=out_array)
     assert_array_equal(out_array_big, expected_erosion)
 
 
 def test_1d_erosion():
     image = np.array([1, 2, 3, 2, 1])
     expected = np.array([1, 1, 2, 1, 1])
-    eroded = gray.erosion(image)
+    eroded = morphology.erosion(image)
     assert_array_equal(eroded, expected)
-
-
-def test_deprecated_import():
-    msg = "Importing from skimage.morphology.grey is deprecated."
-    with expected_warnings([msg + r"|\A\Z"]):
-        from skimage.morphology.grey import erosion  # noqa
-
-
-@pytest.mark.parametrize(
-    'function', ['erosion', 'dilation', 'closing', 'opening', 'white_tophat',
-                 'black_tophat'],
-)
-def test_selem_kwarg_deprecation(function):
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(gray, function)(np.zeros((4, 4)), selem=np.ones((3, 3)))
 
 
 @pytest.mark.parametrize(
@@ -314,9 +298,9 @@ def test_square_decomposition(cam_image, function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(size, decomposition=None)
-    footprint = footprints.square(size, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.square(size, decomposition=None)
+    footprint = morphology.square(size, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -335,9 +319,9 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols,
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
-    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.rectangle(nrows, ncols, decomposition=None)
+    footprint = morphology.rectangle(nrows, ncols, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -354,9 +338,9 @@ def test_diamond_decomposition(cam_image, function, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(radius, decomposition=None)
-    footprint = footprints.square(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.square(radius, decomposition=None)
+    footprint = morphology.square(radius, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -376,11 +360,11 @@ def test_octagon_decomposition(cam_image, function, m, n, decomposition):
     """
     if m == 0 and n == 0:
         with pytest.raises(ValueError):
-            footprints.octagon(m, n, decomposition=decomposition)
+            morphology.octagon(m, n, decomposition=decomposition)
     else:
-        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
-        footprint = footprints.octagon(m, n, decomposition=decomposition)
-        func = getattr(gray, function)
+        footprint_ndarray = morphology.octagon(m, n, decomposition=None)
+        footprint = morphology.octagon(m, n, decomposition=decomposition)
+        func = getattr(morphology, function)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
@@ -397,9 +381,9 @@ def test_cube_decomposition(cell3d_image, function, size, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.cube(size, decomposition=None)
-    footprint = footprints.cube(size, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.cube(size, decomposition=None)
+    footprint = morphology.cube(size, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -417,9 +401,9 @@ def test_octahedron_decomposition(cell3d_image, function, radius,
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
-    footprint = footprints.octahedron(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    footprint_ndarray = morphology.octahedron(radius, decomposition=None)
+    footprint = morphology.octahedron(radius, decomposition=decomposition)
+    func = getattr(morphology, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)

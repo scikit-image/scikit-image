@@ -1,11 +1,7 @@
-from .exposure import histogram, equalize_hist, \
-                      rescale_intensity, cumulative_distribution, \
-                      adjust_gamma, adjust_sigmoid, adjust_log, \
-                      is_low_contrast
-
-from ._adapthist import equalize_adapthist
-from .histogram_matching import match_histograms
-
+from ._multimethods import (adjust_gamma, adjust_log, adjust_sigmoid,
+                            cumulative_distribution, equalize_adapthist,
+                            equalize_hist, histogram, is_low_contrast,
+                            match_histograms, rescale_intensity)
 
 __all__ = ['histogram',
            'equalize_hist',

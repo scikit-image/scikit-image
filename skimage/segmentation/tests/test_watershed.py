@@ -49,7 +49,7 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
-from skimage._shared.filters import gaussian
+from skimage._shared.multimethods import gaussian
 from skimage.measure import label
 
 from .._watershed import watershed
@@ -499,7 +499,7 @@ def test_no_markers():
 
 def test_connectivity():
     """
-    Watershed segmentation should output different result for 
+    Watershed segmentation should output different result for
     different connectivity
     when markers are calculated where None is supplied.
     Issue = 5084

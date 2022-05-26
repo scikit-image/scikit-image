@@ -10,12 +10,11 @@ from numpy.testing import (assert_allclose, assert_almost_equal,
 from skimage import data, draw, transform
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+from skimage.measure import (euler_number, perimeter, perimeter_crofton,
+                             regionprops, regionprops_table)
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
-                                          _parse_docs, _props_to_dict,
-                                          euler_number, perimeter,
-                                          perimeter_crofton, regionprops,
-                                          regionprops_table)
+                                          _parse_docs, _props_to_dict)
 from skimage.segmentation import slic
 
 SAMPLE = np.array(

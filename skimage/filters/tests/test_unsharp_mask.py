@@ -80,36 +80,6 @@ def test_unsharp_masking_with_different_ranges(shape, offset, channel_axis,
     assert output.shape == shape
 
 
-@pytest.mark.parametrize("shape,multichannel",
-                         [((16, 16), False),
-                          ((15, 15, 2), True),
-                          ((13, 17, 3), True)])
-@pytest.mark.parametrize("offset", [-5, 0, 5])
-@pytest.mark.parametrize("preserve", [False, True])
-def test_unsharp_masking_with_different_ranges_deprecated(shape, offset,
-                                                          multichannel,
-                                                          preserve):
-    radius = 2.0
-    amount = 1.0
-    dtype = np.int16
-    array = (np.random.random(shape) * 5 + offset).astype(dtype)
-    negative = np.any(array < 0)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        output = unsharp_mask(array, radius, amount, multichannel=multichannel,
-                              preserve_range=preserve)
-    if preserve is False:
-        assert np.any(output <= 1)
-        assert np.any(output >= -1)
-        if negative is False:
-            assert np.any(output >= 0)
-    assert output.dtype in [np.float32, np.float64]
-    assert output.shape == shape
-
-    # providing multichannel positionally also raises a warning
-    with expected_warnings(["Providing the `multichannel`"]):
-        output = unsharp_mask(array, radius, amount, multichannel, preserve)
-
-
 @pytest.mark.parametrize("shape,channel_axis",
                          [((16, 16), None),
                           ((15, 15, 2), -1),

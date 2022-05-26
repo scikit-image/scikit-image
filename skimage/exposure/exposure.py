@@ -719,10 +719,10 @@ def adjust_log(image, gain=1, inv=False):
 
     if inv:
         out = (2 ** (image / scale) - 1) * scale * gain
-        return dtype(out)
+        return out.astype(dtype, copy=False)
 
     out = np.log2(1 + image / scale) * scale * gain
-    return out.astype(dtype)
+    return out.astype(dtype, copy=False)
 
 
 def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
@@ -768,10 +768,10 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
 
     if inv:
         out = (1 - 1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
-        return dtype(out)
+        return out.astype(dtype, copy=False)
 
     out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
-    return out.astype(dtype)
+    return out.astype(dtype, copy=False)
 
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,

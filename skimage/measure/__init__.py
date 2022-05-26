@@ -1,18 +1,14 @@
-from ._find_contours import find_contours
-from ._marching_cubes_lewiner import marching_cubes, mesh_surface_area
-from ._regionprops import (regionprops, perimeter,
-                           perimeter_crofton, euler_number, regionprops_table)
-from ._polygon import approximate_polygon, subdivide_polygon
-from .pnpoly import points_in_poly, grid_points_in_poly
-from ._moments import (moments, moments_central, moments_coords,
-                       moments_coords_central, moments_normalized, centroid,
-                       moments_hu, inertia_tensor, inertia_tensor_eigvals)
-from .profile import profile_line
-from .fit import LineModelND, CircleModel, EllipseModel, ransac
-from .block import block_reduce
-from ._label import label
-from .entropy import shannon_entropy
-from ._blur_effect import blur_effect
+from ._multimethods import (approximate_polygon, block_reduce, blur_effect,
+                            centroid, euler_number, find_contours,
+                            grid_points_in_poly, inertia_tensor,
+                            inertia_tensor_eigvals, label, marching_cubes,
+                            mesh_surface_area, moments, moments_central,
+                            moments_coords, moments_coords_central, moments_hu,
+                            moments_normalized, perimeter, perimeter_crofton,
+                            points_in_poly, profile_line, ransac, regionprops,
+                            regionprops_table, shannon_entropy,
+                            subdivide_polygon)
+from .fit import CircleModel, EllipseModel, LineModelND
 
 
 __all__ = ['find_contours',

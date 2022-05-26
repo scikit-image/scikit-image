@@ -5,10 +5,11 @@ from scipy import ndimage as ndi
 
 from .._shared import utils
 from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian as gaussian_multimethod
 from .._shared.utils import _supported_float_type, convert_to_float, warn
 from ..util import img_as_float
 
-__all__ = ['gaussian', 'difference_of_gaussians']
+__all__ = ['difference_of_gaussians', 'gaussian']
 
 
 @utils.deprecate_multichannel_kwarg()
@@ -144,12 +145,11 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
         raise ValueError('high_sigma must be equal to or larger than'
                          'low_sigma for all axes')
 
-    im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate,
-                   preserve_range=False)
+    im1 = gaussian_multimethod(image, low_sigma, mode=mode, cval=cval,
+                               channel_axis=channel_axis, truncate=truncate,
+                               preserve_range=False)
 
-    im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate,
-                   preserve_range=False)
-
+    im2 = gaussian_multimethod(image, high_sigma, mode=mode, cval=cval,
+                               channel_axis=channel_axis, truncate=truncate,
+                               preserve_range=False)
     return im1 - im2

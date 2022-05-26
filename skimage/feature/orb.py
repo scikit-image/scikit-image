@@ -1,15 +1,10 @@
 import numpy as np
 
-from ..feature.util import (FeatureDetector, DescriptorExtractor,
-                            _mask_border_keypoints,
-                            _prepare_grayscale_input_2D)
-
-from ..feature import (corner_fast, corner_orientations, corner_peaks,
-                       corner_harris)
-from ..transform import pyramid_gaussian
 from .._shared.utils import check_nD
-
+from ..transform import pyramid_gaussian
 from .orb_cy import _orb_loop
+from .util import (FeatureDetector, DescriptorExtractor,
+                   _mask_border_keypoints, _prepare_grayscale_input_2D)
 
 
 OFAST_MASK = np.zeros((31, 31))
@@ -136,6 +131,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                      self.downscale, channel_axis=None))
 
     def _detect_octave(self, octave_image):
+        from ._multimethods import (corner_fast, corner_harris,
+                                    corner_orientations, corner_peaks)
         dtype = octave_image.dtype
         # Extract keypoints for current octave
         fast_response = corner_fast(octave_image, self.fast_n,

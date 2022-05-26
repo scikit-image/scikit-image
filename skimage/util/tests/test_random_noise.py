@@ -1,7 +1,7 @@
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_allclose
-
 import numpy as np
+import pytest
+from numpy.testing import assert_array_equal, assert_allclose
+
 from skimage.data import camera
 from skimage.util import random_noise, img_as_float
 
@@ -121,12 +121,12 @@ def test_localvar():
 
     # Ensure local variance bounds checking works properly
     bad_local_vars = np.zeros_like(data)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         random_noise(data, mode='localvar', seed=seed,
                      local_vars=bad_local_vars)
     bad_local_vars += 0.1
     bad_local_vars[0, 0] = -1
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         random_noise(data, mode='localvar', seed=seed,
                      local_vars=bad_local_vars)
 
@@ -217,5 +217,5 @@ def test_clip_speckle():
 
 def test_bad_mode():
     data = np.zeros((64, 64))
-    with testing.raises(KeyError):
+    with pytest.raises(KeyError):
         random_noise(data, 'perlin')

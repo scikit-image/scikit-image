@@ -31,12 +31,6 @@ def test_color_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-def test_max_iter_kwarg_deprecation():
-    img = np.zeros((20, 21, 3))
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        slic(img, max_iter=10, start_label=0)
-
-
 def test_multichannel_2d():
     rnd = np.random.default_rng(0)
     img = np.zeros((20, 20, 8))
@@ -75,31 +69,6 @@ def test_gray_2d():
     assert_equal(seg[10:, :10], 2)
     assert_equal(seg[:10, 10:], 1)
     assert_equal(seg[10:, 10:], 3)
-
-
-def test_gray_2d_deprecated_multichannel():
-    rnd = np.random.default_rng(0)
-    img = np.zeros((20, 21))
-    img[:10, :10] = 0.33
-    img[10:, :10] = 0.67
-    img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
-    img[img > 1] = 1
-    img[img < 0] = 0
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        seg = slic(img, sigma=0, n_segments=4, compactness=1,
-                   multichannel=False, convert2lab=False, start_label=0)
-
-    assert_equal(len(np.unique(seg)), 4)
-    assert_equal(seg.shape, img.shape)
-    assert_equal(seg[:10, :10], 0)
-    assert_equal(seg[10:, :10], 2)
-    assert_equal(seg[:10, 10:], 1)
-    assert_equal(seg[10:, 10:], 3)
-
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        seg = slic(img, 4, 1, 10, 0, None, False, convert2lab=False,
-                   start_label=0)
 
 
 def _check_segment_labels(seg1, seg2, allowed_mismatch_ratio=0.1):

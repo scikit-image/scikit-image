@@ -4,7 +4,6 @@ import numpy as np
 from scipy.signal import get_window
 
 from .._shared.utils import safe_as_int
-from ..transform import warp
 
 
 def window(window_type, shape, warp_kwargs=None):
@@ -97,6 +96,7 @@ def window(window_type, shape, warp_kwargs=None):
     .. [1] Two-dimensional window design, Wikipedia,
            https://en.wikipedia.org/wiki/Two_dimensional_window_design
     """
+    from ..transform import warp
 
     if np.isscalar(shape):
         shape = safe_as_int(shape),

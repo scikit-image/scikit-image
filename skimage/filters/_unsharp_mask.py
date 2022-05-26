@@ -1,8 +1,8 @@
 import numpy as np
 
-from ..util.dtype import img_as_float
 from .._shared import utils
-from .._shared.filters import gaussian
+from .._shared.multimethods import gaussian
+from ..util.dtype import img_as_float
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):

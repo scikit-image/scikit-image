@@ -1,13 +1,12 @@
 import numpy as np
 from scipy.ndimage import maximum_filter, minimum_filter, convolve
 
-from ..transform import integral_image
-from ..feature import structure_tensor
-from ..morphology import octagon, star
-from ..feature.censure_cy import _censure_dob_loop
-from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
-                            _mask_border_keypoints)
 from .._shared.utils import check_nD
+from ..morphology import octagon, star
+from ..transform import integral_image
+from .censure_cy import _censure_dob_loop
+from .util import (FeatureDetector, _prepare_grayscale_input_2D,
+                   _mask_border_keypoints)
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales
@@ -103,6 +102,7 @@ def _star_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
+    from ._multimethods import structure_tensor
     Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
     feature_mask[(Arr + Acc) ** 2
                  > line_threshold * (Arr * Acc - Arc ** 2)] = False

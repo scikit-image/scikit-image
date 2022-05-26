@@ -1,9 +1,9 @@
 import numpy as np
-from skimage import dtype_limits
-from skimage.util.dtype import dtype_range
-from skimage.util import invert
+from numpy.testing import assert_array_equal
 
-from skimage._shared.testing import assert_array_equal
+from skimage import dtype_limits
+from skimage.util import invert
+from skimage.util.dtype import dtype_range
 
 
 def test_invert_bool():
