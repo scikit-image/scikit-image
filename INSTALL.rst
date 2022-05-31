@@ -3,12 +3,12 @@
 Installing scikit-image
 ==============================================================================
 
-How you should install ``scikit-image`` depends on your needs and skills:
-
-- Simplest solution:
+The way you should install ``scikit-image`` depends mostly on your needs. The
+simplest solution would be using a
   `scientific Python distribution <#scientific-python-distributions>`_.
 
-- If you can install Python packages and work in virtual environments:
+If you can install Python packages and work in virtual environments, you
+might want to check:
 
   - `pip <#install-via-pip>`_
 
