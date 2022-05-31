@@ -63,7 +63,6 @@ the most recent ``scikit-image``.
 We recommend one of these distributions:
 
 - `Anaconda <https://www.anaconda.com/distribution/>`_
-- `Python(x,y) <https://python-xy.github.io/>`_
 - `WinPython <https://winpython.github.io/>`_
 
 When using the ``scikit-image``
