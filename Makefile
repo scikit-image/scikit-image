@@ -28,5 +28,4 @@ test_coverage:
 	$(PYTEST) -o python_functions=test_* skimage --cov=skimage
 
 html:
-	pip install -q -r requirements/docs.txt
 	export SPHINXOPTS=-W; make -C doc html
