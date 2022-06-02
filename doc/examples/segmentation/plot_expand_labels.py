@@ -36,7 +36,13 @@ seg1 = label(ws == foreground)
 expanded = expand_labels(seg1, distance=10)
 
 # Show the segmentations.
-fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(9, 5), sharex=True, sharey=True)
+fig, axes = plt.subplots(
+    nrows=1,
+    ncols=3,
+    figsize=(9, 5),
+    sharex=True,
+    sharey=True,
+)
 
 axes[0].imshow(coins, cmap="Greys_r")
 axes[0].set_title("Original")
