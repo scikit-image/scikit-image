@@ -60,7 +60,9 @@ ax[3].set_title("Polar-Transformed Rotated")
 ax[3].imshow(rotated_polar)
 plt.show()
 
-shifts, error, phasediff = phase_cross_correlation(image_polar, rotated_polar)
+shifts, error, phasediff = phase_cross_correlation(image_polar,
+                                                   rotated_polar,
+                                                   normalization=None)
 print(f'Expected value for counterclockwise rotation in degrees: '
       f'{angle}')
 print(f'Recovered value for counterclockwise rotation: '
@@ -102,7 +104,8 @@ plt.show()
 
 # setting `upsample_factor` can increase precision
 shifts, error, phasediff = phase_cross_correlation(image_polar, rescaled_polar,
-                                                   upsample_factor=20)
+                                                   upsample_factor=20,
+                                                   normalization=None)
 shiftr, shiftc = shifts[:2]
 
 # Calculate scale factor from translation
@@ -151,7 +154,8 @@ radius = 705
 warped_image = warp_polar(image, radius=radius, scaling="log")
 warped_rts = warp_polar(rts_image, radius=radius, scaling="log")
 shifts, error, phasediff = phase_cross_correlation(warped_image, warped_rts,
-                                                   upsample_factor=20)
+                                                   upsample_factor=20,
+                                                   normalization=None)
 shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
@@ -209,7 +213,8 @@ warped_image_fs = warped_image_fs[:shape[0] // 2, :]  # only use half of FFT
 warped_rts_fs = warped_rts_fs[:shape[0] // 2, :]
 shifts, error, phasediff = phase_cross_correlation(warped_image_fs,
                                                    warped_rts_fs,
-                                                   upsample_factor=10)
+                                                   upsample_factor=10,
+                                                   normalization=None)
 
 # Use translation parameters to calculate rotation and scaling parameters
 shiftr, shiftc = shifts[:2]

@@ -95,6 +95,19 @@ class TestImageCollection():
         with testing.raises(AttributeError):
             set_files('newfiles')
 
+    def test_custom_load_func_sequence(self):
+        filename = fetch('data/no_time_for_that_tiny.gif')
+
+        def reader(frameno):
+            vid = imageio.get_reader(filename)
+            return vid.get_data(frameno)
+
+        ic = ImageCollection(range(24), load_func=reader)
+        # the length of ic should be that of the given load_pattern sequence
+        assert len(ic) == 24
+        # GIF file has frames of size 25x14 with 4 channels (RGBA)
+        assert ic[0].shape == (25, 14, 4)
+
     def test_custom_load_func_w_kwarg(self):
         load_pattern = fetch('data/no_time_for_that_tiny.gif')
 

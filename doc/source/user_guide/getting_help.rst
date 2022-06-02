@@ -63,10 +63,9 @@ functions include one or more examples.
 Mailing-list
 ------------
 
-The scikit-image mailing-list is scikit-image@python.org (users
-should `join
-<https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ before posting). This
-mailing-list is shared by users and developers, and it is the right
+Join us on the `scikit-image
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
+This mailing-list is shared by users and developers, and it is the right
 place to ask any question about ``skimage``, or in general, image
 processing using Python.  Posting snippets of code with minimal examples
 ensures to get more relevant and focused answers.

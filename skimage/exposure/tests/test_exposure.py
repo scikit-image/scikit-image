@@ -862,7 +862,7 @@ def test_is_low_contrast_boolean():
                                            exposure.adjust_log,
                                            exposure.adjust_sigmoid])
 def test_negative_input(exposure_func):
-    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.float64)
     with pytest.raises(ValueError):
         exposure_func(image)
 

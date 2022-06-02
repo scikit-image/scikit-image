@@ -6,7 +6,8 @@ cimport numpy as cnp
 import numpy as np
 cnp.import_array()
 
-def argmin2(cnp.double_t[:] array):
+
+def argmin2(cnp.float64_t[:] array):
     """Return the index of the 2nd smallest value in an array.
 
     Parameters
@@ -62,9 +63,9 @@ def cut_cost(cut, W):
     cdef cnp.int32_t row, col
     cdef cnp.int32_t[:] indices = W.indices
     cdef cnp.int32_t[:] indptr = W.indptr
-    cdef cnp.double_t[:] data = W.data.astype(np.double)
+    cdef cnp.float64_t[:] data = W.data.astype(np.float64)
     cdef cnp.int32_t row_index
-    cdef cnp.double_t cost = 0
+    cdef cnp.float64_t cost = 0
 
     num_rows = W.shape[0]
     num_cols = W.shape[1]

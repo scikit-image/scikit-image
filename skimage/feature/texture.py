@@ -339,7 +339,7 @@ def local_binary_pattern(image, P, R, method='default'):
         'nri_uniform': ord('N'),
         'var': ord('V')
     }
-    image = np.ascontiguousarray(image, dtype=np.double)
+    image = np.ascontiguousarray(image, dtype=np.float64)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 

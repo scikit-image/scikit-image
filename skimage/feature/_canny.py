@@ -66,24 +66,30 @@ def _preprocess(image, mask, sigma, mode, cval):
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
                            preserve_range=False)
     if mask is None:
-        # Smooth the masked image
-        smoothed_image = gaussian(image, **gaussian_kwargs)
+        mask = np.ones(image.shape)
+        masked_image = image.copy()
+
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
         eroded_mask[-1:, :] = 0
         eroded_mask[:, :1] = 0
         eroded_mask[:, -1:] = 0
-        return smoothed_image, eroded_mask
 
-    masked_image = np.zeros_like(image)
-    masked_image[mask] = image[mask]
+    else:
+        mask = mask.astype(bool, copy=False)
+        masked_image = np.zeros_like(image)
+        masked_image[mask] = image[mask]
+
+        # Make the eroded mask. Setting the border value to zero will wipe
+        # out the image edges for us.
+        s = ndi.generate_binary_structure(2, 2)
+        eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
 
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
-    bleed_over = (
-        gaussian(mask.astype(float), **gaussian_kwargs) + np.finfo(float).eps
-    )
+    bleed_over = gaussian(mask.astype(float, copy=False),
+                          **gaussian_kwargs) + np.finfo(float).eps
 
     # Smooth the masked image
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
@@ -92,11 +98,6 @@ def _preprocess(image, mask, sigma, mode, cval):
     # recalibrate by dividing by the function on the mask to recover
     # the effect of smoothing from just the significant pixels.
     smoothed_image /= bleed_over
-
-    # Make the eroded mask. Setting the border value to zero will wipe
-    # out the image edges for us.
-    s = ndi.generate_binary_structure(2, 2)
-    eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
 
     return smoothed_image, eroded_mask
 
