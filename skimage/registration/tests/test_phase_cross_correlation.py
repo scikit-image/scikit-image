@@ -134,7 +134,10 @@ def test_wrong_input():
     template = np.ones((5, 5))
     with expected_warnings(
         [
-            r"invalid value encountered in true_divide|invalid value encountered in divide|\A\Z"
+            r"invalid value encountered in true_divide"
+            + r"|"
+            + r"invalid value encountered in divide"
+            + r"|\A\Z"
         ]
     ):
         with pytest.raises(ValueError):
