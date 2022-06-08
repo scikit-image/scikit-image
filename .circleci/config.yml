@@ -44,7 +44,6 @@ jobs:
             - /home/circleci/.cache/scikit-image/master
       - store_artifacts:
           path: doc/build/html
-          destination: doc/build/html
 
 workflows:
   version: 2
