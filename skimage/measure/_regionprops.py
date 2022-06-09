@@ -89,11 +89,6 @@ PROPS = {
     'weighted_moments_normalized': 'moments_weighted_normalized',
 }
 
-OBJECT_COLUMNS = {
-    'image', 'coords', 'image_convex', 'slice',
-    'image_filled', 'image_intensity'
-}
-
 COL_DTYPES = {
     'area': float,
     'area_bbox': float,
@@ -136,6 +131,8 @@ COL_DTYPES = {
     'slice': object,
     'solidity': float,
 }
+
+OBJECT_COLUMNS = [col for col, dtype in COL_DTYPES.items() if dtype == object]
 
 PROP_VALS = set(PROPS.values())
 

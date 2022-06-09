@@ -1249,17 +1249,25 @@ class EuclideanTransform(ProjectiveTransform):
 
     @property
     def rotation(self):
-        return math.atan2(self.params[1, 0], self.params[1, 1])
+        if self.dimensionality == 2:
+            return math.atan2(self.params[1, 0], self.params[1, 1])
+        elif self.dimensionality == 3:
+            # Returning 3D Euler rotation matrix
+            return self.params[:3, :3]
+        else:
+            raise NotImplementedError(
+                'Rotation only implemented for 2D and 3D transforms.'
+            )
 
     @property
     def translation(self):
-        return self.params[0:2, 2]
+        return self.params[0:self.dimensionality, self.dimensionality]
 
 
 class SimilarityTransform(EuclideanTransform):
-    """2D similarity transformation.
+    """Similarity transformation.
 
-    Has the following form::
+    Has the following form in 2D::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1347,9 +1355,9 @@ class SimilarityTransform(EuclideanTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, ndim) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, ndim) array
             Destination coordinates.
 
         Returns
@@ -1366,8 +1374,14 @@ class SimilarityTransform(EuclideanTransform):
 
     @property
     def scale(self):
-        # det = scale**(# of dimensions), therefore scale = det**(1/2)
-        return np.sqrt(np.linalg.det(self.params))
+        # det = scale**(# of dimensions), therefore scale = det**(1/ndim)
+        if self.dimensionality == 2:
+            return np.sqrt(np.linalg.det(self.params))
+        elif self.dimensionality == 3:
+            return np.cbrt(np.linalg.det(self.params))
+        else:
+            raise NotImplementedError(
+                'Scale is only implemented for 2D and 3D.')
 
 
 class PolynomialTransform(GeometricTransform):
