@@ -952,14 +952,22 @@ def ring_detector_preproc(image, sigma):
         The least principal curvature of the Hessian matrix obtained from
         the input image and sigma.
     """
-    derivatives = {}
-    hessian = hessian_matrix(image, sigma)
-    derivatives['Lrr'], derivatives['Lrc'], derivatives['Lcc'] = hessian
+    hess_deriv, hess_eigvals = calculate_hessian_vals(image, sigma)
 
-    hessian_eigvals = hessian_matrix_eigvals((hessian))
+    # return only hess_eigvals[1], the least principal curvature
+    return hess_deriv, hess_eigvals[1]
 
-    # the least principal curvature being hessian_eigvals[1]
-    return derivatives, hessian_eigvals[1]
+
+def _hessian_derivatives(image, sigma):
+    """
+    """
+    hess_deriv = {}
+
+    hess_mat = hess_matrix(image, sigma)
+    hess_deriv['Lrr'], hess_deriv['Lrc'], hess_deriv['Lcc'] = hess_mat
+    hess_eigvals = hessian_matrix_eigvals((hess_mat))
+
+    return hess_deriv, hess_eigvals
 
 
 def rings_detection(self):
@@ -990,7 +998,8 @@ def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
     """
     """
     derivatives, least_princ_curv = ring_detector_preproc(image, sigma)
-    _aux_directed_ridge_detector(derivatives['Lrr'],
-            derivatives['Lcc'], derivatives['Lrc'],
-            derivatives['principal_curv'], curv_thresh)
+    directed_ridges = _aux_directed_ridge_detector(
+        derivatives['Lrr'], derivatives['Lcc'],
+        derivatives['Lrc'], derivatives['principal_curv'],
+        curv_thresh)
     return
