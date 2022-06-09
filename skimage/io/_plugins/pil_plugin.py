@@ -153,7 +153,7 @@ def _palette_is_grayscale(pil_image):
     if pil_image.mode != 'P':
         raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
-    palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
+    palette = np.asarray(pil_image.getpalette()).reshape((-1, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
     valid_palette = palette[start:stop + 1]
