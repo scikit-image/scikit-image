@@ -29,9 +29,7 @@ def _offset_array(arr, low_boundary, high_boundary):
             # prevent overflow errors when offsetting
             arr = arr.astype(offset_dtype)
         arr = arr - offset
-    else:
-        offset = 0
-    return arr, offset
+    return arr
 
 
 def _bincount_histogram_centers(image, source_range):
@@ -75,8 +73,10 @@ def _bincount_histogram(image, source_range, bin_centers=None):
     if bin_centers is None:
         bin_centers = _bincount_histogram_centers(image, source_range)
     image_min, image_max = bin_centers[0], bin_centers[-1]
-    image, offset = _offset_array(image, image_min, image_max)
-    hist = np.bincount(image.ravel(), minlength=image_max - image_min + 1)
+    image = _offset_array(image, image_min, image_max)
+    hist = np.bincount(
+        image.ravel(), minlength=image_max - min(image_min, 0) + 1
+    )
     if source_range == 'image':
         idx = max(image_min, 0)
         hist = hist[idx:]
