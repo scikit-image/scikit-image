@@ -74,7 +74,9 @@ def _bincount_histogram(image, source_range, bin_centers=None):
         bin_centers = _bincount_histogram_centers(image, source_range)
     image_min, image_max = bin_centers[0], bin_centers[-1]
     image = _offset_array(image, image_min, image_max)
-    hist = np.bincount(image.ravel(), minlength=image_max - min(image_min, 0) + 1)
+    hist = np.bincount(
+        image.ravel(), minlength=image_max - min(image_min, 0) + 1
+    )
     if source_range == 'image':
         idx = max(image_min, 0)
         hist = hist[idx:]
