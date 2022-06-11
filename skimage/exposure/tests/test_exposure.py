@@ -54,6 +54,15 @@ def test_int_range_image():
     assert_equal(bin_centers[-1], 100)
 
 
+def test_multichannel_int_range_image():
+    im = np.array([[10, 5], [100, 102]], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, channel_axis=-1)
+    for ch in range(im.shape[-1]):
+        assert_equal(len(frequencies[ch]), len(bin_centers))
+    assert_equal(bin_centers[0], 5)
+    assert_equal(bin_centers[-1], 102)
+
+
 def test_peak_uint_range_dtype():
     im = np.array([10, 100], dtype=np.uint8)
     frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
