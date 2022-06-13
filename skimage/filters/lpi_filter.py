@@ -130,8 +130,8 @@ class LPIFilter2D(object):
         return out
 
 
-def forward(data, impulse_response=None, filter_params={},
-            predefined_filter=None):
+def apply_filter_forward(data, impulse_response=None, filter_params={},
+                         predefined_filter=None):
     """Apply the given filter to data.
 
     Parameters
@@ -167,8 +167,8 @@ def forward(data, impulse_response=None, filter_params={},
     return predefined_filter(data)
 
 
-def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
-            predefined_filter=None):
+def apply_filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
+                         predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
     Parameters
