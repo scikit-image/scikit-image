@@ -120,7 +120,7 @@ class LPIFilter2D(object):
 
         Parameters
         ----------
-        data : (M,N) ndarray
+        data : (M, N) ndarray
 
         """
         check_nD(data, 2, 'data')
@@ -136,7 +136,7 @@ def forward(data, impulse_response=None, filter_params={},
 
     Parameters
     ----------
-    data : (M,N) ndarray
+    data : (M, N) ndarray
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
