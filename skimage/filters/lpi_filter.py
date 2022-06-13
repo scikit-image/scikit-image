@@ -14,8 +14,8 @@ def _min_limit(x, val=np.finfo(float).eps):
     x[mask] = np.sign(x[mask]) * val
 
 
-def _centre(x, oshape):
-    """Return an array of oshape from the centre of x.
+def _center(x, oshape):
+    """Return an array of oshape from the center of x.
 
     """
     start = (np.array(x.shape) - np.array(oshape)) // 2 + 1
@@ -126,7 +126,7 @@ class LPIFilter2D(object):
         check_nD(data, 2, 'data')
         F, G = self._prepare(data)
         out = fft.ifftn(F * G)
-        out = np.abs(_centre(out, data.shape))
+        out = np.abs(_center(out, data.shape))
         return out
 
 
@@ -204,7 +204,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     mask = np.abs(F) > max_gain
     F[mask] = np.sign(F[mask]) * max_gain
 
-    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
+    return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def wiener(data, impulse_response=None, filter_params={}, K=0.25,
@@ -246,4 +246,4 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
-    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
+    return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
