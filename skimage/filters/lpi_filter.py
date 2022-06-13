@@ -247,8 +247,3 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
     return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
-
-
-def constrained_least_squares(data, lam, impulse_response=None,
-                              filter_params={}):
-    raise NotImplementedError
