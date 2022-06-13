@@ -3,7 +3,7 @@ from scipy.spatial import cKDTree
 
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
-from ._hough_transform_ridge import _hough_ridge
+from ._hough_transform_ridge import directed_ridge_detector
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -405,12 +405,12 @@ def hough_ridge(image, sigma=1.8, curv_thresh=-25, radii=[7, 85],
         particle tracking using 2d microscope imaging. Sci. Rep. 5,
         13584; doi: 10.1038/srep13584 (2015).
     """
-    detected_rings = _hough_ridge(image,
-                                  sigma,
-                                  curv_thresh,
-                                  radii,
-                                  hough_thresh,
-                                  delta_r)
+    detected_rings = directed_ridge_detector(image,
+                                             sigma,
+                                             curv_thresh,
+                                             radii,
+                                             hough_thresh,
+                                             delta_r)
     # ridge_hough = RidgeHoughTransform(image)
     # ridge_hough.params['sigma'] = sigma
     # ridge_hough.params['Rmin'] = r_min

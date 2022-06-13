@@ -911,7 +911,8 @@ cpdef _aux_directed_ridge_detector(double [:,:] Lrr,
             ###   Find Ridges:    ###
             #
             # threshold the curvature (note that it should be smaller than...)
-            if curv[i,j] > curv_thresh: continue
+            if curv[i,j] > curv_thresh:
+                continue
             # perform non-minimum suppression in the least principal direction
             cosQ, sinQ = least_principal_direction(Lrr[i, j], Lcc[i, j], Lrc[i, j])
             if fabs(cosQ) > cos_q_pi:
@@ -970,7 +971,8 @@ def _hessian_derivatives(image, sigma):
     return hess_deriv, hess_eigvals
 
 
-def rings_detection(self):
+def ring_detection(image, radii, derivatives, curve_thresh, hough_thresh,
+                   delta_r):
     assert self.params['Rmin']>=3
     assert self.params['Rmin'] <= self.params['Rmax']
     ht_out = ridge_circle_hough_transform(self.deriv['Lrr'],
@@ -989,12 +991,12 @@ def rings_detection(self):
                              self.params['delta_r'],
                              #self.params['eccentricity'] ## opencv dependency
                                  )
-    self.output = {'rings' : np.asarray(rings),
-                   'rings_subpxl' : np.asarray(rings_subpxl),
-                   }
+    return {'rings' : np.asarray(rings),
+            'rings_subpxl' : np.asarray(rings_subpxl)}
 
 
-def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
+def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25, radii=[7, 85],
+                            hough_thresh=[3, 0.33 * 2 * np.pi], delta_r=3):
     """
     """
     derivatives, least_princ_curv = ring_detector_preproc(image, sigma)
@@ -1002,4 +1004,7 @@ def directed_ridge_detector(image, sigma=1.8, curv_thresh=-25):
         derivatives['Lrr'], derivatives['Lcc'],
         derivatives['Lrc'], derivatives['principal_curv'],
         curv_thresh)
-    return
+    detected_rings = ring_detection
+
+
+    return detected_rings
