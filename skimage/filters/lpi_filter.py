@@ -158,7 +158,7 @@ def apply_filter_forward(data, impulse_response=None, filter_params={},
     ...     return np.exp(-np.hypot(r, c)/1)
     >>>
     >>> from skimage import data
-    >>> filtered = forward(data.coins(), filt_func)
+    >>> filtered = apply_filter_forward(data.coins(), filt_func)
 
     """
     check_nD(data, 2, 'data')
