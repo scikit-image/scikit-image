@@ -19,6 +19,9 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
     A gray level co-occurrence matrix is a histogram of co-occurring
     grayscale values at a given offset over an image.
 
+    .. versionchanged:: 0.19
+               `greymatrix` was renamed to `graymatrix` in 0.19.
+
     Parameters
     ----------
     image : array_like
@@ -174,6 +177,9 @@ def graycoprops(P, prop='contrast'):
 
     Each GLCM is normalized to have a sum of 1 before the computation of
     texture properties.
+
+    .. versionchanged:: 0.19
+           `greycoprops` was renamed to `graycoprops` in 0.19.
 
     Parameters
     ----------
