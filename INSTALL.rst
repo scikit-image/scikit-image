@@ -380,13 +380,13 @@ Or tests from a specific file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py
+    pytest skimage/morphology/tests/test_gray.py
 
 Or a single test within that file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
 
 Use ``--doctest-modules`` to run doctests. For example, run all tests and all
 doctests using:

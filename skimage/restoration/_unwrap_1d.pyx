@@ -3,14 +3,15 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
+cimport numpy as cnp
 from libc.math cimport M_PI
 
 
-def unwrap_1d(double[::1] image, double[::1] unwrapped_image):
+def unwrap_1d(cnp.float64_t[::1] image, cnp.float64_t[::1] unwrapped_image):
     '''Phase unwrapping using the naive approach.'''
     cdef:
         Py_ssize_t i
-        double difference
+        cnp.float64_t difference
         long periods = 0
     with nogil:
         unwrapped_image[0] = image[0]

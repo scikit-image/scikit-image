@@ -36,18 +36,24 @@ VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 # 2D-only filter weights
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
-                               [0, -1]], dtype=np.double)
+                               [0, -1]], dtype=np.float64)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
-                               [-1, 0]], dtype=np.double)
+                               [-1, 0]], dtype=np.float64)
 
 # These filter weights can be found in Farid & Simoncelli (2004),
 # Table 1 (3rd and 4th row). Additional decimal places were computed
 # using the code found at https://www.cs.dartmouth.edu/farid/
-p = np.array([[0.0376593171958126, 0.249153396177344, 0.426374573253687,
-               0.249153396177344, 0.0376593171958126]])
-d1 = np.array([[0.109603762960254, 0.276690988455557, 0, -0.276690988455557,
-                -0.109603762960254]])
-HFARID_WEIGHTS = d1.T * p
+farid_smooth = np.array([[0.0376593171958126,
+                          0.249153396177344,
+                          0.426374573253687,
+                          0.249153396177344,
+                          0.0376593171958126]])
+farid_edge = np.array([[0.109603762960254,
+                        0.276690988455557,
+                        0,
+                        -0.276690988455557,
+                        -0.109603762960254]])
+HFARID_WEIGHTS = farid_edge.T * farid_smooth
 VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
 
@@ -706,27 +712,41 @@ def laplace(image, ksize=3, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def farid(image, *, mask=None):
+def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Farid transform.
 
     Parameters
     ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
+    image : array
+        The input image.
+    mask : array of bool, optional
+        Clip the output image to this mask. (Values where mask=0 will be set
+        to 0.)
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            farid_mag = np.sqrt(sum([farid(image, axis=i)**2
+                                     for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
 
     Returns
     -------
-    output : 2-D array
+    output : array of float
         The Farid edge map.
 
     See also
     --------
     farid_h, farid_v : horizontal and vertical edge detection.
-    sobel, prewitt, farid, skimage.feature.canny
+    scharr, sobel, prewitt, skimage.feature.canny
 
     Notes
     -----
@@ -750,11 +770,11 @@ def farid(image, *, mask=None):
     >>> from skimage import filters
     >>> edges = filters.farid(camera)
     """
-    check_nD(image, 2)
-    out = np.sqrt(farid_h(image, mask=mask) ** 2
-                  + farid_v(image, mask=mask) ** 2)
-    out /= np.sqrt(2)
-    return out
+    output = _generic_edge_filter(image, smooth_weights=farid_smooth,
+                                  edge_weights=farid_edge, axis=axis,
+                                  mode=mode, cval=cval)
+    output = _mask_filter_result(output, mask)
+    return output
 
 
 def farid_h(image, *, mask=None):

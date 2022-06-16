@@ -167,7 +167,7 @@ axs[3].scatter(xs=np.arange(len(sigmoid)),
                c=scalars_to_rgba(sigmoid,
                                  cmap=cmap, vmin=0, vmax=1, alpha=1.)[:, :3])
 
-# Subplot aesthetics (optimized for matplotlib 3.3)
+# Subplot aesthetics
 for iax, ax in enumerate(axs[:]):
 
     # Get rid of panes and axis lines

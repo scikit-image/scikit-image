@@ -29,10 +29,10 @@ jobs:
             cibw_arch: x86_64
             # exclude i686 on Python 3.10 (No NumPy or SciPy wheels available)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
           python-version: '3.9'
@@ -50,7 +50,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: ./dist/*.whl
@@ -65,15 +65,15 @@ jobs:
         cibw_python: [ "cp38-*" , "cp39-*" , "cp310-*" ]
         cibw_manylinux: [ manylinux2014 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
           python-version: '3.9'
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Install cibuildwheel
@@ -92,7 +92,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: ./dist/*.whl
@@ -109,11 +109,11 @@ jobs:
         cibw_arch: [ "x86_64", "arm64"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
           python-version: '3.9'
@@ -121,6 +121,7 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
+
       - name: Build wheels for CPython Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
@@ -135,13 +136,25 @@ jobs:
               # https://github.com/scipy/scipy/issues/14688
               # so being conservative, we just do the same here
               export MACOSX_DEPLOYMENT_TARGET=12.0
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0.darwin_20.arm64.tbz2 -O libomp.tbz2
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
           else
               export MACOSX_DEPLOYMENT_TARGET=10.13
-              wget https://packages.macports.org/libomp/libomp-11.0.1_0+universal.darwin_17.i386-x86_64.tbz2 -O libomp.tbz2
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-64/llvm-openmp-11.1.0-hda6cdc1_1.tar.bz2"
           fi
           echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
-          sudo tar -C / -xvjf libomp.tbz2 opt
+
+          # use conda to install llvm-openmp
+          # Note that we do NOT activate the conda environment, we just add the
+          # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
+          sudo conda create -n build $OPENMP_URL
+          PREFIX="/usr/local/miniconda/envs/build"
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
+          export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
+          export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -I$PREFIX/include"
+          export CXXFLAGS="$CXXFLAGS -I$PREFIX/include"
+          export LDFLAGS="$LDFLAGS -Wl,-S -Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -lomp"
+
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
@@ -149,34 +162,32 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_TEST_SKIP: "*-macosx_arm64"
-          # CIBW_BEFORE_BUILD: pip install certifi numpy==1.19.3
-          CC: /usr/bin/clang
-          CXX: /usr/bin/clang++
-          CPPFLAGS: "-Xpreprocessor -fopenmp"
-          CFLAGS: "-Wno-implicit-function-declaration -I/opt/local/include/libomp"
-          CXXFLAGS: "-I/opt/local/include/libomp"
-          LDFLAGS: "-Wl,-S -Wl,-rpath,/opt/local/lib/libomp -L/opt/local/lib/libomp -lomp"
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: ./dist/*.whl
 
   build_windows_wheels:
-    name: Build ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+    name: Build ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64", "x86"]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
+        exclude:
+          - os: windows-latest
+            cibw_python: "cp310-*"
+            cibw_arch: x86
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
           python-version: '3.9'
@@ -193,8 +204,7 @@ jobs:
         run: |
           choco install --force --x86 llvm
 
-      # install clang-cl (needed for Pythran)
-      - name: Install clang-cl
+      - name: Install x64 clang-cl
         if: matrix.cibw_arch == 'AMD64'
         run: |
           choco install --force llvm
@@ -205,28 +215,59 @@ jobs:
           SET PATH="C:\\Program Files\\LLVM\\bin;%PATH%"
           SET PATH="C:\\Program Files (x86)\\LLVM\\bin;%PATH%"
 
-      - name: Build Windows wheels for CPython 3.10
-        # NumPy dropped x86 wheels for Python 3.10
+      - name: Build x86 Windows wheels for CPython
+        if: matrix.cibw_arch == 'x86'
+        # To avoid "LINK : fatal error LNK1158: cannot run 'rc.exe'"
+        # we explicitly add rc.exe to path using the method from:
+        # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
+        # with additional -arch=x86 flag to vsdevcmd.bat
+        run: |
+          function Invoke-VSDevEnvironment {
+            $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+              $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
+              $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
+            & "${env:COMSPEC}" /s /c "`"$Command`" -arch=x86 -no_logo && set" | Foreach-Object {
+                  if ($_ -match '^([^=]+)=(.*)') {
+                      [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+                  }
+              }
+          }
+          Invoke-VSDevEnvironment
+          Get-Command rc.exe | Format-Table -AutoSize
+          python -m cibuildwheel --output-dir dist
+        env:
+          CIBW_BUILD: ${{ matrix.cibw_python }}
+          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
+
+      - name: Build x64 Windows wheels for CPython
         if: matrix.cibw_arch == 'AMD64'
+        # To avoid "LINK : fatal error LNK1158: cannot run 'rc.exe'"
+        # we explicitly add rc.exe to path using the method from:
+        # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
+        # with additional -arch=x86 flag to vsdevcmd.bat
         run: |
+          function Invoke-VSDevEnvironment {
+            $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+              $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
+              $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
+            & "${env:COMSPEC}" /s /c "`"$Command`" -arch=amd64 -no_logo && set" | Foreach-Object {
+                  if ($_ -match '^([^=]+)=(.*)') {
+                      [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+                  }
+              }
+          }
+          Invoke-VSDevEnvironment
+          Get-Command rc.exe | Format-Table -AutoSize
           python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: "cp310-*"
+          CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
           # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
 
-      - name: Build Windows wheels for CPython
-        run: |
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: "cp3?-*"
-          CIBW_SKIP: "cp36-* cp37-*"
-          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
-          LDFLAGS: "-Wl,-S"
-
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: ./dist/*.whl
@@ -237,10 +278,10 @@ jobs:
     if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
           python-version: '3.9'
@@ -251,7 +292,7 @@ jobs:
           pip install -r requirements/build.txt
           pip install twine
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         id: download
         with:
           name: wheels

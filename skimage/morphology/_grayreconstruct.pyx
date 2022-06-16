@@ -7,20 +7,34 @@ Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentsky
 
+Updated by Gregory Lee (April, 2022):
+    - added a 64-bit integer variant for large images
+
 """
 cimport numpy as cnp
 cimport cython
 cnp.import_array()
 
 
+ctypedef fused np_ints:
+    cnp.int32_t
+    cnp.int64_t
+
+ctypedef fused np_uints:
+    cnp.uint32_t
+    cnp.uint64_t
+
+
 @cython.boundscheck(False)
-def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
+@cython.nonecheck(False)
+@cython.wraparound(False)
+def reconstruction_loop(cnp.ndarray[dtype=np_uints, ndim=1,
                                     negative_indices=False, mode='c'] aranks,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=np_ints, ndim=1,
                                     negative_indices=False, mode='c'] aprev,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=np_ints, ndim=1,
                                     negative_indices=False, mode='c'] anext,
-                        cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                        cnp.ndarray[dtype=np_ints, ndim=1,
                                     negative_indices=False, mode='c'] astrides,
                         Py_ssize_t current_idx,
                         Py_ssize_t image_stride):
@@ -52,10 +66,10 @@ def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
     cdef unsigned int neighbor_rank, current_rank, mask_rank
     cdef int i, neighbor_idx, current_link, nprev, nnext
     cdef int nstrides = astrides.shape[0]
-    cdef cnp.uint32_t *ranks = <cnp.uint32_t *>(aranks.data)
-    cdef cnp.int32_t *prev = <cnp.int32_t *>(aprev.data)
-    cdef cnp.int32_t *next = <cnp.int32_t *>(anext.data)
-    cdef cnp.int32_t *strides = <cnp.int32_t *>(astrides.data)
+    cdef np_uints *ranks = <np_uints *>(aranks.data)
+    cdef np_ints *prev = <np_ints *>(aprev.data)
+    cdef np_ints *next = <np_ints *>(anext.data)
+    cdef np_ints *strides = <np_ints *>(astrides.data)
 
     with nogil:
         while current_idx != -1:

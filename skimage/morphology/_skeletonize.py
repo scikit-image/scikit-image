@@ -22,7 +22,7 @@ def skeletonize(image, *, method=None):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
+        An image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
@@ -77,7 +77,7 @@ def skeletonize(image, *, method=None):
     """
 
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image)
+        skeleton = skeletonize_2d(image.astype(bool, copy=False))
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
@@ -160,16 +160,8 @@ def skeletonize_2d(image):
 
     """
 
-    # convert to unsigned int (this should work for boolean values)
-    image = image.astype(np.uint8)
-
-    # check some properties of the input image:
-    #  - 2D
-    #  - binary image with only 0's and 1's
     if image.ndim != 2:
-        raise ValueError('Skeletonize requires a 2D array')
-    if not np.all(np.in1d(image.flat, (0, 1))):
-        raise ValueError('Image contains values other than 0 and 1')
+        raise ValueError("Zhang's skeletonize method requires a 2D array")
 
     return _fast_skeletonize(image)
 

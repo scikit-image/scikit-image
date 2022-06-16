@@ -17,6 +17,11 @@ In a typical classification problem, the final step (not included in
 this example) would be to train a classifier, such as logistic
 regression, to label image patches from new images.
 
+.. versionchanged:: 0.19
+           `greymatrix` was renamed to `graymatrix` in 0.19.
+.. versionchanged:: 0.19
+           `greycoprops` was renamed to `graycoprops` in 0.19.
+
 References
 ----------
 .. [1] Haralick, RM.; Shanmugam, K.,
