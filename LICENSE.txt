@@ -11,7 +11,7 @@ Files: doc/source/themes/scikit-image/layout.html
 Copyright: 2007-2010 the Sphinx team
 License: BSD-3-Clause
 
-Files: skimage/filters/_ctmf.pyx skimage/filters/edges.py
+Files: skimage/filters/edges.py
        skimage/filters/_rank_order.py
        skimage/morphology/heap_general.pxi
        skimage/morphology/heap_watershed.pxi
