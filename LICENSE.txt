@@ -10,9 +10,9 @@ Files: skimage/filters/edges.py
        skimage/filters/_rank_order.py
        skimage/segmentation/heap_general.pxi
        skimage/segmentation/heap_watershed.pxi
+       skimage/segmentation/_watershed_cy.pyx
        skimage/morphology/_skeletonize.py
        skimage/morphology/tests/test_watershed.py
-       skimage/morphology/_watershed.pyx
        skimage/morphology/watershed.py
        skimage/feature/_canny.py
 Copyright: 2003-2009 Massachusetts Institute of Technology
