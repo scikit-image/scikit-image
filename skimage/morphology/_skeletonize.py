@@ -1,8 +1,3 @@
-"""
-Algorithms for computing the skeleton of a binary image
-"""
-
-
 import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
