@@ -170,12 +170,11 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
-        The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -194,6 +193,16 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
     lower algorithm complexity makes the `skimage.filters.rank.minimum`
     function more efficient for larger images and footprints.
+
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     Examples
     --------
@@ -242,12 +251,11 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
-        The neighborhood expressed as an array of 1's and 0's.
-        If None, it will be a cross-shaped footprint (connectivity=1). This can
-        also be a sequence of 2-tuples where the first element of each 2-tuple
-        is a footprint and the second element as an integer describing the
-        number of times it should be iterated.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -266,6 +274,16 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
     For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
     algorithm complexity makes the `skimage.filters.rank.maximum` function more
     efficient for larger images and footprints.
+
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     Examples
     --------
@@ -325,12 +343,11 @@ def opening(image, footprint=None, out=None):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
-        The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -339,6 +356,18 @@ def opening(image, footprint=None, out=None):
     -------
     opening : array, same shape and type as `image`
         The result of the morphological opening.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     Examples
     --------
@@ -380,12 +409,11 @@ def closing(image, footprint=None, out=None):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
-        The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -394,6 +422,18 @@ def closing(image, footprint=None, out=None):
     -------
     closing : array, same shape and type as `image`
         The result of the morphological closing.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     Examples
     --------
@@ -450,12 +490,11 @@ def white_tophat(image, footprint=None, out=None):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
-        The neighborhood expressed as an array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -464,6 +503,18 @@ def white_tophat(image, footprint=None, out=None):
     -------
     out : array, same shape and type as `image`
         The result of the morphological white top hat.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     See Also
     --------
@@ -531,12 +582,11 @@ def black_tophat(image, footprint=None, out=None):
     ----------
     image : ndarray
         Image array.
-    footprint : ndarray, optional
+    footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -545,6 +595,18 @@ def black_tophat(image, footprint=None, out=None):
     -------
     out : array, same shape and type as `image`
         The result of the morphological black top hat.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automically generate a
+    footprint sequence of this type.
 
     See Also
     --------
