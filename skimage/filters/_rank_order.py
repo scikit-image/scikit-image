@@ -1,13 +1,3 @@
-"""rankorder.py - convert an image of any type to an image of ints whose
-pixels have an identical rank order compared to the original image
-
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentstky
-"""
 import numpy as np
 
 
