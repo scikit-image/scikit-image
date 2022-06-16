@@ -13,8 +13,8 @@ License: BSD-3-Clause
 
 Files: skimage/filters/edges.py
        skimage/filters/_rank_order.py
-       skimage/morphology/heap_general.pxi
-       skimage/morphology/heap_watershed.pxi
+       skimage/segmentation/heap_general.pxi
+       skimage/segmentation/heap_watershed.pxi
        skimage/morphology/_skeletonize.py
        skimage/morphology/tests/test_watershed.py
        skimage/morphology/_watershed.pyx
