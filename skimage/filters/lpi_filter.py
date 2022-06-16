@@ -130,8 +130,8 @@ class LPIFilter2D(object):
         return out
 
 
-def apply_filter_forward(data, impulse_response=None, filter_params={},
-                         predefined_filter=None):
+def filter_forward(data, impulse_response=None, filter_params={},
+                   predefined_filter=None):
     """Apply the given filter to data.
 
     Parameters
@@ -158,7 +158,7 @@ def apply_filter_forward(data, impulse_response=None, filter_params={},
     ...     return np.exp(-np.hypot(r, c)/1)
     >>>
     >>> from skimage import data
-    >>> filtered = apply_filter_forward(data.coins(), filt_func)
+    >>> filtered = filter_forward(data.coins(), filt_func)
 
     """
     check_nD(data, 2, 'data')
@@ -167,8 +167,8 @@ def apply_filter_forward(data, impulse_response=None, filter_params={},
     return predefined_filter(data)
 
 
-def apply_filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
-                         predefined_filter=None):
+def filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
+                   predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
     Parameters
