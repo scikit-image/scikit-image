@@ -39,8 +39,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     # add precomputed footprint decomposition data
     config.add_data_files('ball_decompositions.npy',
-                          'disk_decompositions.npy'),
-
+                          'disk_decompositions.npy')
     return config
 
 

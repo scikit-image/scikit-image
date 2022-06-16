@@ -448,7 +448,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.

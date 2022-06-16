@@ -86,9 +86,13 @@ class TestCanny(unittest.TestCase):
              [False, False, False, False, False, False]])
 
         result = feature.canny(image, low_threshold=0.6, high_threshold=0.8,
-                               use_quantiles=True, mode='nearest')
+                               use_quantiles=True)
 
         assert_equal(result, correct_output)
+
+    def test_img_all_ones(self):
+        image = np.ones((10, 10))
+        assert np.all(feature.canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
         image = img_as_float(data.camera()[::50, ::50])

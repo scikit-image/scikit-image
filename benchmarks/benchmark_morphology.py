@@ -168,3 +168,55 @@ class GrayMorphology3D(BinaryMorphology3D):
         self, shape, footprint, radius, *args
     ):
         morphology.erosion(self.image, self.footprint)
+
+
+class GrayReconstruction(object):
+
+    # skip rectangle as roughly equivalent to square
+    param_names = ["shape", "dtype"]
+    params = [
+        ((10, 10), (64, 64), (1200, 1200), (96, 96, 96)),
+        (np.uint8, np.float32, np.float64),
+    ]
+
+    def setup(self, shape, dtype):
+        rng = np.random.default_rng(123)
+        # make an image that is mostly True, with a few isolated False areas
+        rvals = rng.integers(1, 255, size=shape).astype(dtype=dtype)
+
+        roi1 = tuple(slice(s // 4, s // 2) for s in rvals.shape)
+        roi2 = tuple(slice(s // 2 + 1, (3 * s) // 4) for s in rvals.shape)
+        seed = np.full(rvals.shape, 1, dtype=dtype)
+        seed[roi1] = rvals[roi1]
+        seed[roi2] = rvals[roi2]
+
+        # create a mask with a couple of square regions set to seed maximum
+        mask = np.full(seed.shape, 1, dtype=dtype)
+        mask[roi1] = 255
+        mask[roi2] = 255
+
+        self.seed = seed
+        self.mask = mask
+
+    def time_reconstruction(self, shape, dtype):
+        morphology.reconstruction(self.seed, self.mask)
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        Peakmem benchmarks measure the maximum amount of RAM used by a
+        function. However, this maximum also includes the memory used
+        during the setup routine (as of asv 0.2.1; see [1]_).
+        Measuring an empty peakmem function might allow us to disambiguate
+        between the memory used by setup and the memory used by target (see
+        other ``peakmem_`` functions below).
+
+        References
+        ----------
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory  # noqa
+        """
+        pass
+
+    def peakmem_reconstruction(self, shape, dtype):
+        morphology.reconstruction(self.seed, self.mask)
+
