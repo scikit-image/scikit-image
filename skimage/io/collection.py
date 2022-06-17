@@ -107,6 +107,14 @@ class ImageCollection(object):
     ----------------
     load_func : callable
         ``imread`` by default. See notes below.
+    index_per_frame : bool
+        If True (default), indices in the `ImageCollection` refer to
+        individual image frames for file types that store multiple image
+        frames per file (such as TIFF or GIF). Setting `index_per_frame`
+        to False makes `ImageCollection` assume that each index references
+        a single object per file name (which by default will depend on the
+        specific `imageio` plugin, but typically be the first image frame).
+        Has no effect when `load_func` is set. See notes below.
 
     Attributes
     ----------
@@ -166,6 +174,33 @@ class ImageCollection(object):
 
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
+    Some image types, for example TIFF or GIF, allow to store multiple
+    image frames per file. In this case, `ImageCollection` by default
+    indexes each frame individually. Thus, if the file `giffile` contains
+    `N` frames, we will have `len(ImageCollection(gifffile))==N`. In general,
+    assuming a list of file names `filename_list` without shell globbing,
+    `ImageCollection` only guarantees
+    `len(ImageCollection(filename_list))>=len(filename_list)`, but not
+    strict equality.
+    The drawback of this approach is that upon initialization, all the
+    files will need to be accessed to determine the number of frames stored
+    in each of them. This latter task is performed by the appropriate
+    `imagio` plugin for each file type.
+
+    Setting `index_per_frame` to False, `ImageCollection` assumes each
+    file to contain a single image object, and indexing is on a per file
+    basis. As a result, the assertion
+    `len(ImageCollection(filename_list))==len(filename_list)` holds True.
+    It is then up to the `imageio` plugin to determine whether by deault
+    the individual `ImageCollection` entries correspond to the first frame
+    of any multi-frame images only, or to a data structure holding all
+    image frames. (This can be customized by providing a `load_func`.)
+    This mode of addressing images has the advantage that initialization
+    is "lazy": the files are only accessed once they are explicitly
+    referenced. Setting `index_per_frame` to False should thus be the
+    preferred mode when working with large image collections on slow
+    storage media.
+
     Examples
     --------
     >>> import imageio
@@ -190,8 +225,13 @@ class ImageCollection(object):
     >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
     >>> len(image_col)
     24
+    >>> len(io.ImageCollection(filename))
+    24
+    >>> len(io.ImageCollection(filename, index_per_frame=False))
+    1
     """
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
+    def __init__(self, load_pattern, conserve_memory=True,
+                 index_per_frame=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
         self._files = []
@@ -209,20 +249,21 @@ class ImageCollection(object):
         else:
             raise TypeError('Invalid pattern as input.')
 
+        self._numframes = len(self._files)
+        self._frame_index = None
+        self.load_func = load_func
         self.load_func_kwargs = load_func_kwargs
         if load_func is None:
             try:
                 from imageio.v3 import imread as iio_imread
                 self.load_func = iio_imread
-                self._numframes = self._find_images()
+                if index_per_frame:
+                    self._numframes = self._find_images()
             except ModuleNotFoundError:
                 # only needed for older imagio compatibility
                 self.load_func = self._load_func_v2
-                self._numframes = self._find_images_v2()
-        else:
-            self.load_func = load_func
-            self._numframes = len(self._files)
-            self._frame_index = None
+                if index_per_frame:
+                    self._numframes = self._find_images_v2()
 
         if conserve_memory:
             memory_slots = 1
