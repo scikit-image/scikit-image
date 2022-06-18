@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.stats import pearsonr
-from functools import wraps
 from .._shared.utils import check_shape_equality, is_binary_ndarray
 
 __all__ = ['pearson_corr_coeff',
@@ -11,8 +10,8 @@ __all__ = ['pearson_corr_coeff',
 
 
 def pearson_corr_coeff(image0, image1, mask=None):
-    r"""Calculate Pearson's Correlation Coefficient between pixel intensities in
-    channels.
+    r"""Calculate Pearson's Correlation Coefficient between pixel intensities
+    in channels.
 
     Parameters
     ----------
@@ -22,9 +21,8 @@ def pearson_corr_coeff(image0, image1, mask=None):
         Image of channel 2 to be correlated with channel B.
         Must have same dimensions as `image0`.
     mask : (M, N) ndarray of dtype bool, optional
-        Only `image0` and `image1` pixels within this region of interest mask are
-        included in the calculation.
-        Must have same dimensions as `image0`.
+        Only `image0` and `image1` pixels within this region of interest mask
+        are included in the calculation. Must have same dimensions as `image0`.
 
     Returns
     -------
@@ -35,8 +33,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
         Two-tailed p-value.
 
     Notes
-    -------
-
+    -----
     Pearson's Correlation Coefficient (PCC) measures the linear correlation
     between the pixel intensities of the two images. Its value ranges from -1
     for perfect linear anti-correlation and +1 for perfect linear correlation.
@@ -70,9 +67,9 @@ def pearson_corr_coeff(image0, image1, mask=None):
     PCC is sensitive to these measures [3]_ [4]_.
 
     References
-    -------
-    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
-    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html
+    ----------
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html  # noqa
+    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html  # noqa
     .. [3] Dunn, K. W., Kamocka, M. M., & McDonald, J. H. (2011). A practical
            guide to evaluating colocalization in biological microscopy.
            American journal of physiology. Cell physiology, 300(4), C723–C742.
@@ -119,7 +116,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
         Manders' colocalization coefficient.
 
     Notes
-    -------
+    -----
     Manders' Colocalization Coefficient (MCC) is the fraction of total
     intensity of a certain channel (channel A) that is within the segmented
     region of a second channel (channel B) [1]_. It ranges from 0 for no
@@ -202,7 +199,7 @@ def manders_overlap_coeff(image0, image1, mask=None):
         images.
 
     Notes
-    -------
+    -----
     Manders' Overlap Coefficient (MOC) is given by the equation [1]_:
 
     .. math::
@@ -302,4 +299,4 @@ def intersection_coeff(image0_mask, image1_mask, mask=None):
     if nonzero_image0 == 0:
         return 0
     nonzero_joint = np.count_nonzero(np.logical_and(image0_mask, image1_mask))
-    return  nonzero_joint / nonzero_image0
+    return nonzero_joint / nonzero_image0
