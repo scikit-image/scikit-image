@@ -29,8 +29,8 @@ def pearson_corr_coeff(image0, image1, mask=None):
     Returns
     -------
     pcc : float
-        Pearson's correlation coefficient of the pixel intensities between the
-        two images, within the mask if provided.
+        Pearson's correlation coefficient of the pixel intensities between
+        the two images, within the mask if provided.
     p-value : float
         Two-tailed p-value.
 
@@ -162,7 +162,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
 
     """
     image0 = np.asarray(image0)
-    image1_mask = is_binary_ndarray(image1_mask)
+    image1_mask = is_binary_ndarray(image1_mask, "image1_mask")
     if mask is not None:
         mask = is_binary_ndarray(mask)
         check_shape_equality(image0, image1_mask, mask)
@@ -193,7 +193,7 @@ def manders_overlap_coeff(image0, image1, mask=None):
     mask : (M, N) ndarray of dtype bool, optional
         Only `image0` and `image1` pixel values within this region of interest
         mask are included in the calculation.
-        Must have same dimensions as `image0`.
+        Must have ♣same dimensions as `image0`.
 
     Returns
     -------
@@ -288,8 +288,8 @@ def intersection_coeff(image0_mask, image1_mask, mask=None):
         Fraction of `image0_mask` that overlaps with `image1_mask`.
 
     """
-    image0_mask = is_binary_ndarray(image0_mask)
-    image1_mask = is_binary_ndarray(image1_mask)
+    image0_mask = is_binary_ndarray(image0_mask, "image0_mask")
+    image1_mask = is_binary_ndarray(image1_mask, "image1_mask")
     if mask is not None:
         mask = is_binary_ndarray(mask)
         check_shape_equality(image0_mask, image1_mask, mask)
