@@ -341,13 +341,13 @@ class TestPeakLocalMax():
                                        threshold_abs=-1,
                                        exclude_border=False)
         result = np.zeros_like(image, dtype=bool)
-        result[tuple(peak_idx.T)] = 1
+        result[tuple(peak_idx.T)] = True
         assert np.all(result)
         peak_idx = peak.peak_local_max(image, footprint=footprint,
                                        threshold_abs=-1,
                                        exclude_border=False)
         result = np.zeros_like(image, dtype=bool)
-        result[tuple(peak_idx.T)] = 1
+        result[tuple(peak_idx.T)] = True
         assert np.all(result)
 
     def test_3D(self):
