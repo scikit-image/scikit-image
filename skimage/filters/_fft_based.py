@@ -75,7 +75,7 @@ def butterworth(
         Input image.
     cutoff_frequency_ratio : float, optional
         Determines the position of the cut-off relative to the shape of the
-        FFT. This should be in the range [0, 0.5].
+        FFT. Receives a value between [0, 0.5].
     high_pass : bool, optional
         Whether to perform a high pass filter. If False, a low pass filter is
         performed.
