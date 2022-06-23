@@ -4,9 +4,9 @@ Colocalization metrics
 ===========
 
 In this example, we demonstrate the use of different metrics to assess the
-colocalisation of two different image channels.
+colocalization of two different image channels.
 
-Colocalisation can be split into two different concepts:
+Colocalization can be split into two different concepts:
 1. Co-occurence: what proportion of a substance is localised to a particular area
 2. Correlation: what is the relationship in intensity between two substances
 
@@ -21,14 +21,16 @@ Colocalisation can be split into two different concepts:
 
 # We begin by segmenting the nucleus of a sample image as described in another
 # `example <https://scikit-image.org/docs/stable/auto_examples/applications/plot_fluorescence_nuclear_envelope.html#sphx-glr-auto-examples-applications-plot-fluorescence-nuclear-envelope-py>`_
-#  and assume that whatever is not in the nucleus is in the cytoplasm.
-#  The protein, "Protein A", will be simulated as blobs and segmented.
+# and assume that whatever is not in the nucleus is in the cytoplasm.
+# The protein, "Protein A", will be simulated as blobs and segmented.
 
 import matplotlib.pyplot as plt
+import numpy as np
+import random
 from skimage import data, measure, filters, segmentation
 from scipy import ndimage as ndi
 from matplotlib.colors import LinearSegmentedColormap
-import random
+
 random.seed(36)
 
 # segment nucleus
@@ -81,7 +83,7 @@ for a in ax.ravel():
 measure.intersection_coeff(proteinA_seg, nucleus_seg)
 
 #####################################################################
-# **Mander's Colocalisation Coefficient (MCC)
+# **Mander's Colocalization Coefficient (MCC)
 # The overlap coefficient assumes that the area of protein segmentation
 # corresponds to the concentration of that protein - with larger areas
 # indicating more protein. As the resolution of images are usually too small to
@@ -89,7 +91,7 @@ measure.intersection_coeff(proteinA_seg, nucleus_seg)
 # the intensity of that pixel brighter. So to better capture the the protein
 # concentration, we may choose to determine what proportion of the *intensity*
 # of the protein channel is inside the nucleus. This metric is known as Manders'
-# Colocalisation Coefficient.
+# Colocalization Coefficient.
 #
 # In this image, while there are a lot of Protein A spots within the nucleus
 # they are dim compared to some of the spots outside the nucleus, so the MCC is
@@ -102,9 +104,9 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 # compare the MCC value of the original image with that of the randomly
 # scrambled image. Information about this method is given in [1]_.
 
-# .. [1] J. S. Aaron, A. B. Taylor and T.-L. Chew, Image
-# co-localization – co-occurrence versus correlation. J Cell Sci 1 February 2018
-# 131 (3): jcs211847. doi: https://doi.org/10.1242/jcs.211847
+# .. [1] J. S. Aaron, A. B. Taylor and T.-L. Chew, Image co-localization –
+#        co-occurrence versus correlation. J Cell Sci 1 February 2018
+#        131 (3): jcs211847. doi: https://doi.org/10.1242/jcs.211847
 
 #####################################################################
 # Correlation: association of two proteins
