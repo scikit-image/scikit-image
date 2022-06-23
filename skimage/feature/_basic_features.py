@@ -57,10 +57,10 @@ def _mutiscale_basic_features_singlechannel(
         at different scales are added to the feature set.
     sigma_min : float, optional
         Smallest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.
@@ -134,10 +134,10 @@ def multiscale_basic_features(
         at different scales are added to the feature set.
     sigma_min : float, optional
         Smallest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
-        neighbourhoods before extracting features.
+        neighborhoods before extracting features.
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.

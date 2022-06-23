@@ -62,6 +62,7 @@ class TestMatchHistogram:
         reference = np.moveaxis(self.template_rgb, -1, channel_axis)
         matched = exposure.match_histograms(image, reference,
                                             channel_axis=channel_axis)
+        assert matched.dtype == image.dtype
         matched = np.moveaxis(matched, channel_axis, -1)
         reference = np.moveaxis(reference, channel_axis, -1)
         matched_pdf = self._calculate_image_empirical_pdf(matched)
@@ -113,3 +114,13 @@ class TestMatchHistogram:
             channels_pdf.append((channel_values, channel_quantiles))
 
         return np.asarray(channels_pdf, dtype=object)
+
+    def test_match_histograms_consistency(self):
+        """ensure equivalent results for float and integer-based code paths"""
+        image_u8 = self.image_rgb
+        reference_u8 = self.template_rgb
+        image_f64 = self.image_rgb.astype(np.float64)
+        reference_f64 = self.template_rgb.astype(np.float64, copy=False)
+        matched_u8 = exposure.match_histograms(image_u8, reference_u8)
+        matched_f64 = exposure.match_histograms(image_f64, reference_f64)
+        assert_array_almost_equal(matched_u8.astype(np.float64), matched_f64)

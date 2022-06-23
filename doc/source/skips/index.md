@@ -13,6 +13,7 @@ maxdepth: 1
 1-governance
 2-values
 3-transition-to-v1
+4-transition-to-v2
 ```
 
 ```{toctree}

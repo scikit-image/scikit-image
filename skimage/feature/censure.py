@@ -29,7 +29,7 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
 def _filter_image(image, min_scale, max_scale, mode):
 
     response = np.zeros((image.shape[0], image.shape[1],
-                         max_scale - min_scale + 1), dtype=np.double)
+                         max_scale - min_scale + 1), dtype=np.float64)
 
     if mode == 'dob':
 
@@ -230,7 +230,7 @@ class CENSURE(FeatureDetector):
 
         # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on
         # the filter_response to suppress points that are neither minima or
-        # maxima in 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray
+        # maxima in 3 x 3 x 3 neighborhood. We obtain a boolean ndarray
         # `feature_mask` containing all the minimas and maximas in
         # `filter_response` as True.
         # (3) Then we suppress all the points in the `feature_mask` for which

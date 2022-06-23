@@ -1,7 +1,7 @@
-numpy>=1.17.3
-scipy>=1.4.1
-networkx>=2.2
-pillow>=6.1.0,!=7.1.0,!=7.1.1,!=8.3.0
+numpy>=1.19
+scipy>=1.5
+networkx>=2.5
+pillow>=9.0.1
 imageio>=2.4.1
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
