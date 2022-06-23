@@ -107,7 +107,8 @@ def _check_sigmas(sigmas):
 
 
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
-                                mode='constant', cval=0):
+                                mode='constant', cval=0,
+                                use_gaussian_derivatives=False):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -129,6 +130,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    use_gaussian_derivatives : boolean, optional
+        Indicates whether the Hessian is computed by convolving with Gaussian
+        derivatives, or by a simple finite-difference operation.
 
     Returns
     -------
@@ -145,11 +149,14 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     image = image.astype(float_dtype, copy=False)
 
     # Make nD hessian
-    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
-                                      mode=mode, cval=cval)
-
-    # Correct for scale
-    hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
+    hessian_matrix_kwargs = dict(
+        sigma=sigma, order='rc', mode=mode, cval=cval,
+        use_gaussian_derivatives=use_gaussian_derivatives
+    )
+    hessian_elements = hessian_matrix(image, **hessian_matrix_kwargs)
+    if not use_gaussian_derivatives:
+        # Kept to preserve legacy behavior
+        hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     # Compute Hessian eigenvalues
     hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
@@ -168,8 +175,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     return hessian_eigenvalues
 
 
-def meijering(image, sigmas=range(1, 10, 2), alpha=None,
-              black_ridges=True, mode='reflect', cval=0):
+def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
+              black_ridges=True, mode='reflect', cval=0,
+              use_gaussian_derivatives=True):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -187,8 +195,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter
     alpha : float, optional
-        Frangi correction constant that adjusts the filter's
-        sensitivity to deviation from a plate-like structure.
+        Shaping filter constant, that selects maximally flat elongated
+        features. Optimal value should be -1/3.
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -224,10 +232,6 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     # Get image dimensions
     ndim = image.ndim
 
-    # Set parameters
-    if alpha is None:
-        alpha = 1.0 / ndim
-
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -243,8 +247,10 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
-                                                  mode=mode, cval=cval)
+        eigenvalues = compute_hessian_eigenvalues(
+            image, sigma, sorting='abs', mode=mode, cval=cval,
+            use_gaussian_derivatives=use_gaussian_derivatives
+        )
 
         if ndim > 1:
 
