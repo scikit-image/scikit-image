@@ -89,9 +89,8 @@ def butterworth(
         When True, the square of a Butterworth filter is used. See notes below
         for more details.
     npad : int, optional
-        Pad each edge of image the by `npad` pixels using `numpy.pad`'s
-        ``mode='edge'`` extension. Try increasing `npad` if boundary artifacts
-        are apparent.
+        Pad each edge of the image by `npad` pixels using `numpy.pad`'s
+        ``mode='edge'`` extension.
 
     Returns
     -------
@@ -101,7 +100,7 @@ def butterworth(
     Notes
     -----
     A band-pass filter can be achieved by combining a high-pass and low-pass
-    filter.
+    filter. The user can increase `npad` if boundary artifacts are apparent.
 
     The "Butterworth filter" used in image processing textbooks (e.g. [1]_,
     [2]_) is often the square of the traditional Butterworth filters as
