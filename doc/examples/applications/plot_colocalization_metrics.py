@@ -1,7 +1,7 @@
 """
-===========
+======================
 Colocalization metrics
-===========
+======================
 
 In this example, we demonstrate the use of different metrics to assess the
 colocalization of two different image channels.
@@ -14,7 +14,7 @@ Colocalization can be split into two different concepts:
 
 #####################################################################
 # Co-occurence: subcellular localization
-# ==========================
+# ======================================
 # Imagine that we are trying to determine the subcellular localization of a
 # protein - is it located more in the nucleus or cytoplasm compared to a
 # control?
@@ -43,11 +43,15 @@ nucleus_seg = segmentation.clear_border(fill)
 # protein blobs of varying intensity
 proteinA = np.zeros_like(nucleus, dtype="float64")
 proteinA_seg = np.zeros_like(nucleus, dtype="float64")
-for i in range(10):
-  blobs = data.binary_blobs(180, blob_size_fraction=0.5, volume_fraction=(50/(180**2)), seed=i)
-  blobs_image = filters.gaussian(blobs, sigma=1.5)*random.randint(50,256)
-  proteinA += blobs_image
-  proteinA_seg += blobs
+
+for blob_seed in range(10):
+    blobs = data.binary_blobs(180,
+                              blob_size_fraction=0.5,
+                              volume_fraction=(50/(180**2)),
+                              seed=blob_seed)
+    blobs_image = filters.gaussian(blobs, sigma=1.5)*random.randint(50,256)
+    proteinA += blobs_image
+    proteinA_seg += blobs
 
 # plot data
 fig, ax = plt.subplots(3, 2, figsize=(8, 12), sharey=True)
@@ -110,7 +114,7 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 
 #####################################################################
 # Correlation: association of two proteins
-# ==========================
+# ========================================
 # Now, imagine that we want to know how closely related two proteins are.
 #
 # First, we will generate Protein B and plot intensities of the two proteins in
