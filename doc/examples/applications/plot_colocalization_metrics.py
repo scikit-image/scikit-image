@@ -15,6 +15,7 @@ Colocalization can be split into two different concepts:
 #####################################################################
 # Co-occurence: subcellular localization
 # ======================================
+#
 # Imagine that we are trying to determine the subcellular localization of a
 # protein - is it located more in the nucleus or cytoplasm compared to a
 # control?
@@ -79,7 +80,9 @@ for a in ax.ravel():
     a.set_axis_off()
 
 #####################################################################
-# **Intersection coefficient**
+# Intersection coefficient
+# ========================
+#
 # After segmenting both the nucleus and the protein of interest, we can
 # determine what fraction of the protein A segmentation overlaps with the
 # nucleus segmentation.
@@ -87,7 +90,9 @@ for a in ax.ravel():
 measure.intersection_coeff(proteinA_seg, nucleus_seg)
 
 #####################################################################
-# **Mander's Colocalization Coefficient (MCC)
+# Mander's Colocalization Coefficient (MCC)
+# =========================================
+#
 # The overlap coefficient assumes that the area of protein segmentation
 # corresponds to the concentration of that protein - with larger areas
 # indicating more protein. As the resolution of images are usually too small to
@@ -115,6 +120,7 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 #####################################################################
 # Correlation: association of two proteins
 # ========================================
+#
 # Now, imagine that we want to know how closely related two proteins are.
 #
 # First, we will generate Protein B and plot intensities of the two proteins in
