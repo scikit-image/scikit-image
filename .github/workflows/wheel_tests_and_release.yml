@@ -11,6 +11,9 @@ env:
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
 
 
+permissions:
+  contents: read
+
 jobs:
   build_linux_37_and_above_wheels:
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
@@ -273,6 +276,8 @@ jobs:
           path: ./dist/*.whl
 
   deploy:
+    permissions:
+      contents: write  # for softprops/action-gh-release to create GitHub release
     name: Release
     needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
     if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
