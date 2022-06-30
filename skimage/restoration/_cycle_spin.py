@@ -1,5 +1,6 @@
 from itertools import product
 import numpy as np
+from .._shared import utils
 from .._shared.utils import warn
 
 try:
@@ -46,8 +47,10 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
                      s, t in zip(max_shifts, shift_steps)])
 
 
+@utils.channel_as_last_axis()
+@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
-               multichannel=False, func_kw={}):
+               multichannel=False, func_kw={}, *, channel_axis=None):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
@@ -71,9 +74,17 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         ``None``, the full set of available cores are used.
     multichannel : bool, optional
         Whether to treat the final axis as channels (no cycle shifts are
-        performed over the channels axis).
+        performed over the channels axis). This argument is deprecated: specify
+        `channel_axis` instead.
     func_kw : dict, optional
         Additional keyword arguments to supply to ``func``.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -113,6 +124,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
 
     """
     x = np.asanyarray(x)
+    multichannel = channel_axis is not None
     all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts,
                                   shift_steps)
     all_shifts = list(all_shifts)

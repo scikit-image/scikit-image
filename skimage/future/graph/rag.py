@@ -4,7 +4,9 @@ from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
+
 from ... import measure, segmentation, util, color
+from ..._shared.version_requirements import require
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -358,7 +360,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.nodes[n].update({'labels': [n],
                                'pixel count': 0,
                                'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
+                                                       dtype=np.float64)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
@@ -401,7 +403,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
-        `scipy.ndimage.filters.generate_binary_structure`.
+        `scipy.ndimage.generate_binary_structure`.
 
     Examples
     --------
@@ -446,6 +448,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
+@require("matplotlib", ">=3.3")
 def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.

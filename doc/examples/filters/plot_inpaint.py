@@ -15,9 +15,11 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
         https://en.wikipedia.org/wiki/Inpainting
 .. [2]  Wikipedia. Biharmonic equation
         https://en.wikipedia.org/wiki/Biharmonic_equation
-.. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
-        inpainting by biharmonic functions: numerical aspects",
-        :arXiv:`1707.06567`
+.. [3]  S.B.Damelin and N.S.Hoang. "On Surface Completion and Image
+        Inpainting by Biharmonic Functions: Numerical Aspects",
+        International Journal of Mathematics and Mathematical Sciences,
+        Vol. 2018, Article ID 3950312
+        :DOI:`10.1155/2018/3950312`
 .. [4]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
         Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
         28 (2010), 104-113,
@@ -28,23 +30,39 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
+from skimage.morphology import disk, binary_dilation
 from skimage.restoration import inpaint
 
-image_orig = data.astronaut()[0:200, 0:200]
+image_orig = data.astronaut()
 
-# Create mask with three defect regions: left, middle, right respectively
-mask = np.zeros(image_orig.shape[:-1])
+# Create mask with six block defect regions
+mask = np.zeros(image_orig.shape[:-1], dtype=bool)
 mask[20:60, 0:20] = 1
 mask[160:180, 70:155] = 1
 mask[30:60, 170:195] = 1
+mask[-60:-30, 170:195] = 1
+mask[-180:-160, 70:155] = 1
+mask[-60:-20, 0:20] = 1
 
-# Defect image over the same region in each color channel
-image_defect = image_orig.copy()
-for layer in range(image_defect.shape[-1]):
-    image_defect[np.where(mask)] = 0
+# add a few long, narrow defects
+mask[200:205, -200:] = 1
+mask[150:255, 20:23] = 1
+mask[365:368, 60:130] = 1
 
-image_result = inpaint.inpaint_biharmonic(image_defect, mask,
-                                          multichannel=True)
+# add randomly positioned small point-like defects
+rstate = np.random.default_rng(0)
+for radius in [0, 2, 4]:
+    # larger defects are less common
+    thresh = 3 + 0.25 * radius  # make larger defects less commmon
+    tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
+    if radius > 0:
+        tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+    mask[tmp_mask] = 1
+
+# Apply defect mask to the image over the same region in each color channel
+image_defect = image_orig * ~mask[..., np.newaxis]
+
+image_result = inpaint.inpaint_biharmonic(image_defect, mask, channel_axis=-1)
 
 fig, axes = plt.subplots(ncols=2, nrows=2)
 ax = axes.ravel()

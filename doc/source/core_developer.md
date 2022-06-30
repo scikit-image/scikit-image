@@ -20,7 +20,7 @@ guidelines.
 All Contributors Are Treated The Same
 -------------------------------------
 
-You now have the ability to push changes directly to the master
+You now have the ability to push changes directly to the main
 branch, but should never do so; instead, continue making pull requests
 as before and in accordance with the 
 {doc}`general contributor guide <contribute>`.
@@ -95,7 +95,7 @@ whether to accept the changes.)
 [gh_feedback]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request
 
 Our default merge policy is to squash all PR commits into a single
-commit. Users who wish to bring the latest changes from ``master``
+commit. Users who wish to bring the latest changes from ``main``
 into their branch should be advised to merge, not to rebase.  Even
 when merge conflicts arise, don’t ask for a rebase unless you know
 that a contributor is experienced with git. Instead, rebase the branch
@@ -134,6 +134,13 @@ wait a few days before merging. This waiting time gives others a chance to
 speak up in case they are not fine with the current state of the pull request.
 Another exceptional situation is one where the first approving review happened
 a long time ago and many changes have taken place in the meantime.
+
+When squashing commits GitHub concatenates all commit messages.
+Please edit the resulting message so that it gives a concise, tidy
+overview of changes. For example, you may want to grab the
+description from the PR itself, and delete lines such as "pep8 fix",
+"apply review comments", etc. Please retain all Co-authored-by
+entries.
 
 Closing issues and pull requests
 --------------------------------
@@ -193,12 +200,12 @@ resources such as:
    should read both.)
 -  The scikit-image [tag on StackOverflow][so_tag]
 -  The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
--  Our [mailing list][ml]
+-  Our [developer forum][ml]
 -  Our [chat room](https://skimage.zulipchat.com/)
 
 [numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
-[ml]: https://mail.python.org/mailman3/lists/scikit-image.python.org/
+[ml]: https://discuss.scientific-python.org/c/contributor/skimage
 
 You are not required to monitor all of the social resources.
 
@@ -207,7 +214,7 @@ Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
-<skimage-core@python.org>. As of this writing, there is no hard-and-fast
+<skimage-core@discuss.scientific-python.org>. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have: been
 part of the project for at least six months, contributed
 significant changes of their own, contributed to the discussion and

@@ -140,7 +140,7 @@ for iax, ax in enumerate(axs[:]):
         ax.plot((line * rect_shape)[:, 0] - 1,
                 (line * rect_shape)[:, 1] - 1,
                 (line * rect_shape)[:, 2] - 1,
-                linewidth=1, color='grey')
+                linewidth=1, color='gray')
 
 # Add boxes illustrating the kernels
 ns = np.array(im_orig.shape) // kernel_size - 1
@@ -167,7 +167,7 @@ axs[3].scatter(xs=np.arange(len(sigmoid)),
                c=scalars_to_rgba(sigmoid,
                                  cmap=cmap, vmin=0, vmax=1, alpha=1.)[:, :3])
 
-# Subplot aesthetics (optimized for matplotlib 3.3)
+# Subplot aesthetics
 for iax, ax in enumerate(axs[:]):
 
     # Get rid of panes and axis lines
@@ -210,7 +210,7 @@ plt.subplots_adjust(left=0.05,
 rect_ax = fig.add_axes([0, 0, 1, 1], facecolor='none')
 rect_ax.set_axis_off()
 rect = patches.Rectangle((0.68, 0.01), 0.315, 0.98,
-                         edgecolor='grey', facecolor='none',
+                         edgecolor='gray', facecolor='none',
                          linewidth=2, linestyle='--')
 rect_ax.add_patch(rect)
 

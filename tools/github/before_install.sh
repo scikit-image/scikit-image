@@ -6,8 +6,6 @@ export PIP_DEFAULT_TIMEOUT=60
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
 
-export TEST_ARGS="--doctest-modules --cov=skimage"
-
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
     local retry_max=3
@@ -31,16 +29,7 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-python -m pip install --upgrade pip wheel setuptools
-
-
-# install specific wheels from wheelhouse
-for requirement in matplotlib scipy pillow; do
-    WHEELS="$WHEELS $(grep $requirement requirements/default.txt)"
-done
-# cython is not in the default.txt requirements
-WHEELS="$WHEELS $(grep -i cython requirements/build.txt)"
-python -m pip install $PIP_FLAGS $WHEELS
+python -m pip install --upgrade "pip<22.1" wheel setuptools
 
 # Install build time requirements
 python -m pip install $PIP_FLAGS -r requirements/build.txt
@@ -52,16 +41,10 @@ python -m pip install $PIP_FLAGS -r requirements/default.txt
 python -m pip list
 
 section () {
-    echo -en "travis_fold:start:$1\r"
     tools/header.py $1
 }
 
-section_end () {
-    echo -en "travis_fold:end:$1\r"
-}
-
 export -f section
-export -f section_end
 export -f retry
 
 set +ex

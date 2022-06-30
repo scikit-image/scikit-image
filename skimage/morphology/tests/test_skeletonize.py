@@ -1,14 +1,15 @@
 import numpy as np
-from skimage.morphology import skeletonize, medial_axis, thin
+import pytest
+from numpy.testing import assert_array_equal
+from scipy.ndimage import correlate
+
+from skimage import draw
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
+from skimage.io import imread
+from skimage.morphology import medial_axis, skeletonize, thin
 from skimage.morphology._skeletonize import (_generate_thin_luts,
                                              G123_LUT, G123P_LUT)
-from skimage import draw
-from scipy.ndimage import correlate
-from skimage.io import imread
-from skimage import data
-
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, fetch
 
 
 class TestSkeletonize():
@@ -19,26 +20,13 @@ class TestSkeletonize():
 
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        with testing.raises(ValueError):
+        with pytest.raises(ValueError):
             skeletonize(im, method='zhang')
-
-    def test_skeletonize_not_binary(self):
-        im = np.zeros((5, 5))
-        im[0, 0] = 1
-        im[0, 1] = 2
-        with testing.raises(ValueError):
-            skeletonize(im)
-
-    def test_skeletonize_unexpected_value(self):
-        im = np.zeros((5, 5))
-        im[0, 0] = 2
-        with testing.raises(ValueError):
-            skeletonize(im)
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
@@ -68,7 +56,7 @@ class TestSkeletonize():
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbours(self):
+    def test_skeletonize_num_neighbors(self):
         # an empty image
         image = np.zeros((300, 300))
 
@@ -145,6 +133,12 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert_array_equal(result, expected)
 
+    def test_max_iter_kwarg_deprecation(self):
+        result1 = thin(self.input_image, max_num_iter=1).astype(np.uint8)
+        with expected_warnings(["`max_iter` is a deprecated argument name"]):
+            result2 = thin(self.input_image, max_iter=1).astype(np.uint8)
+        assert_array_equal(result1, result2)
+
     def test_noiter(self):
         result = thin(self.input_image).astype(np.uint8)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -158,7 +152,7 @@ class TestThin():
 
     def test_baddim(self):
         for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
-            with testing.raises(ValueError):
+            with pytest.raises(ValueError):
                 thin(ii)
 
     def test_lut_generation(self):

@@ -1,3 +1,100 @@
+scikit-image 0.18.3
+===================
+
+We're happy to announce the release of scikit-image v0.18.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+This is a small bugfix release for compatibility with Pooch 1.5 and SciPy 1.7.
+
+Bug fixes
+---------
+- Only import from Pooch's public API. This resolves an import failure with
+  Pooch 1.5.0. (#5531, backport of #5529)
+- Do not use deprecated ``scipy.linalg.pinv2`` in ``random_walker`` when
+  using the multigrid solver. (#5531, backport of #5437)
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+David Manthey
+Gregory Lee
+Mark Harfouche
+
+3 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+Gregory Lee
+Juan Nunez-Iglesias
+Mark Harfouche
+
+
+scikit-image 0.18.2
+===================
+
+We're happy to announce the release of scikit-image v0.18.2!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+This release mostly serves to add wheels for the aarch64 architecture; it also
+fixes a couple of minor bugs.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+Bug fixes
+---------
+- allow either SyntaxError or OSError for truncated JPG (#5315, #5334)
+- Fix sphinx: role already being registered (#5319, #5335)
+
+Development process
+-------------------
+- Update pyproject.toml to ensure pypy compatibility and aarch compatibility (#5326, #5328)
+- Build aarch64 wheels (#5197, #5210)
+- See if latest Ubuntu image fixes QEMU CPU detection issue (#5227, #5233)
+- Rename `master` to `main` throughout (#5243, #5295)
+- Fixup test for INSTALL_FROM_SDIST (#5283, #5296)
+- Remove unecessary manual installation of packages from before_install (#5298)
+- Use manylinux2010 for python 3.9+ (#5303, #5310)
+- add numpy version specification on aarch for cpython 3.8 (#5374, #5375)
+
+7 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- François Boulogne
+- Janakarajan Natarajan
+- Juan Nunez-Iglesias
+- John Lee
+- Mark Harfouche
+- MeeseeksMachine
+- Stéfan van der Walt
+
+
+9 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory R. Lee
+- Juan Nunez-Iglesias
+- Marianne Corvellec
+- Mark Harfouche
+- Matti Picus
+- Matthias Bussonnier
+- Riadh Fezzani
+- Stéfan van der Walt
+
+
+scikit-image 0.18.1
+===================
+
+This is a bug fix release and contains the following two bug fixes:
+
+- Fix indexing error for labelling in large (>2GB) arrays (#5143, #5151)
+- Only use retry_if_failed with recent pooch (#5148)
+
+See below for the new features and API changes in 0.18.0.
+
 Announcement: scikit-image 0.18.0
 =================================
 

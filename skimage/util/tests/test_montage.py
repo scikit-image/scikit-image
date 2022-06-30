@@ -29,7 +29,8 @@ def test_montage_simple_rgb():
             )
     arr_in = arr_in.reshape(n_images, n_rows, n_cols, n_channels)
 
-    arr_out = montage(arr_in, multichannel=True)
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        arr_out = montage(arr_in, multichannel=True)
     arr_ref = np.array(
         [[[ 0,  1],
           [ 2,  3],
@@ -49,6 +50,44 @@ def test_montage_simple_rgb():
           [ 7,  8]]]
         )
     assert_array_equal(arr_out, arr_ref)
+
+
+@testing.parametrize('channel_axis', (0, 1, 2, 3, -1, -2, -3, -4))
+def test_montage_simple_rgb_channel_axes(channel_axis):
+    n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
+    arr_in = np.arange(n_images * n_rows * n_cols * n_channels, dtype=float)
+    arr_in = arr_in.reshape(n_images, n_rows, n_cols, n_channels)
+
+    # place channels at the desired location
+    arr_in = np.moveaxis(arr_in, -1, channel_axis)
+
+    arr_out = montage(arr_in, channel_axis=channel_axis)
+    arr_ref = np.array(
+        [[[ 0,  1],
+          [ 2,  3],
+          [ 8,  9],
+          [10, 11]],
+         [[ 4,  5],
+          [ 6,  7],
+          [12, 13],
+          [14, 15]],
+         [[ 7,  8],
+          [ 7,  8],
+          [ 7,  8],
+          [ 7,  8]],
+         [[ 7,  8],
+          [ 7,  8],
+          [ 7,  8],
+          [ 7,  8]]]
+    )
+    assert_array_equal(arr_out, arr_ref)
+
+
+@testing.parametrize('channel_axis', (4, -5))
+def test_montage_invalid_channel_axes(channel_axis):
+    arr_in = np.arange(16, dtype=float).reshape(2, 2, 2, 2)
+    with testing.raises(np.AxisError):
+        montage(arr_in, channel_axis=channel_axis)
 
 
 def test_montage_fill_gray():
@@ -83,7 +122,7 @@ def test_montage_grid_custom_gray():
 
     arr_out = montage(arr_in, grid_shape=(3, 2))
     arr_ref = np.array(
-	[[  0.,   1.,   4.,   5.],
+        [[  0.,   1.,   4.,   5.],
          [  2.,   3.,   6.,   7.],
          [  8.,   9.,  12.,  13.],
          [ 10.,  11.,  14.,  15.],
@@ -141,8 +180,10 @@ def test_error_ndim():
 
     arr_error = np.random.randn(1, 2, 3)
     with testing.raises(ValueError):
-        montage(arr_error, multichannel=True)
+        with expected_warnings(["'multichannel is a deprecated argument"]):
+            montage(arr_error, multichannel=True)
 
     arr_error = np.random.randn(1, 2, 3, 4, 5)
     with testing.raises(ValueError):
-        montage(arr_error, multichannel=True)
+        with expected_warnings(["'multichannel is a deprecated argument"]):
+            montage(arr_error, multichannel=True)

@@ -1,5 +1,6 @@
 from scipy import ndimage
 from ._ccomp import label_cython as clabel
+from .._shared.utils import deprecate_kwarg
 
 
 def _label_bool(image, background=None, return_num=False, connectivity=None):
@@ -20,8 +21,8 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
             f'be in [1, ..., {image.ndim}]. Got {connectivity}.'
         )
 
-    selem = _resolve_neighborhood(None, connectivity, image.ndim)
-    result = ndimage.label(image, structure=selem)
+    footprint = _resolve_neighborhood(None, connectivity, image.ndim)
+    result = ndimage.label(image, structure=footprint)
 
     if return_num:
         return result
@@ -29,7 +30,10 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
         return result[0]
 
 
-def label(input, background=None, return_num=False, connectivity=None):
+@deprecate_kwarg({'input': 'label_image'},
+                 deprecated_version='0.19',
+                 removed_version='1.0')
+def label(label_image, background=None, return_num=False, connectivity=None):
     r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -47,7 +51,7 @@ def label(input, background=None, return_num=False, connectivity=None):
 
     Parameters
     ----------
-    input : ndarray of dtype int
+    label_image : ndarray of dtype int
         Image to label.
     background : int, optional
         Consider all pixels with this value as background pixels, and label
@@ -113,8 +117,8 @@ def label(input, background=None, return_num=False, connectivity=None):
      [1 1 2]
      [0 0 0]]
     """
-    if input.dtype == bool:
-        return _label_bool(input, background=background,
+    if label_image.dtype == bool:
+        return _label_bool(label_image, background=background,
                            return_num=return_num, connectivity=connectivity)
     else:
-        return clabel(input, background, return_num, connectivity)
+        return clabel(label_image, background, return_num, connectivity)

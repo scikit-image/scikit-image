@@ -40,7 +40,7 @@ plt.show()
 # `mitosis <https://en.wikipedia.org/wiki/Mitosis>`_ (cell division).
 
 #####################################################################
-# Another way of visualizing a greyscale image is contour plotting:
+# Another way of visualizing a grayscale image is contour plotting:
 
 fig, ax = plt.subplots(figsize=(5, 5))
 qcs = ax.contour(image, origin='image')
@@ -130,7 +130,7 @@ plt.show()
 # too low to separate those very bright areas corresponding to dividing nuclei
 # from relatively bright pixels otherwise present in many nuclei. On the other
 # hand, we want a smoother image, removing small spurious objects and,
-# possibly, merging clusters of neighbouring objects (some could correspond to
+# possibly, merging clusters of neighboring objects (some could correspond to
 # two nuclei emerging from one cell division). In a way, the segmentation
 # challenge we are facing with dividing nuclei is the opposite of that with
 # (touching) cells.

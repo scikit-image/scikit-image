@@ -6,18 +6,18 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
+from packaging import version
 
 import numpy as np
 from PIL import Image, __version__ as pil_version
 
-# Check CVE-2020-10379
-from distutils.version import LooseVersion
-if LooseVersion(pil_version) < LooseVersion('7.1.0'):
+# Check CVE-2021-27921 and others
+if version.parse(pil_version) < version.parse('8.1.2'):
     from warnings import warn
-    warn('Your installed pillow version is < 7.1.0. '
-         'Several security issues (CVE-2020-11538, '
-         'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
-         'have been fixed in pillow 7.1.0 or higher. '
+    warn('Your installed pillow version is < 8.1.2. '
+         'Several security issues (CVE-2021-27921, '
+         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
+         'and more) have been fixed in pillow 8.1.2 or higher. '
          'We recommend to upgrade this library.',
          stacklevel=2)
 
@@ -157,7 +157,24 @@ class ImageCollection(object):
       x = ic[0]  # calls vidread_step(video_file, step=3)
       x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
-    Another use of ``load_func`` would be to convert all images to ``uint8``::
+    Alternatively, if `load_func` is provided and `load_pattern` is a
+    sequence, an `ImageCollection` of corresponding length will be created,
+    and the individual images will be loaded by calling `load_func` with the
+    matching element of the `load_pattern` as its first argument. In this
+    case, the elements of the sequence do not need to be names of existing
+    files (or strings at all). For example, to create an `ImageCollection`
+    containing 500 images from a video::
+
+      class vidread_random:
+          def __init__ (self, f):
+              self.vid = imageio.get_reader(f)
+          def __call__ (self, frameno):
+              return self.vid.get_data(frameno)
+      ic = ImageCollection(range(500), load_func=vidread_random('movie.mp4'))
+
+      ic  # is an ImageCollection object of length 500
+
+    Another use of `load_func` would be to convert all images to ``uint8``::
 
       def imread_convert(f):
           return imread(f).astype(np.uint8)
@@ -166,6 +183,7 @@ class ImageCollection(object):
 
     Examples
     --------
+    >>> import imageio
     >>> import skimage.io as io
     >>> from skimage import data_dir
 
@@ -175,7 +193,18 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    >>> image_col = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+
+    >>> class multiread:
+    ...     def __init__ (self, f):
+    ...         self.vid = imageio.get_reader(f)
+    ...     def __call__ (self, frameno):
+    ...         return self.vid.get_data(frameno)
+    ...
+    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
+    >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> len(image_col)
+    24
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
@@ -186,12 +215,14 @@ class ImageCollection(object):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
+        elif isinstance(load_pattern, Sequence) and load_func is not None:
+            self._files = list(load_pattern)
         else:
             raise TypeError('Invalid pattern as input.')
-
-        self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
             from ._io import imread
@@ -403,7 +434,7 @@ def imread_collection_wrapper(imread):
 
 class MultiImage(ImageCollection):
 
-    """A class containing all frames from multi-frame images.
+    """A class containing all frames from multi-frame TIFF images.
 
     Parameters
     ----------
@@ -411,35 +442,41 @@ class MultiImage(ImageCollection):
         Pattern glob or filenames to load. The path can be absolute or
         relative.
     conserve_memory : bool, optional
-        Whether to conserve memory by only caching a single frame. Default is
-        True.
-
-    Other parameters
-    ----------------
-    load_func : callable
-        ``imread`` by default.  See notes below.
+        Whether to conserve memory by only caching the frames of a single
+        image. Default is True.
 
     Notes
     -----
-    If ``conserve_memory=True`` the memory footprint can be reduced, however
-    the performance can be affected because frames have to be read from file
-    more often.
+    The object that is returned can be used as a list of image-data objects,
+    where each entry in the list represents one image. In this regard it is
+    very similar to `ImageCollection`, but the two differ in the treatment
+    of multi-frame images.
 
-    The last accessed frame is cached, all other frames will have to be read
-    from file.
+    For a TIFF image containing N frames of size WxH, `MultiImage` stores
+    all frames of that image as a single entry of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
 
-    The current implementation makes use of ``tifffile`` for Tiff files and
-    PIL otherwise.
+    For an animated GIF image, `MultiImage` in the current implementation
+    will only read one frame, while `ImageCollection` by default will read
+    all of them.
 
     Examples
     --------
     >>> from skimage import data_dir
 
-    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
-    >>> len(img) # doctest: +SKIP
+    >>> multipage_tiff = data_dir + '/multipage.tif'
+    >>> img = MultiImage(multipage_tiff)
+    >>> len(img) # img contains one file
+    1
+    >>> img[0].shape # this image contains two frames of size (15, 10)
+    (2, 15, 10)
+
+    >>> ic = ImageCollection(multipage_tiff)
+    >>> len(ic) # ic contains two images
     2
-    >>> for frame in img: # doctest: +SKIP
-    ...     print(frame.shape) # doctest: +SKIP
+    >>> for frame in ic:
+    ...     print (frame.shape)
+    ...
     (15, 10)
     (15, 10)
 

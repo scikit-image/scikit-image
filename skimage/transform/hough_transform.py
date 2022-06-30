@@ -1,9 +1,8 @@
 import numpy as np
 from scipy.spatial import cKDTree
-from ._hough_transform import (_hough_circle,
-                               _hough_ellipse,
-                               _hough_line,
-                               _probabilistic_hough_line as _prob_hough_line)
+
+from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
+from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -63,7 +62,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                                min_ydistance=min_distance,
                                threshold=threshold,
                                num_peaks=num_peaks)
-    if a.any():
+    if a.size > 0:
         return (h, angles[a], dists[d])
     else:
         return (h, np.array([]), np.array([]))
@@ -174,7 +173,8 @@ def hough_line(image, theta=None):
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
-        Defaults to a vector of 180 angles evenly spaced from -pi/2 to pi/2.
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
 
     Returns
     -------
@@ -204,7 +204,8 @@ def hough_line(image, theta=None):
     >>> img[35:45, 35:50] = 1
     >>> for i in range(90):
     ...     img[i, i] = 1
-    >>> img += np.random.random(img.shape) > 0.95
+    >>> rng = np.random.default_rng()
+    >>> img += rng.random(img.shape) > 0.95
 
     Apply the Hough transform:
 
@@ -218,7 +219,7 @@ def hough_line(image, theta=None):
 
     if theta is None:
         # These values are approximations of pi/2
-        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
     return _hough_line(image, theta=theta)
 
@@ -241,7 +242,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
-        If None, use a range from -pi/2 to pi/2.
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
     seed : int, optional
         Seed to initialize the random number generator.
 
@@ -262,10 +264,11 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         raise ValueError('The input image `image` must be 2D.')
 
     if theta is None:
-        theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
-    return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta, seed=seed)
+    return _prob_hough_line(image, threshold=threshold,
+                            line_length=line_length, line_gap=line_gap,
+                            theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,

@@ -3,9 +3,9 @@
 GLCM Texture Features
 =====================
 
-This example illustrates texture classification using grey level
+This example illustrates texture classification using gray level
 co-occurrence matrices (GLCMs) [1]_. A GLCM is a histogram of co-occurring
-greyscale values at a given offset over an image.
+grayscale values at a given offset over an image.
 
 In this example, samples of two different textures are extracted from
 an image: grassy areas and sky areas. For each patch, a GLCM with
@@ -17,16 +17,21 @@ In a typical classification problem, the final step (not included in
 this example) would be to train a classifier, such as logistic
 regression, to label image patches from new images.
 
+.. versionchanged:: 0.19
+           `greymatrix` was renamed to `graymatrix` in 0.19.
+.. versionchanged:: 0.19
+           `greycoprops` was renamed to `graycoprops` in 0.19.
+
 References
 ----------
 .. [1] Haralick, RM.; Shanmugam, K.,
        "Textural features for image classification"
        IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
-       :DOI:`10.1109/TSMC.1973.4309314` 
+       :DOI:`10.1109/TSMC.1973.4309314`
 """
 import matplotlib.pyplot as plt
 
-from skimage.feature import greycomatrix, greycoprops
+from skimage.feature import graycomatrix, graycoprops
 from skimage import data
 
 
@@ -53,10 +58,10 @@ for loc in sky_locations:
 xs = []
 ys = []
 for patch in (grass_patches + sky_patches):
-    glcm = greycomatrix(patch, distances=[5], angles=[0], levels=256,
+    glcm = graycomatrix(patch, distances=[5], angles=[0], levels=256,
                         symmetric=True, normed=True)
-    xs.append(greycoprops(glcm, 'dissimilarity')[0, 0])
-    ys.append(greycoprops(glcm, 'correlation')[0, 0])
+    xs.append(graycoprops(glcm, 'dissimilarity')[0, 0])
+    ys.append(graycoprops(glcm, 'correlation')[0, 0])
 
 # create the figure
 fig = plt.figure(figsize=(8, 8))

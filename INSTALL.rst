@@ -220,8 +220,8 @@ Additional help
 
 If you still have questions, reach out through
 
-- our `forum on image.sc <https://forum.image.sc/tags/scikit-image>`_
-- our `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_
+- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 - our `chat channel <https://skimage.zulipchat.com/>`_
 - `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
 
@@ -241,7 +241,7 @@ We also make a few more assumptions about your system:
 - You have a C compiler set up.
 - You have a C++ compiler set up.
 - You are running a version of Python compatible with our system as listed
-  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
+  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/main/setup.py#L212>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
   You have set up the `upstream` remote to point to our repository and `origin`
   to point to your fork.
@@ -256,7 +256,7 @@ This directory contains the following files:
     ├── azure-pipelines.yml
     ├── benchmarks
     ├── CODE_OF_CONDUCT.md
-    ├── CONTRIBUTING.txt
+    ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
     ├── doc
     ├── INSTALL.rst
@@ -272,7 +272,6 @@ This directory contains the following files:
     ├── skimage
     ├── TODO.txt
     ├── tools
-    └── viewer_examples
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
@@ -298,6 +297,8 @@ When using ``venv``, you may find the following bash commands useful:
   python -m venv skimage-dev
   # Activate it. On Linux and MacOS:
   source skimage-dev/bin/activate
+  # Make sure that pip is up to date
+  pip install --upgrade pip
   # Install all development and runtime dependencies of scikit-image
   pip install -r <(cat requirements/*.txt)
   # Build and install scikit-image from source
@@ -340,8 +341,8 @@ that have changed. Do so with the following commands:
 .. code-block:: sh
 
     # Grab the latest source
-    git checkout master
-    git pull upstream master
+    git checkout main
+    git pull upstream main
     # Update the installation
     pip install -e . -vv
 
@@ -379,13 +380,13 @@ Or tests from a specific file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py
+    pytest skimage/morphology/tests/test_gray.py
 
 Or a single test within that file:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
 
 Use ``--doctest-modules`` to run doctests. For example, run all tests and all
 doctests using:
@@ -429,7 +430,7 @@ either download and install Windows compilers from `here`_  or use
 A run-through of the compilation process for Windows is included in
 our `setup of Azure Pipelines`_ (a continuous integration service).
 
-.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
+.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
@@ -475,9 +476,6 @@ functionality is only available with the following installed:
 
 * `Astropy <https://www.astropy.org>`__
     Provides FITS I/O capability.
-
-* `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
-    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <https://pyamg.org/>`__
     The ``pyamg`` module is used for the fast ``cg_mg`` mode of random

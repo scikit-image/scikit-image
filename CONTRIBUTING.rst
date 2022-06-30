@@ -1,0 +1,612 @@
+.. _howto_contribute:
+
+How to contribute to scikit-image
+=================================
+
+Developing Open Source is great fun! Join us on the `scikit-image
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
+which of the following challenges you'd like to solve.
+
+* Mentoring is available for those new to scientific programming in Python.
+* If you're looking for something to implement or to fix, you can browse the
+  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
+* The technical detail of the `development process`_ is summed up below.
+  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
+
+.. contents::
+   :local:
+
+Development process
+-------------------
+
+Here's the long and short of it:
+
+1. If you are a first-time contributor:
+
+   * Go to `https://github.com/scikit-image/scikit-image
+     <https://github.com/scikit-image/scikit-image>`_ and click the
+     "fork" button to create your own copy of the project.
+
+   * Clone the project to your local computer::
+
+      git clone https://github.com/your-username/scikit-image.git
+
+   * Change the directory::
+
+      cd scikit-image
+
+   * Add the upstream repository::
+
+      git remote add upstream https://github.com/scikit-image/scikit-image.git
+
+   * Now, you have remote repositories named:
+
+     - ``upstream``, which refers to the ``scikit-image`` repository
+     - ``origin``, which refers to your personal fork
+
+.. note::
+
+    Although our code is hosted on `github
+    <https://github.com/scikit-image/>`_, our dataset is stored on `gitlab
+    <https://gitlab.com/scikit-image/data>`_ and fetched with `pooch
+    <https://github.com/fatiando/pooch>`_. New data must be submitted on
+    gitlab. Once merged, the data registry ``skimage/data/_registry.py``
+    in the main codebase on github must be updated.
+
+2. Develop your contribution:
+
+   * Pull the latest changes from upstream::
+
+      git checkout main
+      git pull upstream main
+
+   * Create a branch for the feature you want to work on. Use a sensible name,
+     such as 'transform-speedups'::
+
+      git checkout -b transform-speedups
+
+   * Commit locally as you progress (with ``git add`` and ``git commit``).
+     Please write `good commit messages
+     <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
+
+3. To submit your contribution:
+
+   * Push your changes back to your fork on GitHub::
+
+      git push origin transform-speedups
+
+   * Enter your GitHub username and password (repeat contributors or advanced
+     users can remove this step by `connecting to GitHub with SSH
+     <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
+
+   * Go to GitHub. The new branch will show up with a green "pull request"
+     button -- click it.
+
+   * If you want, post on the `developer forum
+     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
+     to ask for review.
+
+For a more detailed discussion, read these :doc:`detailed documents
+<gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
+
+4. Review process:
+
+   * Reviewers (the other developers and interested community members) will
+     write inline and/or general comments on your pull request (PR) to help
+     you improve its implementation, documentation, and style.  Every single
+     developer working on the project has their code reviewed, and we've come
+     to see it as a friendly conversation from which we all learn and the
+     overall code quality benefits.  Therefore, please don't let the review
+     discourage you from contributing: its only aim is to improve the quality
+     of the project, not to criticize (we are, after all, very grateful for the
+     time you're donating!).
+
+   * To update your pull request, make your changes on your local repository
+     and commit. As soon as those changes are pushed up (to the same branch as
+     before) the pull request will update automatically.
+
+   * Continuous integration (CI) services are triggered after each pull request
+     submission to build the package, run unit tests, measure code coverage,
+     and check the coding style (PEP8) of your branch. The tests must pass
+     before your PR can be merged. If CI fails, you can find out why by
+     clicking on the "failed" icon (red cross) and inspecting the build and
+     test logs.
+
+   * A pull request must be approved by two core team members before merging.
+
+5. Document changes
+
+   If your change introduces any API modifications, please update
+   ``doc/source/api_changes.txt``.
+
+   If your change introduces a deprecation, add a reminder to ``TODO.txt``
+   for the team to remove the deprecated functionality in the future.
+
+.. note::
+
+   To reviewers: if it is not obvious from the PR description, add a short
+   explanation of what a branch did to the merge message and, if closing a
+   bug, also add "Closes #123" where 123 is the issue number.
+
+
+Divergence between ``upstream main`` and your feature branch
+------------------------------------------------------------
+
+If GitHub indicates that the branch of your PR can no longer
+be merged automatically, merge the main branch into yours::
+
+   git fetch upstream main
+   git merge upstream/main
+
+If any conflicts occur, they need to be fixed before continuing.  See
+which files are in conflict using::
+
+   git status
+
+Which displays a message like::
+
+   Unmerged paths:
+     (use "git add <file>..." to mark resolution)
+
+     both modified:   file_with_conflict.txt
+
+Inside the conflicted file, you'll find sections like these::
+
+   <<<<<<< HEAD
+   The way the text looks in your branch
+   =======
+   The way the text looks in the main branch
+   >>>>>>> main
+
+Choose one version of the text that should be kept, and delete the
+rest::
+
+   The way the text looks in your branch
+
+Now, add the fixed file::
+
+   git add file_with_conflict.txt
+
+Once you've fixed all merge conflicts, do::
+
+   git commit
+
+.. note::
+
+   Advanced Git users are encouraged to `rebase instead of merge
+   <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   but we squash and merge most PRs either way.
+
+Build environment setup
+-----------------------
+
+Please refer to :ref:`installing-scikit-image` for development installation
+instructions.
+
+Guidelines
+----------
+
+* All code should have tests (see `test coverage`_ below for more details).
+* All code should be documented, to the same
+  `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
+* For new functionality, always add an example to the gallery (see
+  :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
+* No changes are ever merged without review and approval by two core team members.
+  There are two exceptions to this rule. First, pull requests which affect
+  only the documentation require review and approval by only one core team
+  member in most cases. If the maintainer feels the changes are large or
+  likely to be controversial, two reviews should still be encouraged. The
+  second case is that of minor fixes which restore CI to a working state,
+  because these should be merged fairly quickly. Reach out on the
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ if
+  you get no response to your pull request.
+  **Never merge your own pull request.**
+
+Stylistic Guidelines
+--------------------
+
+* Set up your editor to remove trailing whitespace.  Follow `PEP08
+  <https://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+
+* Use numpy data types instead of strings (``np.uint8`` instead of
+  ``"uint8"``).
+
+* Use the following import conventions::
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from scipy import ndimage as ndi
+
+   # only in Cython code
+   cimport numpy as cnp
+   cnp.import_array()
+
+* When documenting array parameters, use ``image : (M, N) ndarray``
+  and then refer to ``M`` and ``N`` in the docstring, if necessary.
+
+* Refer to array dimensions as (plane), row, column, not as x, y, z. See
+  :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
+  in the user guide for more information.
+
+* Functions should support all input image dtypes.  Use utility functions such
+  as ``img_as_float`` to help convert to an appropriate type.  The output
+  format can be whatever is most efficient.  This allows us to string together
+  several functions into a pipeline, e.g.::
+
+   hough(canny(my_image))
+
+* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
+  in C/C++ and Cython code.
+
+* Use relative module imports, i.e. ``from .._shared import xyz`` rather than
+  ``from skimage._shared import xyz``.
+
+* Wrap Cython code in a pure Python function, which defines the API. This
+  improves compatibility with code introspection tools, which are often not
+  aware of Cython code.
+
+* For Cython functions, release the GIL whenever possible, using
+  ``with nogil:``.
+
+
+Testing
+-------
+
+See the testing section of the Installation guide.
+
+Test coverage
+-------------
+
+Tests for a module should ideally cover all code in that module,
+i.e., statement coverage should be at 100%.
+
+To measure the test coverage, install
+`pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
+(using ``pip install pytest-cov``) and then run::
+
+  $ make coverage
+
+This will print a report with one line for each file in `skimage`,
+detailing the test coverage::
+
+  Name                                             Stmts   Exec  Cover   Missing
+  ------------------------------------------------------------------------------
+  skimage/color/colorconv                             77     77   100%
+  skimage/filter/__init__                              1      1   100%
+  ...
+
+
+Building docs
+-------------
+
+To build docs, run ``make`` from the ``doc`` directory. ``make help`` lists
+all targets. For example, to build the HTML documentation, you can run:
+
+.. code:: sh
+
+    make html
+
+Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
+To rebuild a full clean documentation, run:
+
+.. code:: sh
+
+    make clean
+    make html
+
+Requirements
+~~~~~~~~~~~~
+
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`_,
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_,
+and LaTeX are needed to build the documentation.
+
+**Sphinx:**
+
+Sphinx and other python packages needed to build the documentation
+can be installed using: ``scikit-image/requirements/docs.txt`` file.
+
+.. code:: sh
+
+    pip install -r requirements/docs.txt
+
+.. _sphinx_gallery:
+
+**Sphinx-Gallery:**
+
+The above install command includes the installation of
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_, which we use to create
+the :ref:`examples_gallery`.
+Refer to the Sphinx-Gallery documentation for complete instructions on syntax and usage.
+
+If you are contributing an example to the gallery or editing an existing one,
+build the docs (see above) and open a web browser to check how your edits
+render at ``scikit-image/doc/build/html/auto_examples/``: navigate to the file
+you have added or changed.
+
+When adding an example, visit also
+``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
+thumbnail renders on the gallery's homepage. To change the thumbnail image,
+please refer to `this section
+<https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
+of the Sphinx-Gallery docs.
+
+Note that gallery examples should have a maximum figure width of 8 inches.
+
+**LaTeX Ubuntu:**
+
+.. code:: sh
+
+    sudo apt-get install -qq texlive texlive-latex-extra dvipng
+
+**LaTeX Mac:**
+
+Install the full `MacTex <https://www.tug.org/mactex/>`__ installation or
+install the smaller
+`BasicTex <https://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
+and *dvipng* packages:
+
+.. code:: sh
+
+    sudo tlmgr install ucs dvipng
+
+Fixing Warnings
+~~~~~~~~~~~~~~~
+
+-  "citation not found: R###" There is probably an underscore after a
+   reference in the first line of a docstring (e.g. [1]\_). Use this
+   method to find the source file: $ cd doc/build; grep -rin R####
+
+-  "Duplicate citation R###, other instance in..."" There is probably a
+   [2] without a [1] in one of the docstrings
+
+-  Make sure to use pre-sphinxification paths to images (not the
+   \_images directory)
+
+Deprecation cycle
+-----------------
+
+If the behavior of the library has to be changed, a deprecation cycle must be
+followed to warn users.
+
+- a deprecation cycle is *not* necessary when:
+
+    * adding a new function, or
+    * adding a new keyword argument to the *end* of a function signature, or
+    * fixing what was buggy behavior
+
+- a deprecation cycle is necessary for *any breaking API change*, meaning a
+    change where the function, invoked with the same arguments, would return a
+    different result after the change. This includes:
+
+    * changing the order of arguments or keyword arguments, or
+    * adding arguments or keyword arguments to a function, or
+    * changing a function's name or submodule, or
+    * changing the default value of a function's arguments.
+
+Usually, our policy is to put in place a deprecation cycle over two releases.
+
+For the sake of illustration, we consider the modification of a default value in
+a function signature. In version N (therefore, next release will be N+1), we
+have
+
+.. code-block:: python
+
+    def a_function(image, rescale=True):
+        out = do_something(image, rescale=rescale)
+        return out
+
+that has to be changed to
+
+.. code-block:: python
+
+    def a_function(image, rescale=None):
+        if rescale is None:
+            warn('The default value of rescale will change '
+                 'to `False` in version N+3.', stacklevel=2)
+            rescale = True
+        out = do_something(image, rescale=rescale)
+        return out
+
+and in version N+3
+
+.. code-block:: python
+
+    def a_function(image, rescale=False):
+        out = do_something(image, rescale=rescale)
+        return out
+
+Here is the process for a 2-release deprecation cycle:
+
+- In the signature, set default to `None`, and modify the docstring to specify
+  that it's `True`.
+- In the function, _if_ rescale is set to `None`, set to `True` and warn that the
+  default will change to `False` in version N+3.
+- In ``doc/release/release_dev.rst``, under deprecations, add "In
+  `a_function`, the `rescale` argument will default to `False` in N+3."
+- In ``TODO.txt``, create an item in the section related to version N+3 and write
+  "change rescale default to False in a_function".
+
+Note that the 2-release deprecation cycle is not a strict rule and in some
+cases, the developers can agree on a different procedure upon justification
+(like when we can't detect the change, or it involves moving or deleting an
+entire function for example).
+
+Scikit-image uses warnings to highlight changes in its API so that users may
+update their code accordingly. The ``stacklevel`` argument sets the location in
+the callstack where the warnings will point. In most cases, it is appropriate
+to set the ``stacklevel`` to ``2``.  When warnings originate from helper
+routines internal to the scikit-image library, it is may be more appropriate to
+set the ``stacklevel`` to ``3``. For more information, see the documentation of
+the `warn <https://docs.python.org/3/library/warnings.html#warnings.warn>`__
+function in the Python standard library.
+
+To test if your warning is being emitted correctly, try calling the function
+from an IPython console. It should point you to the console input itself
+instead of being emitted by the files in the scikit-image library.
+
+* **Good**: ``ipython:1: UserWarning: ...``
+* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
+
+Bugs
+----
+
+Please `report bugs on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
+
+Benchmarks
+----------
+
+While not mandatory for most pull requests, we ask that performance related
+PRs include a benchmark in order to clearly depict the use-case that is being
+optimized for. A historical view of our snapshots can be found on
+at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
+
+In this section we will review how to setup the benchmarks,
+and three commands ``asv dev``, ``asv run`` and ``asv continuous``.
+
+Prerequisites
+~~~~~~~~~~~~~
+Begin by installing `airspeed velocity <https://asv.readthedocs.io/en/stable/>`_
+in your development environment. Prior to installation, be sure to activate your
+development environment, then if using ``venv`` you may install the requirement with::
+
+  source skimage-dev/bin/activate
+  pip install asv
+
+If you are using conda, then the command::
+
+  conda activate skimage-dev
+  conda install asv
+
+is more appropriate. Once installed, it is useful to run the command::
+
+  asv machine
+
+To let airspeed velocity know more information about your machine.
+
+Writing a benchmark
+~~~~~~~~~~~~~~~~~~~
+To write  benchmark, add a file in the ``benchmarks`` directory which contains a
+a class with one ``setup`` method and at least one method prefixed with ``time_``.
+
+The ``time_`` method should only contain code you wish to benchmark.
+Therefore it is useful to move everything that prepares the benchmark scenario
+into the ``setup`` method. This function is called before calling a ``time_``
+method and its execution time is not factored into the benchmarks.
+
+Take for example the ``TransformSuite`` benchmark:
+
+.. code-block:: python
+
+  import numpy as np
+  from skimage import transform
+
+  class TransformSuite:
+      """Benchmark for transform routines in scikit-image."""
+
+      def setup(self):
+          self.image = np.zeros((2000, 2000))
+          idx = np.arange(500, 1500)
+          self.image[idx[::-1], idx] = 255
+          self.image[idx, idx] = 255
+
+      def time_hough_line(self):
+          result1, result2, result3 = transform.hough_line(self.image)
+
+Here, the creation of the image is completed in the ``setup`` method, and not
+included in the reported time of the benchmark.
+
+It is also possible to benchmark features such as peak memory usage. To learn
+more about the features of `asv`, please refer to the official
+`airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+
+Also, the benchmark files need to be importable when benchmarking old versions
+of scikit-image. So if anything from scikit-image is imported at the top level,
+it should be done as:
+
+.. code-block:: python
+
+    try:
+        from skimage import metrics
+    except ImportError:
+        pass
+
+The benchmarks themselves don't need any guarding against missing features,
+only the top-level imports.
+
+To allow tests of newer functions to be marked as "n/a" (not available)
+rather than "failed" for older versions, the setup method itself can raise a
+NotImplemented error.  See the following example for the registration module:
+
+.. code-block:: python
+
+    try:
+        from skimage import registration
+    except ImportError:
+        raise NotImplementedError("registration module not available")
+
+Testing the benchmarks locally
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Prior to running the true benchmark, it is often worthwhile to test that the
+code is free of typos. To do so, you may use the command::
+
+  asv dev -b TransformSuite
+
+Where the ``TransformSuite`` above will be run once in your current environment
+to test that everything is in order.
+
+Running your benchmark
+~~~~~~~~~~~~~~~~~~~~~~
+
+The command above is fast, but doesn't test the performance of the code
+adequately. To do that you may want to run the benchmark in your current
+environment to see the performance of your change as you are developing new
+features. The command ``asv run -E existing`` will specify that you wish to run
+the benchmark in your existing environment. This will save a significant amount
+of time since building scikit-image can be a time consuming task::
+
+  asv run -E existing -b TransformSuite
+
+Comparing results to main
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Often, the goal of a PR is to compare the results of the modifications in terms
+speed to a snapshot of the code that is in the main branch of the
+``scikit-image`` repository. The command ``asv continuous`` is of help here::
+
+  asv continuous main -b TransformSuite
+
+This call will build out the environments specified in the ``asv.conf.json``
+file and compare the performance of the benchmark between your current commit
+and the code in the main branch.
+
+The output may look something like::
+
+  $ asv continuous main -b TransformSuite
+  · Creating environments
+  · Discovering benchmarks
+  ·· Uninstalling from conda-py3.7-cython-numpy1.15-scipy
+  ·· Installing 544c0fe3 <benchmark_docs> into conda-py3.7-cython-numpy1.15-scipy.
+  · Running 4 total benchmarks (2 commits * 2 environments * 1 benchmarks)
+  [  0.00%] · For scikit-image commit 37c764cb <benchmark_docs~1> (round 1/2):
+  [...]
+  [100.00%] ··· ...ansform.TransformSuite.time_hough_line           33.2±2ms
+
+  BENCHMARKS NOT SIGNIFICANTLY CHANGED.
+
+In this case, the differences between HEAD and main are not significant
+enough for airspeed velocity to report.
+
+It is also possible to get a comparison of results for two specific revisions
+for which benchmark results have previously been run via the `asv compare`
+command::
+
+    asv compare v0.14.5 v0.17.2
+
+Finally, one can also run ASV benchmarks only for a specific commit hash or
+release tag by appending ``^!`` to the commit or tag name. For example to run
+the skimage.filter module benchmarks on release v0.17.2::
+
+    asv run -b Filter v0.17.2^!
+    

@@ -18,7 +18,7 @@ Get the local copy of the code
 
 From the command line::
 
-   git clone git://github.com/scikit-image/scikit-image.git
+   git clone https://github.com/scikit-image/scikit-image.git
 
 You now have a copy of the code tree in the new ``scikit-image`` directory.
 

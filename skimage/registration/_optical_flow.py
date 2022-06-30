@@ -5,10 +5,13 @@
 
 from functools import partial
 from itertools import combinations_with_replacement
+
 import numpy as np
 from scipy import ndimage as ndi
-from skimage.transform import warp
 
+from .._shared.filters import gaussian as gaussian_filter
+from .._shared.utils import _supported_float_type
+from ..transform import warp
 from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 
@@ -76,7 +79,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
                                              [1] + reference_image.ndim * [3])
 
         image1_warp = warp(moving_image, get_warp_points(grid, flow_current),
-                           mode='nearest')
+                           mode='edge')
         grad = np.array(np.gradient(image1_warp))
         NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
@@ -219,6 +222,10 @@ def optical_flow_tvl1(reference_image, moving_image,
                      tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
+    if np.dtype(dtype) != _supported_float_type(dtype):
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
+        raise ValueError(msg)
+
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
@@ -257,7 +264,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     if gaussian:
         sigma = ndim * (size / 4, )
-        filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
+        filter_func = partial(gaussian_filter, sigma=sigma, mode='mirror')
     else:
         filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
                               mode='mirror')
@@ -275,10 +282,10 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
 
     for _ in range(num_warp):
         if prefilter:
-            flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
+            flow = ndi.median_filter(flow, (1, ) + ndim * (3, ))
 
         moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
-                                 mode='nearest')
+                                 mode='edge')
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
         error_image = ((grad * flow).sum(axis=0)
                        + reference_image - moving_image_warp)
@@ -370,5 +377,9 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     solver = partial(_ilk, radius=radius, num_warp=num_warp, gaussian=gaussian,
                      prefilter=prefilter)
+
+    if np.dtype(dtype) != _supported_float_type(dtype):
+        msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
+        raise ValueError(msg)
 
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)

@@ -3,11 +3,13 @@
 # cython: nonecheck=False
 # cython: wraparound=False
 
+cimport numpy as cnp
+
 
 cdef extern from "unwrap_2d_ljmu.h":
     void unwrap2D(
-            double *wrapped_image,
-            double *UnwrappedImage,
+            cnp.float64_t *wrapped_image,
+            cnp.float64_t *UnwrappedImage,
             unsigned char *input_mask,
             int image_width, int image_height,
             int wrap_around_x, int wrap_around_y,
@@ -15,9 +17,9 @@ cdef extern from "unwrap_2d_ljmu.h":
             ) nogil
 
 
-def unwrap_2d(double[:, ::1] image,
+def unwrap_2d(cnp.float64_t[:, ::1] image,
               unsigned char[:, ::1] mask,
-              double[:, ::1] unwrapped_image,
+              cnp.float64_t[:, ::1] unwrapped_image,
               wrap_around,
               seed):
     cdef:
