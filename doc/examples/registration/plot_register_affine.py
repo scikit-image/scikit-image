@@ -8,7 +8,7 @@ which can be used to align our target and reference images.
 
 The :func:`skimage.measure.register_affine` function uses a Gaussian pyramid,
 a cost function, and an optimization function to find the affine transformation
-that best converts a reference space to a target space. This transformation
+that best aligns a reference image to a target image. This transformation
 (which is expressed as an (ndim+1, ndim+1) matrix) can be used by
 :func:`scipy.ndimage.affine_transform` to convert the target image to the
 reference space. This approach is explained in detail in Chapter 7 of Elegant
