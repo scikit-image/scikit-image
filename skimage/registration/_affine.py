@@ -70,18 +70,19 @@ def _param_cost(reference_image, moving_image, parameter_vector, *,
     return cost(reference_image, transformed)
 
 
-def affine(reference_image, moving_image,
+def affine(reference_image,
+           moving_image,
            *,
            cost=cost_nmi,
+           method='Powell',
            initial_parameters=None,
+           pyramid_scale=2,
+           pyramid_minimum_size=8,
+           level_callback=None,
+           inverse=True,
+           channel_axis=None,
            vector_to_matrix=None,
            translation_indices=None,
-           inverse=True,
-           pyramid_scale=2,
-           pyramid_minimum_size=32,
-           multichannel=False,
-           level_callback=None,
-           method='Powell',
            **kwargs):
     """Find a transformation matrix to register a moving image to a reference.
 
