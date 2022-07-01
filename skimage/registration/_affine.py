@@ -80,7 +80,7 @@ def affine(reference_image,
            pyramid_minimum_size=8,
            level_callback=None,
            inverse=True,
-           channel_axis=None,
+           multichannel=False,
            vector_to_matrix=None,
            translation_indices=None,
            **kwargs):
@@ -177,10 +177,10 @@ def affine(reference_image,
 
     pyramid_ref = pyramid_gaussian(reference_image, downscale=pyramid_scale,
                                    max_layer=nlevels,
-                                   channel_axis=-1)
+                                   multichannel=multichannel)
     pyramid_mvg = pyramid_gaussian(moving_image, downscale=pyramid_scale,
                                    max_layer=nlevels,
-                                   channel_axis=-1)
+                                   multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
 
     if initial_parameters is None:
