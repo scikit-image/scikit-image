@@ -176,10 +176,10 @@ def affine(reference_image, moving_image,
 
     pyramid_ref = pyramid_gaussian(reference_image, downscale=pyramid_scale,
                                    max_layer=nlevels,
-                                   multichannel=multichannel)
+                                   channel_axis=-1)
     pyramid_mvg = pyramid_gaussian(moving_image, downscale=pyramid_scale,
                                    max_layer=nlevels,
-                                   multichannel=multichannel)
+                                   channel_axis=-1)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
 
     if initial_parameters is None:
