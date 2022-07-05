@@ -68,10 +68,10 @@ cpdef _nonmaximum_suppression_bilinear(
                     continue
 
                 is_down = (isobel[x, y] <= 0)
-                is_up = 1 - is_down
+                is_up = (isobel[x, y] >= 0)
 
                 is_left = (jsobel[x, y] <= 0)
-                is_right = 1 - is_left
+                is_right = (jsobel[x, y] >= 0)
 
                 cond1 = (is_up and is_right) or (is_down and is_left)
                 cond2 = (is_down and is_right) or (is_up and is_left)
