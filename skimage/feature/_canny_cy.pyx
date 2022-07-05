@@ -73,7 +73,9 @@ cpdef _nonmaximum_suppression_bilinear(
                 is_left = (jsobel[x, y] <= 0)
                 is_right = (jsobel[x, y] >= 0)
 
+                # Gradients are both positive or both negative
                 cond1 = (is_up and is_right) or (is_down and is_left)
+                # One gradient is negative while the other is positive
                 cond2 = (is_down and is_right) or (is_up and is_left)
                 if not cond1 and not cond2:
                     continue
@@ -112,4 +114,4 @@ cpdef _nonmaximum_suppression_bilinear(
                     c_minus = (neigh2_2 * w + neigh2_1 * (1.0 - w)) <= m
                     if c_minus:
                         out[x, y] = m
-    return np.asarray(out)
+    return out.base
