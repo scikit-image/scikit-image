@@ -75,39 +75,41 @@ cpdef _nonmaximum_suppression_bilinear(
 
                 cond1 = (is_up and is_right) or (is_down and is_left)
                 cond2 = (is_down and is_right) or (is_up and is_left)
-                if cond1 or cond2:
-                    abs_isobel = fabs(isobel[x, y])
-                    abs_jsobel = fabs(jsobel[x, y])
-                    if cond1:
-                        if abs_isobel > abs_jsobel:
-                            w = abs_jsobel / abs_isobel
-                            neigh1_1 = magnitude[x + 1, y]
-                            neigh1_2 = magnitude[x + 1, y + 1]
-                            neigh2_1 = magnitude[x - 1, y]
-                            neigh2_2 = magnitude[x - 1, y - 1]
-                        else:
-                            w = abs_isobel / abs_jsobel
-                            neigh1_1 = magnitude[x, y + 1]
-                            neigh1_2 = magnitude[x + 1, y + 1]
-                            neigh2_1 = magnitude[x, y - 1]
-                            neigh2_2 = magnitude[x - 1, y - 1]
-                    elif cond2:
-                        if abs_isobel < abs_jsobel:
-                            w = abs_isobel / abs_jsobel
-                            neigh1_1 = magnitude[x, y + 1]
-                            neigh1_2 = magnitude[x - 1, y + 1]
-                            neigh2_1 = magnitude[x, y - 1]
-                            neigh2_2 = magnitude[x + 1, y - 1]
-                        else:
-                            w = abs_jsobel / abs_isobel
-                            neigh1_1 = magnitude[x - 1, y]
-                            neigh1_2 = magnitude[x - 1, y + 1]
-                            neigh2_1 = magnitude[x + 1, y]
-                            neigh2_2 = magnitude[x + 1, y - 1]
-                    # linear interpolation
-                    c_plus = (neigh1_2 * w + neigh1_1 * (1.0 - w)) <= m
-                    if c_plus:
-                        c_minus = (neigh2_2 * w + neigh2_1 * (1.0 - w)) <= m
-                        if c_minus:
-                            out[x, y] = m
+                if not cond1 and not cond2:
+                    continue
+
+                abs_isobel = fabs(isobel[x, y])
+                abs_jsobel = fabs(jsobel[x, y])
+                if cond1:
+                    if abs_isobel > abs_jsobel:
+                        w = abs_jsobel / abs_isobel
+                        neigh1_1 = magnitude[x + 1, y]
+                        neigh1_2 = magnitude[x + 1, y + 1]
+                        neigh2_1 = magnitude[x - 1, y]
+                        neigh2_2 = magnitude[x - 1, y - 1]
+                    else:
+                        w = abs_isobel / abs_jsobel
+                        neigh1_1 = magnitude[x, y + 1]
+                        neigh1_2 = magnitude[x + 1, y + 1]
+                        neigh2_1 = magnitude[x, y - 1]
+                        neigh2_2 = magnitude[x - 1, y - 1]
+                elif cond2:
+                    if abs_isobel < abs_jsobel:
+                        w = abs_isobel / abs_jsobel
+                        neigh1_1 = magnitude[x, y + 1]
+                        neigh1_2 = magnitude[x - 1, y + 1]
+                        neigh2_1 = magnitude[x, y - 1]
+                        neigh2_2 = magnitude[x + 1, y - 1]
+                    else:
+                        w = abs_jsobel / abs_isobel
+                        neigh1_1 = magnitude[x - 1, y]
+                        neigh1_2 = magnitude[x - 1, y + 1]
+                        neigh2_1 = magnitude[x + 1, y]
+                        neigh2_2 = magnitude[x + 1, y - 1]
+                # linear interpolation
+                c_plus = (neigh1_2 * w + neigh1_1 * (1.0 - w)) <= m
+                if c_plus:
+                    c_minus = (neigh2_2 * w + neigh2_1 * (1.0 - w)) <= m
+                    if c_minus:
+                        out[x, y] = m
     return np.asarray(out)
