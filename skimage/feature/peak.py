@@ -177,7 +177,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     Returns
     -------
-    output : ndarray or ndarray of bools
+    output : ndarray
         The coordinates of the peaks.
 
     Notes
