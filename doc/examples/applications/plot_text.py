@@ -17,10 +17,7 @@ import matplotlib.pyplot as plt
 img = iio.imread("imageio:chelsea.png")
 
 fig = plt.figure()
-fig.figimage(
-    img,
-    resize=True,  # Resize the figure to the image to avoid any interpolation.
-)
+fig.figimage(img, resize=True)
 fig.text(0, 0.99, "I am stefan's cat.", fontsize=32, va="top")
 fig.canvas.draw()
 annotated_img = np.asarray(fig.canvas.renderer.buffer_rgba())
