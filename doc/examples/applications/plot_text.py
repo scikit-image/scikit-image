@@ -12,15 +12,15 @@ using the `matplotlib <https://matplotlib.org/>`_ library.
 import numpy as np
 import imageio.v3 as iio
 import matplotlib.pyplot as plt
-from matplotlib.figure import figaspect
 
 img = iio.imread("imageio:chelsea.png")
 
-fig, ax = plt.subplots(figsize=figaspect(img), dpi=75)
-ax.imshow(img)
-ax.text(5, 5, "I am stefan's cat.", fontsize=32, va="top")
-ax.set_axis_off()
-ax.set_position([0, 0, 1, 1])
+fig = plt.figure()
+fig.figimage(
+    img,
+    resize=True,  # Resize the figure to the image to avoid any interpolation.
+)
+fig.text(0, .99, "I am stefan's cat.", fontsize=32, va="top")
 fig.canvas.draw()
 annotated_img = np.asarray(fig.canvas.renderer.buffer_rgba())
 plt.close(fig)
