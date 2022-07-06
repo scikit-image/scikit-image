@@ -997,7 +997,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self._tesselation.vertices:
+        for tri in self._tesselation.simplices:
             affine = AffineTransform(dimensionality=ndim)
             success &= affine.estimate(src[tri, :], dst[tri, :])
             self.affines.append(affine)
@@ -1007,7 +1007,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
         self.inverse_affines = []
-        for tri in self._inverse_tesselation.vertices:
+        for tri in self._inverse_tesselation.simplices:
             affine = AffineTransform(dimensionality=ndim)
             success &= affine.estimate(dst[tri, :], src[tri, :])
             self.inverse_affines.append(affine)
@@ -1039,7 +1039,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self._tesselation.vertices)):
+        for index in range(len(self._tesselation.simplices)):
             # affine transform for triangle
             affine = self.affines[index]
             # all coordinates within triangle
@@ -1074,7 +1074,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self._inverse_tesselation.vertices)):
+        for index in range(len(self._inverse_tesselation.simplices)):
             # affine transform for triangle
             affine = self.inverse_affines[index]
             # all coordinates within triangle
