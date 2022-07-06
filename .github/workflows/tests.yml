@@ -3,6 +3,9 @@ name: Test
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
 
   test_skimage_linux:
