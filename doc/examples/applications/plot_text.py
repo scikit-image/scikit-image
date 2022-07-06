@@ -5,7 +5,7 @@ Render text onto an image
 
 Scikit-image currently doesn't feature a function that allows you to
 plot/render text onto an image. However, there is a fairly easy workaround
-using the `matplotlib <https://matplotlib.org/>`_ library.
+using scikit-image's optional dependency `matplotlib <https://matplotlib.org/>`_.
 
 """
 
