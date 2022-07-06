@@ -26,8 +26,7 @@ plt.close(fig)
 
 ###############################################################################
 # For the purpose of this example, we can also show the image; however, if one
-# just wants to render the image on top of the text, this step is not
-# necessary.
+# just wants to write onto the image, this step is not necessary.
 
 fig, ax = plt.subplots()
 ax.imshow(annotated_img)
