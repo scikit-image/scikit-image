@@ -4,8 +4,9 @@ Render text onto an image
 =========================
 
 Scikit-image currently doesn't feature a function that allows you to
-plot/render text onto an image. However, there is a fairly easy workaround
-using scikit-image's optional dependency `matplotlib <https://matplotlib.org/>`_.
+write text onto an image. However, there is a fairly easy workaround
+using scikit-image's optional dependency `matplotlib
+<https://matplotlib.org/>`_.
 
 """
 
@@ -20,7 +21,7 @@ fig.figimage(
     img,
     resize=True,  # Resize the figure to the image to avoid any interpolation.
 )
-fig.text(0, .99, "I am stefan's cat.", fontsize=32, va="top")
+fig.text(0, 0.99, "I am stefan's cat.", fontsize=32, va="top")
 fig.canvas.draw()
 annotated_img = np.asarray(fig.canvas.renderer.buffer_rgba())
 plt.close(fig)
