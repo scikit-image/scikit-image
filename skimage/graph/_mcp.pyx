@@ -1,6 +1,9 @@
 #cython: cdivision=True
 #cython: nonecheck=False
-
+"""
+Cython implementation of Dijkstra's minimum cost path algorithm,
+for use with data on a n-dimensional lattice.
+"""
 import cython
 import numpy as np
 from . import heap
