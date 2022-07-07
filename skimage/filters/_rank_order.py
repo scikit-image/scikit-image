@@ -1,3 +1,7 @@
+"""
+_rank_order.py - convert an image of any type to an image of ints whose
+pixels have an identical rank order compared to the original image
+"""
 import numpy as np
 
 
