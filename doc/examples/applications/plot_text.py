@@ -10,11 +10,11 @@ using scikit-image's optional dependency `matplotlib
 
 """
 
-import numpy as np
-import imageio.v3 as iio
 import matplotlib.pyplot as plt
+import numpy as np
+from skimage import data
 
-img = iio.imread("imageio:chelsea.png")
+img = data.cat()
 
 fig = plt.figure()
 fig.figimage(img, resize=True)
