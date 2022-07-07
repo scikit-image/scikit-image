@@ -1,5 +1,8 @@
 # -*- python -*-
 
+"""
+Cython implementation of a binary min heap.
+"""
 # cython specific imports
 import cython
 from libc.stdlib cimport malloc, free
