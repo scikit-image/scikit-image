@@ -346,11 +346,11 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        lamba1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                       sorting='val',
-                                                       mode=mode, cval=cval)
+        lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
+                                                        sorting='val',
+                                                        mode=mode, cval=cval)
 
-        # Compute tubeness, see  equation (9) in reference [1]_.
+        # Compute tubeness, see equation (9) in reference [1]_.
         # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
         filtered = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
 
