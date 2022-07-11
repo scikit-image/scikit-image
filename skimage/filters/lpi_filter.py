@@ -15,7 +15,7 @@ def _min_limit(x, val=np.finfo(float).eps):
 
 
 def _center(x, oshape):
-    """Return an array of oshape from the center of x.
+    """Return an array of shape ``oshape`` from the center of array ``x``.
 
     """
     start = (np.array(x.shape) - np.array(oshape)) // 2 + 1
