@@ -416,7 +416,7 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned is a list of image-data arrays. In this
+    `MultiImage` returns a list of image-data arrays. In this
     regard, it is very similar to `ImageCollection`, but the two differ in
     their treatment of multi-frame images.
 
@@ -425,23 +425,23 @@ class MultiImage(ImageCollection):
     list. `ImageCollection` instead creates N elements of shape `(W, H)`.
 
     For an animated GIF image, `MultiImage` reads only the first frame, while
-    `ImageCollection` reads all of them by default.
+    `ImageCollection` reads all frames by default.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> mi = MultiImage(multipage_tiff)
-    >>> len(mi)  # mi contains one element
+    >>> multi_img = MultiImage(multipage_tiff)
+    >>> len(multi_img)  # multi_img contains one element
     1
-    >>> mi[0].shape  # this element is a two-frame image of shape (2, 15, 10)
+    >>> multi_img[0].shape  # this element is a two-frame image of shape (2, 15, 10)
     (2, 15, 10)
 
-    >>> ic = ImageCollection(multipage_tiff)
-    >>> len(ic)  # ic contains two elements
+    >>> image_col = ImageCollection(multipage_tiff)
+    >>> len(image_col)  # image_col contains two elements
     2
-    >>> for frame in ic:
+    >>> for frame in image_col:
     ...     print(frame.shape)  # each element is a frame of shape (15, 10)
     ...
     (15, 10)
