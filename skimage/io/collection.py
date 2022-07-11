@@ -6,22 +6,7 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
-from packaging import version
-
 import numpy as np
-from PIL import Image, __version__ as pil_version
-
-# Check CVE-2021-27921 and others
-if version.parse(pil_version) < version.parse('8.1.2'):
-    from warnings import warn
-    warn('Your installed pillow version is < 8.1.2. '
-         'Several security issues (CVE-2021-27921, '
-         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
-         'and more) have been fixed in pillow 8.1.2 or higher. '
-         'We recommend to upgrade this library.',
-         stacklevel=2)
-
-from tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -122,6 +107,14 @@ class ImageCollection(object):
     ----------------
     load_func : callable
         ``imread`` by default. See notes below.
+    index_per_frame : bool
+        If True (default), indices in the `ImageCollection` refer to
+        individual image frames for file types that store multiple image
+        frames per file (such as TIFF or GIF). Setting `index_per_frame`
+        to False makes `ImageCollection` assume that each index references
+        a single object per file name (which by default will depend on the
+        specific `imageio` plugin, but typically be the first image frame).
+        Has no effect when `load_func` is set. See notes below.
 
     Attributes
     ----------
@@ -181,6 +174,33 @@ class ImageCollection(object):
 
       ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
+    Some image types, for example TIFF or GIF, allow to store multiple
+    image frames per file. In this case, `ImageCollection` by default
+    indexes each frame individually. Thus, if the file `giffile` contains
+    `N` frames, we will have `len(ImageCollection(gifffile))==N`. In general,
+    assuming a list of file names `filename_list` without shell globbing,
+    `ImageCollection` only guarantees
+    `len(ImageCollection(filename_list))>=len(filename_list)`, but not
+    strict equality.
+    The drawback of this approach is that upon initialization, all the
+    files will need to be accessed to determine the number of frames stored
+    in each of them. This latter task is performed by the appropriate
+    `imagio` plugin for each file type.
+
+    Setting `index_per_frame` to False, `ImageCollection` assumes each
+    file to contain a single image object, and indexing is on a per file
+    basis. As a result, the assertion
+    `len(ImageCollection(filename_list))==len(filename_list)` holds True.
+    It is then up to the `imageio` plugin to determine whether by deault
+    the individual `ImageCollection` entries correspond to the first frame
+    of any multi-frame images only, or to a data structure holding all
+    image frames. (This can be customized by providing a `load_func`.)
+    This mode of addressing images has the advantage that initialization
+    is "lazy": the files are only accessed once they are explicitly
+    referenced. Setting `index_per_frame` to False should thus be the
+    preferred mode when working with large image collections on slow
+    storage media.
+
     Examples
     --------
     >>> import imageio
@@ -205,8 +225,13 @@ class ImageCollection(object):
     >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
     >>> len(image_col)
     24
+    >>> len(io.ImageCollection(filename))
+    24
+    >>> len(io.ImageCollection(filename, index_per_frame=False))
+    1
     """
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
+    def __init__(self, load_pattern, conserve_memory=True,
+                 index_per_frame=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
         self._files = []
@@ -224,14 +249,21 @@ class ImageCollection(object):
         else:
             raise TypeError('Invalid pattern as input.')
 
+        self._numframes = len(self._files)
+        self._frame_index = None
+        self.load_func = load_func
+        self.load_func_kwargs = load_func_kwargs
         if load_func is None:
-            from ._io import imread
-            self.load_func = imread
-            self._numframes = self._find_images()
-        else:
-            self.load_func = load_func
-            self._numframes = len(self._files)
-            self._frame_index = None
+            try:
+                from imageio.v3 import imread as iio_imread
+                self.load_func = iio_imread
+                if index_per_frame:
+                    self._numframes = self._find_images()
+            except ModuleNotFoundError:
+                # only needed for older imagio compatibility
+                self.load_func = self._load_func_v2
+                if index_per_frame:
+                    self._numframes = self._find_images_v2()
 
         if conserve_memory:
             memory_slots = 1
@@ -241,7 +273,6 @@ class ImageCollection(object):
         self._conserve_memory = conserve_memory
         self._cached = None
 
-        self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
@@ -252,29 +283,42 @@ class ImageCollection(object):
     def conserve_memory(self):
         return self._conserve_memory
 
-    def _find_images(self):
+    # only needed for older imagio compatibility
+    def _load_func_v2(self, fname, **kwargs):
+        from imageio import get_reader
+        if 'index' in kwargs:
+            img_num = kwargs['index']
+            del kwargs['index']
+        else:
+            img_num = 0
+        return get_reader(fname, **kwargs).get_data(img_num)
+
+    # only needed for older imagio compatibility
+    def _find_images_v2(self):
+        from imageio import get_reader
         index = []
         for fname in self._files:
-            if fname.lower().endswith(('.tiff', '.tif')):
-                with open(fname, 'rb') as f:
-                    img = TiffFile(f)
-                    index += [(fname, i) for i in range(len(img.pages))]
-            else:
-                try:
-                    im = Image.open(fname)
-                    im.seek(0)
-                except (IOError, OSError):
-                    continue
+            try:
                 i = 0
-                while True:
-                    try:
-                        im.seek(i)
-                    except EOFError:
-                        break
+                for img in get_reader(fname, **self.load_func_kwargs):
                     index.append((fname, i))
                     i += 1
-                if hasattr(im, 'fp') and im.fp:
-                    im.fp.close()
+            except (IOError, OSError):
+                continue
+        self._frame_index = index
+        return len(index)
+
+    def _find_images(self):
+        from imageio.v3 import imiter
+        index = []
+        for fname in self._files:
+            try:
+                i = 0
+                for img in imiter(fname, **self.load_func_kwargs):
+                    index.append((fname, i))
+                    i += 1
+            except (IOError, OSError):
+                continue
         self._frame_index = index
         return len(index)
 
@@ -311,13 +355,14 @@ class ImageCollection(object):
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
                     if img_num is not None:
-                        kwargs['img_num'] = img_num
+                        kwargs['index'] = img_num
                     try:
                         self.data[idx] = self.load_func(fname, **kwargs)
-                    # Account for functions that do not accept an img_num kwarg
+                    # Account for functions that do not accept our kwarg
+                    # for accessing individual image frames
                     except TypeError as e:
-                        if "unexpected keyword argument 'img_num'" in str(e):
-                            del kwargs['img_num']
+                        if "unexpected keyword argument" in str(e):
+                            del kwargs['index']
                             self.data[idx] = self.load_func(fname, **kwargs)
                         else:
                             raise
@@ -434,7 +479,7 @@ def imread_collection_wrapper(imread):
 
 class MultiImage(ImageCollection):
 
-    """A class containing all frames from multi-frame TIFF images.
+    """A class containing all frames from multi-frame images.
 
     Parameters
     ----------
@@ -447,28 +492,26 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned can be used as a list of image-data objects,
-    where each entry in the list represents one image. In this regard it is
-    very similar to `ImageCollection`, but the two differ in the treatment
-    of multi-frame images.
+    `MultiImage` can be used as a list of image-data objects similar to
+    `ImageCollection`, but is intended for multi-frame images from which
+    it loads all frames into a single entry of the list.
 
-    For a TIFF image containing N frames of size WxH, `MultiImage` stores
-    all frames of that image as a single entry of shape `(N, W, H)` in the
-    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
-
-    For an animated GIF image, `MultiImage` in the current implementation
-    will only read one frame, while `ImageCollection` by default will read
-    all of them.
+    For a bitmap or grayscale image containing N frames of size WxH,
+    `MultiImage` stores all frames of that image as a single entry of
+    shape `(N, W, H)` in the list. `ImageCollection` instead creates N
+    entries of shape `(W, H)`. The behavior when loading color images is
+    analogous; `MultiImage` prefixes the array shape with the number of
+    frames.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> img = MultiImage(multipage_tiff)
-    >>> len(img) # img contains one file
+    >>> mi = MultiImage(multipage_tiff)
+    >>> len(mi) # mi contains one file
     1
-    >>> img[0].shape # this image contains two frames of size (15, 10)
+    >>> mi[0].shape # this image contains two frames of size (15, 10)
     (2, 15, 10)
 
     >>> ic = ImageCollection(multipage_tiff)
@@ -480,17 +523,53 @@ class MultiImage(ImageCollection):
     (15, 10)
     (15, 10)
 
+    >>> singlepage_pngs = [data_dir + '/brick.png', data_dir + '/color.png']
+    >>> png_mi = MultiImage(singlepage_pngs)
+    >>> len(png_mi) # two files
+    2
+    >>> png_mi[0].shape # the first file is of size (512, 512)
+    (1, 512, 512)
+    >>> png_ic = ImageCollection(singlepage_pngs)
+    >>> len(png_ic) # again, two files
+    2
+    >>> png_ic[0].shape
+    (512, 512)
     """
 
     def __init__(self, filename, conserve_memory=True, dtype=None,
                  **imread_kwargs):
         """Load a multi-img."""
-        from ._io import imread
-
         self._filename = filename
+        try:
+            from imageio.v3 import imiter
+            load_func = self._load_func_v3
+        except ModuleNotFoundError:
+            # only needed for older imagio compatibility
+            from imageio import mimread
+            load_func = self._load_func_v2
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=imread, **imread_kwargs)
+                                         load_func=load_func,
+                                         **imread_kwargs)
 
     @property
     def filename(self):
         return self._filename
+
+    def _load_func_v3(self, filename, **imread_kwargs):
+        """Multi-img load_func using imageio v3 API."""
+        from imageio.v3 import imiter
+        imgdata = []
+        for img in imiter(filename, **imread_kwargs):
+            imgdata.append(img)
+        return np.array(imgdata)
+
+    # only needed for older imagio compatibility
+    def _load_func_v2(self, filename, **imread_kwargs):
+        """Multi-img load_func using old-style imageio API."""
+        from imageio import mimread
+        try:
+            imgdata = np.array(mimread(filename, **imread_kwargs))
+        except RuntimeError:
+            from imageio import imread
+            imgdata = np.array([imread(filename, **imread_kwargs)])
+        return imgdata

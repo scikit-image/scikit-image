@@ -140,5 +140,6 @@ class TestImageCollection():
             self.images.concatenate()
 
     def test_multiimage_imagecollection(self):
-        assert_equal(self.images_matched[0], self.frames_matched[0])
-        assert_equal(self.images_matched[1], self.frames_matched[1])
+        assert_equal(self.images_matched[0], self.frames_matched[0][0,:])
+        assert_equal(self.images_matched[1], self.frames_matched[1][0,:])
+
