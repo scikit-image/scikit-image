@@ -58,7 +58,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     # Compute the image histogram for better performances
     nbins = 256  # Default in threshold functions
-    hist = histogram(image.ravel(), nbins, source_range='image')
+    hist = histogram(image.reshape(-1), nbins, source_range='image')
 
     # Handle default value
     methods = methods or {}
@@ -66,7 +66,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True)
-    ax = ax.ravel()
+    ax = ax.reshape(-1)
 
     ax[0].imshow(image, cmap=plt.cm.gray)
     ax[0].set_title('Original')
@@ -94,7 +94,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
@@ -304,9 +304,9 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
             counts, bin_centers = counts[start:end], bin_centers[start:end]
     else:
         counts, bin_centers = histogram(
-                image.ravel(), nbins, source_range='image', normalize=normalize
+            image.reshape(-1), nbins, source_range='image', normalize=normalize
             )
-    return counts.astype(float), bin_centers
+    return counts.astype('float32', copy=False), bin_centers
 
 
 def threshold_otsu(image=None, nbins=256, *, hist=None):
@@ -357,7 +357,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     # Check if the image has more than one intensity value; if not, return that
     # value
     if image is not None:
-        first_pixel = image.ravel()[0]
+        first_pixel = image.reshape(-1)[0]
         if np.all(image == first_pixel):
             return first_pixel
 
@@ -430,7 +430,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
         return bin_centers[0]
 
     # Calculate probability mass function
-    pmf = counts.astype(np.float32) / counts.sum()
+    pmf = counts.astype('float32', copy=False) / counts.sum()
     P1 = np.cumsum(pmf)  # Cumulative normalized histogram
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
@@ -511,7 +511,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
         else:
             return bin_centers[0]
 
-    counts = counts.astype(np.float32)
+    counts = counts.astype('float32', copy=False)
 
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
@@ -729,7 +729,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1),
                                       source_range='image')
-        hist = hist.astype(float)
+        hist = hist.astype('float32', copy=False)
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
@@ -837,7 +837,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
 
-    smooth_hist = counts.astype(np.float64, copy=False)
+    smooth_hist = counts.astype('float32', copy=False)
 
     for counter in range(max_num_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
@@ -923,13 +923,14 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.reshape(-1), nbins,
+                                  source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
-    arg_low_level, arg_high_level = np.where(hist > 0)[0][[0, -1]]
+    arg_low_level, arg_high_level = np.flatnonzero(hist)[[0, -1]]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
@@ -1010,7 +1011,6 @@ def _mean_std(image, w):
     integral = integral_image(padded, dtype=np.float64)
     padded *= padded
     integral_sq = integral_image(padded, dtype=np.float64)
-
 
     # Create lists of non-zero kernel indices and values
     kernel_indices = list(itertools.product(*tuple([(0, _w) for _w in w])))
@@ -1282,15 +1282,18 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = _validate_image_histogram(image, hist, nbins,
                                                   normalize=True)
-    prob = prob.astype('float32')
+    prob = prob.astype('float32', copy=False)
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
-        msg = (f'The input image has only {nvalues} different values. '
-               f'It cannot be thresholded in {classes} classes.')
+        msg = (f'After discretization into bins, the input image has '
+               f'only {nvalues} different values. It cannot be thresholded '
+               f'in {classes} classes. If there are more unique values '
+               f'before discretization, try increasing the number of bins '
+               f'(`nbins`).')
         raise ValueError(msg)
     elif nvalues == classes:
-        thresh_idx = np.where(prob > 0)[0][:-1]
+        thresh_idx = np.flatnonzero(prob)[:-1]
     else:
         # Get threshold indices
         try:

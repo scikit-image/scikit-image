@@ -54,6 +54,15 @@ def test_int_range_image():
     assert_equal(bin_centers[-1], 100)
 
 
+def test_multichannel_int_range_image():
+    im = np.array([[10, 5], [100, 102]], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, channel_axis=-1)
+    for ch in range(im.shape[-1]):
+        assert_equal(len(frequencies[ch]), len(bin_centers))
+    assert_equal(bin_centers[0], 5)
+    assert_equal(bin_centers[-1], 102)
+
+
 def test_peak_uint_range_dtype():
     im = np.array([10, 100], dtype=np.uint8)
     frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
@@ -862,7 +871,7 @@ def test_is_low_contrast_boolean():
                                            exposure.adjust_log,
                                            exposure.adjust_sigmoid])
 def test_negative_input(exposure_func):
-    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.double)
+    image = np.arange(-10, 245, 4).reshape((8, 8)).astype(np.float64)
     with pytest.raises(ValueError):
         exposure_func(image)
 

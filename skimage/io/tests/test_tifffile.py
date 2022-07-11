@@ -38,9 +38,7 @@ def test_imread_multipage_rgb_tif():
 
 
 def test_tifffile_kwarg_passthrough ():
-    img = imread(fetch('data/multipage.tif'), key=[1],
-                 multifile=False, multifile_close=True, fastij=True,
-                 is_ome=True)
+    img = imread(fetch('data/multipage.tif'), key=[1], is_ome=True)
     assert img.shape == (15, 10), img.shape
 
 

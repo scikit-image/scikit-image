@@ -18,13 +18,13 @@ cdef inline dtype_t _min(dtype_t a, dtype_t b) nogil:
     return a if a <= b else b
 
 
-cdef inline void histogram_increment(Py_ssize_t[::1] histo, double* pop,
+cdef inline void histogram_increment(Py_ssize_t[::1] histo, cnp.float64_t* pop,
                                      dtype_t value) nogil:
     histo[value] += 1
     pop[0] += 1
 
 
-cdef inline void histogram_decrement(Py_ssize_t[::1] histo, double* pop,
+cdef inline void histogram_decrement(Py_ssize_t[::1] histo, cnp.float64_t* pop,
                                      dtype_t value) nogil:
     histo[value] -= 1
     pop[0] -= 1
@@ -45,15 +45,15 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
-                            dtype_t, Py_ssize_t, Py_ssize_t, double,
-                            double, Py_ssize_t, Py_ssize_t) nogil,
+cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.float64_t,
+                            dtype_t, Py_ssize_t, Py_ssize_t, cnp.float64_t,
+                            cnp.float64_t, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
                 char[:, ::1] footprint,
                 char[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
                 signed char shift_x, signed char shift_y,
-                double p0, double p1,
+                cnp.float64_t p0, cnp.float64_t p1,
                 Py_ssize_t s0, Py_ssize_t s1,
                 Py_ssize_t n_bins) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
@@ -85,8 +85,8 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
 
-    # number of pixels actually inside the neighborhood (double)
-    cdef double pop = 0
+    # number of pixels actually inside the neighborhood (cnp.float64_t)
+    cdef cnp.float64_t pop = 0
 
     # build attack and release borders by using difference along axis
     t = np.hstack((footprint, np.zeros((footprint.shape[0], 1))))

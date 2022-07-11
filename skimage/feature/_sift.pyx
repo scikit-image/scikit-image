@@ -119,7 +119,7 @@ cpdef _update_histogram(np_floats[:, :, ::1] histograms,
                 histograms[r, c, k_index2] += w2
 
 
-cpdef _local_max(np_floats[:, :, ::1] octave, double thresh):
+cpdef _local_max(np_floats[:, :, ::1] octave, cnp.float64_t thresh):
     cdef:
         Py_ssize_t n_r = octave.shape[0]
         Py_ssize_t n_c = octave.shape[1]

@@ -16,7 +16,7 @@ cnp.import_array()
 def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                  cnp.uint8_t[:, :, ::1] mask,
                  np_floats[:, ::1] segments,
-                 float step,
+                 cnp.float32_t step,
                  Py_ssize_t max_num_iter,
                  np_floats[::1] spacing,
                  bint slic_zero,
