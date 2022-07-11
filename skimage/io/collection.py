@@ -467,8 +467,7 @@ class MultiImage(ImageCollection):
     >>> multi_img = MultiImage(multipage_tiff)
     >>> len(multi_img)  # multi_img contains one element
     1
-    >>> multi_img[0].shape  # this element is a two-frame image of shape
-    >>>                     # (2, 15, 10)
+    >>> multi_img[0].shape  # this element is a two-frame image of shape:
     (2, 15, 10)
 
     >>> image_col = ImageCollection(multipage_tiff)
