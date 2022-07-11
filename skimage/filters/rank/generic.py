@@ -651,7 +651,7 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     References
     ----------
-    .. [1] Gonzalez, R. C. and Wood, R. E. "Digital Image Processing
+    .. [1] Gonzalez, R. C. and Woods, R. E. "Digital Image Processing
            (3rd Edition)." Prentice-Hall Inc, 2006.
 
     """
@@ -1265,12 +1265,13 @@ def entropy(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
-                                       out_dtype=np.double)
+                                       out_dtype=np.float64)
     else:
         return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z, out_dtype=np.double)
+                                          shift_z=shift_z,
+                                          out_dtype=np.float64)
 
 
 @deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
@@ -1384,7 +1385,7 @@ def windowed_histogram(image, footprint, out=None, mask=None,
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y,
-                                   out_dtype=np.double,
+                                   out_dtype=np.float64,
                                    pixel_size=n_bins)
 
 

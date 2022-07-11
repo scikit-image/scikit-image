@@ -149,10 +149,10 @@ class TestSElem():
 
 
 @pytest.mark.parametrize(
-    'function, args, supports_decomposition',
+    'function, args, supports_sequence_decomposition',
     [
-        (footprints.disk, (3,), False),
-        (footprints.ball, (3,), False),
+        (footprints.disk, (3,), True),
+        (footprints.ball, (3,), True),
         (footprints.square, (3,), True),
         (footprints.cube, (3,), True),
         (footprints.diamond, (3,), True),
@@ -164,11 +164,75 @@ class TestSElem():
     ]
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.float64])
-def test_footprint_dtype(function, args, supports_decomposition, dtype):
+def test_footprint_dtype(function, args, supports_sequence_decomposition,
+                         dtype):
     # make sure footprint dtype matches what was requested
     footprint = function(*args, dtype=dtype)
     assert footprint.dtype == dtype
 
-    if supports_decomposition:
+    if supports_sequence_decomposition:
         sequence = function(*args, dtype=dtype, decomposition='sequence')
         assert all([fp_tuple[0].dtype == dtype for fp_tuple in sequence])
+
+
+@pytest.mark.parametrize("function", ["disk", "ball"])
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 75,
+                                    100])
+def test_nsphere_series_approximation(function, radius):
+    fp_func = getattr(footprints, function)
+    expected = fp_func(radius, strict_radius=False, decomposition=None)
+    footprint_sequence = fp_func(radius, strict_radius=False,
+                                 decomposition="sequence")
+    approximate = footprints.footprint_from_sequence(footprint_sequence)
+    assert approximate.shape == expected.shape
+
+    # verify that maximum error does not exceed some fraction of the size
+    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    if radius == 1:
+        assert error == 0
+    else:
+        max_error = 0.1 if function == "disk" else 0.15
+        assert error / expected.size <= max_error
+
+
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
+@pytest.mark.parametrize("strict_radius", [False, True])
+def test_disk_crosses_approximation(radius, strict_radius):
+    fp_func = footprints.disk
+    expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
+    footprint_sequence = fp_func(radius, strict_radius=strict_radius,
+                                 decomposition="crosses")
+    approximate = footprints.footprint_from_sequence(footprint_sequence)
+    assert approximate.shape == expected.shape
+
+    # verify that maximum error does not exceed some fraction of the size
+    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    max_error = 0.05
+    assert error / expected.size <= max_error
+
+
+@pytest.mark.parametrize("width", [3, 8, 20, 50])
+@pytest.mark.parametrize("height", [3, 8, 20, 50])
+def test_ellipse_crosses_approximation(width, height):
+    fp_func = footprints.ellipse
+    expected = fp_func(width, height, decomposition=None)
+    footprint_sequence = fp_func(width, height, decomposition="crosses")
+    approximate = footprints.footprint_from_sequence(footprint_sequence)
+    assert approximate.shape == expected.shape
+
+    # verify that maximum error does not exceed some fraction of the size
+    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    max_error = 0.05
+    assert error / expected.size <= max_error
+
+
+def test_disk_series_approximation_unavailable():
+    # ValueError if radius is too large (only precomputed up to radius=250)
+    with pytest.raises(ValueError):
+        footprints.disk(radius=10000, decomposition="sequence")
+
+
+def test_ball_series_approximation_unavailable():
+    # ValueError if radius is too large (only precomputed up to radius=100)
+    with pytest.raises(ValueError):
+        footprints.ball(radius=10000, decomposition="sequence")

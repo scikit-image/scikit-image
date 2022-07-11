@@ -8,7 +8,7 @@ cimport numpy as cnp
 cnp.import_array()
 
 
-def _fast_skeletonize(image):
+def _fast_skeletonize(cnp.uint8_t [:, ::1] image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
     Iteratively, pixels meeting removal criteria are removed,
     till only the skeleton remains (that is, no further removable pixel
@@ -40,37 +40,40 @@ def _fast_skeletonize(image):
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbors. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
-    cdef int *lut = \
-      [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
-       0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
-       0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
-       0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
-       1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
-       0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
+    cdef cnp.uint8_t *lut = [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0,
+                             1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0,
+                             3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             2, 0, 0, 0, 3, 0, 2, 2, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0,
+                             0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0,
+                             3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0,
+                             2, 0, 0, 0, 3, 1, 0, 0, 1, 3, 0, 0, 0, 0,
+                             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3,
+                             0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                             0, 0, 3, 3, 0, 1, 0, 0, 0, 0, 2, 2, 0, 0,
+                             2, 0, 0, 0]
 
-    cdef int pixel_removed, first_pass, neighbors
+    cdef cnp.uint8_t first_pass, pixel_removed, neighbors
 
     # indices for fast iteration
-    cdef Py_ssize_t row, col, nrows = image.shape[0]+2, ncols = image.shape[1]+2
+    cdef Py_ssize_t row, col, nrows, ncols, pass_num
+    nrows, ncols = image.shape[:2]
+    nrows += 2
+    ncols += 2
 
-    # we copy over the image into a larger version with a single pixel border
+    # Copy over the image into a larger version with a single pixel border
     # this removes the need to handle border cases below
-    _skeleton = np.zeros((nrows, ncols), dtype=np.uint8)
-    _skeleton[1:nrows-1, 1:ncols-1] = image > 0
-
-    _cleaned_skeleton = _skeleton.copy()
-
-    # cdef'd numpy-arrays for fast, typed access
-    cdef cnp.uint8_t [:, ::1] skeleton, cleaned_skeleton
-
-    skeleton = _skeleton
-    cleaned_skeleton = _cleaned_skeleton
+    cdef cnp.uint8_t [:, ::1] skeleton = np.zeros((nrows, ncols),
+                                                  dtype=np.uint8)
+    skeleton[1:-1, 1:-1] = image
+    cdef cnp.uint8_t [:, ::1] cleaned_skeleton = skeleton.copy()
 
     pixel_removed = True
 
@@ -80,8 +83,8 @@ def _fast_skeletonize(image):
         while pixel_removed:
             pixel_removed = False
 
-            # there are two phases, in the first phase, pixels labeled (see below)
-            # 1 and 3 are removed, in the second 2 and 3
+            # there are two phases, in the first phase, pixels labeled
+            # (see below) 1 and 3 are removed, in the second 2 and 3
 
             # nogil can't iterate through `(True, False)` because it is a Python
             # tuple. Use the fact that 0 is Falsy, and 1 is truthy in C
@@ -92,21 +95,31 @@ def _fast_skeletonize(image):
                 for row in range(1, nrows-1):
                     for col in range(1, ncols-1):
                         # all set pixels ...
+
                         if skeleton[row, col]:
-                            # are correlated with a kernel (coefficients spread around here ...)
-                            # to apply a unique number to every possible neighborhood ...
+                            # are correlated with a kernel
+                            # (coefficients spread around here ...)
+                            # to apply a unique number to every
+                            # possible neighborhood ...
 
-                            # which is used with the lut to find the "connectivity type"
+                            # which is used with the lut to find the
+                            # "connectivity type"
 
-                            neighbors = lut[  1*skeleton[row - 1, col - 1] +   2*skeleton[row - 1, col] +\
-                                              4*skeleton[row - 1, col + 1] +   8*skeleton[row, col + 1] +\
-                                             16*skeleton[row + 1, col + 1] +  32*skeleton[row + 1, col] +\
-                                             64*skeleton[row + 1, col - 1] + 128*skeleton[row, col - 1]]
+                            neighbors = lut[skeleton[row - 1, col - 1] +
+                                            2 * skeleton[row - 1, col] +
+                                            4 * skeleton[row - 1, col + 1] +
+                                            8 * skeleton[row, col + 1] +
+                                            16 * skeleton[row + 1, col + 1] +
+                                            32 * skeleton[row + 1, col] +
+                                            64 * skeleton[row + 1, col - 1] +
+                                            128 * skeleton[row, col - 1]]
 
-                            # if the condition is met, the pixel is removed (unset)
-                            if ((neighbors == 1 and first_pass) or
-                                    (neighbors == 2 and not first_pass) or
-                                    (neighbors == 3)):
+                            if (neighbors == 0):
+                                continue
+                            elif ((neighbors == 3) or
+                                  (neighbors == 1 and first_pass) or
+                                  (neighbors == 2 and not first_pass)):
+                                # Remove the pixel
                                 cleaned_skeleton[row, col] = 0
                                 pixel_removed = True
 
@@ -114,7 +127,7 @@ def _fast_skeletonize(image):
                 # is overwritten with the cleaned version
                 skeleton[:, :] = cleaned_skeleton[:, :]
 
-    return _skeleton[1:nrows-1, 1:ncols-1].astype(bool)
+    return skeleton.base[1:-1, 1:-1].astype(bool)
 
 
 """

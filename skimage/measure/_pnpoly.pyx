@@ -37,8 +37,8 @@ def _grid_points_in_poly(shape, verts):
     """
     verts = np.asarray(verts)
 
-    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.double)
-    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.double)
+    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.float64)
 
     cdef Py_ssize_t M = shape[0]
     cdef Py_ssize_t N = shape[1]
@@ -79,11 +79,11 @@ def _points_in_poly(points, verts):
     points = np.asarray(points)
     verts = np.asarray(verts)
 
-    cdef cnp.float64_t[::1] x = points[:, 0].astype(np.double)
-    cdef cnp.float64_t[::1] y = points[:, 1].astype(np.double)
+    cdef cnp.float64_t[::1] x = points[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] y = points[:, 1].astype(np.float64)
 
-    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.double)
-    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.double)
+    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.float64)
 
     cdef unsigned char[::1] out = np.zeros(x.shape[0], dtype=bool)
 
