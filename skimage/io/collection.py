@@ -461,7 +461,6 @@ class MultiImage(ImageCollection):
     Examples
     --------
     >>> from skimage import data_dir
-    >>> from skimage.io import ImageCollection, MultiImage
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
     >>> multi_img = MultiImage(multipage_tiff)
