@@ -185,7 +185,7 @@ def attach_stub(package_name: str, filename: str):
         If a stub file is not found for `filename`, or if the stubfile is
         formmated incorrectly (e.g. if it contains an relative import from
         outside of the module)
-    
+
     Examples
     --------
     >>> from .._shared import lazy
