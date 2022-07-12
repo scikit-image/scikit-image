@@ -67,35 +67,12 @@ dtype_limits
 
 __version__ = '0.20.0.dev0'
 
-submodules = [
-    'color',
-    'data',
-    'draw',
-    'exposure',
-    'feature',
-    'filters',
-    'future',
-    'graph',
-    'io',
-    'measure',
-    'metrics',
-    'morphology',
-    'registration',
-    'restoration',
-    'segmentation',
-    'transform',
-    'util',
-]
-
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 7))
 
 from ._shared import lazy
-__getattr__, __lazy_dir__, _ = lazy.attach(
-    __name__,
-    submodules,
-    submod_attrs={'data': ['data_dir']}
-)
+# add exports to the __init__.pyi file adjacent to this file
+__getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
 
 
 def __dir__():
