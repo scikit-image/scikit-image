@@ -185,11 +185,6 @@ def attach_stub(package_name: str, filename: str):
         If a stub file is not found for `filename`, or if the stubfile is
         formmated incorrectly (e.g. if it contains an relative import from
         outside of the module)
-
-    Examples
-    --------
-    >>> from .._shared import lazy
-    >>> __getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
     """
     stubfile = filename if filename.endswith("i") else f"{filename}i"
 
