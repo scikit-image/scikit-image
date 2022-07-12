@@ -247,8 +247,8 @@ if __name__ == "__main__":
         python_requires='>=3.8',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         package_data={
-            # distribute Cython source files in the wheel
-            "": ["*.pyx", "*.pxd", "*.pxi", ""],
+            # distribute Cython source files and type stubs in the wheel
+            "": ["*.pyx", "*.pxd", "*.pxi", "*.pyi"],
             # tests dirs have an __init__.py so are automatically included
         },
         include_package_data=False,
