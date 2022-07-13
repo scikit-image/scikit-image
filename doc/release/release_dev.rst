@@ -39,7 +39,8 @@ Bugfixes
 Deprecations
 ------------
 
-- The function ``filters.lpi_filter.inverse`` was deprecated.
+- The function ``filters.inverse`` was deprecated. Please use
+  ``filters.filter_inverse``.
 
 
 Contributors to this release
