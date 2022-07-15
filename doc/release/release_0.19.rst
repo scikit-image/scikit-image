@@ -1,3 +1,178 @@
+Announcement: scikit-image 0.19.3
+=================================
+
+We're happy to announce the release of scikit-image v0.19.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+Bugs Fixed
+----------
+- Revert unintentional change to default multichannel behavior introduced in v0.19.0 for ``skimage.restoration.cycle_spin`` (now defaults to single channel again)
+- Fix corner case with an optimal angle of 0 degrees in hough_line_peaks
+- Fixed the gallery example involving registration with log-polar transformations
+- Update test suite for compatibility with the most recent ``tifffile`` release.
+- warp/rotate: fixed a bug with clipping when cval is not in the input range
+- Fix computation of histogram bins for multichannel integer-valued images
+
+General Maintenance
+-------------------
+- Update ``skimage.future.manual_polygon_segmentation`` to work with Matplotlib 3.5.
+- Update ``skimage.io.imread`` to avoid warnings when using ``imageio``>=2.16.2.
+- Now compatible with Pillow >= 9.1 (palette may contain <256 entries)
+- Added support for NumPy 1.23
+
+Pull Requests Included
+----------------------
+- Backport PR #6306 on branch v0.19.x (Fix for error in 'Using Polar and Log-Polar Transformations for Registration') (#6312)
+- Backport PR #6271 on branch v0.19.x (hough_line_peaks fix for corner case with optimal angle=0) (#6313)
+- Backport PR #6261 on branch v0.19.x (Ignore sparse matrix deprecation warning) (#6316)
+- backport PR 6328: Fix issue with newer versions of matplotlib in manual segmentation (#6334)
+- Backport PR #6343 on branch v0.19.x (avoid warnings about change to v3 API from imageio) (#6344)
+- Backport PR #6355 on branch v0.19.x (remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough`) (#6357)
+- Backport PR #6352 on branch v0.19.x (Fix channel_axis default for cycle_spin) (#6358)
+- Backport PR #6348 on branch v0.19.x (Fix smoothed image computation when mask is None in canny) (#6359)
+- Backport PR #6361 on branch v0.19.x (Document support for Path objects in io functions) (#6363)
+- Backport PR #6400 on branch v0.19.x (Add support for NumPy 1.23) (#6403)
+- Backport PR #6335 on branch v0.19.x (warp/rotate: fixed a bug with clipping when cval is not in the input range) (#6411)
+- Backport PR #6413 on branch v0.19.x (Fix computation of histogram bins for multichannel integer-valued images) (#6414)
+
+10 authors added to this release [alphabetical by first name or login]
+----------------------------------------------------------------------
+- Albert Y. Shih
+- Bartłomiej Śmietanka
+- Dave Mellert
+- Gregory Lee
+- Graham Inggs
+- Jarrod Millman
+- John Hagen
+- Mark Harfouche
+- Riadh Fezzani
+- Stefan van der Walt
+
+7 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory Lee
+- Jarrod Millman
+- Juan Nunez-Iglesias
+- Lars Grüter
+- Mark Harfouche
+- Riadh Fezzani
+
+
+scikit-image 0.19.2
+===================
+
+We're happy to announce the release of scikit-image v0.19.2! This is primarily
+a bug fix release, although there is one new gallery example related to
+detection of fluorescence at the nuclear envelope of mammalian cells.
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+Pull Requests Included
+----------------------
+- fix mistake in tests.yml made during backport (gh-6129)
+- Backport PR #6145 on branch v0.19.x (Fix channel_axis handling in pyramid_gaussian and pyramid_laplace) (gh-6155)
+- Backport PR #6130 on branch v0.19.x (bump deprecated Azure windows environment) (gh-6131)
+- Backport PR #6148 on branch v0.19.x (deprecate n_iter_max (should be max_num_iter)) (gh-6156)
+- Backport PR #6152 on branch v0.19.x (specify python version used by mybinder.org for gallery demos) (gh-6157)
+- Backport PR #6139 on branch v0.19.x (fix phase_cross_correlation typo) (gh-6158)
+- Backport PR #6133 on branch v0.19.x (Update user warning message for viewer module.) (gh-6159)
+- Backport PR #6169 on branch v0.19.x (Fix unintended change to output dtype of match_histograms) (gh-6172)
+- Backport PR #6184 on branch v0.19.x (Fix SIFT wrong octave indices + typo) (gh-6186)
+- Backport PR #6191 on branch v0.19.x (Fix issue6190 - inconsistent default parameters in pyramids.py) (gh-6193)
+- Backport PR #6207 on branch v0.19.x (Always set params to nan when ProjectiveTransform.estimate fails) (gh-6210)
+- Backport PR #5262 on branch v0.19.x (Add textbook-like tutorial on measuring fluorescence at nuclear envelope.) (gh-6213)
+- Backport PR #6087 on branch v0.19.x (Add two datasets for use in upcoming scientific tutorials.) (gh-6215)
+- Backport PR #6214 on branch v0.19.x (EuclideanTransform.estimate should return False when NaNs are present) (gh-6221)
+- Backport PR #6219 on branch v0.19.x (Allow the output_shape argument to be any iterable for resize and resize_local_mean) (gh-6222)
+- Backport PR #6223 on branch v0.19.x (Update filename in testing instructions.) (gh-6225)
+- Backport PR #6231 on branch v0.19.x (Update imports/refs from deprecated scipy.ndimage.filters namespace) (gh-6233)
+- Backport PR #6229 on branch v0.19.x (Remove redundant testing on Appveyor) (gh-6234)
+- Backport PR #6183 on branch v0.19.x (Fix decorators warnings stacklevel) (gh-6238)
+- Backport PR #6239 on branch v0.19.x (DOC: fix SciPy intersphinx) (gh-6241)
+- Backport PR #6232 on branch v0.19.x (Include Cython sources via package_data) (gh-6244)
+- Backport PR #6227 on branch v0.19.x (Fix calculation of Z normal in marching cubes) (gh-6245)
+- Backport PR #6242 on branch v0.19.x (Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0`) (gh-6246)
+- Backport PR #6211 on branch v0.19.x (PiecewiseAffineTransform.estimate return should reflect underlying transforms) gh-6247
+- update MacOS libomp installation in wheel building script (gh-6249)
+
+
+9 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Chris Roat
+- Fabian Schneider
+- Gregory Lee
+- Hande Gözükan
+- Larry Bradley
+- Marianne Corvellec
+- Mark Harfouche
+- Miles Lucas
+- Riadh Fezzani
+
+8 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory Lee
+- Juan Nunez-Iglesias
+- Marianne Corvellec
+- Mark Harfouche
+- Riadh Fezzani
+- Robert Haase
+- Stefan van der Walt
+
+
+scikit-image 0.19.1
+===================
+
+We're happy to announce the release of scikit-image v0.19.1!
+
+This is a small bug fix release that resolves a couple of backwards compatibility issues and a couple of issues with the wheels on PyPI. Specifically, MacOs wheels for Apple M1 (arm64) on PyPI were broken in 0.19.0, but should now be repaired. The arm64 wheels are for MacOs >= 12 only. Wheel sizes are also greatly reduced relative to 0.19.0 by stripping debug symbols from the binaries and making sure that Cython-generated source files are not bundled in the wheels.
+
+
+Pull Requests Included
+----------------------
+- Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) (gh-6115)
+- Backport PR #6097 on branch v0.19.x (restore non-underscore functions in skimage.data) (gh-6099)
+- Backport PR #6095 on branch v0.19.x (Preserve backwards compatibility for `channel_axis` parameter in transform functions) (gh-6100)
+- Backport PR #6103 on branch v0.19.x (make rank filter test comparisons robust across architectures) (gh-6106)
+- Backport PR #6105 on branch v0.19.x (pass a specific random_state into ransac in test_ransac_geometric) (gh-6107)
+- Fix two equality comparison bugs in the wheel build script (gh-6098)
+- Backport of gh-6109 (Add linker flags to strip debug symbols during wheel building) (gh-6110)
+- Pin setuptools maximum in v0.19.x to avoid breaking on planned distutils API changes (gh-6112)
+- Avoid potential circular import of rgb2gray (gh-6113)
+- Backport PR #6089 on branch v0.19.x (Skip tests requiring fetched data) (gh-6115)
+- Backport PR #6118 on branch v0.19.x (Fixes to tests.yml and fixes for expected warnings) (gh-6127)
+- Backport PR #6114 on branch v0.19.x (relax test condition to make it more robust to variable CI load) (gh-6128)
+
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Gregory R. Lee
+- Joshua Newton
+- Mark Harfouche
+
+5 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Gregory R. Lee
+- Juan Nunez-Iglesias
+- Marianne Corvellec
+- Mark Harfouche
+- Stefan van der Walt
+
+
 Announcement: scikit-image 0.19.0
 =================================
 
@@ -35,6 +210,10 @@ Pythran as an alternative to Cython for generating compiled code. We plan to
 keep Cython support as well going forward, so developers are free to use either
 one as appropriate. For those curious about Pythran, a good overview was given
 in the SciPy 2021 presentation, "Building SciPy Kernels with Pythran" (https://www.youtube.com/watch?v=6a9D9WL6ZjQ).
+
+This release now supports Python 3.7-3.10. Apple M1 architecture (arm64)
+support is new to this release. MacOS 12 wheels are provided for
+Python 3.8-3.10.
 
 
 New Features
@@ -202,6 +381,7 @@ Improvements
 - replace use of scipy.ndimage.gaussian_filter with skimage.filters.gaussian
   (gh-5872)
 - add channel_axis argument to quickshift (gh-5987)
+- add MacOS arm64 wheels (gh-6068)
 
 
 API Changes

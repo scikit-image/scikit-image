@@ -11,10 +11,6 @@ Version 0.17
 Version 0.20
 ------------
 
-* In ``skimage/feature/peak.py``, remove the `indices` argument and
-  the decorator `remove_arg`.
-* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
-  decorator from `find_contours`.
 * In ``skimage/feature/corner.py``, change `order` default to 'rc' in
   `structure_tensor`.
 * In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
@@ -37,6 +33,8 @@ Other (2022)
 ------------
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
+  to (sparse) matricies (instead of arrays).
 
 Other (2023)
 ------------

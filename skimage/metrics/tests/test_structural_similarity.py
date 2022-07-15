@@ -243,8 +243,8 @@ def test_structural_similarity_small_image(dtype):
 
 def test_invalid_input():
     # size mismatch
-    X = np.zeros((9, 9), dtype=np.double)
-    Y = np.zeros((8, 8), dtype=np.double)
+    X = np.zeros((9, 9), dtype=np.float64)
+    Y = np.zeros((8, 8), dtype=np.float64)
     with pytest.raises(ValueError):
         structural_similarity(X, Y)
     # win_size exceeds image extent

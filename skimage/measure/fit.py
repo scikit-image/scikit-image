@@ -543,7 +543,7 @@ class EllipseModel(BaseModel):
         #                                + b * ctheta * ct)
         #     return [dfx_t + dfy_t]
 
-        residuals = np.empty((N, ), dtype=np.double)
+        residuals = np.empty((N, ), dtype=np.float64)
 
         # initial guess for parameter t of closest point on ellipse
         t0 = np.arctan2(y - yc, x - xc) - theta

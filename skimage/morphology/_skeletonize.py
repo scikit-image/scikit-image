@@ -22,7 +22,7 @@ def skeletonize(image, *, method=None):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
+        An image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
@@ -77,7 +77,7 @@ def skeletonize(image, *, method=None):
     """
 
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image)
+        skeleton = skeletonize_2d(image.astype(bool, copy=False))
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
@@ -117,7 +117,7 @@ def skeletonize_2d(image):
     removing pixels on object borders. This continues until no
     more pixels can be removed.  The image is correlated with a
     mask that assigns each pixel a number in the range [0...255]
-    corresponding to each possible pattern of its 8 neighbouring
+    corresponding to each possible pattern of its 8 neighboring
     pixels. A look up table is then used to assign the pixels a
     value of 0, 1, 2 or 3, which are selectively removed during
     the iterations.
@@ -160,16 +160,8 @@ def skeletonize_2d(image):
 
     """
 
-    # convert to unsigned int (this should work for boolean values)
-    image = image.astype(np.uint8)
-
-    # check some properties of the input image:
-    #  - 2D
-    #  - binary image with only 0's and 1's
     if image.ndim != 2:
-        raise ValueError('Skeletonize requires a 2D array')
-    if not np.all(np.in1d(image.flat, (0, 1))):
-        raise ValueError('Image contains values other than 0 and 1')
+        raise ValueError("Zhang's skeletonize method requires a 2D array")
 
     return _fast_skeletonize(image)
 
@@ -453,7 +445,7 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
     # (if the number of connected components is different with and
     # without the central pixel)
     # OR
-    # 3. Keep if # pixels in neighbourhood is 2 or less
+    # 3. Keep if # pixels in neighborhood is 2 or less
     # Note that table is independent of image
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
     table = (center_is_foreground  # condition 1.
@@ -479,7 +471,7 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
     # with fewer neighbors are more "cornery" and should be processed last.
     # We use a cornerness_table lookup table where the score of a
     # configuration is the number of background (0-value) pixels in the
-    # 3x3 neighbourhood
+    # 3x3 neighborhood
     cornerness_table = np.array([9 - np.sum(_pattern_of(index))
                                  for index in range(512)])
     corner_score = _table_lookup(masked_image, cornerness_table)

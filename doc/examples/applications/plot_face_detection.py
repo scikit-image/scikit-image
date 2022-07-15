@@ -43,7 +43,7 @@ computations and possibly decrease the amount of false detections. You can save
 a lot of time by increasing the ``min_size`` parameter, because the majority of
 time is spent on searching on the smallest scales.
 
-``min_neighbour_number`` and ``intersection_score_threshold`` parameters are
+``min_neighbor_number`` and ``intersection_score_threshold`` parameters are
 made to cluster the excessive detections of the same face and to filter out
 false detections.  True faces usually has a lot of dectections around them and
 false ones usually have single detection. First algorithm searches for
@@ -53,7 +53,7 @@ intersection score between them is larger then
 equation (intersection area) / (small rectangle ratio). The described
 intersection criteria was chosen over intersection over union to avoid a corner
 case when small rectangle inside of a big one have small intersection score.
-Then each cluster is thresholded using ``min_neighbour_number`` parameter which
+Then each cluster is thresholded using ``min_neighbor_number`` parameter which
 leaves the clusters that have a same or bigger number of detections in them.
 
 You should also take into account that false detections are inevitable and if
