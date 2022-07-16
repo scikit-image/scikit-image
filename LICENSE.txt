@@ -36,7 +36,7 @@ Function: skimage/_shared/version_requirements.py:_check_version
 Copyright: 2013 The IPython Development Team
 License: BSD-3-Clause
 
-Function: skimage/_shared/version_requirements.py:is_installed:
+Function: skimage/_shared/version_requirements.py:is_installed
 Copyright: 2009-2011 Pierre Raybaut
 License: MIT
 
