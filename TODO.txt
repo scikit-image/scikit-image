@@ -3,18 +3,8 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.17
 ------------
 
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.20
-------------
-
-* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
-  `structure_tensor`.
-* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
-  function.
 
 Version 1.0
 -----------
