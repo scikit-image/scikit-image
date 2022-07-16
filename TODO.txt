@@ -11,9 +11,6 @@ Version 1.0
 
 * consider removing the argument `coordinates` in
   `skimage.segmentation.active_contour`, which has not effect.
-* In ``skimage/morphology/misc.py`` remove the deprecated parameter
-  ``in_place`` in remove_small_holes(), remove_small_objects() and
-  clear_border(), and update the tests.
 * Remove the deprecation warning for `input` kwarg of the `label`
   function in `skimage/measure/_label.py`
 * Change the warning about poorly conditioned data to a ValueError within
