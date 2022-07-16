@@ -40,10 +40,6 @@ def _check_version(actver, version, cmp_op):
     it is assumed that the dependency is satisfied.
     Users on dev branches are responsible for keeping their own packages up to
     date.
-
-    Copyright (C) 2013  The IPython Development Team
-
-    Distributed under the terms of the BSD License.
     """
     try:
         if cmp_op == '>':
