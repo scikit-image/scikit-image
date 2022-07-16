@@ -10,8 +10,9 @@ import scipy.ndimage as ndi
 
 from ..util.dtype import dtype_limits
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from .._shared.utils import _supported_float_type, check_nD
 from ..filters._gaussian import gaussian
+from ._canny_cy import _nonmaximum_suppression_bilinear
 
 
 def _preprocess(image, mask, sigma, mode, cval):
@@ -55,12 +56,14 @@ def _preprocess(image, mask, sigma, mode, cval):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
-
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
                            preserve_range=False)
+    compute_bleedover = (mode == 'constant' or mask is not None)
+    float_type = _supported_float_type(image.dtype)
     if mask is None:
-        mask = np.ones(image.shape)
-        masked_image = image.copy()
+        if compute_bleedover:
+            mask = np.ones(image.shape, dtype=float_type)
+        masked_image = image
 
         eroded_mask = np.ones(image.shape, dtype=bool)
         eroded_mask[:1, :] = 0
@@ -78,11 +81,12 @@ def _preprocess(image, mask, sigma, mode, cval):
         s = ndi.generate_binary_structure(2, 2)
         eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
 
-    # Compute the fractional contribution of masked pixels by applying
-    # the function to the mask (which gets you the fraction of the
-    # pixel data that's due to significant points)
-    bleed_over = gaussian(mask.astype(float, copy=False),
-                          **gaussian_kwargs) + np.finfo(float).eps
+    if compute_bleedover:
+        # Compute the fractional contribution of masked pixels by applying
+        # the function to the mask (which gets you the fraction of the
+        # pixel data that's due to significant points)
+        bleed_over = gaussian(mask.astype(float_type, copy=False),
+                              **gaussian_kwargs) + np.finfo(float_type).eps
 
     # Smooth the masked image
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
@@ -90,109 +94,10 @@ def _preprocess(image, mask, sigma, mode, cval):
     # Lower the result by the bleed-over fraction, so you can
     # recalibrate by dividing by the function on the mask to recover
     # the effect of smoothing from just the significant pixels.
-    smoothed_image /= bleed_over
+    if compute_bleedover:
+        smoothed_image /= bleed_over
 
     return smoothed_image, eroded_mask
-
-
-def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
-                      col_slices, out):
-    """Get the magnitudes shifted left to make a matrix of the points to
-    the right of pts. Similarly, shift left and down to get the points
-    to the top right of pts.
-    """
-    r_0, r_1, r_2, r_3 = row_slices
-    c_0, c_1, c_2, c_3 = col_slices
-    c1 = magnitude[r_0, c_0][pts[r_1, c_1]]
-    c2 = magnitude[r_2, c_2][pts[r_3, c_3]]
-    m = magnitude[pts]
-    w = w_num[pts] / w_denum[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[r_1, c_1][pts[r_0, c_0]]
-    c2 = magnitude[r_3, c_3][pts[r_2, c_2]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    out[pts] = c_plus & c_minus
-
-    return out
-
-
-def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
-    """Edge thinning by non-maximum suppression.
-
-    Finds the normal to the edge at each point using the arctangent of the
-    ratio of the Y sobel over the X sobel - pragmatically, we can
-    look at the signs of X and Y and the relative magnitude of X vs Y
-    to sort the points into 4 categories: horizontal, vertical,
-    diagonal and antidiagonal.
-
-    Look in the normal and reverse directions to see if the values
-    in either of those directions are greater than the point in question.
-    Use interpolation (via _set_local_maxima) to get a mix of points
-    instead of picking the one that's the closest to the normal.
-    """
-    abs_isobel = np.abs(isobel)
-    abs_jsobel = np.abs(jsobel)
-
-    eroded_mask = eroded_mask & (magnitude > 0)
-
-    # Normals' orientations
-    is_horizontal = eroded_mask & (abs_isobel >= abs_jsobel)
-    is_vertical = eroded_mask & (abs_isobel <= abs_jsobel)
-    is_up = (isobel >= 0)
-    is_down = (isobel <= 0)
-    is_right = (jsobel >= 0)
-    is_left = (jsobel <= 0)
-    #
-    # --------- Find local maxima --------------
-    #
-    # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
-    # 90-135 degrees and 135-180 degrees.
-    #
-    local_maxima = np.zeros(magnitude.shape, bool)
-    # ----- 0 to 45 degrees ------
-    # Mix diagonal and horizontal
-    pts_plus = is_up & is_right
-    pts_minus = is_down & is_left
-    pts = ((pts_plus | pts_minus) & is_horizontal)
-    # Get the magnitudes shifted left to make a matrix of the points to the
-    # right of pts. Similarly, shift left and down to get the points to the
-    # top right of pts.
-    local_maxima = _set_local_maxima(
-        magnitude, pts, abs_jsobel, abs_isobel,
-        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
-        [slice(None), slice(None), slice(1, None), slice(-1)],
-        local_maxima)
-    # ----- 45 to 90 degrees ------
-    # Mix diagonal and vertical
-    #
-    pts = ((pts_plus | pts_minus) & is_vertical)
-    local_maxima = _set_local_maxima(
-        magnitude, pts, abs_isobel, abs_jsobel,
-        [slice(None), slice(None), slice(1, None), slice(-1)],
-        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
-        local_maxima)
-    # ----- 90 to 135 degrees ------
-    # Mix anti-diagonal and vertical
-    #
-    pts_plus = is_down & is_right
-    pts_minus = is_up & is_left
-    pts = ((pts_plus | pts_minus) & is_vertical)
-    local_maxima = _set_local_maxima(
-        magnitude, pts, abs_isobel, abs_jsobel,
-        [slice(None), slice(None), slice(-1), slice(1, None)],
-        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
-        local_maxima)
-    # ----- 135 to 180 degrees ------
-    # Mix anti-diagonal and anti-horizontal
-    #
-    pts = ((pts_plus | pts_minus) & is_horizontal)
-    local_maxima = _set_local_maxima(
-        magnitude, pts, abs_jsobel, abs_isobel,
-        [slice(-1), slice(1, None), slice(-1), slice(1, None)],
-        [slice(None), slice(None), slice(1, None), slice(-1)],
-        local_maxima)
-
-    return local_maxima
 
 
 def canny(image, sigma=1., low_threshold=None, high_threshold=None,
@@ -312,7 +217,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
-    magnitude = np.hypot(isobel, jsobel)
+    magnitude = isobel * isobel
+    magnitude += jsobel * jsobel
+    np.sqrt(magnitude, out=magnitude)
 
     if use_quantiles:
         low_threshold, high_threshold = np.percentile(magnitude,
@@ -320,21 +227,22 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
                                                        100.0 * high_threshold])
 
     # Non-maximum suppression
-    local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
+    low_masked = _nonmaximum_suppression_bilinear(
+        isobel, jsobel, magnitude, eroded_mask, low_threshold
+    )
 
     # Double thresholding and edge traking
-    low_mask = local_maxima & (magnitude >= low_threshold)
-
     #
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them
     #
+    low_mask = low_masked > 0
     strel = np.ones((3, 3), bool)
     labels, count = ndi.label(low_mask, strel)
     if count == 0:
         return low_mask
 
-    high_mask = local_maxima & (magnitude >= high_threshold)
+    high_mask = low_mask & (low_masked >= high_threshold)
     nonzero_sums = np.unique(labels[high_mask])
     good_label = np.zeros((count + 1,), bool)
     good_label[nonzero_sums] = True

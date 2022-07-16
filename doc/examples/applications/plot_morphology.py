@@ -87,7 +87,7 @@ plot_comparison(orig_phantom, dilated, 'dilation')
 ######################################################################
 # Notice how the white boundary of the image thickens, or gets dilated, as we
 # increase the size of the disk. Also notice the decrease in size of the two
-# black ellipses in the centre, and the thickening of the light gray circle
+# black ellipses in the center, and the thickening of the light gray circle
 # in the center and the 3 patches in the lower part of the image.
 #
 # Opening

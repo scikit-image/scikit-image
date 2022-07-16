@@ -447,39 +447,36 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned can be used as a list of image-data objects,
-    where each entry in the list represents one image. In this regard it is
-    very similar to `ImageCollection`, but the two differ in the treatment
-    of multi-frame images.
+    `MultiImage` returns a list of image-data arrays. In this
+    regard, it is very similar to `ImageCollection`, but the two differ in
+    their treatment of multi-frame images.
 
     For a TIFF image containing N frames of size WxH, `MultiImage` stores
-    all frames of that image as a single entry of shape `(N, W, H)` in the
-    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
+    all frames of that image as a single element of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N elements of shape `(W, H)`.
 
-    For an animated GIF image, `MultiImage` in the current implementation
-    will only read one frame, while `ImageCollection` by default will read
-    all of them.
+    For an animated GIF image, `MultiImage` reads only the first frame, while
+    `ImageCollection` reads all frames by default.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> img = MultiImage(multipage_tiff)
-    >>> len(img) # img contains one file
+    >>> multi_img = MultiImage(multipage_tiff)
+    >>> len(multi_img)  # multi_img contains one element
     1
-    >>> img[0].shape # this image contains two frames of size (15, 10)
+    >>> multi_img[0].shape  # this element is a two-frame image of shape:
     (2, 15, 10)
 
-    >>> ic = ImageCollection(multipage_tiff)
-    >>> len(ic) # ic contains two images
+    >>> image_col = ImageCollection(multipage_tiff)
+    >>> len(image_col)  # image_col contains two elements
     2
-    >>> for frame in ic:
-    ...     print (frame.shape)
+    >>> for frame in image_col:
+    ...     print(frame.shape)  # each element is a frame of shape (15, 10)
     ...
     (15, 10)
     (15, 10)
-
     """
 
     def __init__(self, filename, conserve_memory=True, dtype=None,
