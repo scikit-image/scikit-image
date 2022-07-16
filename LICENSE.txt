@@ -36,7 +36,8 @@ License: BSD-2-Clause
 File: skimage/exposure/_adapthist.py
 License: GraphicsGems-EULA
 
-File: skimage/morphology/_grayreconstruct.pyx
+Files: skimage/morphology/grayreconstruct.py
+       skimage/morphology/_grayreconstruct.pyx
 Copyright: 2003-2009 Massachusetts Institute of Technology
            2009-2011 Broad Institute
            2003 Lee Kamentsky
