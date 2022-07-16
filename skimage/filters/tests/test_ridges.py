@@ -184,8 +184,8 @@ def test_2d_cropped_camera_image():
     assert_allclose(sato(a_black, black_ridges=True, mode='reflect'),
                     sato(a_white, black_ridges=False, mode='reflect'))
 
-    assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
-    assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
+    assert_allclose(frangi(a_black, black_ridges=True),
+                    frangi(a_white, black_ridges=False))
 
     assert_allclose(hessian(a_black, black_ridges=True, mode='reflect'),
                     ones, atol=1 - 1e-7)
@@ -215,8 +215,8 @@ def test_3d_cropped_camera_image():
     assert_allclose(sato(a_black, black_ridges=True, mode='reflect'),
                     sato(a_white, black_ridges=False, mode='reflect'))
 
-    assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
-    assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
+    assert_allclose(frangi(a_black, black_ridges=True),
+                    frangi(a_white, black_ridges=False))
 
     assert_allclose(hessian(a_black, black_ridges=True, mode='reflect'),
                     ones, atol=1 - 1e-7)
@@ -224,9 +224,9 @@ def test_3d_cropped_camera_image():
                     ones, atol=1 - 1e-7)
 
 
-@pytest.mark.parametrize('func, tol', [(frangi, 1e-7),
+@pytest.mark.parametrize('func, tol', [(frangi, 1e-2),
                                        (meijering, 1e-2),
-                                       (sato, 1e-3),
+                                       (sato, 2e-3),
                                        (hessian, 2e-2)])
 def test_border_management(func, tol):
     img = rgb2gray(retina()[300:500, 700:900])
