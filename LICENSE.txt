@@ -47,7 +47,6 @@ Copyright: 2003-2009 Massachusetts Institute of Technology
            2022 Gregory Lee (added a 64-bit integer variant for large images)
 License: BSD-3-Clause
 
-
 File: skimage/segmentation/_expand_labels.py
 Copyright: 2020 Broad Institute
            2020 CellProfiler team
