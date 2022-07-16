@@ -2,7 +2,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn, remove_arg
+from .._shared.utils import warn
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
@@ -47,8 +47,6 @@ def _check_dtype_supported(ar):
                         "Got %s." % ar.dtype)
 
 
-@remove_arg("in_place", changed_version="1.0",
-            help_msg="Please use out argument instead.")
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
                          *, out=None):
     """Remove objects smaller than the specified size.
@@ -151,8 +149,6 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False,
     return out
 
 
-@remove_arg("in_place", changed_version="1.0",
-            help_msg="Please use out argument instead.")
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
                        *, out=None):
     """Remove contiguous holes smaller than the specified size.
