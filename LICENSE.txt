@@ -41,6 +41,11 @@ Copyright: 2003-2009 Massachusetts Institute of Technology
            2003 Lee Kamentsky
 License: BSD-3-Clause
 
+File: skimage/segmentation/_expand_labels.py
+Copyright: 2020 Broad Institute
+           2020 CellProfiler team
+License: BSD-3-Clause
+
 File: skimage/exposure/_adapthist.py
 License: GraphicsGems-EULA
 
