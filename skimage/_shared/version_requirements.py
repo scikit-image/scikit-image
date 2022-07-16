@@ -84,11 +84,6 @@ def is_installed(name, version=None):
     -------
     out : bool
         True if `name` is installed matching the optional version.
-
-    Notes
-    -----
-    Original Copyright (C) 2009-2011 Pierre Raybaut
-    Licensed under the terms of the MIT License.
     """
     if name.lower() == 'python':
         actver = sys.version[:6]
