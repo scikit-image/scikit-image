@@ -33,13 +33,20 @@ Copyright: 2009-2015 Board of Regents of the University of
            2009 Almar Klein
 License: BSD-2-Clause
 
-Files: skimage/morphology/grayreconstruct.py
-       skimage/morphology/_grayreconstruct.pyx
-       skimage/morphology/tests/test_reconstruction.py
+File: skimage/morphology/grayreconstruct.py
+      skimage/morphology/tests/test_reconstruction.py
 Copyright: 2003-2009 Massachusetts Institute of Technology
            2009-2011 Broad Institute
            2003 Lee Kamentsky
 License: BSD-3-Clause
+
+File: skimage/morphology/_grayreconstruct.pyx
+Copyright: 2003-2009 Massachusetts Institute of Technology
+           2009-2011 Broad Institute
+           2003 Lee Kamentsky
+           2022 Gregory Lee (added a 64-bit integer variant for large images)
+License: BSD-3-Clause
+
 
 File: skimage/segmentation/_expand_labels.py
 Copyright: 2020 Broad Institute
