@@ -33,15 +33,16 @@ Copyright: 2009-2015 Board of Regents of the University of
            2009 Almar Klein
 License: BSD-2-Clause
 
-File: skimage/exposure/_adapthist.py
-License: GraphicsGems-EULA
-
 Files: skimage/morphology/grayreconstruct.py
        skimage/morphology/_grayreconstruct.pyx
+       skimage/morphology/tests/test_reconstruction.py
 Copyright: 2003-2009 Massachusetts Institute of Technology
            2009-2011 Broad Institute
            2003 Lee Kamentsky
 License: BSD-3-Clause
+
+File: skimage/exposure/_adapthist.py
+License: GraphicsGems-EULA
 
 Function: skimage/morphology/_skeletonize_cy.pyx:_skeletonize_loop
 Copyright: 2003-2009 Massachusetts Institute of Technology
