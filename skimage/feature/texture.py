@@ -340,7 +340,7 @@ def local_binary_pattern(image, P, R, method='default'):
     }
     if np.issubdtype(image.dtype, np.floating):
         warnings.warn(
-            "Applying `local_binary_pattern` to floating point images may "
+            "Applying `local_binary_pattern` to floating-point images may "
             "give unexpected results when small numerical differences between "
             "adjacent pixels are present. It is recommended to use this "
             "function with images of integer dtype.")
