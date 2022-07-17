@@ -3,6 +3,9 @@ import warnings
 
 import numpy as np
 
+# keep .dtype imports first to avoid circular imports
+from .dtype import (dtype_limits, img_as_float, img_as_float32, img_as_float64,
+                    img_as_bool, img_as_int, img_as_ubyte, img_as_uint)
 from ._bounding_box_crop import bounding_box_crop
 from ._invert import invert
 from ._label import label_points
@@ -12,8 +15,6 @@ from ._regular_grid import regular_grid, regular_seeds
 from .apply_parallel import apply_parallel
 from .arraycrop import crop
 from .compare import compare_images
-from .dtype import (dtype_limits, img_as_float, img_as_float32, img_as_float64,
-                    img_as_bool, img_as_int, img_as_ubyte, img_as_uint)
 from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
