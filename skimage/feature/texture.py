@@ -343,7 +343,7 @@ def local_binary_pattern(image, P, R, method='default'):
             "Applying `local_binary_pattern` to floating point images may "
             "give unexpected results when small numerical differences between "
             "adjacent pixels are present. It is recommended to use this "
-            "function with images having an integer dtype.")
+            "function with images of integer dtype.")
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
