@@ -28,7 +28,7 @@ def bounding_box_crop(image, bounding_box, axes=None, copy=False):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.util.crop import bounding_box_crop
+    >>> from skimage.util import bounding_box_crop
     >>> img = data.camera()
     >>> img.shape
     (512, 512)
