@@ -288,7 +288,7 @@ class TestLBP():
 
         # Use P=4 to avoid interpolation effects
         P, R = 4, 1
-        msg = "Applying `local_binary_pattern` to floating point images"
+        msg = "Applying `local_binary_pattern` to floating-point images"
         with expected_warnings([msg]):
             lbp = local_binary_pattern(image, P, R, 'var')
 
