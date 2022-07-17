@@ -13,15 +13,6 @@ The most important insight in the paper is that entry time onto the queue
 solves two problems: a pixel should be assigned to the neighbor with the
 largest gradient or, if there is no gradient, pixels on a plateau should
 be split between markers on opposite sides.
-
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-
-Original author: Lee Kamentsky
 """
 
 import numpy as np

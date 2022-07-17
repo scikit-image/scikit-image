@@ -3,15 +3,6 @@ Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
 Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
 
 http://tog.acm.org/resources/GraphicsGems/
-
-The Graphics Gems code is copyright-protected.  In other words, you cannot
-claim the text of the code as your own and resell it. Using the code is
-permitted in any program, product, or library, non-commercial or commercial.
-Giving credit is not required, though is a nice gesture.  The code comes as-is,
-and if there are any flaws or problems with any Gems code, nobody involved with
-Gems - authors, editors, publishers, or webmasters - are to be held
-responsible.  Basically, don't be a jerk, and remember that anything free
-comes with no guarantee.
 """
 import math
 import numbers
