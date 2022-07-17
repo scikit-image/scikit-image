@@ -5,7 +5,7 @@ import numpy as np
 from .version_requirements import require
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def polygon_clip(rp, cp, r0, c0, r1, c1):
     """Clip a polygon to the given bounding box.
 
@@ -32,10 +32,6 @@ def polygon_clip(rp, cp, r0, c0, r1, c1):
     poly = path.Path(np.vstack((rp, cp)).T, closed=True)
     clip_rect = transforms.Bbox([[r0, c0], [r1, c1]])
     poly_clipped = poly.clip_to_bbox(clip_rect).to_polygons()[0]
-
-    # This should be fixed in matplotlib >1.5
-    if np.all(poly_clipped[-1] == poly_clipped[-2]):
-        poly_clipped = poly_clipped[:-1]
 
     return poly_clipped[:, 0], poly_clipped[:, 1]
 

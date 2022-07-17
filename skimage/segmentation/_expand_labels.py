@@ -1,14 +1,3 @@
-"""
-expand_labels is derived from code that was
-originally part of CellProfiler, code licensed under BSD license.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2020 Broad Institute
-All rights reserved.
-
-Original authors: CellProfiler team
-
-"""
 import numpy as np
 from scipy.ndimage import distance_transform_edt
 

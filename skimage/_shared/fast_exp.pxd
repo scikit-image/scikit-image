@@ -6,8 +6,8 @@ cimport numpy as cnp
 from .fused_numerics cimport np_floats
 
 cdef extern from "fast_exp.h":
-    double _fast_exp(double y) nogil
-    float _fast_expf(float y) nogil
+    cnp.float64_t _fast_exp(cnp.float64_t y) nogil
+    cnp.float32_t _fast_expf(cnp.float32_t y) nogil
 
 
 cdef inline np_floats _fast_exp_floats(np_floats x) nogil:

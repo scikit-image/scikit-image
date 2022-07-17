@@ -1,17 +1,10 @@
-"""
-These tests are originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-"""
+import math
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal
 
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.utils import _supported_float_type
 from skimage.morphology.grayreconstruct import reconstruction
 
 
@@ -42,29 +35,42 @@ def test_one_image_peak():
     assert_array_almost_equal(reconstruction(image, mask), 2)
 
 
-def test_two_image_peaks():
+# minsize chosen to test sizes covering use of 8, 16 and 32-bit integers
+# internally
+@pytest.mark.parametrize('minsize', [None, 200, 20000, 40000, 80000])
+@pytest.mark.parametrize('dtype', [np.uint8, np.float32])
+def test_two_image_peaks(minsize, dtype):
     """Test reconstruction with two peak pixels isolated by the mask"""
-    image = np.array([[1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 2, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 3, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1]])
+    image = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 2, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 3, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=dtype)
 
-    mask = np.array([[4, 4, 4, 1, 1, 1, 1, 1],
-                     [4, 4, 4, 1, 1, 1, 1, 1],
-                     [4, 4, 4, 1, 1, 1, 1, 1],
-                     [1, 1, 1, 1, 1, 4, 4, 4],
-                     [1, 1, 1, 1, 1, 4, 4, 4],
-                     [1, 1, 1, 1, 1, 4, 4, 4]])
+    mask = np.array([[4, 4, 4, 1, 1, 1, 1, 1, 1],
+                     [4, 4, 4, 1, 1, 1, 1, 1, 1],
+                     [4, 4, 4, 1, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 4, 4, 4, 1],
+                     [1, 1, 1, 1, 1, 4, 4, 4, 1],
+                     [1, 1, 1, 1, 1, 4, 4, 4, 1]], dtype=dtype)
 
-    expected = np.array([[2, 2, 2, 1, 1, 1, 1, 1],
-                         [2, 2, 2, 1, 1, 1, 1, 1],
-                         [2, 2, 2, 1, 1, 1, 1, 1],
-                         [1, 1, 1, 1, 1, 3, 3, 3],
-                         [1, 1, 1, 1, 1, 3, 3, 3],
-                         [1, 1, 1, 1, 1, 3, 3, 3]])
-    assert_array_almost_equal(reconstruction(image, mask), expected)
+    expected = np.array([[2, 2, 2, 1, 1, 1, 1, 1, 1],
+                         [2, 2, 2, 1, 1, 1, 1, 1, 1],
+                         [2, 2, 2, 1, 1, 1, 1, 1, 1],
+                         [1, 1, 1, 1, 1, 3, 3, 3, 1],
+                         [1, 1, 1, 1, 1, 3, 3, 3, 1],
+                         [1, 1, 1, 1, 1, 3, 3, 3, 1]], dtype=dtype)
+    if minsize is not None:
+        # increase data size by tiling (done to test various int types)
+        nrow = math.ceil(math.sqrt(minsize / image.size))
+        ncol = math.ceil(minsize / (image.size * nrow))
+        image = np.tile(image, (nrow, ncol))
+        mask = np.tile(mask, (nrow, ncol))
+        expected = np.tile(expected, (nrow, ncol))
+    out = reconstruction(image, mask)
+    assert out.dtype == _supported_float_type(mask.dtype)
+    assert_array_almost_equal(out, expected)
 
 
 def test_zero_image_one_mask():
@@ -73,12 +79,17 @@ def test_zero_image_one_mask():
     assert_array_almost_equal(result, 0)
 
 
-def test_fill_hole():
+@pytest.mark.parametrize('dtype', [np.int8, np.uint8, np.int16, np.uint16,
+                                   np.int32, np.uint32, np.int64, np.uint64,
+                                   np.float16, np.float32, np.float64])
+def test_fill_hole(dtype):
     """Test reconstruction by erosion, which should fill holes in mask."""
-    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
-    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0], dtype=dtype)
+    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0], dtype=dtype)
     result = reconstruction(seed, mask, method='erosion')
-    assert_array_almost_equal(result, np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0]))
+    assert result.dtype == _supported_float_type(mask.dtype)
+    expected = np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0], dtype=dtype)
+    assert_array_almost_equal(result, expected)
 
 
 def test_invalid_seed():

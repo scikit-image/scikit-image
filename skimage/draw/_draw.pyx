@@ -137,11 +137,11 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef int dc_prime
 
     cdef int dr = abs(r0 - r1)
-    cdef float err = dc - dr
-    cdef float err_prime
+    cdef cnp.float64_t err = dc - dr
+    cdef cnp.float64_t err_prime
 
     cdef int c, r, sign_c, sign_r
-    cdef float ed
+    cdef cnp.float64_t ed
 
     if c0 < c1:
         sign_c = 1
@@ -294,8 +294,8 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
-    cdef double dceil = 0
-    cdef double dceil_prev = 0
+    cdef cnp.float64_t dceil = 0
+    cdef cnp.float64_t dceil_prev = 0
 
     cdef char cmethod
     if method == 'bresenham':
@@ -374,8 +374,8 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
-    cdef double dceil = 0
-    cdef double dceil_prev = 0
+    cdef cnp.float64_t dceil = 0
+    cdef cnp.float64_t dceil_prev = 0
 
     cdef list rr = [r, c,  r,  c, -r, -c, -r, -c]
     cdef list cc = [c, r, -c, -r,  c,  r, -c, -r]
@@ -407,7 +407,7 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
 
 
 def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
-                       Py_ssize_t c_radius, double orientation, shape):
+                       Py_ssize_t c_radius, cnp.float64_t orientation, shape):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -416,7 +416,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
         Centre coordinate of ellipse.
     r_radius, c_radius : int
         Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
-    orientation : double
+    orientation : cnp.float64_t
         Major axis orientation in clockwise direction as radians.
     shape : tuple
         Image shape which is used to determine the maximum extent of output pixel
@@ -451,7 +451,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
     cdef Py_ssize_t r, c, e2, err
 
     cdef int ir0, ir1, ic0, ic1, ird, icd
-    cdef double sin_angle, ra, ca, za, a, b
+    cdef cnp.float64_t sin_angle, ra, ca, za, a, b
 
     if orientation == 0:
         c = -c_radius
@@ -533,7 +533,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
 def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
                     Py_ssize_t r1, Py_ssize_t c1,
                     Py_ssize_t r2, Py_ssize_t c2,
-                    double weight):
+                    cnp.float64_t weight):
     """Generate Bezier segment coordinates.
 
     Parameters
@@ -544,7 +544,7 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
         Coordinates of the middle control point.
     r2, c2 : int
         Coordinates of the last control point.
-    weight : double
+    weight : cnp.float64_t
         Middle control point weight, it describes the line tension.
 
     Returns
@@ -569,16 +569,16 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
     cdef list rr = list()
 
     # Steps
-    cdef double sc = c2 - c1
-    cdef double sr = r2 - r1
+    cdef cnp.float64_t sc = c2 - c1
+    cdef cnp.float64_t sr = r2 - r1
 
-    cdef double d2c = c0 - c2
-    cdef double d2r = r0 - r2
-    cdef double d1c = c0 - c1
-    cdef double d1r = r0 - r1
-    cdef double rc = d1c * sr + d1r * sc
-    cdef double cur = d1c * sr - d1r * sc
-    cdef double err
+    cdef cnp.float64_t d2c = c0 - c2
+    cdef cnp.float64_t d2r = r0 - r2
+    cdef cnp.float64_t d1c = c0 - c1
+    cdef cnp.float64_t d1r = r0 - r1
+    cdef cnp.float64_t rc = d1c * sr + d1r * sc
+    cdef cnp.float64_t cur = d1c * sr - d1r * sc
+    cdef cnp.float64_t err
 
     cdef bint test1, test2
 
@@ -661,7 +661,7 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
 def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
                   Py_ssize_t r1, Py_ssize_t c1,
                   Py_ssize_t r2, Py_ssize_t c2,
-                  double weight, shape):
+                  cnp.float64_t weight, shape):
     """Generate Bezier curve coordinates.
 
     Parameters
@@ -672,7 +672,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
         Coordinates of the middle control point.
     r2, c2 : int
         Coordinates of the last control point.
-    weight : double
+    weight : cnp.float64_t
         Middle control point weight, it describes the line tension.
     shape : tuple
         Image shape which is used to determine the maximum extent of output
@@ -701,7 +701,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
     cdef list rr = list()
 
     cdef int vc, vr
-    cdef double dc, dr, ww, t, q
+    cdef cnp.float64_t dc, dr, ww, t, q
     vc = c0 - 2 * c1 + c2
     vr = r0 - 2 * r1 + r2
 
@@ -716,7 +716,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
                 r0 = r2
                 r2 = <Py_ssize_t>(dr + r1)
         if (c0 == c2) or (weight == 1.):
-            t = <double>(c0 - c1) / vc
+            t = <cnp.float64_t>(c0 - c1) / vc
         else:
             q = sqrt(4. * weight * weight * (c0 - c1) * (c2 - c1) + (c2 - c0) * floor(c2 - c0))
             if (c1 < c0):
