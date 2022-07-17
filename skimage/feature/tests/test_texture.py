@@ -254,7 +254,7 @@ class TestLBP():
     @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
     def test_float_warning(self, dtype):
         image = self.image.astype(dtype)
-        msg = "Applying `local_binary_pattern` to floating point images"
+        msg = "Applying `local_binary_pattern` to floating-point images"
         with expected_warnings([msg]):
             lbp = local_binary_pattern(image, 8, 1, 'ror')
         ref = np.array([[  0, 127,   0, 255,   3, 255],
