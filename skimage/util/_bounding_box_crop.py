@@ -28,7 +28,6 @@ def bounding_box_crop(image, bounding_box, axes=None, copy=False):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.util import bounding_box_crop
     >>> img = data.camera()
     >>> img.shape
     (512, 512)
@@ -43,11 +42,11 @@ def bounding_box_crop(image, bounding_box, axes=None, copy=False):
     (75, 100)
     """
 
-    # empty length of bounding box detected on None detected
+    # empty length of bounding box detected on None
     if not bounding_box:
         return image
 
-    # check data isinstance of numpy array
+    # ensure data is a numpy array
     if not isinstance(image, np.ndarray):
         raise ValueError("data must be numpy array")
 
