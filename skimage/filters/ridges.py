@@ -50,37 +50,6 @@ def _divide_nonzero(array1, array2, cval=1e-10):
     return np.divide(array1, denominator)
 
 
-def _sortbyabs(array, axis=0):
-    """
-    Sort array along a given axis by absolute values.
-
-    Parameters
-    ----------
-    array : (N, ..., M) ndarray
-        Array with input image data.
-    axis : int
-        Axis along which to sort.
-
-    Returns
-    -------
-    array : (N, ..., M) ndarray
-        Array sorted along a given axis by absolute values.
-
-    Notes
-    -----
-    Modified from: http://stackoverflow.com/a/11253931/4067734
-    """
-
-    # Create auxiliary array for indexing
-    index = list(np.ix_(*[np.arange(i) for i in array.shape]))
-
-    # Get indices of abs sorted array
-    index[axis] = np.abs(array).argsort(axis)
-
-    # Return abs sorted array
-    return array[tuple(index)]
-
-
 def _check_sigmas(sigmas):
     """Check sigma values for ridges filters.
 
@@ -164,7 +133,8 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     if sorting == 'abs':
 
         # Sort eigenvalues by absolute values in ascending order
-        hessian_eigenvalues = _sortbyabs(hessian_eigenvalues, axis=0)
+        hessian_eigenvalues = np.take_along_axis(
+            hessian_eigenvalues, abs(hessian_eigenvalues).argsort(0), 0)
 
     elif sorting == 'val':
 

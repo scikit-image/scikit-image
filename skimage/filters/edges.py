@@ -1,14 +1,3 @@
-"""
-
-Sobel and Prewitt filters originally part of CellProfiler, code licensed under
-both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-
-"""
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import binary_erosion, convolve
