@@ -360,7 +360,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.nodes[n].update({'labels': [n],
                                'pixel count': 0,
                                'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
+                                                       dtype=np.float64)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
@@ -448,7 +448,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.

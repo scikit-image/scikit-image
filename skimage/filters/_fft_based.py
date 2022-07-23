@@ -89,7 +89,7 @@ def butterworth(
         Input image.
     cutoff_frequency_ratio : float, optional
         Determines the position of the cut-off relative to the shape of the
-        FFT. This should be in the range [0, 0.5].
+        FFT. This value should be in the range [0, 0.5].
     high_pass : bool, optional
         Whether to perform a high pass filter. If False, a low pass filter is
         performed.
@@ -103,11 +103,11 @@ def butterworth(
         When True, the square of a Butterworth filter is used. See notes below
         for more details.
     npad : int, optional
-        Pad each edge of image the by `npad` pixels using `numpy.pad`'s
+        Pad each edge of the image by `npad` pixels using `numpy.pad`'s
         ``mode='edge'`` extension. Try increasing `npad` if boundary artifacts
         are apparent.
     amplitude_range : 2-tuple of float, optional
-        The Frequency response will have amplitudes in the specified range. The
+        The frequency response will have amplitudes in the specified range. The
         first value is the desired amplitude in the stop-band while the second
         is the desired amplitude in the pass-band.
 
@@ -121,16 +121,16 @@ def butterworth(
     A band-pass filter can be achieved by combining a high-pass and low-pass
     filter.
 
-    The "Butterworth filter" used in image processing textbooks (e.g. [1]_,
-    [2]_) is often the square of the traditional Butterworth filters as
+    The "Butterworth filter" used in image processing textbooks (e.g., [1]_,
+    [2]_) is often the square of the traditional Butterworth filter as
     described by [3]_, [4]_. The squared version will be used here if
-    `squared_butterworth` is set to ``True``. The lowpass, squared Butterworth
-    filter is given by the following expression for the lowpass case:
+    `squared_butterworth` is set to ``True``. The low-pass, squared Butterworth
+    filter is given by the following expression for the low-pass case:
 
     .. math::
         H_{low}(f) = \\frac{1}{1 + \\left(\\frac{f}{c f_s}\\right)^{2n}}
 
-    with the highpass case given by
+    with the high-pass case given by:
 
     .. math::
         H_{hi}(f) = 1 - H_{low}(f)
@@ -147,8 +147,8 @@ def butterworth(
     between 0 and 0.5. The frequency response (gain) at the cutoff is 0.5 when
     ``squared_butterworth`` is true and :math:`1/\\sqrt{2}` when it is false.
 
-    When an `amplitude_range`, :math:`(a_{min}, a_{max})` is specified,
-    a modified Butterworth, :math:`H^{\\prime} (f)` is used:
+    When an `amplitude_range` :math:`(a_{min}, a_{max})` is specified,
+    a modified Butterworth :math:`H^{\\prime} (f)` is used:
 
     .. math::
         H^{\\prime} (f) = a_{min}  + H(f) * (a_{max} - a_{min})

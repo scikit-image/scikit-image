@@ -79,7 +79,7 @@ cdef inline void _count_attack_border_elements(char[:, :, ::1] footprint,
 cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] image,
                                                             char[:, :, ::1] footprint,
                                                             Py_ssize_t [::1] histo,
-                                                            double* pop,
+                                                            cnp.float64_t* pop,
                                                             char* mask_data,
                                                             Py_ssize_t p,
                                                             Py_ssize_t planes,
@@ -113,7 +113,7 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
                                    Py_ssize_t [:, :, ::1] se,
                                    Py_ssize_t [::1] num_se,
                                    Py_ssize_t [::1] histo,
-                                   double* pop, char* mask_data,
+                                   cnp.float64_t* pop, char* mask_data,
                                    Py_ssize_t p, Py_ssize_t r, Py_ssize_t c,
                                    Py_ssize_t planes, Py_ssize_t rows,
                                    Py_ssize_t cols,
@@ -160,15 +160,15 @@ cdef inline char is_in_mask_3D(Py_ssize_t planes, Py_ssize_t rows,
         return mask[p * rows * cols + r * cols + c]
 
 
-cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
-                               dtype_t, Py_ssize_t, Py_ssize_t, double,
-                               double, Py_ssize_t, Py_ssize_t) nogil,
+cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.float64_t,
+                               dtype_t, Py_ssize_t, Py_ssize_t, cnp.float64_t,
+                               cnp.float64_t, Py_ssize_t, Py_ssize_t) nogil,
                    dtype_t[:, :, ::1] image,
                    char[:, :, ::1] footprint,
                    char[:, :, ::1] mask,
                    dtype_t_out[:, :, :, ::1] out,
                    signed char shift_x, signed char shift_y,
-                   signed char shift_z, double p0, double p1,
+                   signed char shift_z, cnp.float64_t p0, cnp.float64_t p1,
                    Py_ssize_t s0, Py_ssize_t s1,
                    Py_ssize_t n_bins) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
@@ -209,8 +209,8 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
     # define local variable types
     cdef Py_ssize_t p, r, c, rr, cc, pp, value, local_max, i, even_row
 
-    # number of pixels actually inside the neighborhood (double)
-    cdef double pop = 0
+    # number of pixels actually inside the neighborhood (cnp.float64_t)
+    cdef cnp.float64_t pop = 0
 
     # the current local histogram distribution
     cdef Py_ssize_t [::1] histo = np.zeros(n_bins, dtype=np.intp)
