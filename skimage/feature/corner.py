@@ -372,7 +372,8 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
 
 
 def _symmetric_compute_eigenvalues(S_elems):
-    """Compute eigenvalues from the upperdiagonal entries of a symmetric matrix
+    """Compute eigenvalues from the upper-diagonal entries of a symmetric
+    matrix.
 
     Parameters
     ----------
