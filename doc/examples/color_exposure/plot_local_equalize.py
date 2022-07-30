@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.util.dtype import dtype_range
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 from skimage import exposure
 from skimage.morphology import disk
 from skimage.morphology import ball
@@ -64,7 +64,7 @@ def plot_img_and_hist(image, axes, bins=256):
 
 
 # Load an example image
-img = img_as_ubyte(data.moon())
+img = rescale_to_ubyte(data.moon())
 
 # Global equalize
 img_rescale = exposure.equalize_hist(img)
@@ -140,7 +140,7 @@ def plot_img_and_hist(image, axes, bins=256):
 
 
 # Load an example image
-img = img_as_ubyte(data.brain())
+img = rescale_to_ubyte(data.brain())
 
 # Global equalization
 img_rescale = exposure.equalize_hist(img)

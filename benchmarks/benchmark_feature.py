@@ -11,7 +11,7 @@ class FeatureSuite:
         # Use a real-world image for more realistic features, but tile it to
         # get a larger size for the benchmark.
         self.image = np.tile(color.rgb2gray(data.astronaut()), (4, 4))
-        self.image_ubyte = util.img_as_ubyte(self.image)
+        self.image_ubyte = util.rescale_to_ubyte(self.image)
         self.keypoints = feature.corner_peaks(
                 self.image, min_distance=5, threshold_rel=0.1
                 )

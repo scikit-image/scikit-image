@@ -7,7 +7,7 @@ from .._shared.utils import check_nD, _supported_float_type
 from ..feature.util import DescriptorExtractor, FeatureDetector
 from .._shared.filters import gaussian
 from ..transform import rescale
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ._sift import (_local_max, _ori_distances, _update_histogram)
 
 
@@ -649,7 +649,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     def _preprocess(self, image):
         check_nD(image, 2)
-        image = img_as_float(image)
+        image = rescale_to_float(image)
         self.float_dtype = _supported_float_type(image.dtype)
         image = image.astype(self.float_dtype, copy=False)
 

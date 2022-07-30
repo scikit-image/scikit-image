@@ -25,13 +25,13 @@ from matplotlib import pyplot as plt
 from skimage.data import chelsea
 from skimage.restoration import calibrate_denoiser, denoise_wavelet
 
-from skimage.util import img_as_float, random_noise
+from skimage.util import rescale_to_float, random_noise
 from functools import partial
 
 # rescale_sigma=True required to silence deprecation warnings
 _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
-image = img_as_float(chelsea())
+image = rescale_to_float(chelsea())
 sigma = 0.3
 noisy = random_noise(image, var=sigma ** 2)
 

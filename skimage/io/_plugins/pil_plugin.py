@@ -4,7 +4,7 @@ import numpy as np
 from packaging import version
 from PIL import Image, __version__ as pil_version
 
-from ...util import img_as_ubyte, img_as_uint
+from ...util import rescale_to_ubyte, rescale_to_uint
 
 # Check CVE-2021-27921 and others
 if version.parse(pil_version) < version.parse('8.1.2'):
@@ -172,7 +172,7 @@ def ndarray_to_pil(arr, format_str=None):
 
     """
     if arr.ndim == 3:
-        arr = img_as_ubyte(arr)
+        arr = rescale_to_ubyte(arr)
         mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
     elif format_str in ['png', 'PNG']:
@@ -180,17 +180,17 @@ def ndarray_to_pil(arr, format_str=None):
         mode_base = 'I'
 
         if arr.dtype.kind == 'f':
-            arr = img_as_uint(arr)
+            arr = rescale_to_uint(arr)
 
         elif arr.max() < 256 and arr.min() >= 0:
             arr = arr.astype(np.uint8)
             mode = mode_base = 'L'
 
         else:
-            arr = img_as_uint(arr)
+            arr = rescale_to_uint(arr)
 
     else:
-        arr = img_as_ubyte(arr)
+        arr = rescale_to_ubyte(arr)
         mode = 'L'
         mode_base = 'L'
 
@@ -239,10 +239,11 @@ def imsave(fname, arr, format_str=None, **kwargs):
     -----
     Use the Python Imaging Library.
     See PIL docs [1]_ for a list of other supported formats.
-    All images besides single channel PNGs are converted using `img_as_uint8`.
+    All images besides single channel PNGs are converted using
+    `rescale_to_uint8`.
     Single Channel PNGs have the following behavior:
-    - Integer values in [0, 255] and Boolean types -> img_as_uint8
-    - Floating point and other integers -> img_as_uint16
+    - Integer values in [0, 255] and Boolean types -> rescale_to_uint8
+    - Floating point and other integers -> rescale_to_uint16
 
     References
     ----------

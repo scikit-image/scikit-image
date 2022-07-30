@@ -53,7 +53,7 @@ from scipy import ndimage as ndi
 
 from ..._shared.utils import check_nD, deprecate_kwarg, warn
 from ...morphology.footprints import _footprint_is_sequence
-from ...util import img_as_ubyte
+from ...util import rescale_to_ubyte
 from . import generic_cy
 
 
@@ -106,17 +106,17 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
     if input_dtype not in (np.uint8, np.uint16):
         message = (f'Possible precision loss converting image of type '
                    f'{input_dtype} to uint8 as required by rank filters. '
-                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'Convert manually using skimage.util.rescale_to_ubyte to '
                    f'silence this warning.')
         warn(message, stacklevel=5)
-        image = img_as_ubyte(image)
+        image = rescale_to_ubyte(image)
 
     if _footprint_is_sequence(footprint):
         raise ValueError(
             "footprint sequences are not currently supported by rank filters"
         )
 
-    footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
+    footprint = np.ascontiguousarray(rescale_to_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
         raise ValueError('Image dimensions and neighborhood dimensions'
                          'do not match')
@@ -124,7 +124,7 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
     image = np.ascontiguousarray(image)
 
     if mask is not None:
-        mask = img_as_ubyte(mask)
+        mask = rescale_to_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
     if image is out:
@@ -194,12 +194,12 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
     if image.dtype not in (np.uint8, np.uint16):
         message = (f'Possible precision loss converting image of type '
                    f'{image.dtype} to uint8 as required by rank filters. '
-                   f'Convert manually using skimage.util.img_as_ubyte to '
+                   f'Convert manually using skimage.util.rescale_to_ubyte to '
                    f'silence this warning.')
         warn(message, stacklevel=2)
-        image = img_as_ubyte(image)
+        image = rescale_to_ubyte(image)
 
-    footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
+    footprint = np.ascontiguousarray(rescale_to_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
         raise ValueError('Image dimensions and neighborhood dimensions'
                          'do not match')
@@ -208,7 +208,7 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
     if mask is None:
         mask = np.ones(image.shape, dtype=np.uint8)
     else:
-        mask = img_as_ubyte(mask)
+        mask = rescale_to_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
     if image is out:

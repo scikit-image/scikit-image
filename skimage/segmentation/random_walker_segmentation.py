@@ -40,7 +40,7 @@ try:
 except ImportError:
     amg_loaded = False
 
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 from scipy.sparse.linalg import cg, spsolve
 
@@ -456,14 +456,14 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
                              'dimension 2 or 3.')
         if data.shape != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
-        data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
+        data = np.atleast_3d(rescale_to_float(data))[..., np.newaxis]
     else:
         if data.ndim not in (3, 4):
             raise ValueError('For multichannel input, data must have 3 or 4 '
                              'dimensions.')
         if data.shape[:-1] != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
-        data = img_as_float(data)
+        data = rescale_to_float(data)
         if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
             data = data[:, :, np.newaxis, :]
 

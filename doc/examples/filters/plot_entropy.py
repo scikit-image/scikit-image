@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
 
@@ -59,7 +59,7 @@ fig.tight_layout()
 # Texture detection
 # =================
 
-image = img_as_ubyte(data.camera())
+image = rescale_to_ubyte(data.camera())
 
 fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(12, 4),
                                sharex=True, sharey=True)

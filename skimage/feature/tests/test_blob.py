@@ -31,7 +31,7 @@ def test_blob_dog(dtype, threshold_type):
     if threshold_type == 'absolute':
         threshold = 2.0
         if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
+            # account for internal scaling to [0, 1] by rescale_to_float
             threshold /= img.ptp()
         threshold_rel = None
     elif threshold_type == 'relative':
@@ -210,7 +210,7 @@ def test_blob_log(dtype, threshold_type):
     if threshold_type == 'absolute':
         threshold = 1
         if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
+            # account for internal scaling to [0, 1] by rescale_to_float
             threshold /= img.ptp()
         threshold_rel = None
     elif threshold_type == 'relative':
@@ -377,7 +377,8 @@ def test_blob_doh(dtype, threshold_type):
         #       range [0, 1] internally.
         threshold = 0.05
         if img.dtype.kind == 'f':
-            # account for lack of internal scaling to [0, 1] by img_as_float
+            # account for lack of internal scaling to [0, 1] by
+            # rescale_to_float
             ptp = img.ptp()
             threshold *= ptp ** 2
         threshold_rel = None

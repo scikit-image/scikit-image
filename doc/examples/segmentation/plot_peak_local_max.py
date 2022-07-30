@@ -13,9 +13,9 @@ dilated image are returned as local maxima.
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 from skimage.feature import peak_local_max
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 
-im = img_as_float(data.coins())
+im = rescale_to_float(data.coins())
 
 # image_max is the dilation of im with a 20*20 structuring element
 # It is used within peak_local_max function

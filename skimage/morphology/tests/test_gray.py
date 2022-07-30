@@ -7,7 +7,7 @@ from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.morphology import gray, footprints
-from skimage.util import img_as_uint, img_as_ubyte
+from skimage.util import rescale_to_uint, rescale_to_ubyte
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ class TestMorphology():
         footprints_2D = (footprints.square, footprints.diamond,
                          footprints.disk, footprints.star)
 
-        image = img_as_ubyte(transform.downscale_local_mean(
+        image = rescale_to_ubyte(transform.downscale_local_mean(
             color.rgb2gray(data.coffee()), (20, 20)))
 
         output = {}
@@ -252,7 +252,7 @@ def test_float():
 
 def test_uint16():
     im16, eroded16, dilated16, opened16, closed16 = (
-        map(img_as_uint, [im, eroded, dilated, opened, closed]))
+        map(rescale_to_uint, [im, eroded, dilated, opened, closed]))
     assert_allclose(gray.erosion(im16), eroded16)
     assert_allclose(gray.dilation(im16), dilated16)
     assert_allclose(gray.opening(im16), opened16)

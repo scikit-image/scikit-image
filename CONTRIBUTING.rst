@@ -229,7 +229,7 @@ Stylistic Guidelines
   in the user guide for more information.
 
 * Functions should support all input image dtypes.  Use utility functions such
-  as ``img_as_float`` to help convert to an appropriate type.  The output
+  as ``rescale_as_float`` to help convert to an appropriate type.  The output
   format can be whatever is most efficient.  This allows us to string together
   several functions into a pipeline, e.g.::
 

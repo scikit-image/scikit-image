@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage import data, filters, img_as_float
+from skimage import data, filters, rescale_to_float
 from skimage._shared.testing import test_parallel, expected_warnings
 from skimage.segmentation import slic
 
@@ -113,7 +113,7 @@ def test_slic_consistency_across_image_magnitude():
     # give the same segmentation result
     img_uint8 = data.cat()[:256, :128]
     img_uint16 = 256 * img_uint8.astype(np.uint16)
-    img_float32 = img_as_float(img_uint8)
+    img_float32 = rescale_to_float(img_uint8)
     img_float32_norm = img_float32 / img_float32.max()
 
     seg1 = slic(img_uint8)

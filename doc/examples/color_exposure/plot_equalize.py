@@ -22,7 +22,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage import exposure
 
 
@@ -33,7 +33,7 @@ def plot_img_and_hist(image, axes, bins=256):
     """Plot an image along with its histogram and cumulative histogram.
 
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     ax_img, ax_hist = axes
     ax_cdf = ax_hist.twinx()
 

@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage._shared.testing import (assert_array_almost_equal, assert_equal,
                                      expected_warnings)
-from skimage import color, data, img_as_float
+from skimage import color, data, rescale_to_float
 from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel
 
@@ -126,7 +126,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     2.) tuple of length ``image.ndim - 1`` corresponding to spatial axes
     3.) tuple of length ``image.ndim`` corresponding to all axes
     """
-    cat = img_as_float(data.chelsea())
+    cat = rescale_to_float(data.chelsea())
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat, channel_axis=-1)

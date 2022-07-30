@@ -4,7 +4,7 @@ from scipy.ndimage import binary_erosion, convolve
 
 from .._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
-from ..util.dtype import img_as_float
+from ..util.dtype import rescale_to_float
 
 # n-dimensional filter weights
 SOBEL_EDGE = np.array([1, 0, -1])
@@ -168,7 +168,7 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     output = np.zeros(image.shape, dtype=image.dtype)
 
     for edge_dim in axes:
@@ -620,7 +620,7 @@ def roberts_pos_diag(image, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -658,7 +658,7 @@ def roberts_neg_diag(image, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -693,7 +693,7 @@ def laplace(image, ksize=3, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     # Create the discrete Laplacian operator - We keep only the real part of
     # the filter
     _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
@@ -801,7 +801,7 @@ def farid_h(image, *, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     result = convolve(image, HFARID_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -838,6 +838,6 @@ def farid_v(image, *, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = img_as_float(image)
+        image = rescale_to_float(image)
     result = convolve(image, VFARID_WEIGHTS)
     return _mask_filter_result(result, mask)

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from skimage import data, draw, img_as_float
+from skimage import data, draw, rescale_to_float
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
 from skimage._shared.utils import _supported_float_type
@@ -357,7 +357,7 @@ def test_noisy_square_image():
 def test_squared_dot():
     im = np.zeros((50, 50))
     im[4:8, 4:8] = 1
-    im = img_as_float(im)
+    im = rescale_to_float(im)
 
     # Moravec fails
 
@@ -377,7 +377,7 @@ def test_rotated_img():
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = img_as_float(data.astronaut().mean(axis=2))
+    im = rescale_to_float(data.astronaut().mean(axis=2))
     im_rotated = im.T
 
     # Moravec

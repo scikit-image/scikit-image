@@ -20,7 +20,7 @@ from skimage.transform._warps import (_stackcopy,
 from skimage.transform._geometric import (AffineTransform,
                                           ProjectiveTransform,
                                           SimilarityTransform)
-from skimage.util.dtype import img_as_float, _convert
+from skimage.util.dtype import rescale_to_float, _convert
 
 
 np.random.seed(0)
@@ -468,7 +468,7 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
-    image = img_as_float(checkerboard()).astype(dtype, copy=False)
+    image = rescale_to_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -498,7 +498,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(astronaut()))
+    img = rescale_to_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))

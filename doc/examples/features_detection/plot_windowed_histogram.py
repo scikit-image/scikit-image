@@ -40,7 +40,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data, transform
-from skimage.util import img_as_ubyte
+from skimage.util import rescale_to_ubyte
 from skimage.morphology import disk
 from skimage.filters import rank
 
@@ -77,7 +77,7 @@ def windowed_histogram_similarity(image, footprint, reference_hist, n_bins):
 
 
 # Load the `skimage.data.coins` image
-img = img_as_ubyte(data.coins())
+img = rescale_to_ubyte(data.coins())
 
 # Quantize to 16 levels of grayscale; this way the output image will have a
 # 16-dimensional feature vector per pixel
@@ -103,7 +103,7 @@ similarity = windowed_histogram_similarity(quantized_img, footprint, coin_hist,
                                            coin_hist.shape[0])
 
 # Now try a rotated image
-rotated_img = img_as_ubyte(transform.rotate(img, 45.0, resize=True))
+rotated_img = rescale_to_ubyte(transform.rotate(img, 45.0, resize=True))
 # Quantize to 16 levels as before
 quantized_rotated_image = rotated_img // 16
 # Similarity on rotated image

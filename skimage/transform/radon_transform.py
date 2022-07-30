@@ -32,7 +32,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         equal to ``min(image.shape)``.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
@@ -207,7 +207,7 @@ def iradon(radon_image, theta=None, output_size=None,
         ``radon`` called with ``circle=True``.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns

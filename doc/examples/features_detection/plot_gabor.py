@@ -18,7 +18,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import data
-from skimage.util import img_as_float
+from skimage.util import rescale_to_float
 from skimage.filters import gabor_kernel
 
 
@@ -54,9 +54,9 @@ for theta in range(4):
 
 
 shrink = (slice(0, None, 3), slice(0, None, 3))
-brick = img_as_float(data.brick())[shrink]
-grass = img_as_float(data.grass())[shrink]
-gravel = img_as_float(data.gravel())[shrink]
+brick = rescale_to_float(data.brick())[shrink]
+grass = rescale_to_float(data.grass())[shrink]
+gravel = rescale_to_float(data.gravel())[shrink]
 image_names = ('brick', 'grass', 'gravel')
 images = (brick, grass, gravel)
 

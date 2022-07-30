@@ -18,11 +18,11 @@ import matplotlib.pyplot as plt
 
 from scipy.ndimage import gaussian_filter
 from skimage import data
-from skimage import img_as_float
+from skimage import rescale_to_float
 from skimage.morphology import reconstruction
 
 # Convert to float: Important for subtraction later which won't work with uint8
-image = img_as_float(data.coins())
+image = rescale_to_float(data.coins())
 image = gaussian_filter(image, 1)
 
 seed = np.copy(image)

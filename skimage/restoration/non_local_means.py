@@ -46,7 +46,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         noise variance into account (see Notes below).
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.

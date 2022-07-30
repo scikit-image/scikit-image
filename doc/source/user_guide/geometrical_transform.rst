@@ -48,7 +48,7 @@ parameters (e.g. scale, shear, rotation and translation)::
 
    from skimage import data
    from skimage import transform
-   from skimage import img_as_float
+   from skimage import rescale_to_float
    
    tform = transform.EuclideanTransform(
       rotation=np.pi / 12.,
@@ -59,7 +59,7 @@ or the full transformation matrix::
 
    from skimage import data
    from skimage import transform
-   from skimage import img_as_float
+   from skimage import rescale_to_float
    
    matrix = np.array([[np.cos(np.pi/12), -np.sin(np.pi/12), 100],
                       [np.sin(np.pi/12), np.cos(np.pi/12), -20],
@@ -78,7 +78,7 @@ represented with finite coordinates.
 
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
-   img = img_as_float(data.chelsea())
+   img = rescale_to_float(data.chelsea())
    tf_img = transform.warp(img, tform.inverse)
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_transform_types_001.png

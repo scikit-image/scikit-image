@@ -111,7 +111,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
@@ -281,7 +281,7 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
@@ -387,7 +387,7 @@ def rotate(image, angle, resize=False, center=None, order=None,
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -570,7 +570,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -812,7 +812,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -1250,7 +1250,7 @@ def resize_local_mean(image, output_shape, grid_mode=True,
         coordinate location 0 in each mode.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of `rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 

@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose
 from scipy.ndimage import fourier_shift
 import scipy.fft as fft
 
-from skimage import img_as_float
+from skimage import rescale_to_float
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, binary_blobs
@@ -86,7 +86,7 @@ def test_size_one_dimension_input():
 
 
 def test_3d_input():
-    phantom = img_as_float(binary_blobs(length=32, n_dim=3))
+    phantom = rescale_to_float(binary_blobs(length=32, n_dim=3))
     reference_image = fft.fftn(phantom)
     shift = (-2., 1., 5.)
     shifted_image = fourier_shift(reference_image, shift)
@@ -145,7 +145,7 @@ def test_wrong_input():
 
 
 def test_4d_input_pixel():
-    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    phantom = rescale_to_float(binary_blobs(length=32, n_dim=4))
     reference_image = fft.fftn(phantom)
     shift = (-2., 1., 5., -3)
     shifted_image = fourier_shift(reference_image, shift)
@@ -156,7 +156,7 @@ def test_4d_input_pixel():
 
 
 def test_4d_input_subpixel():
-    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    phantom = rescale_to_float(binary_blobs(length=32, n_dim=4))
     reference_image = fft.fftn(phantom)
     subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
     shifted_image = fourier_shift(reference_image, subpixel_shift)

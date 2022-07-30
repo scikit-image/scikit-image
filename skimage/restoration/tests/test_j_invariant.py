@@ -10,11 +10,11 @@ from skimage.metrics import mean_squared_error as mse
 from skimage.restoration import (calibrate_denoiser,
                                  denoise_wavelet)
 from skimage.restoration.j_invariant import _invariant_denoise
-from skimage.util import img_as_float, random_noise
+from skimage.util import rescale_to_float, random_noise
 
-test_img = img_as_float(camera())
-test_img_color = img_as_float(chelsea())
-test_img_3d = img_as_float(binary_blobs(64, n_dim=3)) / 2
+test_img = rescale_to_float(camera())
+test_img_color = rescale_to_float(chelsea())
+test_img_3d = rescale_to_float(binary_blobs(64, n_dim=3)) / 2
 noisy_img = random_noise(test_img, mode='gaussian', var=0.01)
 noisy_img_color = random_noise(test_img_color, mode='gaussian', var=0.01)
 noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)

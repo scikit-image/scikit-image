@@ -33,13 +33,13 @@ of each variant.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, img_as_float
+from skimage import data, rescale_to_float
 from skimage.restoration import denoise_nl_means, estimate_sigma
 from skimage.metrics import peak_signal_noise_ratio
 from skimage.util import random_noise
 
 
-astro = img_as_float(data.astronaut())
+astro = rescale_to_float(data.astronaut())
 astro = astro[30:180, 150:300]
 
 sigma = 0.08

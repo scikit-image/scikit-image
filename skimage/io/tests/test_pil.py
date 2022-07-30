@@ -3,7 +3,7 @@ import numpy as np
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 
-from ... import img_as_float
+from ... import rescale_to_float
 from .. import imread, imsave, use_plugin, reset_plugins
 
 from PIL import Image
@@ -46,7 +46,7 @@ def test_png_round_trip():
     f.close()
     I = np.eye(3)
     imsave(fname, I)
-    Ip = img_as_float(imread(fname))
+    Ip = rescale_to_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
