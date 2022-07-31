@@ -8,12 +8,6 @@ from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.measure.fit import _dynamic_max_trials
 from skimage.transform import AffineTransform
 
-
-def test_line_model_invalid_input():
-    with testing.raises(ValueError):
-        LineModelND().estimate(np.empty((1, 3)))
-
-
 def test_line_model_predict():
     model = LineModelND()
     model.params = ((0, 0), (1, 1))
@@ -38,15 +32,11 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1), np.zeros(1))
 
-    with testing.raises(ValueError):
-        LineModelND().estimate(np.empty((1, 3)))
+    assert LineModelND().estimate(np.empty((1, 3))) == False
+    assert LineModelND().estimate(np.empty((1, 2))) == False
 
     with testing.raises(ValueError):
         LineModelND().residuals(np.empty((1, 3)))
-
-    data = np.empty((1, 2))
-    with testing.raises(ValueError):
-        LineModelND().estimate(data)
 
 
 def test_line_model_nd_predict():
@@ -101,10 +91,6 @@ def test_line_model_nd_residuals():
     assert_equal(abs(model.residuals(data, params=params)), 30)
 
 
-def test_line_modelND_under_determined():
-    data = np.empty((1, 3))
-    with testing.raises(ValueError):
-        LineModelND().estimate(data)
 
 
 def test_circle_model_invalid_input():

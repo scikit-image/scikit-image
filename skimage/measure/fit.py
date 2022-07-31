@@ -91,7 +91,7 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            raise ValueError('At least 2 input points needed.')
+            return False
 
         self.params = (origin, direction)
 
