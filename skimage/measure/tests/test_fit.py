@@ -32,8 +32,8 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1), np.zeros(1))
 
-    assert not LineModelND().estimate(np.empty((1, 3))) 
-    assert not LineModelND().estimate(np.empty((1, 2))) 
+    assert not LineModelND().estimate(np.empty((1, 3)))
+    assert not LineModelND().estimate(np.empty((1, 2)))
 
     with testing.raises(ValueError):
         LineModelND().residuals(np.empty((1, 3)))
