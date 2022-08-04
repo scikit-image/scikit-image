@@ -128,10 +128,13 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
                                            balance * np.abs(reg) ** 2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+        # deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+        #                      shape=image.shape)
+        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
                              shape=image.shape)
     else:
-        deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+        # deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+        deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
     if clip:
         deconv[deconv > 1] = 1
