@@ -66,7 +66,6 @@ def test_wiener(dtype, ndim):
     # for ndim == 2 use camera (to compare to presaved result)
     if ndim != 2:
         test_img = np.random.randint(0, 100, [50] * ndim)
-        test_img = ndi.gaussian_filter(test_img, sigma=5)
     else: test_img = util.img_as_float(camera())
 
     data = convolve(test_img, psf, 'same')
@@ -172,7 +171,6 @@ def test_richardson_lucy(ndim):
     psf = np.ones([5] * ndim, dtype=float) / 5 ** ndim
     if ndim != 2:
         test_img = np.random.randint(0, 100, [30] * ndim)
-        test_img = ndi.gaussian_filter(test_img, sigma=5)
     else: test_img = util.img_as_float(camera())
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
