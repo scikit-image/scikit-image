@@ -66,7 +66,8 @@ def test_wiener(dtype, ndim):
     # for ndim == 2 use camera (to compare to presaved result)
     if ndim != 2:
         test_img = np.random.randint(0, 100, [50] * ndim)
-    else: test_img = util.img_as_float(camera())
+    else:
+        test_img = util.img_as_float(camera())
 
     data = convolve(test_img, psf, 'same')
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
@@ -77,8 +78,8 @@ def test_wiener(dtype, ndim):
     if ndim == 2:
         rtol, atol = _get_rtol_atol(dtype)
         path = fetch('restoration/tests/camera_wiener.npy')
-        np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol,
-                                atol=atol)
+        np.testing.assert_allclose(deconvolved, np.load(path),
+                                   rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(ndim, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
@@ -89,8 +90,8 @@ def test_wiener(dtype, ndim):
     assert deconvolved.real.dtype == _supported_float_type(dtype)
     if ndim == 2:
         np.testing.assert_allclose(np.real(deconvolved),
-                                np.load(path),
-                                rtol=rtol, atol=atol)
+                                   np.load(path),
+                                   rtol=rtol, atol=atol)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -166,12 +167,14 @@ def test_image_shape():
     np.testing.assert_array_less(np.median(sup_relative_error), 0.1)
     np.testing.assert_array_less(np.median(un_relative_error), 0.1)
 
+
 @pytest.mark.parametrize('ndim', [1, 2, 3])
 def test_richardson_lucy(ndim):
     psf = np.ones([5] * ndim, dtype=float) / 5 ** ndim
     if ndim != 2:
         test_img = np.random.randint(0, 100, [30] * ndim)
-    else: test_img = util.img_as_float(camera())
+    else:
+        test_img = util.img_as_float(camera())
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
