@@ -175,7 +175,7 @@ def test_richardson_lucy(ndim):
         test_img = np.random.randint(0, 100, [30] * ndim)
     else:
         test_img = util.img_as_float(camera())
-    data = convolve2d(test_img, psf, 'same')
+    data = convolve(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
