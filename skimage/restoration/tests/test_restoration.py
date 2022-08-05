@@ -26,33 +26,6 @@ def _get_rtol_atol(dtype):
     return rtol, atol
 
 
-# @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-# def test_wiener(dtype):
-#     psf = np.ones((5, 5), dtype=dtype) / 25
-#     data = convolve2d(test_img, psf, 'same')
-#     np.random.seed(0)
-#     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-#     data = data.astype(dtype, copy=False)
-#     deconvolved = restoration.wiener(data, psf, 0.05)
-#     assert deconvolved.dtype == _supported_float_type(dtype)
-
-#     rtol, atol = _get_rtol_atol(dtype)
-#     path = fetch('restoration/tests/camera_wiener.npy')
-#     np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol,
-#                                atol=atol)
-
-#     _, laplacian = uft.laplacian(2, data.shape)
-#     otf = uft.ir2tf(psf, data.shape, is_real=False)
-#     assert otf.real.dtype == _supported_float_type(dtype)
-#     deconvolved = restoration.wiener(data, otf, 0.05,
-#                                      reg=laplacian,
-#                                      is_real=False)
-#     assert deconvolved.real.dtype == _supported_float_type(dtype)
-#     np.testing.assert_allclose(np.real(deconvolved),
-#                                np.load(path),
-#                                rtol=rtol, atol=atol)
-
-
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('ndim', [1, 2, 3])
 def test_wiener(dtype, ndim):
