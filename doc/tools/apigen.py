@@ -468,7 +468,7 @@ class ApiDocWriter(object):
         else:
             relpath = outdir
         print("outdir: ", relpath)
-        with open(path,'wt') as idx:
+        with open(path, 'wt') as idx:
             w = idx.write
             w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
@@ -503,5 +503,4 @@ class ApiDocWriter(object):
             w('.. toctree::\n')
             w('   :maxdepth: 2\n\n')
             for f in self.written_modules:
-                w('   %s\n' % os.path.join(relpath,f))
- 
+                w('   %s\n' % os.path.join(relpath, f)) 
