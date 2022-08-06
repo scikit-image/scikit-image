@@ -179,9 +179,9 @@ class ApiDocWriter(object):
             print(filename, 'erk')
             # nothing that we could handle here.
             return ([],[])
-        f = open(filename, 'rt')
-        functions, classes = self._parse_lines(f)
-        f.close()
+        with open(filename, 'rt') as f:
+            functions, classes = self._parse_lines(f)
+
         return functions, classes
 
     def _parse_module_with_import(self, uri):
