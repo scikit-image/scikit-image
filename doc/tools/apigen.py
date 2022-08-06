@@ -473,7 +473,7 @@ class ApiDocWriter(object):
             w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
             # We look at the module name.
-            # If it is `skimage`, display, 
+            # If it is `skimage`, display,
             # if `skimage.submodule`, only show `submodule`,
             # if it is `skimage.submodule.subsubmodule`, ignore.
 
