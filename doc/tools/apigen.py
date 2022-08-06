@@ -469,40 +469,40 @@ class ApiDocWriter(object):
         else:
             relpath = outdir
         print("outdir: ", relpath)
-        idx = open(path,'wt')
-        w = idx.write
-        w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
+        with open(path,'wt') as idx:
+            w = idx.write
+            w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
-        # if it is `skimage.submodule.subsubmodule`, ignore.
+            # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
+            # if it is `skimage.submodule.subsubmodule`, ignore.
 
-        title = "API Reference for skimage |version|"
-        w(title + "\n")
-        w("=" * len(title) + "\n\n")
+            title = "API Reference for skimage |version|"
+            w(title + "\n")
+            w("=" * len(title) + "\n\n")
 
-        subtitle = "Submodules"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodules"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        for f in self.written_modules:
-            module_name = f.split('.')
-            if len(module_name) > 2:
-                continue
-            elif len(module_name) == 1:
-                module_name = module_name[0]
-                prefix = "-"
-            elif len(module_name) == 2:
-                module_name = module_name[1]
-                prefix = "\n  -"
-            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
-        w('\n')
+            for f in self.written_modules:
+                module_name = f.split('.')
+                if len(module_name) > 2:
+                    continue
+                elif len(module_name) == 1:
+                    module_name = module_name[0] 
+                    prefix = "-"
+                elif len(module_name) == 2:
+                    module_name = module_name[1]
+                    prefix = "\n  -"
+                w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
+            w('\n')
 
-        subtitle = "Submodule Contents"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodule Contents"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        w('.. toctree::\n')
-        w('   :maxdepth: 2\n\n')
-        for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath,f))
-        idx.close()
+            w('.. toctree::\n')
+            w('   :maxdepth: 2\n\n')
+            for f in self.written_modules:
+                w('   %s\n' % os.path.join(relpath,f))
+ 
