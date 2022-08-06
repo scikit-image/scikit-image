@@ -414,7 +414,7 @@ class ApiDocWriter(object):
             # write out to file
             outfile = os.path.join(outdir,
                                    m + self.rst_extension)
-            with open(outfile, 'wt') as fileobj
+            with open(outfile, 'wt') as fileobj:
                 fileobj.write(api_str)
             written_modules.append(m)
         self.written_modules = written_modules
