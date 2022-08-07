@@ -1,6 +1,51 @@
 __all__ = ['imread', 'imsave']
 
-from tifffile import imwrite as imsave, imread as tifffile_imread
+from tifffile import imwrite as tifffile_imwrite
+from tifffile import imread as tifffile_imread
+
+
+def imsave(fname, arr, **kwargs):
+    """Load a tiff image to file.
+
+    Parameters
+    ----------
+    fname : str or file
+        File name or file-like-object.
+    arr : ndarray
+        The array to write
+    kwargs : keyword pairs, optional
+        Additional keyword arguments to pass through (see ``tifffile``'s
+        ``imwrite`` function).
+
+    Notes
+    -----
+    Provided by the tifffile library [1]_, and supports many
+    advanced image types including multi-page and floating point.
+
+    This implementation will set `photomotric='RGB'` when writing if the first
+    or last axis of arr has shape 3 or 4. To override this, explicitly
+    specify the photometric kwarg.
+
+    This implementation will set `planarconfig='SEPARATE'` when writing if the
+    first axis of arr has shape 3 or 4. To override this, explicitly
+    specify the planarconfig kwarg.
+
+
+    References
+    ----------
+    .. [1] https://pypi.org/project/tifffile/
+
+    """
+    if arr.shape[0] in [3, 4]:
+        if 'planarconfig' not in kwargs:
+            kwargs['planarconfig'] = 'SEPARATE'
+        rgb = True
+    else:
+        rgb = arr.shape[-1] in [3, 4]
+    if rgb and 'photometric' not in kwargs:
+        kwargs['photometric'] = 'RGB'
+
+    return tifffile_imwrite(fname, arr, **kwargs)
 
 
 def imread(fname, **kwargs):

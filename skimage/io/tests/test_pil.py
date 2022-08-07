@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pytest
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 
@@ -60,7 +61,8 @@ def test_imread_as_gray():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-def test_imread_separate_channels():
+@pytest.mark.parametrize('explicit_kwargs', [False, True])
+def test_imread_separate_channels(explicit_kwargs):
     # Test that imread returns RGBA values contiguously even when they are
     # stored in separate planes.
     x = np.random.rand(3, 16, 8)
@@ -70,7 +72,11 @@ def test_imread_separate_channels():
     # Tifffile is used as backend whenever suffix is .tif or .tiff
     # To avoid pending changes to tifffile defaults, we must specify this is an
     # RGB image with separate planes (i.e. channel_axis=0).
-    imsave(fname, x, photometric='rgb', planarconfig='separate')
+    if explicit_kwargs:
+        kwargs = {'photometric': 'RGB', 'planarconfig': 'SEPARATE'}
+    else:
+        kwargs = {}
+    imsave(fname, x, **kwargs)
     img = imread(fname)
     os.remove(fname)
     assert img.shape == (16, 8, 3), img.shape
