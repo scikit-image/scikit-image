@@ -213,23 +213,6 @@ def setup_test():
 
         warnings.simplefilter('error')
 
-        # do not error on specific warnings from the skimage.io module
-        # https://github.com/scikit-image/scikit-image/issues/5337
-        warnings.filterwarnings(
-            'default', message='TiffFile:', category=DeprecationWarning
-        )
-
-        warnings.filterwarnings(
-            'default', message='TiffWriter:', category=DeprecationWarning
-        )
-        # newer tifffile change the start of the warning string
-        # e.g. <tifffile.TiffWriter.write> data with shape ...
-        warnings.filterwarnings(
-            'default',
-            message='<tifffile.',
-            category=DeprecationWarning
-        )
-
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
         )
