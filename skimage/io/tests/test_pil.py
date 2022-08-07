@@ -67,7 +67,10 @@ def test_imread_separate_channels():
     f = NamedTemporaryFile(suffix='.tif')
     fname = f.name
     f.close()
-    imsave(fname, x)
+    # Tifffile is used as backend whenever suffix is .tif or .tiff
+    # To avoid pending changes to tifffile defaults, we must specify this is an
+    # RGB image with separate planes (i.e. channel_axis=0).
+    imsave(fname, x, photometric='rgb', planarconfig='separate')
     img = imread(fname)
     os.remove(fname)
     assert img.shape == (16, 8, 3), img.shape

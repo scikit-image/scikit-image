@@ -57,7 +57,9 @@ class TestSave:
         f.close()
         if use_pathlib:
             fname = pathlib.Path(fname)
-        imsave(fname, x, check_contrast=False)
+        # Need to specify
+        kwargs = {'photometric': 'rgb'} if x.shape[-1] in [3, 4] else {}
+        imsave(fname, x, check_contrast=False, **kwargs)
         y = imread(fname)
         assert_array_equal(x, y)
 
