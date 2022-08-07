@@ -1,26 +1,24 @@
 import os
-import numpy as np
-import pytest
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 
-from ... import img_as_float
-from .. import imread, imsave, use_plugin, reset_plugins
-
+import numpy as np
+import pytest
 from PIL import Image
-from .._plugins.pil_plugin import (
-    pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...color import rgb2lab
-
 from skimage._shared import testing
-from skimage._shared.testing import (mono_check, color_check,
-                                     assert_equal, assert_array_equal,
-                                     assert_array_almost_equal,
-                                     assert_allclose, fetch)
-from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
-
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_allclose,
+                                     assert_array_almost_equal,
+                                     assert_array_equal, assert_equal,
+                                     color_check, fetch, mono_check)
 from skimage.metrics import structural_similarity
+
+from ... import img_as_float
+from ...color import rgb2lab
+from .. import imread, imsave, reset_plugins, use_plugin
+from .._plugins.pil_plugin import (_palette_is_grayscale, ndarray_to_pil,
+                                   pil_to_ndarray)
 
 
 def setup():
