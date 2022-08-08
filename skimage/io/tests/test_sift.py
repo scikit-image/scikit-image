@@ -56,12 +56,10 @@ def test_load_surf():
     # Check whether loading by filename works
     load_surf(fname)
 
-    f = open(fname, 'r')
-    features = load_surf(f)
-    f.close()
-    os.remove(fname)
-
-    assert_equal(len(features), 2)
-    assert_equal(len(features['data'][0]), 64)
-    assert_equal(features['column'][1], 68.5773)
-    assert_equal(features['row'][0], 62.0491)
+    with open(fname, 'r') as f:
+        features = load_surf(f)
+        os.remove(fname)
+        assert_equal(len(features), 2)
+        assert_equal(len(features['data'][0]), 64)
+        assert_equal(features['column'][1], 68.5773)
+        assert_equal(features['row'][0], 62.0491)
