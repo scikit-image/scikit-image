@@ -17,7 +17,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     Parameters
     ----------
     image : ndarray
-       Input degraded image (can be N dimensional).
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        Point Spread Function. This is assumed to be the impulse
        response (input image space) if the data-type is real, or the
@@ -128,12 +128,9 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
                                            balance * np.abs(reg) ** 2)
     if is_real:
-        # deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
-        #                      shape=image.shape)
         deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
                              shape=image.shape)
     else:
-        # deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
         deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
     if clip:
@@ -377,7 +374,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     Parameters
     ----------
     image : ndarray
-       Input degraded image (can be N dimensional).
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        The point spread function.
     num_iter : int, optional
