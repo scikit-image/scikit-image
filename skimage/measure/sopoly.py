@@ -57,7 +57,7 @@ def _get_cut_id(a1, a2, left2right=True):
     return cut_id
 
 
-def _get_cut(a, vertices, next_cut=True, same_ray=True, sign=0):
+def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
     """ Looks for the next/previous valid vertex that can be used as cut
     along with vertex `a`.
 
@@ -66,7 +66,7 @@ def _get_cut(a, vertices, next_cut=True, same_ray=True, sign=0):
     a : int
         An index of a vertex on the polygon used as reference to look for a cut
         that satisfyes the given conditions.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
     next_cut : bool, optional
@@ -85,16 +85,16 @@ def _get_cut(a, vertices, next_cut=True, same_ray=True, sign=0):
     cut_id : int
         The next/previous vertex index that satisfies the specifications given.
     """
-    n_vertices = vertices.shape[0]
-    ray_a = int(vertices[a, 2])
+    n_vertices = vert_info.shape[0]
+    ray_a = int(vert_info[a, 2])
 
     if same_ray:
-        criterion_0 = np.ones(n_vertices, dtype=np.bool)
-        criterion_1 = vertices[:, 2].astype(np.int32) == ray_a
+        criterion_0 = np.ones(n_vertices, dtype=bool)
+        criterion_1 = vert_info[:, 2].astype(np.int32) == ray_a
 
-        shifted_indices = np.argsort(vertices[:, -1])
-        pos_shift = np.where(vertices[shifted_indices, -1].astype(np.int32) ==
-                             int(vertices[a, -1]))[0][-1 * next_cut]
+        shifted_indices = np.argsort(vert_info[:, -1])
+        pos_shift = np.where(vert_info[shifted_indices, -1].astype(np.int32) ==
+                             int(vert_info[a, -1]))[0][-1 * next_cut]
 
         shifted_indices = shifted_indices[
             np.mod(
@@ -104,13 +104,13 @@ def _get_cut(a, vertices, next_cut=True, same_ray=True, sign=0):
         shifted_indices = np.mod(
             a + (1 if next_cut else 0) + np.arange(n_vertices),
             n_vertices)
-        criterion_0 = vertices[:, 2].astype(np.int32) >= 0
-        criterion_1 = vertices[:, 2].astype(np.int32) != ray_a
+        criterion_0 = vert_info[:, 2].astype(np.int32) >= 0
+        criterion_1 = vert_info[:, 2].astype(np.int32) != ray_a
 
     if sign:
-        criterion_2 = vertices[:, -2].astype(np.int32) == sign
+        criterion_2 = vert_info[:, -2].astype(np.int32) == sign
     else:
-        criterion_2 = np.ones(n_vertices, dtype=np.bool)
+        criterion_2 = np.ones(n_vertices, dtype=bool)
 
     criteria = criterion_0 * criterion_1 * criterion_2
     cut_id = np.where(criteria[shifted_indices])[0]
@@ -123,7 +123,7 @@ def _get_cut(a, vertices, next_cut=True, same_ray=True, sign=0):
     return cut_id
 
 
-def _check_adjacency(a1, a2, vertices, left2right=True):
+def _check_adjacency(a1, a2, vert_info, left2right=True):
     """ Check if the cut point a2 is adjacent to the cut a1 to the left/right.
 
     Parameters
@@ -132,7 +132,7 @@ def _check_adjacency(a1, a2, vertices, left2right=True):
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
     left2right : bool, optional
@@ -146,10 +146,7 @@ def _check_adjacency(a1, a2, vertices, left2right=True):
         or right to left.
 
     """
-    n_vertices = vertices.shape[0]
-
-    ray_a1 = int(vertices[a1, 2])
-    ray_a2 = int(vertices[a2, 2])
+    n_vertices = vert_info.shape[0]
 
     if left2right:
         shifted_indices = _shift_indices(a1, a2, n_vertices,
@@ -162,19 +159,11 @@ def _check_adjacency(a1, a2, vertices, left2right=True):
 
     # Both points are non-adjacent if there is at least one cut between them
     is_adjacent = not np.any(
-        np.bitwise_and(
-                np.bitwise_or(
-                    vertices[shifted_indices, 2].astype(np.int32) != ray_a1,
-                    vertices[shifted_indices, 2].astype(np.int32) != ray_a2
-                ),
-                vertices[shifted_indices, 2].astype(np.int32) >= 0
-            )
-        )
-
+        vert_info[shifted_indices, 2].astype(np.int32) >= 0)
     return is_adjacent
 
 
-def _condition_1(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _condition_1(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
     """ First condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
@@ -185,9 +174,18 @@ def _condition_1(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    max_crest_cuts : list
+        List of tuples containing the indices that correspond to maximum crests
+        on the polygon when walked from left to right.
+    min_crest_cuts : list
+        List of tuples containing the indices that correspond to minimum crests
+        on the polygon when walked from left to right.
+    visited : dict
+        A dictionary containing the dependencies and validities of the
+        already visited cuts.
     check_left : bool, optional
         If the validity of the cut is being tested from left to right,
         or right to left.
@@ -202,10 +200,10 @@ def _condition_1(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         this cut depends on, and an identifier of this condition number.
     """
     children_ids = []
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None, children_ids
 
-    is_valid = _check_adjacency(a1, a2, vertices, left2right=check_left)
+    is_valid = _check_adjacency(a1, a2, vert_info, left2right=check_left)
     if is_valid:
         children_ids.append([(-1, -1, 'self',
                               '1%s' % ('L' if check_left else 'R'))])
@@ -213,7 +211,7 @@ def _condition_1(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     return is_valid, children_ids
 
 
-def _condition_2(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _condition_2(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
     """ Second condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
@@ -224,9 +222,18 @@ def _condition_2(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    max_crest_cuts : list
+        List of tuples containing the indices that correspond to maximum crests
+        on the polygon when walked from left to right.
+    min_crest_cuts : list
+        List of tuples containing the indices that correspond to minimum crests
+        on the polygon when walked from left to right.
+    visited : dict
+        A dictionary containing the dependencies and validities of the
+        already visited cuts.
     check_left : bool, optional
         If the validity of the cut is being tested from left to right,
         or right to left.
@@ -243,32 +250,32 @@ def _condition_2(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     children_ids = []
     is_valid = None
 
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None, children_ids
 
-    b1 = _get_cut(a1, vertices,
+    b1 = _get_cut(a1, vert_info,
                   next_cut=check_left,
                   same_ray=False,
                   sign=1)
-    b2 = _get_cut(a2, vertices,
+    b2 = _get_cut(a2, vert_info,
                   next_cut=not check_left,
                   same_ray=False,
                   sign=-1)
 
     if b1 is None or b2 is None or \
-       not (_check_adjacency(a1, b1, vertices, left2right=check_left) and
-            _check_adjacency(b2, a2, vertices, left2right=check_left)):
+       not (_check_adjacency(a1, b1, vert_info, left2right=check_left) and
+            _check_adjacency(b2, a2, vert_info, left2right=check_left)):
         return None, children_ids
 
-    ray_b1 = int(vertices[b1, 2])
-    ray_b2 = int(vertices[b2, 2])
+    ray_b1 = int(vert_info[b1, 2])
+    ray_b2 = int(vert_info[b2, 2])
 
     if ray_b1 != ray_b2:
         return None, children_ids
 
-    is_valid, child_id = _check_validity(b1, b2, vertices,
-                                         max_crest_ids,
-                                         min_crest_ids,
+    is_valid, child_id = _check_validity(b1, b2, vert_info,
+                                         max_crest_cuts,
+                                         min_crest_cuts,
                                          visited,
                                          check_left=check_left)
 
@@ -282,7 +289,7 @@ def _condition_2(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     return is_valid, children_ids
 
 
-def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
     """ Third condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
@@ -293,9 +300,18 @@ def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    max_crest_cuts : list
+        List of tuples containing the indices that correspond to maximum crests
+        on the polygon when walked from left to right.
+    min_crest_cuts : list
+        List of tuples containing the indices that correspond to minimum crests
+        on the polygon when walked from left to right.
+    visited : dict
+        A dictionary containing the dependencies and validities of the
+        already visited cuts.
     check_left : bool, optional
         If the validity of the cut is being tested from left to right,
         or right to left.
@@ -311,11 +327,11 @@ def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     """
     children_ids = []
 
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None, children_ids
 
-    a1_pos = int(vertices[a1, -1])
-    a2_pos = int(vertices[a2, -1])
+    a1_pos = int(vert_info[a1, -1])
+    a2_pos = int(vert_info[a2, -1])
 
     # If there are no vertices between a1 and 2, continue with other condition.
     if abs(a1_pos - a2_pos) - 1 < 2:
@@ -323,16 +339,16 @@ def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
 
     # This condition is applied only if there are four or more
     # cut points in the same ray.
-    ver_in_ray_ids = list(np.where(vertices[:, 2].astype(np.int32) ==
-                                   int(vertices[a1, 2]))[0])
+    ver_in_ray_ids = list(np.where(vert_info[:, 2].astype(np.int32) ==
+                                   int(vert_info[a1, 2]))[0])
     if len(ver_in_ray_ids) < 4:
         return None, children_ids
 
-    ray_a = int(vertices[a1, 2])
+    ray_a = int(vert_info[a1, 2])
     is_valid = None
 
     for mc in filter(lambda mc: mc[1] == ray_a,
-                     min_crest_ids if check_left else max_crest_ids):
+                     min_crest_cuts if check_left else max_crest_cuts):
         a3 = mc[2 if check_left else 3]
         a4 = mc[3 if check_left else 2]
 
@@ -341,25 +357,25 @@ def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
             continue
 
         # Check the order of the intersection vertices on the current ray
-        if not (vertices[a1, -1] <
-                vertices[a3, -1] <
-                vertices[a4, -1] <
-                vertices[a2, -1]):
+        if not (vert_info[a1, -1] <
+                vert_info[a3, -1] <
+                vert_info[a4, -1] <
+                vert_info[a2, -1]):
             continue
 
         # Check if point a3' and a1 are left/right valid
-        is_valid_1, child_id_1 = _check_validity(a1, a3, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_1, child_id_1 = _check_validity(a1, a3, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
                                                  check_left=check_left)
 
         child_id_1 = (*child_id_1, '3%s' % ('L' if check_left else 'R'))
 
         # Check if point a2' and a4 are left/right valid
-        is_valid_2, child_id_2 = _check_validity(a4, a2, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_2, child_id_2 = _check_validity(a4, a2, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
                                                  check_left=check_left)
 
@@ -390,7 +406,7 @@ def _condition_3(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     return is_valid, children_ids
 
 
-def _condition_4(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
     """ Fourth condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
@@ -401,9 +417,18 @@ def _condition_4(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    max_crest_cuts : list
+        List of tuples containing the indices that correspond to maximum crests
+        on the polygon when walked from left to right.
+    min_crest_cuts : list
+        List of tuples containing the indices that correspond to minimum crests
+        on the polygon when walked from left to right.
+    visited : dict
+        A dictionary containing the dependencies and validities of the
+        already visited cuts.
     check_left : bool, optional
         If the validity of the cut is being tested from left to right,
         or right to left.
@@ -419,18 +444,18 @@ def _condition_4(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     """
     children_ids = []
 
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None, children_ids
 
     # This condition is applied only if there are four or more
     # cut points in the same ray.
     ver_in_ray_ids = list(np.where(
-        vertices[:, 2].astype(np.int32) == int(vertices[a1, 2]))[0])
+        vert_info[:, 2].astype(np.int32) == int(vert_info[a1, 2]))[0])
 
     if len(ver_in_ray_ids) < 4:
         return None, children_ids
 
-    a3 = _get_cut(a2, vertices, next_cut=True, same_ray=True, sign=1)
+    a3 = _get_cut(a2, vert_info, next_cut=True, same_ray=True, sign=1)
     if a3 is None:
         return None, children_ids
 
@@ -439,38 +464,40 @@ def _condition_4(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         lambda mc:
             mc[3 if check_left else 2] == a2 and
             mc[2 if check_left else 3] == a3,
-            max_crest_ids if check_left else min_crest_ids)):
+            max_crest_cuts if check_left else min_crest_cuts)):
         return None, children_ids
 
     # Get all points to the right of a3 in the same ray
     a_p = a3
     is_valid = None
     n_vertices_on_ray = np.max(
-        vertices[vertices[:, 2].astype(np.int32) == int(vertices[a3, 2]), -1])
+        vert_info[vert_info[:, 2].astype(np.int32)
+                  ==
+                  int(vert_info[a3, 2]), -1])
     set_id = 0
 
-    while int(vertices[a_p, -1]) < n_vertices_on_ray:
+    while int(vert_info[a_p, -1]) < n_vertices_on_ray:
         set_id += 1
 
-        a_p = _get_cut(a_p, vertices, next_cut=True, same_ray=True, sign=-1)
+        a_p = _get_cut(a_p, vert_info, next_cut=True, same_ray=True, sign=-1)
         if a_p is None:
             break
 
         # Check if that point and a1 are left/right valid
-        is_valid_1, child_id_1 = _check_validity(a1, a_p, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_1, child_id_1 = _check_validity(a1, a_p, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
                                                  check_left=check_left)
 
         child_id_1 = (*child_id_1, '4%s' % ('L' if check_left else 'R'))
 
         # Check if that point and a3 are right/left valid
-        is_valid_2, child_id_2 = _check_validity(a3, a_p, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_2, child_id_2 = _check_validity(a3, a_p, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
-                                                 check_left=check_left)
+                                                 check_left=not check_left)
 
         child_id_2 = (*child_id_2, '4%s' % ('L' if check_left else 'R'))
 
@@ -501,7 +528,7 @@ def _condition_4(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     return is_valid, children_ids
 
 
-def _condition_5(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _condition_5(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
     """ Fifth condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
@@ -512,9 +539,18 @@ def _condition_5(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    max_crest_cuts : list
+        List of tuples containing the indices that correspond to maximum crests
+        on the polygon when walked from left to right.
+    min_crest_cuts : list
+        List of tuples containing the indices that correspond to minimum crests
+        on the polygon when walked from left to right.
+    visited : dict
+        A dictionary containing the dependencies and validities of the
+        already visited cuts.
     check_left : bool, optional
         If the validity of the cut is being tested from left to right,
         or right to left.
@@ -530,18 +566,18 @@ def _condition_5(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     """
     children_ids = []
 
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None, children_ids
 
     # This condition is applied only if there are four or more
     # cut points in the same ray.
     ver_in_ray_ids = list(
-        np.where(vertices[:, 2].astype(np.int32) == int(vertices[a1, 2]))[0])
+        np.where(vert_info[:, 2].astype(np.int32) == int(vert_info[a1, 2]))[0])
 
     if len(ver_in_ray_ids) < 4:
         return None, children_ids
 
-    a3 = _get_cut(a1, vertices, next_cut=False, same_ray=True, sign=-1)
+    a3 = _get_cut(a1, vert_info, next_cut=False, same_ray=True, sign=-1)
     if a3 is None:
         return None, children_ids
 
@@ -549,35 +585,35 @@ def _condition_5(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     if not any(filter(
         lambda mc:
         mc[3 if check_left else 2] == a3 and mc[2 if check_left else 3] == a1,
-            max_crest_ids if check_left else min_crest_ids)):
+            max_crest_cuts if check_left else min_crest_cuts)):
         return None, children_ids
 
     # Get all points to the right of a3 in the same ray
     a_p = a3
     is_valid = None
     set_id = 0
-    while int(vertices[a_p, -1]) > 0:
+    while int(vert_info[a_p, -1]) > 0:
         set_id += 1
 
-        a_p = _get_cut(a_p, vertices, next_cut=False, same_ray=True, sign=1)
+        a_p = _get_cut(a_p, vert_info, next_cut=False, same_ray=True, sign=1)
         if a_p is None:
             break
 
         # Check if that point and a1 are right valid
-        is_valid_1, child_id_1 = _check_validity(a_p, a2, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_1, child_id_1 = _check_validity(a_p, a2, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
                                                  check_left=check_left)
 
         child_id_1 = (*child_id_1, '5%s' % ('L' if check_left else 'R'))
 
         # Check if that point and a3 are left valid
-        is_valid_2, child_id_2 = _check_validity(a_p, a3, vertices,
-                                                 max_crest_ids,
-                                                 min_crest_ids,
+        is_valid_2, child_id_2 = _check_validity(a_p, a3, vert_info,
+                                                 max_crest_cuts,
+                                                 min_crest_cuts,
                                                  visited,
-                                                 check_left=check_left)
+                                                 check_left=not check_left)
 
         child_id_2 = (*child_id_2, '5%s' % ('L' if check_left else 'R'))
 
@@ -608,8 +644,8 @@ def _condition_5(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
     return is_valid, children_ids
 
 
-def _invalidity_condition_1(a1, a2, vertices):
-    """ First condition that can turn a cut to be left invalid.
+def _invalidity_condition_1(a1, a2, vert_info, check_left=True):
+    """ First condition that can turn a cut to be left/right invalid.
 
     Parameters
     ----------
@@ -617,9 +653,12 @@ def _invalidity_condition_1(a1, a2, vertices):
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    check_left : bool, optional
+        If the validity of the cut is being tested from left to right,
+        or right to left.
 
     Returns
     -------
@@ -628,37 +667,37 @@ def _invalidity_condition_1(a1, a2, vertices):
         this condition.
         This returns None when this condition can not be tested.
     """
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None
 
-    a1_pos = int(vertices[a1, -1])
-    a2_pos = int(vertices[a2, -1])
+    a1_pos = int(vert_info[a1, -1])
+    a2_pos = int(vert_info[a2, -1])
 
     # If there are no vertices between a1 and 2, continue with other condition
     if a1_pos - a2_pos != 2:
         return None
 
     ver_in_ray_ids = list(
-        np.where(vertices[:, 2].astype(np.int32) == int(vertices[a1, 2]))[0])
+        np.where(vert_info[:, 2].astype(np.int32) == int(vert_info[a1, 2]))[0])
 
     if len(ver_in_ray_ids) < 3:
         return None
 
-    a3 = _get_cut(a1, vertices, next_cut=True, same_ray=True, sign=-1)
+    a3 = _get_cut(a1, vert_info, next_cut=check_left, same_ray=True, sign=-1)
 
     if a3 is None:
         return None
 
-    if not _check_adjacency(a3, a1, vertices, left2right=True):
+    if not _check_adjacency(a3, a1, vert_info, left2right=check_left):
         return None
 
-    is_valid = not (vertices[a1, -1] < vertices[a3, -1] < vertices[a2, -1])
+    is_valid = not (vert_info[a1, -1] < vert_info[a3, -1] < vert_info[a2, -1])
 
     return is_valid
 
 
-def _invalidity_condition_2(a1, a2, vertices):
-    """ Second condition that can turn a cut to be left invalid.
+def _invalidity_condition_2(a1, a2, vert_info, check_left=True):
+    """ Second condition that can turn a cut to be left/right invalid.
 
     Parameters
     ----------
@@ -666,9 +705,12 @@ def _invalidity_condition_2(a1, a2, vertices):
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    check_left : bool, optional
+        If the validity of the cut is being tested from left to right,
+        or right to left.
 
     Returns
     -------
@@ -677,34 +719,36 @@ def _invalidity_condition_2(a1, a2, vertices):
         this condition.
         This returns None when this condition can not be tested.
     """
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None
 
-    a1_pos = int(vertices[a1, -1])
-    a2_pos = int(vertices[a2, -1])
+    a1_pos = int(vert_info[a1, -1])
+    a2_pos = int(vert_info[a2, -1])
 
     # If there are no vertices between a1 and 2, continue with other condition
     if a1_pos - a2_pos != 2:
         return None
 
     ver_in_ray_ids = list(
-        np.where(vertices[:, 2].astype(np.int32) == int(vertices[a1, 2]))[0])
+        np.where(vert_info[:, 2].astype(np.int32) == int(vert_info[a1, 2]))[0])
     if len(ver_in_ray_ids) < 3:
         return None
 
-    a3 = _get_cut(a2, vertices, next_cut=False, same_ray=True, sign=-1)
+    a3 = _get_cut(a2, vert_info, next_cut=not check_left, same_ray=True,
+                  sign=1)
 
     if a3 is None:
         return None
 
-    if not _check_adjacency(a2, a3, vertices, left2right=True):
+    if not _check_adjacency(a2, a3, vert_info, left2right=check_left):
         return None
 
-    is_valid = not (vertices[a1, -1] < vertices[a3, -1] < vertices[a2, -1])
+    is_valid = not (vert_info[a1, -1] < vert_info[a3, -1] < vert_info[a2, -1])
     return is_valid
 
 
-def _invalidity_condition_3(a1, a2, vertices, tolerance=1e-4):
+def _invalidity_condition_3(a1, a2, vert_info, check_left=True,
+                            tolerance=1e-4):
     """ Third condition that can turn a cut to be left invalid.
 
     Parameters
@@ -713,9 +757,14 @@ def _invalidity_condition_3(a1, a2, vertices, tolerance=1e-4):
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
+    check_left : bool, optional
+        If the validity of the cut is being tested from left to right,
+        or right to left.
+    tolerance : float, optional
+        A tolerance used to fetermine if two intersection points are the same.
 
     Returns
     -------
@@ -724,42 +773,52 @@ def _invalidity_condition_3(a1, a2, vertices, tolerance=1e-4):
         this condition.
         This returns None when this condition can not be tested.
     """
-    if vertices[a1, 3] < 0.5 or vertices[a2, 3] > 0.5:
+    if vert_info[a1, 3] < 0.5 or vert_info[a2, 3] > 0.5:
         return None
 
-    b2 = _get_cut(a1, vertices, next_cut=True, same_ray=False, sign=0)
-    b1 = _get_cut(a2, vertices, next_cut=False, same_ray=False, sign=0)
+    b2 = _get_cut(a1, vert_info, next_cut=check_left, same_ray=False, sign=0)
+    b1 = _get_cut(a2, vert_info, next_cut=not check_left, same_ray=False,
+                  sign=0)
 
     if b1 is None or b2 is None:
         return None
 
-    if not (_check_adjacency(b1, a2, vertices, left2right=True) and
-            _check_adjacency(a1, b2, vertices, left2right=True)):
+    if not (_check_adjacency(b1, a2, vert_info, left2right=check_left) and
+            _check_adjacency(a1, b2, vert_info, left2right=check_left)):
         return None
 
-    n_vertices = vertices.shape[0]
-    # Get all intersections between b2 and a1, and between a2 and b1
-    shifted_indices_1 = _shift_indices(a1, b2, n_vertices,
-                                       ex_start=True,
-                                       ex_end=True)
+    n_vertices = vert_info.shape[0]
+    # Get all intersections between b2 and a1, and between a2 and b1.
+    if check_left:
+        shifted_indices_1 = _shift_indices(a1, b2, n_vertices,
+                                           ex_start=True,
+                                           ex_end=True)
 
-    shifted_indices_2 = _shift_indices(b1, a2, n_vertices,
-                                       ex_start=True,
-                                       ex_end=True)
+        shifted_indices_2 = _shift_indices(b1, a2, n_vertices,
+                                           ex_start=True,
+                                           ex_end=True)
+    else:
+        shifted_indices_1 = _shift_indices(b2, a1, n_vertices,
+                                           ex_start=True,
+                                           ex_end=True)
+
+        shifted_indices_2 = _shift_indices(a2, b1, n_vertices,
+                                           ex_start=True,
+                                           ex_end=True)
 
     b2_a1_int = list(np.where(
-        vertices[shifted_indices_1, 2].astype(np.int32) < -1)[0])
+        vert_info[shifted_indices_1, 2].astype(np.int32) < -1)[0])
     a2_b1_int = list(np.where(
-        vertices[shifted_indices_2, 2].astype(np.int32) < -1)[0])
+        vert_info[shifted_indices_2, 2].astype(np.int32) < -1)[0])
 
     # This condition does not apply if only one of the two segments
     # contain an intersection.
     if len(b2_a1_int) == 0 or len(a2_b1_int) == 0:
         return None
 
-    int_1 = vertices[shifted_indices_1[b2_a1_int], :2]
+    int_1 = vert_info[shifted_indices_1[b2_a1_int], :2]
     int_1 = int_1 / np.linalg.norm(int_1, axis=1)[..., np.newaxis]
-    int_2 = vertices[shifted_indices_2[a2_b1_int], :2]
+    int_2 = vert_info[shifted_indices_2[a2_b1_int], :2]
     int_2 = int_2 / np.linalg.norm(int_2, axis=1)[..., np.newaxis]
 
     # If there is at least one intersection point that is the same for
@@ -779,7 +838,7 @@ all_invalid_conditions = [_invalidity_condition_1,
                           _invalidity_condition_3]
 
 
-def _check_validity(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
+def _check_validity(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                     check_left=True):
     """ Checks recursively the validity of a cut between indices `a1` and `a2`
     of the polygon.
@@ -790,13 +849,13 @@ def _check_validity(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         The first index of the polygon for the cut between a1 and a2.
     a2 : int
         The last index of the polygon for the cut between a1 and a2.
-    vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
-    max_crest_ids : list
+    max_crest_cuts : list
         List of tuples containing the indices that correspond to maximum crests
         on the polygon when walked from left to right.
-    min_crest_ids : list
+    min_crest_cuts : list
         List of tuples containing the indices that correspond to minimum crests
         on the polygon when walked from left to right.
     visited : dict
@@ -826,22 +885,21 @@ def _check_validity(a1, a2, vertices, max_crest_ids, min_crest_ids, visited,
         visited[cut_id] = ['Exp', children_ids]
         is_valid = True
 
-        if check_left:
-            for condition in all_invalid_conditions:
-                resp = condition(a1, a2, vertices)
-                if resp is not None:
-                    is_valid &= resp
-                if not is_valid:
-                    break
+        for condition in all_invalid_conditions:
+            resp = condition(a1, a2, vert_info, check_left=check_left)
+            if resp is not None:
+                is_valid &= resp
+            if not is_valid:
+                break
 
         if is_valid:
             # This cut is not left valid until the contrary is proven
             is_valid = None
             for condition in all_valid_conditions:
                 resp, cond_children_ids = \
-                    condition(a1, a2, vertices,
-                              max_crest_ids=max_crest_ids,
-                              min_crest_ids=min_crest_ids,
+                    condition(a1, a2, vert_info,
+                              max_crest_cuts=max_crest_cuts,
+                              min_crest_cuts=min_crest_cuts,
                               visited=visited,
                               check_left=check_left)
 
@@ -906,6 +964,7 @@ def _traverse_tree(root, visited, path=None):
 
         validity |= sibling_validity
 
+    visited[root][0] = validity
     return validity
 
 
@@ -937,14 +996,15 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
         children conditions.
 
     """
+    root = root if len(root) == 3 else root[:-1]
     immersion = {root: {}}
-    conditions = visited.get(root if len(root) == 3 else root[:-1], None)
+    _, conditions = visited.get(root, None)
 
     a1, a2 = root[:2]
     left2right = root[2][-1] == 'L'
     sub_poly = []
 
-    if conditions[1][0][0][0] < 0:
+    if conditions[0][0][0] < 0:
         # The base case is reached is when a cut that is left/right
         # valid by condition 1
         if left2right:
@@ -958,20 +1018,34 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
 
         return immersion, sub_poly
 
-    for sib_cond in conditions[1]:
-        if len(sib_cond) == 1:
-            child = sib_cond[0]
-            child_cond_id = child[-1][0]
-            child_left2right = child[-1][1] == 'L'
+    for sib_cond in conditions:
+        for child_1 in sib_cond:
+            child_owner, child_conditions = visited.get(child_1[:-1],
+                                                        (None, None))
+            # Set the owner of this branch to the current visited node.
+            if child_owner is None and child_conditions is not None:
+                visited[child_1[:-1]][0] = root
 
-            sub_immersion, child_poly = _immerse_tree(child, visited,
+        child_1 = sib_cond[0]
+        child_cond_id = child_1[-1][0]
+
+        # If this branch has been already added to the poygon list by another
+        # node, continue with the next children condition.
+        cut_owner, _ = visited.get(child_1[:-1], (None, None))
+        if cut_owner is not None and cut_owner != root:
+            continue
+
+        if len(sib_cond) == 1:
+            child_left2right = child_1[-1][1] == 'L'
+
+            sub_immersion, child_poly = _immerse_tree(child_1, visited,
                                                       n_vertices,
                                                       polys_idx)
             immersion[root].update(sub_immersion)
 
-            # If this cut was selected by complying with condition 2,
-            # add the child path, and send it to the parent path.
-            b1, b2 = child[:2]
+            # If this cut was selected by satisfying condition 2,
+            # append the child path to the parent path.
+            b1, b2 = child_1[:2]
             if child_cond_id == '2':
                 if child_left2right:
                     ex_child_end = False \
@@ -1011,7 +1085,7 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
         else:
             # Children cuts that where generated using rules 3, 4, and 5
             # have a special way to be merged with their respective parents.
-            child_1, child_2 = sib_cond
+            child_2 = sib_cond[1]
             child_cond_id = child_1[-1][0]
             child_left2right = child_1[-1][1] == 'L'
 
@@ -1019,16 +1093,19 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
                 sub_immersion, child_poly = _immerse_tree(child_1, visited,
                                                           n_vertices,
                                                           polys_idx)
-                immersion[root].update(sub_immersion)
-
-                polys_idx.append(np.concatenate(child_poly, axis=0))
+                if len(child_poly):
+                    # If the children branch has not been added to the
+                    # sub-polygons list, append it.
+                    immersion[root].update(sub_immersion)
+                    polys_idx.append(np.concatenate(child_poly, axis=0))
 
                 sub_immersion, child_poly = _immerse_tree(child_2, visited,
                                                           n_vertices,
                                                           polys_idx)
-                immersion[root].update(sub_immersion)
 
-                polys_idx.append(np.concatenate(child_poly, axis=0))
+                if len(child_poly):
+                    immersion[root].update(sub_immersion)
+                    polys_idx.append(np.concatenate(child_poly, axis=0))
 
                 if child_left2right:
                     sub_poly.append(_shift_indices(child_1[1], child_2[0],
@@ -1057,13 +1134,16 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
                                                    ex_start=False,
                                                    ex_end=False))
 
-                polys_idx.append(np.concatenate(sub_poly, axis=0))
+                if len(child_poly):
+                    polys_idx.append(np.concatenate(sub_poly, axis=0))
 
                 sub_immersion, child_poly = _immerse_tree(child_2, visited,
                                                           n_vertices,
                                                           polys_idx)
-                immersion[root].update(sub_immersion)
-                polys_idx.append(np.concatenate(child_poly, axis=0))
+
+                if len(child_poly):
+                    immersion[root].update(sub_immersion)
+                    polys_idx.append(np.concatenate(child_poly, axis=0))
 
                 sub_poly = []
 
@@ -1083,13 +1163,16 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
                                                    ex_start=False,
                                                    ex_end=False))
 
-                polys_idx.append(np.concatenate(sub_poly, axis=0))
+                if len(child_poly):
+                    polys_idx.append(np.concatenate(sub_poly, axis=0))
 
                 sub_immersion, child_poly = _immerse_tree(child_2, visited,
                                                           n_vertices,
                                                           polys_idx)
-                immersion[root].update(sub_immersion)
-                polys_idx.append(np.concatenate(child_poly, axis=0))
+
+                if len(child_poly):
+                    immersion[root].update(sub_immersion)
+                    polys_idx.append(np.concatenate(child_poly, axis=0))
 
                 sub_poly = []
         break
@@ -1097,13 +1180,13 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
     return immersion, sub_poly
 
 
-def _get_root_indices(new_vertices):
+def _get_root_indices(vert_info):
     """ Finds the indices of the vertices that define the root cut used to
     recurse the polygon subdivision algorithm.
 
     Parameters
     ----------
-    new_vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         An array containing the coordinates of the polygon vertices and
         additional information about each vertex.
 
@@ -1115,25 +1198,25 @@ def _get_root_indices(new_vertices):
         The positional index of the root right vertex
 
     """
-    n_vertices = new_vertices.shape[0]
+    n_vertices = vert_info.shape[0]
 
     # Non-intersection points:
-    org_ids = np.where(new_vertices[:, 2].astype(np.int32) == -1)[0]
+    org_ids = np.where(vert_info[:, 2].astype(np.int32) == -1)[0]
 
-    root_vertex = org_ids[np.argmax(new_vertices[org_ids, 1])]
+    root_vertex = org_ids[np.argmax(vert_info[org_ids, 1])]
 
     shifted_indices = np.mod(root_vertex + 1 + np.arange(n_vertices),
                              n_vertices)
 
     right_idx = np.where(
-        new_vertices[shifted_indices, 2].astype(np.int32) == 0)[0][0]
+        vert_info[shifted_indices, 2].astype(np.int32) == 0)[0][0]
     right_idx = shifted_indices[right_idx]
 
     shifted_indices = np.mod(root_vertex + np.arange(n_vertices),
                              n_vertices)
 
     left_idx = np.where(
-        new_vertices[shifted_indices, 2].astype(np.int32) == 0)[0][-1]
+        vert_info[shifted_indices, 2].astype(np.int32) == 0)[0][-1]
     left_idx = shifted_indices[left_idx]
 
     return left_idx, right_idx
@@ -1162,29 +1245,30 @@ def _get_crest_ids(vertices, tolerance=1e-3):
         The positional index of the minimum crest vertex.
 
     """
-    # Get the dir of the polygon when walking its perimeter.
-    # Only crest points of left turns are considered
-    diff_x_prev = vertices[1:, 0] - vertices[:-1, 0]
-    diff_x_next = -diff_x_prev
-    diff_x_prev = np.insert(diff_x_prev, 0, vertices[0, 0] - vertices[-1, 0])
-    diff_x_next = np.append(diff_x_next, vertices[-1, 0] - vertices[0, 0])
-    dir = np.bitwise_and(diff_x_prev >= -tolerance, diff_x_next <= tolerance)
+    # Get the direction of the polygon when traversing its perimeter.
+    edges = vertices[1:, :2] - vertices[:-1, :2]
+    edges = np.vstack((vertices[0, :2] - vertices[-1, :2], edges))
+    edges = edges / np.linalg.norm(edges, axis=1).reshape(-1, 1)
 
+    norm_left = np.hstack((-edges[:, np.newaxis, 1], edges[:, np.newaxis, 0]))
+
+    cos_angle = np.sum(norm_left[:-1] * edges[1:], axis=1)
+    cos_angle = np.append(cos_angle, np.sum(norm_left[-1] * edges[0]))
+
+    dir_left = cos_angle > 0.0
+
+    # Only crest points of left turns are considered
     diff_y_prev = vertices[1:, 1] - vertices[:-1, 1]
     diff_y_next = -diff_y_prev
-
     diff_y_prev = np.insert(diff_y_prev, 0, vertices[0, 1] - vertices[-1, 1])
     diff_y_next = np.append(diff_y_next, vertices[-1, 1] - vertices[0, 1])
 
-    # Higher than previous hTp, and higher than next hTn
-    hTp = diff_y_prev > tolerance
-    hTn = diff_y_next > tolerance
+    u_prev = diff_y_prev > tolerance
+    u_next = diff_y_next > tolerance
+    d_prev = diff_y_prev < -tolerance
+    d_next = diff_y_next < -tolerance
 
-    # Lower than previous lTp, and lower than next lTn
-    lTp = diff_y_prev < -tolerance
-    lTn = diff_y_next < -tolerance
-
-    equal_to_next = np.fabs(diff_y_next) < tolerance
+    ey_next = np.fabs(diff_y_next) <= tolerance
 
     # Determines if the path is climbing up.
     clmb_up = reduce(lambda l1, l2:
@@ -1192,7 +1276,7 @@ def _get_crest_ids(vertices, tolerance=1e-3):
                         (l2[0] and l2[2])
                         or
                         (l1[-1] and not l2[0] and not l2[1])],
-                     zip(hTp, lTp, equal_to_next), [False])[1:]
+                     zip(u_prev, d_prev, ey_next), [False])[1:]
 
     # Determines if the path is climbing down.
     clmb_dwn = reduce(lambda l1, l2:
@@ -1200,66 +1284,89 @@ def _get_crest_ids(vertices, tolerance=1e-3):
                         (l2[0] and l2[2])
                         or
                         (l1[-1] and not any(l2[:2]))],
-                      zip(lTp, hTp, equal_to_next), [False])[1:]
+                      zip(d_prev, u_prev, ey_next), [False])[1:]
 
-    # Find maximum crests on left turns only (dir < 0)
-    max_crest_ids = np.nonzero(np.bitwise_and(np.bitwise_not(dir),
-                                              hTp * hTn + hTp * clmb_up))[0]
+    # Find maximum crests on left turns only.
+    max_crest_ids = np.nonzero(dir_left *
+                               (u_prev * u_next + u_prev * clmb_up))[0]
 
-    # Find minimum crests on left turns only (dir > 0)
-    min_crest_ids = np.nonzero(np.bitwise_and(dir,
-                                              lTp * lTn + lTp * clmb_dwn))[0]
+    # Find minimum crests on left turns only.
+    min_crest_ids = np.nonzero(dir_left *
+                               (d_prev * d_next + d_prev * clmb_dwn))[0]
 
     if len(max_crest_ids) > 0:
-        max_crest = np.argmax(vertices[max_crest_ids, 1])
+        max_crest = max_crest_ids[np.argmax(vertices[max_crest_ids, 1])]
     else:
         max_crest = None
 
     if len(min_crest_ids) > 0:
-        min_crest = np.argmin(vertices[min_crest_ids, 1])
+        min_crest = min_crest_ids[np.argmin(vertices[min_crest_ids, 1])]
     else:
         min_crest = None
 
     return max_crest_ids, min_crest_ids, max_crest, min_crest
 
 
-def _get_crest_cuts(new_vertices, crest_ids):
+def _check_clockwise(vertices):
+    """ Check if the polygon vertices are in a clockwise ordering.
+    The polygon sub-division algorithm works for clockwise polygns.
+
+    Parameters
+    ----------
+    vertices : numpy.ndarray
+        An array containing the coordinates of the polygon vertices.
+
+    Returns
+    -------
+    is_clockwise : bool or None
+        Whether the polygon is in clockwise direction or not.
+        This is None when no crest points were detected.
+
+    """
+    signed_area = np.sum(vertices[:-1, 0] * vertices[1:, 1] -
+                         vertices[:-1, 1] * vertices[1:, 0]) + \
+        vertices[-1, 0] * vertices[0, 1] - vertices[-1, 1] * vertices[0, 0]
+    is_clockwise = signed_area < 0
+    return is_clockwise
+
+
+def _get_crest_cuts(vert_info, crest_ids):
     """ Finds the positional indices of the intersection vertices
     that are closest to each crest point.
 
     Parameters
     ----------
-    new_vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         An array containing the coordinates of the polygon vertices with
         additional information of each vertex.
 
     Returns
     -------
-    closest_ids : list
+    closest_cuts : list
         A list of tuples with the index of the crest point, the positional
         index of the two intersection vertices that are closest to it,
         and their corresponding ray index.
 
     """
-    n_vertices = new_vertices.shape[0]
-    closest_ids = []
+    n_vertices = vert_info.shape[0]
+    closest_cuts = []
 
     for i in crest_ids:
         shifted_indices = np.mod(i + np.arange(n_vertices), n_vertices)
         prev_id = np.where(
-            new_vertices[shifted_indices, 2].astype(np.int32) >= 0)[0][-1]
+            vert_info[shifted_indices, 2].astype(np.int32) >= 0)[0][-1]
         prev_id = shifted_indices[prev_id]
 
         shifted_indices = np.mod(i + 1 + np.arange(n_vertices), n_vertices)
         next_id = np.where(
-            new_vertices[shifted_indices, 2].astype(np.int32) >= 0)[0][0]
+            vert_info[shifted_indices, 2].astype(np.int32) >= 0)[0][0]
         next_id = shifted_indices[next_id]
 
-        r = int(new_vertices[prev_id, 2])
+        r = int(vert_info[prev_id, 2])
 
-        closest_ids.append((i, r, prev_id, next_id))
+        closest_cuts.append((i, r, prev_id, next_id))
 
-    return closest_ids
+    return closest_cuts
 
 
 def _get_self_intersections(vertices):
@@ -1395,7 +1502,8 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
     rays_formulae : list
         A list of tuples containing the parametric formula of a ray.
     tolerance : float, optional
-        The tolerance used to determine if a ray iside an edge of the polygon.
+        The tolerance used to determine if a ray intersects an edge of
+        the polygon.
 
     Returns
     -------
@@ -1466,14 +1574,14 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
     return cut_coords, valid_edges, t_coefs
 
 
-def _sort_ray_cuts(new_vertices, rays_formulae):
+def _sort_ray_cuts(vert_info, rays_formulae):
     """ Adds the positional ordering of the intersection vertices that are
     on rays. It also assigns their corresponding sign according to the
     direction of the polygon when it is walked from left to right.
 
     Parameters
     ----------
-    new_vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         An array containing the coordinates of the polygon vertices with
         additional information about each vertex.
     rays_formulae : list
@@ -1481,7 +1589,7 @@ def _sort_ray_cuts(new_vertices, rays_formulae):
 
     Returns
     -------
-    new_vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The set of vetices coordinates with the updated information about the
         position of intersection vertices.
 
@@ -1490,29 +1598,29 @@ def _sort_ray_cuts(new_vertices, rays_formulae):
     all_ord_per_ray = []
     all_sym_per_ray = []
     for k, ((_, rs_y, _), _, _) in enumerate(rays_formulae):
-        sel_k = np.nonzero(new_vertices[:, -1].astype(np.int32) == k)[0]
+        sel_k = np.nonzero(vert_info[:, -1].astype(np.int32) == k)[0]
         if len(sel_k) == 0:
             continue
 
         # Determine the intersection's symbol using the y coordinate of the
         # previous point of each intersection (sel_k - 1).
-        inter_symbols = (new_vertices[sel_k - 1, 1] < rs_y) * 2 - 1
+        inter_symbols = (vert_info[sel_k - 1, 1] < rs_y) * 2 - 1
 
         rank_ord = np.empty(len(sel_k))
-        rank_ord[np.argsort(new_vertices[sel_k, 0])] = list(range(len(sel_k)))
+        rank_ord[np.argsort(vert_info[sel_k, 0])] = list(range(len(sel_k)))
 
         all_idx_per_ray += list(rank_ord)
         all_ord_per_ray += list(sel_k)
         all_sym_per_ray += list(inter_symbols)
 
-    new_vertices = np.hstack((new_vertices,
-                              np.zeros((new_vertices.shape[0], 2))))
+    vert_info = np.hstack((vert_info, np.zeros((vert_info.shape[0], 2))))
+
     # Fourth column contains the symbol of the cut, and the sixth column the
     # index of that cut on the corresponding ray.
-    new_vertices[all_ord_per_ray, -2] = all_sym_per_ray
-    new_vertices[all_ord_per_ray, -1] = all_idx_per_ray
+    vert_info[all_ord_per_ray, -2] = all_sym_per_ray
+    vert_info[all_ord_per_ray, -1] = all_idx_per_ray
 
-    return new_vertices
+    return vert_info
 
 
 def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
@@ -1536,17 +1644,17 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
     Returns
     -------
-    new_vertices : numpy.ndarray
+    vert_info : numpy.ndarray
         The set of vetices coordinates with the updated information about the
         position of intersection vertices.
 
     """
-    new_vertices = []
+    vert_info = []
     last_j = 0
 
     for i in np.unique(valid_edges[:, 0]):
-        new_vertices.append(np.hstack((vertices[last_j:i+1, :],
-                                       -np.ones((i-last_j+1, 1)))))
+        vert_info.append(
+            np.hstack((vertices[last_j:i+1, :], -np.ones((i-last_j+1, 1)))))
         sel_i = np.nonzero(valid_edges[:, 0] == i)[0]
         sel_r = valid_edges[sel_i, 2]
 
@@ -1555,34 +1663,31 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
         sel_i = sel_i[ord_idx]
         sel_r = sel_r[ord_idx]
 
-        new_vertices.append(np.hstack((cut_coords[sel_i],
-                                       sel_r.reshape(-1, 1))))
+        vert_info.append(np.hstack((cut_coords[sel_i], sel_r.reshape(-1, 1))))
         last_j = i + 1
 
     n_vertices = vertices.shape[0]
-    new_vertices.append(np.hstack((vertices[last_j:, :],
-                                   -np.ones((n_vertices-last_j, 1)))))
-    new_vertices = np.vstack(new_vertices)
+    vert_info.append(
+        np.hstack((vertices[last_j:, :], -np.ones((n_vertices-last_j, 1)))))
+    vert_info = np.vstack(vert_info)
 
-    return new_vertices
+    return vert_info
 
 
-def subdivide_selfoverlapping(vertices):
+def divide_selfoverlapping(coords):
     """ Divide a self-overlapping polygon into non self-overlapping polygons.
     This implements the algorithm proposed in [1].
 
     Parameters
     ----------
-    vertices : numpy.ndarray
-        A two-dimensional array containing the x and y coordinates of the
-        polygon vertices.
+    coords : (N, 2) array
+        Coordinates of the polygon vertices.
 
     Returns
     -------
     sub_polys : list
-        A list of numpy.ndarrays with the coordinates of the non
-        self-overlapping polygons obtained from sub-dividing the
-        original polygon.
+        A list of ndarrays with the coordinates of the non
+        self-overlapping polygons obtained from dividing the original polygon.
 
     References
     ----------
@@ -1590,41 +1695,57 @@ def subdivide_selfoverlapping(vertices):
            Analysis and applications. Computer-Aided Design, 46, 227-232.
            :DOI: https://doi.org/10.1016/j.cad.2013.08.037
     """
+    # Change the order of the axis to x, y from rr, cc.
+    vertices = coords[:, [1, 0]]
     max_crest_ids, min_crest_ids, max_crest, min_crest = \
-        _get_crest_ids(vertices)
+        _get_crest_ids(vertices, tolerance=2*np.finfo(np.float32).eps)
+
+    # Check if the polygon vertices are given in counter-clockwise direction
+    is_clockwise = _check_clockwise(vertices)
+
+    if is_clockwise is None:
+        # If the polygon does not have any crest point, it is because
+        # it is not self-overlapping.
+        return [vertices[:, [1, 0]]]
+
+    if not is_clockwise:
+        vertices = vertices[::-1, :]
+        max_crest_ids, min_crest_ids, max_crest, min_crest = \
+            _get_crest_ids(vertices, tolerance=2*np.finfo(np.float32).eps)
 
     if max_crest is None and min_crest is None:
         # If the polygon does not have any crest point, it is because
         # it is not self-overlapping.
-        return [vertices]
+        return [vertices[::(-1)**(not is_clockwise), [1, 0]]]
 
-    rays_max = _compute_rays(vertices, max_crest_ids, -0.1)
-    rays_min = _compute_rays(vertices, min_crest_ids, 0.1)
+    rays_max = _compute_rays(vertices, max_crest_ids, epsilon=-1e-4)
+    rays_min = _compute_rays(vertices, min_crest_ids, epsilon=1e-4)
 
-    rays_formulae = _sort_rays(rays_max + rays_min, vertices[:, 1].max())
+    rays_formulae = _sort_rays(rays_max + rays_min, vertices[:, 1].max(),
+                               tolerance=2e-4)
     self_inter_formulae = _get_self_intersections(vertices)
 
     cut_coords, valid_edges, t_coefs = \
-        _find_intersections(vertices, rays_formulae + self_inter_formulae)
-    new_vertices = _merge_new_vertices(vertices, cut_coords,
-                                       valid_edges,
-                                       t_coefs)
-    new_vertices = _sort_ray_cuts(new_vertices, rays_formulae)
+        _find_intersections(vertices, rays_formulae + self_inter_formulae,
+                            tolerance=2*np.finfo(np.float32).eps)
+    vert_info = _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs)
+    vert_info = _sort_ray_cuts(vert_info, rays_formulae)
 
     # Get the first point at the left of the crest point
-    new_max_crest_ids, new_min_crest_ids, _, _ = _get_crest_ids(new_vertices)
-    new_max_crest_ids = _get_crest_cuts(new_vertices, new_max_crest_ids)
-    new_min_crest_ids = _get_crest_cuts(new_vertices, new_min_crest_ids)
+    new_max_crest_ids, new_min_crest_ids, _, _ = \
+        _get_crest_ids(vert_info, tolerance=2*np.finfo(np.float32).eps)
+    new_max_crest_cuts = _get_crest_cuts(vert_info, new_max_crest_ids)
+    new_min_crest_cuts = _get_crest_cuts(vert_info, new_min_crest_ids)
 
-    left_idx, right_idx = _get_root_indices(new_vertices)
+    left_idx, right_idx = _get_root_indices(vert_info)
 
     # The root is left valid by construction.
     # Therefore, the right validity of the root cut is checked and then all the
     # possible valid cuts are computed.
     visited = {}
-    _, root_id = _check_validity(left_idx, right_idx, new_vertices,
-                                 new_max_crest_ids,
-                                 new_min_crest_ids,
+    _, root_id = _check_validity(left_idx, right_idx, vert_info,
+                                 new_max_crest_cuts,
+                                 new_min_crest_cuts,
                                  visited,
                                  check_left=False)
 
@@ -1634,16 +1755,25 @@ def subdivide_selfoverlapping(vertices):
     if not polygon_is_valid:
         # If the polygon cannot be sub-divided into polygons that are not
         # self-overlapping, return the original polygon.
-        return [vertices]
+        return [vertices[::(-1)**(not is_clockwise), [1, 0]]]
+
+    # Remove invalid cuts from the `visited` dictionary. This dictionary
+    # is reused to identify branches that have been already added to
+    # the sub-polygons list.
+    for k in list(visited.keys()):
+        if visited[k][0]:
+            visited[k][0] = None
+        else:
+            del visited[k]
 
     # Perform a single immersion on the validity tree to get the first valid
     # path that cuts the polygon into non self-overlapping sub-polygons.
     sub_polys_ids = []
-    _, sub_poly = _immerse_tree(root_id, visited, new_vertices.shape[0],
+    _, sub_poly = _immerse_tree(root_id, visited, vert_info.shape[0],
                                 sub_polys_ids)
 
     # Add the root cut of the immersion tree
-    n_vertices = new_vertices.shape[0]
+    n_vertices = vert_info.shape[0]
     shifted_indices = np.mod(left_idx + np.arange(n_vertices), n_vertices)
     r = right_idx - left_idx + 1 + (0 if right_idx > left_idx else n_vertices)
     sub_poly = [shifted_indices[:r]] + sub_poly
@@ -1651,6 +1781,10 @@ def subdivide_selfoverlapping(vertices):
 
     polys = []
     for poly_ids in sub_polys_ids:
-        polys.append(new_vertices[poly_ids, :2])
+        # Revert the ordering of the columns to be rr, cc instead of x, y
+        new_sub_poly = vert_info[poly_ids, :]
+        new_sub_poly = new_sub_poly[::(-1)**(not is_clockwise), [1, 0]]
+
+        polys.append(new_sub_poly)
 
     return polys
