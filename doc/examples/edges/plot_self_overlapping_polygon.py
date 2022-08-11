@@ -1,11 +1,11 @@
 """
 ==================================
 Subdivide self-overlapping polygons
-==================================
+===================================
 
 This example shows how to divide a self-overlapping polygon into non
-self-overlapping sub polygons. Each sub-polygon can be drawn or analyzed by
-separate.
+self-overlapping sub-polygons. Each sub-polygon can then be drawn or analyzed
+separately.
 
 """
 
@@ -33,7 +33,7 @@ img_subpolys = np.zeros((512, 512, 3), dtype=np.double)
 rr, cc = polygon(poly[:, 0], poly[:, 1], img.shape)
 img[rr, cc, 1] = 1
 
-# Sub-divide the polygon into non self-overlapping sub-polygons
+# Subdivide the polygon into non self-overlapping sub-polygons
 sub_polys = divide_selfoverlapping(poly)
 
 print("Number of sub-polygons:", len(sub_polys))

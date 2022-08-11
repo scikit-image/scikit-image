@@ -16,7 +16,7 @@ sample_cw_overlap = np.array([[200, 271], [251, 267], [312, 267], [381, 269],
                               [254, 265], [199, 269], [169, 248], [146, 277],
                               [168, 307]])
 
-# A self-overlapping polygon with traversion direction given in counter
+# A self-overlapping polygon with traversal direction given in counter
 # clockwise direction.
 sample_ccw_overlap = np.array([[168, 307], [146, 277], [169, 248], [199, 269],
                                [254, 265], [309, 271], [381, 269], [422, 271],
