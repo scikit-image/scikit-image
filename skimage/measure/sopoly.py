@@ -93,8 +93,8 @@ def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
         criterion_1 = vert_info[:, 2].astype(np.int32) == ray_a
 
         shifted_indices = np.argsort(vert_info[:, -1])
-        pos_shift = np.where(vert_info[shifted_indices, -1].astype(np.int32) ==
-                             int(vert_info[a, -1]))[0][-1 * next_cut]
+        pos_shift = np.where(vert_info[shifted_indices, -1].astype(np.int32)
+                             == int(vert_info[a, -1]))[0][-1 * next_cut]
 
         shifted_indices = shifted_indices[
             np.mod(
@@ -339,8 +339,8 @@ def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
     # This condition is applied only if there are four or more
     # cut points in the same ray.
-    ver_in_ray_ids = list(np.where(vert_info[:, 2].astype(np.int32) ==
-                                   int(vert_info[a1, 2]))[0])
+    ver_in_ray_ids = list(np.where(vert_info[:, 2].astype(np.int32)
+                                   == int(vert_info[a1, 2]))[0])
     if len(ver_in_ray_ids) < 4:
         return None, children_ids
 
@@ -357,10 +357,10 @@ def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
             continue
 
         # Check the order of the intersection vertices on the current ray
-        if not (vert_info[a1, -1] <
-                vert_info[a3, -1] <
-                vert_info[a4, -1] <
-                vert_info[a2, -1]):
+        if not (vert_info[a1, -1]
+                < vert_info[a3, -1]
+                < vert_info[a4, -1]
+                < vert_info[a2, -1]):
             continue
 
         # Check if point a3' and a1 are left/right valid
@@ -472,8 +472,7 @@ def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
     is_valid = None
     n_vertices_on_ray = np.max(
         vert_info[vert_info[:, 2].astype(np.int32)
-                  ==
-                  int(vert_info[a3, 2]), -1])
+                  == int(vert_info[a3, 2]), -1])
     set_id = 0
 
     while int(vert_info[a_p, -1]) < n_vertices_on_ray:
@@ -990,9 +989,9 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
     Returns
     -------
     immersion : dict
-        The children sub-tree of valid conditions.
+        The children sub tree of valid conditions.
     sub_poly : list
-        A list of indices of all sub-polygons generated from
+        A list of indices of all sub polygons generated from
         children conditions.
 
     """
@@ -1095,7 +1094,7 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
                                                           polys_idx)
                 if len(child_poly):
                     # If the children branch has not been added to the
-                    # sub-polygons list, append it.
+                    # sub polygons list, append it.
                     immersion[root].update(sub_immersion)
                     polys_idx.append(np.concatenate(child_poly, axis=0))
 
@@ -1309,7 +1308,7 @@ def _get_crest_ids(vertices, tolerance=1e-3):
 
 def _check_clockwise(vertices):
     """ Check if the polygon vertices are in a clockwise ordering.
-    The polygon sub-division algorithm works for clockwise polygns.
+    The polygon sub division algorithm works for clockwise polygns.
 
     Parameters
     ----------
@@ -1753,13 +1752,13 @@ def divide_selfoverlapping(coords):
     polygon_is_valid = _traverse_tree(root_id, visited)
 
     if not polygon_is_valid:
-        # If the polygon cannot be sub-divided into polygons that are not
+        # If the polygon cannot be sub divided into polygons that are not
         # self-overlapping, return the original polygon.
         return [vertices[::(-1)**(not is_clockwise), [1, 0]]]
 
     # Remove invalid cuts from the `visited` dictionary. This dictionary
     # is reused to identify branches that have been already added to
-    # the sub-polygons list.
+    # the sub polygons list.
     for k in list(visited.keys()):
         if visited[k][0]:
             visited[k][0] = None
@@ -1767,7 +1766,7 @@ def divide_selfoverlapping(coords):
             del visited[k]
 
     # Perform a single immersion on the validity tree to get the first valid
-    # path that cuts the polygon into non self-overlapping sub-polygons.
+    # path that cuts the polygon into non self-overlapping sub polygons.
     sub_polys_ids = []
     _, sub_poly = _immerse_tree(root_id, visited, vert_info.shape[0],
                                 sub_polys_ids)
