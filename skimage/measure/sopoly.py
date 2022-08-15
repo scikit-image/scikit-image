@@ -4,7 +4,7 @@ from functools import reduce
 
 
 def _shift_indices(a1, a2, n_vertices, ex_start=True, ex_end=True):
-    """ Shifts the position of the indices in a way that wraps them connecting
+    """Shift the position of the indices in a way that wraps them connecting
     the last index with the first one.
 
     Parameters
@@ -58,14 +58,14 @@ def _get_cut_id(a1, a2, left2right=True):
 
 
 def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
-    """ Looks for the next/previous valid vertex that can be used as cut
+    """Look for the next/previous valid vertex that can be used as cut
     along with vertex `a`.
 
     Parameters
     ----------
     a : int
         An index of a vertex on the polygon used as reference to look for a cut
-        that satisfyes the given conditions.
+        that satisfies the given conditions.
     vert_info : numpy.ndarray
         The array containing the information about the polygon and the
         characteristics of each vertex.
@@ -124,7 +124,7 @@ def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
 
 
 def _check_adjacency(a1, a2, vert_info, left2right=True):
-    """ Check if the cut point a2 is adjacent to the cut a1 to the left/right.
+    """Check whether cut point a2 is adjacent to cut point a1 to the left/right.
 
     Parameters
     ----------
@@ -142,7 +142,7 @@ def _check_adjacency(a1, a2, vert_info, left2right=True):
     Returns
     -------
     is_adjacent : bool
-        If the indices a1 and a2 are adjacent when looked from left to right,
+        Whether indices a1 and a2 are adjacent when looked from left to right,
         or right to left.
 
     """
