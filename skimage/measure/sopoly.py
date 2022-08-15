@@ -16,17 +16,16 @@ def _shift_indices(a1, a2, n_vertices, ex_start=True, ex_end=True):
     n_vertices : int
         The number of vertices in the polygon.
     ex_start : bool
-        If the first index (a1) will be excluded from the
+        Wheter the first index (a1) will be excluded from the
         selected sequence of indices.
     ex_end : bool
-        If the last index (a2) will be excluded from the
+        Wheter the last index (a2) will be excluded from the
         selected sequence of indices.
 
     Returns
     -------
     shifted_indices : numpy.ndarray
         The sequence of wrapped and shifted indices between a1 and a2.
-
     """
     shifted_indices = np.mod(a1 + np.arange(n_vertices), n_vertices)
     r = a2 - a1 + 1 + (0 if a2 > a1 else n_vertices)
@@ -34,7 +33,7 @@ def _shift_indices(a1, a2, n_vertices, ex_start=True, ex_end=True):
 
 
 def _get_cut_id(a1, a2, left2right=True):
-    """ Generate an identifier key for the cut between a1 and a2.
+    """Generate an identifier key for the cut between a1 and a2.
 
     Parameters
     ----------
@@ -70,11 +69,10 @@ def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
         The array containing the information about the polygon and the
         characteristics of each vertex.
     next_cut : bool, optional
-        If the cut is looked for after index `a` from left to right on
-        the polygon.
-        Use False to look for the previous cut instead.
+        Whether the cut is looked for after index `a` from left to right on
+        the polygon. Use False to look for the previous cut instead.
     same_ray : bool, optional
-        If the next/previous cut index is being looked for on the same ray
+        Whether the next/previous cut index is being looked for on the same ray
         where `a` belongs.
     sign : int, optional
         The orientation (positive 1 /negative -1 / ambiguous 0) of the
@@ -124,7 +122,8 @@ def _get_cut(a, vert_info, next_cut=True, same_ray=True, sign=0):
 
 
 def _check_adjacency(a1, a2, vert_info, left2right=True):
-    """Check whether cut point a2 is adjacent to cut point a1 to the left/right.
+    """Check whether cut point a2 is adjacent to cut point a1 to
+    the left/right.
 
     Parameters
     ----------
@@ -137,7 +136,7 @@ def _check_adjacency(a1, a2, vert_info, left2right=True):
         characteristics of each vertex.
     left2right : bool, optional
         The direction of the condition tested for the validity of this cut.
-        The default direction is from left to right on the polygon vertices
+        The default direction is from left to right on the polygon vertices.
 
     Returns
     -------
@@ -165,7 +164,7 @@ def _check_adjacency(a1, a2, vert_info, left2right=True):
 
 def _condition_1(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
-    """ First condition that a cut has to satisfy in order to be
+    """Verify the first condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
 
     Parameters
@@ -187,14 +186,14 @@ def _condition_1(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is left/right valid, or None if this cut
-        validity has already been expanded.
+        Whether the cut between a1 and a2 is left/right valid,
+        or None if this cut validity has already been expanded.
     children_ids : list
         A list of tuples containing the indices of the Exp cuts that
         this cut depends on, and an identifier of this condition number.
@@ -213,7 +212,7 @@ def _condition_1(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 def _condition_2(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
-    """ Second condition that a cut has to satisfy in order to be
+    """Verify the second condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
 
     Parameters
@@ -235,14 +234,14 @@ def _condition_2(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is left/right valid, or None if this cut
-        validity has already been expanded.
+        Whether the cut between a1 and a2 is left/right valid,
+        or None if this cut validity has already been expanded.
     children_ids : list
         A list of tuples containing the indices of the Exp cuts that
         this cut depends on, and an identifier of this condition number.
@@ -291,7 +290,7 @@ def _condition_2(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
-    """ Third condition that a cut has to satisfy in order to be
+    """Verify the third condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
 
     Parameters
@@ -313,14 +312,14 @@ def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is left/right valid, or None if this cut
-        validity has already been expanded.
+        Whether the cut between a1 and a2 is left/right valid,
+        or None if this cut validity has already been expanded.
     children_ids : list
         A list of tuples containing the indices of the Exp cuts that
         this cut depends on, and an identifier of this condition number.
@@ -408,7 +407,7 @@ def _condition_3(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
-    """ Fourth condition that a cut has to satisfy in order to be
+    """Verify the fourth condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
 
     Parameters
@@ -430,14 +429,14 @@ def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is left/right valid, or None if this cut
-        validity has already been expanded.
+        Whether the cut between a1 and a2 is left/right valid,
+        or None if this cut validity has already been expanded.
     children_ids : list
         A list of tuples containing the indices of the Exp cuts that
         this cut depends on, and an identifier of this condition number.
@@ -529,7 +528,7 @@ def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 def _condition_5(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                  check_left=True):
-    """ Fifth condition that a cut has to satisfy in order to be
+    """Verify the fifth condition that a cut has to satisfy in order to be
     left or right valid, according to `check_left`.
 
     Parameters
@@ -551,14 +550,14 @@ def _condition_5(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is left/right valid, or None if this
-        cut validity has already been expanded.
+        Whether the cut between a1 and a2 is left/right valid,
+        or None if this cut validity has already been expanded..
     children_ids : list
         A list of tuples containing the indices of the Exp cuts that
         this cut depends on, and an identifier of this condition number .
@@ -644,7 +643,8 @@ def _condition_5(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 
 def _invalidity_condition_1(a1, a2, vert_info, check_left=True):
-    """ First condition that can turn a cut to be left/right invalid.
+    """ Verify the first condition that can turn a cut to be
+    left/right invalid.
 
     Parameters
     ----------
@@ -656,13 +656,13 @@ def _invalidity_condition_1(a1, a2, vert_info, check_left=True):
         The array containing the information about the polygon and the
         characteristics of each vertex.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 has no invalidity according with
+        Whether the cut between a1 and a2 has no invalidity according with
         this condition.
         This returns None when this condition can not be tested.
     """
@@ -696,7 +696,8 @@ def _invalidity_condition_1(a1, a2, vert_info, check_left=True):
 
 
 def _invalidity_condition_2(a1, a2, vert_info, check_left=True):
-    """ Second condition that can turn a cut to be left/right invalid.
+    """Verify the second condition that can turn a cut to be
+    left/right invalid.
 
     Parameters
     ----------
@@ -708,13 +709,13 @@ def _invalidity_condition_2(a1, a2, vert_info, check_left=True):
         The array containing the information about the polygon and the
         characteristics of each vertex.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 has no invalidity according with
+        Whether the cut between a1 and a2 has no invalidity according with
         this condition.
         This returns None when this condition can not be tested.
     """
@@ -748,7 +749,7 @@ def _invalidity_condition_2(a1, a2, vert_info, check_left=True):
 
 def _invalidity_condition_3(a1, a2, vert_info, check_left=True,
                             tolerance=1e-4):
-    """ Third condition that can turn a cut to be left invalid.
+    """Verfy the third condition that can turn a cut to be left/right invalid.
 
     Parameters
     ----------
@@ -760,7 +761,7 @@ def _invalidity_condition_3(a1, a2, vert_info, check_left=True,
         The array containing the information about the polygon and the
         characteristics of each vertex.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
     tolerance : float, optional
         A tolerance used to fetermine if two intersection points are the same.
@@ -768,7 +769,7 @@ def _invalidity_condition_3(a1, a2, vert_info, check_left=True,
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 has no invalidity according with
+        Whether the cut between a1 and a2 has no invalidity according with
         this condition.
         This returns None when this condition can not be tested.
     """
@@ -839,7 +840,7 @@ all_invalid_conditions = [_invalidity_condition_1,
 
 def _check_validity(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                     check_left=True):
-    """ Checks recursively the validity of a cut between indices `a1` and `a2`
+    """Check recursively the validity of a cut between indices `a1` and `a2`
     of the polygon.
 
     Parameters
@@ -861,19 +862,18 @@ def _check_validity(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
         A dictionary containing the dependencies and validities of the
         already visited cuts.
     check_left : bool, optional
-        If the validity of the cut is being tested from left to right,
+        Whether the validity of the cut is being tested from left to right,
         or right to left.
 
     Returns
     -------
     is_valid : bool or None
-        If the cut between a1 and a2 is valid or is being Exp
-        This returns None when its cuts dependencies have been Exp before.
+        Whether the cut between a1 and a2 is valid or is being explored.
+        This returns None when its cuts dependencies have been explored before.
     cut_id : tuple
         A tuple containing the indices a1 and a2,
         and the direction of the vertices of the polygon between indices a1 and
          a2 of the current cut.
-
     """
     cut_id = _get_cut_id(a1, a2, left2right=check_left)
 
@@ -915,7 +915,7 @@ def _check_validity(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
 
 
 def _traverse_tree(root, visited, path=None):
-    """ Traverse the tree of validity of the cuts that were tested previously
+    """Traverse the tree of validity of the cuts that were tested previously
     with `_check_validity`.
 
     Parameters
@@ -935,7 +935,6 @@ def _traverse_tree(root, visited, path=None):
     -------
     validity : bool
         The validity of the current branch being traversed.
-
     """
     root = root if len(root) == 3 else root[:-1]
 
@@ -968,7 +967,7 @@ def _traverse_tree(root, visited, path=None):
 
 
 def _immerse_tree(root, visited, n_vertices, polys_idx):
-    """ Traverses the valid paths according to the visited dictionary to get
+    """Traverse the valid paths according to the visited dictionary to get
     the set of non-overlapping sub polygons.
     This traverses only one of the possible valid immersions for simplicity.
 
@@ -993,7 +992,6 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
     sub_poly : list
         A list of indices of all sub polygons generated from
         children conditions.
-
     """
     root = root if len(root) == 3 else root[:-1]
     immersion = {root: {}}
@@ -1180,7 +1178,7 @@ def _immerse_tree(root, visited, n_vertices, polys_idx):
 
 
 def _get_root_indices(vert_info):
-    """ Finds the indices of the vertices that define the root cut used to
+    """Find the indices of the vertices that define the root cut used to
     recurse the polygon subdivision algorithm.
 
     Parameters
@@ -1195,7 +1193,6 @@ def _get_root_indices(vert_info):
         The positional index of the root left vertex
     right_idx : int
         The positional index of the root right vertex
-
     """
     n_vertices = vert_info.shape[0]
 
@@ -1222,7 +1219,7 @@ def _get_root_indices(vert_info):
 
 
 def _get_crest_ids(vertices, tolerance=1e-3):
-    """ Finds the positional indices of the crest points.
+    """Find the positional indices of the crest points.
     Only crests where there is a left turn on the polygon are considered.
 
     Parameters
@@ -1242,7 +1239,6 @@ def _get_crest_ids(vertices, tolerance=1e-3):
         The positional index of the maximum crest vertex.
     min_crest : int
         The positional index of the minimum crest vertex.
-
     """
     # Get the direction of the polygon when traversing its perimeter.
     edges = vertices[1:, :2] - vertices[:-1, :2]
@@ -1307,7 +1303,7 @@ def _get_crest_ids(vertices, tolerance=1e-3):
 
 
 def _check_clockwise(vertices):
-    """ Check if the polygon vertices are in a clockwise ordering.
+    """Check whether the polygon vertices are in a clockwise ordering.
     The polygon sub division algorithm works for clockwise polygns.
 
     Parameters
@@ -1320,7 +1316,6 @@ def _check_clockwise(vertices):
     is_clockwise : bool or None
         Whether the polygon is in clockwise direction or not.
         This is None when no crest points were detected.
-
     """
     signed_area = np.sum(vertices[:-1, 0] * vertices[1:, 1] -
                          vertices[:-1, 1] * vertices[1:, 0]) + \
@@ -1330,7 +1325,7 @@ def _check_clockwise(vertices):
 
 
 def _get_crest_cuts(vert_info, crest_ids):
-    """ Finds the positional indices of the intersection vertices
+    """Find the positional indices of the intersection vertices
     that are closest to each crest point.
 
     Parameters
@@ -1345,7 +1340,6 @@ def _get_crest_cuts(vert_info, crest_ids):
         A list of tuples with the index of the crest point, the positional
         index of the two intersection vertices that are closest to it,
         and their corresponding ray index.
-
     """
     n_vertices = vert_info.shape[0]
     closest_cuts = []
@@ -1369,7 +1363,7 @@ def _get_crest_cuts(vert_info, crest_ids):
 
 
 def _get_self_intersections(vertices):
-    """ Computes the rays formulae of all edges to identify
+    """Compute the rays formulae of all edges to identify
     self-intersections later.
     This will iterate over all edges to generate the ray formulae.
 
@@ -1387,7 +1381,6 @@ def _get_self_intersections(vertices):
         direction of the ray.
         It also states that the rays were not computed from a crest point
         (last element in the tuple = False).
-
     """
     n_vertices = vertices.shape[0]
     rays_formulae = []
@@ -1403,7 +1396,7 @@ def _get_self_intersections(vertices):
 
 
 def _compute_rays(vertices, crest_ids, epsilon=1e-1):
-    """ Computes the rays that cross each crest point, offsetted by epsilon.
+    """Compute the rays that cross each crest point, offsetted by epsilon.
     The rays are returned in general line form.
     For maximum crests, give a negative epsion instead.
 
@@ -1426,7 +1419,6 @@ def _compute_rays(vertices, crest_ids, epsilon=1e-1):
         of the ray.
         It also states that the rays were computed from a crest point
         (last element in the tuple = True).
-
     """
     rays_formulae = []
     existing_heights = []
@@ -1445,7 +1437,7 @@ def _compute_rays(vertices, crest_ids, epsilon=1e-1):
 
 
 def _sort_rays(rays_formulae, max_crest_y, tolerance=1e-3):
-    """ Sorts the rays according to its relative position to the crest point.
+    """Sort the rays according to its relative position to the crest point.
     It also filters any repeated rays.
 
     Parameters
@@ -1464,7 +1456,6 @@ def _sort_rays(rays_formulae, max_crest_y, tolerance=1e-3):
     sorted_rays_formulae : list
         The list of unique rays formulae sorted according to their position in
         the y-axis.
-
     """
     if len(rays_formulae) == 1:
         return rays_formulae
@@ -1491,8 +1482,8 @@ def _sort_rays(rays_formulae, max_crest_y, tolerance=1e-3):
 
 
 def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
-    """ Walks the polygon to find self-intersections and
-    intersections a set of rays.
+    """Walk the polygon to find self-intersections and intersections a
+    set of rays.
 
     Parameters
     ----------
@@ -1514,7 +1505,6 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
     t_coefs : numpy.ndarray
         The coefficients of the parametric rays that define the position of
         the intersection vertex on its respective edge.
-
     """
     n_vertices = vertices.shape[0]
 
@@ -1574,7 +1564,7 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
 
 
 def _sort_ray_cuts(vert_info, rays_formulae):
-    """ Adds the positional ordering of the intersection vertices that are
+    """Add the positional ordering of the intersection vertices that are
     on rays. It also assigns their corresponding sign according to the
     direction of the polygon when it is walked from left to right.
 
@@ -1591,7 +1581,6 @@ def _sort_ray_cuts(vert_info, rays_formulae):
     vert_info : numpy.ndarray
         The set of vetices coordinates with the updated information about the
         position of intersection vertices.
-
     """
     all_idx_per_ray = []
     all_ord_per_ray = []
@@ -1623,7 +1612,7 @@ def _sort_ray_cuts(vert_info, rays_formulae):
 
 
 def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
-    """ Merges the new vertices computed from self-intersections and
+    """Merge the new vertices computed from self-intersections and
     intersections of the polygon with any ray.
     The newly inserted vertices are sorted according to the coefficient used
     to compute them.
@@ -1646,7 +1635,6 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
     vert_info : numpy.ndarray
         The set of vetices coordinates with the updated information about the
         position of intersection vertices.
-
     """
     vert_info = []
     last_j = 0
@@ -1674,7 +1662,7 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
 
 def divide_selfoverlapping(coords):
-    """ Divide a self-overlapping polygon into non self-overlapping polygons.
+    """Divide a self-overlapping polygon into non self-overlapping polygons.
     This implements the algorithm proposed in [1].
 
     Parameters

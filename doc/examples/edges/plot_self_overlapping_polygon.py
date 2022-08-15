@@ -10,7 +10,6 @@ Each sub polygon can then be drawn or analyzed separately.
 .. [1] Uddipan Mukherjee, "Self-overlapping curves: Analysis and applications,"
     Computer-Aided Design, 2014, 46, 227-232.
     :DOI:`10.1016/j.cad.2013.08.037`
-
 """
 
 import numpy as np
