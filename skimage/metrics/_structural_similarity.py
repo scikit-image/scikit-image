@@ -130,7 +130,9 @@ def structural_similarity(
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **args)
+            ch_result = structural_similarity(
+                im1[_at(ch)], im2[_at(ch)], **args
+            )
             if gradient and full:
                 mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
@@ -254,7 +256,9 @@ def structural_similarity(
         # The following is Eqs. 7-8 of Avanaki 2009.
         grad = filter_func(A1 / D, **filter_args) * im1
         grad += filter_func(-S / B2, **filter_args) * im2
-        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
+        grad += filter_func(
+            (ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args
+        )
         grad *= 2 / im1.size
 
         if full:
