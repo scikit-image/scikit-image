@@ -1,7 +1,7 @@
 import functools
 
 import numpy as np
-from scipy.ndimage import uniform_filter
+from scipy.ndimage import uniform_filter, zoom
 
 from .._shared import utils
 from .._shared.filters import gaussian
@@ -9,7 +9,7 @@ from .._shared.utils import _supported_float_type, check_shape_equality, warn
 from ..util.arraycrop import crop
 from ..util.dtype import dtype_range
 
-__all__ = ['structural_similarity']
+__all__ = ['structural_similarity', 'multiscale_structural_similarity']
 
 
 @utils.deprecate_multichannel_kwarg()
@@ -252,3 +252,63 @@ def structural_similarity(im1, im2,
             return mssim, S
         else:
             return mssim
+
+
+@utils.deprecate_multichannel_kwarg()
+def muliscale_structural_similarity(im1, im2,
+                          *,
+                          win_size=11,
+                          multiscale_weights=[0.0448, 0.2856, 0.3001, 0.2363, 0.1333], **kwargs):
+    """
+    Compute the multiscale structural similarity index between two images.
+
+    Parameters
+    ----------
+    im1, im2 : ndarray
+        Images. Any dimensionality with same shape.
+    win_size : int, optional
+        The side-length of the sliding window used in comparison. Must be an
+        odd value. 
+    multiscale_weights : list, optional
+        The weights that needs to applied to the ssim at each scale
+
+    Returns
+    -------
+    ms_ssim : float
+        The multiscale structural similarity index over the image.
+    
+    Notes
+    -----
+    - kwargs can be used to pass arguments for the ssim metric at each scale see metrics.ssim for details
+    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa       
+
+    """
+
+    check_shape_equality(im1, im2)
+    min_size_img = 2**len(multiscale_weights)
+
+    # assuming 3rd dim is the channel
+    assert min(im1.shape[0], im1.shape[1]), f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
+    
+    mssim = []
+    mcs = []
+    
+    for i in range(len(multiscale_weights)):
+        # calculate ssim at scale i
+        sim, cs = structural_similarity(im1=im1, im2=im2, win_size=win_size, full=True, **kwargs)
+        
+        # multiply the weights for the scale i
+        mssim.append(sim ** multiscale_weights[i])
+        mcs.append(cs.mean()** multiscale_weights[i])
+
+        #rescale the images for scale i+1
+        im1 = zoom(im1, zoom=0.5)
+        im2 = zoom(im2, zoom=0.5)
+
+    
+    mssim = np.stack(mssim)
+    mcs = np.stack(mcs)
+
+    # From Matlab implementation https://ece.uwaterloo.ca/~z70wang/research/iwssim/
+    ms_ssim = np.prod(mcs[:-1])* mssim[-1]
+    return ms_ssim

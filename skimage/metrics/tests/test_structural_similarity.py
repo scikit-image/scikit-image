@@ -5,7 +5,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 from skimage import data
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
-from skimage.metrics import structural_similarity
+from skimage.metrics import structural_similarity, muliscale_structural_similarity
 
 np.random.seed(5)
 cam = data.camera()
@@ -257,3 +257,25 @@ def test_invalid_input():
         structural_similarity(X, X, K2=-0.1)
     with pytest.raises(ValueError):
         structural_similarity(X, X, sigma=-1.0)
+
+def test_ms_structural_similarity():
+    # color image example
+    Xc = data.chelsea()
+    sigma = 15.0
+    Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
+    Yc = Yc.astype(Xc.dtype)
+
+    # multichannel result should be mean of the individual channel results
+    mssim = muliscale_structural_similarity(Xc, Yc, channel_axis=-1)
+    mssim_sep = [muliscale_structural_similarity(
+        Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
+    assert_almost_equal(mssim, np.mean(mssim_sep))
+
+    # structural_similarity of image with itself should be 1.0
+    assert_equal(muliscale_structural_similarity(Xc, Xc, channel_axis=-1), 1.0)
+
+    # test small image
+
+    X = np.zeros((5, 5))
+    with pytest.raises(AssertionError):
+        muliscale_structural_similarity(X, X)
