@@ -9,15 +9,23 @@ from .._shared.utils import _supported_float_type, check_shape_equality, warn
 from ..util.arraycrop import crop
 from ..util.dtype import dtype_range
 
-__all__ = ['structural_similarity', 'multiscale_structural_similarity']
+__all__ = ["structural_similarity", "multiscale_structural_similarity"]
 
 
 @utils.deprecate_multichannel_kwarg()
-def structural_similarity(im1, im2,
-                          *,
-                          win_size=None, gradient=False, data_range=None,
-                          channel_axis=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
+def structural_similarity(
+    im1,
+    im2,
+    *,
+    win_size=None,
+    gradient=False,
+    data_range=None,
+    channel_axis=None,
+    multichannel=False,
+    gaussian_weights=False,
+    full=False,
+    **kwargs,
+):
     """
     Compute the mean structural similarity index between two images.
 
@@ -103,12 +111,14 @@ def structural_similarity(im1, im2,
 
     if channel_axis is not None:
         # loop over channels
-        args = dict(win_size=win_size,
-                    gradient=gradient,
-                    data_range=data_range,
-                    channel_axis=None,
-                    gaussian_weights=gaussian_weights,
-                    full=full)
+        args = dict(
+            win_size=win_size,
+            gradient=gradient,
+            data_range=data_range,
+            channel_axis=None,
+            gaussian_weights=gaussian_weights,
+            full=full,
+        )
         args.update(kwargs)
         nch = im1.shape[channel_axis]
         mssim = np.empty(nch, dtype=float_type)
@@ -120,8 +130,7 @@ def structural_similarity(im1, im2,
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[_at(ch)],
-                                              im2[_at(ch)], **args)
+            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **args)
             if gradient and full:
                 mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
@@ -140,16 +149,16 @@ def structural_similarity(im1, im2,
         else:
             return mssim
 
-    K1 = kwargs.pop('K1', 0.01)
-    K2 = kwargs.pop('K2', 0.03)
-    sigma = kwargs.pop('sigma', 1.5)
+    K1 = kwargs.pop("K1", 0.01)
+    K2 = kwargs.pop("K2", 0.03)
+    sigma = kwargs.pop("sigma", 1.5)
     if K1 < 0:
         raise ValueError("K1 must be positive")
     if K2 < 0:
         raise ValueError("K2 must be positive")
     if sigma < 0:
         raise ValueError("sigma must be positive")
-    use_sample_covariance = kwargs.pop('use_sample_covariance', True)
+    use_sample_covariance = kwargs.pop("use_sample_covariance", True)
 
     if gaussian_weights:
         # Set to give an 11-tap filter with the default sigma of 1.5 to match
@@ -162,26 +171,30 @@ def structural_similarity(im1, im2,
             r = int(truncate * sigma + 0.5)  # radius as in ndimage
             win_size = 2 * r + 1
         else:
-            win_size = 7   # backwards compatibility
+            win_size = 7  # backwards compatibility
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
-            'win_size exceeds image extent. '
-            'Either ensure that your images are '
-            'at least 7x7; or pass win_size explicitly '
-            'in the function call, with an odd value '
-            'less than or equal to the smaller side of your '
-            'images. If your images are multichannel '
-            '(with color channels), set channel_axis to '
-            'the axis number corresponding to the channels.')
+            "win_size exceeds image extent. "
+            "Either ensure that your images are "
+            "at least 7x7; or pass win_size explicitly "
+            "in the function call, with an odd value "
+            "less than or equal to the smaller side of your "
+            "images. If your images are multichannel "
+            "(with color channels), set channel_axis to "
+            "the axis number corresponding to the channels."
+        )
 
     if not (win_size % 2 == 1):
-        raise ValueError('Window size must be odd.')
+        raise ValueError("Window size must be odd.")
 
     if data_range is None:
         if im1.dtype != im2.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im1.dtype.", stacklevel=2)
+            warn(
+                "Inputs have mismatched dtype.  Setting data_range based on "
+                "im1.dtype.",
+                stacklevel=2,
+            )
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
 
@@ -189,16 +202,16 @@ def structural_similarity(im1, im2,
 
     if gaussian_weights:
         filter_func = gaussian
-        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
+        filter_args = {"sigma": sigma, "truncate": truncate, "mode": "reflect"}
     else:
         filter_func = uniform_filter
-        filter_args = {'size': win_size}
+        filter_args = {"size": win_size}
 
     # ndimage filters need floating point data
     im1 = im1.astype(float_type, copy=False)
     im2 = im2.astype(float_type, copy=False)
 
-    NP = win_size ** ndim
+    NP = win_size**ndim
 
     # filter has already normalized by NP
     if use_sample_covariance:
@@ -222,10 +235,12 @@ def structural_similarity(im1, im2,
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
-    A1, A2, B1, B2 = ((2 * ux * uy + C1,
-                       2 * vxy + C2,
-                       ux ** 2 + uy ** 2 + C1,
-                       vx + vy + C2))
+    A1, A2, B1, B2 = (
+        2 * ux * uy + C1,
+        2 * vxy + C2,
+        ux**2 + uy**2 + C1,
+        vx + vy + C2,
+    )
     D = B1 * B2
     S = (A1 * A2) / D
 
@@ -239,9 +254,8 @@ def structural_similarity(im1, im2,
         # The following is Eqs. 7-8 of Avanaki 2009.
         grad = filter_func(A1 / D, **filter_args) * im1
         grad += filter_func(-S / B2, **filter_args) * im2
-        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D,
-                            **filter_args)
-        grad *= (2 / im1.size)
+        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
+        grad *= 2 / im1.size
 
         if full:
             return mssim, grad, S
@@ -255,10 +269,14 @@ def structural_similarity(im1, im2,
 
 
 @utils.deprecate_multichannel_kwarg()
-def muliscale_structural_similarity(im1, im2,
-                          *,
-                          win_size=11,
-                          multiscale_weights=[0.0448, 0.2856, 0.3001, 0.2363, 0.1333], **kwargs):
+def muliscale_structural_similarity(
+    im1,
+    im2,
+    *,
+    win_size=11,
+    multiscale_weights=[0.0448, 0.2856, 0.3001, 0.2363, 0.1333],
+    **kwargs,
+):
     """
     Compute the multiscale structural similarity index between two images.
 
@@ -268,7 +286,7 @@ def muliscale_structural_similarity(im1, im2,
         Images. Any dimensionality with same shape.
     win_size : int, optional
         The side-length of the sliding window used in comparison. Must be an
-        odd value. 
+        odd value.
     multiscale_weights : list, optional
         The weights that needs to applied to the ssim at each scale
 
@@ -276,39 +294,42 @@ def muliscale_structural_similarity(im1, im2,
     -------
     ms_ssim : float
         The multiscale structural similarity index over the image.
-    
+
     Notes
     -----
     - kwargs can be used to pass arguments for the ssim metric at each scale see metrics.ssim for details
-    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa       
+    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa
 
     """
 
     check_shape_equality(im1, im2)
-    min_size_img = 2**len(multiscale_weights)
+    min_size_img = 2 ** len(multiscale_weights)
 
     # assuming 3rd dim is the channel
-    assert min(im1.shape[0], im1.shape[1]), f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
-    
+    assert min(
+        im1.shape[0], im1.shape[1]
+    ), f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
+
     mssim = []
     mcs = []
-    
+
     for i in range(len(multiscale_weights)):
         # calculate ssim at scale i
-        sim, cs = structural_similarity(im1=im1, im2=im2, win_size=win_size, full=True, **kwargs)
-        
+        sim, cs = structural_similarity(
+            im1=im1, im2=im2, win_size=win_size, full=True, **kwargs
+        )
+
         # multiply the weights for the scale i
         mssim.append(sim ** multiscale_weights[i])
-        mcs.append(cs.mean()** multiscale_weights[i])
+        mcs.append(cs.mean() ** multiscale_weights[i])
 
-        #rescale the images for scale i+1
+        # rescale the images for scale i+1
         im1 = zoom(im1, zoom=0.5)
         im2 = zoom(im2, zoom=0.5)
 
-    
     mssim = np.stack(mssim)
     mcs = np.stack(mcs)
 
     # From Matlab implementation https://ece.uwaterloo.ca/~z70wang/research/iwssim/
-    ms_ssim = np.prod(mcs[:-1])* mssim[-1]
+    ms_ssim = np.prod(mcs[:-1]) * mssim[-1]
     return ms_ssim
