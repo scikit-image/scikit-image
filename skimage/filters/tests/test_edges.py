@@ -28,6 +28,23 @@ def test_roberts_diagonal1(dtype):
     assert_array_almost_equal(result.astype(bool), expected)
 
 
+@pytest.mark.parametrize(
+    'function_name',
+    ['farid', 'laplace', 'prewitt', 'roberts', 'scharr', 'sobel']
+)
+def test_int_rescaling(function_name):
+    """Basic test that uint8 inputs get rescaled from [0, 255] to [0, 1.]
+
+    The output of any of these filters should be within roughly a factor of
+    two of the input range. For integer inputs, rescaling to floats in
+    [0.0, 1.0] should occur, so just verify outputs are not > 2.0.
+    """
+    img = data.coins()[:128, :128]
+    func = getattr(filters, function_name)
+    filtered = func(img)
+    assert filtered.max() <= 2.0
+
+
 def test_roberts_diagonal2():
     """Roberts' filter on a diagonal edge should be a diagonal line."""
     image = np.rot90(np.tri(10, 10, 0), 3)
@@ -514,8 +531,8 @@ MAX_SOBEL_0 = np.array([
      [0, 0, 0]],
     [[1, 1, 1],
      [1, 1, 1],
-     [1, 1, 1]],
-]).astype(float)
+     [1, 1, 1]]],
+    dtype=float)
 
 # maximum Sobel 3D edge in magnitude
 MAX_SOBEL_ND = np.array([
@@ -529,8 +546,8 @@ MAX_SOBEL_ND = np.array([
 
     [[1, 1, 0],
      [1, 1, 0],
-     [1, 1, 0]]
-]).astype(float)
+     [1, 1, 0]]],
+    dtype=float)
 
 # maximum Scharr 3D edge in magnitude. This illustrates the better rotation
 # invariance of the Scharr filter!
@@ -543,29 +560,83 @@ MAX_SCHARR_ND = np.array([
      [0, 1, 1]],
     [[0, 0, 1],
      [0, 1, 1],
-     [1, 1, 1]]
-]).astype(float)
+     [1, 1, 1]]],
+    dtype=float)
+
+# maximum Farid 3D edge on axis 0
+MAX_FARID_0 = np.zeros((5, 5, 5), dtype=float)
+MAX_FARID_0[2:, :, :] = 1
+
+# maximum Farid 3D edge in magnitude (not necessarily the true maximum,
+# but this was the empirical max over the blobs image as in the test below).
+MAX_FARID_ND = np.array([
+    [[1, 0, 0, 0, 0],
+     [1, 1, 1, 1, 0],
+     [1, 1, 1, 1, 1],
+     [1, 1, 1, 1, 1],
+     [1, 1, 1, 1, 1]],
+    [[0, 0, 0, 0, 0],
+     [1, 1, 0, 0, 0],
+     [1, 1, 1, 1, 0],
+     [1, 1, 1, 1, 1],
+     [1, 1, 1, 1, 1]],
+    [[0, 0, 0, 0, 0],
+     [1, 0, 0, 0, 0],
+     [1, 1, 1, 0, 0],
+     [1, 1, 1, 1, 0],
+     [1, 1, 1, 1, 1]],
+    [[0, 0, 0, 0, 0],
+     [0, 0, 0, 0, 0],
+     [1, 0, 0, 0, 0],
+     [1, 1, 1, 0, 0],
+     [1, 1, 1, 1, 1]],
+    [[0, 0, 0, 0, 0],
+     [0, 0, 0, 0, 0],
+     [0, 0, 0, 0, 0],
+     [0, 0, 0, 0, 0],
+     [1, 1, 1, 1, 1]]],
+    dtype=float)
 
 
 @pytest.mark.parametrize(
     ('func', 'max_edge'),
     [(filters.prewitt, MAX_SOBEL_ND),
      (filters.sobel, MAX_SOBEL_ND),
-     (filters.scharr, MAX_SCHARR_ND)]
+     (filters.scharr, MAX_SCHARR_ND),
+     (filters.farid, MAX_FARID_ND)]
 )
 def test_3d_edge_filters(func, max_edge):
-    blobs = data.binary_blobs(length=128, n_dim=3)
+    blobs = data.binary_blobs(length=128, n_dim=3, seed=5)
     edges = func(blobs)
-    assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
+    center = max_edge.shape[0] // 2
+    if center == 2:
+        # exact edge as defined in MAX_FARID_0 not present in blobs data
+        rtol = 1e-3
+    else:
+        rtol = 1e-7
+    assert_allclose(
+        np.max(edges), func(max_edge)[center, center, center], rtol=rtol)
 
 
 @pytest.mark.parametrize(
-    'func', (filters.prewitt, filters.sobel, filters.scharr)
+    ('func', 'max_edge'),
+    [(filters.prewitt, MAX_SOBEL_0),
+     (filters.sobel, MAX_SOBEL_0),
+     (filters.scharr, MAX_SOBEL_0),
+     (filters.farid, MAX_FARID_0)]
 )
-def test_3d_edge_filters_single_axis(func):
-    blobs = data.binary_blobs(length=128, n_dim=3)
+def test_3d_edge_filters_single_axis(func, max_edge):
+    blobs = data.binary_blobs(length=128, n_dim=3, seed=5)
     edges0 = func(blobs, axis=0)
-    assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
+    center = max_edge.shape[0] // 2
+    if center == 2:
+        # exact edge as defined in MAX_FARID_0 not present in blobs data
+        rtol = 1e-3
+    else:
+        rtol = 1e-7
+    assert_allclose(np.max(edges0),
+                    func(max_edge, axis=0)[center, center, center],
+                    rtol=rtol)
 
 
 @pytest.mark.parametrize(

@@ -19,6 +19,9 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
     A gray level co-occurrence matrix is a histogram of co-occurring
     grayscale values at a given offset over an image.
 
+    .. versionchanged:: 0.19
+               `greymatrix` was renamed to `graymatrix` in 0.19.
+
     Parameters
     ----------
     image : array_like
@@ -175,6 +178,9 @@ def graycoprops(P, prop='contrast'):
     Each GLCM is normalized to have a sum of 1 before the computation of
     texture properties.
 
+    .. versionchanged:: 0.19
+           `greycoprops` was renamed to `graycoprops` in 0.19.
+
     Parameters
     ----------
     P : ndarray
@@ -288,7 +294,7 @@ def local_binary_pattern(image, P, R, method='default'):
     image : (N, M) array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of
+        Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
@@ -339,7 +345,7 @@ def local_binary_pattern(image, P, R, method='default'):
         'nri_uniform': ord('N'),
         'var': ord('V')
     }
-    image = np.ascontiguousarray(image, dtype=np.double)
+    image = np.ascontiguousarray(image, dtype=np.float64)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
@@ -463,22 +469,22 @@ def draw_multiblock_lbp(image, r, c, width, height,
     # Colors are specified in floats.
     output = img_as_float(output)
 
-    # Offsets of neighbour rectangles relative to central one.
+    # Offsets of neighbor rectangles relative to central one.
     # It has order starting from top left and going clockwise.
-    neighbour_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
-                              (0, 1), (1, 1), (1, 0),
-                              (1, -1), (0, -1))
+    neighbor_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
+                             (0, 1), (1, 1), (1, 0),
+                             (1, -1), (0, -1))
 
     # Pre-multiply the offsets with width and height.
-    neighbour_rect_offsets = np.array(neighbour_rect_offsets)
-    neighbour_rect_offsets[:, 0] *= height
-    neighbour_rect_offsets[:, 1] *= width
+    neighbor_rect_offsets = np.array(neighbor_rect_offsets)
+    neighbor_rect_offsets[:, 0] *= height
+    neighbor_rect_offsets[:, 1] *= width
 
     # Top-left coordinates of central rectangle.
     central_rect_r = r + height
     central_rect_c = c + width
 
-    for element_num, offset in enumerate(neighbour_rect_offsets):
+    for element_num, offset in enumerate(neighbor_rect_offsets):
 
         offset_r, offset_c = offset
 

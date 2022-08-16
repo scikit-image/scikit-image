@@ -1,13 +1,13 @@
 __all__ = ['imread', 'imsave']
 
-from distutils.version import LooseVersion
 import numpy as np
+from packaging import version
 from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
 
 # Check CVE-2021-27921 and others
-if LooseVersion(pil_version) < LooseVersion('8.1.2'):
+if version.parse(pil_version) < version.parse('8.1.2'):
     from warnings import warn
     warn('Your installed pillow version is < 8.1.2. '
          'Several security issues (CVE-2021-27921, '
@@ -153,7 +153,8 @@ def _palette_is_grayscale(pil_image):
     if pil_image.mode != 'P':
         raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
-    palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
+    # Starting in pillow 9.1 palettes may have less than 256 entries
+    palette = np.asarray(pil_image.getpalette()).reshape((-1, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
     valid_palette = palette[start:stop + 1]

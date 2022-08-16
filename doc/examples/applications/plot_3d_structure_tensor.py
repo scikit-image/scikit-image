@@ -158,13 +158,13 @@ fig3 = px.imshow(
 plotly.io.show(fig3)
 
 #####################################################################
-# We are looking at a local property. Let us consider a tiny neighbourhood
+# We are looking at a local property. Let us consider a tiny neighborhood
 # around the maximum eigenvalue in the above X-Y plane.
 
 eigen[0, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
 
 #####################################################################
-# If we examine the second-largest eigenvalues in this neighbourhood, we can
+# If we examine the second-largest eigenvalues in this neighborhood, we can
 # see that they have the same order of magnitude as the largest ones.
 
 eigen[1, coords[1], coords[2] - 2:coords[2] + 1, coords[3] - 2:coords[3] + 1]
@@ -216,7 +216,7 @@ plotly.io.show(fig5)
 # plane Z = 1`.
 
 #####################################################################
-# The neighbourhood in question is 'somewhat isotropic' in a plane (which,
+# The neighborhood in question is 'somewhat isotropic' in a plane (which,
 # here, would be relatively close to the X-Y plane): There is a factor of
 # less than 2 between the second-largest and largest eigenvalues.
 # This description is compatible with what we are seeing in the image, i.e., a

@@ -16,7 +16,9 @@ from skimage.restoration._denoise import _wavelet_threshold
 try:
     import dask  # noqa
 except ImportError:
-    DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
+    DASK_NOT_INSTALLED_WARNING = (
+        'The optional dask dependency is not installed'
+    )
 else:
     DASK_NOT_INSTALLED_WARNING = None
 
@@ -93,8 +95,8 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
     denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
 
     with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised = restoration.denoise_tv_chambolle(astro, weight=0.1,
-                                                    multichannel=True)
+        restoration.denoise_tv_chambolle(astro, weight=0.1,
+                                         multichannel=True)
 
     # providing multichannel argument positionally also warns
     with expected_warnings(["Providing the `multichannel` argument"]):
@@ -102,6 +104,17 @@ def test_denoise_tv_chambolle_multichannel_deprecation():
                                                     True)
 
     assert_array_equal(denoised[..., 0], denoised0)
+
+
+def test_denoise_tv_chambolle_n_iter_max_deprecation():
+    expected = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                max_num_iter=10)
+
+    with expected_warnings(["`n_iter_max` is a deprecated argument"]):
+        denoised = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1,
+                                                    n_iter_max=10)
+
+    assert_array_equal(expected, denoised)
 
 
 def test_denoise_tv_chambolle_float_result_range():
@@ -271,7 +284,7 @@ def test_denoise_bilateral_negative2():
 
     # 2 images with a given offset should give the same result (with the same
     # offset)
-    assert_array_equal(out1, out2 + 10)
+    assert_array_almost_equal(out1, out2 + 10)
 
 
 def test_denoise_bilateral_2d():
@@ -303,7 +316,7 @@ def test_denoise_bilateral_pad():
     assert_array_equal(condition_padding, 0)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.double])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_denoise_bilateral_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
@@ -315,7 +328,7 @@ def test_denoise_bilateral_types(dtype):
                                   sigma_spatial=10, channel_axis=None)
 
 
-@pytest.mark.parametrize('dtype', [np.float32, np.double])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_denoise_bregman_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
@@ -541,6 +554,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
         denoised_wrong_multichannel, channel_axis, -1
     )
 
+    img = img.astype(denoised_wrong_multichannel.dtype)
     psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
     psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert psnr_ok > psnr_wrong
@@ -1078,78 +1092,78 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
                  rescale_sigma=rescale_sigma)
 
 
+@pytest.mark.parametrize('channel_axis', [-1, None])
 @pytest.mark.parametrize('rescale_sigma', [True, False])
-def test_cycle_spinning_multichannel(rescale_sigma):
+def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
     sigma = 0.1
     rstate = np.random.default_rng(1234)
 
-    for channel_axis in -1, None:
-        if channel_axis is not None:
-            img = astro
-            # can either omit or be 0 along the channels axis
-            valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
-            # can either omit or be 1 on channels axis.
-            valid_steps = [1, 2, (1, 2), (1, 2, 1)]
-            # too few or too many shifts or non-zero shift on channels
-            invalid_shifts = [(1, 1, 2), (1, ), (1, 1, 0, 1)]
-            # too few or too many shifts or any shifts <= 0
-            invalid_steps = [(1, ), (1, 1, 1, 1), (0, 1), (-1, -1)]
-        else:
-            img = astro_gray
-            valid_shifts = [1, (0, 1), (1, 0), (1, 1)]
-            valid_steps = [1, 2, (1, 2)]
-            invalid_shifts = [(1, 1, 2), (1, )]
-            invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
+    if channel_axis is not None:
+        img = astro
+        # can either omit or be 0 along the channels axis
+        valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
+        # can either omit or be 1 on channels axis.
+        valid_steps = [1, 2, (1, 2), (1, 2, 1)]
+        # too few or too many shifts or non-zero shift on channels
+        invalid_shifts = [(1, 1, 2), (1, ), (1, 1, 0, 1)]
+        # too few or too many shifts or any shifts <= 0
+        invalid_steps = [(1, ), (1, 1, 1, 1), (0, 1), (-1, -1)]
+    else:
+        img = astro_gray
+        valid_shifts = [1, (0, 1), (1, 0), (1, 1)]
+        valid_steps = [1, 2, (1, 2)]
+        invalid_shifts = [(1, 1, 2), (1, )]
+        invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
 
-        noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
+    noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
-        denoise_func = restoration.denoise_wavelet
-        func_kw = dict(sigma=sigma, channel_axis=channel_axis,
-                       rescale_sigma=rescale_sigma)
+    denoise_func = restoration.denoise_wavelet
+    func_kw = dict(sigma=sigma, channel_axis=channel_axis,
+                   rescale_sigma=rescale_sigma)
 
-        # max_shifts=0 is equivalent to just calling denoise_func
+    # max_shifts=0 is equivalent to just calling denoise_func
+    with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
+        dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+                                       func_kw=func_kw,
+                                       channel_axis=channel_axis)
+        dn = denoise_func(noisy, **func_kw)
+    assert_array_equal(dn, dn_cc)
+
+    # denoising with cycle spinning will give better PSNR than without
+    for max_shifts in valid_shifts:
         with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
-            dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=max_shifts,
                                            func_kw=func_kw,
                                            channel_axis=channel_axis)
-            dn = denoise_func(noisy, **func_kw)
-        assert_array_equal(dn, dn_cc)
+        psnr = peak_signal_noise_ratio(img, dn)
+        psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+        assert psnr_cc > psnr
 
-        # denoising with cycle spinning will give better PSNR than without
-        for max_shifts in valid_shifts:
-            with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
-                dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                               max_shifts=max_shifts,
-                                               func_kw=func_kw,
-                                               channel_axis=channel_axis)
-            psnr = peak_signal_noise_ratio(img, dn)
-            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
-            assert psnr_cc > psnr
+    for shift_steps in valid_steps:
+        with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=2,
+                                           shift_steps=shift_steps,
+                                           func_kw=func_kw,
+                                           channel_axis=channel_axis)
+        psnr = peak_signal_noise_ratio(img, dn)
+        psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+        assert psnr_cc > psnr
 
-        for shift_steps in valid_steps:
-            with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
-                dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                               max_shifts=2,
-                                               shift_steps=shift_steps,
-                                               func_kw=func_kw,
-                                               channel_axis=channel_axis)
-            psnr = peak_signal_noise_ratio(img, dn)
-            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
-            assert psnr_cc > psnr
-
-        for max_shifts in invalid_shifts:
-            with pytest.raises(ValueError):
-                dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                               max_shifts=max_shifts,
-                                               func_kw=func_kw,
-                                               channel_axis=channel_axis)
-        for shift_steps in invalid_steps:
-            with pytest.raises(ValueError):
-                dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                               max_shifts=2,
-                                               shift_steps=shift_steps,
-                                               func_kw=func_kw,
-                                               channel_axis=channel_axis)
+    for max_shifts in invalid_shifts:
+        with pytest.raises(ValueError):
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=max_shifts,
+                                           func_kw=func_kw,
+                                           channel_axis=channel_axis)
+    for shift_steps in invalid_steps:
+        with pytest.raises(ValueError):
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=2,
+                                           shift_steps=shift_steps,
+                                           func_kw=func_kw,
+                                           channel_axis=channel_axis)
 
 
 def test_cycle_spinning_num_workers():
@@ -1165,6 +1179,13 @@ def test_cycle_spinning_num_workers():
     dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                     func_kw=func_kw, channel_axis=None,
                                     num_workers=1)
+
+    # Repeat dn_cc1 computation, but without channel_axis specified to
+    # verify that the default behavior is channel_axis=None
+    dn_cc1_ = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                     func_kw=func_kw, num_workers=1)
+    assert_array_equal(dn_cc1, dn_cc1_)
+
     with expected_warnings([DASK_NOT_INSTALLED_WARNING]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, channel_axis=None,

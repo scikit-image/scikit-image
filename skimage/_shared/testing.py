@@ -46,8 +46,10 @@ if _error_on_warnings.lower() == 'true':
 elif _error_on_warnings.lower() == 'false':
     _error_on_warnings = False
 else:
-    _error_on_warnings = bool(int(_error_on_warnings))
-
+    try:
+        _error_on_warnings = bool(int(_error_on_warnings))
+    except ValueError:
+        _error_on_warnings = False
 
 def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
@@ -206,7 +208,6 @@ def setup_test():
     if _error_on_warnings:
         from scipy import signal, ndimage, special, optimize, linalg
         from scipy.io import loadmat
-        from skimage import viewer
 
         np.random.seed(0)
 
@@ -221,14 +222,16 @@ def setup_test():
         warnings.filterwarnings(
             'default', message='TiffWriter:', category=DeprecationWarning
         )
+        # newer tifffile change the start of the warning string
+        # e.g. <tifffile.TiffWriter.write> data with shape ...
+        warnings.filterwarnings(
+            'default',
+            message='<tifffile.',
+            category=DeprecationWarning
+        )
 
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
-        )
-
-        # ignore known FutureWarnings from viewer module
-        warnings.filterwarnings(
-            'ignore', category=FutureWarning, module='skimage.viewer'
         )
 
         # Ignore other warnings only seen when using older versions of
@@ -252,14 +255,23 @@ def setup_test():
             module='skimage.io'
         )
 
+        # ignore warning from cycle_spin about Dask not being installed
         warnings.filterwarnings(
-            'default', message='Viewer requires Qt', category=UserWarning
+            'default',
+            message='The optional dask dependency is not installed.',
+            category=UserWarning
         )
 
         warnings.filterwarnings(
             'default',
             message='numpy.ufunc size changed',
             category=RuntimeWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='\n\nThe scipy.sparse array containers',
+            category=DeprecationWarning
         )
 
 

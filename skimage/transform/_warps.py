@@ -28,7 +28,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     ----------
     image: ndarray
         Image to be resized.
-    output_shape: tuple or ndarray
+    output_shape: iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved.
 
@@ -52,6 +52,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     equal to output_shape_length.
 
     """
+    output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
     if output_ndim > image.ndim:
@@ -74,14 +75,14 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     Performs interpolation to up-size or down-size N-dimensional images. Note
     that anti-aliasing should be enabled when down-sizing images to avoid
-    aliasing artifacts. For down-sampling with an integer factor also see
+    aliasing artifacts. For downsampling with an integer factor also see
     `skimage.transform.downscale_local_mean`.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved. In case the
         number of input channels does not equal the number of output channels a
@@ -114,13 +115,13 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
-        to down-scaling. It is crucial to filter when down-sampling
-        the image to avoid aliasing artifacts. If input image data
-        type is bool, no anti-aliasing is applied.
+        to downsampling. It is crucial to filter when downsampling
+        the image to avoid aliasing artifacts. If not specified, it is set to
+        True when downsampling an image whose data type is not bool.
     anti_aliasing_sigma : {float, tuple of floats}, optional
-        Standard deviation for Gaussian filtering to avoid aliasing artifacts.
+        Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
-        down-scaling factor, where s > 1. For the up-size case, s < 1, no
+        downsampling factor, where s > 1. For the up-size case, s < 1, no
         anti-aliasing is performed prior to rescaling.
 
     Notes
@@ -143,18 +144,25 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
+    input_type = image.dtype
 
-    if image.dtype == np.float16:
+    if input_type == np.float16:
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = not image.dtype == bool
+        anti_aliasing = (not input_type == bool and
+                         any(x < y for x, y in zip(output_shape, input_shape)))
 
-    if image.dtype == bool and anti_aliasing:
+    if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")
 
-    factors = (np.asarray(input_shape, dtype=float) /
-               np.asarray(output_shape, dtype=float))
+    factors = np.divide(input_shape, output_shape)
+    order = _validate_interpolation_order(input_type, order)
+    if order > 0:
+        image = convert_to_float(image, preserve_range)
+
+    # Save input value range for clip
+    img_bounds = np.array([image.min(), image.max()]) if clip else None
 
     # Translate modes used by np.pad to those used by scipy.ndimage
     ndi_mode = _to_ndimage_mode(mode)
@@ -175,13 +183,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     if NumpyVersion(scipy.__version__) >= '1.6.0':
         # The grid_mode kwarg was introduced in SciPy 1.6.0
-        order = _validate_interpolation_order(image.dtype, order)
         zoom_factors = [1 / f for f in factors]
-        if order > 0:
-            image = convert_to_float(image, preserve_range)
         out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
                        cval=cval, grid_mode=True)
-        _clip_warp_output(image, out, order, mode, cval, clip)
 
     # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
 
@@ -198,7 +202,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
             # take into account that 0th pixel is at position (0.5, 0.5)
             dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
             dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
@@ -211,12 +215,12 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         tform.params[0, 1] = 0
         tform.params[1, 0] = 0
 
+        # clip outside of warp to clip w.r.t input values, not filtered values.
         out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=clip,
+                   mode=mode, cval=cval, clip=False,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _validate_interpolation_order(image.dtype, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
@@ -225,12 +229,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                                          sparse=False,
                                          indexing='ij'))
 
-        image = convert_to_float(image, preserve_range)
-
         out = ndi.map_coordinates(image, coord_map, order=order,
                                   mode=ndi_mode, cval=cval)
 
-        _clip_warp_output(image, out, order, mode, cval, clip)
+    _clip_warp_output(img_bounds, out, mode, cval, clip)
 
     return out
 
@@ -687,7 +689,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     return coords
 
 
-def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
+def _clip_warp_output(input_image, output_image, mode, cval, clip):
     """Clip output image to range of values of input image.
 
     Note that this function modifies the values of `output_image` in-place
@@ -702,35 +704,44 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
 
     Other parameters
     ----------------
-    order : int, optional
-        The order of the spline interpolation, default is 1. The order has to
-        be in the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
-    cval : float, optional
+    cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    clip : bool, optional
+    clip : bool
         Whether to clip the output to the range of values of the input image.
         This is enabled by default, since higher order interpolation may
         produce values outside the given input range.
 
     """
-    if clip and order != 0:
-        min_val = input_image.min()
-        max_val = input_image.max()
+    if clip:
+        min_val = np.min(input_image)
+        if np.isnan(min_val):
+            # NaNs detected, use NaN-safe min/max
+            min_func = np.nanmin
+            max_func = np.nanmax
+            min_val = min_func(input_image)
+        else:
+            min_func = np.min
+            max_func = np.max
+        max_val = max_func(input_image)
 
-        preserve_cval = (mode == 'constant' and not
-                         (min_val <= cval <= max_val))
+        # Check if cval has been used such that it expands the effective input
+        # range
+        preserve_cval = (mode == 'constant'
+                         and not min_val <= cval <= max_val
+                         and min_func(output_image) <= cval <= max_func(output_image))
 
+        # expand min/max range to account for cval
         if preserve_cval:
-            cval_mask = output_image == cval
+            # cast cval to the same dtype as the input image
+            cval = input_image.dtype.type(cval)
+            min_val = min(min_val, cval)
+            max_val = max(max_val, cval)
 
         np.clip(output_image, min_val, max_val, out=output_image)
-
-        if preserve_cval:
-            output_image[cval_mask] = cval
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
@@ -983,7 +994,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
                                      mode=ndi_mode, order=order, cval=cval)
 
-    _clip_warp_output(image, warped, order, mode, cval, clip)
+    _clip_warp_output(image, warped, mode, cval, clip)
 
     return warped
 
@@ -1214,7 +1225,7 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     image : ndarray
         Input image. If this is a multichannel image, the axis corresponding
         to channels should be specified using `channel_axis`
-    output_shape : tuple or ndarray
+    output_shape : iterable
         Size of the generated output image. When `channel_axis` is not None,
         the `channel_axis` should either be omitted from `output_shape` or the
         ``output_shape[channel_axis]`` must match

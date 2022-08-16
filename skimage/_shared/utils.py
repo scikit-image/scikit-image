@@ -10,6 +10,7 @@ from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
+
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
            'reshape_nd', 'identity', 'slice_at_axis']
@@ -23,7 +24,43 @@ class skimage_deprecation(Warning):
     pass
 
 
-class change_default_value:
+def _get_stack_rank(func):
+    """Return function rank in the call stack."""
+    if _is_wrapped(func):
+        return 1 + _get_stack_rank(func.__wrapped__)
+    else:
+        return 0
+
+
+def _is_wrapped(func):
+    return "__wrapped__" in dir(func)
+
+
+def _get_stack_length(func):
+    """Return function call stack length."""
+    return _get_stack_rank(func.__globals__.get(func.__name__, func))
+
+
+class _DecoratorBaseClass:
+    """Used to manage decorators' warnings stacklevel.
+
+    The `_stack_length` class variable is used to store the number of
+    times a function is wrapped by a decorator.
+
+    Let `stack_length` be the total number of times a decorated
+    function is wrapped, and `stack_rank` be the rank of the decorator
+    in the decorators stack. The stacklevel of a warning is then
+    `stacklevel = 1 + stack_length - stack_rank`.
+    """
+
+    _stack_length = {}
+
+    def get_stack_length(self, func):
+        return self._stack_length.get(func.__name__,
+                                      _get_stack_length(func))
+
+
+class change_default_value(_DecoratorBaseClass):
     """Decorator for changing the default value of an argument.
 
     Parameters
@@ -52,6 +89,8 @@ class change_default_value:
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
+        stack_rank = _get_stack_rank(func)
+
         if self.warning_msg is None:
             self.warning_msg = (
                 f'The new recommended value for {self.arg_name} is '
@@ -63,15 +102,17 @@ class change_default_value:
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
-                warnings.warn(self.warning_msg, FutureWarning, stacklevel=2)
+                warnings.warn(self.warning_msg, FutureWarning,
+                              stacklevel=stacklevel)
             return func(*args, **kwargs)
 
         return fixed_func
 
 
-class remove_arg:
+class remove_arg(_DecoratorBaseClass):
     """Decorator to remove an argument from function's signature.
 
     Parameters
@@ -92,6 +133,7 @@ class remove_arg:
         self.changed_version = changed_version
 
     def __call__(self, func):
+
         parameters = inspect.signature(func).parameters
         arg_idx = list(parameters.keys()).index(self.arg_name)
         warning_msg = (
@@ -103,17 +145,87 @@ class remove_arg:
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
+        stack_rank = _get_stack_rank(func)
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
             if len(args) > arg_idx or self.arg_name in kwargs.keys():
                 # warn that arg_name is deprecated
-                warnings.warn(warning_msg, FutureWarning, stacklevel=2)
+                warnings.warn(warning_msg, FutureWarning,
+                              stacklevel=stacklevel)
             return func(*args, **kwargs)
 
         return fixed_func
 
 
-class deprecate_kwarg:
+def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
+    """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
+
+    Parameters
+    ---------
+    func : function
+        The function whose docstring we wish to update.
+    kwarg_mapping : dict
+        A dict containing {old_arg: new_arg} key/value pairs as used by
+        `deprecate_kwarg`.
+    deprecated_version : str
+        A major.minor version string specifying when old_arg was
+        deprecated.
+
+    Returns
+    -------
+    new_doc : str
+        The updated docstring. Returns the original docstring if numpydoc is
+        not available.
+    """
+    if func.__doc__ is None:
+        return None
+    try:
+        from numpydoc.docscrape import FunctionDoc, Parameter
+    except ImportError:
+        # Return an unmodified docstring if numpydoc is not available.
+        return func.__doc__
+
+    Doc = FunctionDoc(func)
+    for old_arg, new_arg in kwarg_mapping.items():
+        desc = [f'Deprecated in favor of `{new_arg}`.',
+                f'',
+                f'.. deprecated:: {deprecated_version}']
+        Doc['Other Parameters'].append(
+            Parameter(name=old_arg,
+                      type='DEPRECATED',
+                      desc=desc)
+        )
+    new_docstring = str(Doc)
+
+    # new_docstring will have a header starting with:
+    #
+    # .. function:: func.__name__
+    #
+    # and some additional blank lines. We strip these off below.
+    split = new_docstring.split('\n')
+    no_header = split[1:]
+    while not no_header[0].strip():
+        no_header.pop(0)
+
+    # Store the initial description before any of the Parameters fields.
+    # Usually this is a single line, but the while loop covers any case
+    # where it is not.
+    descr = no_header.pop(0)
+    while no_header[0].strip():
+        descr += '\n    ' + no_header.pop(0)
+    descr += '\n\n'
+    # '\n    ' rather than '\n' here to restore the original indentation.
+    final_docstring = descr + '\n    '.join(no_header)
+    # strip any extra spaces from ends of lines
+    final_docstring = '\n'.join(
+        [line.rstrip() for line in final_docstring.split('\n')]
+    )
+    return final_docstring
+
+
+class deprecate_kwarg(_DecoratorBaseClass):
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
@@ -122,6 +234,8 @@ class deprecate_kwarg:
     kwarg_mapping: dict
         Mapping between the function's old argument names and the new
         ones.
+    deprecated_version : str
+        The package version in which the argument was first deprecated.
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
@@ -131,32 +245,46 @@ class deprecate_kwarg:
 
     """
 
-    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
+    def __init__(self, kwarg_mapping, deprecated_version, warning_msg=None,
+                 removed_version=None):
         self.kwarg_mapping = kwarg_mapping
         if warning_msg is None:
             self.warning_msg = ("`{old_arg}` is a deprecated argument name "
                                 "for `{func_name}`. ")
             if removed_version is not None:
                 self.warning_msg += (f'It will be removed in '
-                                     f'version {removed_version}.')
+                                     f'version {removed_version}. ')
             self.warning_msg += "Please use `{new_arg}` instead."
         else:
             self.warning_msg = warning_msg
 
+        self.deprecated_version = deprecated_version
+
     def __call__(self, func):
+
+        stack_rank = _get_stack_rank(func)
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
+
             for old_arg, new_arg in self.kwarg_mapping.items():
                 if old_arg in kwargs:
                     #  warn that the function interface has changed:
                     warnings.warn(self.warning_msg.format(
                         old_arg=old_arg, func_name=func.__name__,
-                        new_arg=new_arg), FutureWarning, stacklevel=2)
+                        new_arg=new_arg), FutureWarning,
+                        stacklevel=stacklevel)
                     # Substitute new_arg to old_arg
                     kwargs[new_arg] = kwargs.pop(old_arg)
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
+
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
+                                              self.deprecated_version)
+            fixed_func.__doc__ = newdoc
         return fixed_func
 
 
@@ -174,13 +302,18 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
     def __init__(self, removed_version='1.0', multichannel_position=None):
         super().__init__(
             kwarg_mapping={'multichannel': 'channel_axis'},
+            deprecated_version='0.19',
             warning_msg=None,
             removed_version=removed_version)
         self.position = multichannel_position
 
     def __call__(self, func):
+
+        stack_rank = _get_stack_rank(func)
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
 
             if self.position is not None and len(args) > self.position:
                 warning_msg = (
@@ -190,7 +323,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 )
                 warnings.warn(warning_msg.format(func_name=func.__name__),
                               FutureWarning,
-                              stacklevel=2)
+                              stacklevel=stacklevel)
                 if 'channel_axis' in kwargs:
                     raise ValueError(
                         "Cannot provide both a `channel_axis` kwarg and a "
@@ -204,7 +337,8 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
                 #  warn that the function interface has changed:
                 warnings.warn(self.warning_msg.format(
                     old_arg='multichannel', func_name=func.__name__,
-                    new_arg='channel_axis'), FutureWarning, stacklevel=2)
+                    new_arg='channel_axis'), FutureWarning,
+                    stacklevel=stacklevel)
 
                 # multichannel = True -> last axis corresponds to channels
                 convert = {True: -1, False: None}
@@ -212,10 +346,15 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
 
             # Call the function with the fixed arguments
             return func(*args, **kwargs)
+
+        if func.__doc__ is not None:
+            newdoc = docstring_add_deprecated(
+                func, {'multichannel': 'channel_axis'}, '0.19')
+            fixed_func.__doc__ = newdoc
         return fixed_func
 
 
-class channel_as_last_axis():
+class channel_as_last_axis:
     """Decorator for automatically making channels axis last for all arrays.
 
     This decorator reorders axes for compatibility with functions that only
@@ -245,6 +384,7 @@ class channel_as_last_axis():
         self.multichannel_output = multichannel_output
 
     def __call__(self, func):
+
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
 
@@ -292,7 +432,7 @@ class channel_as_last_axis():
         return fixed_func
 
 
-class deprecated(object):
+class deprecated:
     """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.

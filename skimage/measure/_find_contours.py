@@ -8,7 +8,6 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-@deprecate_kwarg({'array': 'image'}, removed_version="0.20")
 def find_contours(image, level=None,
                   fully_connected='low', positive_orientation='low',
                   *,
@@ -146,7 +145,7 @@ def find_contours(image, level=None,
     if level is None:
         level = (np.nanmin(image) + np.nanmax(image)) / 2.0
 
-    segments = _get_contour_segments(image.astype(np.double), float(level),
+    segments = _get_contour_segments(image.astype(np.float64), float(level),
                                      fully_connected == 'high', mask=mask)
     contours = _assemble_contours(segments)
     if positive_orientation == 'high':

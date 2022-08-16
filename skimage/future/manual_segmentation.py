@@ -1,6 +1,7 @@
 from functools import reduce
 import numpy as np
 from ..draw import polygon
+from .._shared.version_requirements import require
 
 
 LEFT_CLICK = 1
@@ -16,6 +17,7 @@ def _mask_from_vertices(vertices, shape, label):
     return mask
 
 
+@require("matplotlib", ">=3.3")
 def _draw_polygon(ax, vertices, alpha=0.4):
     from matplotlib.patches import Polygon
     from matplotlib.collections import PatchCollection
@@ -28,6 +30,7 @@ def _draw_polygon(ax, vertices, alpha=0.4):
     return polygon_object
 
 
+@require("matplotlib", ">=3.3")
 def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on polygon selections made with the mouse.
 
@@ -98,7 +101,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         if event.inaxes is None or event.inaxes is undo_pos:
             return
         # Do not record click events when toolbar is active
-        if fig.canvas.manager.toolbar._active is not None:
+        if ax.get_navigate_mode():
             return
 
         if event.button == LEFT_CLICK:  # Select vertex
@@ -142,6 +145,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
 
 
+@require("matplotlib", ">=3.3")
 def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on freeform selections made with the mouse.
 

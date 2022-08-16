@@ -55,7 +55,7 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     """Draw a single-pixel thick line in n dimensions.
 
     The line produced will be ndim-connected. That is, two subsequent
-    pixels in the line will be either direct or diagonal neighbours in
+    pixels in the line will be either direct or diagonal neighbors in
     n dimensions.
 
     Parameters

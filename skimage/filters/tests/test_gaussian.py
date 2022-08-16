@@ -9,7 +9,7 @@ from skimage.filters import difference_of_gaussians, gaussian
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
-    a[1, 1] = 1.
+    a[1, 1] = 1
     with pytest.raises(ValueError):
         gaussian(a, sigma=-1.0)
     with pytest.raises(ValueError):

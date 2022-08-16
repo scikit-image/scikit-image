@@ -53,7 +53,6 @@ system::
   {'gtk': ['imshow'],
    'matplotlib': ['imshow', 'imread', 'imread_collection'],
    'pil': ['imread', 'imsave', 'imread_collection'],
-   'qt': ['imshow', 'imsave', 'imread', 'imread_collection'],
    'test': ['imsave', 'imshow', 'imread', 'imread_collection'],}
 
 or only those already loaded::

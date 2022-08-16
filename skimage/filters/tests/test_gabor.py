@@ -93,7 +93,14 @@ def test_gabor():
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_gabor_dtype(dtype):
+def test_gabor_float_dtype(dtype):
     image = np.ones((16, 16), dtype=dtype)
     y = gabor(image, 0.3)
     assert all(arr.dtype == _supported_float_type(image.dtype) for arr in y)
+
+
+@pytest.mark.parametrize('dtype', [np.uint8, np.int32, np.intp])
+def test_gabor_int_dtype(dtype):
+    image = np.full((16, 16), 128, dtype=dtype)
+    y = gabor(image, 0.3)
+    assert all(arr.dtype == dtype for arr in y)

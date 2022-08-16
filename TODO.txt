@@ -3,29 +3,8 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 Version 0.17
 ------------
 
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.20
-------------
-
-* In ``skimage/feature/peak.py``, remove the `indices` argument and
-  the decorator `remove_arg`.
-* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
-  decorator from `find_contours`.
-* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
-  `structure_tensor`.
-* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
-  function.
-* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
-  `skivi.py` in `skimage/io/_plugins`.
-* Remove enrirely the folder skimage/scripts containing skivi app.
-  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
-  setup.py
-* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py`
 
 Version 1.0
 -----------
@@ -42,16 +21,10 @@ Version 1.0
 
 Other (2022)
 ------------
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and
-  `skimage.registration._phase_cross_correlation.py` once the minimum supported
-  version of ``scipy`` reaches 1.4.
-* Remove unneeded `deconv_type` and astype call in `weiner` and
-  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
-  supported version of ``scipy`` reaches 1.4.
-* Remove two unneeded astype calls in `butterworth` once the minimum supported
-  version of ``scipy`` reaches 1.4.
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
+  to (sparse) matricies (instead of arrays).
 
 Other (2023)
 ------------
@@ -66,3 +39,5 @@ Other
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).
+* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
+  ``skimage/morphology/convex_hull.py``.

@@ -182,10 +182,14 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.show()               # doctest: +SKIP
     """
     check_nD(image, 2)
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    # do not cast integer types to float!
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+        kernel_dtype = np.promote_types(image.dtype, np.complex64)
+    else:
+        kernel_dtype = np.complex128
 
-    kernel_dtype = np.promote_types(image.dtype, np.complex64)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset, dtype=kernel_dtype)
 
