@@ -16,8 +16,6 @@ Source (APS) of Argonne National Laboratory (ANL). This analysis is taken from
        https://www.youtube.com/watch?v=cB1HTgmWTd8
 """
 
-
-
 import numpy as np
 import pandas as pd
 import plotly.io
