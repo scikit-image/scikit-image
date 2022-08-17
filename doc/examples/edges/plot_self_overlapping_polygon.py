@@ -48,13 +48,17 @@ fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(9, 4))
 
 # Overlapped areas in self-overlapping polygons are drawn as holes.
 ax1.imshow(img)
-ax1.set_title("Overlaps in self-overlapping polygons appear as\n"
+ax1.set_title("Overlaps in self-overlapping\n"
+              "polygons appear as\n"
               "holes when drawn")
 
 # Draw each sub polygon with a different color.
 ax2.imshow(img_subpolys)
-ax2.set_title("Each sub polygon, obtained after dividing the\n"
-              "main polygon, drawn with different color")
+ax2.set_title("Each sub polygon,\n"
+              "obtained after \n"
+              "dividing the main\n"
+              "polygon, drawn with\n"
+              "different colors")
 
 # Paint all sub polygon using the same color.
 for sub_poly in sub_polys:
@@ -62,7 +66,9 @@ for sub_poly in sub_polys:
     img_subpolys[rr, cc, :] = [0, 1, 0]
 
 ax3.imshow(img_subpolys)
-ax3.set_title("All sub polygons drawn using the\n"
-              "same color now without holes")
+ax3.set_title("All sub polygons\n"
+              "drawn using\n"
+              "the same color\n"
+              "now without holes")
 
 plt.show()
