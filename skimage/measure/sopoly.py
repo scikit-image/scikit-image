@@ -1544,11 +1544,11 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
 
             # Determine if the intersection is inside the current edge or not.
             if is_ray:
-                inter_in_edge = tolerance <= t_coefs[0] <= 1.0-tolerance
+                inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance
             else:
-                inter_in_edge = tolerance <= t_coefs[0] <= 1.0-tolerance \
+                inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance \
                                 and \
-                                tolerance <= t_coefs[1] <= 1.0-tolerance
+                                tolerance <= t_coefs[1] <= 1.0 - tolerance
 
             # Add this cut if it is on an edge of the polygon
             if inter_in_edge:
