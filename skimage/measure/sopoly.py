@@ -1544,7 +1544,7 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
                 inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance
             else:
                 inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance \
-                                and tolerance <= t_coefs[1] <= 1.0 - tolerance
+                                 and tolerance <= t_coefs[1] <= 1.0 - tolerance
 
             # Add this cut if it is on an edge of the polygon
             if inter_in_edge:
@@ -1638,7 +1638,7 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
     for i in np.unique(valid_edges[:, 0]):
         vert_info.append(
             np.hstack((vertices[last_j:i + 1, :],
-                       -np.ones((i-last_j + 1, 1)))))
+                       -np.ones((i - last_j + 1, 1)))))
         sel_i = np.nonzero(valid_edges[:, 0] == i)[0]
         sel_r = valid_edges[sel_i, 2]
 
