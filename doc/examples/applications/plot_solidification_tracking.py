@@ -45,3 +45,11 @@ fig = px.imshow(
     labels={'animation_frame': 'time point'}
 )
 plotly.io.show(fig)
+
+#####################################################################
+# Compute image deltas
+# =================
+# Let us apply a Gaussian low-pass filter to the images in order to smooth
+# them.
+# Next, we compute the image deltas, i.e., the sequence of differences
+# between two consecutive frames.
