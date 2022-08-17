@@ -262,8 +262,8 @@ def _condition_2(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
                   sign=-1)
 
     if b1 is None or b2 is None or \
-       not (_check_adjacency(a1, b1, vert_info, left2right=check_left) and
-            _check_adjacency(b2, a2, vert_info, left2right=check_left)):
+       not (_check_adjacency(a1, b1, vert_info, left2right=check_left)
+            and _check_adjacency(b2, a2, vert_info, left2right=check_left)):
         return None, children_ids
 
     ray_b1 = int(vert_info[b1, 2])
@@ -461,8 +461,8 @@ def _condition_4(a1, a2, vert_info, max_crest_cuts, min_crest_cuts, visited,
     # Verify that a2' and a3 are minimal crest cuts
     if not any(filter(
         lambda mc:
-            mc[3 if check_left else 2] == a2 and
-            mc[2 if check_left else 3] == a3,
+            mc[3 if check_left else 2] == a2
+            and mc[2 if check_left else 3] == a3,
             max_crest_cuts if check_left else min_crest_cuts)):
         return None, children_ids
 
@@ -783,8 +783,8 @@ def _invalidity_condition_3(a1, a2, vert_info, check_left=True,
     if b1 is None or b2 is None:
         return None
 
-    if not (_check_adjacency(b1, a2, vert_info, left2right=check_left) and
-            _check_adjacency(a1, b2, vert_info, left2right=check_left)):
+    if not (_check_adjacency(b1, a2, vert_info, left2right=check_left)
+            and _check_adjacency(a1, b2, vert_info, left2right=check_left)):
         return None
 
     n_vertices = vert_info.shape[0]
@@ -1267,27 +1267,23 @@ def _get_crest_ids(vertices, tolerance=1e-3):
 
     # Determines if the path is climbing up.
     clmb_up = reduce(lambda l1, l2:
-                     l1 + [
-                        (l2[0] and l2[2])
-                        or
-                        (l1[-1] and not l2[0] and not l2[1])],
+                     l1 + [(l2[0] and l2[2])
+                           or (l1[-1] and not l2[0] and not l2[1])],
                      zip(u_prev, d_prev, ey_next), [False])[1:]
 
     # Determines if the path is climbing down.
     clmb_dwn = reduce(lambda l1, l2:
-                      l1 + [
-                        (l2[0] and l2[2])
-                        or
-                        (l1[-1] and not any(l2[:2]))],
+                      l1 + [(l2[0] and l2[2])
+                            or (l1[-1] and not any(l2[:2]))],
                       zip(d_prev, u_prev, ey_next), [False])[1:]
 
     # Find maximum crests on left turns only.
-    max_crest_ids = np.nonzero(dir_left *
-                               (u_prev * u_next + u_prev * clmb_up))[0]
+    max_crest_ids = np.nonzero(dir_left
+                               * (u_prev * u_next + u_prev * clmb_up))[0]
 
     # Find minimum crests on left turns only.
-    min_crest_ids = np.nonzero(dir_left *
-                               (d_prev * d_next + d_prev * clmb_dwn))[0]
+    min_crest_ids = np.nonzero(dir_left
+                               * (d_prev * d_next + d_prev * clmb_dwn))[0]
 
     if len(max_crest_ids) > 0:
         max_crest = max_crest_ids[np.argmax(vertices[max_crest_ids, 1])]
@@ -1317,9 +1313,10 @@ def _check_clockwise(vertices):
         Whether the polygon is in clockwise direction or not.
         This is None when no crest points were detected.
     """
-    signed_area = np.sum(vertices[:-1, 0] * vertices[1:, 1] -
-                         vertices[:-1, 1] * vertices[1:, 0]) + \
-        vertices[-1, 0] * vertices[0, 1] - vertices[-1, 1] * vertices[0, 0]
+    signed_area = (np.sum(vertices[:-1, 0] * vertices[1:, 1]
+                          - vertices[:-1, 1] * vertices[1:, 0])
+                   + vertices[-1, 0] * vertices[0, 1]
+                   - vertices[-1, 1] * vertices[0, 0])
     is_clockwise = signed_area < 0
     return is_clockwise
 
@@ -1547,8 +1544,7 @@ def _find_intersections(vertices, rays_formulae, tolerance=1e-3):
                 inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance
             else:
                 inter_in_edge = tolerance <= t_coefs[0] <= 1.0 - tolerance \
-                                and \
-                                tolerance <= t_coefs[1] <= 1.0 - tolerance
+                                and tolerance <= t_coefs[1] <= 1.0 - tolerance
 
             # Add this cut if it is on an edge of the polygon
             if inter_in_edge:
@@ -1641,7 +1637,8 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
     for i in np.unique(valid_edges[:, 0]):
         vert_info.append(
-            np.hstack((vertices[last_j:i+1, :], -np.ones((i-last_j+1, 1)))))
+            np.hstack((vertices[last_j:i + 1, :],
+                       -np.ones((i-last_j + 1, 1)))))
         sel_i = np.nonzero(valid_edges[:, 0] == i)[0]
         sel_r = valid_edges[sel_i, 2]
 
@@ -1655,7 +1652,7 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
     n_vertices = vertices.shape[0]
     vert_info.append(
-        np.hstack((vertices[last_j:, :], -np.ones((n_vertices-last_j, 1)))))
+        np.hstack((vertices[last_j:, :], -np.ones((n_vertices - last_j, 1)))))
     vert_info = np.vstack(vert_info)
 
     return vert_info
@@ -1685,7 +1682,7 @@ def divide_selfoverlapping(coords):
     # Change the order of the axis to x, y from rr, cc.
     vertices = coords[:, [1, 0]]
     max_crest_ids, min_crest_ids, max_crest, min_crest = \
-        _get_crest_ids(vertices, tolerance=2*np.finfo(np.float32).eps)
+        _get_crest_ids(vertices, tolerance=2 * np.finfo(np.float32).eps)
 
     # Check if the polygon vertices are given in counter-clockwise direction
     is_clockwise = _check_clockwise(vertices)
@@ -1698,7 +1695,7 @@ def divide_selfoverlapping(coords):
     if not is_clockwise:
         vertices = vertices[::-1, :]
         max_crest_ids, min_crest_ids, max_crest, min_crest = \
-            _get_crest_ids(vertices, tolerance=2*np.finfo(np.float32).eps)
+            _get_crest_ids(vertices, tolerance=2 * np.finfo(np.float32).eps)
 
     if max_crest is None and min_crest is None:
         # If the polygon does not have any crest point, it is because
@@ -1714,13 +1711,13 @@ def divide_selfoverlapping(coords):
 
     cut_coords, valid_edges, t_coefs = \
         _find_intersections(vertices, rays_formulae + self_inter_formulae,
-                            tolerance=2*np.finfo(np.float32).eps)
+                            tolerance=2 * np.finfo(np.float32).eps)
     vert_info = _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs)
     vert_info = _sort_ray_cuts(vert_info, rays_formulae)
 
     # Get the first point at the left of the crest point
     new_max_crest_ids, new_min_crest_ids, _, _ = \
-        _get_crest_ids(vert_info, tolerance=2*np.finfo(np.float32).eps)
+        _get_crest_ids(vert_info, tolerance=2 * np.finfo(np.float32).eps)
     new_max_crest_cuts = _get_crest_cuts(vert_info, new_max_crest_ids)
     new_min_crest_cuts = _get_crest_cuts(vert_info, new_min_crest_ids)
 
