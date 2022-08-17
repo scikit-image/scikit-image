@@ -21,7 +21,7 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 
-from skimage import measure, segmentation
+from skimage import filters, measure, segmentation
 from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
@@ -48,8 +48,21 @@ plotly.io.show(fig)
 
 #####################################################################
 # Compute image deltas
-# =================
+# ====================
 # Let us apply a Gaussian low-pass filter to the images in order to smooth
-# them.
+# the images and reduce noise.
 # Next, we compute the image deltas, i.e., the sequence of differences
-# between two consecutive frames.
+# between two consecutive frames. To do this, we subtract ``image_sequence``
+# from itself, but offset by one frame so that the subtracted images are 
+# one frame behind in time.
+
+images_smoothed = filters.gaussian(image_sequence)
+image_deltas = images_smoothed[1:, :, :] - images_smoothed[:-1, :, :]
+
+fig = px.imshow(
+    image_deltas,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig)
