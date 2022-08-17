@@ -66,3 +66,25 @@ fig = px.imshow(
     labels={'animation_frame': 'time point'}
 )
 plotly.io.show(fig)
+
+#####################################################################
+# Clip Lowest and Highest Intensities
+# ===================================
+# Calculate the 5th and 95th percentile intensities of ``image_deltas`` 
+# and clip the intensities in the images below the 5th percentile
+# intensity and above the 95th percentile intensity while also rescaling 
+# the intensity of the images to [0, 1]. 
+
+p_low, p_high = np.percentile(image_deltas, [5, 95])
+clipped = image_deltas - p_low
+clipped[(clipped < 0.0)] = 0.0
+clipped = clipped / p_high
+clipped[(clipped > 1.0)] = 1.0
+
+fig = px.imshow(
+    clipped,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig)
