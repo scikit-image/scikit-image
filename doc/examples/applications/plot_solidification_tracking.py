@@ -33,7 +33,10 @@ x2 = 330
 
 image_sequence = image_sequence[:, y1:y2, x1:x2]
 
-image_sequence.shape
+print(f'shape: {image_sequence.shape}')
+
+#####################################################################
+# The dataset is a 2D image stack with 11 frames (time points).
 
 fig = px.imshow(
     image_sequence,
