@@ -21,7 +21,7 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 
-from skimage import filters, measure, segmentation
+from skimage import filters, measure, restoration, segmentation
 from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
@@ -88,3 +88,22 @@ fig = px.imshow(
     labels={'animation_frame': 'time point'}
 )
 plotly.io.show(fig)
+
+#####################################################################
+# Invert and denoise images
+# =========================
+# Next, we'll invert the images so the regions of highest intensity 
+# will correspond to the region we're interested in tracking (i.e. the 
+# solid-liquid interface). With the images inverted, we'll apply a total 
+# variation denoising filter te reduce some of the noise beyond the interface.
+
+inverted = 1 - clipped
+denoised = restoration.denoise_tv_chambolle(inverted)
+
+fig = px.imshow(
+    denoised,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig) 
