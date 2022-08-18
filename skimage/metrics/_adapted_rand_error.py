@@ -31,10 +31,13 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     -------
     are : float
         The adapted Rand error; equal to
-        :math:`1 - \frac{\sum_{ij} p_{ij}^{2}}{\alpha \sum_{k} s_{k}^{2} + (1-\alpha)\sum_{k} t_{k}^{2}}`,
-        where :math:`p_{ij}` is the probability that a pixel has the same label in the test image *and*
-        in the true image, :math:`t_{k}` is the probability that a pixel has label :math:`k` in the true image,
-        and :math:`s_{k}` is the probability that a pixel has label :math:`k` in the test image
+        :math:`1 - \frac{\sum_{ij} p_{ij}^{2}}{\alpha \sum_{k} s_{k}^{2} +
+        (1-\alpha)\sum_{k} t_{k}^{2}}`,
+        where :math:`p_{ij}` is the probability that a pixel has the same label
+        in the test image *and* in the true image, :math:`t_{k}` is the
+        probability that a pixel has label :math:`k` in the true image,
+        and :math:`s_{k}` is the probability that a pixel has label :math:`k`
+        in the test image.
     prec : float
         The adapted Rand precision: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,
