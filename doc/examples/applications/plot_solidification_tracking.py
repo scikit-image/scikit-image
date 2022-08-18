@@ -98,7 +98,7 @@ plotly.io.show(fig)
 # variation denoising filter te reduce some of the noise beyond the interface.
 
 inverted = 1 - clipped
-denoised = restoration.denoise_tv_chambolle(inverted)
+denoised = restoration.denoise_tv_chambolle(inverted, weight=0.15)
 
 fig = px.imshow(
     denoised,
