@@ -53,9 +53,7 @@ def test_are():
                         (0.5, 0.5, 1.0))
 
     with pytest.raises(ValueError):
-        assert_equal(adapted_rand_error(im_true, im_test, alpha=1.01),
-                     (0, 0, 0))
+        adapted_rand_error(im_true, im_test, alpha=1.01)
     with pytest.raises(ValueError):
-        assert_equal(adapted_rand_error(im_true, im_test, alpha=-0.01),
-                     (0, 0, 0))
+        adapted_rand_error(im_true, im_test, alpha=-0.01)
 
