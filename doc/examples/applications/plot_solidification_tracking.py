@@ -4,10 +4,13 @@ Track solidification of a metallic alloy
 ========================================
 
 In this example, we identify and track the solid-liquid (S-L) interface in a
-metallic alloy sample undergoing solidification. The image sequence was
-obtained by Gus Becker using synchrotron x-radiography at the Advanced Photon
-Source (APS) of Argonne National Laboratory (ANL). This analysis is taken from
-[source with DOI?], also presented in a conference talk [1]_.
+metallic sample undergoing solidification. Tracking the solidification over 
+time enables the calculatation of the solidification velocity. This is 
+important to characterize the solidified structure of the sample and will be 
+used to inform research into additive manufacturing of metals. The image 
+sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys 
+(CANFSA) using synchrotron x-radiography at the Advanced Photon Source (APS) at Argonne 
+National Laboratory (ANL). This analysis was presented at a conference [1]_.
 
 .. [1] Corvellec M. and Becker C. G. (2021, May 17-18)
        "Quantifying solidification of metallic alloys with scikit-image"
