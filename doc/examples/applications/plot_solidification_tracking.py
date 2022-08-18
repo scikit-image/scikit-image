@@ -77,9 +77,9 @@ plotly.io.show(fig)
 
 p_low, p_high = np.percentile(image_deltas, [5, 95])
 clipped = image_deltas - p_low
-clipped[(clipped < 0.0)] = 0.0
+clipped[clipped < 0.0] = 0.0
 clipped = clipped / p_high
-clipped[(clipped > 1.0)] = 1.0
+clipped[clipped > 1.0] = 1.0
 
 fig = px.imshow(
     clipped,
