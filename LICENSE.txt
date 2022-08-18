@@ -69,6 +69,10 @@ Function: skimage/_shared/version_requirements.py:is_installed
 Copyright: 2009-2011 Pierre Raybaut
 License: MIT
 
+Files: skimage/measure/sopoly.py
+Copyright: 2022 The Jackson Laboratory
+License: MIT
+
 
 License: BSD-2-Clause
 
