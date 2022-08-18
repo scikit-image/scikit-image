@@ -107,3 +107,38 @@ fig = px.imshow(
     labels={'animation_frame': 'time point'}
 )
 plotly.io.show(fig) 
+
+#####################################################################
+# Create binary images
+# ====================
+# Our next step is to create binarize the images, splitting each image 
+# into a foreground and a background. We want the solid-liquid interfaces 
+# to be the most prominent features in the foreground of these binary images 
+# so that the interfaces can eventually be separated from the rest of the 
+# image. First, we create an empty image (NumPy array full of zeros) matching
+# the size of the images processed so far:
+
+print(f'{denoised.shape=}')
+mask = np.zeros_like(denoised)
+print(f'{mask.shape=}')
+
+#####################################################################
+# With an empty array the same size of our images, we now set 
+# a threshold value ``thresh_val`` to create our binary images, ``mask``. 
+# This can be set manually, but we'll use an automated minimum threshold 
+# method from the ``filters`` submodule of scikit-image (there are other 
+# methods that may work better for different applications). With the threshold 
+# value set, we select the pixels in ``denoised`` with an intensity above 
+# ``thresh_val`` and use these pixels to index the corresponding positions in 
+# our empty array ``mask`` and set these pixels to 1.
+
+thresh_val = filters.threshold_minimum(denoised)
+mask[denoised > thresh_val] = 1
+
+fig = px.imshow(
+    mask,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig) 
