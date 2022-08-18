@@ -5,7 +5,7 @@ __all__ = ['adapted_rand_error']
 
 
 def adapted_rand_error(image_true=None, image_test=None, *, table=None,
-                       ignore_labels=(0,)):
+                       ignore_labels=(0,), alpha=0.5):
     r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
@@ -20,12 +20,21 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
+    alpha : float, optional
+       A float value bounded [0,1] controlling the relative weight given to
+       precision and recall in the adapted Rand error calculation.
+       Default is to weight precision and recall equally.
+       When alpha = 0, adapted Rand error = recall.
+       When alpha = 1, adapted Rand error = precision.
 
     Returns
     -------
     are : float
-        The adapted Rand error; equal to :math:`1 - \frac{2pr}{p + r}`,
-        where ``p`` and ``r`` are the precision and recall described below.
+        The adapted Rand error; equal to
+        :math:`1 - \frac{\sum_{ij} p_{ij}^{2}}{\alpha \sum_{k} s_{k}^{2} + (1-\alpha)\sum_{k} t_{k}^{2}}`,
+        where :math:`p_{ij}` is the probability that a pixel has the same label in the test image *and*
+        in the true image, :math:`t_{k}` is the probability that a pixel has label :math:`k` in the true image,
+        and :math:`s_{k}` is the probability that a pixel has label :math:`k` in the test image
     prec : float
         The adapted Rand precision: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,
@@ -55,6 +64,9 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     else:
         p_ij = table
 
+    if alpha < 0.0 or alpha > 1.0:
+        raise ValueError('alpha must be between 0 and 1')
+
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
@@ -70,7 +82,7 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     precision = sum_p_ij2 / sum_a2
     recall = sum_p_ij2 / sum_b2
 
-    fscore = 2. * precision * recall / (precision + recall)
+    fscore = sum_p_ij2 / (alpha * sum_a2 + (1 - alpha) * sum_b2)
     are = 1. - fscore
 
     return are, precision, recall
