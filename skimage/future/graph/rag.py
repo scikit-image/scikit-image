@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
@@ -149,14 +148,14 @@ class RAG(nx.Graph):
             # output, without this, a float array of the same shape as the
             # input image will be created and that could be expensive in
             # memory consumption.
+            output = np.broadcast_to(1., label_image.shape)
+            output.setflags(write=True)
             ndi.generic_filter(
                 label_image,
                 function=_add_edge_filter,
                 footprint=fp,
                 mode='nearest',
-                output=as_strided(np.empty((1,), dtype=float),
-                                  shape=label_image.shape,
-                                  strides=((0,) * label_image.ndim)),
+                output=output,
                 extra_arguments=(self,))
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
@@ -426,8 +425,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     n = np.max(labels_large) + 1
 
     # use a dummy broadcast array as data for RAG
-    ones = as_strided(np.ones((1,), dtype=float), shape=labels_small.shape,
-                      strides=(0,))
+    ones = np.broadcast_to(1., labels_small.shape)
     count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
                                      dtype=int, shape=(n, n)).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
