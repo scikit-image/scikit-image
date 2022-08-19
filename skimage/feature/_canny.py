@@ -136,7 +136,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
 
     See also
     --------
-    skimage.sobel
+    skimage.filters.sobel
 
     Notes
     -----
