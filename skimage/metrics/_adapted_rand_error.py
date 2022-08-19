@@ -21,23 +21,13 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
     alpha : float, optional
-       A float value bounded [0,1] controlling the relative weight given to
-       precision and recall in the adapted Rand error calculation.
-       Default is to weight precision and recall equally.
-       When alpha = 0, adapted Rand error = recall.
-       When alpha = 1, adapted Rand error = precision.
+       Relative weight given to precision and recall in the adapted Rand error
+       calculation.
 
     Returns
     -------
     are : float
-        The adapted Rand error; equal to
-        :math:`1 - \frac{\sum_{ij} p_{ij}^{2}}{\alpha \sum_{k} s_{k}^{2} +
-        (1-\alpha)\sum_{k} t_{k}^{2}}`,
-        where :math:`p_{ij}` is the probability that a pixel has the same label
-        in the test image *and* in the true image, :math:`t_{k}` is the
-        probability that a pixel has label :math:`k` in the true image,
-        and :math:`s_{k}` is the probability that a pixel has label :math:`k`
-        in the test image.
+        The adapted Rand error.
     prec : float
         The adapted Rand precision: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,
@@ -50,6 +40,22 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     Notes
     -----
     Pixels with label 0 in the true segmentation are ignored in the score.
+
+    The adapted Rand error is calculated as follows:
+
+    :math:`1 - \frac{\sum_{ij} p_{ij}^{2}}{\alpha \sum_{k} s_{k}^{2} +
+    (1-\alpha)\sum_{k} t_{k}^{2}}`,
+    where :math:`p_{ij}` is the probability that a pixel has the same label
+    in the test image *and* in the true image, :math:`t_{k}` is the
+    probability that a pixel has label :math:`k` in the true image,
+    and :math:`s_{k}` is the probability that a pixel has label :math:`k`
+    in the test image.
+
+    Default behavior is to weight precision and recall equally in the
+    adapted Rand error calculation.
+    When alpha = 0, adapted Rand error = recall.
+    When alpha = 1, adapted Rand error = precision.
+
 
     References
     ----------
