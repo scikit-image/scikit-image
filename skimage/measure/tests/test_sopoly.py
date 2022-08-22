@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.measure import divide_selfoverlapping
+from skimage.measure import separate_selfoverlapping_polygon
 
 from skimage._shared.testing import assert_array_equal
 
@@ -84,39 +84,39 @@ sample_ccw_self_inter_overlap = np.array([[326, 3], [237, 21], [168, 67],
 
 
 def test_overlap():
-    sub_polys = divide_selfoverlapping(sample_cw_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_cw_overlap)
     assert len(sub_polys) == 3
 
-    sub_polys = divide_selfoverlapping(sample_ccw_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_ccw_overlap)
     assert len(sub_polys) == 3
 
 
 def test_no_overlap():
     # No self-overlapping polygons are retured with no change
-    sub_polys = divide_selfoverlapping(sample_cw_no_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_cw_no_overlap)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_cw_no_overlap)
 
-    sub_polys = divide_selfoverlapping(sample_ccw_no_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_ccw_no_overlap)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_ccw_no_overlap)
 
 
 def test_no_overlap_self_intersect():
-    sub_polys = divide_selfoverlapping(sample_cw_self_inter)
+    sub_polys = separate_selfoverlapping_polygon(sample_cw_self_inter)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_cw_self_inter)
 
-    sub_polys = divide_selfoverlapping(sample_ccw_self_inter)
+    sub_polys = separate_selfoverlapping_polygon(sample_ccw_self_inter)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_ccw_self_inter)
 
 
 def test_overlap_self_intersect():
-    sub_polys = divide_selfoverlapping(sample_cw_self_inter_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_cw_self_inter_overlap)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_cw_self_inter_overlap)
 
-    sub_polys = divide_selfoverlapping(sample_ccw_self_inter_overlap)
+    sub_polys = separate_selfoverlapping_polygon(sample_ccw_self_inter_overlap)
     assert len(sub_polys) == 1
     assert_array_equal(sub_polys[0], sample_ccw_self_inter_overlap)

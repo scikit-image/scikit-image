@@ -1,9 +1,9 @@
 """
 ===================================
-Subdivide self-overlapping polygons
+Separate self-overlapping polygons
 ===================================
 
-This example shows how to divide a self-overlapping polygon into non
+This example shows how to separate a self-overlapping polygon into non
 self-overlapping sub polygons using the method [1]_.
 Each sub polygon can then be drawn or analyzed separately.
 
@@ -37,7 +37,7 @@ rr, cc = draw.polygon(poly[:, 0], poly[:, 1], img.shape)
 img[rr, cc, 1] = 1
 
 # Subdivide the polygon into non self-overlapping sub polygons
-sub_polys = measure.divide_selfoverlapping(poly)
+sub_polys = measure.separate_selfoverlapping_polygon(poly)
 
 print("Number of sub polygons:", len(sub_polys))
 
@@ -49,7 +49,7 @@ for s, sub_poly in enumerate(sub_polys):
     cc = cc - np.mean(cc).astype(np.int64) + 256 + (s % 3) * 512
     img_subpolys_exp[rr, cc, :] = poly_col
 
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(9, 4))
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(9, 9))
 
 # Overlapped areas in self-overlapping polygons are drawn as holes.
 ax1.imshow(img)

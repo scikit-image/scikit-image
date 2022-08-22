@@ -13,7 +13,7 @@ from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
 from ._blur_effect import blur_effect
-from .sopoly import divide_selfoverlapping
+from ._sopoly import separate_selfoverlapping_polygon
 
 
 __all__ = ['find_contours',
@@ -45,5 +45,5 @@ __all__ = ['find_contours',
            'grid_points_in_poly',
            'shannon_entropy',
            'blur_effect',
-           'divide_selfoverlapping'
+           'separate_selfoverlapping_polygon'
            ]

@@ -1309,9 +1309,8 @@ def _check_clockwise(vertices):
 
     Returns
     -------
-    is_clockwise : bool or None
+    is_clockwise : bool
         Whether the polygon is in clockwise direction or not.
-        This is None when no crest points were detected.
     """
     signed_area = (np.sum(vertices[:-1, 0] * vertices[1:, 1]
                           - vertices[:-1, 1] * vertices[1:, 0])
@@ -1660,7 +1659,7 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
     return vert_info
 
 
-def divide_selfoverlapping(coords):
+def separate_selfoverlapping_polygon(coords):
     """Separate a self-overlapping polygon into non-overlapping subpolygons.
 
     These subpolygons are simple polygons whose summed area is identical with
@@ -1685,21 +1684,16 @@ def divide_selfoverlapping(coords):
     """
     # Change the order of the axis to x, y from rr, cc.
     vertices = coords[:, [1, 0]]
-    max_crest_ids, min_crest_ids, max_crest, min_crest = \
-        _get_crest_ids(vertices, tolerance=2 * np.finfo(np.float32).eps)
 
-    # Check if the polygon vertices are given in counter-clockwise direction
+    # Check if the polygon vertices are given in counter-clockwise direction.
     is_clockwise = _check_clockwise(vertices)
-
-    if is_clockwise is None:
-        # If the polygon does not have any crest point, it is because
-        # it is not self-overlapping.
-        return [vertices[:, [1, 0]]]
 
     if not is_clockwise:
         vertices = vertices[::-1, :]
-        max_crest_ids, min_crest_ids, max_crest, min_crest = \
-            _get_crest_ids(vertices, tolerance=2 * np.finfo(np.float32).eps)
+
+    # Look for maximum and minimum crest points on left turns of the polygon.
+    max_crest_ids, min_crest_ids, max_crest, min_crest = \
+        _get_crest_ids(vertices, tolerance=2 * np.finfo(np.float32).eps)
 
     if max_crest is None and min_crest is None:
         # If the polygon does not have any crest point, it is because
