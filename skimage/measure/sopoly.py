@@ -1661,8 +1661,10 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
 
 def divide_selfoverlapping(coords):
-    """Divide a self-overlapping polygon into non self-overlapping polygons.
-    This implements the algorithm proposed in [1].
+    """Separate a self-overlapping polygon into non-overlapping subpolygons.
+
+    These subpolygons are simple polygons whose summed area is identical with
+    the full surface of the overlapping one.
 
     Parameters
     ----------
@@ -1671,9 +1673,9 @@ def divide_selfoverlapping(coords):
 
     Returns
     -------
-    sub_polys : list
-        A list of ndarrays with the coordinates of the non
-        self-overlapping polygons obtained from dividing the original polygon.
+    sub_polys : list of ndarray
+        A list of the coordinates of the non self-overlapping polygons obtained
+        from dividing the original polygon.
 
     References
     ----------
