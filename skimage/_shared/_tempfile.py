@@ -23,5 +23,5 @@ def temporary_file(suffix=''):
     with NamedTemporaryFile(suffix=suffix, delete=False) as tempfile_stream:
         tempfile = tempfile_stream.name
 
-        yield tempfile
+    yield tempfile
     os.remove(tempfile)
