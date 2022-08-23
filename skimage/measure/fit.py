@@ -293,7 +293,7 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input data does not contain enough significant data points.")
+            warn("Input does not contain enough significant data points.")
             return False
 
         center = C[0:2]
