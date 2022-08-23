@@ -20,8 +20,7 @@ def temporary_file(suffix=''):
     ...     io.imsave(tempfile, im)
     ...     assert np.all(io.imread(tempfile) == im)
     """
-    tempfile_stream = NamedTemporaryFile(suffix=suffix, delete=False)
-    tempfile = tempfile_stream.name
-    tempfile_stream.close()
+    with NamedTemporaryFile(suffix=suffix, delete=False) as tempfile:
+        tempfile = tempfile_stream.name
     yield tempfile
     os.remove(tempfile)
