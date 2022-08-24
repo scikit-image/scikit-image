@@ -35,7 +35,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
         maintain attachement and regularization parts in
         correspondence.
     num_warp : int
-        Number of times image1 is warped.
+        Number of times moving_image is warped.
     num_iter : int
         Number of fixed point iteration.
     tol : float
@@ -165,7 +165,7 @@ def optical_flow_tvl1(reference_image, moving_image,
         a small value in order to maintain attachement and
         regularization parts in correspondence.
     num_warp : int, optional
-        Number of times image1 is warped.
+        Number of times moving_image is warped.
     num_iter : int, optional
         Number of fixed point iteration.
     tol : float, optional
