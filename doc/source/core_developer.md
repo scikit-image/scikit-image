@@ -80,6 +80,17 @@ When reviewing, focus on the following:
    tests not only execute the code, but explores corner cases.  It is tempting
    not to review tests, but please do so.
 
+5. **Licensing:** New contributions _must_ be compatible with 
+   {doc}`scikit-image's license <license>`. Which licenses are compatible is a
+   hard question to answer. If in doubt, ask the team for help. If the 
+   contributor is not the copyright holder of the submitted code, ask for
+   approval and include them in our license.
+
+6. **Established methods:** In general, we are looking to include well cited 
+   algorithms and methods that are of general use to the imaging community. 
+   While this is not a hard requirement, new contributions should further
+   {doc}`our mission <values>`.
+
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
 [dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
 
