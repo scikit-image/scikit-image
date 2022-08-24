@@ -148,14 +148,14 @@ def test_circle_model_residuals():
 
 def test_circle_model_insufficient_data():
     model = CircleModel()
-
-    with expected_warnings(["Input data does not contain enough significant"]):
+    warning_message = ["Input does not contain enough significant data points."]
+    with expected_warnings(warning_message):
         model.estimate(np.array([[1, 2], [3, 4]]))
 
-    with expected_warnings(["Input data does not contain enough significant"]):
+    with expected_warnings(warning_message):
         model.estimate(np.ones((6, 2)))
 
-    with expected_warnings(["Input data does not contain enough significant"]):
+    with expected_warnings(warning_message):
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
 
 
