@@ -272,7 +272,6 @@ def structural_similarity(
             return mssim
 
 
-@utils.deprecate_multichannel_kwarg()
 def multiscale_structural_similarity(im1, im2,
                           *,
                           win_size=11,
