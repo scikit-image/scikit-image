@@ -276,6 +276,7 @@ def multiscale_structural_similarity(im1, im2,
                           *,
                           win_size=11,
                           multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333),
+                          channel_axis = 2,
                           **kwargs):
     """
     Compute the multiscale structural similarity index between two images.
@@ -286,7 +287,10 @@ def multiscale_structural_similarity(im1, im2,
         Images. Any dimensionality with same shape.
     win_size : int, optional
         The side-length of the sliding window used in comparison. Must be an
-        odd value. 
+        odd value.
+    channel_axis : int
+        This parameter indicates which axis of the array corresponds
+        to channels.
     multiscale_weights : list, optional
         The weights that needs to applied to the ssim at each scale
 
@@ -304,17 +308,18 @@ def multiscale_structural_similarity(im1, im2,
 
     check_shape_equality(im1, im2)
     min_size_img = 2 ** len(multiscale_weights)
+    n_dims = list(im1.shape)
+    n_dims.pop(channel_axis)
+    smallest_spatial_dim = min(n_dims)
 
-    # assuming 3rd dim is the channel
-    assert min(im1.shape[0], im1.shape[1]), f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
+    assert smallest_spatial_dim >= min_size_img, f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
     
     mssim = []
     mcs = []
     
     for weight in multiscale_weights:
         # calculate ssim at current scale
-        sim, cs = structural_similarity(im1, im2, win_size=win_size, full=True,
-                                        **kwargs)
+        sim, cs = structural_similarity(im1, im2, win_size=win_size, channel_axis=channel_axis, full=True, **kwargs)
         
         # multiply the weights for current scale
         mssim.append(sim ** weight)
