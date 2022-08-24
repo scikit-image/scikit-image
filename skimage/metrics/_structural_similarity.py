@@ -276,7 +276,8 @@ def structural_similarity(
 def multiscale_structural_similarity(im1, im2,
                           *,
                           win_size=11,
-                          multiscale_weights=[0.0448, 0.2856, 0.3001, 0.2363, 0.1333], **kwargs):
+                          multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333),
+                          **kwargs):
     """
     Compute the multiscale structural similarity index between two images.
 
@@ -311,13 +312,14 @@ def multiscale_structural_similarity(im1, im2,
     mssim = []
     mcs = []
     
-    for i in range(len(multiscale_weights)):
-        # calculate ssim at scale i
-        sim, cs = structural_similarity(im1=im1, im2=im2, win_size=win_size, full=True, **kwargs)
+    for weight in multiscale_weights:
+        # calculate ssim at current scale
+        sim, cs = structural_similarity(im1, im2, win_size=win_size, full=True,
+                                        **kwargs)
         
-        # multiply the weights for the scale i
-        mssim.append(sim ** multiscale_weights[i])
-        mcs.append(cs.mean() ** multiscale_weights[i])
+        # multiply the weights for current scale
+        mssim.append(sim ** weight)
+        mcs.append(cs.mean() ** weight)
 
         # rescale the images for scale i+1
         im1 = zoom(im1, zoom=0.5)
