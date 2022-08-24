@@ -13,7 +13,7 @@ from functools import partial
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, *, preserve_range=False):
+def radon(image, theta=None, circle=True, *, preserve_range=False, center=None):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -21,8 +21,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
     Parameters
     ----------
     image : ndarray
-        Input image. The rotation axis will be located in the pixel with
-        indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
+        Input image.
     theta : array, optional
         Projection angles (in degrees). If `None`, the value is set to
         np.arange(180).
@@ -34,12 +33,16 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    center : array_like, optional
+        It specifies the rotation center of the image. By default, the rotation
+        axis will be located in the position:
+        ``((image.shape[0] - 1) / 2, (image.shape[1] - 1) / 2)``
 
     Returns
     -------
     radon_image : ndarray
         Radon transform (sinogram).  The tomography rotation axis will lie
-        at the pixel index ``radon_image.shape[0] // 2`` along the 0th
+        at the position ``(radon_image.shape[0] - 1) / 2`` along the 0th
         dimension of ``radon_image``.
 
     References
@@ -63,21 +66,31 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
 
     image = convert_to_float(image, preserve_range)
 
+    inp_img_center = (np.array(image.shape, dtype=np.float32) - 1) / 2
+    if center is not None:
+        center = np.array(center, dtype=np.float32)
+        rel_rot_center = center - inp_img_center
+    else:
+        rel_rot_center = np.zeros(2, dtype=np.float32)
+
     if circle:
         shape_min = min(image.shape)
-        radius = shape_min // 2
-        img_shape = np.array(image.shape)
+        radius = (shape_min - 1) / 2
+
+        img_shape = np.array(image.shape, dtype=int)
         coords = np.array(np.ogrid[: image.shape[0], : image.shape[1]], dtype=object)
-        dist = ((coords - img_shape // 2) ** 2).sum(0)
+        dist = ((coords - (inp_img_center + rel_rot_center)) ** 2).sum(0)
+
         outside_reconstruction_circle = dist > radius**2
         if np.any(image[outside_reconstruction_circle]):
             warn(
                 'Radon transform: image must be zero outside the '
                 'reconstruction circle'
             )
+
         # Crop image to make it square
         slices = tuple(
-            slice(int(np.ceil(excess / 2)), int(np.ceil(excess / 2) + shape_min))
+            slice(int(np.ceil(excess / 2)), -int(np.ceil(excess / 2)))
             if excess > 0
             else slice(None)
             for excess in (img_shape - shape_min)
@@ -85,40 +98,41 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         padded_image = image[slices]
     else:
         diagonal = np.sqrt(2) * max(image.shape)
-        pad = [int(np.ceil(diagonal - s)) for s in image.shape]
-        new_center = [(s + p) // 2 for s, p in zip(image.shape, pad)]
-        old_center = [s // 2 for s in image.shape]
-        pad_before = [nc - oc for oc, nc in zip(old_center, new_center)]
-        pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
+        pad = [int(np.ceil((diagonal - s) / 2)) for s in image.shape]
+        pad_width = [(p, p) for p in pad]
         padded_image = np.pad(image, pad_width, mode='constant', constant_values=0)
 
     # padded_image is always square
     if padded_image.shape[0] != padded_image.shape[1]:
         raise ValueError('padded_image must be a square')
-    center = padded_image.shape[0] // 2
+
     radon_image = np.zeros((padded_image.shape[0], len(theta)), dtype=image.dtype)
+
+    padded_center = (np.array(padded_image.shape, dtype=np.float32) - 1) / 2
+    center = padded_center + rel_rot_center
+
+    # Translation matrices to and from the center position
+    C = np.array([[0, 0, center[1]], [0, 0, center[0]], [0, 0, 0]], dtype=np.float32)
+    T1 = np.eye(3, dtype=np.float32) - C
+    T2 = np.eye(3, dtype=np.float32) + C
 
     for i, angle in enumerate(np.deg2rad(theta)):
         cos_a, sin_a = np.cos(angle), np.sin(angle)
         R = np.array(
-            [
-                [cos_a, sin_a, -center * (cos_a + sin_a - 1)],
-                [-sin_a, cos_a, -center * (cos_a - sin_a - 1)],
-                [0, 0, 1],
-            ]
+            [[cos_a, sin_a, 0], [-sin_a, cos_a, 0], [0, 0, 1]], dtype=np.float32
         )
-        rotated = warp(padded_image, R, clip=False)
+
+        # Transformation matrix, that takes the center into account
+        T2_R_T1 = T2.dot(R.dot(T1))
+        rotated = warp(padded_image, T2_R_T1, clip=False)
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
 
 def _sinogram_circle_to_square(sinogram):
-    diagonal = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
-    pad = diagonal - sinogram.shape[0]
-    old_center = sinogram.shape[0] // 2
-    new_center = diagonal // 2
-    pad_before = new_center - old_center
-    pad_width = ((pad_before, pad - pad_before), (0, 0))
+    diagonal = np.sqrt(2) * sinogram.shape[0]
+    pad = int(np.ceil((diagonal - sinogram.shape[0]) / 2))
+    pad_width = ((pad,), (0,))
     return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
@@ -190,6 +204,7 @@ def iradon(
     interpolation="linear",
     circle=True,
     preserve_range=True,
+    center=None,
 ):
     """Inverse radon transform.
 
@@ -201,9 +216,7 @@ def iradon(
     radon_image : ndarray
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different
-        angle. The tomography rotation axis should lie at the pixel
-        index ``radon_image.shape[0] // 2`` along the 0th dimension of
-        ``radon_image``.
+        angle.
     theta : array, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
@@ -224,13 +237,16 @@ def iradon(
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    center : array_like, optional
+        It specifies the rotation center of the image. By default, the rotation
+        axis will be located in the position:
+        ``((image.shape[0] - 1) / 2, (image.shape[1] - 1) / 2)``
 
     Returns
     -------
     reconstructed : ndarray
-        Reconstructed image. The rotation axis will be located in the pixel
-        with indices
-        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+        Reconstructed image. The rotation axis will be located at:
+        ``(reconstructed.shape[0] - 1) / 2, (reconstructed.shape[1] - 1) / 2``.
 
     .. versionchanged:: 0.19
         In ``iradon``, ``filter`` argument is deprecated in favor of
@@ -257,8 +273,15 @@ def iradon(
     if theta is None:
         theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
 
+    img_shape, radon_angles = radon_image.shape
+    if center is not None:
+        img_center = (np.ones(2, dtype=np.float32) * img_shape - 1) / 2
+        rel_rot_center = center - img_center
+    else:
+        rel_rot_center = np.zeros(2, dtype=np.float32)
+
     angles_count = len(theta)
-    if angles_count != radon_image.shape[1]:
+    if angles_count != radon_angles:
         raise ValueError(
             "The given ``theta`` does not match the number of "
             "projections in ``radon_image``."
@@ -281,7 +304,9 @@ def iradon(
         if circle:
             output_size = img_shape
         else:
-            output_size = int(np.floor(np.sqrt((img_shape) ** 2 / 2.0)))
+            is_even = img_shape % 2
+            half_edge = (img_shape - is_even) / (2 * np.sqrt(2.0))
+            output_size = int(np.floor(half_edge) * 2) + is_even
 
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
@@ -300,9 +325,16 @@ def iradon(
 
     # Reconstruct image by interpolation
     reconstructed = np.zeros((output_size, output_size), dtype=dtype)
-    radius = output_size // 2
-    xpr, ypr = np.mgrid[:output_size, :output_size] - radius
-    x = np.arange(img_shape) - img_shape // 2
+
+    rec_img_center = (np.ones(2, dtype=np.float32) * output_size - 1) / 2
+    center = rec_img_center + rel_rot_center
+
+    xpr, ypr = np.mgrid[:output_size, :output_size]
+    xpr = xpr.astype(np.float32) - center[0]
+    ypr = ypr.astype(np.float32) - center[1]
+
+    sino_center = (img_shape - 1) / 2
+    x = np.arange(img_shape) - sino_center
 
     for col, angle in zip(radon_filtered.T, np.deg2rad(theta)):
         t = ypr * np.cos(angle) - xpr * np.sin(angle)
@@ -315,6 +347,7 @@ def iradon(
         reconstructed += interpolant(t)
 
     if circle:
+        radius = (output_size - 1) / 2
         out_reconstruction_circle = (xpr**2 + ypr**2) > radius**2
         reconstructed[out_reconstruction_circle] = 0.0
 
@@ -388,6 +421,7 @@ def iradon_sart(
     clip=None,
     relaxation=0.15,
     dtype=None,
+    center=None,
 ):
     """Inverse radon transform.
 
@@ -399,8 +433,8 @@ def iradon_sart(
     radon_image : ndarray, shape (M, N)
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different angle. The
-        tomography rotation axis should lie at the pixel index
-        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        tomography rotation axis should lie by default at the position
+        ``(radon_image.shape[0] - 1) / 2`` along the 0th dimension of
         ``radon_image``.
     theta : array, shape (N,), optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
@@ -422,13 +456,16 @@ def iradon_sart(
         Output data type, must be floating point. By default, if input
         data type is not float, input is cast to double, otherwise
         dtype is set to input data type.
+    center : array_like, optional
+        It specifies the rotation center of the image. By default, the rotation
+        axis will be located in the position:
+        ``((image.shape[0] - 1) / 2, (image.shape[1] - 1) / 2)``
 
     Returns
     -------
     reconstructed : ndarray
-        Reconstructed image. The rotation axis will be located in the pixel
-        with indices
-        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+        Reconstructed image. The rotation axis will be located at:
+        ``(reconstructed.shape[0] - 1) / 2, (reconstructed.shape[1] - 1) / 2``.
 
     Notes
     -----
@@ -503,7 +540,7 @@ def iradon_sart(
             f'of radon_image ({reconstructed_shape})'
         )
     elif image.dtype != dtype:
-        warn(f'image dtype does not match output dtype: ' f'image is cast to {dtype}')
+        warn(f'image dtype does not match output dtype: image is cast to {dtype}')
 
     image = np.asarray(image, dtype=dtype)
 
@@ -516,6 +553,18 @@ def iradon_sart(
         )
     else:
         projection_shifts = np.asarray(projection_shifts, dtype=dtype)
+
+    if center is not None:
+        center = np.array(center, dtype=np.float32)
+        center_default = (np.array(image.shape, dtype=np.float32) - 1) / 2
+        center_diff = center - center_default
+
+        theta_rad = np.deg2rad(theta).astype(dtype)
+        cos_a = np.cos(theta_rad)
+        sin_a = np.sin(theta_rad)
+
+        projection_shifts += cos_a * center_diff[1] - sin_a * center_diff[0]
+
     if clip is not None:
         if len(clip) != 2:
             raise ValueError('clip must be a length-2 sequence')

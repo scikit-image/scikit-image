@@ -33,9 +33,9 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
         A measure of how long the ray's path through the reconstruction circle was.
     """
     theta = theta / 180. * M_PI
-    cdef np_floats radius = image.shape[0] // 2 - 1
-    cdef np_floats projection_center = image.shape[0] // 2
-    cdef np_floats rotation_center = image.shape[0] // 2
+    cdef np_floats radius = image.shape[0] / 2.0 - 1.5
+    cdef np_floats projection_center = image.shape[0] / 2.0 - 0.5
+    cdef np_floats rotation_center = image.shape[0] / 2.0 - 0.5
     # (s, t) is the (x, y) system rotated by theta
     cdef np_floats t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
@@ -43,6 +43,7 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
     s0 = sqrt(radius * radius - t * t) if radius*radius >= t*t else 0.
     cdef Py_ssize_t Ns = 2 * (<Py_ssize_t>ceil(2 * s0))  # number of steps
                                                          # along the ray
+
     cdef np_floats ray_sum = 0.
     cdef np_floats weight_norm = 0.
     cdef np_floats ds, dx, dy, x0, y0, x, y, di, dj,
@@ -120,9 +121,9 @@ cdef bilinear_ray_update(np_floats[:, :] image,
     else:
         deviation = 0.
     theta = theta / 180. * M_PI
-    cdef np_floats radius = image.shape[0] // 2 - 1
-    cdef np_floats projection_center = image.shape[0] // 2
-    cdef np_floats rotation_center = image.shape[0] // 2
+    cdef np_floats radius = image.shape[0] / 2.0 - 1.5
+    cdef np_floats projection_center = image.shape[0] / 2.0 - 0.5
+    cdef np_floats rotation_center = image.shape[0] / 2.0 - 0.5
     # (s, t) is the (x, y) system rotated by theta
     cdef np_floats t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
