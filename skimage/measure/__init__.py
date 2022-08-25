@@ -13,7 +13,7 @@ from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
 from ._blur_effect import blur_effect
-from ._sopoly import separate_selfoverlapping_polygon
+from ._selfoverlapping_polygon import separate_selfoverlapping_polygon
 
 
 __all__ = ['find_contours',

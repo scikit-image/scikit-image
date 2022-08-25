@@ -1,3 +1,20 @@
+"""_selfoverlapping_polygon.py - a selfoverlapping polygon separation algorithm
+
+This module provides a function to separate a selfoverlapping polygon.
+Selfoverlapping polygons are defined as curves that can be obtained from
+stretching a two dimensional disk without twisting it. Therefore, not all self
+intersecting polygons are selfoverlapping, even when they contain overlapping
+sections.
+
+An example of a selfintesecting polygon that is not selfoverlapping is a sheet
+of paper that has been folded at least one time. That would casue to have two
+faces of the same sheet pointing upwards. On the other hand, an example of a
+selfoverlapping polygon is the loop formed by an exit ramp on a highway.
+
+This function is an implementation of the method proposed in
+Mukherjee, "Self-overlapping curves: Analysis and applications", Computer-Aided
+Design 46 (2014) 227-232.
+"""
 import numpy as np
 import math
 from functools import reduce
@@ -1298,9 +1315,13 @@ def _get_crest_ids(vertices, tolerance=1e-3):
     return max_crest_ids, min_crest_ids, max_crest, min_crest
 
 
-def _check_clockwise(vertices):
-    """Check whether the polygon vertices are in a clockwise ordering.
-    The polygon sub division algorithm works for clockwise polygns.
+def _signed_polygon_area(vertices):
+    """Compute the signed area of a polygon.
+
+    The signed area can be used to determine the direction of the vertices of a
+    polygon. The polygon vertices are in a clockwise direction when its signed
+    area is negative. On the other hand, when the signed area of the polygon is
+    positive, the vertices are in a counter-clockwise direction [1]_.
 
     Parameters
     ----------
@@ -1309,15 +1330,19 @@ def _check_clockwise(vertices):
 
     Returns
     -------
-    is_clockwise : bool
-        Whether the polygon is in clockwise direction or not.
+    signed_area : float
+        The signed area of the polygon.
+
+    References
+    ----------
+    .. [1] https://mathworld.wolfram.com/PolygonArea.html
     """
     signed_area = (np.sum(vertices[:-1, 0] * vertices[1:, 1]
                           - vertices[:-1, 1] * vertices[1:, 0])
                    + vertices[-1, 0] * vertices[0, 1]
                    - vertices[-1, 1] * vertices[0, 0])
-    is_clockwise = signed_area < 0
-    return is_clockwise
+
+    return signed_area
 
 
 def _get_crest_cuts(vert_info, crest_ids):
@@ -1660,9 +1685,9 @@ def _merge_new_vertices(vertices, cut_coords, valid_edges, t_coefs):
 
 
 def separate_selfoverlapping_polygon(coords):
-    """Separate a self-overlapping polygon into non-overlapping subpolygons.
+    """Separate a self-overlapping polygon into non-overlapping sub polygons.
 
-    These subpolygons are simple polygons whose summed area is identical with
+    These sub polygons are simple polygons whose summed area is identical with
     the full surface of the overlapping one.
 
     Parameters
@@ -1674,7 +1699,85 @@ def separate_selfoverlapping_polygon(coords):
     -------
     sub_polys : list of ndarray
         A list of the coordinates of the non self-overlapping polygons obtained
-        from dividing the original polygon.
+        from separating the original polygon.
+
+    Notes
+    -----
+    A selfoverlapping polygon is a complex curve that can be separated into
+    simpler mutually exclusive curves using non trivial lines. That excludes
+    polygons that self intersect by twisting their edges and exposing two faces
+    at the same time.
+
+    The separation algorithm implemented in this function is based on the idea
+    that a complex curve can be compressed, without twisting it, into a two
+    dimensional disk. Therefore, a set of non trivial chords (cuts) separate
+    the disk into mutually exclusive segments [1]_. These segments, in the
+    original complex curve, are the set of resulting non selfoverlapping sub
+    polygons.
+
+    Examples
+    --------
+    >>> from skimage.measure import separate_selfoverlapping_polygon
+    >>> poly = np.array([[200, 271], [251, 267], [312, 267], [381, 269],
+                         [425, 271], [471, 321], [483, 367], [474, 416],
+                         [436, 478], [370, 510], [279, 512], [188, 504],
+                         [91, 470], [36, 414], [0, 303], [0, 206],
+                         [31, 134], [98, 75], [193, 31], [293, 0],
+                         [391, 1], [461, 51], [502, 111], [512, 210],
+                         [446, 252], [422, 271], [381, 269], [309, 271],
+                         [254, 265], [199, 269], [169, 248], [146, 277],
+                         [168, 307]])
+    >>> sub_polys = separate_selfoverlapping_polygon(poly)
+    >>> len(sub_polys)
+    3
+    >>> sub_polys[0]
+    array([[146.0001    ,  52.76837474],
+           [193.        ,  31.        ],
+           [293.        ,   0.        ],
+           [391.        ,   1.        ],
+           [461.        ,  51.        ],
+           [502.        , 111.        ],
+           [512.        , 210.        ],
+           [446.        , 252.        ],
+           [422.16289593, 270.87104072],
+           [422.        , 271.        ],
+           [381.        , 269.        ],
+           [309.        , 271.        ],
+           [272.33333333, 267.        ],
+           [254.        , 265.        ],
+           [199.        , 269.        ],
+           [169.        , 248.        ],
+           [146.0001    , 276.99987391]])
+    >>> sub_polys[1]
+    array([[146.0001    , 489.27838557],
+           [ 91.        , 470.        ],
+           [ 36.        , 414.        ],
+           [  0.        , 303.        ],
+           [  0.        , 206.        ],
+           [ 31.        , 134.        ],
+           [ 98.        ,  75.        ],
+           [146.0001    ,  52.76837474],
+           [146.0001    , 276.99987391],
+           [146.        , 277.        ],
+           [146.0001    , 277.00013636]])
+    >>> sub_polys[2]
+    array([[146.0001    , 277.00013636],
+           [168.        , 307.        ],
+           [200.        , 271.        ],
+           [251.        , 267.        ],
+           [272.33333333, 267.        ],
+           [312.        , 267.        ],
+           [381.        , 269.        ],
+           [422.16289593, 270.87104072],
+           [425.        , 271.        ],
+           [471.        , 321.        ],
+           [483.        , 367.        ],
+           [474.        , 416.        ],
+           [436.        , 478.        ],
+           [370.        , 510.        ],
+           [279.        , 512.        ],
+           [188.        , 504.        ],
+           [146.0001    , 489.27838557]])
 
     References
     ----------
@@ -1686,7 +1789,7 @@ def separate_selfoverlapping_polygon(coords):
     vertices = coords[:, [1, 0]]
 
     # Check if the polygon vertices are given in counter-clockwise direction.
-    is_clockwise = _check_clockwise(vertices)
+    is_clockwise = _signed_polygon_area(vertices) < 0
 
     if not is_clockwise:
         vertices = vertices[::-1, :]
