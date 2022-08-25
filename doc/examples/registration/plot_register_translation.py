@@ -28,7 +28,7 @@ shift = (-22.4, 13.32)
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = fourier_shift(np.fft.fftn(image), shift)
 offset_image = np.fft.ifftn(offset_image)
-print(f"Known offset (y, x): {shift}")
+print(f'Known offset (y, x): {shift}')
 
 # pixel precision first
 shift, error, diffphase = phase_cross_correlation(image, offset_image)
@@ -56,7 +56,7 @@ ax3.set_title("Cross-correlation")
 
 plt.show()
 
-print(f"Detected pixel offset (y, x): {shift}")
+print(f'Detected pixel offset (y, x): {shift}')
 
 # subpixel precision
 shift, error, diffphase = phase_cross_correlation(image, offset_image,
@@ -86,4 +86,4 @@ ax3.set_title("Supersampled XC sub-area")
 
 plt.show()
 
-print(f"Detected subpixel offset (y, x): {shift}")
+print(f'Detected subpixel offset (y, x): {shift}')

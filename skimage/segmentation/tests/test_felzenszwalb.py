@@ -5,7 +5,8 @@ from skimage.segmentation import felzenszwalb
 from skimage._shared import testing
 from skimage._shared.testing import (assert_greater, test_parallel,
                                      assert_equal, assert_array_equal,
-                                     assert_warns, assert_no_warnings)
+                                     assert_warns, assert_no_warnings,
+                                     expected_warnings)
 
 
 @test_parallel()
@@ -41,19 +42,30 @@ def test_minsize():
         assert_greater(counts.min() + 1, min_size)
 
 
-def test_3D():
+@testing.parametrize('channel_axis', [0, -1])
+def test_3D(channel_axis):
     grey_img = np.zeros((10, 10))
     rgb_img = np.zeros((10, 10, 3))
     three_d_img = np.zeros((10, 10, 10))
+
+    rgb_img = np.moveaxis(rgb_img, -1, channel_axis)
     with assert_no_warnings():
-        felzenszwalb(grey_img, multichannel=True)
-        felzenszwalb(grey_img, multichannel=False)
-        felzenszwalb(rgb_img, multichannel=True)
+        felzenszwalb(grey_img, channel_axis=-1)
+        felzenszwalb(grey_img, channel_axis=None)
+        felzenszwalb(rgb_img, channel_axis=channel_axis)
     with assert_warns(RuntimeWarning):
-        felzenszwalb(three_d_img, multichannel=True)
+        felzenszwalb(three_d_img, channel_axis=channel_axis)
     with testing.raises(ValueError):
-        felzenszwalb(rgb_img, multichannel=False)
-        felzenszwalb(three_d_img, multichannel=False)
+        felzenszwalb(rgb_img, channel_axis=None)
+        felzenszwalb(three_d_img, channel_axis=None)
+
+
+def test_3D_multichannel_deprecation():
+    rgb_img = np.zeros((10, 10, 3))
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        felzenszwalb(rgb_img, multichannel=True)
+    with expected_warnings(["Providing the `multichannel` argument"]):
+        felzenszwalb(rgb_img, 1, 0.8, 2, True)
 
 
 def test_color():

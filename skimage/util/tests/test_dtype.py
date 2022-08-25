@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 import itertools
 from skimage import (img_as_float, img_as_float32, img_as_float64,
@@ -110,7 +108,7 @@ def test_copy():
 
 
 def test_bool():
-    img_ = np.zeros((10, 10), np.bool_)
+    img_ = np.zeros((10, 10), bool)
     img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
     img8[1, 1] = True
@@ -149,7 +147,7 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+float_dtype_list = [float, float, np.float64, np.single, np.float32,
                     np.float64, 'float32', 'float64']
 
 
@@ -157,7 +155,7 @@ def test_float_conversion_dtype():
     """Test any convertion from a float dtype to an other."""
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
@@ -172,7 +170,7 @@ def test_float_conversion_dtype_warns():
     from skimage.util.dtype import convert
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
@@ -191,3 +189,17 @@ def test_subclass_conversion():
         x = x.astype(dtype)
         y = _convert(x, np.floating)
         assert y.dtype == x.dtype
+
+
+def test_int_to_float():
+    """Check Normalization when casting img_as_float from int types to float"""
+    int_list = np.arange(9, dtype=np.int64)
+    converted = img_as_float(int_list)
+    assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
+
+    ii32 = np.iinfo(np.int32)
+    ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
+    floats = img_as_float(ii_list)
+
+    assert_equal(floats.max(), 1)
+    assert_equal(floats.min(), -1)

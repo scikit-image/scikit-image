@@ -42,25 +42,20 @@ information was reported by the microscope used to image the cells.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
-from scipy import ndimage as ndi
 
-from skimage import (
-    exposure, io
-)
-from skimage.data import image_fetcher
+from skimage import exposure, io, util
+from skimage.data import cells3d
 
 
 #####################################################################
 # Load and display 3D images
 # ==========================
-# Three-dimensional data can be loaded with `io.imread`.
 
-path = image_fetcher.fetch('data/cells.tif')
-data = io.imread(path)
+data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
 
-print("shape: {}".format(data.shape))
-print("dtype: {}".format(data.dtype))
-print("range: ({}, {})".format(data.min(), data.max()))
+print(f'shape: {data.shape}')
+print(f'dtype: {data.dtype}')
+print(f'range: ({data.min()}, {data.max()})')
 
 # Report spacing from microscope
 original_spacing = np.array([0.2900000, 0.0650000, 0.0650000])
@@ -71,9 +66,9 @@ rescaled_spacing = original_spacing * [1, 4, 4]
 # Normalize spacing so that pixels are a distance of 1 apart
 spacing = rescaled_spacing / rescaled_spacing[2]
 
-print("microscope spacing: {}\n".format(original_spacing))
-print("rescaled spacing: {} (after downsampling)\n".format(rescaled_spacing))
-print("normalized spacing: {}\n".format(spacing))
+print(f'microscope spacing: {original_spacing}\n')
+print(f'rescaled spacing: {rescaled_spacing} (after downsampling)\n')
+print(f'normalized spacing: {spacing}\n')
 
 #####################################################################
 # Let us try and visualize the (3D) image with `io.imshow`.
@@ -209,7 +204,7 @@ def explore_slices(data, cmap="gray"):
 
         ax_3D = fig.add_subplot(133, projection="3d")
 
-        show_plane(ax, data[plane], title="Plane {}".format(plane), cmap=cmap)
+        show_plane(ax, data[plane], title=f'Plane {plane}', cmap=cmap)
         slice_in_3D(ax_3D, plane)
 
         plt.show()

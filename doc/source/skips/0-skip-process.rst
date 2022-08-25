@@ -69,7 +69,7 @@ Each SKIP must have a champion---someone who writes the SKIP using the style
 and format described below, shepherds the discussions in the appropriate
 forums, and attempts to build community consensus around the idea.  The SKIP
 champion (a.k.a. Author) should first attempt to ascertain whether the idea is
-suitable for a SKIP. Posting to the scikit-image `mailing list`_ is the best
+suitable for a SKIP. Posting to the scikit-image `developer forum`_ is the best
 way to do this.
 
 The proposal should be submitted as a draft SKIP via a `GitHub pull
@@ -77,8 +77,8 @@ request`_ to the ``doc/source/skips`` directory with the name
 ``skip-<n>.rst`` where ``<n>`` is an appropriately assigned number (e.g.,
 ``skip-35.rst``). The draft must use the :ref:`skip_template` file.
 
-Once the PR is in place, the SKIP should be announced on the mailing
-list for discussion (comments on the PR itself should be restricted to
+Once the PR is in place, the SKIP should be announced on the developer
+forum for discussion (comments on the PR itself should be restricted to
 minor editorial and technical fixes).
 
 At the earliest convenience, the PR should be merged (regardless of whether it
@@ -99,7 +99,7 @@ repo, as long as it is properly marked as WIP (work in progress).
 Review and Resolution
 ^^^^^^^^^^^^^^^^^^^^^
 
-SKIPs are discussed on the mailing list.  The possible paths of the
+SKIPs are discussed on the developer forum. The possible paths of the
 status of SKIPs are as follows:
 
 .. image:: _static/skip-flowchart.png
@@ -141,7 +141,7 @@ accepted that a competing proposal is a better alternative.
 When a SKIP is ``Accepted``, ``Rejected``, or ``Withdrawn``, the SKIP should be
 updated accordingly. In addition to updating the status field, at the very
 least the ``Resolution`` header should be added with a link to the relevant
-post in the mailing list archives.
+post on the discussion forum.
 
 SKIPs can also be ``Superseded`` by a different SKIP, rendering the
 original obsolete. The ``Replaced-By`` and ``Replaces`` headers
@@ -156,8 +156,8 @@ How a SKIP becomes Accepted
 
 A SKIP is ``Accepted`` by consensus of all interested contributors. We
 need a concrete way to tell whether consensus has been reached. When
-you think a SKIP is ready to accept, send an email to the
-scikit-image mailing list with a subject like:
+you think a SKIP is ready to accept, start a topic on the
+developer forum with a subject like:
 
   Proposal to accept SKIP #<number>: <title>
 
@@ -272,14 +272,14 @@ References and Footnotes
 
 .. [1] This historical record is available by the normal git commands
    for retrieving older revisions, and can also be browsed on
-   `GitHub <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips>`_.
+   `GitHub <https://github.com/scikit-image/scikit-image/tree/main/doc/source/skips>`_.
 
 .. [2] The URL for viewing SKIPs on the web is
    https://scikit-image.org/docs/stable/skips/
 
 .. _repo: https://github.com/scikit-image/scikit-image
 
-.. _mailing list: https://mail.python.org/mailman3/lists/scikit-image.python.org/
+.. _developer forum: https://discuss.scientific-python.org/c/contributor/skimage
 
 .. _issue tracker: https://github.com/scikit-image/scikit-image/issues
 

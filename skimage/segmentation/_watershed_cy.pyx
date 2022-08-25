@@ -1,13 +1,4 @@
-"""watershed.pyx - scithon implementation of guts of watershed
-
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-
-Original author: Lee Kamentsky
+"""watershed.pyx - cython implementation of guts of watershed
 """
 import numpy as np
 from libc.math cimport sqrt
@@ -28,11 +19,11 @@ include "heap_watershed.pxi"
 @cython.cdivision(True)
 @cython.overflowcheck(False)
 @cython.unraisable_tracebacks(False)
-cdef inline double _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
-                                cnp.intp_t[::1] strides) nogil:
+cdef inline cnp.float64_t _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
+                                       cnp.intp_t[::1] strides) nogil:
     """Return the Euclidean distance between raveled points pt0 and pt1."""
-    cdef double result = 0
-    cdef double curr = 0
+    cdef cnp.float64_t result = 0
+    cdef cnp.float64_t curr = 0
     for i in range(strides.shape[0]):
         curr = (pt0 // strides[i]) - (pt1 // strides[i])
         result += curr * curr
@@ -82,7 +73,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
                       cnp.intp_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
                       cnp.intp_t[::1] strides,
-                      cnp.double_t compactness,
+                      cnp.float64_t compactness,
                       DTYPE_INT32_t[::1] output,
                       DTYPE_BOOL_t wsl):
     """Perform watershed algorithm using a raveled image and neighborhood.

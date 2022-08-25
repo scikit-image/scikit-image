@@ -42,7 +42,7 @@ ax = ax.ravel()
 psnr_noisy = peak_signal_noise_ratio(original, noisy)
 ax[0].imshow(noisy)
 ax[0].axis('off')
-ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
+ax[0].set_title(f'Noisy\nPSNR={psnr_noisy:0.4g}')
 
 
 # Repeat denosing with different amounts of cycle spinning.  e.g.
@@ -51,23 +51,23 @@ ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
 # max_shift = 3 -> shifts of (0, 1, 2, 3) along each axis
 # etc...
 
-denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1',
+denoise_kwargs = dict(channel_axis=-1, convert2ycbcr=True, wavelet='db1',
                       rescale_sigma=True)
 
 all_psnr = []
 max_shifts = [0, 1, 3, 5]
 for n, s in enumerate(max_shifts):
     im_bayescs = cycle_spin(noisy, func=denoise_wavelet, max_shifts=s,
-                            func_kw=denoise_kwargs, multichannel=True)
+                            func_kw=denoise_kwargs, channel_axis=-1)
     ax[n+1].imshow(im_bayescs)
     ax[n+1].axis('off')
     psnr = peak_signal_noise_ratio(original, im_bayescs)
     if s == 0:
         ax[n+1].set_title(
-            "Denoised: no cycle shifts\nPSNR={:0.4g}".format(psnr))
+            f'Denoised: no cycle shifts\nPSNR={psnr:0.4g}')
     else:
         ax[n+1].set_title(
-            "Denoised: {0}x{0} shifts\nPSNR={1:0.4g}".format(s+1, psnr))
+            f'Denoised: {s+1}x{s+1} shifts\nPSNR={psnr:0.4g}')
     all_psnr.append(psnr)
 
 # plot PSNR as a function of the degree of cycle shifting

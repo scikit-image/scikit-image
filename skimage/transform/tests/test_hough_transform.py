@@ -1,13 +1,10 @@
 import numpy as np
+import pytest
+from numpy.testing import assert_almost_equal, assert_equal
 
-from skimage import transform
-from skimage import data
-from skimage.feature import canny
-from skimage.draw import line, circle_perimeter, ellipse_perimeter
-
-from skimage._shared import testing
-from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
+from skimage import data, transform
+from skimage._shared.testing import test_parallel
+from skimage.draw import circle_perimeter, ellipse_perimeter, line
 
 
 @test_parallel()
@@ -23,7 +20,7 @@ def test_hough_line():
     dist = d[y[0]]
     theta = angles[x[0]]
 
-    assert_almost_equal(dist, 80.723, 1)
+    assert_almost_equal(dist, 80.0, 1)
     assert_almost_equal(theta, 1.41, 1)
 
 
@@ -41,7 +38,7 @@ def test_hough_line_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         transform.hough_line(img, np.linspace(0, 360, 10))
 
 
@@ -59,10 +56,10 @@ def test_probabilistic_hough():
         img, threshold=10, line_length=10, line_gap=1, theta=theta)
     # sort the lines according to the x-axis
     sorted_lines = []
-    for line in lines:
-        line = list(line)
-        line.sort(key=lambda x: x[0])
-        sorted_lines.append(line)
+    for ln in lines:
+        ln = list(ln)
+        ln.sort(key=lambda x: x[0])
+        sorted_lines.append(ln)
 
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
@@ -78,8 +75,8 @@ def test_probabilistic_hough_seed():
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
-                                               seed=1234)
-    assert len(lines) == 65
+                                               seed=41537233)
+    assert len(lines) == 56
 
 
 def test_probabilistic_hough_bad_input():
@@ -87,7 +84,7 @@ def test_probabilistic_hough_bad_input():
     img[10] = 1
 
     # Expected error, img must be 2D
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         transform.probabilistic_hough_line(img)
 
 
@@ -101,16 +98,16 @@ def test_hough_line_peaks():
     out, theta, dist = transform.hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
-    assert_almost_equal(dist[0], 80.723, 1)
+    assert_almost_equal(dist[0], 81.0, 1)
     assert_almost_equal(theta[0], 1.41, 1)
 
 
 def test_hough_line_peaks_ordered():
     # Regression test per PR #1421
-    testim = np.zeros((256, 64), dtype=np.bool)
+    testim = np.zeros((256, 64), dtype=bool)
 
     testim[50:100, 20] = True
-    testim[85:200, 25] = True
+    testim[20:225, 25] = True
     testim[15:35, 50] = True
     testim[1:-1, 58] = True
 
@@ -120,8 +117,29 @@ def test_hough_line_peaks_ordered():
     assert hspace[0] > hspace[1]
 
 
+def test_hough_line_peaks_single_line():
+    # Regression test for gh-6187, gh-4129
+
+    # create an empty test image
+    img = np.zeros((100, 100), dtype=bool)
+    # draw a horizontal line into our test image
+    img[30, :] = 1
+
+    hough_space, angles, dist = transform.hough_line(img)
+
+    best_h_space, best_angles, best_dist = transform.hough_line_peaks(
+        hough_space, angles, dist
+    )
+    assert len(best_angles) == 1
+    assert len(best_dist) == 1
+    expected_angle = -np.pi / 2
+    expected_dist = -30
+    assert abs(best_angles[0] - expected_angle) < 0.01
+    assert abs(best_dist[0] - expected_dist) < 0.01
+
+
 def test_hough_line_peaks_dist():
-    img = np.zeros((100, 100), dtype=np.bool_)
+    img = np.zeros((100, 100), dtype=bool)
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = transform.hough_line(img)
@@ -136,7 +154,7 @@ def test_hough_line_peaks_angle():
 
 
 def check_hough_line_peaks_angle():
-    img = np.zeros((100, 100), dtype=np.bool_)
+    img = np.zeros((100, 100), dtype=bool)
     img[:, 0] = True
     img[0, :] = True
 
@@ -162,7 +180,7 @@ def check_hough_line_peaks_angle():
 
 
 def test_hough_line_peaks_num():
-    img = np.zeros((100, 100), dtype=np.bool_)
+    img = np.zeros((100, 100), dtype=bool)
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = transform.hough_line(img)
@@ -178,6 +196,15 @@ def test_hough_line_peaks_zero_input():
     hspace, angles, dists = transform.hough_line(img, theta)
     h, a, d = transform.hough_line_peaks(hspace, angles, dists)
     assert_equal(a, np.array([]))
+
+
+def test_hough_line_peaks_single_angle():
+    # Regression test for gh-4814
+    # This code snippet used to raise an IndexError
+    img = np.random.random((100, 100))
+    tested_angles = np.array([np.pi / 2])
+    h, theta, d = transform.hough_line(img, theta=tested_angles)
+    accum, angles, dists = transform.hough_line_peaks(h, theta, d, threshold=2)
 
 
 @test_parallel()

@@ -1,21 +1,10 @@
-"""
-
-Sobel and Prewitt filters originally part of CellProfiler, code licensed under
-both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-
-"""
 import numpy as np
-from .. import img_as_float
-from .._shared.utils import check_nD
 from scipy import ndimage as ndi
-from scipy.ndimage import convolve, binary_erosion
+from scipy.ndimage import binary_erosion, convolve
 
+from .._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
+from ..util.dtype import img_as_float
 
 # n-dimensional filter weights
 SOBEL_EDGE = np.array([1, 0, -1])
@@ -36,18 +25,24 @@ VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 # 2D-only filter weights
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
-                               [0, -1]], dtype=np.double)
+                               [0, -1]], dtype=np.float64)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
-                               [-1, 0]], dtype=np.double)
+                               [-1, 0]], dtype=np.float64)
 
 # These filter weights can be found in Farid & Simoncelli (2004),
 # Table 1 (3rd and 4th row). Additional decimal places were computed
 # using the code found at https://www.cs.dartmouth.edu/farid/
-p = np.array([[0.0376593171958126, 0.249153396177344, 0.426374573253687,
-               0.249153396177344, 0.0376593171958126]])
-d1 = np.array([[0.109603762960254, 0.276690988455557, 0, -0.276690988455557,
-                -0.109603762960254]])
-HFARID_WEIGHTS = d1.T * p
+farid_smooth = np.array([[0.0376593171958126,
+                          0.249153396177344,
+                          0.426374573253687,
+                          0.249153396177344,
+                          0.0376593171958126]])
+farid_edge = np.array([[0.109603762960254,
+                        0.276690988455557,
+                        0,
+                        -0.276690988455557,
+                        -0.109603762960254]])
+HFARID_WEIGHTS = farid_edge.T * farid_smooth
 VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
 
@@ -58,8 +53,8 @@ def _mask_filter_result(result, mask):
     affect values in the result.
     """
     if mask is not None:
-        erosion_selem = ndi.generate_binary_structure(mask.ndim, mask.ndim)
-        mask = binary_erosion(mask, erosion_selem, border_value=0)
+        erosion_footprint = ndi.generate_binary_structure(mask.ndim, mask.ndim)
+        mask = binary_erosion(mask, erosion_footprint, border_value=0)
         result *= mask
     return result
 
@@ -112,7 +107,8 @@ def _reshape_nd(arr, ndim, dim):
 
     Examples
     --------
-    >>> arr = np.random.random(7)
+    >>> rng = np.random.default_rng()
+    >>> arr = rng.random(7)
     >>> _reshape_nd(arr, 2, 0).shape
     (7, 1)
     >>> _reshape_nd(arr, 3, 1).shape
@@ -168,14 +164,19 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
         axes = axis
     return_magnitude = (len(axes) > 1)
 
-    output = np.zeros(image.shape, dtype=float)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
+    output = np.zeros(image.shape, dtype=image.dtype)
 
     for edge_dim in axes:
         kernel = _reshape_nd(edge_weights, ndim, edge_dim)
         smooth_axes = list(set(range(ndim)) - {edge_dim})
         for smooth_dim in smooth_axes:
             kernel = kernel * _reshape_nd(smooth_weights, ndim, smooth_dim)
-        ax_output = ndi.convolve(image, kernel, mode='reflect')
+        ax_output = ndi.convolve(image, kernel, mode=mode)
         if return_magnitude:
             ax_output *= ax_output
         output += ax_output
@@ -218,7 +219,8 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    scharr, prewitt, canny
+    sobel_h, sobel_v : horizontal and vertical edge detection.
+    scharr, prewitt, farid, skimage.feature.canny
 
     References
     ----------
@@ -234,7 +236,6 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.sobel(camera)
     """
-    image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=SOBEL_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
     output = _mask_filter_result(output, mask)
@@ -334,7 +335,8 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, prewitt, canny
+    scharr_h, scharr_v : horizontal and vertical edge detection.
+    sobel, prewitt, farid, skimage.feature.canny
 
     Notes
     -----
@@ -355,7 +357,6 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.scharr(camera)
     """
-    image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=SCHARR_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
     output = _mask_filter_result(output, mask)
@@ -464,7 +465,8 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
 
     See also
     --------
-    sobel, scharr
+    prewitt_h, prewitt_v : horizontal and vertical edge detection.
+    sobel, scharr, farid, skimage.feature.canny
 
     Notes
     -----
@@ -482,7 +484,6 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.prewitt(camera)
     """
-    image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=PREWITT_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
     output = _mask_filter_result(output, mask)
@@ -510,9 +511,9 @@ def prewitt_h(image, mask=None):
     -----
     We use the following kernel::
 
-      1   1   1
-      0   0   0
-     -1  -1  -1
+      1/3   1/3   1/3
+       0     0     0
+     -1/3  -1/3  -1/3
 
     """
     check_nD(image, 2)
@@ -540,9 +541,9 @@ def prewitt_v(image, mask=None):
     -----
     We use the following kernel::
 
-      1   0  -1
-      1   0  -1
-      1   0  -1
+      1/3   0  -1/3
+      1/3   0  -1/3
+      1/3   0  -1/3
 
     """
     check_nD(image, 2)
@@ -568,7 +569,8 @@ def roberts(image, mask=None):
 
     See also
     --------
-    sobel, scharr, prewitt, feature.canny
+    roberts_pos_diag, roberts_neg_diag : diagonal edge detection.
+    sobel, scharr, prewitt, skimage.feature.canny
 
     Examples
     --------
@@ -614,7 +616,11 @@ def roberts_pos_diag(image, mask=None):
 
     """
     check_nD(image, 2)
-    image = img_as_float(image)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
     result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -648,7 +654,11 @@ def roberts_neg_diag(image, mask=None):
 
     """
     check_nD(image, 2)
-    image = img_as_float(image)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
     result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -679,7 +689,11 @@ def laplace(image, ksize=3, mask=None):
     skimage.restoration.uft.laplacian().
 
     """
-    image = img_as_float(image)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
     # Create the discrete Laplacian operator - We keep only the real part of
     # the filter
     _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
@@ -687,26 +701,41 @@ def laplace(image, ksize=3, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def farid(image, *, mask=None):
+def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Farid transform.
 
     Parameters
     ----------
-    image : 2-D array
-        Image to process.
-    mask : 2-D array, optional
-        An optional mask to limit the application to a certain area.
-        Note that pixels surrounding masked regions are also masked to
-        prevent masked regions from affecting the result.
+    image : array
+        The input image.
+    mask : array of bool, optional
+        Clip the output image to this mask. (Values where mask=0 will be set
+        to 0.)
+    axis : int or sequence of int, optional
+        Compute the edge filter along this axis. If not provided, the edge
+        magnitude is computed. This is defined as::
+
+            farid_mag = np.sqrt(sum([farid(image, axis=i)**2
+                                     for i in range(image.ndim)]) / image.ndim)
+
+        The magnitude is also computed if axis is a sequence.
+    mode : str or sequence of str, optional
+        The boundary mode for the convolution. See `scipy.ndimage.convolve`
+        for a description of the modes. This can be either a single boundary
+        mode or one boundary mode per axis.
+    cval : float, optional
+        When `mode` is ``'constant'``, this is the constant used in values
+        outside the boundary of the image data.
 
     Returns
     -------
-    output : 2-D array
+    output : array of float
         The Farid edge map.
 
     See also
     --------
-    sobel, prewitt, canny
+    farid_h, farid_v : horizontal and vertical edge detection.
+    scharr, sobel, prewitt, skimage.feature.canny
 
     Notes
     -----
@@ -730,11 +759,11 @@ def farid(image, *, mask=None):
     >>> from skimage import filters
     >>> edges = filters.farid(camera)
     """
-    check_nD(image, 2)
-    out = np.sqrt(farid_h(image, mask=mask) ** 2
-                  + farid_v(image, mask=mask) ** 2)
-    out /= np.sqrt(2)
-    return out
+    output = _generic_edge_filter(image, smooth_weights=farid_smooth,
+                                  edge_weights=farid_edge, axis=axis,
+                                  mode=mode, cval=cval)
+    output = _mask_filter_result(output, mask)
+    return output
 
 
 def farid_h(image, *, mask=None):
@@ -768,7 +797,11 @@ def farid_h(image, *, mask=None):
            Computer Analysis of Images and Patterns, Kiel, Germany. Sep, 1997.
     """
     check_nD(image, 2)
-    image = img_as_float(image)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
     result = convolve(image, HFARID_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -801,6 +834,10 @@ def farid_v(image, *, mask=None):
            13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
     """
     check_nD(image, 2)
-    image = img_as_float(image)
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+    else:
+        image = img_as_float(image)
     result = convolve(image, VFARID_WEIGHTS)
     return _mask_filter_result(result, mask)

@@ -46,12 +46,12 @@ sigma = 0.08
 noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
-sigma_est = np.mean(estimate_sigma(noisy, multichannel=True))
-print(f"estimated noise standard deviation = {sigma_est}")
+sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
+print(f'estimated noise standard deviation = {sigma_est}')
 
 patch_kw = dict(patch_size=5,      # 5x5 patches
                 patch_distance=6,  # 13x13 search area
-                multichannel=True)
+                channel_axis=-1)
 
 # slow algorithm
 denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False,
@@ -100,10 +100,10 @@ psnr2 = peak_signal_noise_ratio(astro, denoise2)
 psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
 psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
 
-print(f"PSNR (noisy) = {psnr_noisy:0.2f}")
-print(f"PSNR (slow) = {psnr:0.2f}")
-print(f"PSNR (slow, using sigma) = {psnr2:0.2f}")
-print(f"PSNR (fast) = {psnr_fast:0.2f}")
-print(f"PSNR (fast, using sigma) = {psnr2_fast:0.2f}")
+print(f'PSNR (noisy) = {psnr_noisy:0.2f}')
+print(f'PSNR (slow) = {psnr:0.2f}')
+print(f'PSNR (slow, using sigma) = {psnr2:0.2f}')
+print(f'PSNR (fast) = {psnr_fast:0.2f}')
+print(f'PSNR (fast, using sigma) = {psnr2_fast:0.2f}')
 
 plt.show()

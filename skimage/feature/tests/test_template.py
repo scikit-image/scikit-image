@@ -7,18 +7,21 @@ from skimage.feature import match_template, peak_local_max
 from skimage._shared import testing
 
 
-def test_template():
+@testing.parametrize('dtype', [np.float32, np.float64])
+def test_template(dtype):
     size = 100
     # Float prefactors ensure that image range is between 0 and 1
-    image = np.full((400, 400), 0.5)
+    image = np.full((400, 400), 0.5, dtype=dtype)
     target = 0.1 * (np.tri(size) + np.tri(size)[::-1])
+    target = target.astype(dtype, copy=False)
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
         image[x:x + size, y:y + size] = target
     np.random.seed(1)
-    image += 0.1 * np.random.uniform(size=(400, 400))
+    image += 0.1 * np.random.uniform(size=(400, 400)).astype(dtype, copy=False)
 
     result = match_template(image, target)
+    assert result.dtype == dtype
     delta = 5
 
     positions = peak_local_max(result, min_distance=delta)
@@ -180,7 +183,7 @@ def test_bounding_values():
     image = img_as_float(data.page())
     template = np.zeros((3, 3))
     template[1, 1] = 1
-    result = match_template(img_as_float(data.page()), template)
+    result = match_template(image, template)
     print(result.max())
     assert result.max() < 1 + 1e-7
     assert result.min() > -1 - 1e-7

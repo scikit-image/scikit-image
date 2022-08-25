@@ -13,7 +13,7 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_skeletonize_cy.pyx',
             '_convex_hull.pyx',
-            '_greyreconstruct.pyx',
+            '_grayreconstruct.pyx',
             '_extrema_cy.pyx'], working_path=base_path)
     # _skeletonize_3d uses c++, so it must be cythonized separately
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
@@ -25,7 +25,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_greyreconstruct', sources=['_greyreconstruct.c'],
+    config.add_extension('_grayreconstruct', sources=['_grayreconstruct.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_max_tree', sources=['_max_tree.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -37,14 +37,17 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-
+    # add precomputed footprint decomposition data
+    config.add_data_files('ball_decompositions.npy',
+                          'disk_decompositions.npy')
     return config
+
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
           author='Damian Eads',
-          maintainer_email='scikit-image@python.org',
+          maintainer_email='skimage@discuss.scientific-python.org',
           description='Morphology Wrapper',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

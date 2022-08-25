@@ -43,9 +43,10 @@ image = np.logical_or(mask_circle1, mask_circle2)
 # Now we want to separate the two objects in image
 # Generate the markers as local maxima of the distance to the background
 distance = ndi.distance_transform_edt(image)
-local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
-                            labels=image)
-markers = ndi.label(local_maxi)[0]
+coords = peak_local_max(distance, footprint=np.ones((3, 3)), labels=image)
+mask = np.zeros(distance.shape, dtype=bool)
+mask[tuple(coords.T)] = True
+markers, _ = ndi.label(mask)
 labels = watershed(-distance, markers, mask=image)
 
 fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True)

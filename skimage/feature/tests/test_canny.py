@@ -2,27 +2,28 @@ import unittest
 import numpy as np
 from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
-import skimage.feature as F
-from skimage import data, img_as_float
+from skimage import data, feature
+from skimage.util import img_as_float
 
 
 class TestCanny(unittest.TestCase):
     def test_00_00_zeros(self):
         '''Test that the Canny filter finds no points for a blank field'''
-        result = F.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20), bool))
+        result = feature.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20),
+                               bool))
         self.assertFalse(np.any(result))
 
     def test_00_01_zeros_mask(self):
         '''Test that the Canny filter finds no points in a masked image'''
-        result = (F.canny(np.random.uniform(size=(20, 20)), 4, 0, 0,
-                          np.zeros((20, 20), bool)))
+        result = (feature.canny(np.random.uniform(size=(20, 20)), 4, 0, 0,
+                                np.zeros((20, 20), bool)))
         self.assertFalse(np.any(result))
 
     def test_01_01_circle(self):
         '''Test that the Canny filter finds the outlines of a circle'''
         i, j = np.mgrid[-200:200, -200:200].astype(float) / 200
         c = np.abs(np.sqrt(i * i + j * j) - .5) < .02
-        result = F.canny(c.astype(float), 4, 0, 0, np.ones(c.shape, bool))
+        result = feature.canny(c.astype(float), 4, 0, 0, np.ones(c.shape, bool))
         #
         # erode and dilate the circle to get rings that should contain the
         # outlines
@@ -48,7 +49,7 @@ class TestCanny(unittest.TestCase):
         i, j = np.mgrid[-200:200, -200:200].astype(float) / 200
         c = np.abs(np.sqrt(i * i + j * j) - .5) < .02
         cf = c.astype(float) * .5 + np.random.uniform(size=c.shape) * .5
-        result = F.canny(cf, 4, .1, .2, np.ones(c.shape, bool))
+        result = feature.canny(cf, 4, .1, .2, np.ones(c.shape, bool))
         #
         # erode and dilate the circle to get rings that should contain the
         # outlines
@@ -62,52 +63,55 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(point_count < 1600)
 
     def test_image_shape(self):
-        self.assertRaises(ValueError, F.canny, np.zeros((20, 20, 20)), 4, 0, 0)
+        self.assertRaises(ValueError, feature.canny, np.zeros((20, 20, 20)), 4,
+                          0, 0)
 
     def test_mask_none(self):
-        result1 = F.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20), bool))
-        result2 = F.canny(np.zeros((20, 20)), 4, 0, 0)
+        result1 = feature.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20),
+                                bool))
+        result2 = feature.canny(np.zeros((20, 20)), 4, 0, 0)
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = img_as_float(data.camera()[::50, ::50])
+        image = img_as_float(data.camera()[::100, ::100])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
-        correct_output = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-           [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+        correct_output = np.array(
+            [[False, False, False, False, False, False],
+             [False,  True,  True,  True, False, False],
+             [False, False, False,  True, False, False],
+             [False, False, False,  True, False, False],
+             [False, False,  True,  True, False, False],
+             [False, False, False, False, False, False]])
 
-        result = F.canny(image, low_threshold=0.6, high_threshold=0.8, use_quantiles=True)
+        result = feature.canny(image, low_threshold=0.6, high_threshold=0.8,
+                               use_quantiles=True)
 
         assert_equal(result, correct_output)
+
+    def test_img_all_ones(self):
+        image = np.ones((10, 10))
+        assert np.all(feature.canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
         image = img_as_float(data.camera()[::50, ::50])
 
-        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+        self.assertRaises(ValueError, feature.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=3.6)
 
-        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+        self.assertRaises(ValueError, feature.canny, image, use_quantiles=True,
                           low_threshold=-5, high_threshold=0.5)
 
-        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+        self.assertRaises(ValueError, feature.canny, image, use_quantiles=True,
                           low_threshold=99, high_threshold=0.9)
 
-        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+        self.assertRaises(ValueError, feature.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=-100)
 
         # Example from issue #4282
         image = data.camera()
-        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+        self.assertRaises(ValueError, feature.canny, image, use_quantiles=True,
                           low_threshold=50, high_threshold=150)
 
     def test_dtype(self):
@@ -115,7 +119,13 @@ class TestCanny(unittest.TestCase):
         image_uint8 = data.camera()
         image_float = img_as_float(image_uint8)
 
-        result_uint8 = F.canny(image_uint8)
-        result_float = F.canny(image_float)
+        result_uint8 = feature.canny(image_uint8)
+        result_float = feature.canny(image_float)
 
         assert_equal(result_uint8, result_float)
+
+        low = 0.1
+        high = 0.2
+
+        assert_equal(feature.canny(image_float, 1.0, low, high),
+                     feature.canny(image_uint8, 1.0, 255 * low, 255 * high))

@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.data as data
-from skimage.data import image_fetcher
+from skimage.data._fetchers import image_fetcher
 from skimage import io
 from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
 import os
@@ -66,6 +66,16 @@ def test_clock():
 def test_coffee():
     """ Test that "coffee" image can be loaded. """
     data.coffee()
+
+
+def test_eagle():
+    """ Test that "eagle" image can be loaded. """
+    # Fetching the data through the testing module will
+    # cause the test to skip if pooch isn't installed.
+    fetch('data/eagle.png')
+    eagle = data.eagle()
+    assert_equal(eagle.ndim, 2)
+    assert_equal(eagle.dtype, np.dtype('uint8'))
 
 
 def test_horse():
@@ -134,16 +144,66 @@ def test_lfw_subset():
     data.lfw_subset()
 
 
+def test_skin():
+    """Test that "skin" image can be loaded.
+
+    Needs internet connection.
+    """
+    skin = data.skin()
+    assert skin.ndim == 3
+
+
 def test_cell():
     """ Test that "cell" image can be loaded."""
     data.cell()
 
 
-def test_cells_3d():
+def test_cells3d():
     """Needs internet connection."""
-    path = fetch('data/cells.tif')
+    path = fetch('data/cells3d.tif')
     image = io.imread(path)
-    assert image.shape == (60, 256, 256)
+    assert image.shape == (60, 2, 256, 256)
 
 
+def test_brain_3d():
+    """Needs internet connection."""
+    path = fetch('data/brain.tiff')
+    image = io.imread(path)
+    assert image.shape == (10, 256, 256)
 
+
+def test_kidney_3d_multichannel():
+    """Test that 3D multichannel image of kidney tissue can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/kidney.tif')
+    kidney = data.kidney()
+    assert kidney.shape == (16, 512, 512, 3)
+
+
+def test_lily_multichannel():
+    """Test that microscopy image of lily of the valley can be loaded.
+
+    Needs internet connection.
+    """
+    fetch('data/lily.tif')
+    lily = data.lily()
+    assert lily.shape == (922, 922, 4)
+
+
+def test_vortex():
+    fetch('data/pivchallenge-B-B001_1.tif')
+    fetch('data/pivchallenge-B-B001_2.tif')
+    image0, image1 = data.vortex()
+    for image in [image0, image1]:
+        assert image.shape == (512, 512)
+
+
+@pytest.mark.parametrize(
+    'function_name', ['create_image_fetcher', 'file_hash', 'image_fetcher']
+)
+def test_fetchers_are_public(function_name):
+    # Check that the following functions that are only used indirectly in the
+    # above tests are public.
+    assert hasattr(data, function_name)

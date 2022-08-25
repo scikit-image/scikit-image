@@ -15,7 +15,7 @@ cdef DTYPE_t BG_NODE_NULL = -999
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef long (* fun_ravel)(long, long, long, shape_info *) nogil
+ctypedef size_t (* fun_ravel)(size_t, size_t, size_t, shape_info *) nogil
 
 
 # For having stuff concerning background in one place
@@ -167,26 +167,29 @@ cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef long ravel_index1D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index1D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index2D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 2D array. z is ignored
     """
-    cdef long ret = x + y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x
     return ret
 
 
-cdef long ravel_index3D(long x, long y, long z, shape_info *shapeinfo) nogil:
+cdef size_t ravel_index3D(size_t x, size_t y, size_t z,
+                          shape_info *shapeinfo) nogil:
     """
     Ravel index of a 3D array
     """
-    cdef long ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
+    cdef size_t ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
     return ret
 
 
@@ -340,7 +343,7 @@ def undo_reshape_array(arr, swaps):
     return reshaped
 
 
-def label_cython(input_, neighbors=None, background=None, return_num=False,
+def label_cython(input_, background=None, return_num=False,
                  connectivity=None):
     # Connected components search as described in Fiorio et al.
     # We have to ensure that the shape of the input can be handled by the
@@ -367,30 +370,15 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
     get_shape_info(shape, &shapeinfo)
     get_bginfo(background, &bg)
 
-    if neighbors is None and connectivity is None:
+    if connectivity is None:
         # use the full connectivity by default
         connectivity = ndim
-    elif neighbors is not None:
-        # backwards-compatible neighbors recalc to connectivity,
-        if neighbors == 4:
-            connectivity = 1
-        elif neighbors == 8:
-            connectivity = ndim
-        else:
-            raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
-                             % neighbors)
-        # not sure why stacklevel should only be 2 not 3. Maybe cython
-        # is stripping away a stacklevel????
-        warn("The argument 'neighbors' is deprecated and will be removed in "
-             "scikit-image 0.18, use 'connectivity' instead. "
-             "For neighbors={neighbors}, use connectivity={connectivity}"
-             "".format(neighbors=neighbors, connectivity=connectivity),
-             stacklevel=2)
 
     if not 1 <= connectivity <= ndim:
         raise ValueError(
-            "Connectivity below 1 or above %d is illegal."
-            % ndim)
+            f'Connectivity for {input_.ndim}D image should '
+            f'be in [1, ..., {input_.ndim}]. Got {connectivity}.'
+        )
 
     cdef DTYPE_t conn = connectivity
     # Label output
@@ -495,6 +483,8 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
+    if shapeinfo.numels == 0:
+        return
     # Initialize the first row
     cdef DTYPE_t x, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
@@ -515,6 +505,8 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     Perform forward scan on a 2D array.
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
@@ -567,6 +559,8 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     Perform forward scan on a 3D array.
 
     """
+    if shapeinfo.numels == 0:
+        return
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     # Handle first plane

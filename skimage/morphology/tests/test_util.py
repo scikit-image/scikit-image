@@ -1,8 +1,8 @@
 """Tests for `_util`."""
 
 
-import pytest
 import numpy as np
+import pytest
 from numpy.testing import assert_array_equal
 
 from skimage.morphology import _util
@@ -14,22 +14,22 @@ from skimage.morphology import _util
 @pytest.mark.parametrize("order", ["C", "F"])
 def test_offsets_to_raveled_neighbors_highest_connectivity(image_shape, order):
     """
-    Check scenarios where selem is always of the highest connectivity
+    Check scenarios where footprint is always of the highest connectivity
     and all dimensions are > 2.
     """
-    selem = np.ones((3,) * len(image_shape), dtype=bool)
+    footprint = np.ones((3,) * len(image_shape), dtype=bool)
     center = (1,) * len(image_shape)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center, order
+        image_shape, footprint, center, order
     )
 
     # Assert only neighbors are present, center was removed
-    assert len(offsets) == selem.sum() - 1
+    assert len(offsets) == footprint.sum() - 1
     assert 0 not in offsets
     # Assert uniqueness
     assert len(set(offsets)) == offsets.size
     # offsets form pairs of with same value but different signs
-    # if selem is symmetric around center
+    # if footprint is symmetric around center
     assert all(-x in offsets for x in offsets)
 
     # Construct image whose values are the Manhattan distance to its center
@@ -65,35 +65,36 @@ def test_offsets_to_raveled_neighbors_highest_connectivity(image_shape, order):
     (2,), (2, 2), (2, 1, 2), (2, 2, 1, 2), (0, 2, 1, 2)
 ])
 @pytest.mark.parametrize("order", ["C", "F"])
-def test_offsets_to_raveled_neighbors_selem_smaller_image(image_shape, order):
+def test_offsets_to_raveled_neighbors_footprint_smaller_image(image_shape,
+                                                              order):
     """
     Test if a dimension indicated by `image_shape` is smaller than in
-    `selem`.
+    `footprint`.
     """
-    selem = np.ones((3,) * len(image_shape), dtype=bool)
+    footprint = np.ones((3,) * len(image_shape), dtype=bool)
     center = (1,) * len(image_shape)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center, order
+        image_shape, footprint, center, order
     )
 
     # Assert only neighbors are present, center and duplicates (possible
     # for this scenario) where removed
-    assert len(offsets) <= selem.sum() - 1
+    assert len(offsets) <= footprint.sum() - 1
     assert 0 not in offsets
     # Assert uniqueness
     assert len(set(offsets)) == offsets.size
     # offsets form pairs of with same value but different signs
-    # if selem is symmetric around center
+    # if footprint is symmetric around center
     assert all(-x in offsets for x in offsets)
 
 
 def test_offsets_to_raveled_neighbors_explicit_0():
     """Check reviewed example."""
     image_shape = (100, 200, 3)
-    selem = np.ones((3, 3, 3), dtype=bool)
+    footprint = np.ones((3, 3, 3), dtype=bool)
     center = (1, 1, 1)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center
+        image_shape, footprint, center
     )
 
     desired = np.array([
@@ -105,23 +106,21 @@ def test_offsets_to_raveled_neighbors_explicit_0():
 
 
 def test_offsets_to_raveled_neighbors_explicit_1():
-    """Check reviewed example where selem is larger in last dimension."""
+    """Check reviewed example where footprint is larger in last dimension."""
     image_shape = (10, 9, 8, 3)
-    selem = np.ones((3, 3, 3, 4), dtype=bool)
+    footprint = np.ones((3, 3, 3, 4), dtype=bool)
     center = (1, 1, 1, 1)
     offsets = _util._offsets_to_raveled_neighbors(
-        image_shape, selem, center
+        image_shape, footprint, center
     )
 
     desired = np.array([
-          24,    3,    1,   -1,   -3,  -24, -216,  216, -192,  215,   -2,
-         -21,  -23,    2,  -25,  -27,    4,  217,   21,  219,   -4,   23,
-          25, -240,  240,  192,   27, -213, -219,  213, -215, -217, -243,
-         191, -241,  195,  189,  212,   26,    5,   20,   28,   22,  214,
-         243, -237,  -22,  241, -214, -212,  237, -218, -195,  -20,  220,
-        -193, -191,  218, -189,  -28,  -26,  193, -239, -220,  239,  196,
-         221,  242,  236,  238,  194, -244, -188, -238, -211, -196, -194,
-        -190, -236,  -19,  244,   29,  188, -242,  190, -187,  197, -235,
-         245
-    ])
+            216, 24, -24, 3, -216, 1, -1, -3, 215, -27, -25, -23, -21, -2,
+            -192, 192, 2, 4, 21, 23, 25, 27, -4, 217, 213, -219, 219, -217,
+            -213, -215, 240, -240, 193, 239, -237, 241, -239, 218, -220, 22,
+            -241, 243, 189, 26, -243, 191, 20, -218, 195, -193, 220, -191,
+            -212, -189, 214, 28, -195, -214, -28, 212, -22, 237, -20, -26, 236,
+            196, 190, 242, 238, 194, 188, -244, -188, -196, -194, -190, -238,
+            -236, 244, -242, 5, 221, -211, -19, 29, -235, -187, 197, 245
+            ])
     assert_array_equal(offsets, desired)

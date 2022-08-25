@@ -54,7 +54,7 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         raise ValueError("Descriptor length must equal.")
 
     if metric is None:
-        if np.issubdtype(descriptors1.dtype, np.bool_):
+        if np.issubdtype(descriptors1.dtype, bool):
             metric = 'hamming'
         else:
             metric = 'euclidean'
@@ -86,7 +86,7 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         second_best_indices2 = np.argmin(distances[indices1], axis=1)
         second_best_distances = distances[indices1, second_best_indices2]
         second_best_distances[second_best_distances == 0] \
-            = np.finfo(np.double).eps
+            = np.finfo(np.float64).eps
         ratio = best_distances / second_best_distances
         mask = ratio < max_ratio
         indices1 = indices1[mask]

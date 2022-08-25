@@ -219,7 +219,7 @@ def test_imsave_filelike():
 
 def test_imsave_boolean_input():
     shape = (2, 2)
-    image = np.eye(*shape, dtype=np.bool)
+    image = np.eye(*shape, dtype=bool)
     s = BytesIO()
 
     # save to file-like object

@@ -1,55 +1,16 @@
 """test_watershed.py - tests the watershed function
-
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-
-Original author: Lee Kamentsky
 """
-#Portions of this test were taken from scipy's watershed test in test_ndimage.py
-#
-# Copyright (C) 2003-2005 Peter J. Verveer
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#
-# 3. The name of the author may not be used to endorse or promote
-#    products derived from this software without specific prior
-#    written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
-# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 import math
 import unittest
-import pytest
+
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
 
-from .._watershed import watershed
+from skimage._shared.filters import gaussian
 from skimage.measure import label
+
+from .._watershed import watershed
 
 eps = 1e-12
 blob = np.array([[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
@@ -360,7 +321,7 @@ class TestWatershed(unittest.TestCase):
             markers[x, y] = idx
             idx += 1
 
-        image = ndi.gaussian_filter(image, 4)
+        image = gaussian(image, 4, mode='reflect')
         watershed(image, markers, self.eight)
         ndi.watershed_ift(image.astype(np.uint16), markers, self.eight)
 
@@ -466,17 +427,17 @@ def test_numeric_seed_watershed():
 
 
 def test_incorrect_markers_shape():
+    image = np.ones((5, 6))
+    markers = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        markers = np.ones((5, 7))
-        output = watershed(image, markers)
+        watershed(image, markers)
 
 
 def test_incorrect_mask_shape():
+    image = np.ones((5, 6))
+    mask = np.ones((5, 7))
     with pytest.raises(ValueError):
-        image = np.ones((5, 6))
-        mask = np.ones((5, 7))
-        output = watershed(image, markers=4, mask=mask)
+        watershed(image, markers=4, mask=mask)
 
 
 def test_markers_in_mask():
@@ -494,5 +455,44 @@ def test_no_markers():
     assert np.max(out) == 2
 
 
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+def test_connectivity():
+    """
+    Watershed segmentation should output different result for 
+    different connectivity
+    when markers are calculated where None is supplied.
+    Issue = 5084
+    """
+    # Generate a dummy BrightnessTemperature image
+    x, y = np.indices((406, 270))
+    x1, y1, x2, y2, x3, y3, x4, y4 = 200, 208, 300, 120, 100, 100, 340, 208
+    r1, r2, r3, r4 = 100, 50, 40, 80
+    mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
+    mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+    mask_circle3 = (x - x3)**2 + (y - y3)**2 < r3**2
+    mask_circle4 = (x - x4)**2 + (y - y4)**2 < r4**2
+    image = np.logical_or(mask_circle1, mask_circle2)
+    image = np.logical_or(image, mask_circle3)
+    image = np.logical_or(image, mask_circle4)
+
+    # calcuate distance in discrete increase
+    DummyBT = ndi.distance_transform_edt(image)
+    DummyBT_dis = np.around(DummyBT / 12, decimals = 0)*12
+    # calculate the mask
+    Img_mask = np.where(DummyBT_dis == 0, 0, 1)
+
+    # segments for connectivity 1 and 2
+    labels_c1 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=1,
+                          compactness=0.01)
+    labels_c2 = watershed(200 - DummyBT_dis, mask=Img_mask, connectivity=2,
+                          compactness=0.01)
+
+    # assertions
+    assert np.unique(labels_c1).shape[0] == 6
+    assert np.unique(labels_c2).shape[0] == 5
+
+    # checking via area of each individual segment.
+    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1301, 11278]):
+        assert np.sum(labels_c1 == lab) == area
+
+    for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
+        assert np.sum(labels_c2 == lab) == area

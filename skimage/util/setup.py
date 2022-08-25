@@ -24,7 +24,7 @@ def configuration(parent_package='', top_path=None):
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@python.org',
+          maintainer_email='skimage@discuss.scientific-python.org',
           description='Segmentation Algorithms',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

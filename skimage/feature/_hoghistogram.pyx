@@ -4,16 +4,19 @@
 
 import numpy as np
 cimport numpy as cnp
+
+from .._shared.fused_numerics cimport np_floats
 cnp.import_array()
 
-cdef float cell_hog(double[:, ::1] magnitude,
-                    double[:, ::1] orientation,
-                    float orientation_start, float orientation_end,
-                    int cell_columns, int cell_rows,
-                    int column_index, int row_index,
-                    int size_columns, int size_rows,
-                    int range_rows_start, int range_rows_stop,
-                    int range_columns_start, int range_columns_stop) nogil:
+
+cdef np_floats cell_hog(np_floats[:, ::1] magnitude,
+                        np_floats[:, ::1] orientation,
+                        np_floats orientation_start, np_floats orientation_end,
+                        int cell_columns, int cell_rows,
+                        int column_index, int row_index,
+                        int size_columns, int size_rows,
+                        int range_rows_start, int range_rows_stop,
+                        int range_columns_start, int range_columns_stop) nogil:
     """Calculation of the cell's HOG value
 
     Parameters
@@ -53,7 +56,7 @@ cdef float cell_hog(double[:, ::1] magnitude,
         The total HOG value.
     """
     cdef int cell_column, cell_row, cell_row_index, cell_column_index
-    cdef float total = 0.
+    cdef cnp.float32_t total = 0.
 
     for cell_row in range(range_rows_start, range_rows_stop):
         cell_row_index = row_index + cell_row
@@ -74,13 +77,13 @@ cdef float cell_hog(double[:, ::1] magnitude,
     return total / (cell_rows * cell_columns)
 
 
-def hog_histograms(double[:, ::1] gradient_columns,
-                   double[:, ::1] gradient_rows,
+def hog_histograms(np_floats[:, ::1] gradient_columns,
+                   np_floats[:, ::1] gradient_rows,
                    int cell_columns, int cell_rows,
                    int size_columns, int size_rows,
                    int number_of_cells_columns, int number_of_cells_rows,
                    int number_of_orientations,
-                   cnp.float64_t[:, :, :] orientation_histogram):
+                   np_floats[:, :, ::1] orientation_histogram):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Parameters
@@ -107,24 +110,24 @@ def hog_histograms(double[:, ::1] gradient_columns,
         The histogram array which is modified in place.
     """
 
-    cdef double[:, ::1] magnitude = np.hypot(gradient_columns,
-                                             gradient_rows)
-    cdef double[:, ::1] orientation = \
+    cdef np_floats[:, ::1] magnitude = np.hypot(gradient_columns,
+                                                gradient_rows)
+    cdef np_floats[:, ::1] orientation = \
         np.rad2deg(np.arctan2(gradient_rows, gradient_columns)) % 180
     cdef int i, c, r, o, r_i, c_i, cc, cr, c_0, r_0, \
         range_rows_start, range_rows_stop, \
         range_columns_start, range_columns_stop
-    cdef float orientation_start, orientation_end, \
+    cdef np_floats orientation_start, orientation_end, \
         number_of_orientations_per_180
 
     r_0 = cell_rows / 2
     c_0 = cell_columns / 2
     cc = cell_rows * number_of_cells_rows
     cr = cell_columns * number_of_cells_columns
-    range_rows_stop = cell_rows / 2
-    range_rows_start = -range_rows_stop
-    range_columns_stop = cell_columns / 2
-    range_columns_start = -range_columns_stop
+    range_rows_stop = (cell_rows + 1) / 2
+    range_rows_start = -(cell_rows / 2)
+    range_columns_stop = (cell_columns + 1) / 2
+    range_columns_start = -(cell_columns / 2)
     number_of_orientations_per_180 = 180. / number_of_orientations
 
     with nogil:
