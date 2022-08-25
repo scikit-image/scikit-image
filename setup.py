@@ -176,7 +176,7 @@ class ConditionalOpenMP(build_ext):
         return True
 
     def build_extensions(self):
-        """ Hook into extension building to check compiler flags """
+        """Hook into extension building to check compiler flags."""
 
         if self.can_compile_link():
 
