@@ -446,7 +446,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.5")
+@require("matplotlib", ">=3.3")
 def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.
@@ -498,7 +498,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
-    from matplotlib import colors, colormaps
+    from matplotlib import colors
     from matplotlib import pyplot as plt
     from matplotlib.collections import LineCollection
 
@@ -516,12 +516,12 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
         # Ignore the alpha channel
         out = image[:, :, :3]
     else:
-        img_cmap = colormaps[img_cmap]
+        img_cmap = plt.get_cmap(img_cmap)
         out = color.rgb2gray(image)
         # Ignore the alpha channel
         out = img_cmap(out)[:, :, :3]
 
-    edge_cmap = colormaps[edge_cmap]
+    edge_cmap = plt.get_cmap(edge_cmap)
 
     # Handling the case where one node has multiple labels
     # offset is 1 so that regionprops does not ignore 0
