@@ -337,6 +337,7 @@ def test_image_convex():
     )
     assert_array_equal(img, ref)
 
+
 def test_image_convex_3D_label_2D():
     img = regionprops(SAMPLE_3D_LABEL_2D())[0].image_convex
     ref = np.array(
@@ -347,7 +348,8 @@ def test_image_convex_3D_label_2D():
         ]
     )
     assert_array_equal(img, ref)
-    
+
+
 def test_image_convex_3D_label_1D():
     img = regionprops(SAMPLE_3D_LABEL_1D())[0].image_convex
     ref = np.array(
@@ -358,6 +360,7 @@ def test_image_convex_3D_label_1D():
         ]
     )
     assert_array_equal(img, ref)
+
 
 def test_coordinates():
     sample = np.zeros((10, 10), dtype=np.int8)
