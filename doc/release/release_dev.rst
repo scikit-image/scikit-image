@@ -16,6 +16,7 @@ https://scikit-image.org
 New Features
 ------------
 
+- Isotropic versions of binary morphologic operators (#6492)
 
 
 Improvements
