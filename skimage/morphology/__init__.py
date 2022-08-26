@@ -2,6 +2,8 @@ from .binary import (binary_erosion, binary_dilation, binary_opening,
                      binary_closing)
 from .gray import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
+from .isotropic import (isotropic_erosion, isotropic_dilation,
+                        isotropic_opening, isotropic_closing)
 from .footprints import (ball, cube, diamond, disk, ellipse,
                          octagon, octahedron, rectangle, square, star)
 from ..measure._label import label
@@ -23,6 +25,10 @@ __all__ = ['binary_erosion',
            'dilation',
            'opening',
            'closing',
+           'isotropic_erosion',
+           'isotropic_dilation',
+           'isotropic_opening',
+           'isotropic_closing',
            'white_tophat',
            'black_tophat',
            'square',
