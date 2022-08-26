@@ -181,6 +181,7 @@ class ApiDocWriter(object):
             return ([],[])
         with open(filename, 'rt') as f:
             functions, classes = self._parse_lines(f)
+
         return functions, classes
 
     def _parse_module_with_import(self, uri):
@@ -467,12 +468,13 @@ class ApiDocWriter(object):
         else:
             relpath = outdir
         print("outdir: ", relpath)
-        with open(path,'wt') as idx:
+        with open(path, 'wt') as idx:
             w = idx.write
             w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-            # We look at the module name.  If it is `skimage`,
-            # display, if `skimage.submodule`, only show `submodule`,
+            # We look at the module name.
+            # If it is `skimage`, display,
+            # if `skimage.submodule`, only show `submodule`,
             # if it is `skimage.submodule.subsubmodule`, ignore.
 
             title = "API Reference for skimage |version|"
@@ -503,4 +505,4 @@ class ApiDocWriter(object):
             w('.. toctree::\n')
             w('   :maxdepth: 2\n\n')
             for f in self.written_modules:
-                w('   %s\n' % os.path.join(relpath,f))
+                w('   %s\n' % os.path.join(relpath, f))
