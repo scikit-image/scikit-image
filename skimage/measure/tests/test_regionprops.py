@@ -43,6 +43,12 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+SAMPLE_3D_LABEL_2D = np.zeros((5, 4, 5), dtype=np.uint8)
+SAMPLE_3D_LABEL_2D[1:4, 1, 1:4] = 1
+SAMPLE_3D_LABEL_2D[3, 1, 2] = 0
+SAMPLE_3D_LABEL_1D = np.zeros((5, 4, 5), dtype=np.uint8)
+SAMPLE_3D_LABEL_1D[1:4, 1, 2] = 1
+
 
 def get_moment_function(img, spacing=(1, 1)):
     rows, cols = img.shape
@@ -331,6 +337,27 @@ def test_image_convex():
     )
     assert_array_equal(img, ref)
 
+def test_image_convex_3D_label_2D():
+    img = regionprops(SAMPLE_3D_LABEL_2D())[0].image_convex
+    ref = np.array(
+        [
+            [[True, True, True]],
+            [[True, True, True]],
+            [[True, True, True]]
+        ]
+    )
+    assert_array_equal(img, ref)
+    
+def test_image_convex_3D_label_1D():
+    img = regionprops(SAMPLE_3D_LABEL_1D())[0].image_convex
+    ref = np.array(
+        [
+            [[True, ]],
+            [[True, ]],
+            [[True, ]]
+        ]
+    )
+    assert_array_equal(img, ref)
 
 def test_coordinates():
     sample = np.zeros((10, 10), dtype=np.int8)
