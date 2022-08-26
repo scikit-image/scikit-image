@@ -150,6 +150,7 @@ class BinaryMorphology3D(object):
     ):
         morphology.binary_erosion(self.image, self.footprint)
 
+
 class IsotropicMorphology2D(object):
 
     # skip rectangle as roughly equivalent to square
@@ -169,6 +170,7 @@ class IsotropicMorphology2D(object):
         self, shape, radius, *args
     ):
         morphology.isotropic_erosion(self.image, radius)
+
 
 # Repeat the same footprint tests for grayscale morphology
 # just need to call morphology.erosion instead of morphology.binary_erosion
@@ -238,4 +240,3 @@ class GrayReconstruction(object):
 
     def peakmem_reconstruction(self, shape, dtype):
         morphology.reconstruction(self.seed, self.mask)
-
