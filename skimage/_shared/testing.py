@@ -116,9 +116,8 @@ def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     if '.' not in suffix:
         suffix = '.' + suffix
-    temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    fname = temp_file.name
-    temp_file.close()
+    with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
+        fname = temp_file.name
     io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
