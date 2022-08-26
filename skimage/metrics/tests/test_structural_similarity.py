@@ -282,5 +282,5 @@ def test_ms_structural_similarity():
     # test small image
 
     X = np.ones((5, 5))
-    with pytest.raises(AssertionError):
+    with expected_warnings(["Running truncated mssim. To run full ms-ssim expected minimum img spatial dim 16"]):
         multiscale_structural_similarity(X, X)

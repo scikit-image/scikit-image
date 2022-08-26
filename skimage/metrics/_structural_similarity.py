@@ -276,6 +276,7 @@ def multiscale_structural_similarity(im1, im2,
                           *,
                           win_size=11,
                           multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333),
+                          # \alpha, \beta values from https://ece.uwaterloo.ca/~z70wang/publications/msssim.pdf
                           channel_axis = 2,
                           **kwargs):
     """
@@ -302,32 +303,35 @@ def multiscale_structural_similarity(im1, im2,
     Notes
     -----
     - kwargs can be used to pass arguments for the ssim metric at each scale see metrics.ssim for details
-    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa       
+    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa[1]
+    Reference:
+        [1] https://github.com/jorge-pessoa/pytorch-msssim/blob/dev/pytorch_msssim/__init__.py
+            (MIT License)       
 
     """
-
     check_shape_equality(im1, im2)
-    min_size_img = 2 ** len(multiscale_weights)
-    n_dims = list(im1.shape)
-    n_dims.pop(channel_axis)
-    smallest_spatial_dim = min(n_dims)
 
-    assert smallest_spatial_dim >= min_size_img, f"min required image size is {min_size_img}, multiscale_weights of length {len(multiscale_weights)} is being used"
-    
     mssim = []
     mcs = []
     
     for weight in multiscale_weights:
         # calculate ssim at current scale
-        sim, cs = structural_similarity(im1, im2, win_size=win_size, channel_axis=channel_axis, full=True, **kwargs)
-        
-        # multiply the weights for current scale
-        mssim.append(sim ** weight)
-        mcs.append(cs.mean() ** weight)
+        if min(im1.shape[0], im1.shape[1]) > 1:
+            sim, cs = structural_similarity(im1, im2, win_size=win_size, channel_axis=channel_axis, full=True, **kwargs)
+            
+            # multiply the weights for current scale
+            mssim.append(sim ** weight)
+            mcs.append(cs.mean() ** weight)
 
-        # rescale the images for scale i+1
-        im1 = zoom(im1, zoom=0.5)
-        im2 = zoom(im2, zoom=0.5)
+            # rescale the images for scale i+1
+            im1 = zoom(im1, zoom=0.5)
+            im2 = zoom(im2, zoom=0.5)
+        else:
+            warn(
+                f"Running truncated mssim. To run full ms-ssim expected minimum img spatial dim {2 ** len(multiscale_weights)}",
+                stacklevel=2,
+            )
+
 
     mssim = np.stack(mssim)
     mcs = np.stack(mcs)
