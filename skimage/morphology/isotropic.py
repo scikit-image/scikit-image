@@ -62,8 +62,8 @@ def isotropic_dilation(image, radius, out=None):
         The result of the morphological dilation with values in
         ``[False, True]``.
     """
-    
-    dist = ndi.distance_transform_edt(image==0)
+
+    dist = ndi.distance_transform_edt(image == 0)
     return np.less(dist, radius, out=out)
 
 
