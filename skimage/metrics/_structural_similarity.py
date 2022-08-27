@@ -276,8 +276,8 @@ def multiscale_structural_similarity(im1, im2,
                           *,
                           win_size=11,
                           multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333),
-                          # \alpha, \beta values from https://ece.uwaterloo.ca/~z70wang/publications/msssim.pdf
                           channel_axis=None,
+                          scale_factor= 0.5,
                           **kwargs):
     """
     Compute the multiscale structural similarity index between two images.
@@ -289,9 +289,11 @@ def multiscale_structural_similarity(im1, im2,
     win_size : int, optional
         The side-length of the sliding window used in comparison. Must be an
         odd value.
-    channel_axis : int
-        This parameter indicates which axis of the array corresponds
-        to channels.
+    channel_axis : int, optional
+        This parameter indicates which axis of the array corresponds to channels.
+        By default it is set to `None` for grayscale image. 
+    scale_factor: float, optional
+        The factor by which to reduce an image at each level of the multiscale reduction
     multiscale_weights : list, optional
         The weights that needs to applied to the ssim at each scale
 
@@ -303,10 +305,12 @@ def multiscale_structural_similarity(im1, im2,
     Notes
     -----
     - kwargs can be used to pass arguments for the ssim metric at each scale see metrics.ssim for details
-    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa[1]
+    - The default multiscale weights  are set as `multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333)`[1]
+    - Code adapted version of the pytorch implementation of the msssim from `pytorch-mssim` by @jorge-pessoa[2]
     Reference:
         [1] https://github.com/jorge-pessoa/pytorch-msssim/blob/dev/pytorch_msssim/__init__.py
-            (MIT License)       
+            (MIT License)
+        [2] https://ece.uwaterloo.ca/~z70wang/publications/msssim.pdf       
 
     """
     check_shape_equality(im1, im2)
@@ -316,7 +320,7 @@ def multiscale_structural_similarity(im1, im2,
     
     for weight in multiscale_weights:
         # calculate ssim at current scale
-        if min(im1.shape[0], im1.shape[1]) > 1:
+        if min(im1.shape[0], im1.shape[1]) > win_size:
             sim, cs = structural_similarity(im1, im2, win_size=win_size, channel_axis=channel_axis, full=True, **kwargs)
             
             # multiply the weights for current scale
@@ -324,12 +328,11 @@ def multiscale_structural_similarity(im1, im2,
             mcs.append(cs.mean() ** weight)
 
             # rescale the images for scale i+1
-            im1 = zoom(im1, zoom=0.5)
-            im2 = zoom(im2, zoom=0.5)
+            im1 = zoom(im1, zoom=scale_factor)
+            im2 = zoom(im2, zoom=scale_factor)
         else:
             warn(
-                f"Running truncated mssim. To run full ms-ssim expected 
-                f"minimum image size {2 ** len(multiscale_weights)}",
+                f"Running truncated mssim. To run full ms-ssim expected minimum img spatial dim {win_size*(1./scale_factor) ** len(multiscale_weights)}",
                 stacklevel=2,
             )
             break
