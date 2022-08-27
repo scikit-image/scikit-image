@@ -91,7 +91,7 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            raise ValueError('At least 2 input points needed.')
+            return False
 
         self.params = (origin, direction)
 
@@ -293,8 +293,8 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input data does not contain enough significant data points. "
-                 "In scikit-image 1.0, this warning will become a ValueError.")
+            warn("Input does not contain enough significant data points.")
+            return False
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
