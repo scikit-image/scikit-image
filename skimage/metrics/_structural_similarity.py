@@ -277,7 +277,7 @@ def multiscale_structural_similarity(im1, im2,
                           win_size=11,
                           multiscale_weights=(0.0448, 0.2856, 0.3001, 0.2363, 0.1333),
                           # \alpha, \beta values from https://ece.uwaterloo.ca/~z70wang/publications/msssim.pdf
-                          channel_axis = 2,
+                          channel_axis=None,
                           **kwargs):
     """
     Compute the multiscale structural similarity index between two images.
@@ -328,9 +328,11 @@ def multiscale_structural_similarity(im1, im2,
             im2 = zoom(im2, zoom=0.5)
         else:
             warn(
-                f"Running truncated mssim. To run full ms-ssim expected minimum img spatial dim {2 ** len(multiscale_weights)}",
+                f"Running truncated mssim. To run full ms-ssim expected 
+                f"minimum image size {2 ** len(multiscale_weights)}",
                 stacklevel=2,
             )
+            break
 
 
     mssim = np.stack(mssim)
