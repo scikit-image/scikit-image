@@ -339,7 +339,7 @@ def test_image_convex():
 
 
 def test_image_convex_3D_label_2D():
-    img = regionprops(SAMPLE_3D_LABEL_2D())[0].image_convex
+    img = regionprops(SAMPLE_3D_LABEL_2D)[0].image_convex
     ref = np.array(
         [
             [[True, True, True]],
@@ -351,7 +351,7 @@ def test_image_convex_3D_label_2D():
 
 
 def test_image_convex_3D_label_1D():
-    img = regionprops(SAMPLE_3D_LABEL_1D())[0].image_convex
+    img = regionprops(SAMPLE_3D_LABEL_1D)[0].image_convex
     ref = np.array(
         [
             [[True, ]],
