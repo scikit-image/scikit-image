@@ -28,12 +28,9 @@ from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
 
-y1 = 0
-y2 = 180
-x1 = 100
-x2 = 330
+y0, y1, x0, x1 = 0, 180, 100, 330
 
-image_sequence = image_sequence[:, y1:y2, x1:x2]
+image_sequence = image_sequence[:, y0:y1, x0:x1]
 
 print(f'shape: {image_sequence.shape}')
 
