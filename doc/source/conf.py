@@ -453,6 +453,7 @@ def linkcode_resolve(domain, info):
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
 
+
 # ----------------------------------------------------------------------------
 # MyST
 # ----------------------------------------------------------------------------
