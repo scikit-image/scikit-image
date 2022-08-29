@@ -93,8 +93,8 @@ plotly.io.show(fig)
 # ==================
 # Next, we invert the ``clipped`` images so the regions of highest intensity
 # will correspond to the region we are interested in tracking (i.e., the 
-# S-L interface). With the images inverted, we'll apply a total 
-# variation denoising filter to reduce noise beyond the interface.
+# S-L interface). We now apply a total variation denoising filter to reduce 
+# noise beyond the interface.
 
 inverted = 1 - clipped
 denoised = restoration.denoise_tv_chambolle(inverted, weight=0.15)
@@ -111,7 +111,7 @@ plotly.io.show(fig)
 # Binarize
 # ========
 # Our next step is to create binary images, splitting each image 
-# into a foreground and a background: We want the solid-liquid interface 
+# into a foreground and a background: We want the S-L interface 
 # to be the most prominent feature in the foreground of each binary image,
 # so that it can eventually be separated from the rest of the image.
 # 
