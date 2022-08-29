@@ -326,11 +326,22 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install major development and runtime dependencies of scikit-image
-  conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
+  conda install --file requirements/default.txt
+  conda install --file requirements/build.txt
+  conda install --file requirements/test.txt
   # Install scikit-image from source
   pip install -e . -vv
   # Test your installation
   pytest skimage
+
+On Windows, use backslashes when referring to files in the folder
+`requirements`:
+
+.. code-block:: sh
+
+  conda install --file requirements\default.txt
+  conda install --file requirements\build.txt
+  conda install --file requirements\test.txt
 
 Updating the installation
 ------------------------------------------------------------------------------
