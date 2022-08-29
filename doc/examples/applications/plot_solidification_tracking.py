@@ -20,7 +20,6 @@ National Laboratory (ANL). This analysis was presented at a conference [1]_.
 """
 
 import numpy as np
-import pandas as pd
 import plotly.io
 import plotly.express as px
 
@@ -74,7 +73,7 @@ plotly.io.show(fig)
 # Clip lowest and highest intensities
 # ===================================
 # We now calculate the 5th and 95th percentile intensities of ``image_deltas``:
-# we want to clip the intensities which lie below the 5th percentile
+# We want to clip the intensities which lie below the 5th percentile
 # intensity and above the 95th percentile intensity, while also rescaling 
 # the intensity values to [0, 1]. 
 
@@ -93,12 +92,12 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# Invert and denoise images
-# =========================
-# Next, we'll invert the images so the regions of highest intensity 
-# will correspond to the region we're interested in tracking (i.e. the 
-# solid-liquid interface). With the images inverted, we'll apply a total 
-# variation denoising filter te reduce some of the noise beyond the interface.
+# Invert and denoise
+# ==================
+# Next, we invert the ``clipped`` images so the regions of highest intensity
+# will correspond to the region we are interested in tracking (i.e., the 
+# S-L interface). With the images inverted, we'll apply a total 
+# variation denoising filter to reduce noise beyond the interface.
 
 inverted = 1 - clipped
 denoised = restoration.denoise_tv_chambolle(inverted, weight=0.15)
@@ -112,31 +111,21 @@ fig = px.imshow(
 plotly.io.show(fig) 
 
 #####################################################################
-# Create binary images
-# ====================
-# Our next step is to create binarize the images, splitting each image 
-# into a foreground and a background. We want the solid-liquid interfaces 
-# to be the most prominent features in the foreground of these binary images 
-# so that the interfaces can eventually be separated from the rest of the 
-# image. First, we create an empty image (NumPy array full of zeros) matching
-# the size of the images processed so far:
-
-print(f'{denoised.shape=}')
-mask = np.zeros_like(denoised)
-print(f'{mask.shape=}')
-
-#####################################################################
-# With an empty array the same size of our images, we now set 
+# Binarize
+# ========
+# Our next step is to create binary images, splitting each image 
+# into a foreground and a background: We want the solid-liquid interface 
+# to be the most prominent feature in the foreground of each binary image,
+# so that it can eventually be separated from the rest of the image.
+# 
+# We need 
 # a threshold value ``thresh_val`` to create our binary images, ``mask``. 
 # This can be set manually, but we'll use an automated minimum threshold 
 # method from the ``filters`` submodule of scikit-image (there are other 
-# methods that may work better for different applications). With the threshold 
-# value set, we select the pixels in ``denoised`` with an intensity above 
-# ``thresh_val`` and use these pixels to index the corresponding positions in 
-# our empty array ``mask`` and set these pixels to 1.
+# methods that may work better for different applications).
 
 thresh_val = filters.threshold_minimum(denoised)
-mask[denoised > thresh_val] = 1
+mask = denoised > thresh_val
 
 fig = px.imshow(
     mask,
@@ -144,4 +133,8 @@ fig = px.imshow(
     binary_string=True,
     labels={'animation_frame': 'time point'}
 )
-plotly.io.show(fig) 
+plotly.io.show(fig)
+
+#####################################################################
+# Filter minimum size
+# ===================
