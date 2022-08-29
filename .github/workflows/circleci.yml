@@ -1,7 +1,7 @@
 on: [status]
 jobs:
   circleci_artifacts_redirector_job:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: Run CircleCI artifacts redirector
     steps:
       - name: GitHub Action step

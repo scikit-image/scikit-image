@@ -10,7 +10,7 @@ jobs:
 
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
