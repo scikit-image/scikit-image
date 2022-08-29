@@ -10,6 +10,8 @@ def isotropic_erosion(image, radius, out=None):
 
     This function returns the same result as binary erosion but performs
     faster for large circular structuring elements.
+    This works by applying a threshold to the exact Euclidean distance map
+    of the image.
 
     Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
     pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
@@ -41,6 +43,8 @@ def isotropic_dilation(image, radius, out=None):
 
     This function returns the same result as binary dilation but performs
     faster for large circular structuring elements.
+    This works by applying a threshold to the exact Euclidean distance map
+    of the inverted image.
 
     Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
     pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
