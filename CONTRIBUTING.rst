@@ -117,7 +117,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 5. Document changes
 
    If your change introduces any API modifications, please update
-   ``doc/source/api_changes.txt``.
+   ``doc/release/release_dev.rst``.
 
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.

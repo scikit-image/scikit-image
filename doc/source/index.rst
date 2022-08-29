@@ -16,7 +16,6 @@ Sections
 
    overview
    api/api
-   api_changes
    install
    user_guide
    glossary
@@ -36,7 +35,7 @@ Sections
 
        Introduction to scikit-image.
 
-     - `API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
+     - `API Reference <api/api.html>`_
 
        Documentation for the functions included in scikit-image.
 
