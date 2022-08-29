@@ -23,7 +23,7 @@ import numpy as np
 import plotly.io
 import plotly.express as px
 
-from skimage import filters, measure, restoration, segmentation
+from skimage import color, filters, measure, restoration, segmentation
 from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
@@ -116,16 +116,16 @@ plotly.io.show(fig)
 # so that it can eventually be separated from the rest of the image.
 # 
 # We need 
-# a threshold value ``thresh_val`` to create our binary images, ``mask``. 
+# a threshold value ``thresh_val`` to create our binary images, ``binarized``. 
 # This can be set manually, but we'll use an automated minimum threshold 
 # method from the ``filters`` submodule of scikit-image (there are other 
 # methods that may work better for different applications).
 
 thresh_val = filters.threshold_minimum(denoised)
-mask = denoised > thresh_val
+binarized = denoised > thresh_val
 
 fig = px.imshow(
-    mask,
+    binarized,
     animation_frame=0,
     binary_string=True,
     labels={'animation_frame': 'time point'}
@@ -135,3 +135,21 @@ plotly.io.show(fig)
 #####################################################################
 # Filter minimum size
 # ===================
+# In our binary iamges, the S-L interface appears as the largest region of
+# connected pixels. We can select this region by first labeling each separate
+# region in the binary images. This will create an image in which each pixel
+# coonected to other pixels of the region will be assigned a separate integer
+# value in ``labeled``. 
+
+labeled = measure.label(binarized)
+
+#####################################################################
+# We can visualize this by coloring the labels of ``labeled`` and overlaying
+# those with the original images ``image_sequence``. ``label2rgb()`` takes
+# a 2D image, so we must be careful to account for offset introduced after
+# the image delta step when plotting these images.
+
+labeled_overlay_0 = color.label2rgb(
+        labeled[0, :, :], image=image_sequence[1, :, :], bg_label=0)
+
+px.imshow(labeled_overlay_0, color_continuous_scale='gray')
