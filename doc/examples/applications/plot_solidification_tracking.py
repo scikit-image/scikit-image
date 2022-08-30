@@ -117,7 +117,7 @@ plotly.io.show(fig)
 #
 # We need
 # a threshold value ``thresh_val`` to create our binary images, ``binarized``.
-# This can be set manually, but we'll use an automated minimum threshold
+# This can be set manually, but we shall use an automated minimum threshold
 # method from the ``filters`` submodule of scikit-image (there are other
 # methods that may work better for different applications).
 
@@ -133,8 +133,8 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# Filter minimum size
-# ===================
+# Select largest region
+# =====================
 # In our binary iamges, the S-L interface appears as the largest region of
 # connected pixels. We can select this region by first labeling each separate
 # region in the binary images. This will create an image in which each pixel
@@ -146,7 +146,7 @@ labeled = measure.label(binarized)
 #####################################################################
 # We can visualize this by coloring the labels of ``labeled`` and overlaying
 # those over the original images (``image_sequence``). The function
-# ``label2rgb()`` takes a 2D image (it's just a preview), so we must be
+# :func:`label2rgb()` takes a 2D image (it's just a preview), so we must be
 # careful to account for offset introduced after the image delta step when
 # plotting these images.
 
