@@ -48,15 +48,15 @@ plotly.io.show(fig)
 #####################################################################
 # Compute image deltas
 # ====================
-# Let us apply a Gaussian low-pass filter to the images in order to smooth
+# Let us apply a Gaussian low-pass filter in order to smooth
 # the images and reduce noise.
 # Next, we compute the image deltas, i.e., the sequence of differences
-# between two consecutive frames. To do this, we subtract ``image_sequence``
+# between two consecutive frames. To do this, we subtract the image sequence
 # from itself, but offset by one frame so that the subtracted images are
 # one frame behind in time.
 
-images_smoothed = filters.gaussian(image_sequence)
-image_deltas = images_smoothed[1:, :, :] - images_smoothed[:-1, :, :]
+smoothed = filters.gaussian(image_sequence)
+image_deltas = smoothed[1:, :, :] - smoothed[:-1, :, :]
 
 fig = px.imshow(
     image_deltas,
@@ -135,7 +135,7 @@ plotly.io.show(fig)
 #####################################################################
 # Select largest region
 # =====================
-# In our binary iamges, the S-L interface appears as the largest region of
+# In our binary images, the S-L interface appears as the largest region of
 # connected pixels. We can select this region by first labeling each separate
 # region in the binary images. This will create an image in which each pixel
 # coonected to other pixels of the region will be assigned a separate integer
