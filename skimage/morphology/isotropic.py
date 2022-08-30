@@ -68,7 +68,7 @@ def isotropic_dilation(image, radius, out=None):
     """
 
     dist = ndi.distance_transform_edt(image == 0)
-    return np.less(dist, radius, out=out)
+    return np.less_equal(dist, radius, out=out)
 
 
 def isotropic_opening(image, radius, out=None):
