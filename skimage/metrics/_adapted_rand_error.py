@@ -21,8 +21,8 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
     alpha : float, optional
-       Relative weight given to precision and recall in the adapted Rand error
-       calculation.
+        Relative weight given to precision and recall in the adapted Rand error
+        calculation.
 
     Returns
     -------
