@@ -4,12 +4,12 @@ Track solidification of a metallic alloy
 ========================================
 
 In this example, we identify and track the solid-liquid (S-L) interface in a
-metallic sample undergoing solidification. Tracking the solidification over 
-time enables the calculatation of the solidification velocity. This is 
-important to characterize the solidified structure of the sample and will be 
-used to inform research into additive manufacturing of metals. The image 
-sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys 
-(CANFSA) using synchrotron x-radiography at the Advanced Photon Source (APS) at Argonne 
+metallic sample undergoing solidification. Tracking the solidification over
+time enables the calculatation of the solidification velocity. This is
+important to characterize the solidified structure of the sample and will be
+used to inform research into additive manufacturing of metals. The image
+sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys
+(CANFSA) using synchrotron x-radiography at the Advanced Photon Source (APS) at Argonne
 National Laboratory (ANL). This analysis was presented at a conference [1]_.
 
 .. [1] Corvellec M. and Becker C. G. (2021, May 17-18)
@@ -52,7 +52,7 @@ plotly.io.show(fig)
 # the images and reduce noise.
 # Next, we compute the image deltas, i.e., the sequence of differences
 # between two consecutive frames. To do this, we subtract ``image_sequence``
-# from itself, but offset by one frame so that the subtracted images are 
+# from itself, but offset by one frame so that the subtracted images are
 # one frame behind in time.
 
 images_smoothed = filters.gaussian(image_sequence)
@@ -71,8 +71,8 @@ plotly.io.show(fig)
 # ===================================
 # We now calculate the 5th and 95th percentile intensities of ``image_deltas``:
 # We want to clip the intensities which lie below the 5th percentile
-# intensity and above the 95th percentile intensity, while also rescaling 
-# the intensity values to [0, 1]. 
+# intensity and above the 95th percentile intensity, while also rescaling
+# the intensity values to [0, 1].
 
 p_low, p_high = np.percentile(image_deltas, [5, 95])
 clipped = image_deltas - p_low
@@ -92,8 +92,8 @@ plotly.io.show(fig)
 # Invert and denoise
 # ==================
 # Next, we invert the ``clipped`` images so the regions of highest intensity
-# will correspond to the region we are interested in tracking (i.e., the 
-# S-L interface). We now apply a total variation denoising filter to reduce 
+# will correspond to the region we are interested in tracking (i.e., the
+# S-L interface). We now apply a total variation denoising filter to reduce
 # noise beyond the interface.
 
 inverted = 1 - clipped
@@ -105,20 +105,20 @@ fig = px.imshow(
     binary_string=True,
     labels={'animation_frame': 'time point'}
 )
-plotly.io.show(fig) 
+plotly.io.show(fig)
 
 #####################################################################
 # Binarize
 # ========
-# Our next step is to create binary images, splitting each image 
-# into a foreground and a background: We want the S-L interface 
+# Our next step is to create binary images, splitting each image
+# into a foreground and a background: We want the S-L interface
 # to be the most prominent feature in the foreground of each binary image,
 # so that it can eventually be separated from the rest of the image.
-# 
-# We need 
-# a threshold value ``thresh_val`` to create our binary images, ``binarized``. 
-# This can be set manually, but we'll use an automated minimum threshold 
-# method from the ``filters`` submodule of scikit-image (there are other 
+#
+# We need
+# a threshold value ``thresh_val`` to create our binary images, ``binarized``.
+# This can be set manually, but we'll use an automated minimum threshold
+# method from the ``filters`` submodule of scikit-image (there are other
 # methods that may work better for different applications).
 
 thresh_val = filters.threshold_minimum(denoised)
@@ -139,7 +139,7 @@ plotly.io.show(fig)
 # connected pixels. We can select this region by first labeling each separate
 # region in the binary images. This will create an image in which each pixel
 # coonected to other pixels of the region will be assigned a separate integer
-# value in ``labeled``. 
+# value in ``labeled``.
 
 labeled = measure.label(binarized)
 
