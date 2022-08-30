@@ -8,6 +8,17 @@ scikit-image is an image processing toolbox for SciPy_. View the
 .. _SciPy: https://www.scipy.org
 
 
+TryItOut
+========
+.. replite::
+   :kernel: xeus-python
+   :height: 600px
+   :prompt: Try it!
+
+   %matplotlib inline
+
+   import skimage
+
 Sections
 ========
 

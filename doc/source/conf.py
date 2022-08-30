@@ -41,7 +41,11 @@ extensions = ['sphinx_copybutton',
               'sphinx.ext.linkcode',
               'sphinx_gallery.gen_gallery',
               'myst_parser',
+              "jupyterlite_sphinx",
               ]
+jupyterlite_config = "jupyterlite_config.json"
+jupyterlite_dir = "."
+
 
 autosummary_generate = True
 
