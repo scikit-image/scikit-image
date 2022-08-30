@@ -18,3 +18,4 @@ ipywidgets
 plotly>=4.14.0
 kaleido
 jupyterlite_sphinx
+conda

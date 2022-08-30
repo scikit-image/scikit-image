@@ -11,6 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+
+
+
 import sys
 import os
 import skimage
@@ -43,7 +46,10 @@ extensions = ['sphinx_copybutton',
               'myst_parser',
               "jupyterlite_sphinx",
               ]
-jupyterlite_config = "jupyterlite_config.json"
+
+
+jupyterlite_config = os.path.join( os.path.dirname(__file__),"..", "jupyterlite_config.json")
+print(jupyterlite_config)
 jupyterlite_dir = "."
 
 

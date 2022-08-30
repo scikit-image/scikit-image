@@ -1,0 +1,5 @@
+{
+  "XeusPythonEnv": {
+    "packages": ["scikit-image", "matplotlib"]
+  }
+}
