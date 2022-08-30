@@ -110,8 +110,8 @@ plotly.io.show(fig)
 #####################################################################
 # Binarize
 # ========
-# Our next step is to create binary images, splitting each image
-# into a foreground and a background: We want the S-L interface
+# Our next step is to create binary images, splitting the images
+# into foreground and background: We want the S-L interface
 # to be the most prominent feature in the foreground of each binary image,
 # so that it can eventually be separated from the rest of the image.
 #
@@ -145,9 +145,10 @@ labeled = measure.label(binarized)
 
 #####################################################################
 # We can visualize this by coloring the labels of ``labeled`` and overlaying
-# those with the original images ``image_sequence``. ``label2rgb()`` takes
-# a 2D image, so we must be careful to account for offset introduced after
-# the image delta step when plotting these images.
+# those over the original images (``image_sequence``). The function
+# ``label2rgb()`` takes a 2D image (it's just a preview), so we must be
+# careful to account for offset introduced after the image delta step when
+# plotting these images.
 
 labeled_overlay_0 = color.label2rgb(
         labeled[0, :, :], image=image_sequence[1, :, :], bg_label=0)
