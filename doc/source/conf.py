@@ -48,8 +48,8 @@ extensions = ['sphinx_copybutton',
               ]
 
 
-jupyterlite_config = os.path.join( os.path.dirname(__file__),"..", "jupyterlite_config.json")
-print(jupyterlite_config)
+this_dir = os.path.dirname(__file__)
+jupyterlite_config = os.path.join(this_dir, "..", "jupyterlite_config.json")
 jupyterlite_dir = "."
 
 
