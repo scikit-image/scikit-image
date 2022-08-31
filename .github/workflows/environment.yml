@@ -17,6 +17,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Install Conda environment from environment.yml
+        uses: mamba-org/provision-with-micromamba@main
+
       - name: Install Python
         uses: actions/setup-python@v3
         with:
