@@ -994,7 +994,7 @@ def test_nn_resize_int_img():
 
     resized = resize(img, (8, 8), order=0)
 
-    assert np.array_equal(np.unique(resized), [0, 5, 7])
+    assert np.array_equal(np.unique(resized), np.unique(img))
 
 
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])
