@@ -406,7 +406,7 @@ class TestPeakLocalMax():
         image[3, 0] = -1
 
         peaks = peak.peak_local_max(image, min_distance=3)
-        assert not peaks
+        assert peaks.size == 0
 
         peaks = peak.peak_local_max(image, min_distance=3, exclude_border=0)
         assert len(peaks) == 2
