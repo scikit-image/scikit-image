@@ -40,7 +40,7 @@ def _get_peak_mask(image, footprint, threshold, mask=None):
         return image > threshold
 
     image_max = ndi.maximum_filter(image, footprint=footprint,
-                                   mode='constant')
+                                   mode='nearest')
 
     out = image == image_max
 
