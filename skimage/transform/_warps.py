@@ -150,8 +150,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = (not input_type == bool and
-                         any(x < y for x, y in zip(output_shape, input_shape)))
+        anti_aliasing = (
+            not input_type == bool and
+            not (np.issubdtype(input_type, np.integer) and order == 0) and
+            any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")
