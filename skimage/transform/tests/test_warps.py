@@ -986,6 +986,17 @@ def test_resize_local_mean_dtype():
                              preserve_range=True).dtype == x_f32.dtype
 
 
+def test_nn_resize_int_img():
+    """Issue #6467"""
+    img = np.zeros((12, 12), dtype=np.int16)
+    img[4:8, 1:4] = 5
+    img[4:8, 7:10] = 7
+
+    resized = resize(img, (8, 8), order=0)
+
+    assert np.array_equal(np.unique(resized), np.unique(img))
+
+
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])
 def test_output_shape_arg_type(_type):
     img = np.random.rand(3, 3)
