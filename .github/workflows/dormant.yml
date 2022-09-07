@@ -1,0 +1,40 @@
+# Mark issues without activity as dormant
+# See https://github.com/actions/stale for documentation and configuration
+
+name: Mark dormant issues
+on:
+  schedule:
+    - cron: "15 2 * * *"  # trigger everyday at 2:15
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v5
+        with:
+          debug-only: true
+          days-before-stale: 180
+          days-before-close: -1  # never close
+          stale-issue-label: ":zzz: dormant"
+          remove-stale-when-updated: true
+          stale-issue-message: >
+            Hey, there hasn't been any recent activity on this for more than 180
+            days, so we have marked it as "dormant" for now until there is some
+            new activity. Please, feel free to reach out to people directly by
+            mentioning them here or on our
+            [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
+            if more feedback is needed! If you feel that this issue is no longer
+            relevant you may close this or we may do it at some point manually.
+            In any case, thank you for your contributions so far!
+          stale-pr-message: >
+            Hey, there hasn't been any recent activity on this for more than 180
+            days, so we have marked it as "dormant" for now until there is some
+            new activity. Please, feel free to reach out to people directly by
+            mentioning them here or on our
+            [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
+            if more feedback is needed! Otherwise, we would be thankful for a
+            brief update on whether you are planning to continue this or if you
+            are happy for someone to take over.
+            In any case, thank you for your contributions so far!
