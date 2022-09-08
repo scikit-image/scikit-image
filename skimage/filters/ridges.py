@@ -326,7 +326,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
         # Remove background and store results in (n+1)D matrices
         filtered = np.where(lambdas[-1] > 0, filtered, 0)
-        
+
         # Take maximum between sigmas
         filtered_max = np.maximum(filtered_max, filtered)
 
