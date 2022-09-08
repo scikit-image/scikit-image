@@ -209,9 +209,9 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
     if black_ridges:
         image = invert(image)
 
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered at
-    # different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, float_dtype)
+    # Generate empty array for storing maximum values
+    # from different (sigma) scales
+    filtered_max = np.zeros(image.shape, float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -241,11 +241,11 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
             # Remove background
             filtered = np.where(auxiliary < 0, filtered, 0)
 
-            # Store results in (n+1)D matrices
-            filtered_array[i] = filtered
+            # Take maximum between sigmas
+            filtered_max = np.maximum(filtered_max, filtered)
 
     # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    return filtered_max
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
@@ -308,9 +308,9 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
     float_dtype = _supported_float_type(image.dtype)
 
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered
-    # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
+    # Generate empty array for storing maximum values
+    # from different (sigma) scales
+    filtered_max = np.zeros(image.shape, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -325,10 +325,13 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
         filtered = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
 
         # Remove background and store results in (n+1)D matrices
-        filtered_array[i] = np.where(lambdas[-1] > 0, filtered, 0)
+        filtered = np.where(lambdas[-1] > 0, filtered, 0)
+        
+        # Take maximum between sigmas
+        filtered_max = np.maximum(filtered_max, filtered)
 
     # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    return filtered_max
 
 
 def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
@@ -427,10 +430,9 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
     float_dtype = _supported_float_type(image.dtype)
 
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered
-    # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
-    lambdas_array = np.zeros_like(filtered_array, dtype=float_dtype)
+    # Generate empty array for storing maximum values
+    # from different (sigma) scales
+    filtered_max = np.zeros(image.shape, dtype=float_dtype)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
@@ -456,17 +458,18 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
         # Compute output image for given (sigma) scale and store results in
         # (n+1)D matrices, see equations (13) and (15) in reference [1]_
-        filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
+        filtered = ((1 - np.exp(-r_a / alpha_sq))
                              * np.exp(-r_b / beta_sq)
                              * (1 - np.exp(-r_g / gamma_sq)))
 
-        lambdas_array[i] = np.max(lambdas, axis=0)
+        # Remove background
+        filtered[np.max(lambdas, axis=0) > 0] = 0
 
-    # Remove background
-    filtered_array[lambdas_array > 0] = 0
+        # Take maximum between sigmas
+        filtered_max = np.maximum(filtered_max, filtered)
 
     # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    return filtered_max
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
