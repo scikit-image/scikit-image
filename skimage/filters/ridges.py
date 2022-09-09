@@ -459,8 +459,8 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
         # Compute output image for given (sigma) scale and store results in
         # (n+1)D matrices, see equations (13) and (15) in reference [1]_
         filtered = ((1 - np.exp(-r_a / alpha_sq))
-                             * np.exp(-r_b / beta_sq)
-                             * (1 - np.exp(-r_g / gamma_sq)))
+                     * np.exp(-r_b / beta_sq)
+                     * (1 - np.exp(-r_g / gamma_sq)))
 
         # Remove background
         filtered[np.max(lambdas, axis=0) > 0] = 0
