@@ -4,7 +4,7 @@
 name: Mark dormant issues
 on:
   schedule:
-    - cron: "15 2 * * *"  # trigger everyday at 2:15
+    - cron: "15 2 * * *"  # trigger every day at 2:15
 permissions:
   issues: write
   pull-requests: write
@@ -20,21 +20,22 @@ jobs:
           stale-issue-label: ":zzz: dormant"
           remove-stale-when-updated: true
           stale-issue-message: >
-            Hey, there hasn't been any recent activity on this for more than 180
+            Hey, there hasn't been any activity on this for more than 180
             days, so we have marked it as "dormant" for now until there is some
-            new activity. Please, feel free to reach out to people directly by
+            new activity. Feel free to reach out to people directly by
             mentioning them here or on our
             [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
             if more feedback is needed! If you feel that this issue is no longer
-            relevant you may close this or we may do it at some point manually.
+            relevant you may close it by yourself; otherwise, we may do it at
+            some point (either way, it will be done manually).
             In any case, thank you for your contributions so far!
           stale-pr-message: >
-            Hey, there hasn't been any recent activity on this for more than 180
+            Hey, there hasn't been any activity on this for more than 180
             days, so we have marked it as "dormant" for now until there is some
-            new activity. Please, feel free to reach out to people directly by
+            new activity. Feel free to reach out to people directly by
             mentioning them here or on our
             [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
-            if more feedback is needed! Otherwise, we would be thankful for a
-            brief update on whether you are planning to continue this or if you
-            are happy for someone to take over.
+            if more feedback is needed! Otherwise, we would appreciate a short
+            update if you plan to continue this or if you are okay with someone
+            else taking over.
             In any case, thank you for your contributions so far!
