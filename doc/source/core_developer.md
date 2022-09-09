@@ -80,19 +80,23 @@ When reviewing, focus on the following:
    tests not only execute the code, but explores corner cases.  It is tempting
    not to review tests, but please do so.
 
-5. **Licensing:** New contributions _must_ be compatible with 
-   {doc}`scikit-image's license <license>`. Which licenses are compatible is a
-   hard question to answer. If in doubt, ask the team for help. If the 
-   contributor is not the copyright holder of the submitted code, ask for
-   approval and include them in our license.
+5. **Licensing:** New contributions should be available under the same license
+   or be compatible with {doc}`scikit-image's license <license>`. Which ones are
+   compatible is a hard question to answer. Examples of BSD-compatible licenses
+   are the [MIT License][mit_license] and [Apache License 2.0][apache_2-2]. If
+   in doubt, ask the team for help. If the contributor is not the copyright
+   holder of the submitted code, ask for approval and include them in our
+   license.
 
-6. **Established methods:** In general, we are looking to include well cited 
-   algorithms and methods that are of general use to the imaging community. 
-   While this is not a hard requirement, new contributions should further
-   {doc}`our mission <values>`.
+6. **Established methods:** In general, we are looking to include algorithms and
+   methods that are established and widely used in literature and by the imaging 
+   community. While this is not a hard requirement, new contributions should
+   further {doc}`our mission <values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
 [dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
+[mit_license]: https://spdx.org/licenses/MIT.html
+[apache_2-2]: https://spdx.org/licenses/Apache-2.0.html
 
 Other changes may be *nitpicky*: spelling mistakes, formatting,
 etc. Do not ask contributors to make these changes, and instead
