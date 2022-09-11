@@ -22,7 +22,7 @@ jobs:
           stale-issue-message: >
             Hey, there hasn't been any activity on this for more than 180
             days, so we have marked it as "dormant" for now until there is some
-            new activity. Feel free to reach out to people directly by
+            new activity. You are welcome to reach out to people directly by
             mentioning them here or on our
             [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
             if more feedback is needed! If you feel that this issue is no longer
@@ -32,10 +32,10 @@ jobs:
           stale-pr-message: >
             Hey, there hasn't been any activity on this for more than 180
             days, so we have marked it as "dormant" for now until there is some
-            new activity. Feel free to reach out to people directly by
+            new activity. You are welcome to reach out to people directly by
             mentioning them here or on our
             [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
-            if more feedback is needed! Otherwise, we would appreciate a short
-            update if you plan to continue this or if you are okay with someone
-            else taking over.
+            if more feedback is needed! Otherwise, we would be thankful for a 
+            short update, for example if you would like to continue or if you
+            are okay with someone else doing so.
             In any case, thank you for your contributions so far!
