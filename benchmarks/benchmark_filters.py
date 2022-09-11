@@ -127,14 +127,26 @@ class RidgeFilters:
         """
         pass
 
+    def time_meijering(self):
+        filters.meijering(self.image)
+
     def peakmem_meijering(self):
         filters.meijering(self.image)
+
+    def time_sato(self):
+        filters.sato(self.image)
 
     def peakmem_sato(self):
         filters.sato(self.image)
 
+    def time_frangi(self):
+        filters.frangi(self.image)
+
     def peakmem_frangi(self):
         filters.frangi(self.image)
+
+    def time_hessian(self):
+        filters.hessian(self.image)
 
     def peakmem_hessian(self):
         filters.hessian(self.image)
