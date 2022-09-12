@@ -8,14 +8,11 @@ from scipy import ndimage as ndi
 def isotropic_erosion(image, radius, out=None, spacing=None):
     """Return binary morphological erosion of an image.
 
-    This function returns the same result as binary erosion but performs
-    faster for large circular structuring elements.
+    This function returns the same result as :func:`skimage.morphology.binary_erosion`
+    but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
     of the image. [1]_, [2]_
-
-    Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
-    pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
-    regions and enlarges dark regions.
+    The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
     ----------
@@ -58,14 +55,11 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
 def isotropic_dilation(image, radius, out=None, spacing=None):
     """Return binary morphological dilation of an image.
 
-    This function returns the same result as binary dilation but performs
-    faster for large circular structuring elements.
+    This function returns the same result as :func:`skimage.morphology.binary_dilation`
+    but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
     of the inverted image. [1]_, [2]_
-
-    Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
-    pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
-    regions and shrinks dark regions.
+    The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
     ----------
@@ -108,14 +102,10 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
 def isotropic_opening(image, radius, out=None, spacing=None):
     """Return binary morphological opening of an image.
 
-    This function returns the same result as binary opening but performs
-    faster for large circular structuring elements.
+    This function returns the same result as :func:`skimage.morphology.binary_opening`
+    but performs faster for large circular structuring elements.
     This works by thresholding the exact Euclidean distance map. [1]_, [2]_
-
-    The morphological opening on an image is defined as an erosion followed by
-    a dilation. Opening can remove small bright spots (i.e. "salt") and connect
-    small dark cracks. This tends to "open" up (dark) gaps between (bright)
-    features.
+    The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
     ----------
@@ -157,14 +147,10 @@ def isotropic_opening(image, radius, out=None, spacing=None):
 def isotropic_closing(image, radius, out=None, spacing=None):
     """Return binary morphological closing of an image.
 
-    This function returns the same result as binary closing but performs
-    faster for large circular structuring elements.
+    This function returns the same result as binary :func:`skimage.morphology.binary_closing`
+    but performs faster for large circular structuring elements.
     This works by thresholding the exact Euclidean distance map. [1]_, [2]_
-
-    The morphological closing on an image is defined as a dilation followed by
-    an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
-    small bright cracks. This tends to "close" up (dark) gaps between (bright)
-    features.
+    The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
     ----------
