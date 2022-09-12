@@ -17,7 +17,7 @@ jobs:
           debug-only: true
           days-before-stale: 180
           days-before-close: -1  # never close
-          stale-issue-label: ":zzz: dormant"
+          stale-issue-label: ":zzz: Dormant"
           remove-stale-when-updated: true
           stale-issue-message: >
             Hey, there hasn't been any activity on this for more than 180
