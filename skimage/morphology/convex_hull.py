@@ -77,7 +77,8 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     return coords_in_hull
 
 
-def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, return_labels=False):
+def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
+                      return_labels=False):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -96,17 +97,19 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, return_la
         to numerical floating point errors, a tolerance of 0 can result in
         some points erroneously being classified as being outside the hull.
     return_labels: bool, optional
-        If ``True``, a mask of integers will be returned. The possible labels are:
-        O - outside, 1 - inside, 2 - vertex, 3 - edge.
+        If ``True``, a mask of integers will be returned. The possible
+        labels are: O - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     Returns
     -------
     hull : (M, N) array of bool or int
-        If ``return_labels`` is True, the return type is a binary image with pixels
-        in convex hull set to True (edges/vertices are included by default).
+        If ``return_labels`` is True, the return type is a binary image
+        with pixels in convex hull set to True (edges/vertices are 
+        included by default).
 
-        If ``return_labels`` is False, the return type is a raw labels array, with pixels
-        assigned to labels between 0 and 3. The values are: O - outside, 1 - inside, 2 - vertex, 3 - edge.
+        If ``return_labels`` is False, the return type is a raw labels array,
+        with pixels assigned to labels between 0 and 3. The values are: 
+        O - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     References
     ----------
@@ -170,7 +173,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, return_la
         coords_in_hull = _check_coords_in_hull(gridcoords,
                                                hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
-    
+
     return mask
 
 

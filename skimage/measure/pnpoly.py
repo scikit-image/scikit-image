@@ -5,8 +5,8 @@ def grid_points_in_poly_label(shape, verts):
     """Test whether points on a specified grid are inside a polygon.
 
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
-    check what is the relative location to the polygon. For each pixel, it assigns
-    one of these values: O - outside, 1 - inside, 2 - vertex, 3 - edge.
+    check what is the relative location to the polygon. For each pixel, it
+    assigns one of these values: O - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     Parameters
     ----------
@@ -26,7 +26,8 @@ def grid_points_in_poly_label(shape, verts):
     -------
     labels: (M, N) ndarray of int
         Labels array, with pixels having a label between 0 and 3.
-        The meaning of the values is: O - outside, 1 - inside, 2 - vertex, 3 - edge.
+        The meaning of the values is: O - outside, 1 - inside,
+        2 - vertex, 3 - edge.
 
     """
     return _grid_points_in_poly(shape, verts)
@@ -37,7 +38,7 @@ def grid_points_in_poly(shape, verts):
 
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
     test whether that point lies inside a polygon.
-    
+
     Note that this function explicitly includes vertices/edges inside the poly.
     For a better control on this behaviour, use ``grid_points_in_poly_label``.
 
