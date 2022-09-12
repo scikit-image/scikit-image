@@ -7,9 +7,9 @@ from skimage._shared.testing import assert_equal
 
 
 def test_load_sift():
-    f = NamedTemporaryFile(delete=False)
-    fname = f.name
-    f.close()
+    with NamedTemporaryFile(delete=False) as f:
+        fname = f.name
+
     with open(fname, 'wb') as f:
         f.write(b'''2 128
     133.92 135.88 14.38 -2.732
@@ -43,9 +43,9 @@ def test_load_sift():
 
 
 def test_load_surf():
-    f = NamedTemporaryFile(delete=False)
-    fname = f.name
-    f.close()
+    with NamedTemporaryFile(delete=False) as f:
+        fname = f.name
+
     with open(fname, 'wb') as f:
         f.write(b'''65
 2
@@ -58,8 +58,9 @@ def test_load_surf():
 
     with open(fname, 'r') as f:
         features = load_surf(f)
-        assert_equal(len(features), 2)
-        assert_equal(len(features['data'][0]), 64)
-        assert_equal(features['column'][1], 68.5773)
-        assert_equal(features['row'][0], 62.0491)
     os.remove(fname)
+
+    assert_equal(len(features), 2)
+    assert_equal(len(features['data'][0]), 64)
+    assert_equal(features['column'][1], 68.5773)
+    assert_equal(features['row'][0], 62.0491)

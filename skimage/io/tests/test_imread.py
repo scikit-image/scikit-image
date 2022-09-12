@@ -49,9 +49,9 @@ def test_bilevel():
 
 class TestSave(TestCase):
     def roundtrip(self, x, scaling=1):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
+        with NamedTemporaryFile(suffix='.png') as f:
+            fname = f.name
+
         imsave(fname, x)
         y = imread(fname)
 

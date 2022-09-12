@@ -452,3 +452,13 @@ def linkcode_resolve(domain, info):
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+
+
+# ----------------------------------------------------------------------------
+# MyST
+# ----------------------------------------------------------------------------
+
+myst_enable_extensions = [
+    # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
+    "fieldlist",
+]

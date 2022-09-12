@@ -1,4 +1,4 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
