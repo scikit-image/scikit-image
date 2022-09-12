@@ -1,7 +1,7 @@
 from ._pnpoly import _grid_points_in_poly, _points_in_poly
 
 
-def grid_points_in_poly(shape, verts):
+def grid_points_in_poly(shape, verts, return_labels=False):
     """Test whether points on a specified grid are inside a polygon.
 
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
@@ -26,7 +26,7 @@ def grid_points_in_poly(shape, verts):
         True where the grid falls inside the polygon.
 
     """
-    return _grid_points_in_poly(shape, verts)
+    return _grid_points_in_poly(shape, verts, return_labels=return_labels)
 
 
 def points_in_poly(points, verts):

@@ -62,6 +62,18 @@ def test_pathological_qhull_example():
                  [1, 1, 1, 1, 1, 0, 0]], dtype=bool)
     assert_array_equal(convex_hull_image(image), expected)
 
+def test_pathological_qhull_labels():
+    image = np.array(
+                [[0, 0, 0, 0, 1, 0, 0],
+                 [0, 0, 1, 1, 1, 1, 1],
+                 [1, 1, 1, 0, 0, 0, 0]], dtype=bool)
+    
+    expected = np.array([[0, 0, 0, 3, 1, 3, 0],
+                         [0, 3, 1, 1, 1, 1, 1],
+                         [1, 1, 1, 1, 3, 0, 0]])
+    
+    assert_array_equal(convex_hull_image(image, return_labels=True)[1], expected)
+
 
 def test_possible_hull():
     image = np.array(

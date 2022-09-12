@@ -33,3 +33,18 @@ def test_grid_points_in_poly():
     expected = np.tril(np.ones((5, 5), dtype=bool))
 
     assert_array_equal(grid_points_in_poly((5, 5), v), expected)
+
+
+def test_grid_points_in_poly_with_labels():
+    v = np.array([[0, 0],
+                  [5, 0],
+                  [5, 5]])
+
+    expected = np.array([[2, 0, 0, 0, 0],
+                        [3, 3, 0, 0, 0],
+                        [3, 1, 3, 0, 0],
+                        [3, 1, 1, 3, 0],
+                        [3, 1, 1, 1, 3]])
+    _, labels = grid_points_in_poly((5, 5), v, return_labels=True)
+
+    assert_array_equal(labels, expected)
