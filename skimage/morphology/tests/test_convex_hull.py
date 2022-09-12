@@ -72,7 +72,8 @@ def test_pathological_qhull_labels():
                          [0, 0, 1, 1, 1, 1, 1],
                          [1, 1, 1, 1, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_image(image, include_borders=False), expected)
+    actual = convex_hull_image(image, include_borders=False)
+    assert_array_equal(actual, expected)
 
 
 def test_possible_hull():
