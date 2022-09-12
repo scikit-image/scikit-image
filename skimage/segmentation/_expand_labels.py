@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def expand_labels(label_image, distance=1):
+def expand_labels(label_image, distance=1, spacing=None):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
     Given a label image, ``expand_labels`` grows label regions (connected components)
@@ -20,6 +20,8 @@ def expand_labels(label_image, distance=1):
         label image
     distance : float
         Euclidean distance in pixels by which to grow the labels. Default is one.
+    spacing: iterable of floats, optional
+        Spacing between voxels in each spatial dimension. If None, then the spacing between pixels/voxels in each dimension is assumed 1.
 
     Returns
     -------
@@ -79,7 +81,7 @@ def expand_labels(label_image, distance=1):
     """
 
     distances, nearest_label_coords = distance_transform_edt(
-        label_image == 0, return_indices=True
+        label_image == 0, return_indices=True, sampling=spacing
     )
     labels_out = np.zeros_like(label_image)
     dilate_mask = distances <= distance
