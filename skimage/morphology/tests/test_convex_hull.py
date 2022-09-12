@@ -68,11 +68,11 @@ def test_pathological_qhull_labels():
                       [0, 0, 1, 1, 1, 1, 1],
                       [1, 1, 1, 0, 0, 0, 0]], dtype=bool)
 
-    expected = np.array([[0, 0, 0, 3, 1, 3, 0],
-                         [0, 3, 1, 1, 1, 1, 1],
-                         [1, 1, 1, 1, 3, 0, 0]])
+    expected = np.array([[0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 1, 1, 1, 1, 1],
+                         [1, 1, 1, 1, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_image(image, return_labels=True), expected)
+    assert_array_equal(convex_hull_image(image, include_borders=False), expected)
 
 
 def test_possible_hull():

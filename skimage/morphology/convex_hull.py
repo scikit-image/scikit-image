@@ -78,7 +78,7 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
 
 
 def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
-                      return_labels=False):
+                      include_borders=True):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -162,10 +162,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
 
     # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
-        if return_labels:
-            mask = grid_points_in_poly_label(image.shape, vertices)
-        else:
-            mask = grid_points_in_poly(image.shape, vertices)
+        # If include_borders is True, we do an intersection
+        included_labels = [1, 2, 3] if include_borders else [1]
+        labels = grid_points_in_poly_label(image.shape, vertices)
+
+        mask = np.isin(labels, included_labels)
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
