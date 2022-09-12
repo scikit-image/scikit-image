@@ -10,7 +10,7 @@ from .._shared.geometry cimport point_in_polygon, points_in_polygon
 cnp.import_array()
 
 
-def _grid_points_in_poly(shape, verts, return_labels=False):
+def _grid_points_in_poly(shape, verts):
     """Test whether points on a specified grid are inside a polygon.
 
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
