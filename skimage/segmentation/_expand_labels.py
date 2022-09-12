@@ -21,7 +21,8 @@ def expand_labels(label_image, distance=1, spacing=None):
     distance : float
         Euclidean distance in pixels by which to grow the labels. Default is one.
     spacing: iterable of floats, optional
-        Spacing between voxels in each spatial dimension. If None, then the spacing between pixels/voxels in each dimension is assumed 1.
+        Spacing between voxels in each spatial dimension. If None, then the 
+        spacing between pixels/voxels in each dimension is assumed 1.
 
     Returns
     -------
