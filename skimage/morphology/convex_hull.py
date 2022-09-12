@@ -101,7 +101,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
 
     Returns
     -------
-    hull : (M, N) array of bool or int
+    hull : (M, N) array of bool
         Binary image with pixels in convex hull set to True.
 
     References
