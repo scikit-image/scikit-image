@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.measure import points_in_poly, grid_points_in_poly
+from skimage.measure import points_in_poly, grid_points_in_poly, grid_points_in_poly_label
 
 from skimage._shared.testing import assert_array_equal
 
@@ -35,7 +35,7 @@ def test_grid_points_in_poly():
     assert_array_equal(grid_points_in_poly((5, 5), v), expected)
 
 
-def test_grid_points_in_poly_with_labels():
+def test_grid_points_in_poly_label():
     v = np.array([[0, 0],
                   [5, 0],
                   [5, 5]])
@@ -45,6 +45,5 @@ def test_grid_points_in_poly_with_labels():
                         [3, 1, 3, 0, 0],
                         [3, 1, 1, 3, 0],
                         [3, 1, 1, 1, 3]])
-    _, labels = grid_points_in_poly((5, 5), v, return_labels=True)
 
-    assert_array_equal(labels, expected)
+    assert_array_equal(grid_points_in_poly_label((5, 5), v), expected)

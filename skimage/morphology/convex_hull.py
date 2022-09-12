@@ -2,7 +2,7 @@
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull
-from ..measure.pnpoly import grid_points_in_poly
+from ..measure.pnpoly import grid_points_in_poly, grid_points_in_poly_label
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
@@ -160,9 +160,9 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, return_la
     # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
         if return_labels:
-            mask, labels = grid_points_in_poly(image.shape, vertices, return_labels=True)
-            return mask, labels
-        mask = grid_points_in_poly(image.shape, vertices)
+            mask = grid_points_in_poly_label(image.shape, vertices)
+        else:
+            mask = grid_points_in_poly(image.shape, vertices)
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
