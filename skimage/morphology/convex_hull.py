@@ -95,11 +95,18 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10, return_la
         Tolerance when determining whether a point is inside the hull. Due
         to numerical floating point errors, a tolerance of 0 can result in
         some points erroneously being classified as being outside the hull.
+    return_labels: bool, optional
+        If ``True``, a label mask will also be returned along with the default
+        boolean mask. The possible labels are: O - outside, 1 - inside,
+        2 - vertex, 3 - edge.
 
     Returns
     -------
     hull : (M, N) array of bool
         Binary image with pixels in convex hull set to True.
+    labels: (M, N) array of labels (integers)
+        Labels array, with pixels having a label between 0 and 3.
+        This is only returned if `return_labels` is set to True.
 
     References
     ----------
