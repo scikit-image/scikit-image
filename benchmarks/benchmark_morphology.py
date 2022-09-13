@@ -239,7 +239,7 @@ class LocalMaxima(object):
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
 
-        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        .. [1] https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
         """
         pass
 
