@@ -48,6 +48,19 @@ class Skeletonize3d(object):
         self.skeletonize(self.image)
 
 
+class MedialSurface(object):
+
+    def setup(self, *args):
+        try:
+            self.medial_surface = morphology.medial_surface
+        except AttributeError:
+            raise NotImplementedError("medial_surface is unavailable")
+        self.image = np.stack(5 * [util.invert(data.horse())])
+
+    def time_skeletonize_3d(self):
+        self.medial_surface(self.image)
+
+
 # For binary morphology all functions ultimately are based on a single erosion
 # function in the scipy.ndimage C code, so only benchmark binary_erosion here.
 
@@ -219,4 +232,3 @@ class GrayReconstruction(object):
 
     def peakmem_reconstruction(self, shape, dtype):
         morphology.reconstruction(self.seed, self.mask)
-
