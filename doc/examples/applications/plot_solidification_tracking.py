@@ -138,9 +138,7 @@ plotly.io.show(fig)
 # =====================
 # In our binary images, the S-L interface appears as the largest region of
 # connected pixels. We can select this region by first labeling each separate
-# region in the binary images. This will create an image in which each pixel
-# coonected to other pixels of the region will be assigned a separate integer
-# value in ``labeled``.
+# region in the binary images.
 
 labeled = measure.label(binarized)
 
