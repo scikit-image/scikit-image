@@ -23,6 +23,7 @@ a conference [1]_.
 import numpy as np
 import plotly.io
 import plotly.express as px
+import pandas as pd
 
 from skimage import color, filters, measure, restoration, segmentation
 from skimage.data import nickel_solidification
@@ -154,3 +155,14 @@ labeled_overlay_0 = color.label2rgb(
 
 fig = px.imshow(labeled_overlay_0, color_continuous_scale='gray')
 plotly.io.show(fig)
+
+#####################################################################
+# We will now select the largest region in each image. We can do this
+# by creating a :func:`regionprops_table()` and sorting the table by the
+# ``area`` column in descending order. This puts the largest region in row 0.
+
+props_0 = measure.regionprops_table(
+        labeled_list[0], properties=('label', 'area', 'bbox'))
+props_0_df = pd.DataFrame(props_0)
+props_0_df = props_0_df.sort_values('area', ascending=False)
+props_0_df.head()
