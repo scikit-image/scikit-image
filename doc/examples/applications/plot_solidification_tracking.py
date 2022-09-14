@@ -9,8 +9,9 @@ time enables the calculatation of the solidification velocity. This is
 important to characterize the solidified structure of the sample and will be
 used to inform research into additive manufacturing of metals. The image
 sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys
-(CANFSA) using synchrotron x-radiography at the Advanced Photon Source (APS) at Argonne
-National Laboratory (ANL). This analysis was presented at a conference [1]_.
+(CANFSA) using synchrotron x-radiography at the Advanced Photon Source (APS)
+at Argonne National Laboratory (ANL). This analysis was first presented at
+a conference [1]_.
 
 .. [1] Corvellec M. and Becker C. G. (2021, May 17-18)
        "Quantifying solidification of metallic alloys with scikit-image"
