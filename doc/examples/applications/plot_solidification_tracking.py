@@ -38,6 +38,11 @@ print(f'shape: {image_sequence.shape}')
 
 #####################################################################
 # The dataset is a 2D image stack with 11 frames (time points).
+# In the first section of this tutorial, image processing steps
+# reducing noise in the images are performed on the entire 3D dataset
+# such that the removal over localized, transient noise is favored as
+# opposed to physical features (e.g. bubbles, splatters, etc.) that
+# exist in roughly the same position from one frame to the next.
 
 fig = px.imshow(
     image_sequence,
@@ -50,7 +55,7 @@ plotly.io.show(fig)
 #####################################################################
 # Compute image deltas
 # ====================
-# Let us apply a Gaussian low-pass filter in order to smooth
+# Let us first apply a Gaussian low-pass filter in order to smooth
 # the images and reduce noise.
 # Next, we compute the image deltas, i.e., the sequence of differences
 # between two consecutive frames. To do this, we subtract the image sequence
