@@ -1,4 +1,4 @@
-# Mark issues without activity as dormant
+# Mark issues and pull requests without activity as dormant
 # See https://github.com/actions/stale for documentation and configuration
 
 name: Mark dormant issues
@@ -17,7 +17,7 @@ jobs:
           debug-only: true
           days-before-stale: 180
           days-before-close: -1  # never close
-          stale-issue-label: ":zzz: Dormant"
+          stale-issue-label: ":sleeping: Dormant"
           remove-stale-when-updated: true
           stale-issue-message: >
             Hey, there hasn't been any activity on this for more than 180
