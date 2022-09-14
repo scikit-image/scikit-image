@@ -159,10 +159,40 @@ plotly.io.show(fig)
 #####################################################################
 # We will now select the largest region in each image. We can do this
 # by creating a :func:`regionprops_table()` and sorting the table by the
-# ``area`` column in descending order. This puts the largest region in row 0.
+# ``area`` column in descending order. This puts the largest region in
+# row 0. We can visualize this with a pandas ``Dataframe`` object.
 
 props_0 = measure.regionprops_table(
         labeled_list[0], properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
+# Show the top five items in the Dataframe
 props_0_df.head()
+
+#####################################################################
+# We can select the region from the ``labeled`` image by selecting all
+# pixels that match the region's label. We will do this for each image
+# by iterating through ``labeled_list``. The label of the largest region
+# in each labeled image is retrieved (after creating and sorting a
+# new Dataframe ``props_df`` for each image) by selecting the 0th item from the
+# ``'label'`` column of that Dataframe.
+largest_list = []
+for labeled in labeled_list:
+    props = measure.regionprops_table(
+            labeled, properties=('label', 'area', 'bbox'))
+    props_df = pd.DataFrame(props)
+    # Sort properties table based on the area column in descending order
+    # (largest area will be in row 0)
+    props_df = props_df.sort_values('area', ascending=False)
+    # Append binary image with only region with the largest area
+    largest_list.append(labeled == props_df.iloc[0]['label'])
+
+# Stack list of 2D arrays into 3D array
+largest = np.stack(largest_list)
+fig = px.imshow(
+    largest,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig)
