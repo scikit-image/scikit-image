@@ -220,3 +220,31 @@ class GrayReconstruction(object):
     def peakmem_reconstruction(self, shape, dtype):
         morphology.reconstruction(self.seed, self.mask)
 
+
+class LocalMaxima(object):
+
+    param_names = ["connectivity", "allow_borders"]
+    params = [(1, 2), (False, True)]
+
+    def setup(self, *args):
+        # Natural image with small extrema
+        self.image = data.moon()
+
+    def time_2d(self, connectivity, allow_borders):
+        morphology.local_maxima(
+            self.image, connectivity=connectivity,
+            allow_borders=allow_borders
+        )
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        .. [1] https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_2d(self,connectivity, allow_borders):
+        morphology.local_maxima(
+            self.image, connectivity=connectivity,
+            allow_borders=allow_borders
+        )
