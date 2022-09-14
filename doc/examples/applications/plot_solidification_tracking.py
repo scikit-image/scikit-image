@@ -137,19 +137,20 @@ plotly.io.show(fig)
 # Select largest region
 # =====================
 # In our binary images, the S-L interface appears as the largest region of
-# connected pixels. We can select this region by first labeling each separate
-# region in the binary images.
-
-labeled = measure.label(binarized)
-
-#####################################################################
-# We can visualize this by coloring the labels of ``labeled`` and overlaying
-# those over the original images (``image_sequence``). The function
-# :func:`label2rgb()` takes a 2D image (it's just a preview), so we must be
+# connected pixels. We can do this first labeling each separate
+# region of connected pixels in the binary images with the function
+# :func:`label()`. We do this in a list comprehension so each
+# image is labeled in 2D and our labels do not extend through time.
+# The labels can be visualized by overlaying
+# ``labeled`` over the original images (``image_sequence``). The function
+# :func:`label2rgb()` takes a 2D image, so we must be
 # careful to account for offset introduced after the image delta step when
 # plotting these images.
 
+labeled_list = [
+        measure.label(binarized[i, :, :]) for i in range(binarized.shape[0])]
 labeled_overlay_0 = color.label2rgb(
-        labeled[0, :, :], image=image_sequence[1, :, :], bg_label=0)
+        labeled_list[0], image=image_sequence[1, :, :], bg_label=0)
 
-px.imshow(labeled_overlay_0, color_continuous_scale='gray')
+fig = px.imshow(labeled_overlay_0, color_continuous_scale='gray')
+plotly.io.show(fig)
