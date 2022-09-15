@@ -143,18 +143,18 @@ plotly.io.show(fig)
 # Select largest region
 # =====================
 # In our binary images, the S-L interface appears as the largest region of
-# connected pixels. For this part of the routine, we will operate on each
-# 2D image separately, as opposed to the entire 3D dataset. We are are
+# connected pixels. For this step of the workflow, we will operate on each
+# 2D image separately, as opposed to the entire 3D dataset. We are
 # not interested in regions connected across space and time, so we operate
 # on one image at a time so the regions do not span multiple moments in
 # time. We do this with a list comprehension by labeling each binarized
-# image with the function :func:`label()` while slicing the dataset from
+# image with the function :func:`skimage.measure.label()` while slicing the dataset from
 # ``i = 0`` to ``i = binarized.shape[0]``.
 # We can do this first labeling each separate
 # region of connected pixels in the binary images
 # The labels can be visualized by overlaying
 # ``labeled`` over the original images (``image_sequence``). The function
-# :func:`label2rgb()` takes a 2D image, so we must be
+# :func:`skimage.color.label2rgb()` takes a 2D image, so we must be
 # careful to account for offset introduced after the image delta step when
 # plotting these images.
 
@@ -168,15 +168,16 @@ plotly.io.show(fig)
 
 #####################################################################
 # We will now select the largest region in each image. We can do this
-# by creating a :func:`regionprops_table()` and sorting the table by the
-# ``area`` column in descending order. This puts the largest region in
-# row 0. We can visualize this with a pandas ``Dataframe`` object.
+# by computing region properties, including the ``area`` property, and
+# sorting by ``area`` values. Function
+# :func:`skimage.measure.regionprops_table()` returns a table of region
+# properties which can be readily read into a Pandas ``DataFrame``.
 
 props_0 = measure.regionprops_table(
         labeled_list[0], properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
-# Show the top five items in the Dataframe
+# Show top five rows
 props_0_df.head()
 
 #####################################################################
