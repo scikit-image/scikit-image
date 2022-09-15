@@ -145,9 +145,9 @@ plotly.io.show(fig)
 # In our binary images, the S-L interface appears as the largest region of
 # connected pixels. For this step of the workflow, we will operate on each
 # 2D image separately, as opposed to the entire 3D dataset. We are
-# not interested in regions connected across space and time, so we operate
+# only interested in regions connected in space, so we operate
 # on one image at a time so the regions do not span multiple moments in
-# time. We do this with a list comprehension by labeling each binarized
+# time across multiple images. We do this with a list comprehension by labeling each binarized
 # image with the function :func:`skimage.measure.label()` while slicing the dataset from
 # ``i = 0`` to ``i = binarized.shape[0]``.
 # We can do this first labeling each separate
