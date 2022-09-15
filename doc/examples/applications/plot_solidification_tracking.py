@@ -20,12 +20,14 @@ a conference [1]_.
        https://www.youtube.com/watch?v=cB1HTgmWTd8
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
+from numpy.polynomial import polynomial
 import plotly.io
 import plotly.express as px
 import pandas as pd
 
-from skimage import color, filters, measure, restoration, segmentation
+from skimage import color, draw, filters, measure, restoration
 from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
@@ -186,8 +188,12 @@ props_0_df.head()
 # by iterating through ``labeled_list``. The label of the largest region
 # in each labeled image is retrieved (after creating and sorting a
 # new Dataframe ``props_df`` for each image) by selecting the 0th item from the
-# ``'label'`` column of that Dataframe.
-largest_list = []
+# ``'label'`` column of that Dataframe. We'll also store the bounding box,
+# or bbox, information for each image, which will be used to track the
+# position of the S-L interface.
+
+largest_mask_list = []
+bboxes = []
 for labeled in labeled_list:
     props = measure.regionprops_table(
             labeled, properties=('label', 'area', 'bbox'))
@@ -196,12 +202,39 @@ for labeled in labeled_list:
     # (largest area will be in row 0)
     props_df = props_df.sort_values('area', ascending=False)
     # Append binary image with only region with the largest area
-    largest_list.append(labeled == props_df.iloc[0]['label'])
+    largest_mask_list.append(labeled == props_df.iloc[0]['label'])
+    bboxes.append([props_df.iloc[0][f'bbox-{i}'] for i in range(4)])
 
 # Stack list of 2D arrays into 3D array
-largest = np.stack(largest_list)
+largest_masked = np.stack(largest_mask_list)
 fig = px.imshow(
-    largest,
+    largest_masked,
+    animation_frame=0,
+    binary_string=True,
+    labels={'animation_frame': 'time point'}
+)
+plotly.io.show(fig)
+
+#####################################################################
+# To visualize the bbox, we create a 4D image to introduce
+# RGB color channels. After initializing an empty array, we broadcast
+# the region mask to each RGB channel so the interface region appears white.
+# We then use the function :func:`skimage.draw.rectangle_perimeter` to
+# generate the coordinates of a rectangle to overlay on the image.
+
+largest_masked_color = np.zeros((*largest_masked.shape, 3))
+# Iterate through bboxes and largest_mask_list at the same time
+for i, (bbox, mask) in enumerate(zip(bboxes, largest_mask_list)):
+    # Broadcast the mask to each RGB channel so region appears white
+    for channel in range(3):
+        largest_masked_color[i, :, :, channel] = mask
+    minr, minc, maxr, maxc = bbox
+    rect_pts_r, rect_pts_c = draw.rectangle_perimeter(
+            (minr, minc), (maxr, maxc))
+    # Add rectangle coords to channel 0 so rectangle appears red
+    largest_masked_color[i, rect_pts_r, rect_pts_c, 0] = 1
+fig = px.imshow(
+    largest_masked_color,
     animation_frame=0,
     binary_string=True,
     labels={'animation_frame': 'time point'}
