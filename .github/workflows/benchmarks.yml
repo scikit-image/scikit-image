@@ -5,6 +5,9 @@ on:
     types: [labeled]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   benchmark:
     if: contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch'
