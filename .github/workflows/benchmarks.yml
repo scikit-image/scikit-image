@@ -67,6 +67,9 @@ jobs:
         run: |
           set -x
 
+          echo "github.event.label.name: ${{ github.event.label.name }}"
+          echo "github.event_name: ${{ github.event_name }}"
+
           python -m pip install virtualenv
 
           # ID this runner
