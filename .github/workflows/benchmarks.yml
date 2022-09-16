@@ -7,7 +7,7 @@ on:
 
 jobs:
   benchmark:
-    # if: ${{ github.event.label.name == 'run-benchmark' || github.event_name == 'workflow_dispatch' }}
+     if: ${{ contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch' }}
     name: Linux
     runs-on: ubuntu-latest
     env:
@@ -66,9 +66,6 @@ jobs:
           ASV_SKIP_SLOW: 1
         run: |
           set -x
-
-          echo "github.event.label.name: ${{ github.event.label.name }}"
-          echo "github.event_name: ${{ github.event_name }}"
 
           python -m pip install virtualenv
 
