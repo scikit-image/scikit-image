@@ -29,7 +29,7 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
-python -m pip install --upgrade "pip<22.1" wheel setuptools
+python -m pip install --upgrade "pip<22.1" wheel "setuptools<65"
 
 # Install build time requirements
 python -m pip install $PIP_FLAGS -r requirements/build.txt
