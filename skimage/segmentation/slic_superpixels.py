@@ -270,18 +270,19 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     if mask is not None:
         # Create masked_image to rescale while ignoring masked values
         mask = np.ascontiguousarray(mask, dtype=bool)
-        inverted_mask = ~mask
         if channel_axis is not None:
-            inverted_mask = np.expand_dims(inverted_mask, axis=channel_axis)
-            inverted_mask = np.broadcast_to(inverted_mask, image.shape)
-        masked_image = np.ma.masked_array(image, mask=inverted_mask)
+            mask_ = np.expand_dims(mask, axis=channel_axis)
+            mask_ = np.broadcast_to(mask_, image.shape)
+        else:
+            mask_ = mask
+        image_values = image[mask_]
     else:
-        masked_image = image
+        image_values = image
 
     # Rescale image to [0, 1] to make choice of compactness insensitive to
     # input image scale.
-    imin = masked_image.min()
-    imax = masked_image.max()
+    imin = image_values.min()
+    imax = image_values.max()
     image -= imin
     if imax != 0:
         image /= (imax - imin)
