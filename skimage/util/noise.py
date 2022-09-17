@@ -181,7 +181,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     elif mode == 'poisson':
         # Determine unique values in image & calculate the next power of two
         vals = len(np.unique(image))
-        vals = 2 ** np.ceil(np.log2(vals))
+        # Taking uint8 as an example, the expected input range is 0 to 255, not 0 to 256
+        vals = 2 ** np.ceil(np.log2(vals)) - 1
 
         # Ensure image is exclusively positive
         if low_clip == -1.:
