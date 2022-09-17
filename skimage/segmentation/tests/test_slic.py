@@ -558,3 +558,24 @@ def test_start_label_fix():
                   n_segments=6, compactness=0.01, enforce_connectivity=True,
                   max_num_iter=10)
     assert superp.min() == start_label
+
+
+def test_raises_ValueError_if_input_has_NaN():
+    img = np.zeros((4,5), dtype=float)
+    img[2, 3] = np.NaN
+    with pytest.raises(ValueError):
+        slic(img, channel_axis=None)
+
+    mask = ~np.isnan(img)
+    slic(img, mask=mask, channel_axis=None)
+
+
+@pytest.mark.parametrize("inf", [-np.inf, np.inf])
+def test_raises_ValueError_if_input_has_inf(inf):
+    img = np.zeros((4,5), dtype=float)
+    img[2, 3] = inf
+    with pytest.raises(ValueError):
+        slic(img, channel_axis=None)
+
+    mask = np.isfinite(img)
+    slic(img, mask=mask, channel_axis=None)

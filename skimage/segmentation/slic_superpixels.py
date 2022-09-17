@@ -203,6 +203,10 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         dimension is not of length 3.
     ValueError
         If ``start_label`` is not 0 or 1.
+    ValueError
+        If ``image`` contains unmasked NaN values.
+    ValueError
+        If ``image`` contains unmasked infinite values.
 
     Notes
     -----
@@ -214,7 +218,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
       and ``spacing=[5, 1, 1]``, the effective `sigma` is ``[0.2, 1, 1]``. This
       ensures sensible smoothing for anisotropic images.
 
-    * The image is rescaled to be in [0, 1] prior to processing.
+    * The image is rescaled to be in [0, 1] prior to processing (masked
+      values are ignored).
 
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
@@ -254,12 +259,28 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     # function input
     image = image.astype(float_dtype, copy=True)
 
+    if mask is not None:
+        # Create masked_image to rescale while ignoring masked values
+        mask = np.ascontiguousarray(mask, dtype=bool)
+        inverted_mask = ~mask
+        if channel_axis is not None:
+            inverted_mask = np.expand_dims(inverted_mask, axis=channel_axis)
+            inverted_mask = np.broadcast_to(inverted_mask, image.shape)
+        masked_image = np.ma.masked_array(image, mask=inverted_mask)
+    else:
+        masked_image = image
+
     # Rescale image to [0, 1] to make choice of compactness insensitive to
     # input image scale.
-    image -= image.min()
-    imax = image.max()
+    imin = masked_image.min()
+    imax = masked_image.max()
+    image -= imin
     if imax != 0:
-        image /= imax
+        image /= (imax - imin)
+    if np.isnan(imin):
+        raise ValueError("unmasked NaN values in image are not supported")
+    if np.isinf(imin) or np.isinf(imax):
+        raise ValueError("unmasked infinite values in image are not supported")
 
     use_mask = mask is not None
     dtype = image.dtype
@@ -291,7 +312,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.ascontiguousarray(mask, dtype=bool).view('uint8')
+        mask = mask.view('uint8')
         if mask.ndim == 2:
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:
