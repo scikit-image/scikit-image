@@ -283,13 +283,13 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     # input image scale.
     imin = image_values.min()
     imax = image_values.max()
-    image -= imin
-    if imax != 0:
-        image /= (imax - imin)
     if np.isnan(imin):
         raise ValueError("unmasked NaN values in image are not supported")
     if np.isinf(imin) or np.isinf(imax):
         raise ValueError("unmasked infinite values in image are not supported")
+    image -= imin
+    if imax != imin:
+        image /= (imax - imin)
 
     use_mask = mask is not None
     dtype = image.dtype
