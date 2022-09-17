@@ -207,6 +207,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         If ``image`` contains unmasked NaN values.
     ValueError
         If ``image`` contains unmasked infinite values.
+    ValueError
+        If ``image`` is 2D but ``channel_axis`` is -1 (the default).
 
     Notes
     -----
@@ -252,6 +254,12 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     >>> segments = slic(img, n_segments=100, compactness=20)
 
     """
+    if image.ndim == 2 and channel_axis is not None:
+        raise ValueError(
+            f"channel_axis={channel_axis} indicates a multichannel for a two-"
+            "dimensional image which is not supported, use channel_axis=None if"
+            "the image is grayscale"
+        )
 
     image = img_as_float(image)
     float_dtype = utils._supported_float_type(image.dtype)

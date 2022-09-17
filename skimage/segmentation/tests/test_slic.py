@@ -102,6 +102,14 @@ def test_gray_2d_deprecated_multichannel():
                    start_label=0)
 
 
+def test_gray2d_default_channel_axis():
+    img = np.zeros((20, 21))
+    img[:10, :10] = 0.33
+    with pytest.raises(ValueError, match="channel_axis=-1 indicates a multichannel"):
+        slic(img)
+    slic(img, channel_axis=None)
+
+
 def _check_segment_labels(seg1, seg2, allowed_mismatch_ratio=0.1):
     size = seg1.size
     ndiff = np.sum(seg1 != seg2)
@@ -224,10 +232,12 @@ def test_enforce_connectivity():
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
-                              convert2lab=False, start_label=0)
+                              convert2lab=False, start_label=0,
+                              channel_axis=None)
     segments_disconnected = slic(img, 2, compactness=0.0001,
                                  enforce_connectivity=False,
-                                 convert2lab=False, start_label=0)
+                                 convert2lab=False, start_label=0,
+                                 channel_axis=None)
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
@@ -235,7 +245,8 @@ def test_enforce_connectivity():
                                       enforce_connectivity=True,
                                       convert2lab=False,
                                       max_size_factor=0.8,
-                                      start_label=0)
+                                      start_label=0,
+                                      channel_axis=None)
 
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
@@ -411,17 +422,18 @@ def test_enforce_connectivity_mask():
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
-                              convert2lab=False, mask=msk)
+                              convert2lab=False, mask=msk, channel_axis=None)
     segments_disconnected = slic(img, 2, compactness=0.0001,
                                  enforce_connectivity=False,
-                                 convert2lab=False, mask=msk)
+                                 convert2lab=False, mask=msk, channel_axis=None)
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
     segments_connected_low_max = slic(img, 2, compactness=0.0001,
                                       enforce_connectivity=True,
                                       convert2lab=False,
-                                      max_size_factor=0.8, mask=msk)
+                                      max_size_factor=0.8, mask=msk,
+                                      channel_axis=None)
 
     result_connected = np.array([[0, 1, 1, 2, 2, 0],
                                  [0, 1, 1, 2, 2, 0],
@@ -541,7 +553,7 @@ def test_dtype_support(dtype):
     img = np.random.rand(28, 28).astype(dtype)
 
     # Simply run the function to assert that it runs without error
-    slic(img, start_label=1)
+    slic(img, start_label=1, channel_axis=None)
 
 
 def test_start_label_fix():
