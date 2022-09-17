@@ -72,7 +72,9 @@ class MaskSlicSegmentation(SlicSegmentation):
         try:
             mask = np.zeros((64, 64)) > 0
             mask[10:-10, 10:-10] = 1
-            segmentation.slic(np.ones_like(mask), mask=mask)
+            segmentation.slic(
+                np.ones_like(mask), mask=mask, **_channel_kwarg(False)
+            )
         except TypeError:
             raise NotImplementedError("masked slic unavailable")
 
