@@ -115,14 +115,18 @@ def test_slic_consistency_across_image_magnitude():
     img_uint16 = 256 * img_uint8.astype(np.uint16)
     img_float32 = img_as_float(img_uint8)
     img_float32_norm = img_float32 / img_float32.max()
+    img_float32_offset = img_float32 + 1000
 
     seg1 = slic(img_uint8)
     seg2 = slic(img_uint16)
     seg3 = slic(img_float32)
     seg4 = slic(img_float32_norm)
+    seg5 = slic(img_float32_offset)
 
     np.testing.assert_array_equal(seg1, seg2)
     np.testing.assert_array_equal(seg1, seg3)
+    # Assert that offset has no impact on result
+    np.testing.assert_array_equal(seg4, seg5)
     # Floating point cases can have mismatch due to floating point error
     # exact match was observed on x86_64, but mismatches seen no i686.
     # For now just verify that a similar number of superpixels are present in
