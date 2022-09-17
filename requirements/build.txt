@@ -2,4 +2,4 @@ Cython>=0.29.21,!=0.29.18
 packaging>=20.0
 pythran
 wheel
-numpy>=1.19
+numpy>=1.19.0
