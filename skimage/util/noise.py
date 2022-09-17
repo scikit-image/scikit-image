@@ -189,6 +189,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             image = (image + 1.) / (old_max + 1.)
 
         # Generating noise for each unique value in image.
+        # the max value of 2**n unique integer values is 2 ** n - 1, so I think the following code is more precise: 
+        vals -= 1
         out = rng.poisson(image * vals) / float(vals)
 
         # Return image to original range if input was signed
