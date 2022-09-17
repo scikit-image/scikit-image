@@ -150,7 +150,7 @@ def test_poisson():
     cam_noisy2 = random_noise(data, mode='poisson', seed=seed, clip=False)
 
     rng = np.random.default_rng(seed)
-    expected = rng.poisson(img_as_float(data) * 256) / 256.
+    expected = rng.poisson(img_as_float(data) * 255) / 255.
     assert_allclose(cam_noisy, np.clip(expected, 0., 1.))
     assert_allclose(cam_noisy2, expected)
 
