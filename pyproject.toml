@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "wheel",
-    "setuptools<65",
+    "setuptools<=65.3,!=65.0,!=65.1",
     "packaging",
     "Cython>=0.29.24,<3.0",
     "pythran",
