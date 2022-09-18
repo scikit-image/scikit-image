@@ -105,7 +105,9 @@ def test_gray_2d_deprecated_multichannel():
 def test_gray2d_default_channel_axis():
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
-    with pytest.raises(ValueError, match="channel_axis=-1 indicates a multichannel"):
+    with pytest.raises(
+            ValueError, match="channel_axis=-1 indicates multichannel"
+    ):
         slic(img)
     slic(img, channel_axis=None)
 
