@@ -147,23 +147,10 @@ plotly.io.show(fig)
 # =====================
 # In our binary images, the S-L interface appears as the largest region of
 # connected pixels. For this step of the workflow, we will operate on each
-# 2D image separately, as opposed to the entire 3D dataset. We are
-# only interested in regions connected in space, so we operate
-# on one image at a time so the regions do not span multiple moments in
-# time across multiple images. We do this with a list comprehension by labeling each binarized
-# image with the function :func:`skimage.measure.label()` while slicing the dataset from
-# ``i = 0`` to ``i = binarized.shape[0]``.
-# We can do this first labeling each separate
-# region of connected pixels in the binary images
-# The labels can be visualized by overlaying
-# ``labeled`` over the original images (``image_sequence``). The function
-# :func:`skimage.color.label2rgb()` takes a 2D image, so we must be
-# careful to account for offset introduced after the image delta step when
-# plotting these images.
-
-
-#####################################################################
-# We will now select the largest region in each image. We can do this
+# 2D image separately, as opposed to the entire 3D dataset, because we are
+# only interested in a single moment in time for each region.
+#
+# We select the largest region in each image
 # by computing region properties, including the ``area`` property, and
 # sorting by ``area`` values. Function
 # :func:`skimage.measure.regionprops_table()` returns a table of region
