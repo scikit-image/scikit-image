@@ -216,8 +216,7 @@ largest_masked_color = np.zeros((*largest_region.shape, 3))
 # Iterate through bboxes and largest_mask_list at the same time
 for i, (bbox, mask) in enumerate(zip(bboxes, largest_region)):
     # Broadcast the mask to each RGB channel so region appears white
-    for channel in range(3):
-        largest_masked_color[i, :, :, channel] = mask
+    largest_masked_color[i, :, :, :] = np.dstack([mask] * 3)
     minr, minc, maxr, maxc = bbox
     rect_pts_r, rect_pts_c = draw.rectangle_perimeter(
             (minr, minc), (maxr, maxc))
