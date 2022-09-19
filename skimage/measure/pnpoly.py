@@ -20,7 +20,7 @@ def grid_points_in_poly(shape, verts, binarize=True):
         duplicated.
     binarize: bool
         If `True`, the output of the function is a boolean mask.
-        Otherwise, it is a labels array. The labels are:
+        Otherwise, it is a labeled array. The labels are:
         O - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     See Also
