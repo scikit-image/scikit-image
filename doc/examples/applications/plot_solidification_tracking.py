@@ -23,9 +23,9 @@ a conference [1]_.
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import polynomial
-import plotly.io
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+import plotly.io
 
 from skimage import color, draw, filters, measure, restoration
 from skimage.data import nickel_solidification
@@ -40,10 +40,11 @@ print(f'shape: {image_sequence.shape}')
 
 #####################################################################
 # The dataset is a 2D image stack with 11 frames (time points).
-# In the first section of this tutorial, image processing steps
-# reducing noise in the images are performed on the entire 3D dataset
-# such that the removal over localized, transient noise is favored as
-# opposed to physical features (e.g. bubbles, splatters, etc.) that
+# We visualize and analyze it in a workflow where the first image processing
+# steps are performed on the entire three-dimensional dataset (i.e., across
+# space and time),
+# such that the removal of localized, transient noise is favored as
+# opposed to that of physical features (e.g., bubbles, splatters, etc.), which
 # exist in roughly the same position from one frame to the next.
 
 fig = px.imshow(
@@ -61,8 +62,8 @@ plotly.io.show(fig)
 # the images and reduce noise.
 # Next, we compute the image deltas, i.e., the sequence of differences
 # between two consecutive frames. To do this, we subtract the image sequence
-# from itself, but offset by one frame so that the subtracted images are
-# one frame behind in time.
+# ending at the second-to-last frame from the image sequence starting
+# at the second frame.
 
 smoothed = filters.gaussian(image_sequence)
 image_deltas = smoothed[1:, :, :] - smoothed[:-1, :, :]
@@ -244,8 +245,8 @@ plotly.io.show(fig)
 #####################################################################
 # Plot interface location over time
 # =================================
-# The final step in this routine is to plot the location of the S-L
-# interfaces over time. This can be done simply by plotting `maxr`
+# The final step in this analysis is to plot the location of the S-L
+# interfaces over time. This can be achieved by plotting ``maxr``
 # over time since this value shows the y location of the bottom of
 # the interface. The pixel size in this experiment was 1.93 microns per
 # pixel and the framerate was 80,000 frames per second, so these values
@@ -263,8 +264,8 @@ ax.set_xlabel('Time ($\mu$s)')
 plt.show()
 
 #####################################################################
-# The solidification velocity can be calculated by simpling fitting
-# a linear polynomial to the points. The velocity is the first order
+# The solidification velocity can be obtained by fitting
+# a linear polynomial to the scatter plot. The velocity is the first-order
 # coefficient.
 
 c0, c1 = polynomial.polyfit(time_us, interface_y_um, 1)
