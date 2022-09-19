@@ -161,13 +161,6 @@ plotly.io.show(fig)
 # careful to account for offset introduced after the image delta step when
 # plotting these images.
 
-labeled_list = [
-        measure.label(binarized[i, :, :]) for i in range(binarized.shape[0])]
-labeled_overlay_0 = color.label2rgb(
-        labeled_list[0], image=image_sequence[1, :, :], bg_label=0)
-
-fig = px.imshow(labeled_overlay_0, color_continuous_scale='gray')
-plotly.io.show(fig)
 
 #####################################################################
 # We will now select the largest region in each image. We can do this
@@ -177,7 +170,7 @@ plotly.io.show(fig)
 # properties which can be readily read into a Pandas ``DataFrame``.
 
 props_0 = measure.regionprops_table(
-        labeled_list[0], properties=('label', 'area', 'bbox'))
+        measure.label(binarized[0, :, :]), properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
 # Show top five rows
@@ -193,23 +186,19 @@ props_0_df.head()
 # or bbox, information for each image, which will be used to track the
 # position of the S-L interface.
 
-largest_mask_list = []
-bboxes = []
-for labeled in labeled_list:
-    props = measure.regionprops_table(
-            labeled, properties=('label', 'area', 'bbox'))
-    props_df = pd.DataFrame(props)
-    # Sort properties table based on the area column in descending order
-    # (largest area will be in row 0)
-    props_df = props_df.sort_values('area', ascending=False)
-    # Append binary image with only region with the largest area
-    largest_mask_list.append(labeled == props_df.iloc[0]['label'])
-    bboxes.append([props_df.iloc[0][f'bbox-{i}'] for i in range(4)])
+largest_region = np.empty_like(binarized)
+bboxes = np.empty_like((binarized.shape[0], 4))
 
-# Stack list of 2D arrays into 3D array
-largest_masked = np.stack(largest_mask_list)
+for i in range(binarized.shape[0]):
+    labeled = measure.label(binarized[i, :, :])
+    props = measure.regionprops_table(
+        labeled, properties=('label', 'area', 'bbox'))
+    props_df = pd.DataFrame(props)
+    props_df = props_df.sort_values('area', ascending=False)
+    largest_region[i, :, :] = (labeled == props_df.iloc[0]['label'])
+    bboxes = [props_df.iloc[0][f'bbox-{i}'] for i in range(4)]
 fig = px.imshow(
-    largest_masked,
+    largest_region,
     animation_frame=0,
     binary_string=True,
     labels={'animation_frame': 'time point'}
