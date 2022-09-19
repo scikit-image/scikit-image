@@ -52,7 +52,7 @@ def _grid_points_in_poly(shape, verts):
             for n in range(N):
                 out[m, n] = point_in_polygon(vx, vy, m, n)
 
-    return out.view(bool)
+    return out
 
 
 def _points_in_poly(points, verts):
