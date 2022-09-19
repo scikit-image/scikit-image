@@ -1,3 +1,5 @@
+:orphan:
+
 # Version 0.16
 
 - The following functions are deprecated and will be removed in 0.18:
