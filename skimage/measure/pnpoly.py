@@ -29,7 +29,7 @@ def grid_points_in_poly(shape, verts, binarize=True):
 
     Returns
     -------
-    mask : (M, N) ndarray of bool
+    mask : (M, N) ndarray
         If `binarize` is True, the output is a boolean mask. True means the
         corresponding pixel falls inside the polygon.
         If `binarize` is False, the output is a label array, with pixels
