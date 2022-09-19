@@ -196,7 +196,7 @@ for i in range(binarized.shape[0]):
     props_df = pd.DataFrame(props)
     props_df = props_df.sort_values('area', ascending=False)
     largest_region[i, :, :] = (labeled == props_df.iloc[0]['label'])
-    bboxes = [props_df.iloc[0][f'bbox-{i}'] for i in range(4)]
+    bboxes.append([props_df.iloc[0][f'bbox-{i}'] for i in range(4)])
 fig = px.imshow(
     largest_region,
     animation_frame=0,
