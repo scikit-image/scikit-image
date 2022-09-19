@@ -210,6 +210,8 @@ plotly.io.show(fig)
 # the interface. The pixel size in this experiment was 1.93 microns per
 # pixel and the framerate was 80,000 frames per second, so these values
 # are used to convert pixels and image number to physical units.
+# We calculate the average solidfication velocity by fitting a linear
+# polynomial to the scatter plot. The velocity is the first order-coefficient.
 
 ums_per_pixel = 1.93
 fps = 80000
@@ -217,22 +219,9 @@ interface_y_um = [ums_per_pixel * bbox[2] for bbox in bboxes]
 time_us = 1E6 / fps * np.arange(len(interface_y_um))
 fig, ax = plt.subplots(dpi=100)
 ax.scatter(time_us, interface_y_um)
-ax.set_title('S-L interface location vs. time')
-ax.set_ylabel('Location ($\mu$m)')
-ax.set_xlabel('Time ($\mu$s)')
-plt.show()
-
-#####################################################################
-# The solidification velocity can be obtained by fitting
-# a linear polynomial to the scatter plot. The velocity is the first-order
-# coefficient.
-
 c0, c1 = polynomial.polyfit(time_us, interface_y_um, 1)
-fig, ax = plt.subplots(dpi=100)
-ax.scatter(time_us, interface_y_um)
 ax.plot(time_us, c1 * time_us + c0, label=f'Velocity: {abs(round(c1, 3))} m/s')
 ax.set_title('S-L interface location vs. time')
 ax.set_ylabel('Location ($\mu$m)')
 ax.set_xlabel('Time ($\mu$s)')
-ax.legend()
 plt.show()
