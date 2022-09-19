@@ -26,7 +26,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.io
 
-from skimage import color, draw, filters, measure, restoration
+from skimage import filters, measure, restoration
 from skimage.data import nickel_solidification
 
 image_sequence = nickel_solidification()
