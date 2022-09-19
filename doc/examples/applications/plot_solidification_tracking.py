@@ -202,31 +202,6 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# To visualize the bbox, we create a 4D image to introduce
-# RGB color channels. After initializing an empty array, we broadcast
-# the region mask to each RGB channel so the interface region appears white.
-# We then use the function :func:`skimage.draw.rectangle_perimeter` to
-# generate the coordinates of a rectangle to overlay on the image.
-
-largest_masked_color = np.zeros((*largest_region.shape, 3))
-# Iterate through bboxes and largest_mask_list at the same time
-for i, (bbox, mask) in enumerate(zip(bboxes, largest_region)):
-    # Broadcast the mask to each RGB channel so region appears white
-    largest_masked_color[i, :, :, :] = np.dstack([mask] * 3)
-    minr, minc, maxr, maxc = bbox
-    rect_pts_r, rect_pts_c = draw.rectangle_perimeter(
-            (minr, minc), (maxr, maxc))
-    # Add rectangle coords to channel 0 so rectangle appears red
-    largest_masked_color[i, rect_pts_r, rect_pts_c, 0] = 1
-fig = px.imshow(
-    largest_masked_color,
-    animation_frame=0,
-    binary_string=True,
-    labels={'animation_frame': 'time point'}
-)
-plotly.io.show(fig)
-
-#####################################################################
 # Plot interface location over time
 # =================================
 # The final step in this analysis is to plot the location of the S-L
