@@ -3,8 +3,7 @@ from ._marching_cubes_lewiner import marching_cubes, mesh_surface_area
 from ._regionprops import (regionprops, perimeter,
                            perimeter_crofton, euler_number, regionprops_table)
 from ._polygon import approximate_polygon, subdivide_polygon
-from .pnpoly import (points_in_poly, grid_points_in_poly,
-                     grid_points_in_poly_label)
+from .pnpoly import (points_in_poly, grid_points_in_poly)
 from ._moments import (moments, moments_central, moments_coords,
                        moments_coords_central, moments_normalized, centroid,
                        moments_hu, inertia_tensor, inertia_tensor_eigvals)
@@ -43,7 +42,6 @@ __all__ = ['find_contours',
            'label',
            'points_in_poly',
            'grid_points_in_poly',
-           'grid_points_in_poly_label',
            'shannon_entropy',
            'blur_effect',
            ]

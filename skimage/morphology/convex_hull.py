@@ -158,7 +158,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
         # If include_borders is False, we exclude vertices and edge points
         # from the hull mask
         included_labels = [1, 2, 3] if include_borders else [1]
-        labels = grid_points_in_poly_label(image.shape, vertices)
+        labels = grid_points_in_poly(image.shape, vertices, binarize=False)
 
         mask = np.isin(labels, included_labels)
     else:
