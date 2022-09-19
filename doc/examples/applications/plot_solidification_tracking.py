@@ -187,7 +187,7 @@ props_0_df.head()
 # position of the S-L interface.
 
 largest_region = np.empty_like(binarized)
-bboxes = np.empty_like((binarized.shape[0], 4))
+bboxes = []
 
 for i in range(binarized.shape[0]):
     labeled = measure.label(binarized[i, :, :])
@@ -212,9 +212,9 @@ plotly.io.show(fig)
 # We then use the function :func:`skimage.draw.rectangle_perimeter` to
 # generate the coordinates of a rectangle to overlay on the image.
 
-largest_masked_color = np.zeros((*largest_masked.shape, 3))
+largest_masked_color = np.zeros((*largest_region.shape, 3))
 # Iterate through bboxes and largest_mask_list at the same time
-for i, (bbox, mask) in enumerate(zip(bboxes, largest_mask_list)):
+for i, (bbox, mask) in enumerate(zip(bboxes, largest_region)):
     # Broadcast the mask to each RGB channel so region appears white
     for channel in range(3):
         largest_masked_color[i, :, :, channel] = mask
