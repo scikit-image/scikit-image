@@ -7,8 +7,8 @@ def grid_points_in_poly(shape, verts, binarize=True):
     For each ``(r, c)`` coordinate on a grid, i.e. ``(0, 0)``, ``(0, 1)`` etc.,
     test whether that point lies inside a polygon.
 
-    Note that this function explicitly includes vertices/edges inside the poly.
-    For a better control on this behaviour, use ``grid_points_in_poly_label``.
+    You can control the output type with the `binarize` flag. Please refer to its
+    documentation for further details.
 
     Parameters
     ----------
