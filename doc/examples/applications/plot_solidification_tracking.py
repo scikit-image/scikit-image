@@ -154,7 +154,7 @@ plotly.io.show(fig)
 # by computing region properties, including the ``area`` property, and
 # sorting by ``area`` values. Function
 # :func:`skimage.measure.regionprops_table()` returns a table of region
-# properties which can be readily read into a Pandas ``DataFrame``.
+# properties which can be read into a Pandas ``DataFrame``.
 
 props_0 = measure.regionprops_table(
         measure.label(binarized[0, :, :]), properties=('label', 'area', 'bbox'))
@@ -162,6 +162,19 @@ props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
 # Show top five rows
 props_0_df.head()
+
+#####################################################################
+# We can visualize the largest region in the 0th image with its
+# bounding box (bbox) by first labeling the binary image and selecting
+# the labels that correspond to the largest region.
+
+labeled_0 = measure.label(binarized[0, :, :])
+largest_region_0 = labeled_0 == props_0_df.iloc[0]['label']
+minr, minc, maxr, maxc = [props_0_df.iloc[0][f'bbox-{i}'] for i in range(4)]
+fig = px.imshow(largest_region_0, binary_string=True)
+fig.add_shape(
+        type="rect", x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color="Red"))
+plotly.io.show(fig)
 
 #####################################################################
 # We can select the region from the ``labeled`` image by selecting all
@@ -179,7 +192,7 @@ bboxes = []
 for i in range(binarized.shape[0]):
     labeled = measure.label(binarized[i, :, :])
     props = measure.regionprops_table(
-        labeled, properties=('label', 'area', 'bbox'))
+            labeled, properties=('label', 'area', 'bbox'))
     props_df = pd.DataFrame(props)
     props_df = props_df.sort_values('area', ascending=False)
     largest_region[i, :, :] = (labeled == props_df.iloc[0]['label'])
