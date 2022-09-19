@@ -177,13 +177,9 @@ fig.add_shape(
 plotly.io.show(fig)
 
 #####################################################################
-# We can select the region from the ``labeled`` image by selecting all
-# pixels that match the region's label. We will do this for each image
-# by iterating through ``labeled_list``. The label of the largest region
-# in each labeled image is retrieved (after creating and sorting a
-# new Dataframe ``props_df`` for each image) by selecting the 0th item from the
-# ``'label'`` column of that Dataframe. We'll also store the bounding box,
-# or bbox, information for each image, which will be used to track the
+# Next we find the largest region in each image for all images in the
+# dataset into a 3D NumPy array ``largest_region``. We'll also store
+# the bbox information for each image, which will be used to track the
 # position of the S-L interface.
 
 largest_region = np.empty_like(binarized)
