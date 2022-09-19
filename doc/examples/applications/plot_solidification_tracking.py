@@ -22,7 +22,6 @@ a conference [1]_.
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.polynomial import polynomial
 import pandas as pd
 import plotly.express as px
 import plotly.io
@@ -219,7 +218,7 @@ interface_y_um = [ums_per_pixel * bbox[2] for bbox in bboxes]
 time_us = 1E6 / fps * np.arange(len(interface_y_um))
 fig, ax = plt.subplots(dpi=100)
 ax.scatter(time_us, interface_y_um)
-c0, c1 = polynomial.polyfit(time_us, interface_y_um, 1)
+c0, c1 = np.polynomial.polynomial.polyfit(time_us, interface_y_um, 1)
 ax.plot(time_us, c1 * time_us + c0, label=f'Velocity: {abs(round(c1, 3))} m/s')
 ax.set_title('S-L interface location vs. time')
 ax.set_ylabel('Location ($\mu$m)')
