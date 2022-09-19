@@ -155,12 +155,10 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
 
     # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
-        # If include_borders is False, we exclude vertices and edge points
-        # from the hull mask
-        included_labels = [1, 2, 3] if include_borders else [1]
         labels = grid_points_in_poly(image.shape, vertices, binarize=False)
-
-        mask = np.isin(labels, included_labels)
+        # If include_borders is True, we include vertices (2) and edge
+        # points (3) in the mask, otherwise only the inside of the hull (1)
+        mask = labels >= 1 if include_borders else labels == 1
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))
