@@ -151,7 +151,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
     # Generate empty array for storing maximum value
     # from different (sigma) scales
-    filtered_max = np.zeros(image.shape, image.dtype)
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
@@ -226,7 +226,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
     # Generate empty array for storing maximum value
     # from different (sigma) scales
-    filtered_max = np.zeros(image.shape, image.dtype)
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
@@ -325,7 +325,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
     # Generate empty array for storing maximum value
     # from different (sigma) scales
-    filtered_max = np.zeros(image.shape, image.dtype)
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
