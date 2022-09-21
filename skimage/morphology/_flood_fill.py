@@ -135,7 +135,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
         are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
+        Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `footprint` is not None.
     tolerance : float or int, optional
