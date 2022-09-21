@@ -155,19 +155,76 @@ def test_blob_dog_excl_border():
         max_sigma=5,
         sigma_ratio=1.2,
     )
-    assert blobs.shape[0] == 1
+    assert blobs.shape[0] == 1, "one blob should have been detected"
     b = blobs[0]
     assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
-
+    
+    exclude_border_dist = 6
     blobs = blob_dog(
         img,
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
-        exclude_border=6,
+        exclude_border=exclude_border_dist,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
+    
+    # verify that tuple exclude_border work
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+        exclude_border=(exclude_border_dist,exclude_border_dist)
+    )
+
+    msg = "zero blobs should be detected, as only blob is 5 px from border"
+    assert blobs.shape[0] == 0, msg
+
+def test_blob_dog_excl_border_multidim():
+    # Testing muiltidim exclude border
+
+    # image where blob is 5 px from x border, 20 px from y border
+    img = np.ones((512, 512))
+    xs, ys = disk((5, 20), 5)
+    img[xs, ys] = 255
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+    )
+    assert blobs.shape[0] == 1
+    b = blobs[0]
+    assert b[0] == 5, "blob should be 5 px from x border"
+    assert b[1] == 20, "blob should be 20 px from y border"
+    
+    # verify that tuple exclude_border work
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+        exclude_border=(6,6)
+    )
+    
+    msg = "zero blobs should be detected, as only blob is 5 px from x border"
+    assert blobs.shape[0] == 0, msg
+    
+    # verify that tuple exclude_border work
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+        exclude_border=(4,15)
+    )
+    
+    assert blobs.shape[0] == 1, "one blob should have been detected"
+    b = blobs[0]
+    assert b[0] == 5, "blob should be 5 px from x border"
+    assert b[1] == 20, "blob should be 20 px from y border"
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])
