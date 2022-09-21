@@ -142,12 +142,14 @@ def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     assert abs(math.sqrt(3) * b[5] - r) < 1.1
 
 
-def test_blob_dog_excl_border():
+@pytest.mark.parametrize("disc_center", [(5,5), (5, 20)])
+@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4,15)])
+def test_blob_dog_exclude_border(disc_center, exclude_border):
     # Testing exclude border
 
-    # image where blob is 5 px from borders, radius 5
+    # image where blob is disc_center px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = disk((5, 5), 5)
+    xs, ys = disk(disc_center, 5)
     img[xs, ys] = 255
     blobs = blob_dog(
         img,
@@ -157,74 +159,25 @@ def test_blob_dog_excl_border():
     )
     assert blobs.shape[0] == 1, "one blob should have been detected"
     b = blobs[0]
-    assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
+    assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
+    assert b[1] == disc_center[1], f"blob should be {disc_center[1]} px from y border"
     
-    exclude_border_dist = 6
     blobs = blob_dog(
         img,
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
-        exclude_border=exclude_border_dist,
-    )
-    msg = "zero blobs should be detected, as only blob is 5 px from border"
-    assert blobs.shape[0] == 0, msg
-    
-    # verify that tuple exclude_border work
-    blobs = blob_dog(
-        img,
-        min_sigma=1.5,
-        max_sigma=5,
-        sigma_ratio=1.2,
-        exclude_border=(exclude_border_dist,exclude_border_dist)
-    )
-
-    msg = "zero blobs should be detected, as only blob is 5 px from border"
-    assert blobs.shape[0] == 0, msg
-
-def test_blob_dog_excl_border_multidim():
-    # Testing muiltidim exclude border
-
-    # image where blob is 5 px from x border, 20 px from y border
-    img = np.ones((512, 512))
-    xs, ys = disk((5, 20), 5)
-    img[xs, ys] = 255
-    blobs = blob_dog(
-        img,
-        min_sigma=1.5,
-        max_sigma=5,
-        sigma_ratio=1.2,
-    )
-    assert blobs.shape[0] == 1
-    b = blobs[0]
-    assert b[0] == 5, "blob should be 5 px from x border"
-    assert b[1] == 20, "blob should be 20 px from y border"
-    
-    # verify that tuple exclude_border work
-    blobs = blob_dog(
-        img,
-        min_sigma=1.5,
-        max_sigma=5,
-        sigma_ratio=1.2,
-        exclude_border=(6,6)
+        exclude_border=exclude_border,
     )
     
-    msg = "zero blobs should be detected, as only blob is 5 px from x border"
-    assert blobs.shape[0] == 0, msg
-    
-    # verify that tuple exclude_border work
-    blobs = blob_dog(
-        img,
-        min_sigma=1.5,
-        max_sigma=5,
-        sigma_ratio=1.2,
-        exclude_border=(4,15)
-    )
-    
-    assert blobs.shape[0] == 1, "one blob should have been detected"
-    b = blobs[0]
-    assert b[0] == 5, "blob should be 5 px from x border"
-    assert b[1] == 20, "blob should be 20 px from y border"
+    if disc_center == (5, 20) and exclude_border == (4,15):
+        assert blobs.shape[0] == 1, "one blob should have been detected"
+        b = blobs[0]
+        assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
+        assert b[1] == disc_center[1], f"blob should be {disc_center[1]} px from y border"
+    else:
+        msg = "zero blobs should be detected, as only blob is 5 px from border"
+        assert blobs.shape[0] == 0, msg
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])
@@ -386,11 +339,12 @@ def test_blob_log_3d_anisotropic():
     assert abs(math.sqrt(3) * b[4] - r) < 1
     assert abs(math.sqrt(3) * b[5] - r) < 1
 
-
-def test_blob_log_exclude_border():
-    # image where blob is 5 px from borders, radius 5
+@pytest.mark.parametrize("disc_center", [(5,5), (5, 20)])
+@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4,15)])
+def test_blob_log_exclude_border(disc_center, exclude_border):
+    # image where blob is disc_center px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = disk((5, 5), 5)
+    xs, ys = disk(disc_center, 5)
     img[xs, ys] = 255
 
     blobs = blob_log(
@@ -400,16 +354,24 @@ def test_blob_log_exclude_border():
     )
     assert blobs.shape[0] == 1
     b = blobs[0]
-    assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
+    assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
+    assert b[1] == disc_center[1], f"blob should be {disc_center[1]} px from y border"
 
     blobs = blob_log(
         img,
         min_sigma=1.5,
         max_sigma=5,
-        exclude_border=6,
+        exclude_border=exclude_border,
     )
-    msg = "zero blobs should be detected, as only blob is 5 px from border"
-    assert blobs.shape[0] == 0, msg
+    
+    if disc_center == (5, 20) and exclude_border == (4,15):
+        assert blobs.shape[0] == 1, "one blob should have been detected"
+        b = blobs[0]
+        assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
+        assert b[1] == disc_center[1], f"blob should be {disc_center[1]} px from y border"
+    else:
+        msg = "zero blobs should be detected, as only blob is 5 px from border"
+        assert blobs.shape[0] == 0, msg
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
