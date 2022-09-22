@@ -1,5 +1,5 @@
 project(
-  'SciPy',
+  'scikit-image',
   'c', 'cpp',
   # Note that the git commit hash cannot be added dynamically here (it is added
   # in the dynamically generated and installed `scipy/version.py` though - see
@@ -23,11 +23,11 @@ cpp = meson.get_compiler('cpp')
 # Check compiler is recent enough (see "Toolchain Roadmap" for details)
 if cc.get_id() == 'gcc'
   if not cc.version().version_compare('>=8.0')
-    error('SciPy requires GCC >= 8.0')
+    error('scikit-image requires GCC >= 8.0')
   endif
 elif cc.get_id() == 'msvc'
   if not cc.version().version_compare('>=19.20')
-    error('SciPy requires at least vc142 (default with Visual Studio 2019) ' + \
+    error('scikit-image requires at least vc142 (default with Visual Studio 2019) ' + \
           'when building with MSVC')
   endif
 endif
@@ -44,27 +44,14 @@ _global_c_args = cc.get_supported_arguments(
 add_project_arguments(_global_c_args, language : 'c')
 
 # We need -lm for all C code (assuming it uses math functions, which is safe to
-# assume for SciPy). For C++ it isn't needed, because libstdc++/libc++ is
+# assume for scikit-image). For C++ it isn't needed, because libstdc++/libc++ is
 # guaranteed to depend on it. For Fortran code, Meson already adds `-lm`.
 m_dep = cc.find_library('m', required : false)
 if m_dep.found()
   add_project_link_arguments('-lm', language : 'c')
 endif
 
-# Adding at project level causes many spurious -lgfortran flags.
-add_languages('fortran', native: false)
-ff = meson.get_compiler('fortran')
-if ff.has_argument('-Wno-conversion')
-  add_project_arguments('-Wno-conversion', language: 'fortran')
-endif
-
 is_windows = host_machine.system() == 'windows'
-
-# Intel Fortran on Windows does things differently, so deal with that
-if is_windows and ff.get_id() == 'intel-cl'
-  _ifort_flags = ff.get_supported_arguments('/MD', '/names:lowercase', '/assume:underscore')
-  add_project_arguments(_ifort_flags, language: 'fortran')
-endif
 
 # Hide symbols when building on Linux with GCC. For Python extension modules,
 # we only need `PyInit_*` to be public, anything else may cause problems. So we
