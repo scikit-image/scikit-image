@@ -2,8 +2,8 @@ project(
   'scikit-image',
   'c', 'cpp',
   # Note that the git commit hash cannot be added dynamically here (it is added
-  # in the dynamically generated and installed `scipy/version.py` though - see
-  # tools/version_utils.py
+  # in the dynamically generated and installed `scikit-image/version.py` though
+  # - see tools/version_utils.py
   version: '1.10.0.dev0',
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
@@ -51,14 +51,12 @@ if m_dep.found()
   add_project_link_arguments('-lm', language : 'c')
 endif
 
-is_windows = host_machine.system() == 'windows'
-
 # Hide symbols when building on Linux with GCC. For Python extension modules,
 # we only need `PyInit_*` to be public, anything else may cause problems. So we
 # use a linker script to avoid exporting those symbols (this is in addition to
 # Meson using `-fvisibility=hidden` for C and `-fvisibility-inlines-hidden` for
 # C++ code. See gh-15996 for details.
-_linker_script = meson.project_source_root() / 'scipy/_build_utils/link-version-pyinit.map'
+_linker_script = meson.project_source_root() / 'skimage/_build_utils/link-version-pyinit.map'
 version_link_args = ['-Wl,--version-script=' + _linker_script]
 # Note that FreeBSD only accepts version scripts when -shared is passed,
 # hence we need to pass that to `cc.links` explicitly (flag is already
@@ -69,9 +67,8 @@ endif
 
 cython = find_program('cython')
 pythran = find_program('pythran')
-generate_f2pymod = files('tools/generate_f2pymod.py')
-tempita = files('scipy/_build_utils/tempita.py')
-copier = find_program(['cp', 'scipy/_build_utils/copyfiles.py'])
+tempita = files('skimage/_build_utils/tempita.py')
+copier = find_program(['cp', 'skimage/_build_utils/copyfiles.py'])
 
 # https://mesonbuild.com/Python-module.html
 py_mod = import('python')
@@ -80,4 +77,4 @@ py_mod = import('python')
 py3 = py_mod.find_installation()
 py3_dep = py3.dependency()
 
-subdir('scipy')
+subdir('skimage')
