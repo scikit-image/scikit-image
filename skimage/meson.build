@@ -80,35 +80,15 @@ py3.install_sources(
   subdir: 'skimage'
 )
 
-py3.install_sources(
-  ['_build_utils/tests/test_skimage_version.py'],
-  pure: false,
-  subdir: 'skimage/_shared/tests'
-)
-
-# Needed to trick Cython, it won't do a relative import outside a package
-_cython_tree = custom_target('_cython_tree',
-  output: [
-    '__init__.py',
-  ],
-  input: [
-    '__init__.py',
-  ],
-  command: [copier, '@INPUT@', '@OUTDIR@']
-)
-cython_tree = declare_dependency(sources: _cython_tree)
-
 cython_cli = find_program('_build_utils/cythoner.py')
 
 cython_gen = generator(cython_cli,
   arguments : ['@INPUT@', '@OUTPUT@'],
-  output : '@BASENAME@.c',
-  depends : _cython_tree)
+  output : '@BASENAME@.c')
 
 cython_gen_cpp = generator(cython_cli,
   arguments : ['@INPUT@', '@OUTPUT@', '--cplus'],
-  output : '@BASENAME@.cpp',
-  depends : [_cython_tree])
+  output : '@BASENAME@.cpp')
 
 c_undefined_ok = ['-Wno-maybe-uninitialized']
 
@@ -118,4 +98,4 @@ c_undefined_ok = ['-Wno-maybe-uninitialized']
 cython_c_args += ['-Wno-cpp']
 cython_cpp_args = cython_c_args
 
-# subdir('_lib')
+subdir('draw')
