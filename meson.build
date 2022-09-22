@@ -4,16 +4,13 @@ project(
   # Note that the git commit hash cannot be added dynamically here (it is added
   # in the dynamically generated and installed `scikit-image/version.py` though
   # - see tools/version_utils.py
-  version: '1.10.0.dev0',
+  version: '0.20.0.dev0',
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
   default_options: [
     'buildtype=debugoptimized',
     'c_std=c99',
     'cpp_std=c++14',
-    'fortran_std=legacy',
-    'blas=openblas',
-    'lapack=openblas'
   ],
 )
 
