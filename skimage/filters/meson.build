@@ -34,4 +34,5 @@ py3.install_sources(
   subdir: 'skimage/filters'  # Folder relative to site-packages to install to
 )
 
+subdir('rank')
 subdir('tests')
