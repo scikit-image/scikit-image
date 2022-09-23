@@ -99,12 +99,13 @@ cython_c_args += ['-Wno-cpp']
 cython_cpp_args = cython_c_args
 
 subdir('_shared')
-subdir('draw')
-subdir('metrics')
 subdir('color')
 subdir('data')
+subdir('draw')
+subdir('exposure')
+subdir('feature')
 subdir('graph')
 subdir('measure')
+subdir('metrics')
 subdir('morphology')
-subdir('feature')
 subdir('transform')

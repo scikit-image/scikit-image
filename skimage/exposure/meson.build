@@ -1,9 +1,8 @@
-
 python_sources = [
   '__init__.py',
   '_adapthist.py',
   'exposure.py',
-  'histogram_matching.py',
+  'histogram_matching.py'
 ]
 
 py3.install_sources(
