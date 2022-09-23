@@ -29,7 +29,7 @@ endif
 _brief_pythran = custom_target('_brief_pythran',
   output: ['brief_cy.cpp'],
   input: 'brief_pythran.py',
-  command: [pythran, '-E', '@INPUT@', '-o', '@OUTDIR@/brief_cy.cpp']
+  command: [pythran, '-E', '@INPUT@', '-o', '@OUTPUT@']
 )
 
 py3.extension_module('brief_cy',
@@ -49,7 +49,7 @@ py3.extension_module('brief_cy',
 _hessian_det_appx_pythran = custom_target('_hessian_det_appx_pythran',
   output: ['_hessian_det_appx.cpp'],
   input: '_hessian_det_appx_pythran.py',
-  command: [pythran, '-E', '@INPUT@', '-o', '@OUTDIR@/_hessian_det_appx.cpp']
+  command: [pythran, '-E', '@INPUT@', '-o', '@OUTPUT@']
 )
 
 py3.extension_module('_hessian_det_appx',
