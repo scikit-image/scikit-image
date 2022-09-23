@@ -474,7 +474,7 @@ def test_connectivity():
     image = np.logical_or(image, mask_circle3)
     image = np.logical_or(image, mask_circle4)
 
-    # calcuate distance in discrete increase
+    # calculate distance in discrete increase
     DummyBT = ndi.distance_transform_edt(image)
     DummyBT_dis = np.around(DummyBT / 12, decimals = 0)*12
     # calculate the mask

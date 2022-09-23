@@ -31,7 +31,7 @@ cdef inline Py_ssize_t ind2ind(
             shape=to_shape
         ) + offset
 
-    However, it doesn't perform boundary checks or type checks; if missused this
+    However, it doesn't perform boundary checks or type checks; if misused this
     can cause a segfault.
 
     Parameters

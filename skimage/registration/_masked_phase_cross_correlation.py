@@ -67,7 +67,7 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
         if reference_image.shape != moving_image.shape:
             raise ValueError(
                 "Input images have different shapes, moving_mask must "
-                "be explicitely set.")
+                "be explicitly set.")
         moving_mask = reference_mask.astype(bool)
 
     # We need masks to be of the same size as their respective images

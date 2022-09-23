@@ -152,7 +152,7 @@ float_dtype_list = [float, float, np.float64, np.single, np.float32,
 
 
 def test_float_conversion_dtype():
-    """Test any convertion from a float dtype to an other."""
+    """Test any conversion from a float dtype to an other."""
     x = np.array([-1, 1])
 
     # Test all combinations of dtypes conversions
