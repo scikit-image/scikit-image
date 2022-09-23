@@ -121,7 +121,7 @@ You can report issues to the scikit-image Code of Conduct committee, at
 - Egor Panfilov <egor.v.panfilov@gmail.com>
 
 If your report involves any members of the committee, or if they feel they have
-a conflict of interest in handling it, then they will recuse themselves from
+a conflict of interest in handling it, then they will recurse themselves from
 considering your report. Alternatively, if for any reason you feel
 uncomfortable making a report to the committee, then you can also contact:
 
