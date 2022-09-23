@@ -7,8 +7,8 @@
 
 import numpy as np
 cimport numpy as cnp
-cimport safe_openmp as openmp
-from safe_openmp cimport have_openmp
+from . cimport safe_openmp as openmp
+from .safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
