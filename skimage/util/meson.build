@@ -1,8 +1,8 @@
-extensions = [
+cpp_extensions = [
   '_remap'
 ]
 
-foreach ext: extensions
+foreach ext: cpp_extensions
   py3.extension_module(ext,
     cython_gen_cpp.process(ext + '.pyx'),
     cpp_args: cython_cpp_args,

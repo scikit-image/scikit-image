@@ -51,8 +51,13 @@ python_sources = [
   'selem.py'
 ]
 
+data_files = [
+  'ball_decompositions.npy',
+  'disk_decompositions.npy'
+]
+
 py3.install_sources(
-  python_sources,
+  python_sources + data_files,
   pure: false,                  # Will be installed next to binaries
   subdir: 'skimage/morphology'  # Folder relative to site-packages to install to
 )

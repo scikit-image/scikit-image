@@ -2,15 +2,28 @@ extensions = [
   '_denoise_cy',
   '_inpaint',
   '_nl_means_denoising',
-  '_rolling_ball_cy',
-  '_unwrap_1d',
-  '_unwrap_2d',
-  '_unwrap_3d'
+  '_rolling_ball_cy'
 ]
 
 foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
+    c_args: cython_c_args,
+    include_directories: [incdir_numpy, '../_shared'],
+    install: true,
+    subdir: 'skimage/restoration'
+  )
+endforeach
+
+wrap_extensions = [
+  [['_unwrap_1d'], []],
+  [['_unwrap_2d'], ['unwrap_2d_ljmu.c']],
+  [['_unwrap_3d'], ['unwrap_3d_ljmu.c']]
+]
+
+foreach ext: wrap_extensions
+  py3.extension_module(ext,
+    [cython_gen.process(ext[0][0] + '.pyx')] + ext[1],
     c_args: cython_c_args,
     include_directories: [incdir_numpy, '../_shared'],
     install: true,

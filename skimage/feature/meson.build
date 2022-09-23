@@ -8,13 +8,14 @@ pyx_files = [
   ['_sift', cython_gen],
   ['_cascade', cython_gen_cpp],
   ['_haar', cython_gen_cpp]
-  ]
+]
 
 foreach pyx_file: pyx_files
   py3.extension_module(pyx_file[0],
     pyx_file[1].process(pyx_file[0] + '.pyx'),
     c_args: cython_c_args,
-    include_directories: [incdir_numpy],
+    cpp_args: cython_cpp_args,
+    include_directories: [incdir_numpy, '../_shared'],
     install: true,
     subdir: 'skimage/feature'
   )
