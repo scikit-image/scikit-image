@@ -3,7 +3,6 @@ python_sources = [
   '_binary_blobs.py',
   '_fetchers.py',
   '_registry.py',
-  'setup.py',
 ]
 
 py3.install_sources(
