@@ -140,7 +140,7 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=32)',
 # True Butterworth filter
 # =======================
 #
-# To use the traditional signal processing defintion of the Butterworth filter,
+# To use the traditional signal processing definition of the Butterworth filter,
 # set ``squared_butterworth=False``. This variant has an amplitude profile in
 # the frequency domain that is the square root of the default case. This causes
 # the transition from the passband to the stopband to be more gradual at any

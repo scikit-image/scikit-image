@@ -35,7 +35,7 @@ jobs:
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
-            # Test mininum requirements (don't build docs there is a problem
+            # Test minimum requirements (don't build docs there is a problem
             # with dask and astropy)
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64

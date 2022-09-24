@@ -37,7 +37,7 @@ class TestLPIFilter2D:
             # scipy.fft will preserve single precision
             expected_dtype = _supported_float_type(dtype)
         else:
-            # numpy FFTs will convert to double precison
+            # numpy FFTs will convert to double precision
             expected_dtype = np.float64
 
         F = self.f(img)
@@ -67,7 +67,7 @@ class TestLPIFilter2D:
             # scipy.fft will preserve single precision
             expected_dtype = _supported_float_type(dtype)
         else:
-            # numpy FFTs will convert to double precison
+            # numpy FFTs will convert to double precision
             expected_dtype = np.float64
 
         F = self.f(img)

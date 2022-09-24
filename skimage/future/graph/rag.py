@@ -483,7 +483,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     Returns
     -------
     lc : :py:class:`matplotlib.collections.LineCollection`
-         A colection of lines that represent the edges of the graph. It can be
+         A collection of lines that represent the edges of the graph. It can be
          passed to the :meth:`matplotlib.figure.Figure.colorbar` function.
 
     Examples

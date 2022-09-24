@@ -280,7 +280,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
         # Eq. 10:  sigmas.shape = (n_octaves, n_scales + 3).
         # The three extra scales are:
-        #    One for the differences needed for DoG and two auxilliary
+        #    One for the differences needed for DoG and two auxiliary
         #    images (one at either end) for peak_local_max with exclude
         #    border = True (see Fig. 5)
         # The smoothing doubles after n_scales steps.

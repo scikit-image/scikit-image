@@ -129,7 +129,7 @@ def add_to_users(users, new_user):
     else:
         users[new_user.login] = new_user.name
 
-for commit in tqdm(all_commits, desc='Getting commiters and authors'):
+for commit in tqdm(all_commits, desc='Getting committers and authors'):
     committer, author = find_author_info(commit)
     if committer is not None:
         committers.add(committer)
@@ -141,7 +141,7 @@ for commit in tqdm(all_commits, desc='Getting commiters and authors'):
         add_to_users(users, commit.author)
     authors.add(author)
 
-# this gets found as a commiter
+# this gets found as a committer
 committers.discard('GitHub Web Flow')
 authors.discard('Azure Pipelines Bot')
 

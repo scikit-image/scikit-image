@@ -300,7 +300,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           less memory-consuming than the brute force method for large images,
           but it is quite slow.
         - 'cg_j' (conjugate gradient with Jacobi preconditionner): the
-          Jacobi preconditionner is applyed during the Conjugate
+          Jacobi preconditionner is applied during the Conjugate
           gradient method iterations. This may accelerate the
           convergence of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a

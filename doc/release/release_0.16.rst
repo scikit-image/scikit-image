@@ -196,7 +196,7 @@ Documentation improvements
 
 - DOC: Improve the documentation of transform.resize with respect to the anti_aliasing_sigma parameter (#3911)
 - Fix URL for stain deconvolution reference (#3862)
-- Fix doc for denoise guassian (#3869)
+- Fix doc for denoise gaussian (#3869)
 - DOC: various enhancements (cross links, gallery, ref...), mainly for corner detection (#3996)
 - [DOC] clarify that the inertia_tensor may be nD in documentation (#4013)
 - [DOC] How to test and write benchmarks (#4016)
