@@ -40,7 +40,7 @@ class ApiDocWriter(object):
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  ):
-        ''' Initialize package for parsing
+        r''' Initialize package for parsing
 
         Parameters
         ----------
@@ -179,9 +179,9 @@ class ApiDocWriter(object):
             print(filename, 'erk')
             # nothing that we could handle here.
             return ([],[])
-        f = open(filename, 'rt')
-        functions, classes = self._parse_lines(f)
-        f.close()
+        with open(filename, 'rt') as f:
+            functions, classes = self._parse_lines(f)
+
         return functions, classes
 
     def _parse_module_with_import(self, uri):
@@ -211,9 +211,10 @@ class ApiDocWriter(object):
         submodules = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
-            if obj_str not in mod.__dict__:
+            try:
+                obj = getattr(mod, obj_str)
+            except AttributeError:
                 continue
-            obj = mod.__dict__[obj_str]
 
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
@@ -268,6 +269,9 @@ class ApiDocWriter(object):
         if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
             print('WARNING: Empty -', uri)
             return ''
+        functions = sorted(functions)
+        classes = sorted(classes)
+        submodules = sorted(submodules)
 
         # Make a shorter version of the uri that omits the package name for
         # titles
@@ -314,6 +318,8 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
+            full_c = uri + '.' + c
+            ad += '\n.. include:: ' + full_c + '.examples\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -358,7 +364,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        r''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -408,9 +414,8 @@ class ApiDocWriter(object):
             # write out to file
             outfile = os.path.join(outdir,
                                    m + self.rst_extension)
-            fileobj = open(outfile, 'wt')
-            fileobj.write(api_str)
-            fileobj.close()
+            with open(outfile, 'wt') as fileobj:
+                fileobj.write(api_str)
             written_modules.append(m)
         self.written_modules = written_modules
 
@@ -442,8 +447,6 @@ class ApiDocWriter(object):
 
         Parameters
         ----------
-        path : string
-            Filename to write index to
         outdir : string
             Directory to which to write generated index file
         froot : string, optional
@@ -465,40 +468,41 @@ class ApiDocWriter(object):
         else:
             relpath = outdir
         print("outdir: ", relpath)
-        idx = open(path,'wt')
-        w = idx.write
-        w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
+        with open(path, 'wt') as idx:
+            w = idx.write
+            w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
-        # if it is `skimage.submodule.subsubmodule`, ignore.
+            # We look at the module name.
+            # If it is `skimage`, display,
+            # if `skimage.submodule`, only show `submodule`,
+            # if it is `skimage.submodule.subsubmodule`, ignore.
 
-        title = "API Reference for skimage |version|"
-        w(title + "\n")
-        w("=" * len(title) + "\n\n")
+            title = "API Reference for skimage |version|"
+            w(title + "\n")
+            w("=" * len(title) + "\n\n")
 
-        subtitle = "Submodules"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodules"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        for f in self.written_modules:
-            module_name = f.split('.')
-            if len(module_name) > 2:
-                continue
-            elif len(module_name) == 1:
-                module_name = module_name[0]
-                prefix = "-"
-            elif len(module_name) == 2:
-                module_name = module_name[1]
-                prefix = "\n  -"
-            w('{0} `{1} <{2}.html>`__\n'.format(prefix, module_name, os.path.join(f)))
-        w('\n')
+            for f in self.written_modules:
+                module_name = f.split('.')
+                if len(module_name) > 2:
+                    continue
+                elif len(module_name) == 1:
+                    module_name = module_name[0]
+                    prefix = "-"
+                elif len(module_name) == 2:
+                    module_name = module_name[1]
+                    prefix = "\n  -"
+                w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
+            w('\n')
 
-        subtitle = "Submodule Contents"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodule Contents"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        w('.. toctree::\n')
-        w('   :maxdepth: 2\n\n')
-        for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath,f))
-        idx.close()
+            w('.. toctree::\n')
+            w('   :maxdepth: 2\n\n')
+            for f in self.written_modules:
+                w('   %s\n' % os.path.join(relpath, f))

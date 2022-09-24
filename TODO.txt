@@ -1,68 +1,43 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
-
-Version 0.16
-------------
-
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
-* Finalize ``skimage.future.graph`` API.
-* Finalize ``skimage.future.manual_segmentation`` API.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
 
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
-* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
-* Remove ``rough_wall`` from ``skimage.data.__init__``.
+* Finalize ``skimage.future.graph`` API.
+* Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.18
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+* In ``skimage/morphology/misc.py`` remove the deprecated parameter
+  ``in_place`` in remove_small_holes(), remove_small_objects() and
+  clear_border(), and update the tests.
+* Remove the deprecation warning for `input` kwarg of the `label`
+  function in `skimage/measure/_label.py`
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+
+Other (2022)
 ------------
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
+  to (sparse) matricies (instead of arrays).
 
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
-* In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
+Other (2023)
+------------
+* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
+  ``skimage.transform.resize``.
+* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
+  ``skimage._shared.utils._fix_ndimage_mode``
 
 Other
 -----
-* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
-  once minimal required ``numpy`` is set to >= 1.14.0.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
-  ``test_denoise.py`` regarding multidimensional indexing.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for sparse matricies (``np.matrix``) used by scipy.sparse in
-  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
-  moves away from using ``np.matrix`` in a future version too.
-* Remove the conditional import and function call when ``numpy`` is set
-  to > 1.15.x in ``skimage/util/arraycrop.py``.
-* When minimum supported version of ``scipy`` reaches 0.18, use
-  ``scipy.fftpack.next_fast_len`` directly in
-  ``skimage._shared.fft``.
-* Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
-  #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
-* When ``numpy`` is set to > 1.16, one may simplify the implementation of
-  of `feature.blob_log` using the vectorized version of ``np.logspace``.
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
-  the minimum supported version of ``scipy`` reaches 1.4.
-* When Python 3.8 is released, increment the version number on the last OSX
-  build to use Python 3.8 instead of 3.7.
-* When Python 3.8 is released, add entries to the build matrix in appveyor.
-* When Python 3.8 is released, add entries to the build matrix in azure.
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).
+* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
+  ``skimage/morphology/convex_hull.py``.

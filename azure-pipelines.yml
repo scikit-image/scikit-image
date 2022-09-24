@@ -1,35 +1,44 @@
 # Azure Pipelines configuration file for Continuous Integration
 # for building the package and running the tests under Windows.
+variables:
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+  # data cache dir determined via: print(pooch.os_cache('scikit-image'))
+  SKIMAGE_DATA_CACHE_FOLDER: C:\Users\VssAdministrator\AppData\Local\scikit-image\scikit-image\Cache
 
 jobs:
 - job: 'Default'
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-latest'
   strategy:
     maxParallel: 10
     matrix:
-      Python36:
-        PYTHON_VERSION: '3.6'
+      Python38:
+        PYTHON_VERSION: '3.8'
         ARCH: 'x86'
         PIP_FLAGS: ''
-      Python36-x64:
-        PYTHON_VERSION: '3.6'
+      Python38-x64:
+        PYTHON_VERSION: '3.8'
         ARCH: 'x64'
         PIP_FLAGS: ''
         BUILD_DOCS: 'true'
-      Python37:
-        PYTHON_VERSION: '3.7'
+      # build pre release packages on Python 3.8 since it has been out long
+      # enough for wheels to be built for packages that need to be compiled.
+      Python38-x64-pre:
+        PYTHON_VERSION: '3.8'
+        ARCH: 'x64'
+        PIP_FLAGS: '--pre'
+      Python39:
+        PYTHON_VERSION: '3.9'
         ARCH: 'x86'
         PIP_FLAGS: ''
-      Python37-x64:
-        PYTHON_VERSION: '3.7'
+      Python39-x64:
+        PYTHON_VERSION: '3.9'
         ARCH: 'x64'
         PIP_FLAGS: ''
         TEST_EXAMPLES: 'true'
-      Python37-x64-pre:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x64'
-        PIP_FLAGS: '--pre'
+        # NOTE(honles): winpty is required by one of the doc dependencies,
+        #               but does not provide a wheel for Python 3.9
+        # TEST_EXAMPLES: 'true'
   continueOnError: false
   timeoutInMinutes: 60
 
@@ -38,50 +47,88 @@ jobs:
     inputs:
       versionSpec: '$(PYTHON_VERSION)'
       architecture: '$(ARCH)'
+    name: python
 
-  - powershell: |
-      Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
-    displayName: 'Add Python paths to PATH'
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
+  - task: Cache@2
+    inputs:
+      key: '"skimage_data" | skimage/data/_registry.py'
+      path: $(SKIMAGE_DATA_CACHE_FOLDER)
+    displayName: Cache scikit-image data files
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
+  - task: Cache@2
+    inputs:
+      key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
+      restoreKeys: |
+        "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
+        "Python$(PYTHON_VERSION)-$(ARCH)"
+      path: $(PIP_CACHE_DIR)
+    displayName: Cache pip packages
+    # the line below (continueOnError: true) can be removed when the following issue is addressed:
+    # https://github.com/scikit-image/scikit-image/issues/6048
+    continueOnError: true
+
+  - script: |
+      choco install --$(ARCH) -y llvm
+      set PATH=C:\Program Files\LLVM\bin;%PATH%
+      set PATH=C:\Program Files (x86)\LLVM\bin;%PATH%
+      echo '##vso[task.setvariable variable=PATH]%PATH%'
+    displayName: 'Install clang-cl'
 
   - bash: |
-      set -x
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Update pip
-      python -m pip install --retries 3 -U pip setuptools
+      $PYTHON -m pip install -U pip setuptools wheel
+
+      # print out the pip cache dir followed by the variable defined above
+      # to confirm that they match
+      $PYTHON -m pip cache dir
+      echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
       # Check that we have the expected version and architecture for Python
-      python --version
-      pip --version
-      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-      pip list
+      $PYTHON --version
+      $PYTHON -m pip --version
+      $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+      $PYTHON -m pip list
 
       # Install the build and runtime dependencies of the project
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/default.txt
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/build.txt
-      pip list
+      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
+
+      # Disable C99 complex if PyWavelets needs to be built from source.
+      # The compiler used will be MSVC, but C99 may be detected improperly
+      USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
+
+      $PYTHON -m pip list
     displayName: 'Pre-installation'
 
   - bash: |
-      set -x
-
-      # Get stdint headers needed by tifffile.c
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
+      if [ "$(ARCH)" = "x86" ] ; then
+          export CXXFLAGS="-m32"
+      fi
 
       # Compile the package and build the wheel
-      python setup.py bdist_wheel 
+      $PYTHON setup.py bdist_wheel
 
       # Install the generated wheel package
       ls dist
-      pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
+      $PYTHON -m pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
     displayName: 'Installation'
 
   - bash: |
-      set -x
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Install the test dependencies
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
-      pip list
+      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/test.txt
+      $PYTHON -m pip list
 
       # Set non-UI Matplotlib backend
       cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
@@ -89,14 +136,20 @@ jobs:
     displayName: 'Pre-testing'
 
   - bash: |
-      set -x
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Change the working directory in order to run the tests
       # on the installed version of skimage
       cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
 
       # Show the info about the installed scikit-image
-      python -c "import skimage; print(skimage.__path__)"
+      $PYTHON -c "import skimage; print(skimage.__path__)"
+
+      # Show the path pooch is using for the data cache
+      # (this should match the SKIMAGE_DATA_CACHE_FOLDER variable above)
+      $PYTHON -c "import pooch; print(pooch.os_cache('scikit-image'))"
+      echo "SKIMAGE_DATA_CACHE_FOLDER: $SKIMAGE_DATA_CACHE_FOLDER"
 
       # Force matplotlib to use the prepared config
       export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
@@ -106,35 +159,50 @@ jobs:
       # Windows due to inconsistent ndarray formatting in `numpy`.
       # For more details, see https://github.com/numpy/numpy/issues/13468
       export TEST_ARGS="-v --cov=skimage"
-      pytest ${TEST_ARGS} --pyargs skimage
+      $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
     displayName: 'Package testing'
 
   - bash: |
-      set -x
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
+      $PYTHON -m asv check -v -E existing
+    displayName: Check benchmarks
+
+  - bash: |
+      set -ex
+      export PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Install the doc dependencies
-      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
-      pip list
+      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
+      $PYTHON -m pip list
 
       # Build the documentation
+      choco install optipng
       export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-      make html
+      export SPHINXOPTS=-W
+      make -C doc html
     condition: eq(variables['BUILD_DOCS'], 'true')
     displayName: 'Documentation testing'
 
   - bash: |
-      set -x
+      set -ex
+      PYTHON="$(python.pythonLocation)\\python.exe"
 
       # Install the doc dependencies
-      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
-      pip list
+      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
+      $PYTHON -m pip list
 
       # Force matplotlib to use the prepared config
       export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
       # Run example applications
       for f in doc/examples/*/*.py; do
-        python "${f}"
+        # Comment out any plotly.io.show() calls before running the example.
+        # Plotly opens a web browser, which often seemed to cause the CI to
+        # hang and timeout.
+        sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
+
+        $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
         if [ $? -ne 0 ]; then
           exit 1
         fi

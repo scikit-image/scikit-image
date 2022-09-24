@@ -18,12 +18,15 @@ __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
 _integer_types = (np.byte, np.ubyte,          # 8 bits
                   np.short, np.ushort,        # 16 bits
                   np.intc, np.uintc,          # 16 or 32 or 64 bits
-                  np.int_, np.uint,           # 32 or 64 bits
+                  int, np.int_, np.uint,      # 32 or 64 bits
                   np.longlong, np.ulonglong)  # 64 bits
 _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
                    for t in _integer_types}
-dtype_range = {np.bool_: (False, True),
+dtype_range = {bool: (False, True),
+               np.bool_: (False, True),
                np.bool8: (False, True),
+               float: (-1, 1),
+               np.float_: (-1, 1),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
                np.float64: (-1, 1)}
@@ -54,7 +57,126 @@ def dtype_limits(image, clip_negative=False):
     return imin, imax
 
 
-def convert(image, dtype, force_copy=False, uniform=False):
+def _dtype_itemsize(itemsize, *dtypes):
+    """Return first of `dtypes` with itemsize greater than `itemsize`
+
+    Parameters
+    ----------
+    itemsize: int
+        The data type object element size.
+
+    Other Parameters
+    ----------------
+    *dtypes:
+        Any Object accepted by `np.dtype` to be converted to a data
+        type object
+
+    Returns
+    -------
+    dtype: data type object
+        First of `dtypes` with itemsize greater than `itemsize`.
+
+    """
+    return next(dt for dt in dtypes if np.dtype(dt).itemsize >= itemsize)
+
+
+def _dtype_bits(kind, bits, itemsize=1):
+    """Return dtype of `kind` that can store a `bits` wide unsigned int
+
+    Parameters:
+    kind: str
+        Data type kind.
+    bits: int
+        Desired number of bits.
+    itemsize: int
+        The data type object element size.
+
+    Returns
+    -------
+    dtype: data type object
+        Data type of `kind` that can store a `bits` wide unsigned int
+
+    """
+
+    s = next(i for i in (itemsize, ) + (2, 4, 8) if
+             bits < (i * 8) or (bits == (i * 8) and kind == 'u'))
+
+    return np.dtype(kind + str(s))
+
+
+def _scale(a, n, m, copy=True):
+    """Scale an array of unsigned/positive integers from `n` to `m` bits.
+
+    Numbers can be represented exactly only if `m` is a multiple of `n`.
+
+    Parameters
+    ----------
+    a : ndarray
+        Input image array.
+    n : int
+        Number of bits currently used to encode the values in `a`.
+    m : int
+        Desired number of bits to encode the values in `out`.
+    copy : bool, optional
+        If True, allocates and returns new array. Otherwise, modifies
+        `a` in place.
+
+    Returns
+    -------
+    out : array
+        Output image array. Has the same kind as `a`.
+    """
+    kind = a.dtype.kind
+    if n > m and a.max() < 2 ** m:
+        mnew = int(np.ceil(m / 2) * 2)
+        if mnew > m:
+            dtype = f'int{mnew}'
+        else:
+            dtype = f'uint{mnew}'
+        n = int(np.ceil(n / 2) * 2)
+        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
+             f'value {a.max()} fits in {dtype}',
+             stacklevel=3)
+        return a.astype(_dtype_bits(kind, m))
+    elif n == m:
+        return a.copy() if copy else a
+    elif n > m:
+        # downscale with precision loss
+        if copy:
+            b = np.empty(a.shape, _dtype_bits(kind, m))
+            np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
+                            casting='unsafe')
+            return b
+        else:
+            a //= 2**(n - m)
+            return a
+    elif m % n == 0:
+        # exact upscale to a multiple of `n` bits
+        if copy:
+            b = np.empty(a.shape, _dtype_bits(kind, m))
+            np.multiply(a, (2**m - 1) // (2**n - 1), out=b, dtype=b.dtype)
+            return b
+        else:
+            a = a.astype(_dtype_bits(kind, m, a.dtype.itemsize), copy=False)
+            a *= (2**m - 1) // (2**n - 1)
+            return a
+    else:
+        # upscale to a multiple of `n` bits,
+        # then downscale with precision loss
+        o = (m // n + 1) * n
+        if copy:
+            b = np.empty(a.shape, _dtype_bits(kind, o))
+            np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
+            b //= 2**(o - m)
+            return b
+        else:
+            a = a.astype(_dtype_bits(kind, o, a.dtype.itemsize), copy=False)
+            a *= (2**o - 1) // (2**n - 1)
+            a //= 2**(o - m)
+            return a
+
+
+def _convert(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
@@ -83,8 +205,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
 
-    .. versionchanged :: 0.15
-        ``convert`` no longer warns about possible precision or sign
+    .. versionchanged:: 0.15
+        ``_convert`` no longer warns about possible precision or sign
         information loss. See discussions on these warnings at:
         https://github.com/scikit-image/scikit-image/issues/2602
         https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
@@ -104,7 +226,10 @@ def convert(image, dtype, force_copy=False, uniform=False):
     """
     image = np.asarray(image)
     dtypeobj_in = image.dtype
-    dtypeobj_out = np.dtype(dtype)
+    if dtype is np.floating:
+        dtypeobj_out = np.dtype('float64')
+    else:
+        dtypeobj_out = np.dtype(dtype)
     dtype_in = dtypeobj_in.type
     dtype_out = dtypeobj_out.type
     kind_in = dtypeobj_in.kind
@@ -121,103 +246,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
     #   is a subclass of that type (e.g. `np.floating` will allow
     #   `float32` and `float64` arrays through)
 
-    type_out = dtype if isinstance(dtype, type) else dtypeobj_out
-
-    if np.issubdtype(dtypeobj_in, type_out):
+    if np.issubdtype(dtype_in, np.obj2sctype(dtype)):
         if force_copy:
             image = image.copy()
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError("Can not convert from {} to {}."
-                         .format(dtypeobj_in, dtypeobj_out))
-
-    def _dtype_itemsize(itemsize, *dtypes):
-        # Return first of `dtypes` with itemsize greater than `itemsize`
-        return next(dt for dt in dtypes if np.dtype(dt).itemsize >= itemsize)
-
-    def _dtype_bits(kind, bits, itemsize=1):
-        # Return dtype of `kind` that can store a `bits` wide unsigned int
-        def compare(x, y, kind='u'):
-            if kind == 'u':
-                return x <= y
-            else:
-                return x < y
-
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if compare(bits, i * 8,
-                                                                kind=kind))
-        return np.dtype(kind + str(s))
-
-    def _scale(a, n, m, copy=True):
-        """Scale an array of unsigned/positive integers from `n` to `m` bits.
-
-        Numbers can be represented exactly only if `m` is a multiple of `n`.
-
-        Parameters
-        ----------
-        a : ndarray
-            Input image array.
-        n : int
-            Number of bits currently used to encode the values in `a`.
-        m : int
-            Desired number of bits to encode the values in `out`.
-        copy : bool, optional
-            If True, allocates and returns new array. Otherwise, modifies
-            `a` in place.
-
-        Returns
-        -------
-        out : array
-            Output image array. Has the same kind as `a`.
-        """
-        kind = a.dtype.kind
-        if n > m and a.max() < 2 ** m:
-            mnew = int(np.ceil(m / 2) * 2)
-            if mnew > m:
-                dtype = "int{}".format(mnew)
-            else:
-                dtype = "uint{}".format(mnew)
-            n = int(np.ceil(n / 2) * 2)
-            warn("Downcasting {} to {} without scaling because max "
-                 "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
-                 stacklevel=3)
-            return a.astype(_dtype_bits(kind, m))
-        elif n == m:
-            return a.copy() if copy else a
-        elif n > m:
-            # downscale with precision loss
-            if copy:
-                b = np.empty(a.shape, _dtype_bits(kind, m))
-                np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
-                                casting='unsafe')
-                return b
-            else:
-                a //= 2**(n - m)
-                return a
-        elif m % n == 0:
-            # exact upscale to a multiple of `n` bits
-            if copy:
-                b = np.empty(a.shape, _dtype_bits(kind, m))
-                np.multiply(a, (2**m - 1) // (2**n - 1), out=b, dtype=b.dtype)
-                return b
-            else:
-                a = a.astype(_dtype_bits(kind, m, a.dtype.itemsize), copy=False)
-                a *= (2**m - 1) // (2**n - 1)
-                return a
-        else:
-            # upscale to a multiple of `n` bits,
-            # then downscale with precision loss
-            o = (m // n + 1) * n
-            if copy:
-                b = np.empty(a.shape, _dtype_bits(kind, o))
-                np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
-                b //= 2**(o - m)
-                return b
-            else:
-                a = a.astype(_dtype_bits(kind, o, a.dtype.itemsize), copy=False)
-                a *= (2**o - 1) // (2**n - 1)
-                a //= 2**(o - m)
-                return a
+        raise ValueError(f'Cannot convert from {dtypeobj_in} to '
+                         f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min
@@ -285,6 +321,16 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
+        elif kind_in == 'i':
+            # From DirectX conversions:
+            # The most negative value maps to -1.0f
+            # Every other value is converted to a float (call it c)
+            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+
+            image = np.multiply(image, 1. / imax_in,
+                                dtype=computation_type)
+            np.maximum(image, -1.0, out=image)
+
         else:
             image = np.add(image, 0.5, dtype=computation_type)
             image *= 2 / (imax_in - imin_in)
@@ -319,6 +365,28 @@ def convert(image, dtype, force_copy=False, uniform=False):
     return image.astype(dtype_out)
 
 
+def convert(image, dtype, force_copy=False, uniform=False):
+    warn("The use of this function is discouraged as its behavior may change "
+         "dramatically in scikit-image 1.0. This function will be removed "
+         "in scikit-image 1.0.", FutureWarning, stacklevel=2)
+    return _convert(image=image, dtype=dtype,
+                    force_copy=force_copy, uniform=uniform)
+
+
+if _convert.__doc__ is not None:
+    convert.__doc__ = _convert.__doc__ + """
+
+    Warns
+    -----
+    FutureWarning:
+        .. versionadded:: 0.17
+
+        The use of this function is discouraged as its behavior may change
+        dramatically in scikit-image 1.0. This function will be removed
+        in scikit-image 1.0.
+    """
+
+
 def img_as_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
@@ -342,7 +410,7 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.float32, force_copy)
+    return _convert(image, np.float32, force_copy)
 
 
 def img_as_float64(image, force_copy=False):
@@ -368,7 +436,7 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.float64, force_copy)
+    return _convert(image, np.float64, force_copy)
 
 
 def img_as_float(image, force_copy=False):
@@ -397,7 +465,7 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.floating, force_copy)
+    return _convert(image, np.floating, force_copy)
 
 
 def img_as_uint(image, force_copy=False):
@@ -421,7 +489,7 @@ def img_as_uint(image, force_copy=False):
     Positive values are scaled between 0 and 65535.
 
     """
-    return convert(image, np.uint16, force_copy)
+    return _convert(image, np.uint16, force_copy)
 
 
 def img_as_int(image, force_copy=False):
@@ -436,7 +504,7 @@ def img_as_int(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of uint16
+    out : ndarray of int16
         Output image.
 
     Notes
@@ -446,7 +514,7 @@ def img_as_int(image, force_copy=False):
     the output image will still only have positive values.
 
     """
-    return convert(image, np.int16, force_copy)
+    return _convert(image, np.int16, force_copy)
 
 
 def img_as_ubyte(image, force_copy=False):
@@ -470,7 +538,7 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return convert(image, np.uint8, force_copy)
+    return _convert(image, np.uint8, force_copy)
 
 
 def img_as_bool(image, force_copy=False):
@@ -494,4 +562,4 @@ def img_as_bool(image, force_copy=False):
     half is False. All negative values (if present) are False.
 
     """
-    return convert(image, np.bool_, force_copy)
+    return _convert(image, bool, force_copy)

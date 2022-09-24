@@ -7,7 +7,7 @@ export GH_TOKEN=<your-gh-api-token>
 
 Then, for a major release:
 ```
-python /path/to/generate_release_notes.py v0.14.0 master --version 0.15.0
+python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
 ```
 
 For a minor release:
@@ -129,7 +129,7 @@ def add_to_users(users, new_user):
     else:
         users[new_user.login] = new_user.name
 
-for commit in tqdm(all_commits, desc='Getting commiters and authors'):
+for commit in tqdm(all_commits, desc='Getting committers and authors'):
     committer, author = find_author_info(commit)
     if committer is not None:
         committers.add(committer)
@@ -141,7 +141,7 @@ for commit in tqdm(all_commits, desc='Getting commiters and authors'):
         add_to_users(users, commit.author)
     authors.add(author)
 
-# this gets found as a commiter
+# this gets found as a committer
 committers.discard('GitHub Web Flow')
 authors.discard('Azure Pipelines Bot')
 
@@ -188,18 +188,18 @@ announcement_title = f'Announcement: scikit-image {args.version}'
 print(announcement_title)
 print('=' * len(announcement_title))
 
-print(f"""
+print(f'''
 We're happy to announce the release of scikit-image v{args.version}!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-""")
+''')
 
 print("""
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 """
 )
@@ -215,7 +215,7 @@ for section, pull_request_dicts in highlights.items():
 contributors = OrderedDict()
 
 contributors['authors'] = authors
-#contributors['committers'] = committers
+# contributors['committers'] = committers
 contributors['reviewers'] = reviewers
 
 for section_name, contributor_set in contributors.items():
@@ -224,6 +224,11 @@ for section_name, contributor_set in contributors.items():
                      'release [alphabetical by first name or login]')
     print(committer_str)
     print('-' * len(committer_str))
+
+    # Remove None from contributor set if it's in there.
+    if None in contributor_set:
+        contributor_set.remove(None)
+
     for c in sorted(contributor_set, key=str.lower):
         print(f'- {c}')
     print()

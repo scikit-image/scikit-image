@@ -1,12 +1,10 @@
-import os
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal, TestCase
+from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
 from skimage._shared._warnings import expected_warnings
 
 
@@ -19,32 +17,35 @@ def teardown():
 
 
 def test_imageio_as_gray():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+
+    img = imread(fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
 def test_imageio_palette():
-    img = imread(os.path.join(data_dir, 'palette_color.png'))
+    img = imread(fetch('data/palette_color.png'))
     assert img.ndim == 3
 
 
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
-    with testing.raises(SyntaxError):
-        imread(os.path.join(data_dir, 'truncated.jpg'))
+    # The exception type changed from SyntaxError to OSError in PIL 8.2.0, so
+    # allow for either to be raised.
+    with testing.raises((OSError, SyntaxError)):
+        imread(fetch('data/truncated.jpg'))
 
 
 class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
+        with NamedTemporaryFile(suffix='.png') as f:
+            fname = f.name
+
         imsave(fname, x)
         y = imread(fname)
 
@@ -62,9 +63,18 @@ class TestSave(TestCase):
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
 
+    def test_bool_array_save(self):
+        with NamedTemporaryFile(suffix='.png') as f:
+            fname = f.name
+
+        with expected_warnings(['.* is a boolean image']):
+            a = np.zeros((5, 5), bool)
+            a[2, 2] = True
+            imsave(fname, a)
+
 
 def test_return_class():
     testing.assert_equal(
-        type(imread(os.path.join(data_dir, 'color.png'))),
+        type(imread(fetch('data/color.png'))),
         np.ndarray
     )

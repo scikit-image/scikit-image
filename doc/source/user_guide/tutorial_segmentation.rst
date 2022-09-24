@@ -7,8 +7,8 @@ interest in an image.
 In this tutorial, we will see how to segment objects from a background.
 We use the ``coins`` image from ``skimage.data``. This image shows
 several coins outlined against a darker background. The segmentation of
-the coins cannot be done directly from the histogram of grey values,
-because the background shares enough grey levels with the coins that a
+the coins cannot be done directly from the histogram of gray values,
+because the background shares enough gray levels with the coins that a
 thresholding segmentation is not sufficient.
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_001.png
@@ -31,7 +31,7 @@ coins. This is due to the inhomogeneous lighting of the image.
    :align: center
 
 A first idea is to take advantage of the local contrast, that is, to
-use the gradients rather than the grey values.
+use the gradients rather than the gray values.
 
 Edge-based segmentation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,7 +98,7 @@ Region-based segmentation
 Let us first determine markers of the coins and the background. These
 markers are pixels that we can label unambiguously as either object or
 background. Here, the markers are found at the two extreme parts of the
-histogram of grey values:
+histogram of gray values:
 
 ::
 
@@ -133,7 +133,7 @@ and here is the corresponding 2-D plot:
    :align: center
 
 The next step is to find markers of the background and the coins based on the
-extreme parts of the histogram of grey values::
+extreme parts of the histogram of gray values::
 
     >>> markers = np.zeros_like(coins)
     >>> markers[coins < 30] = 1
@@ -145,7 +145,7 @@ extreme parts of the histogram of grey values::
 
 Let us now compute the watershed transform::
 
-    >>> from skimage.morphology import watershed
+    >>> from skimage.segmentation import watershed
     >>> segmentation = watershed(elevation_map, markers)
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_008.png

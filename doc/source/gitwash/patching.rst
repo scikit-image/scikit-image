@@ -29,7 +29,7 @@ Overview
    git config --global user.email you@yourdomain.example.com
    git config --global user.name "Your Name Comes Here"
    # get the repository if you don't have it
-   git clone git://github.com/scikit-image/scikit-image.git
+   git clone https://github.com/scikit-image/scikit-image.git
    # make a branch for your patching
    cd scikit-image
    git branch the-fix-im-thinking-of
@@ -42,10 +42,10 @@ Overview
    # hack hack, hack
    git commit -am 'BF - added fix for Funny bug'
    # make the patch files
-   git format-patch -M -C master
+   git format-patch -M -C main
 
 Then, send the generated patch files to the `scikit-image
-mailing list`_ |emdash| where we will thank you warmly.
+developer forum`_ |emdash| where we will thank you warmly.
 
 In detail
 ---------
@@ -59,7 +59,7 @@ In detail
 #. If you don't already have one, clone a copy of the
    `scikit-image`_ repository::
 
-      git clone git://github.com/scikit-image/scikit-image.git
+      git clone https://github.com/scikit-image/scikit-image.git
       cd scikit-image
 
 #. Make a 'feature branch'.  This will be where you work on
@@ -91,21 +91,21 @@ In detail
       git status
 
 #. Finally, make your commits into patches.  You want all the
-   commits since you branched from the ``master`` branch::
+   commits since you branched from the ``main`` branch::
 
-      git format-patch -M -C master
+      git format-patch -M -C main
 
    You will now have several files named for the commits::
 
       0001-BF-added-tests-for-Funny-bug.patch
       0002-BF-added-fix-for-Funny-bug.patch
 
-   Send these files to the `scikit-image mailing list`_.
+   Send these files to the `scikit-image developer forum`_.
 
 When you are done, to switch back to the main copy of the
-code, just return to the ``master`` branch::
+code, just return to the ``main`` branch::
 
-   git checkout master
+   git checkout main
 
 Moving from patching to development
 ===================================
@@ -118,9 +118,9 @@ have.
 Fork the `scikit-image`_ repository on github |emdash| :ref:`forking`.
 Then::
 
-   # checkout and refresh master branch from main repo
-   git checkout master
-   git pull origin master
+   # checkout and refresh main branch from main repo
+   git checkout main
+   git pull origin main
    # rename pointer to main repository to 'upstream'
    git remote rename origin upstream
    # point your repo to default read / write to your fork on github

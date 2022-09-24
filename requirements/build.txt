@@ -1,3 +1,5 @@
-Cython>=0.25,!=0.28.2,!=0.29.0
+Cython>=0.29.21,!=0.29.18
+packaging>=20.0
+pythran
 wheel
-numpy>=1.13.3
+numpy>=1.19.0

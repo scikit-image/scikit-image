@@ -98,6 +98,14 @@ h6:hover .headerlink {
     text-decoration: none;
 }
 
+.forum {
+    margin-top: 30px;
+    padding: 5px 10px;
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    font-weight: bold;
+}
 .footer {
     margin-top: 30px;
     padding: 5px 10px;
@@ -131,7 +139,7 @@ table.docutils td, table.docutils th {
     margin-right: -15px;
 }
 
-/* master content table */
+/* main content table */
 .contentstable.docutils, .contentstable.docutils td {
     border-color: transparent;
 }
@@ -297,6 +305,30 @@ p.sphx-glr-signature a.reference.external {
   display: none !important;
 }
 
+
+span.togglebutton {
+    cursor: pointer;
+    position: absolute;
+    top: 6px;
+    right: 25px;
+    font-family: "monospace";
+    line-height: 100%;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    margin: 0.5px;
+    color: #777777;  /* Matches sphinx_copybutton */
+    opacity: 0.3;
+    transition: opacity 0.5s;
+}
+
+.highlight:hover .togglebutton {
+    opacity: 1;
+}
+
+
 a.copybtn {
     background: transparent no-repeat none;
     border: none;
@@ -393,4 +425,18 @@ dl.citation {
 
 .citation > dt:first-child:before {
     display: inline;
+}
+
+/* Improved header fields formatting for SKIPs */
+h1 ~ dl dt {
+    float: left;
+    width: 3em;
+    padding-right: 2em;
+}
+
+/* Remove shadow rendering around reference numbers */
+.footnote dt {
+    background: none;
+    float: left;
+    text-shadow: none;
 }

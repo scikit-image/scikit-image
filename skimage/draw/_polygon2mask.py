@@ -36,6 +36,6 @@ def polygon2mask(image_shape, polygon):
     vertex_row_coords, vertex_col_coords = polygon.T
     fill_row_coords, fill_col_coords = draw.polygon(
         vertex_row_coords, vertex_col_coords, image_shape)
-    mask = np.zeros(image_shape, dtype=np.bool)
+    mask = np.zeros(image_shape, dtype=bool)
     mask[fill_row_coords, fill_col_coords] = True
     return mask

@@ -3,17 +3,24 @@
 # cython: nonecheck=False
 # cython: wraparound=False
 
-cdef extern from *:
-  void unwrap3D(double* wrapped_volume,
-                double* unwrapped_volume,
-                unsigned char* input_mask,
-                int image_width, int image_height, int volume_depth,
-                int wrap_around_x, int wrap_around_y, int wrap_around_z,
-                char use_seed, unsigned int seed) nogil
+cimport numpy as cnp
 
-def unwrap_3d(double[:, :, ::1] image,
+
+cdef extern from "unwrap_3d_ljmu.h":
+    void unwrap3D(
+            cnp.float64_t *wrapped_volume,
+            cnp.float64_t *unwrapped_volume,
+            unsigned char *input_mask,
+            int volume_width, int volume_height, int volume_depth,
+            int wrap_around_x, int wrap_around_y, int wrap_around_z,
+            char use_seed, unsigned int seed
+            ) nogil
+
+
+
+def unwrap_3d(cnp.float64_t[:, :, ::1] image,
               unsigned char[:, :, ::1] mask,
-              double[:, :, ::1] unwrapped_image,
+              cnp.float64_t[:, :, ::1] unwrapped_image,
               wrap_around,
               seed):
     cdef:

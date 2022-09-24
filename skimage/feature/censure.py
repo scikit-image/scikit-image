@@ -29,7 +29,7 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
 def _filter_image(image, min_scale, max_scale, mode):
 
     response = np.zeros((image.shape[0], image.shape[1],
-                         max_scale - min_scale + 1), dtype=np.double)
+                         max_scale - min_scale + 1), dtype=np.float64)
 
     if mode == 'dob':
 
@@ -103,9 +103,9 @@ def _star_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
-    feature_mask[(Axx + Ayy) ** 2
-                 > line_threshold * (Axx * Ayy - Axy ** 2)] = False
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
+    feature_mask[(Arr + Acc) ** 2
+                 > line_threshold * (Arr * Acc - Arc ** 2)] = False
 
 
 class CENSURE(FeatureDetector):
@@ -190,7 +190,8 @@ class CENSURE(FeatureDetector):
            [155, 151],
            [184,  63]])
     >>> censure.scales
-    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2,
+           2])
 
     """
 
@@ -229,7 +230,7 @@ class CENSURE(FeatureDetector):
 
         # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on
         # the filter_response to suppress points that are neither minima or
-        # maxima in 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray
+        # maxima in 3 x 3 x 3 neighborhood. We obtain a boolean ndarray
         # `feature_mask` containing all the minimas and maximas in
         # `filter_response` as True.
         # (3) Then we suppress all the points in the `feature_mask` for which
@@ -274,7 +275,7 @@ class CENSURE(FeatureDetector):
             self.scales = scales
             return
 
-        cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
+        cumulative_mask = np.zeros(keypoints.shape[0], dtype=bool)
 
         if self.mode == 'octagon':
             for i in range(self.min_scale + 1, self.max_scale):

@@ -1,5 +1,4 @@
 ignore:
-  - "skimage/external/setup.py"
   - "skimage/_build.py"
   - "scripts/skivi.py"
   - "setup.py"

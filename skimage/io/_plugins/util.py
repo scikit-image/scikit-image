@@ -168,7 +168,6 @@ def histograms(image, nbins):
     -------
     out : (rcounts, gcounts, bcounts, vcounts)
         The binned histograms of the RGB channels and intensity values.
-
     This is a NAIVE histogram routine, meant primarily for fast display.
 
     '''
@@ -283,42 +282,42 @@ class ColorMixer(object):
     def set_to_stateimg(self):
         self.img[:] = self.stateimg[:]
 
-    def add(self, channel, ammount):
-        '''Add the specified ammount to the specified channel.
+    def add(self, channel, amount):
+        '''Add the specified amount to the specified channel.
 
         Parameters
         ----------
         channel : flag
             the color channel to operate on
             RED, GREED, or BLUE
-        ammount : integer
-            the ammount of color to add to the channel,
+        amount : integer
+            the amount of color to add to the channel,
             can be positive or negative.
 
         '''
         if channel not in self.valid_channels:
             raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
-                              _colormixer.add, channel, ammount)
+                              _colormixer.add, channel, amount)
         pool.run()
 
-    def multiply(self, channel, ammount):
+    def multiply(self, channel, amount):
         '''Mutliply the indicated channel by the specified value.
 
-         Parameters
+        Parameters
         ----------
         channel : flag
             the color channel to operate on
             RED, GREED, or BLUE
-        ammount : integer
-            the ammount of color to add to the channel,
+        amount : integer
+            the amount of color to add to the channel,
             can be positive or negative.
 
         '''
         if channel not in self.valid_channels:
             raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
-                              _colormixer.multiply, channel, ammount)
+                              _colormixer.multiply, channel, amount)
         pool.run()
 
     def brightness(self, factor, offset):
@@ -327,10 +326,9 @@ class ColorMixer(object):
         Parameters
         ----------
         offset : integer
-            The ammount to add to each channel.
+            The amount to add to each channel.
         factor : float
             The factor to multiply each channel by.
-
         result = clip((pixel + offset)*factor)
 
         '''
@@ -349,7 +347,7 @@ class ColorMixer(object):
         pool.run()
 
     def hsv_add(self, h_amt, s_amt, v_amt):
-        '''Adjust the H, S, V channels of an image by a constant ammount.
+        '''Adjust the H, S, V channels of an image by a constant amount.
         This is similar to the add() mixer function, but operates over the
         entire image at once. Thus all three additive values, H, S, V, must
         be supplied simultaneously.
@@ -357,11 +355,11 @@ class ColorMixer(object):
         Parameters
         ----------
         h_amt : float
-            The ammount to add to the hue (-180..180)
+            The amount to add to the hue (-180..180)
         s_amt : float
-            The ammount to add to the saturation (-1..1)
+            The amount to add to the saturation (-1..1)
         v_amt : float
-            The ammount to add to the value (-1..1)
+            The amount to add to the value (-1..1)
 
         '''
         pool = ThreadDispatch(self.img, self.stateimg,
@@ -369,7 +367,7 @@ class ColorMixer(object):
         pool.run()
 
     def hsv_multiply(self, h_amt, s_amt, v_amt):
-        '''Adjust the H, S, V channels of an image by a constant ammount.
+        '''Adjust the H, S, V channels of an image by a constant amount.
         This is similar to the add() mixer function, but operates over the
         entire image at once. Thus all three additive values, H, S, V, must
         be supplied simultaneously.
@@ -381,11 +379,11 @@ class ColorMixer(object):
         Parameters
         ----------
         h_amt : float
-            The ammount to to add to the hue (-180..180)
+            The amount to to add to the hue (-180..180)
         s_amt : float
-            The ammount to multiply to the saturation (0..1)
+            The amount to multiply to the saturation (0..1)
         v_amt : float
-            The ammount to multiply to the value (0..1)
+            The amount to multiply to the value (0..1)
 
         '''
         pool = ThreadDispatch(self.img, self.stateimg,
