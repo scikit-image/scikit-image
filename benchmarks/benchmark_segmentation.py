@@ -36,6 +36,14 @@ class SlicSegmentation:
         segmentation.slic(self.image, enforce_connectivity=False,
                           **_channel_kwarg(False), **self.slic_kwargs)
 
+    def time_slic_basic_2jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=2,
+                          **_channel_kwarg(False), **self.slic_kwargs)
+
+    def time_slic_basic_4jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=4,
+                          **_channel_kwarg(False), **self.slic_kwargs)
+
     def time_slic_basic_multichannel(self):
         segmentation.slic(self.image, enforce_connectivity=False,
                           **_channel_kwarg(True), **self.slic_kwargs)
@@ -63,6 +71,14 @@ class SlicSegmentation:
 
     def peakmem_slic_basic_multichannel(self):
         segmentation.slic(self.image, enforce_connectivity=False,
+                          **_channel_kwarg(True), **self.slic_kwargs)
+
+    def peakmem_slic_basic_2jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=2,
+                          **_channel_kwarg(True), **self.slic_kwargs)
+
+    def peakmem_slic_basic_4jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=4,
                           **_channel_kwarg(True), **self.slic_kwargs)
 
 

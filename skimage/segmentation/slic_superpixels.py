@@ -115,7 +115,7 @@ def _get_grid_centroids(image, n_centroids):
 def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=1, mask=None, *,
+         slic_zero=False, start_label=1, mask=None, *, n_jobs=1,
          channel_axis=-1):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
@@ -183,6 +183,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
         .. versionadded:: 0.17
            ``mask`` was introduced in 0.17
+    n_jobs : int, optional
+        Number of used threads, default 1.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -398,7 +400,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     labels = _slic_cython(image, mask, segments, step, max_num_iter,
                           spacing, slic_zero, ignore_color=False,
-                          start_label=start_label)
+                          start_label=start_label, n_jobs=n_jobs)
 
     if enforce_connectivity:
         if use_mask:

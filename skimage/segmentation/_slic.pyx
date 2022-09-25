@@ -3,6 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 from libc.float cimport DBL_MAX
+from cython.parallel cimport prange
 
 import numpy as np
 cimport numpy as cnp
@@ -21,7 +22,9 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                  np_floats[::1] spacing,
                  bint slic_zero,
                  Py_ssize_t start_label=1,
-                 bint ignore_color=False):
+                 bint ignore_color=False,
+                 Py_ssize_t n_jobs=1
+                 ):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -147,17 +150,17 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
 
                 for z in range(z_min, z_max):
                     dz = sz * (cz - z)
-                    dz *= dz
-                    for y in range(y_min, y_max):
+                    dz = dz * dz
+                    for y in prange(y_min, y_max, num_threads=n_jobs):
                         dy = sy * (cy - y)
-                        dy *= dy
+                        dy = dy * dy
                         for x in range(x_min, x_max):
 
                             if use_mask and not mask[z, y, x]:
                                 continue
 
                             dx = sx * (cx - x)
-                            dx *= dx
+                            dx = dx * dx
                             dist_center = (dz + dy + dx) * spatial_weight
 
                             if not ignore_color:
@@ -165,11 +168,11 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                                 for c in range(3, n_features):
                                     t = (image_zyx[z, y, x, c - 3]
                                          - segments[k, c])
-                                    dist_color += t * t
-
+                                    dist_color = dist_color + t * t
+                                    
                                 if slic_zero:
-                                    dist_color /= max_dist_color[k]
-                                dist_center += dist_color
+                                    dist_center = dist_center + dist_color / max_dist_color[k]
+                                dist_center = dist_center + dist_color
 
                             if distance[z, y, x] > dist_center:
                                 nearest_segments[z, y, x] = k + start_label
@@ -197,12 +200,13 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                                 continue
 
                         k = nearest_segments[z, y, x] - start_label
-                        n_segment_elems[k] += 1
-                        segments[k, 0] += z
-                        segments[k, 1] += y
-                        segments[k, 2] += x
+                        n_segment_elems[k] = n_segment_elems[k] + 1
+                        segments[k, 0] = segments[k, 0] + z
+                        segments[k, 1] = segments[k, 1] + y
+                        segments[k, 2] = segments[k, 2] + x
+                        
                         for c in range(3, n_features):
-                            segments[k, c] += image_zyx[z, y, x, c - 3]
+                            segments[k, c] = segments[k, c] + image_zyx[z, y, x, c - 3]
 
             # divide by number of elements per segment to obtain mean
             for k in range(n_segments):
