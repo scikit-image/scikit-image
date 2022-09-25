@@ -135,5 +135,4 @@ def test_nmi_random_3d():
     assert_almost_equal(
         normalized_mutual_information(random1, random2, bins=10),
         1,
-        decimal=2,
-    )
+        decimal=2)

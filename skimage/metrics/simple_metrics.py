@@ -7,8 +7,7 @@ from .._shared.utils import _supported_float_type, check_shape_equality, warn
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
-           'normalized_mutual_information',
-           ]
+           'normalized_mutual_information']
 
 
 def _as_floats(image0, image1):
@@ -193,18 +192,6 @@ def _pad_to(arr, shape):
 def normalized_mutual_information(image0, image1, *, bins=100):
     r"""Compute the normalized mutual information (NMI).
 
-    The normalized mutual information of :math:`A` and :math:`B` is given by::
-
-    ..math::
-
-        Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
-
-    where :math:`H(X) := - \sum_{x \in X}{x \log x}` is the entropy.
-
-    It was proposed to be useful in registering images by Colin Studholme and
-    colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
-    to 2 (perfectly correlated image values, whether positively or negatively).
-
     Parameters
     ----------
     image0, image1 : ndarray
@@ -226,9 +213,21 @@ def normalized_mutual_information(image0, image1, *, bins=100):
         If the images don't have the same number of dimensions.
 
     Notes
-    -----
-    If the two input images are not the same shape, the smaller image is padded
-    with zeros.
+    -----    
+    The normalized mutual information of :math:`A` and :math:`B` is given by::
+
+    ..math::
+
+        Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
+
+    where :math:`H(X) := - \sum_{x \in X}{x \log x}` is the entropy.
+
+    It was proposed to be useful in registering images by Colin Studholme and
+    colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
+    to 2 (perfectly correlated image values, whether positively or negatively).
+
+    If the two input images do not have the same shape, the smaller image is
+    padded with zeros.
 
     References
     ----------

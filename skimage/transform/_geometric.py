@@ -707,8 +707,6 @@ class ProjectiveTransform(GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        src = np.asarray(src)
-        dst = np.asarray(dst)
         n, d = src.shape
 
         src_matrix, src = _center_and_normalize_points(src)
@@ -719,6 +717,7 @@ class ProjectiveTransform(GeometricTransform):
 
         # params: a0, a1, a2, b0, b1, b2, c0, c1
         A = np.zeros((n * d, (d+1) ** 2))
+
         # fill the A matrix with the appropriate block matrices; see docstring
         # for 2D example — this can be generalised to more blocks in the 3D and
         # higher-dimensional cases.
@@ -803,6 +802,11 @@ class ProjectiveTransform(GeometricTransform):
         classname = self.__class__.__name__
         classstr = classname
         return f'<{classstr}({paramstr})>'
+
+    @property
+    def dimensionality(self):
+        """The dimensionality of the transformation."""
+        return self.params.shape[0] - 1
 
     @property
     def dimensionality(self):

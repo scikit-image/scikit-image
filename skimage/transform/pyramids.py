@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-
 from .._shared import utils
 from .._shared.filters import gaussian
 from .._shared.utils import convert_to_float
