@@ -461,7 +461,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         Absolute value of relative difference of the cost function that
         determines the stop criterion. The algorithm stops when:
 
-            |E_(n-1) - E_n| < eps * |E_0|
+            E_(n-1) - E_n < eps * E_0
 
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
