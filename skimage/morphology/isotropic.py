@@ -11,7 +11,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     This function returns the same result as :func:`skimage.morphology.binary_erosion`
     but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
-    of the image. [1]_, [2]_
+    of the image [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
@@ -24,9 +24,10 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
         The array to store the result of the morphology. If None,
         a new array will be allocated.
     spacing : float, or sequence of float, optional
-        Spacing of elements along each dimension. If a sequence, must be of
-        length equal to the input rank; if a single number, this is used for
-        all axes. If not specified, a grid spacing of unity is implied.
+        Spacing of elements along each dimension.
+        If a sequence, must be of length equal to the input's dimension (number of axes).
+        If a single number, this value is used for all axes.
+        If not specified, a grid spacing of unity is implied.
 
     Returns
     -------
@@ -58,7 +59,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
     This function returns the same result as :func:`skimage.morphology.binary_dilation`
     but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
-    of the inverted image. [1]_, [2]_
+    of the inverted image [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
@@ -71,9 +72,10 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     spacing : float, or sequence of float, optional
-        Spacing of elements along each dimension. If a sequence, must be of
-        length equal to the input rank; if a single number, this is used for
-        all axes. If not specified, a grid spacing of unity is implied.
+        Spacing of elements along each dimension.
+        If a sequence, must be of length equal to the input's dimension (number of axes).
+        If a single number, this value is used for all axes.
+        If not specified, a grid spacing of unity is implied.
 
     Returns
     -------
@@ -104,7 +106,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
 
     This function returns the same result as :func:`skimage.morphology.binary_opening`
     but performs faster for large circular structuring elements.
-    This works by thresholding the exact Euclidean distance map. [1]_, [2]_
+    This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
@@ -117,9 +119,10 @@ def isotropic_opening(image, radius, out=None, spacing=None):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     spacing : float, or sequence of float, optional
-        Spacing of elements along each dimension. If a sequence, must be of
-        length equal to the input rank; if a single number, this is used for
-        all axes. If not specified, a grid spacing of unity is implied.
+        Spacing of elements along each dimension.
+        If a sequence, must be of length equal to the input's dimension (number of axes).
+        If a single number, this value is used for all axes.
+        If not specified, a grid spacing of unity is implied.
 
     Returns
     -------
@@ -149,7 +152,7 @@ def isotropic_closing(image, radius, out=None, spacing=None):
 
     This function returns the same result as binary :func:`skimage.morphology.binary_closing`
     but performs faster for large circular structuring elements.
-    This works by thresholding the exact Euclidean distance map. [1]_, [2]_
+    This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
     Parameters
@@ -162,9 +165,10 @@ def isotropic_closing(image, radius, out=None, spacing=None):
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
     spacing : float, or sequence of float, optional
-        Spacing of elements along each dimension. If a sequence, must be of
-        length equal to the input rank; if a single number, this is used for
-        all axes. If not specified, a grid spacing of unity is implied.
+        Spacing of elements along each dimension.
+        If a sequence, must be of length equal to the input's dimension (number of axes).
+        If a single number, this value is used for all axes.
+        If not specified, a grid spacing of unity is implied.
 
     Returns
     -------
