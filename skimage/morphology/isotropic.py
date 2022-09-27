@@ -21,8 +21,8 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     radius : float
         The radius by which regions should be eroded.
     out : ndarray of bool, optional
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array will be allocated.
     spacing : float, or sequence of float, optional
         Spacing of elements along each dimension. If a sequence, must be of
         length equal to the input rank; if a single number, this is used for
