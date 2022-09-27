@@ -13,7 +13,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v5
+      - uses: actions/stale@3de2653986ebd134983c79fe2be5d45cc3d9f4e1  # v6.0.0
         with:
           days-before-stale: 180
           days-before-close: -1  # never close
