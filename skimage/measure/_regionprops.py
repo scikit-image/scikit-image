@@ -1283,9 +1283,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
-                    'use skimage.measure.label to label the connected'
-                    'components of label_image,'
-                    'or label_image.astype(np.uint8) to interpret'
+                    'use skimage.measure.label to label the connected '
+                    'components of label_image, '
+                    'or label_image.astype(np.uint8) to interpret '
                     'the True values as a single label.')
         else:
             raise TypeError(
