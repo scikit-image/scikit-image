@@ -5,6 +5,7 @@ name: Mark dormant issues
 on:
   schedule:
     - cron: "15 2 * * *"  # trigger every day at 2:15
+  workflow_dispatch:  # or run manually
 permissions:
   issues: write
   pull-requests: write
@@ -12,9 +13,8 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v5
+      - uses: actions/stale@3de2653986ebd134983c79fe2be5d45cc3d9f4e1  # v6.0.0
         with:
-          debug-only: true
           days-before-stale: 180
           days-before-close: -1  # never close
           stale-issue-label: ":sleeping: Dormant"
