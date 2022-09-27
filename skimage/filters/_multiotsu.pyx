@@ -11,7 +11,7 @@ cnp.import_array()
 def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
                                       Py_ssize_t thresh_count):
     """Finds the indices of Otsu thresholds according to the values
-    occurence probabilities.
+    occurrence probabilities.
 
     This implementation uses a LUT to reduce the number of floating
     point operations (see [1]_). The use of the LUT reduces the
@@ -20,7 +20,7 @@ def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
     Parameters
     ----------
     prob : array
-        Value occurence probabilities.
+        Value occurrence probabilities.
     thresh_count : int
         The desired number of thresholds (classes-1).
 
@@ -76,7 +76,7 @@ cdef void _set_var_btwcls_lut(cnp.float32_t [::1] prob,
     Parameters
     ----------
     prob : array
-        Value occurence probabilities.
+        Value occurrence probabilities.
     nbins : int
         The number of intensity values.
     var_btwcls : array
@@ -183,7 +183,7 @@ cdef cnp.float32_t _set_thresh_indices_lut(
     sigma_max : float
         Current maximum variance between classes.
     current_indices : array
-        Current evalueted threshold indices.
+        Current evaluated threshold indices.
     thresh_indices : array
         The indices of thresholds maximizing the variance between
         classes.
@@ -242,7 +242,7 @@ cdef cnp.float32_t _set_thresh_indices_lut(
 def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
                                   Py_ssize_t thresh_count):
     """Finds the indices of Otsu thresholds according to the values
-    occurence probabilities.
+    occurrence probabilities.
 
     This implementation, as opposed to `_get_multiotsu_thresh_indices_lut`,
     does not use LUT. It is therefore slower.
@@ -250,7 +250,7 @@ def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
     Parameters
     ----------
     prob : array
-        Value occurence probabilities.
+        Value occurrence probabilities.
     thresh_count : int
         The desired number of threshold.
 
@@ -289,7 +289,7 @@ cdef void _set_moments_lut_first_row(cnp.float32_t [::1] prob,
     Parameters
     ----------
     prob : array
-        Value occurence probabilities.
+        Value occurrence probabilities.
     nbins : int
         The number of intensity values.
     zeroth_moment : array
@@ -330,7 +330,7 @@ cdef cnp.float32_t _get_var_btwclas(cnp.float32_t [::1] zeroth_moment,
         First row of the first order moments LUT (referred to as S in
         [1]_).
     i, j : int
-        The indices of the two considred classes.
+        The indices of the two considered classes.
 
     Returns
     -------
@@ -387,7 +387,7 @@ cdef cnp.float32_t _set_thresh_indices(cnp.float32_t[::1] zeroth_moment,
     sigma_max : float
         Current maximum variance between classes.
     current_indices : array
-        Current evalueted threshold indices.
+        Current evaluated threshold indices.
     thresh_indices : array
         The indices of thresholds maximizing the variance between
         classes.

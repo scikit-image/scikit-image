@@ -12,69 +12,14 @@ perpendicular but not along the structure.
 from warnings import warn
 
 import numpy as np
+from scipy import linalg
 
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import _supported_float_type, check_nD, deprecated
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
-from ..util import img_as_float, invert
+from ..util import img_as_float
 
 
-def _divide_nonzero(array1, array2, cval=1e-10):
-    """
-    Divides two arrays.
-
-    Denominator is set to small value where zero to avoid ZeroDivisionError and
-    return finite float array.
-
-    Parameters
-    ----------
-    array1 : (N, ..., M) ndarray
-        Array 1 in the enumerator.
-    array2 : (N, ..., M) ndarray
-        Array 2 in the denominator.
-    cval : float, optional
-        Value used to replace zero entries in the denominator.
-
-    Returns
-    -------
-    array : (N, ..., M) ndarray
-        Quotient of the array division.
-    """
-
-    # Copy denominator
-    denominator = np.copy(array2)
-
-    # Set zero entries of denominator to small value
-    denominator[denominator == 0] = cval
-
-    # Return quotient
-    return np.divide(array1, denominator)
-
-
-def _check_sigmas(sigmas):
-    """Check sigma values for ridges filters.
-
-    Parameters
-    ----------
-    sigmas : iterable of floats
-        Sigmas argument to be checked
-
-    Returns
-    -------
-    sigmas : ndarray
-        input iterable converted to ndarray
-
-    Raises
-    ------
-    ValueError if any input value is negative
-
-    """
-    sigmas = np.asarray(sigmas).ravel()
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values should be equal to or greater '
-                         'than zero.')
-    return sigmas
-
-
+@deprecated(removed_version="1.0")
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
                                 use_gaussian_derivatives=False):
@@ -145,9 +90,8 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
     return hessian_eigenvalues
 
 
-def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
-              black_ridges=True, mode='reflect', cval=0,
-              use_gaussian_derivatives=True):
+def meijering(image, sigmas=range(1, 10, 2), alpha=None,
+              black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -166,7 +110,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
         Sigmas used as scales of filter
     alpha : float, optional
         Shaping filter constant, that selects maximally flat elongated
-        features. Optimal value should be -1/3.
+        features.  The default, None, selects the optimal value -1/(ndim+1).
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -196,56 +140,35 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=-1 / 3,
         :DOI:`10.1002/cyto.a.20022`
     """
 
-    # Check (sigma) scales
-    sigmas = _check_sigmas(sigmas)
+    image = image.astype(_supported_float_type(image.dtype), copy=False)
+    if not black_ridges:  # Normalize to black ridges.
+        image = -image
 
-    # Get image dimensions
-    ndim = image.ndim
+    if alpha is None:
+        alpha = 1 / (image.ndim + 1)
+    mtx = linalg.circulant(
+        [1, *[alpha] * (image.ndim - 1)]).astype(image.dtype)
 
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
+    for sigma in sigmas:  # Filter for all sigmas.
+        eigvals = hessian_matrix_eigvals(hessian_matrix(
+            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        # Compute normalized eigenvalues l_i = e_i + sum_{j!=i} alpha * e_j.
+        vals = np.tensordot(mtx, eigvals, 1)
+        # Get largest normalized eigenvalue (by magnitude) at each pixel.
+        vals = np.take_along_axis(
+            vals, abs(vals).argmax(0)[None], 0).squeeze(0)
+        # Remove negative values.
+        vals = np.maximum(vals, 0)
+        # Normalize to max = 1 (unless everything is already zero).
+        max_val = vals.max()
+        if max_val > 0:
+            vals /= max_val
+        filtered_max = np.maximum(filtered_max, vals)
 
-    # Invert image to detect dark ridges on bright background
-    if black_ridges:
-        image = invert(image)
-
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered at
-    # different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, float_dtype)
-
-    # Filtering for all (sigma) scales
-    for i, sigma in enumerate(sigmas):
-
-        # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(
-            image, sigma, sorting='abs', mode=mode, cval=cval,
-            use_gaussian_derivatives=use_gaussian_derivatives
-        )
-
-        if ndim > 1:
-
-            # Set coefficients for scaling eigenvalues
-            coefficients = [alpha] * ndim
-            coefficients[0] = 1
-
-            # Compute normalized eigenvalues l_i = e_i + sum_{j!=i} alpha * e_j
-            auxiliary = [np.sum([eigenvalues[i] * np.roll(coefficients, j)[i]
-                         for j in range(ndim)], axis=0) for i in range(ndim)]
-
-            # Get maximum eigenvalues by magnitude
-            auxiliary = auxiliary[-1]
-
-            # Rescale image intensity and avoid ZeroDivisionError
-            filtered = _divide_nonzero(auxiliary, np.min(auxiliary))
-
-            # Remove background
-            filtered = np.where(auxiliary < 0, filtered, 0)
-
-            # Store results in (n+1)D matrices
-            filtered_array[i] = filtered
-
-    # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
@@ -296,43 +219,30 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
         :DOI:`10.1016/S1361-8415(98)80009-1`
     """
 
-    # Check image dimensions
-    check_nD(image, [2, 3])
+    check_nD(image, [2, 3])  # Check image dimensions.
+    image = image.astype(_supported_float_type(image.dtype), copy=False)
+    if not black_ridges:  # Normalize to black ridges.
+        image = -image
 
-    # Check (sigma) scales
-    sigmas = _check_sigmas(sigmas)
-
-    # Invert image to detect bright ridges on dark background
-    if not black_ridges:
-        image = invert(image)
-
-    float_dtype = _supported_float_type(image.dtype)
-
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered
-    # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
-
-    # Filtering for all (sigma) scales
-    for i, sigma in enumerate(sigmas):
-
-        # Calculate (sorted) eigenvalues
-        lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                        sorting='val',
-                                                        mode=mode, cval=cval)
-
-        # Compute tubeness, see equation (9) in reference [1]_.
-        # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
-        filtered = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
-
-        # Remove background and store results in (n+1)D matrices
-        filtered_array[i] = np.where(lambdas[-1] > 0, filtered, 0)
-
-    # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
+    for sigma in sigmas:  # Filter for all sigmas.
+        eigvals = hessian_matrix_eigvals(hessian_matrix(
+            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        # Compute normalized tubeness (eqs. (9) and (22), ref. [1]_) as the
+        # geometric mean of eigvals other than the lowest one
+        # (hessian_matrix_eigvals returns eigvals in decreasing order), clipped
+        # to 0, multiplied by sigma^2.
+        eigvals = eigvals[:-1]
+        vals = (sigma ** 2
+                * np.prod(np.maximum(eigvals, 0), 0) ** (1 / len(eigvals)))
+        filtered_max = np.maximum(filtered_max, vals)
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
-           scale_step=None, alpha=0.5, beta=0.5, gamma=15,
+           scale_step=None, alpha=0.5, beta=0.5, gamma=None,
            black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Frangi vesselness filter.
@@ -365,6 +275,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
+        The default, None, uses half of the maximum Hessian norm.
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -381,9 +292,9 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
     Notes
     -----
-    Written by Marc Schrijver, November 2001
-    Re-Written by D. J. Kroon, University of Twente, May 2009, [2]_
-    Adoption of 3D version from D. G. Ellis, Januar 20017, [3]_
+    Earlier versions of this filter were implemented by Marc Schrijver,
+    (November 2001), D. J. Kroon, University of Twente (May 2009) [2]_, and
+    D. G. Ellis (January 2017) [3]_.
 
     See also
     --------
@@ -407,66 +318,42 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
              stacklevel=2)
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
-    # Check image dimensions
-    check_nD(image, [2, 3])
+    check_nD(image, [2, 3])  # Check image dimensions.
+    image = image.astype(_supported_float_type(image.dtype), copy=False)
+    if not black_ridges:  # Normalize to black ridges.
+        image = -image
 
-    # Check (sigma) scales
-    sigmas = _check_sigmas(sigmas)
-
-    # Rescale filter parameters
-    alpha_sq = 2 * alpha ** 2
-    beta_sq = 2 * beta ** 2
-    gamma_sq = 2 * gamma ** 2
-
-    # Get image dimensions
-    ndim = image.ndim
-
-    # Invert image to detect dark ridges on light background
-    if black_ridges:
-        image = invert(image)
-
-    float_dtype = _supported_float_type(image.dtype)
-
-    # Generate empty (n+1)D arrays for storing auxiliary images filtered
-    # at different (sigma) scales
-    filtered_array = np.zeros(sigmas.shape + image.shape, dtype=float_dtype)
-    lambdas_array = np.zeros_like(filtered_array, dtype=float_dtype)
-
-    # Filtering for all (sigma) scales
-    for i, sigma in enumerate(sigmas):
-
-        # Calculate (abs sorted) eigenvalues
-        lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                        sorting='abs',
-                                                        mode=mode, cval=cval)
-
-        # Compute sensitivity to deviation from a plate-like
-        # structure see equations (11) and (15) in reference [1]_
-        r_a = np.inf if ndim == 2 else _divide_nonzero(*lambdas) ** 2
-
-        # Compute sensitivity to deviation from a blob-like structure,
-        # see equations (10) and (15) in reference [1]_,
-        # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
-        filtered_raw = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
-        r_b = _divide_nonzero(lambda1, filtered_raw) ** 2
-
-        # Compute sensitivity to areas of high variance/texture/structure,
-        # see equation (12)in reference [1]_
-        r_g = sum([lambda1 ** 2] + [lambdai ** 2 for lambdai in lambdas])
-
-        # Compute output image for given (sigma) scale and store results in
-        # (n+1)D matrices, see equations (13) and (15) in reference [1]_
-        filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
-                             * np.exp(-r_b / beta_sq)
-                             * (1 - np.exp(-r_g / gamma_sq)))
-
-        lambdas_array[i] = np.max(lambdas, axis=0)
-
-    # Remove background
-    filtered_array[lambdas_array > 0] = 0
-
-    # Return for every pixel the maximum value over all (sigma) scales
-    return np.max(filtered_array, axis=0)
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
+    for sigma in sigmas:  # Filter for all sigmas.
+        eigvals = hessian_matrix_eigvals(hessian_matrix(
+            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        # Sort eigenvalues by magnitude.
+        eigvals = np.take_along_axis(eigvals, abs(eigvals).argsort(0), 0)
+        lambda1 = eigvals[0]
+        if image.ndim == 2:
+            lambda2, = np.maximum(eigvals[1:], 1e-10)
+            r_a = np.inf  # implied by eq. (15).
+            r_b = abs(lambda1) / lambda2  # eq. (15).
+        else:  # ndim == 3
+            lambda2, lambda3 = np.maximum(eigvals[1:], 1e-10)
+            r_a = lambda2 / lambda3  # eq. (11).
+            r_b = abs(lambda1) / np.sqrt(lambda2 * lambda3)  # eq. (10).
+        s = np.sqrt((eigvals ** 2).sum(0))  # eq. (12).
+        if gamma is None:
+            gamma = s.max() / 2
+            if gamma == 0:
+                gamma = 1  # If s == 0 everywhere, gamma doesn't matter.
+        # Filtered image, eq. (13) and (15).  Our implementation relies on the
+        # blobness exponential factor underflowing to zero whenever the second
+        # or third eigenvalues are negative (we clip them to 1e-10, to make r_b
+        # very large).
+        vals = 1.0 - np.exp(-r_a**2 / (2 * alpha**2))  # plate sensitivity
+        vals *= np.exp(-r_b**2 / (2 * beta**2))  # blobness
+        vals *= 1.0 - np.exp(-s**2 / (2 * gamma**2))  # structuredness
+        filtered_max = np.maximum(filtered_max, vals)
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,

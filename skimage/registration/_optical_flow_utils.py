@@ -16,7 +16,7 @@ def get_warp_points(grid, flow):
     Parameters
     ----------
     grid : iterable
-        The sparse grid to be warped (optained using
+        The sparse grid to be warped (obtained using
         ``np.meshgrid(..., sparse=True)).``)
     flow : ndarray
         The warping motion field.
@@ -110,7 +110,7 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
     I1 : ndarray
         The second gray scale image of the sequence.
     solver : callable
-        The solver applyed at each pyramid level.
+        The solver applied at each pyramid level.
     downscale : float
         The pyramid downscale factor.
     nlevel : int

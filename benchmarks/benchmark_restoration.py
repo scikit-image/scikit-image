@@ -195,7 +195,7 @@ class Inpaint(object):
         rstate = np.random.RandomState(0)
         for radius in [0, 2, 4]:
             # larger defects are less common
-            thresh = 2.75 + 0.25 * radius  # larger defects are less commmon
+            thresh = 2.75 + 0.25 * radius  # larger defects are less common
             tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
             if radius > 0:
                 tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))

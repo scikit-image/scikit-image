@@ -228,9 +228,9 @@ def only2d(method):
 def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
 
-    Paramters
+    Parameters
     ---------
-    inertia_tensor_eigvals : seqeunce of float
+    inertia_tensor_eigvals : sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
     Returns
@@ -905,7 +905,7 @@ def regionprops_table(label_image, intensity_image=None,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
@@ -1067,7 +1067,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.

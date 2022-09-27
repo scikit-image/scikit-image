@@ -105,6 +105,7 @@ segments_watershed = watershed(gradient, markers=250, compactness=0.001)
 print(f'Felzenszwalb number of segments: {len(np.unique(segments_fz))}')
 print(f'SLIC number of segments: {len(np.unique(segments_slic))}')
 print(f'Quickshift number of segments: {len(np.unique(segments_quick))}')
+print(f'Watershed number of segments: {len(np.unique(segments_watershed))}')
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
 

@@ -215,7 +215,7 @@ def _to_array(args):
     return ar
 
 
-# Map an edge-index to two relative pixel positions. The ege index
+# Map an edge-index to two relative pixel positions. The edge index
 # represents a point that lies somewhere in between these pixels.
 # Linear interpolation should be used to determine where it is exactly.
 #   0

@@ -45,7 +45,7 @@ time is spent on searching on the smallest scales.
 
 ``min_neighbor_number`` and ``intersection_score_threshold`` parameters are
 made to cluster the excessive detections of the same face and to filter out
-false detections.  True faces usually has a lot of dectections around them and
+false detections.  True faces usually has a lot of detections around them and
 false ones usually have single detection. First algorithm searches for
 clusters: two rectangle detections are placed in the same cluster if the
 intersection score between them is larger then

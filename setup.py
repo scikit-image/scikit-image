@@ -142,7 +142,7 @@ def parse_requirements_file(filename):
 
 
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
-# The `requirements/extras.txt` file is explicitely omitted because
+# The `requirements/extras.txt` file is explicitly omitted because
 # it contains requirements that do not have wheels uploaded to pip
 # for the platforms we wish to support.
 extras_require = {

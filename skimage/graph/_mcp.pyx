@@ -873,7 +873,7 @@ cdef class MCP_Flexible(MCP):
         as soon as both nodes are frozen.
 
         This method can be overloaded to obtain information about
-        neightboring nodes, and/or to modify the behavior of the MCP
+        neighboring nodes, and/or to modify the behavior of the MCP
         algorithm. One example is the MCP_Connect class, which checks
         for meeting fronts using this hook.
         """

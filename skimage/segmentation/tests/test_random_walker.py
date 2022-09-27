@@ -438,7 +438,7 @@ def test_trivial_cases():
     with expected_warnings(["All unlabeled pixels are isolated"]):
             output_labels = random_walker(img, markers)
     assert np.all(output_labels[markers == 1] == 1)
-    # Here 0-labeled pixels could not be determined (no connexion to seed)
+    # Here 0-labeled pixels could not be determined (no connection to seed)
     assert np.all(output_labels[markers == 0] == -1)
     with expected_warnings(["All unlabeled pixels are isolated"]):
         test = random_walker(img, markers, return_full_prob=True)

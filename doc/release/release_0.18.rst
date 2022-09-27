@@ -57,7 +57,7 @@ Development process
 - See if latest Ubuntu image fixes QEMU CPU detection issue (#5227, #5233)
 - Rename `master` to `main` throughout (#5243, #5295)
 - Fixup test for INSTALL_FROM_SDIST (#5283, #5296)
-- Remove unecessary manual installation of packages from before_install (#5298)
+- Remove unnecessary manual installation of packages from before_install (#5298)
 - Use manylinux2010 for python 3.9+ (#5303, #5310)
 - add numpy version specification on aarch for cpython 3.8 (#5374, #5375)
 

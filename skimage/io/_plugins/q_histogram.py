@@ -55,7 +55,7 @@ class ColorHistogram(QWidget):
         # calculate to number of bars
         nbars = len(self.counts)
 
-        # calculate the bar widths, this compilcation is
+        # calculate the bar widths, this complication is
         # necessary because integer trunction severely cripples
         # the layout.
         remainder = width % nbars

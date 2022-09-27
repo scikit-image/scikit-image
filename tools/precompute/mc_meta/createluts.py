@@ -131,6 +131,6 @@ if __name__ == '__main__':
             '# This file was auto-generated from `mc_meta/LookUpTable.h` by\n'
             '# `mc_meta/createluts.py`. The `mc_meta` scripts are not\n'
             '# distributed with scikit-image, but are available in the\n'
-            '# respository under tools/precompute/mc_meta.\n\n'
+            '# repository under tools/precompute/mc_meta.\n\n'
         )
         f.write(create_luts(fname))

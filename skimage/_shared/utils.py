@@ -400,7 +400,7 @@ class channel_as_last_axis:
                 channel_axis = (channel_axis,)
             if len(channel_axis) > 1:
                 raise ValueError(
-                    "only a single channel axis is currently suported")
+                    "only a single channel axis is currently supported")
 
             if channel_axis == (-1,) or channel_axis == -1:
                 return func(*args, **kwargs)
@@ -723,7 +723,7 @@ def _validate_interpolation_order(image_dtype, order):
     if image_dtype == bool and order != 0:
         raise ValueError(
             "Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
+             "with bool data type. Please set order to 0 or explicitly "
              "cast input image to another data type.")
 
     return order
