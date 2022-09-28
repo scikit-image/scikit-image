@@ -1,6 +1,5 @@
 from collections import namedtuple
 import numpy as np
-import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ..._shared.utils import warn
@@ -200,7 +199,9 @@ def imshow_collection(ic, *args, **kwargs):
     return fig
 
 
-imread = matplotlib.image.imread
+def imread(*args, **kwargs):
+    import matplotlib.image
+    return matplotlib.image.imread(*args, **kwargs)
 
 
 def _app_show():
