@@ -257,7 +257,7 @@ This directory contains the following files:
     ├── benchmarks
     ├── CODE_OF_CONDUCT.md
     ├── CONTRIBUTING.rst
-    ├── CONTRIBUTORS.txt
+    ├── CONTRIBUTORS.md
     ├── doc
     ├── INSTALL.rst
     ├── LICENSE.txt
