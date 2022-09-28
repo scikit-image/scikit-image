@@ -462,10 +462,9 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         the greater `weight`, the more denoising (at
         the expense of fidelity to `image`).
     eps : float, optional
-        Absolute value of relative difference of the cost function that
-        determines the stop criterion. The algorithm stops when
+        Absolute value of relative difference of the cost function :math:`E`
+        that determines the stop criterion. The algorithm stops when
         :math:`|E_{n-1} - E_n| < eps * E_0`.
-
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     multichannel : bool, optional
@@ -483,7 +482,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
 
     Returns
     -------
-    out : ndarray
+    u : ndarray
         Denoised image.
 
     Notes
