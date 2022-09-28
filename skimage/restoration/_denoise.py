@@ -441,7 +441,11 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
 
     This function is an implementation of the algorithm proposed by Chambolle
     in [1]_ to solve the Rudin--Osher--Fatemi minimization problem:
-    :math:`\min_{u} \sum_{i=0}^{N-1} \left( \left| \nabla{u_i} \right| + \frac{\lambda}{2}(f_i - u_i)^2 \right)`
+
+    .. math::
+
+        \min_{u} \sum_{i=0}^{N-1} \left( \left| \nabla{u_i} \right| + \frac{\lambda}{2}(f_i - u_i)^2 \right)
+
     where :math:`f` denotes the input data (noisy image) and :math:`\lambda`
     is a positive parameter. The first term of this cost function is the total
     variation; the second term represents data fidelity. As :math:`\lambda \to 0`,
@@ -459,9 +463,8 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         the expense of fidelity to `image`).
     eps : float, optional
         Absolute value of relative difference of the cost function that
-        determines the stop criterion. The algorithm stops when:
-
-            E_(n-1) - E_n < eps * E_0
+        determines the stop criterion. The algorithm stops when
+        :math:`|E_{n-1} - E_n| < eps * E_0`.
 
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
