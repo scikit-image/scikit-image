@@ -5,6 +5,9 @@ __getattr__, __dir__, __all__ = lazy.attach(
     submodules={'rank'},
     submod_attrs={
         'lpi_filter': ['inverse', 'wiener', 'LPIFilter2D'],
+        'diffusion_linear' : ['diffusion_linear'],
+        'diffusion_nonlinear_iso' : ['diffusion_nonlinear_iso'],
+        'diffusion_nonlinear_aniso' : ['diffusion_nonlinear_aniso'],
         '_gaussian': ['gaussian', 'difference_of_gaussians'],
         'edges': ['sobel', 'sobel_h', 'sobel_v',
                   'scharr', 'scharr_h', 'scharr_v',
