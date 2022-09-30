@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a bug in scikit-image.
+title: "<Please write a comprehensive title summarizing the bug>"
+labels: [":bug: Bug"]
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      Thank you for taking the time to file a bug report! Before creating a new
+      issue, please make sure to take a few minutes to check the issue tracker
+      for existing issues about the bug. 
+
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: "Describe the issue:"
+    description: >
+      Please describe your issue with all necessary detail. Upload all necessary
+      images and files here too!
+
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: "Way to reproduce:"
+    description: >
+      A short code example that reproduces the issue. It should be
+      self-contained, i.e., can be copy-pasted into the Python interpreter or
+      run as-is via `python my_issue.py`.
+    placeholder: |
+      import numpy as np
+      import skimage
+      # Your code here...
+    render: Python
+
+- type: textarea
+  attributes:
+    label: "Traceback or output:"
+    description: >
+      Please include the full error message, traceback or output, if any.
+    placeholder: |
+      Full error (starting from Traceback) or output..
+    render: Shell
+
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: "Version information:"
+    description: |
+      Paste the output from the following Python commands
+      ```python
+      import sys; print(sys.version)
+      import platform; print(platform.platform())
+      import skimage; print(f'scikit-image version: {skimage.__version__}')
+      import numpy; print(f'numpy version: {numpy.__version__}')
+      ```
+    placeholder: |
+      Version information...
+    render: Shell
+
+- type: checkboxes
+  id: terms
+  attributes:
+    label: Code of Conduct
+    description: >
+      By submitting this issue, you agree to follow our 
+      [Code of Conduct](https://scikit-image.org/docs/stable/conduct/code_of_conduct.html)
+    options:
+      - label: I agree to follow this project's Code of Conduct
+        required: true

@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "Questions, Help and Support"
+    url: https://github.com/scikit-image/scikit-image/blob/main/.github/SUPPORT.md
+    about: >
+      If you have a question, please look at the listed resources available on
+      our support page.
+  - name: "StackOverflow"
+    url: https://stackoverflow.com/questions/tagged/scikit-image
+    about: >
+      The "scikit-image" tag on StackOverflow is also a good place to get
+      answers on specific tasks.
