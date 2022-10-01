@@ -295,8 +295,8 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
         the smaller the `weight`, the more denoising (at
         the expense of less similarity to `image`).
     eps : float, optional
-        Stop criterion. The algorithm stops when
-        :math:`\sqrt{(u_n - u_{n-1})^2} < eps`.
+        Stop criterion :math:`\varepsilon > 0`. The algorithm stops when
+        :math:`\|u_n - u_{n-1}\|_2 < \varepsilon`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
