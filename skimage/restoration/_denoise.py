@@ -310,7 +310,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
            ``channel_axis`` was added in 0.19.
     multichannel : bool, optional
         Whether to apply total variation denoising separately to each channel.
-        Should be True for color images, otherwise the denoising is
+        Should be ``True`` for color images, otherwise the denoising is
         also applied in the channels dimension. This argument is deprecated:
         specify `channel_axis` instead.
 
@@ -497,14 +497,14 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         the greater the `weight`, the more denoising (at the expense of
         fidelity to `image`).
     eps : float, optional
-        Absolute value of relative difference of the cost function :math:`E`
-        that determines the stop criterion. The algorithm stops when
-        :math:`|E_{n-1} - E_n| < eps * E_0`.
+        Stop criterion :math:`\varepsilon > 0` (absolute value of relative
+        difference of the cost function :math:`E`).
+        The algorithm stops when :math:`|E_{n-1} - E_n| < \varepsilon * E_0`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     multichannel : bool, optional
         Whether to apply total variation denoising separately to each channel.
-        Should be True for color images, otherwise the denoising is
+        Should be ``True`` for color images, otherwise the denoising is
         also applied in the channels dimension. This argument is deprecated:
         specify `channel_axis` instead.
     channel_axis : int or None, optional
