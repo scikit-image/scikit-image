@@ -3,7 +3,8 @@ from .binary import (binary_erosion, binary_dilation, binary_opening,
 from .gray import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
 from .footprints import (ball, cube, diamond, disk, ellipse,
-                         octagon, octahedron, rectangle, square, star)
+                         octagon, octahedron, rectangle, square, star,
+                         footprint_from_sequence)
 from ..measure._label import label
 from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
@@ -57,4 +58,5 @@ __all__ = ['binary_erosion',
            'diameter_opening',
            'diameter_closing',
            'max_tree_local_maxima',
+           'footprint_from_sequence'
            ]
