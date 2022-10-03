@@ -1,0 +1,283 @@
+Announcement: scikit-image 0.20.0
+=================================
+
+We're happy to announce the release of scikit-image v0.20.0!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+
+Other Pull Requests
+*******************
+- Add benchmarks for morphology.local_maxima (#3255)
+- Add textbook-like tutorial on measuring fluorescence at nuclear envelope. (#5262)
+- Footprint decomposition for faster morphology (part 1) (#5482)
+- Implementation of the Modified Hausdorff Distance (MHD) metric (#5581)
+- Fix typo in moments_hu docstring (#6016)
+- Transplant the change of scikit-learn into scikit-image for RANSAC  (#6046)
+- Fix API docs autogeneration for lazy loaded subpackages (#6075)
+- checkout gh-pages with a shallow clone (#6085)
+- Add two datasets for use in upcoming scientific tutorials. (#6087)
+- Skip tests requiring fetched data (#6089)
+- Fix dev doc build (#6091)
+- Preserve backwards compatibility for `channel_axis` parameter in transform functions (#6095)
+- restore non-underscore functions in skimage.data (#6097)
+- forward port of #6098 (fix MacOS arm64 wheels and Windows Python 3.10 AMD64 wheel) (#6101)
+- make rank filter test comparisons robust across architectures (#6103)
+- pass a specific random_state into ransac in test_ransac_geometric (#6105)
+- Add linker flags to strip debug symbols during wheel building (#6109)
+- relax test condition to make it more robust to variable CI load (#6114)
+- respect SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL setting in tests.yml (#6118)
+- Fixed minor typos in perimeters example (#6121)
+- bump deprecated Azure windows environment (#6130)
+- Update user warning message for viewer module. (#6133)
+- fix phase_cross_correlation typo (#6139)
+- Fix channel_axis handling in pyramid_gaussian and pyramid_laplace (#6145)
+- deprecate n_iter_max (should be max_num_iter) (#6148)
+- Update of Meijering algorithm (resumed) (#6149)
+- Implement 2D ellipse footprint decomposition (#6151)
+- specify python version used by mybinder.org for gallery demos (#6152)
+- remove skimage.viewer (#6160)
+- remove deprecated indices kwarg from peak_local_max (#6161)
+- remove structure_tensor_eigvals and change default structure_tensor order (#6162)
+- remove deprecate_kwarg decorator from find_contours (#6163)
+- Remove deprecated Qt IO plugin and skivi script (#6164)
+- Fix unintended change to output dtype of match_histograms (#6169)
+- add SUPPORT.md (helps point users from GitHub to appropriate support resources) (#6171)
+- Fix decorators warnings stacklevel (#6183)
+- Fix SIFT wrong octave indices + typo (#6184)
+- Fix issue6190 - inconsistent default parameters in pyramids.py (#6191)
+- Adding CITATION.bib (#6195)
+- Improve writing for perimeter estimation example. (#6200)
+- Removing references to git connection protocol (#6201)
+- DOC: Minor cosmetic fixup to address UserWarning. (#6203)
+- Changing occurrences of "neighbour" to EN-US spelling, "neighbor" (#6204)
+- Always set params to nan when ProjectiveTransform.estimate fails (#6207)
+- expand reviewer guidelines in pull request template (#6208)
+- PiecewiseAffineTransform.estimate return should reflect underlying transforms (#6211)
+- EuclideanTransform.estimate should return False when NaNs are present (#6214)
+- Allow the output_shape argument to be any iterable for resize and resize_local_mean (#6219)
+- Update filename in testing instructions. (#6223)
+- Fix calculation of Z normal in marching cubes (#6227)
+- Remove redundant testing on Appveyor (#6229)
+- remove deprecated marching_cubes '_lorensen' option (#6230)
+- Update imports/refs from deprecated scipy.ndimage.filters namespace (#6231)
+- Include Cython sources via package_data (#6232)
+- Allow non-adjacent footprints in flood_fill. (#6236)
+- DOC: fix SciPy intersphinx (#6239)
+- Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (#6242)
+- Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (#6250)
+- improve butterworth docstring and add new kwargs and gallery example (#6251)
+- Forward port v0.19.1 and v0.19.2 release notes (#6253)
+- Update skimage mailing addresses (#6255)
+- implement nD skimage.filters.farid (Farid & Simoncelli filter) (#6257)
+- Ignore sparse matrix deprecation warning (#6261)
+- Fix inpaint_biharmonic for images with Fortran-ordered memory layout (#6263)
+- Fix balance in example code (#6265)
+- Support array-likes consistently in geometric transforms (#6270)
+- hough_line_peaks fix for corner case with optimal angle=0 (#6271)
+- add warning on non-integer image inputs to local_binary_pattern (#6272)
+- More flexible collections with custom load_func. (#6276)
+- clarify behavior of watershed segmentation line with touching markers (#6280)
+- Stop using `git://` for submodules (#6283)
+- Fix adjust_gamma round-off error (#6285)
+- Update for the `MultiImage` docstring. (#6290)
+- Polish the `MultiImage` docstring. (#6292)
+- Update plot_pyramid.py demo to work for diversified shaped images and downsample factors (#6293)
+- remove extraneous function in createluts.py (and move mc_meta reference code) (#6294)
+- Add spacing to regionprops and moments. (#6296)
+- Update data urls to point to a specific commit (#6297)
+- New thumbnails for General-purpose images and scientific images (#6298)
+- New thumbnail for "Datasets" example  by adjusting contrast (#6300)
+- New thumbnail for Specific images (#6301)
+- drop codecov badge from README (#6302)
+- Cython style: prefer cnp.float32_t and cnp.float64_t for clarity (#6303)
+- Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304) (#6306)
+- Remove undefined 'python_to_notebook' in doc/ext/notebook_doc.py (#6307)
+- Fix CI by pinning to Pillow!=9.1.0 (#6315)
+- Fix skeletonize behavior (#6322)
+- parameterize moments tests (#6323)
+- skeletonize maintenance (#6327)
+- Fix issue with newer versions of matplotlib in manual segmentation (#6328)
+- warp/rotate: fixed a bug with clipping when cval is not in the input range (#6335)
+- Add skip-4 draft (#6339)
+- add int64 support to `filters.rank_order` and `morphology.reconstruction` (#6342)
+- avoid warnings about change to v3 API from imageio (#6343)
+- Fix smoothed image computation when mask is None in canny (#6348)
+- Fix channel_axis default for cycle_spin (#6352)
+- Fix SKIP4 header and links (#6353)
+- Improve histogram matching performance on unsigned integer data (resume #6209) (#6354)
+- remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (#6355)
+- Document support for Path objects in io functions (#6361)
+- Add 3D rotation and translation properties for EuclideanTransform object, and 3D scale for SimilarityTransform (#6367)
+-  Fixing typo in _probabilistic_hough_line (#6373)
+- Improve multi-Otsu error message and maintenance of threshold.py (#6375)
+- Removing reference to `marching_cubes_lewiner` from `plot_marching_cubes.py`  (#6377)
+- pin to pip<22.1 (#6379)
+- Update GH actions (#6382)
+- Update matplotlib minimum version (#6383)
+- Don't use pillow 9.1.1 (#6384)
+- Update minimum supported numpy, scipy, and networkx (#6385)
+- Canny: cythonize non-maximum suppression (#6387)
+- derive OBJECT_COLUMNS from COL_DTYPES in regionprops (#6389)
+- DOC: add original plot in examples/segmentation/plot_expand_labels.py (#6396)
+- Add support for NumPy 1.23 (#6400)
+- Use supported circleci images (#6401)
+- Update minimum pillow dependency (#6402)
+- In newer PIL, palette may contain <256 entries (#6405)
+- Use artifact-redirector (#6407)
+- Sync numpy minimum version (#6409)
+- Fix computation of histogram bins for multichannel integer-valued images (#6413)
+- forward-port 0.19.3 release notes (#6416)
+- forwardport gh-6369: Fix windows wheels: use vsdevcmd.bat to make sure rc.exe is on the path (#6417)
+- Adding missing copyrights to LICENSE.txt, formatting according to SPDX identifiers (#6419)
+- Document refactoring from grey* to graymatrix and graycoprops in 0.19 with versionchanged directive (#6420)
+- [MINOR] centre -> center in doc/examples/applications/plot_morphology.py (#6421)
+- [MINOR] colour -> color in doc/examples/applications/plot_3d_interaction.py (#6422)
+- Restrict GitHub Actions permissions only for required ones (#6426)
+- Exclude submodules of doc from package install (#6428)
+- Substitute vertices with simplices in `transform/_geometric.py` (#6430)
+- example to render text onto an image (#6431)
+- Fix minor typo in sato() implemntation. (#6434)
+- Simplify sort-by-absolute-value in ridge filters. (#6440)
+- Speedup ~2x hessian_matrix_eigvals and 2D structure_tensor_eigenvalues. (#6441)
+- removed the completed items in 0.2 (#6442)
+- doc: replaced broken links (#6445)
+- Rewrite the meijering, sato, and frangi ridge filters. (#6446)
+- No valueerror for underdetermined (#6453)
+- Make Wiener restoration N-d (#6454)
+- Remove repeated import in canny_py (#6457)
+- Refactor occurences of `f = open(...)` using `with open(...) as f` instead (#6458)
+- Add multiscale structural similarity (#6470)
+- Add `alpha` argument to `adapted_rand_error`  (#6472)
+- Fix broken link to skimage.filters.sobel. (#6474)
+- Use broadcast_to instead of as_strided to generate broadcasted arrays. (#6476)
+- Update Ubuntu LTS version on Actions workflows (#6478)
+- changed image1 to moving_image in tvl1 parameter docs (#6480)
+- Use matplotlib.colormaps instead of deprecated cm.get_cmap in show_rag (#6483)
+- Use context manager when possible (#6484)
+- Document inclusion criteria for new functionality in core developer guide (#6488)
+- Use pyplot.get_cmap for compatiblity with matplotlib 3.3 to 3.6 in in show_rag (#6490)
+- Replace reference to api_changes.rst with release_dev.rst (#6495)
+- Support float input to skimage.draw.rectangle() [#4283] (#6501)
+- Find peaks at border with `peak_local_max with `exclude_border=0` (#6502)
+- Fix resize anti_aliazing default value when input dtype is integer and order == 0 (#6503)
+- Add Github actions/stale to label "dormant" issues and PRs (#6506)
+- Clarify header pointing to notes for latest version released. (#6508)
+- Reduce ridge filters memory footprints (#6509)
+- Update benchmark environment to recent Python and NumPy versions (#6511)
+- Add new flag to convex_hull_image and grid_points_in_poly (#6515)
+- relax label name comparison in benchmarks.yaml (#6520)
+- update plot_euler_number.py for maplotlib 3.6 compatibility (#6522)
+- Use mask during rescaling in segmentation.slic and improve handling of error cases (#6525)
+- make non-functional change to build.txt to fix cache issue on CircleCI (#6528)
+- update setup.cfg field from license_file to license_files (#6529)
+- Fix wrong doc on connected pixels in flood (#6534)
+- Minor doc fix: add missing print statement in the `plot_segmentations.py` example (#6535)
+- Apply codespell to fix common spelling mistakes (#6537)
+- Ignore codespell fixes with git blame (#6539)
+- Add missing spaces to regionprops error message. (#6545)
+- Update "Mark dormant issues" workflow (#6546)
+- Add missing space in math directive in normalized_mutual_information's docstring (#6549)
+- Add missing option stale-pr-label for "Mark dormant issues" workflow (#6552)
+- Remove FUNDING.yml in preference of org version (#6553)
+
+56 authors added to this release [alphabetical by first name or login]
+----------------------------------------------------------------------
+- =
+- Adeel Hassan
+- Albert Y. Shih
+- AleixBP (AleixBP)
+- Alexandr Kalinin
+- Alexandre de Siqueira
+- Antony Lee
+- Balint Varga
+- Ben Greiner
+- bsmietanka (bsmietanka)
+- Chris Roat
+- Chris Wood
+- Dave Mellert
+- Dudu Lasry
+- Elena Pascal
+- Fabian Schneider
+- Frank A. Krueger
+- Gregory Lee
+- Hande Gözükan
+- Jacob Rosenthal
+- James Gao
+- Jan Kadlec
+- Jan-Hendrik Müller
+- Jan-Lukas Wynen
+- Jarrod Millman
+- johnthagen (johnthagen)
+- Joshua Newton
+- Juan DF
+- Juan Nunez-Iglesias
+- Judd Storrs
+- Larry Bradley
+- Lars Grüter
+- Lucas Johnson
+- maldil (maldil)
+- Marianne Corvellec
+- Mark Harfouche
+- Marvin Albert
+- Miles Lucas
+- Naveen
+- pbuscay (Preston Buscay)
+- peterbell10 (peterbell10)
+- Ray Bell
+- Riadh
+- Riadh Fezzani
+- Robin Thibaut
+- Ross Barnowski
+- Sandeep N Menon
+- Sanghyeok Hyun
+- Sebastian Wallkötter
+- Simon-Martin Schröder
+- Stefan van der Walt
+- Teemu Kumpumäki
+- thvoigtmann (Thomas Voigtmann)
+- thvoigtmann (thvoigtmann)
+- Tim-Oliver Buchholz
+- Tyler Reddy
+
+
+30 reviewers added to this release [alphabetical by first name or login]
+------------------------------------------------------------------------
+- Abhijeet Parida
+- Albert Y. Shih
+- Alexandre de Siqueira
+- Antony Lee
+- Ben Greiner
+- Carlo
+- Chris Roat
+- Dudu Lasry
+- François Boulogne
+- Gregory Lee
+- Jacob Rosenthal
+- James Gao
+- Jan-Hendrik Müller
+- Jarrod Millman
+- Juan DF
+- Juan Nunez-Iglesias
+- Lars Grüter
+- maldil
+- Marianne Corvellec
+- Mark Harfouche
+- Marvin Albert
+- Riadh Fezzani
+- Robert Haase
+- Robin Thibaut
+- Sandeep N Menon
+- Sanghyeok Hyun
+- Sebastian Wallkötter
+- Stefan van der Walt
+- thvoigtmann
+- Tim-Oliver Buchholz
+
