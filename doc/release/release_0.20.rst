@@ -16,18 +16,17 @@ New features and improvements
 -----------------------------
 - Several footprint generating and consuming functions in ``skimage.morphology`` now support footprint decomposition.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be speed up.
+  The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, ``octagon`` in ``skimage.morphology``.
+  The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a tuple of a footprint and the number of times it should be applied iteratively.
   (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
 - Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` which performs better than the directed Hausdorff Distance (HD).
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
-
-API changes and new deprecations
---------------------------------
-- Added the ``decomposition`` parameter to the footprint generating functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, ``octagon`` in ``skimage.morphology``.
-  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
-- The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a tuple of a footprint and the number of times it should be applied iteratively.
-  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_)
 - Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method`` .
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
+- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``. (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_)
+
+Changes and new deprecations
+----------------------------
 
 Completed deprecations
 ----------------------
@@ -43,12 +42,12 @@ Documentation
 Other and development related updates
 -------------------------------------
 - Added benchmarks for ``morphology.local_maxima``. (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
+- Fix the autogeneration of API docs for lazy loaded subpackages. (`#6075 <https://github.com/scikit-image/scikit-image/pull/6075>`_)
+- Checkout gh-pages with a shallow clone. (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_)
 
 TODO
 ----
 - Transplant the change of scikit-learn into scikit-image for RANSAC  (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_)
-- Fix API docs autogeneration for lazy loaded subpackages (`#6075 <https://github.com/scikit-image/scikit-image/pull/6075>`_)
-- checkout gh-pages with a shallow clone (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_)
 - Skip tests requiring fetched data (`#6089 <https://github.com/scikit-image/scikit-image/pull/6089>`_)
 - Fix dev doc build (`#6091 <https://github.com/scikit-image/scikit-image/pull/6091>`_)
 - forward port of `#6098 <https://github.com/scikit-image/scikit-image/pull/6098>`_ (fix MacOS arm64 wheels and Windows Python 3.10 AMD64 wheel) (`#6101 <https://github.com/scikit-image/scikit-image/pull/6101>`_)
