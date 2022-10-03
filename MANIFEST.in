@@ -5,6 +5,7 @@ include *.md
 include *.txt
 include *.rst
 recursive-include requirements *.txt
+recursive-include meson.build
 include requirements/README.md
 include Makefile
 include skimage/restoration/unwrap_*_ljmu.c
