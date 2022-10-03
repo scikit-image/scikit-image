@@ -13,8 +13,55 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 
+New Features
+------------
+
+
+
+Improvements
+------------
+
+
+
+API Changes
+-----------
+
+- All references to EN-GB spelling for the word ``neighbour`` and others—e.g.,
+  ``neigbourhood``, ``neighboring``, were changed to their EN-US spelling,
+  ``neighbor``. With that, ``skimage.measure.perimeter`` parameter ``neighbourhood``
+  was deprecated in favor of ``neighborhood`` in 0.19.2.
+
+
+Backward Incompatible Changes
+-----------------------------
+
+- ``skimage.filters.meijering``, ``skimage.filters.sato``,
+  ``skimage.filters.frangi``, and ``skimage.filters.hessian`` have all been
+  rewritten to match more closely the published algorithms; the output values
+  will be different from previously.  The Hessian matrix calculation is now
+  done more accurately.  The filters will now correctly be set to zero whenever
+  one of the hessian eigenvalues has a sign incompatible with a ridge of the
+  desired polarity.  The gamma constant of the Frangi filter is now set
+  adaptively based on the maximum Hessian norm.
+
+
+Bugfixes
+--------
+
+
+
+Deprecations
+------------
+
+
+
+Contributors to this release
+----------------------------
+
+
+
 Other Pull Requests
-*******************
+-------------------
 - Add benchmarks for morphology.local_maxima (`#3255 <(https://github.com/scikit-image/scikit-image/pull/3255>`_)
 - Add textbook-like tutorial on measuring fluorescence at nuclear envelope. (`#5262 <(https://github.com/scikit-image/scikit-image/pull/5262>`_)
 - Footprint decomposition for faster morphology (part 1) (`#5482 <(https://github.com/scikit-image/scikit-image/pull/5482>`_)
