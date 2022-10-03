@@ -12,50 +12,37 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 
-New Features
-------------
-
-
-
-Improvements
-------------
-
-
-
-API Changes
------------
-
-- All references to EN-GB spelling for the word ``neighbour`` and others—e.g.,
-  ``neigbourhood``, ``neighboring``, were changed to their EN-US spelling,
-  ``neighbor``. With that, ``skimage.measure.perimeter`` parameter ``neighbourhood``
-  was deprecated in favor of ``neighborhood`` in 0.19.2.
-
-
-Backward Incompatible Changes
+New features and improvements
 -----------------------------
+- Several footprint generating and consuming functions in ``skimage.morphology`` now support footprint decomposition.
+  By decomposing a footprint into several smaller ones, morphological operations can potentially be speed up.
+  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
+- Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` which performs better than the directed Hausdorff Distance (HD).
+  (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
 
-- ``skimage.filters.meijering``, ``skimage.filters.sato``,
-  ``skimage.filters.frangi``, and ``skimage.filters.hessian`` have all been
-  rewritten to match more closely the published algorithms; the output values
-  will be different from previously.  The Hessian matrix calculation is now
-  done more accurately.  The filters will now correctly be set to zero whenever
-  one of the hessian eigenvalues has a sign incompatible with a ridge of the
-  desired polarity.  The gamma constant of the Frangi filter is now set
-  adaptively based on the maximum Hessian norm.
+API changes and new deprecations
+--------------------------------
+- Added the ``decomposition`` parameter to the footprint generating functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, ``octagon`` in ``skimage.morphology``.
+  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
+- The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a tuple of a footprint and the number of times it should be applied iteratively.
+  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_)
+- Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method`` .
+  (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
 
+Completed deprecations
+----------------------
 
 Bugfixes
 --------
 
+Documentation
+-------------
+- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope.
+  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_)
 
-
-Deprecations
-------------
-
-
-
-Contributors to this release
-----------------------------
+Other and development related updates
+-------------------------------------
+- Added benchmarks for ``morphology.local_maxima``. (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
 
 TODO
 ----
@@ -226,7 +213,6 @@ TODO
 - Add missing space in math directive in normalized_mutual_information's docstring (`#6549 <https://github.com/scikit-image/scikit-image/pull/6549>`_)
 - Add missing option stale-pr-label for "Mark dormant issues" workflow (`#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_)
 - Remove FUNDING.yml in preference of org version (`#6553 <https://github.com/scikit-image/scikit-image/pull/6553>`_)
-
 
 Pull Requests in this release
 -----------------------------
