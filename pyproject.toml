@@ -1,7 +1,54 @@
+[project]
+name = "scikit-image"
+license = {file = "LICENSE.txt"}
+description = "Image processing in Python"
+maintainers = [
+    {name = "scikit-image developers", email="skimage-core@discuss.scientific-python.org"},
+]
+requires-python = ">=3.8"
+dependencies = [
+    # TODO: update to "pin-compatible" once possible, see
+    # https://github.com/FFY00/meson-python/issues/29
+    "numpy>=1.19.2",
+]
+readme = "README.rst"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: C',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3 :: Only',
+    "Topic :: Software Development :: Libraries",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+dynamic = ['version']
+
+[project.urls]
+homepage = "https://scikit-image.org"
+documentation = "https://scikit-image.org/docs/stable"
+source = "https://github.com/scikit-image/scikit-image"
+download = "https://pypi.org/project/scikit-image/#files"
+tracker = "https://github.com/scikit-image/scikit-image/issues"
+
 [build-system]
+build-backend = 'mesonpy'
 requires = [
+    "meson-python>=0.8.0",
+    "patchelf>=0.11.0",
+    # `wheel` is needed for non-isolated builds, given that `meson-python`
+    # doesn't list it as a runtime requirement (at least in 0.5.0)
     "wheel",
-    "setuptools",
     "packaging",
     "Cython>=0.29.24,<3.0",
     "pythran",
