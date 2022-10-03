@@ -27,6 +27,7 @@ jobs:
         WITHOUT_POOCH: [0]
         SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: [0]
         EAGER_IMPORT: [0]
+        BUILD_WITH_MESON: [0]
         include:
           - platform_id: manylinux_x86_64
             python-version: 3.8
@@ -42,7 +43,8 @@ jobs:
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
-            OPTIONS_NAME: "mini-req-optional-deps"
+            BUID_WITH_MESON: 1
+            OPTIONS_NAME: "mini-req-optional-deps-meson"
           - platform_id: manylinux_x86_64
             python-version: 3.9
             PIP_FLAGS: "--pre"
@@ -89,6 +91,9 @@ jobs:
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
               pip uninstall cython -y;
               pip install dist/scikit-image-*.tar.gz;
+          elif [[ $BUILD_WITH_MESON == "1" ]]; then
+              python -m build --no-isolation
+              pip install dist/scikit_image-*.whl
           else
               pip install -vv -e .;
           fi
