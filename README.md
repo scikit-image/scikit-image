@@ -11,9 +11,8 @@
 
 ## Installation from binaries
 
-- **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
-- **OSX:** ``pip install scikit-image``
-- **Anaconda:** ``conda install -c conda-forge scikit-image``
+- **All platforms:** ``pip install scikit-image``
+- **Conda:** ``conda install -c conda-forge scikit-image``
 
 Also see [installing ``scikit-image``](INSTALL.rst).
 
