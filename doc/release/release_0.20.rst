@@ -3,7 +3,7 @@ Announcement: scikit-image 0.20.0
 
 We're happy to announce the release of scikit-image v0.20.0!
 
-scikit-image is an image processing toolbox for SciPy that includes algorithms
+scikit-image is an image processing toolbox built on SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
@@ -15,8 +15,8 @@ https://scikit-image.org
 New features and improvements
 -----------------------------
 - Several footprint generating and consuming functions in ``skimage.morphology`` now support footprint decomposition.
-  By decomposing a footprint into several smaller ones, morphological operations can potentially be speed up.
-  The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, ``octagon`` in ``skimage.morphology``.
+  By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
+  The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
   The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a tuple of a footprint and the number of times it should be applied iteratively.
   (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
 - Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` which performs better than the directed Hausdorff Distance (HD).
@@ -36,7 +36,7 @@ Bugfixes
 
 Documentation
 -------------
-- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope.
+- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_)
 
 Other and development related updates
@@ -386,16 +386,15 @@ Pull Requests in this release
 
 56 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
-- =
 - Adeel Hassan
 - Albert Y. Shih
-- AleixBP (AleixBP)
+- AleixBP
 - Alexandr Kalinin
 - Alexandre de Siqueira
 - Antony Lee
 - Balint Varga
 - Ben Greiner
-- bsmietanka (bsmietanka)
+- bsmietanka
 - Chris Roat
 - Chris Wood
 - Dave Mellert
@@ -411,7 +410,7 @@ Pull Requests in this release
 - Jan-Hendrik Müller
 - Jan-Lukas Wynen
 - Jarrod Millman
-- johnthagen (johnthagen)
+- johnthagen
 - Joshua Newton
 - Juan DF
 - Juan Nunez-Iglesias
@@ -425,10 +424,9 @@ Pull Requests in this release
 - Marvin Albert
 - Miles Lucas
 - Naveen
-- pbuscay (Preston Buscay)
-- peterbell10 (peterbell10)
+- Preston Buscay
+- Peter Bell
 - Ray Bell
-- Riadh
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
@@ -438,8 +436,7 @@ Pull Requests in this release
 - Simon-Martin Schröder
 - Stefan van der Walt
 - Teemu Kumpumäki
-- thvoigtmann (Thomas Voigtmann)
-- thvoigtmann (thvoigtmann)
+- Thomas Voigtmann
 - Tim-Oliver Buchholz
 - Tyler Reddy
 
@@ -474,6 +471,6 @@ Pull Requests in this release
 - Sanghyeok Hyun
 - Sebastian Wallkötter
 - Stefan van der Walt
-- thvoigtmann
+- Thomas Voigtmann
 - Tim-Oliver Buchholz
 
