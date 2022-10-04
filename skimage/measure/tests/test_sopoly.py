@@ -4,8 +4,8 @@ from skimage.measure import separate_selfoverlapping_polygon
 from skimage._shared.testing import assert_array_equal
 
 
-# A self-overlapping polygon that can be divided into three
-# non self-overlapping polygons.
+# This is a self-overlapping polygon which can be divided into three
+# non self-overlapping sub-polygons.
 sample_cw_overlap = np.array([[200, 271], [251, 267], [312, 267], [381, 269],
                               [425, 271], [471, 321], [483, 367], [474, 416],
                               [436, 478], [370, 510], [279, 512], [188, 504],

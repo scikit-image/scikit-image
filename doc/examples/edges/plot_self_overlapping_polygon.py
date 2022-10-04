@@ -4,8 +4,8 @@ Separate self-overlapping polygons
 ===================================
 
 This example shows how to separate a self-overlapping polygon into non
-self-overlapping sub polygons using the method [1]_.
-Each sub polygon can then be drawn or analyzed separately.
+self-overlapping sub-polygons using the method proposed in [1]_.
+Each sub-polygon can then be drawn or analyzed separately.
 
 .. [1] Uddipan Mukherjee, "Self-overlapping curves: Analysis and applications,"
     Computer-Aided Design, 2014, 46, 227-232.

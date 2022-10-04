@@ -1,23 +1,23 @@
 """_selfoverlapping_polygon.py - a selfoverlapping polygon separation algorithm
 
-This module provides a function to separate a selfoverlapping polygon.
-Selfoverlapping polygons are defined as curves that can be obtained from
-stretching a two dimensional disk without twisting it. Therefore, not all self
-intersecting polygons are selfoverlapping, even when they contain overlapping
+This module provides a function to separate a self-overlapping polygon.
+Self-overlapping polygons are defined as curves which can be obtained from
+stretching a two-dimensional disk without twisting it. Therefore, not all self-
+intersecting polygons are self-overlapping, even when they contain overlapping
 sections.
 
-An example of a selfintesecting polygon that is not selfoverlapping is a sheet
-of paper that has been folded at least one time. That would casue to have two
-faces of the same sheet pointing upwards. On the other hand, an example of a
-selfoverlapping polygon is the loop formed by an exit ramp on a highway.
+An example of a self-intersecting polygon that is not self-overlapping is a sheet
+of paper that has been folded at least one time. That would cause two
+faces of the same sheet to point upwards. Conversely, an example of a
+self-overlapping polygon is the loop formed by an exit ramp on a highway.
 
-This function is an implementation of the method proposed in
+This code is an implementation of the method proposed in
 Mukherjee, "Self-overlapping curves: Analysis and applications", Computer-Aided
 Design 46 (2014) 227-232.
 """
-import numpy as np
-import math
 from functools import reduce
+import math
+import numpy as np
 
 
 def _shift_indices(a1, a2, n_vertices, ex_start=True, ex_end=True):
@@ -1710,9 +1710,9 @@ def separate_selfoverlapping_polygon(coords):
 
     The separation algorithm implemented in this function is based on the idea
     that a complex curve can be compressed, without twisting it, into a two
-    dimensional disk. Therefore, a set of non trivial chords (cuts) separate
+    dimensional disk. Therefore, a set of non-trivial chords (cuts) separate
     the disk into mutually exclusive segments [1]_. These segments, in the
-    original complex curve, are the set of resulting non selfoverlapping sub
+    original complex curve, are the set of resulting non-selfoverlapping sub
     polygons.
 
     Examples
