@@ -582,3 +582,11 @@ def test_umfpack_import():
     except ImportError:
         assert UmfpackContext is None
     return
+
+
+def test_empty_labels():
+    from skimage.segmentation import random_walker
+    image = np.random.random((5, 5))
+    labels = np.zeros((5, 5), dtype=int)
+    with testing.raises(ValueError):
+        random_walker(image, labels)

@@ -467,6 +467,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
             data = data[:, :, np.newaxis, :]
 
+    if np.all(labels <= 0):
+        raise ValueError('No seeds provided in label image: please ensure '
+                         'it contains at least one positive value')
+
     labels_shape = labels.shape
     labels_dtype = labels.dtype
 
