@@ -11,8 +11,8 @@
 
 ## Installation from binaries
 
-- **All platforms:** ``pip install scikit-image``
-- **Conda:** ``conda install -c conda-forge scikit-image``
+- **pip:** ``pip install scikit-image``
+- **conda:** ``conda install -c conda-forge scikit-image``
 
 Also see [installing ``scikit-image``](INSTALL.rst).
 
