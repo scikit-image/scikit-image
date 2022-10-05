@@ -1,4 +1,4 @@
-"""Image Processing SciKit (Toolbox for SciPy)
+"""Image Processing for Python
 
 ``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
@@ -26,11 +26,11 @@ graph
 io
     Reading, saving, and displaying images and video.
 measure
-    Measurement of image properties, e.g., similarity and contours.
+    Measurement of image properties, e.g., region properties and contours.
+metrics
+    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
 morphology
     Morphological operations, e.g., opening or skeletonization.
-novice
-    Simplified interface for teaching purposes.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
@@ -39,9 +39,6 @@ transform
     Geometric and other transforms, e.g., rotation or the Radon transform.
 util
     Generic utilities.
-viewer
-    A simple graphical user interface for visualizing results and exploring
-    parameters.
 
 Utility Functions
 -----------------
@@ -68,13 +65,41 @@ dtype_limits
 
 """
 
-import sys
+__version__ = '0.20.0.dev0'
 
-
-__version__ = '0.15.dev0'
+submodules = [
+    'color',
+    'data',
+    'draw',
+    'exposure',
+    'feature',
+    'filters',
+    'future',
+    'graph',
+    'io',
+    'measure',
+    'metrics',
+    'morphology',
+    'registration',
+    'restoration',
+    'segmentation',
+    'transform',
+    'util',
+]
 
 from ._shared.version_requirements import ensure_python_version
-ensure_python_version((3, 5))
+ensure_python_version((3, 7))
+
+from ._shared import lazy
+__getattr__, __lazy_dir__, _ = lazy.attach(
+    __name__,
+    submodules,
+    submod_attrs={'data': ['data_dir']}
+)
+
+
+def __dir__():
+    return __lazy_dir__() + ['__version__']
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
@@ -113,6 +138,7 @@ except NameError:
     __SKIMAGE_SETUP__ = False
 
 if __SKIMAGE_SETUP__:
+    import sys
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
@@ -132,7 +158,41 @@ else:
                              img_as_ubyte,
                              img_as_bool,
                              dtype_limits)
-    from .data import data_dir
     from .util.lookfor import lookfor
 
-del sys
+if 'dev' in __version__:
+    # Append last commit date and hash to dev version information, if available
+
+    import subprocess
+    import os.path
+
+    try:
+        p = subprocess.Popen(
+            ['git', 'log', '-1', '--format="%h %aI"'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=os.path.dirname(__file__),
+        )
+    except FileNotFoundError:
+        pass
+    else:
+        out, err = p.communicate()
+        if p.returncode == 0:
+            git_hash, git_date = (
+                out.decode('utf-8')
+                .strip()
+                .replace('"', '')
+                .split('T')[0]
+                .replace('-', '')
+                .split()
+            )
+
+            __version__ = '+'.join(
+                [tag for tag in __version__.split('+')
+                 if not tag.startswith('git')]
+            )
+            __version__ += f'+git{git_date}.{git_hash}'
+
+from skimage._shared.tester import PytestTester  # noqa
+test = PytestTester(__name__)
+del PytestTester

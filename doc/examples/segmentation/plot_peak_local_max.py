@@ -4,9 +4,9 @@ Finding local maxima
 ====================
 
 The ``peak_local_max`` function returns the coordinates of local peaks (maxima)
-in an image. A maximum filter is used for finding local maxima. This operation
-dilates the original image and merges neighboring local maxima closer than the
-size of the dilation. Locations where the original image is equal to the
+in an image. Internally, a maximum filter is used for finding local maxima. This
+operation dilates the original image and merges neighboring local maxima closer
+than the size of the dilation. Locations where the original image is equal to the
 dilated image are returned as local maxima.
 
 """

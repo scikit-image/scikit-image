@@ -3,9 +3,9 @@
 import os
 import glob
 
-base = os.path.abspath(os.path.dirname(__file__))
-example_dir = os.path.join(base, 'auto_examples')
-js_fn = os.path.join(base, '_static/random.js')
+base_dir = os.path.abspath(os.path.dirname(__file__))
+example_dir = os.path.join(base_dir, 'auto_examples')
+js_fn = os.path.join(base_dir, '_static/random.js')
 
 javascript = '''\
 
@@ -37,18 +37,17 @@ link_url = 'https://scikit-image.org/docs/dev/auto_examples/'
 
 for example_path in examples:
     example_path = os.path.relpath(example_path, example_dir)
-    example_path, ext = os.path.splitext(example_path)
 
-    image_path, image_file = example_path.rsplit('/', maxsplit=1)
+    example_temp, ext = os.path.splitext(example_path)
+    image_path, image_file = os.path.split(example_temp)
     image_file = 'sphx_glr_' + image_file + '_001.png'
 
     images.append(image_url + image_file)
-    links.append(link_url + example_path + '.html')
+    links.append(link_url + example_temp + '.html')
 
 javascript = javascript.replace('{{IMAGES}}', str(images))
 javascript = javascript.replace('{{LINKS}}', str(links))
 javascript = javascript.replace('{{GALLERY_DIV}}', ''.join(gallery_div.split('\n')))
 
-f = open(js_fn, 'w')
-f.write(javascript)
-f.close()
+with open(js_fn, 'w') as f:
+    f.write(javascript)

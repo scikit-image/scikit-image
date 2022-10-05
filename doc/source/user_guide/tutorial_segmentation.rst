@@ -7,12 +7,12 @@ interest in an image.
 In this tutorial, we will see how to segment objects from a background.
 We use the ``coins`` image from ``skimage.data``. This image shows
 several coins outlined against a darker background. The segmentation of
-the coins cannot be done directly from the histogram of grey values,
-because the background shares enough grey levels with the coins that a
+the coins cannot be done directly from the histogram of gray values,
+because the background shares enough gray levels with the coins that a
 thresholding segmentation is not sufficient.
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_001.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_001.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 ::
@@ -26,18 +26,18 @@ Simply thresholding the image leads either to missing significant parts
 of the coins, or to merging parts of the background with the
 coins. This is due to the inhomogeneous lighting of the image.
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_002.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_002.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 A first idea is to take advantage of the local contrast, that is, to
-use the gradients rather than the grey values.
+use the gradients rather than the gray values.
 
 Edge-based segmentation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Let us first try to detect edges that enclose the coins. For edge
-detection, we use the `Canny detector 
+detection, we use the `Canny detector
 <https://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
 
 ::
@@ -53,8 +53,8 @@ boundary of the coins, or inside the coins.
     >>> from scipy import ndimage as ndi
     >>> fill_coins = ndi.binary_fill_holes(edges)
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_003.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_003.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 Now that we have contours that delineate the outer boundary of the coins,
@@ -62,8 +62,8 @@ we fill the inner part of the coins using the
 ``ndi.binary_fill_holes`` function, which uses mathematical morphology
 to fill the holes.
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_004.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_004.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 Most coins are well segmented out of the background. Small objects from
@@ -83,8 +83,8 @@ has not been segmented correctly at all. The reason is that the contour
 that we got from the Canny detector was not completely closed, therefore
 the filling function did not fill the inner part of the coin.
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_005.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_005.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 Therefore, this segmentation method is not very robust: if we miss a
@@ -98,14 +98,14 @@ Region-based segmentation
 Let us first determine markers of the coins and the background. These
 markers are pixels that we can label unambiguously as either object or
 background. Here, the markers are found at the two extreme parts of the
-histogram of grey values:
+histogram of gray values:
 
 ::
 
     >>> markers = np.zeros_like(coins)
     >>> markers[coins < 30] = 1
     >>> markers[coins > 150] = 2
-   
+
 We will use these markers in a watershed segmentation. The name watershed
 comes from an analogy with hydrology. The `watershed transform
 <https://en.wikipedia.org/wiki/Watershed_%28image_processing%29>`_ floods
@@ -128,28 +128,28 @@ separate the coins from the background.
 
 and here is the corresponding 2-D plot:
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_006.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_006.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 The next step is to find markers of the background and the coins based on the
-extreme parts of the histogram of grey values::
+extreme parts of the histogram of gray values::
 
     >>> markers = np.zeros_like(coins)
     >>> markers[coins < 30] = 1
     >>> markers[coins > 150] = 2
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_007.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_007.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 Let us now compute the watershed transform::
 
-    >>> from skimage.morphology import watershed
+    >>> from skimage.segmentation import watershed
     >>> segmentation = watershed(elevation_map, markers)
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_008.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_008.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 
 With this method, the result is satisfying for all coins. Even if the
@@ -165,7 +165,7 @@ We can now label all the coins one by one using ``ndi.label``::
 
     >>> labeled_coins, _ = ndi.label(segmentation)
 
-.. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_009.png
-   :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
+.. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_009.png
+   :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
 

@@ -15,18 +15,15 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
-import sys
-
-from configparser import ConfigParser
 import os.path
+import warnings
+from configparser import ConfigParser
 from glob import glob
 
 from .collection import imread_collection_wrapper
 
-
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
-
 
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
@@ -41,7 +38,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['imageio', 'pil', 'matplotlib', 'qt'],
+    'all': ['imageio', 'pil', 'matplotlib'],
     'imshow': ['matplotlib'],
     'imshow_collection': ['matplotlib']
 }
@@ -49,7 +46,6 @@ preferred_plugins = {
 
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
-
     """
     global plugin_store
     plugin_store = {'imread': [],
@@ -107,15 +103,16 @@ def _parse_config_file(filename):
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
     to gather plugin meta-data.
-
     """
     pd = os.path.dirname(__file__)
     config_files = glob(os.path.join(pd, '_plugins', '*.ini'))
 
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
+        if 'provides' not in meta_data:
+            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
+            continue
         plugin_meta_data[name] = meta_data
-
         provides = [s.strip() for s in meta_data['provides'].split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 
@@ -228,7 +225,6 @@ def use_plugin(name, kind=None):
 
     Examples
     --------
-
     To use Matplotlib as the default image reader, you would write:
 
     >>> from skimage import io

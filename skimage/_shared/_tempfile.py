@@ -16,12 +16,12 @@ def temporary_file(suffix=''):
     >>> import numpy as np
     >>> from skimage import io
     >>> with temporary_file('.tif') as tempfile:
-    ...     im = np.zeros((5, 5), np.uint8)
+    ...     im = np.arange(25, dtype=np.uint8).reshape((5, 5))
     ...     io.imsave(tempfile, im)
     ...     assert np.all(io.imread(tempfile) == im)
     """
-    tempfile_stream = NamedTemporaryFile(suffix=suffix, delete=False)
-    tempfile = tempfile_stream.name
-    tempfile_stream.close()
+    with NamedTemporaryFile(suffix=suffix, delete=False) as tempfile_stream:
+        tempfile = tempfile_stream.name
+
     yield tempfile
     os.remove(tempfile)

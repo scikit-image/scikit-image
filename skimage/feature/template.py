@@ -1,7 +1,9 @@
+import math
+
 import numpy as np
 from scipy.signal import fftconvolve
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD, _supported_float_type
 
 
 def _window_sum_2d(image, window_shape):
@@ -82,9 +84,9 @@ def match_template(image, template, pad_input=False, mode='constant',
     >>> template = np.zeros((3, 3))
     >>> template[1, 1] = 1
     >>> template
-    array([[ 0.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  0.]])
+    array([[0., 0., 0.],
+           [0., 1., 0.],
+           [0., 0., 0.]])
     >>> image = np.zeros((6, 6))
     >>> image[1, 1] = 1
     >>> image[4, 4] = -1
@@ -110,7 +112,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]])
     """
-    assert_nD(image, (2, 3))
+    check_nD(image, (2, 3))
 
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
@@ -120,7 +122,8 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     image_shape = image.shape
 
-    image = np.array(image, dtype=np.float64, copy=False)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
@@ -139,7 +142,7 @@ def match_template(image, template, pad_input=False, mode='constant',
         image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
 
     template_mean = template.mean()
-    template_volume = np.prod(template.shape)
+    template_volume = math.prod(template.shape)
     template_ssd = np.sum((template - template_mean) ** 2)
 
     if image.ndim == 2:
@@ -159,10 +162,10 @@ def match_template(image, template, pad_input=False, mode='constant',
     np.maximum(denominator, 0, out=denominator)  # sqrt of negative number not allowed
     np.sqrt(denominator, out=denominator)
 
-    response = np.zeros_like(xcorr, dtype=np.float64)
+    response = np.zeros_like(xcorr, dtype=float_dtype)
 
     # avoid zero-division
-    mask = denominator > np.finfo(np.float64).eps
+    mask = denominator > np.finfo(float_dtype).eps
 
     response[mask] = numerator[mask] / denominator[mask]
 

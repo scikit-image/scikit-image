@@ -1,13 +1,16 @@
 include setup*.py
 include MANIFEST.in
+include pyproject.toml
+include *.md
 include *.txt
 include *.rst
 recursive-include requirements *.txt
 include requirements/README.md
 include Makefile
-include skimage/scripts/skivi
-recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.npy *.txt *.in *.cpp *.md
+include skimage/restoration/unwrap_*_ljmu.c
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.h *.ini *.npy *.txt *.in *.md
 recursive-include skimage/data *
+recursive-include skimage/*/tests/data *
 
 include doc/Makefile
 recursive-include doc/examples *.txt

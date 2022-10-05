@@ -1,8 +1,10 @@
-
 import numpy as np
+import pytest
+
 from skimage import io
 from skimage._shared._warnings import expected_warnings
-import matplotlib.pyplot as plt
+
+plt = pytest.importorskip("matplotlib.pyplot")
 
 
 def setup():
@@ -19,6 +21,7 @@ im_hi = imf + 10
 
 imshow_expected_warnings = [
     r"tight_layout : falling back to Agg|\A\Z",
+    r"tight_layout: falling back to Agg|\A\Z",  # formatting change in mpl
     # Maptlotlib 2.2.3 seems to use np.asscalar which issues a warning
     # with numpy 1.16
     # Matplotlib 2.2.3 is the last supported version for python 2.7
@@ -128,7 +131,3 @@ def test_signed_image():
     assert ax_im.get_clim() == (-0.5, 0.5)
     assert n_subplots(ax_im) == 2
     assert ax_im.colorbar is not None
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

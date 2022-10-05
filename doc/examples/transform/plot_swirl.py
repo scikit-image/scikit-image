@@ -1,4 +1,4 @@
-"""
+r"""
 =====
 Swirl
 =====
@@ -42,9 +42,9 @@ mapping for the swirl transformation first computes, relative to a center
 
 .. math::
 
-    \\theta = \\arctan(y/x)
+    \theta = \arctan((y-y0)/(x-x0))
 
-    \\rho = \sqrt{(x - x_0)^2 + (y - y_0)^2},
+    \rho = \sqrt{(x - x_0)^2 + (y - y_0)^2},
 
 and then transforms them according to
 
@@ -56,12 +56,12 @@ and then transforms them according to
 
     s = \mathtt{strength}
 
-    \\theta' = \phi + s \, e^{-\\rho / r + \\theta}
+    \theta' = \phi + s \, e^{-\rho / r} + \theta
 
-where ``strength`` is a parameter for the amount of swirl, ``radius`` indicates
-the swirl extent in pixels, and ``rotation`` adds a rotation angle.  The
+where ``radius`` indicates the swirl extent in pixels, ``rotation`` adds a
+rotation angle, and ``strength`` is a parameter for the amount of swirl. The
 transformation of ``radius`` into :math:`r` is to ensure that the
-transformation decays to :math:`\\approx 1/1000^{\mathsf{th}}` within the
+transformation decays to :math:`\approx 1/1000^{\mathsf{th}}` within the
 specified radius.
 
 """
@@ -77,9 +77,9 @@ swirled = swirl(image, rotation=0, strength=10, radius=120)
 fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3),
                                sharex=True, sharey=True)
 
-ax0.imshow(image, cmap=plt.cm.gray, interpolation='none')
+ax0.imshow(image, cmap=plt.cm.gray)
 ax0.axis('off')
-ax1.imshow(swirled, cmap=plt.cm.gray, interpolation='none')
+ax1.imshow(swirled, cmap=plt.cm.gray)
 ax1.axis('off')
 
 plt.show()

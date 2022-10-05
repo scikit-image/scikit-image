@@ -1,8 +1,8 @@
 import numpy as np
-from ._hough_transform import (_hough_circle,
-                               _hough_ellipse,
-                               _hough_line,
-                               _probabilistic_hough_line as _prob_hough_line)
+from scipy.spatial import cKDTree
+
+from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
+from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -44,7 +44,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     --------
     >>> from skimage.transform import hough_line, hough_line_peaks
     >>> from skimage.draw import line
-    >>> img = np.zeros((15, 15), dtype=np.bool_)
+    >>> img = np.zeros((15, 15), dtype=bool)
     >>> rr, cc = line(0, 0, 14, 14)
     >>> img[rr, cc] = 1
     >>> rr, cc = line(0, 14, 14, 0)
@@ -57,11 +57,12 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     """
     from ..feature.peak import _prominent_peaks
 
+    min_angle = min(min_angle, hspace.shape[1])
     h, a, d = _prominent_peaks(hspace, min_xdistance=min_angle,
                                min_ydistance=min_distance,
                                threshold=threshold,
                                num_peaks=num_peaks)
-    if a.any():
+    if a.size > 0:
         return (h, angles[a], dists[d])
     else:
         return (h, np.array([]), np.array([]))
@@ -96,7 +97,7 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     --------
     >>> from skimage.transform import hough_circle
     >>> from skimage.draw import circle_perimeter
-    >>> img = np.zeros((100, 100), dtype=np.bool_)
+    >>> img = np.zeros((100, 100), dtype=bool)
     >>> rr, cc = circle_perimeter(25, 35, 23)
     >>> img[rr, cc] = 1
     >>> try_radii = np.arange(5, 50)
@@ -118,7 +119,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold: int, optional
+    threshold : int, optional
         Accumulator threshold value.
     accuracy : double, optional
         Bin size on the minor axis used in the accumulator.
@@ -172,7 +173,8 @@ def hough_line(image, theta=None):
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
-        Defaults to a vector of 180 angles evenly spaced from -pi/2 to pi/2.
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
 
     Returns
     -------
@@ -202,7 +204,8 @@ def hough_line(image, theta=None):
     >>> img[35:45, 35:50] = 1
     >>> for i in range(90):
     ...     img[i, i] = 1
-    >>> img += np.random.random(img.shape) > 0.95
+    >>> rng = np.random.default_rng()
+    >>> img += rng.random(img.shape) > 0.95
 
     Apply the Hough transform:
 
@@ -216,7 +219,7 @@ def hough_line(image, theta=None):
 
     if theta is None:
         # These values are approximations of pi/2
-        theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
     return _hough_line(image, theta=theta)
 
@@ -239,7 +242,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double, optional
         Angles at which to compute the transform, in radians.
-        If None, use a range from -pi/2 to pi/2.
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
     seed : int, optional
         Seed to initialize the random number generator.
 
@@ -260,10 +264,11 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         raise ValueError('The input image `image` must be 2D.')
 
     if theta is None:
-        theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
-    return _prob_hough_line(image, threshold=threshold, line_length=line_length,
-                            line_gap=line_gap, theta=theta, seed=seed)
+    return _prob_hough_line(image, threshold=threshold,
+                            line_length=line_length, line_gap=line_gap,
+                            theta=theta, seed=seed)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
@@ -271,10 +276,11 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
                        total_num_peaks=np.inf, normalize=False):
     """Return peaks in a circle Hough transform.
 
-    Identifies most prominent circles separated by certain distances in a
-    Hough space. Non-maximum suppression with different sizes is applied
+    Identifies most prominent circles separated by certain distances in given
+    Hough spaces. Non-maximum suppression with different sizes is applied
     separately in the first and second dimension of the Hough space to
-    identify peaks.
+    identify peaks. For circles with different radius but close in distance,
+    only the one with highest peak is kept.
 
     Parameters
     ----------
@@ -315,6 +321,13 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     >>> img[x, y] = 1
     >>> hspaces = transform.hough_circle(img, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
+
+    Notes
+    -----
+    Circles with bigger radius have higher peaks in Hough space. If larger
+    circles are preferred over smaller ones, `normalize` should be False.
+    Otherwise, circles will be returned in the order of decreasing voting
+    number.
     """
     from ..feature.peak import _prominent_peaks
 
@@ -342,10 +355,77 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
         s = np.argsort(accum / r)
     else:
         s = np.argsort(accum)
+    accum_sorted, cx_sorted, cy_sorted, r_sorted = \
+        accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1]
 
-    if total_num_peaks != np.inf:
-        tnp = total_num_peaks
-        return (accum[s][::-1][:tnp], cx[s][::-1][:tnp], cy[s][::-1][:tnp],
-                r[s][::-1][:tnp])
+    tnp = len(accum_sorted) if total_num_peaks == np.inf else total_num_peaks
 
-    return (accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1])
+    # Skip searching for neighboring circles
+    # if default min_xdistance and min_ydistance are used
+    # or if no peak was detected
+    if (min_xdistance == 1 and min_ydistance == 1) or len(accum_sorted) == 0:
+        return (accum_sorted[:tnp],
+                cx_sorted[:tnp],
+                cy_sorted[:tnp],
+                r_sorted[:tnp])
+
+    # For circles with centers too close, only keep the one with
+    # the highest peak
+    should_keep = label_distant_points(
+        cx_sorted, cy_sorted, min_xdistance, min_ydistance, tnp
+    )
+    return (accum_sorted[should_keep],
+            cx_sorted[should_keep],
+            cy_sorted[should_keep],
+            r_sorted[should_keep])
+
+
+def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
+    """Keep points that are separated by certain distance in each dimension.
+
+    The first point is always accpeted and all subsequent points are selected
+    so that they are distant from all their preceding ones.
+
+    Parameters
+    ----------
+    xs : array
+        X coordinates of points.
+    ys : array
+        Y coordinates of points.
+    min_xdistance : int
+        Minimum distance separating points in the x dimension.
+    min_ydistance : int
+        Minimum distance separating points in the y dimension.
+    max_points : int
+        Max number of distant points to keep.
+
+    Returns
+    -------
+    should_keep : array of bool
+        A mask array for distant points to keep.
+    """
+    is_neighbor = np.zeros(len(xs), dtype=bool)
+    coordinates = np.stack([xs, ys], axis=1)
+    # Use a KDTree to search for neighboring points effectively
+    kd_tree = cKDTree(coordinates)
+    n_pts = 0
+    for i in range(len(xs)):
+        if n_pts >= max_points:
+            # Ignore the point if points to keep reaches maximum
+            is_neighbor[i] = True
+        elif not is_neighbor[i]:
+            # Find a short list of candidates to remove
+            # by searching within a circle
+            neighbors_i = kd_tree.query_ball_point(
+                (xs[i], ys[i]),
+                np.hypot(min_xdistance, min_ydistance)
+            )
+            # Check distance in both dimensions and mark if close
+            for ni in neighbors_i:
+                x_close = abs(xs[ni] - xs[i]) <= min_xdistance
+                y_close = abs(ys[ni] - ys[i]) <= min_ydistance
+                if x_close and y_close and ni > i:
+                    is_neighbor[ni] = True
+            n_pts += 1
+    should_keep = ~is_neighbor
+    return should_keep

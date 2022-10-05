@@ -4,7 +4,7 @@ How to parallelize loops
 
 In image processing, we frequently apply the same algorithm
 on a large batch of images. In this paragraph, we propose to
-use `joblib <https://pythonhosted.org/joblib/>`_ to parallelize
+use `joblib <https://joblib.readthedocs.io>`_ to parallelize
 loops. Here is an example of such repetitive tasks:
 
 .. code-block:: python
@@ -17,7 +17,7 @@ loops. Here is an example of such repetitive tasks:
         """
         Apply some functions and return an image.
         """
-        image = denoise_tv_chambolle(image[0][0], weight=0.1, multichannel=True)
+        image = denoise_tv_chambolle(image[0][0], weight=0.1, channel_axis=-1)
         fd, hog_image = hog(color.rgb2gray(image), orientations=8,
                             pixels_per_cell=(16, 16), cells_per_block=(1, 1),
                             visualize=True)

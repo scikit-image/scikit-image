@@ -1,50 +1,62 @@
-from .binary import (binary_erosion, binary_dilation, binary_opening,
-                     binary_closing)
-from .grey import (erosion, dilation, opening, closing, white_tophat,
-                   black_tophat)
-from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
-                    octagon, star)
+from .binary import (binary_closing, binary_dilation, binary_erosion,
+                     binary_opening)
+from .gray import (black_tophat, closing, dilation, erosion, opening,
+                   white_tophat)
+from .footprints import (ball, cube, diamond, disk, ellipse,
+                         footprint_from_sequence, octagon, octahedron,
+                         rectangle, square, star)
 from ..measure._label import label
-from .watershed import watershed
-from ._skeletonize import skeletonize, medial_axis, thin
-from ._skeletonize_3d import skeletonize_3d
+from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
 from .convex_hull import convex_hull_image, convex_hull_object
-from .greyreconstruct import reconstruction
-from .misc import remove_small_objects, remove_small_holes
-from .extrema import h_minima, h_maxima, local_maxima, local_minima
+from .grayreconstruct import reconstruction
+from .misc import remove_small_holes, remove_small_objects
+from .extrema import h_maxima, h_minima, local_minima, local_maxima
+from ._flood_fill import flood, flood_fill
+from .max_tree import (area_opening, area_closing, diameter_closing,
+                       diameter_opening, max_tree,
+                       max_tree_local_maxima)
 
-
-__all__ = ['binary_erosion',
-           'binary_dilation',
-           'binary_opening',
-           'binary_closing',
-           'erosion',
-           'dilation',
-           'opening',
-           'closing',
-           'white_tophat',
-           'black_tophat',
-           'square',
-           'rectangle',
-           'diamond',
-           'disk',
-           'cube',
-           'octahedron',
+__all__ = ['area_closing',
+           'area_opening',
            'ball',
-           'octagon',
-           'star',
-           'label',
-           'watershed',
-           'skeletonize',
-           'skeletonize_3d',
-           'thin',
-           'medial_axis',
+           'binary_closing',
+           'binary_dilation',
+           'binary_erosion',
+           'binary_opening',
+           'black_tophat',
+           'closing',
            'convex_hull_image',
            'convex_hull_object',
-           'reconstruction',
-           'remove_small_objects',
-           'remove_small_holes',
-           'h_minima',
+           'cube',
+           'diameter_closing',
+           'diameter_opening',
+           'diamond',
+           'dilation',
+           'disk',
+           'ellipse',
+           'erosion',
+           'flood',
+           'flood_fill',
+           'footprint_from_sequence',
            'h_maxima',
+           'h_minima',
+           'label',
            'local_maxima',
-           'local_minima']
+           'local_minima',
+           'max_tree',
+           'max_tree_local_maxima',
+           'medial_axis',
+           'octagon',
+           'octahedron',
+           'opening',
+           'reconstruction',
+           'rectangle',
+           'remove_small_holes',
+           'remove_small_objects',
+           'skeletonize',
+           'skeletonize_3d',
+           'square',
+           'star',
+           'thin',
+           'white_tophat'
+]

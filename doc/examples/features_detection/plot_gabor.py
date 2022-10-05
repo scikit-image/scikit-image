@@ -54,17 +54,17 @@ for theta in range(4):
 
 
 shrink = (slice(0, None, 3), slice(0, None, 3))
-brick = img_as_float(data.load('brick.png'))[shrink]
-grass = img_as_float(data.load('grass.png'))[shrink]
-wall = img_as_float(data.load('rough-wall.png'))[shrink]
-image_names = ('brick', 'grass', 'wall')
-images = (brick, grass, wall)
+brick = img_as_float(data.brick())[shrink]
+grass = img_as_float(data.grass())[shrink]
+gravel = img_as_float(data.gravel())[shrink]
+image_names = ('brick', 'grass', 'gravel')
+images = (brick, grass, gravel)
 
 # prepare reference features
 ref_feats = np.zeros((3, len(kernels), 2), dtype=np.double)
 ref_feats[0, :, :] = compute_feats(brick, kernels)
 ref_feats[1, :, :] = compute_feats(grass, kernels)
-ref_feats[2, :, :] = compute_feats(wall, kernels)
+ref_feats[2, :, :] = compute_feats(gravel, kernels)
 
 print('Rotated images matched against references using Gabor filter banks:')
 
@@ -115,7 +115,7 @@ for label, img, ax in zip(image_names, images, axes[0][1:]):
 for label, (kernel, powers), ax_row in zip(kernel_params, results, axes[1:]):
     # Plot Gabor kernel
     ax = ax_row[0]
-    ax.imshow(np.real(kernel), interpolation='nearest')
+    ax.imshow(np.real(kernel))
     ax.set_ylabel(label, fontsize=7)
     ax.set_xticks([])
     ax.set_yticks([])

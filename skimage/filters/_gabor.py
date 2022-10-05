@@ -1,7 +1,9 @@
+import math
+
 import numpy as np
 from scipy import ndimage as ndi
-from .._shared.utils import assert_nD
 
+from .._shared.utils import _supported_float_type, check_nD
 
 __all__ = ['gabor_kernel', 'gabor']
 
@@ -9,12 +11,12 @@ __all__ = ['gabor_kernel', 'gabor']
 def _sigma_prefactor(bandwidth):
     b = bandwidth
     # See http://www.cs.rug.nl/~imaging/simplecell.html
-    return 1.0 / np.pi * np.sqrt(np.log(2) / 2.0) * \
+    return 1.0 / np.pi * math.sqrt(math.log(2) / 2.0) * \
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0):
+                 n_stds=3, offset=0, dtype=np.complex128):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -31,18 +33,21 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
+        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
+        and ``sigma_y`` will decrease with increasing frequency. This value is
+        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
+        direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations
     offset : float, optional
         Phase offset of harmonic function in radians.
+    dtype : {np.complex64, np.complex128}
+        Specifies if the filter is single or double precision complex.
 
     Returns
     -------
@@ -77,19 +82,29 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     if sigma_y is None:
         sigma_y = _sigma_prefactor(bandwidth) / frequency
 
-    x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
-                     np.abs(n_stds * sigma_y * np.sin(theta)), 1))
-    y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
-                     np.abs(n_stds * sigma_x * np.sin(theta)), 1))
-    y, x = np.mgrid[-y0:y0 + 1, -x0:x0 + 1]
+    if np.dtype(dtype).kind != 'c':
+        raise ValueError("dtype must be complex")
 
-    rotx = x * np.cos(theta) + y * np.sin(theta)
-    roty = -x * np.sin(theta) + y * np.cos(theta)
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    x0 = math.ceil(
+        max(abs(n_stds * sigma_x * ct), abs(n_stds * sigma_y * st), 1)
+    )
+    y0 = math.ceil(
+        max(abs(n_stds * sigma_y * ct), abs(n_stds * sigma_x * st), 1)
+    )
+    y, x = np.meshgrid(np.arange(-y0, y0 + 1),
+                       np.arange(-x0, x0 + 1),
+                       indexing='ij',
+                       sparse=True)
+    rotx = x * ct + y * st
+    roty = -x * st + y * ct
 
-    g = np.zeros(y.shape, dtype=np.complex)
-    g[:] = np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2))
-    g /= 2 * np.pi * sigma_x * sigma_y
-    g *= np.exp(1j * (2 * np.pi * frequency * rotx + offset))
+    g = np.empty(roty.shape, dtype=dtype)
+    np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2)
+           + 1j * (2 * np.pi * frequency * rotx + offset),
+           out=g)
+    g *= 1 / (2 * np.pi * sigma_x * sigma_y)
 
     return g
 
@@ -117,13 +132,14 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
+        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
+        and ``sigma_y`` will decrease with increasing frequency. This value is
+        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
+        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
+        direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations.
@@ -132,7 +148,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
         Mode used to convolve image with a kernel, passed to `ndi.convolve`
     cval : scalar, optional
-        Value to fill past edges of input if `mode` of convolution is
+        Value to fill past edges of input if ``mode`` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.
 
     Returns
@@ -165,9 +181,17 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
+    # do not cast integer types to float!
+    if image.dtype.kind == 'f':
+        float_dtype = _supported_float_type(image.dtype)
+        image = image.astype(float_dtype, copy=False)
+        kernel_dtype = np.promote_types(image.dtype, np.complex64)
+    else:
+        kernel_dtype = np.complex128
+
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
-                     offset)
+                     offset, dtype=kernel_dtype)
 
     filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)

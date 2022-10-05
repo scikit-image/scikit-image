@@ -1,6 +1,7 @@
 import numpy as np
+
 from . import _hoghistogram
-from .._shared.utils import skimage_deprecation, warn
+from .._shared import utils
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -32,11 +33,11 @@ def _hog_channel_gradient(channel):
     -------
     g_row, g_col : channel gradient along `row` and `col` axes correspondingly.
     """
-    g_row = np.empty(channel.shape, dtype=np.double)
+    g_row = np.empty(channel.shape, dtype=channel.dtype)
     g_row[0, :] = 0
     g_row[-1, :] = 0
     g_row[1:-1, :] = channel[2:, :] - channel[:-2, :]
-    g_col = np.empty(channel.shape, dtype=np.double)
+    g_col = np.empty(channel.shape, dtype=channel.dtype)
     g_col[:, 0] = 0
     g_col[:, -1] = 0
     g_col[:, 1:-1] = channel[:, 2:] - channel[:, :-2]
@@ -44,9 +45,11 @@ def _hog_channel_gradient(channel):
     return g_row, g_col
 
 
+@utils.channel_as_last_axis(multichannel_output=False)
+@utils.deprecate_multichannel_kwarg(multichannel_position=8)
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
-        feature_vector=True, multichannel=None):
+        block_norm='L2-Hys', visualize=False, transform_sqrt=False,
+        feature_vector=True, multichannel=None, *, channel_axis=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -71,7 +74,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         Block normalization method:
 
         ``L1``
-           Normalization using L1-norm. (default)
+           Normalization using L1-norm.
         ``L1-sqrt``
            Normalization using L1-norm, followed by square root.
         ``L2``
@@ -79,7 +82,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         ``L2-Hys``
            Normalization using L2-norm, followed by limiting the
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
-           renormalization using L2-norm.
+           renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
 
     visualize : bool, optional
@@ -97,7 +100,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         just before returning.
     multichannel : boolean, optional
         If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial.
+        otherwise as spatial. This argument is deprecated: specify
+        `channel_axis` instead.
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           `channel_axis` was added in 0.19.
 
     Returns
     -------
@@ -131,7 +142,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     -----
     The presented code implements the HOG extraction method from [2]_ with
     the following changes: (I) blocks of (3, 3) cells are used ((2, 2) in the
-    paper; (II) no smoothing within cells (Gaussian spatial window with sigma=8pix
+    paper); (II) no smoothing within cells (Gaussian spatial window with sigma=8pix
     in the paper); (III) L1 block normalization is used (L2-Hys in the paper).
 
     Power law compression, also known as Gamma correction, is used to reduce
@@ -140,24 +151,16 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     ``True``, the function computes the square root of each color channel
     and then applies the hog algorithm to the image.
     """
-
-    if block_norm is None:
-        block_norm = 'L1'
-        warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15. To suppress this message '
-             'specify explicitly the normalization method.',
-             skimage_deprecation)
-
     image = np.atleast_2d(image)
+    float_dtype = utils._supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
 
-    if multichannel is None:
-        multichannel = (image.ndim == 3)
-
+    multichannel = channel_axis is not None
     ndim_spatial = image.ndim - 1 if multichannel else image.ndim
     if ndim_spatial != 2:
-        raise ValueError('Only images with 2 spatial dimensions are '
+        raise ValueError('Only images with two spatial dimensions are '
                          'supported. If using with color/multichannel '
-                         'images, specify `multichannel=True`.')
+                         'images, specify `channel_axis`.')
 
     """
     The first stage applies an optional global image normalization
@@ -182,15 +185,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     e.g. bar like structures in bicycles and limbs in humans.
     """
 
-    if image.dtype.kind == 'u':
-        # convert uint image to float
-        # to avoid problems with subtracting unsigned numbers
-        image = image.astype('float')
-
     if multichannel:
-        g_row_by_ch = np.empty_like(image, dtype=np.double)
-        g_col_by_ch = np.empty_like(image, dtype=np.double)
-        g_magn = np.empty_like(image, dtype=np.double)
+        g_row_by_ch = np.empty_like(image, dtype=float_dtype)
+        g_col_by_ch = np.empty_like(image, dtype=float_dtype)
+        g_magn = np.empty_like(image, dtype=float_dtype)
 
         for idx_ch in range(image.shape[2]):
             g_row_by_ch[:, :, idx_ch], g_col_by_ch[:, :, idx_ch] = \
@@ -232,7 +230,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     n_cells_col = int(s_col // c_col)  # number of cells along col-axis
 
     # compute orientations integral images
-    orientation_histogram = np.zeros((n_cells_row, n_cells_col, orientations))
+    orientation_histogram = np.zeros((n_cells_row, n_cells_col, orientations),
+                                     dtype=float)
+    g_row = g_row.astype(float, copy=False)
+    g_col = g_col.astype(float, copy=False)
 
     _hoghistogram.hog_histograms(g_col, g_row, c_col, c_row, s_col, s_row,
                                  n_cells_col, n_cells_row,
@@ -241,10 +242,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     # now compute the histogram for each cell
     hog_image = None
 
-    if visualise is not None:
-        visualize = visualise
-        warn('Argument `visualise` is deprecated and will '
-             'be changed to `visualize` in v0.16', skimage_deprecation)
     if visualize:
         from .. import draw
 
@@ -255,7 +252,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
             np.pi * (orientations_arr + .5) / orientations)
         dr_arr = radius * np.sin(orientation_bin_midpoints)
         dc_arr = radius * np.cos(orientation_bin_midpoints)
-        hog_image = np.zeros((s_row, s_col), dtype=float)
+        hog_image = np.zeros((s_row, s_col), dtype=float_dtype)
         for r in range(n_cells_row):
             for c in range(n_cells_col):
                 for o, dr, dc in zip(orientations_arr, dr_arr, dc_arr):
@@ -284,8 +281,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     n_blocks_row = (n_cells_row - b_row) + 1
     n_blocks_col = (n_cells_col - b_col) + 1
-    normalized_blocks = np.zeros((n_blocks_row, n_blocks_col,
-                                  b_row, b_col, orientations))
+    normalized_blocks = np.zeros(
+        (n_blocks_row, n_blocks_col, b_row, b_col, orientations),
+        dtype=float_dtype
+    )
 
     for r in range(n_blocks_row):
         for c in range(n_blocks_col):

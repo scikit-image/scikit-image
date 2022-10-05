@@ -1,64 +1,43 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
-
-
-Version 0.15
-------------
-* Finalize ``skimage.future.graph`` API.
-* Finalize ``skimage.future.manual_segmentation`` API.
-* Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
-  update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
-
-Version 0.16
-------------
-* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``,
-  ``skimage.transform.pyramid_expandset``, set default value of
-  ``multichannel`` to False
-* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
-  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
-* Remove checks for the ``multichannel`` deprecation warnings in several tests
-  in ``skimage.transform.tests.test_pyramids.py`` and
-  ``skimage.transform.tests.test_warps.py``.
-* Remove `flatten` for `imread` in ``skimage.io._io.py``.
-* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
-* Remove deprecated argument ``visualise`` from function skimage.feature.hog
-* Remove deprecated module ``skimage.novice``
-  * Remove the ``save-demo.jpg`` line from ``.gitignore``
-  * Remove the warning filter from ``conftest.py``
-* In ``skimage.measure._regionprops``, remove all references to
-  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
-* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
-  arguments.
-* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
-* In ``skimage.filters.median``, change default from ``behavior='rank'`` to
-  ``behavior='ndimage'``.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
 
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
+* Finalize ``skimage.future.graph`` API.
+* Finalize ``skimage.future.manual_segmentation`` API.
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+* In ``skimage/morphology/misc.py`` remove the deprecated parameter
+  ``in_place`` in remove_small_holes(), remove_small_objects() and
+  clear_border(), and update the tests.
+* Remove the deprecation warning for `input` kwarg of the `label`
+  function in `skimage/measure/_label.py`
+* Change the warning about poorly conditioned data to a ValueError within
+  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+
+Other (2022)
+------------
+* Remove pillow version related warning for CVE when pillow > 8.1.2 in
+  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
+  to (sparse) matricies (instead of arrays).
+
+Other (2023)
+------------
+* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
+  ``skimage.transform.resize``.
+* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
+  ``skimage._shared.utils._fix_ndimage_mode``
 
 Other
 -----
-* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
-  once minimal required ``numpy`` is set to >= 1.14.0.
-* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
-  ``skimage.feature.corner``.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
-  ``test_denoise.py`` regarding multidimensional indexing.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for sparse matricies (``np.matrix``) used by scipy.sparse in
-  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
-  moves away from using ``np.matrix`` in a future version too.
-* Remove the conditional import and function call when ``numpy`` is set
-  to > 1.15.x in ``skimage/util/arraycrop.py``.
-* When minimum supported version of ``scipy`` reaches 0.18, use 
-  ``scipy.fftpack.next_fast_len`` directly in 
-  ``skimage.feature.masked_register_translation``.
-* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
-  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
-  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
-  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
+* Check whether imread wheels are available, then re-enable testing imread
+  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).
+* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
+  ``skimage/morphology/convex_hull.py``.

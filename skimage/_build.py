@@ -1,6 +1,6 @@
 import sys
 import os
-from distutils.version import LooseVersion
+from packaging import version
 from multiprocessing import cpu_count
 
 CYTHON_VERSION = '0.23.4'
@@ -41,7 +41,7 @@ def cython(pyx_files, working_path=''):
 
     try:
         from Cython import __version__
-        if LooseVersion(__version__) < CYTHON_VERSION:
+        if version.parse(__version__) < version.parse(CYTHON_VERSION):
             raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
 
         from Cython.Build import cythonize
@@ -60,9 +60,13 @@ def cython(pyx_files, working_path=''):
                 process_tempita_pyx(pyxfile)
                 pyx_files[i] = pyxfile.replace('.pyx.in', '.pyx')
 
-        # Cython doesn't automatically choose a number of threads > 1
-        # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
-        cythonize(pyx_files, nthreads=cpu_count())
+        # skip cythonize when creating an sdist
+        # (we do not want the large cython-generated sources to be included)
+        if 'sdist' not in sys.argv:
+            # Cython doesn't automatically choose a number of threads > 1
+            # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
+            cythonize(pyx_files, nthreads=cpu_count(),
+                      compiler_directives={'language_level': 3})
 
 
 def process_tempita_pyx(fromfile):

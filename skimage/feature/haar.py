@@ -8,7 +8,6 @@ from ._haar import haar_like_feature_coord_wrapper
 from ._haar import haar_like_feature_wrapper
 from ..color import gray2rgb
 from ..draw import rectangle
-from .._shared.utils import check_random_state
 from ..util import img_as_float
 
 FEATURE_TYPE = ('type-2-x', 'type-2-y',
@@ -28,8 +27,8 @@ def _validate_feature_type(feature_type):
         for feat_t in feature_type_:
             if feat_t not in FEATURE_TYPE:
                 raise ValueError(
-                    'The given feature type is unknown. Got {} instead of one'
-                    ' of {}.'.format(feat_t, FEATURE_TYPE))
+                                f'The given feature type is unknown. Got {feat_t} instead of one '
+                                f'of {FEATURE_TYPE}.')
     return feature_type_
 
 
@@ -142,7 +141,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     extracting features for all possible ROI in an image; use threading when
     extracting the feature at specific location for a limited number of ROIs.
     Refer to the example
-    :ref:`sphx_glr_auto_examples_xx_applications_plot_haar_extraction_selection_classification.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_haar_extraction_selection_classification.py`
     for more insights.
 
     Examples
@@ -154,9 +153,9 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     >>> img_ii = integral_image(img)
     >>> feature = haar_like_feature(img_ii, 0, 0, 5, 5, 'type-3-x')
     >>> feature
-    array([-1, -2, -3, -4, -1, -2, -3, -4, -1, -2, -3, -4, -1, -2, -3, -4, -1,
-           -2, -3, -4, -1, -2, -3, -4, -1, -2, -3, -1, -2, -3, -1, -2, -3, -1,
-           -2, -1, -2, -1, -2, -1, -1, -1])
+    array([-1, -2, -3, -4, -5, -1, -2, -3, -4, -5, -1, -2, -3, -4, -5, -1, -2,
+           -3, -4, -1, -2, -3, -4, -1, -2, -3, -4, -1, -2, -3, -1, -2, -3, -1,
+           -2, -3, -1, -2, -1, -2, -1, -2, -1, -1, -1])
 
     You can compute the feature for some pre-computed coordinates.
 
@@ -173,8 +172,8 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     >>> feature
     array([ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-            0,  0,  0,  0,  0,  0,  0,  0, -1, -3, -1, -3, -1, -3, -1, -3, -1,
-           -3, -1, -3, -1, -3, -2, -1, -3, -2, -2, -2, -1])
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -3, -5, -2, -4, -1,
+           -3, -5, -2, -4, -2, -4, -2, -4, -2, -1, -3, -2, -1, -1, -1, -1, -1])
 
     References
     ----------
@@ -188,7 +187,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
-           http://www.merl.com/publications/docs/TR2004-043.pdf
+           https://www.merl.com/publications/docs/TR2004-043.pdf
            :DOI:`10.1109/CVPR.2001.990517`
 
     """
@@ -245,7 +244,7 @@ def draw_haar_like_feature(image, r, c, width, height,
         needs to be an array containing the type of each feature, as returned
         by :func:`haar_like_feature_coord`. By default, all coordinates are
         computed.
-    color_positive_rectangle : tuple of 3 floats
+    color_positive_block : tuple of 3 floats
         Floats specifying the color for the positive block. Corresponding
         values define (R, G, B) values. Default value is red (1, 0, 0).
     color_negative_block : tuple of 3 floats
@@ -257,11 +256,15 @@ def draw_haar_like_feature(image, r, c, width, height,
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-    random_state : int, RandomState instance or None, optional
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`. The random state is used when generating a set of
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+
+        The random state is used when generating a set of
         features smaller than the total number of available features.
 
     Returns
@@ -280,14 +283,14 @@ def draw_haar_like_feature(image, r, c, width, height,
     ...                                feature_coord,
     ...                                max_n_features=1)
     >>> image
-    array([[[ 0. ,  0.5,  0. ],
-            [ 0.5,  0. ,  0. ]],
+    array([[[0. , 0.5, 0. ],
+            [0.5, 0. , 0. ]],
     <BLANKLINE>
-           [[ 0.5,  0. ,  0. ],
-            [ 0. ,  0.5,  0. ]]])
+           [[0.5, 0. , 0. ],
+            [0. , 0.5, 0. ]]])
 
     """
-    random_state = check_random_state(random_state)
+    random_state = np.random.default_rng(random_state)
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
 

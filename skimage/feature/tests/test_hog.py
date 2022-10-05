@@ -1,14 +1,12 @@
-import os
 import numpy as np
-from scipy import ndimage as ndi
-from skimage import color
-from skimage import data, data_dir
-from skimage import feature
-from skimage import img_as_float
-from skimage import draw
-from skimage._shared.testing import assert_almost_equal
-from skimage._shared import testing
-from skimage._shared.testing import expected_warnings
+import pytest
+from numpy.testing import assert_almost_equal
+
+from skimage import color, data, draw, feature, img_as_float
+from skimage._shared import filters
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
+from skimage._shared.utils import _supported_float_type
 
 
 def test_hog_output_size():
@@ -20,28 +18,34 @@ def test_hog_output_size():
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
 
-def test_hog_output_correctness_l1_norm():
-    img = color.rgb2gray(data.astronaut())
-    correct_output = np.load(
-        os.path.join(data_dir, 'astronaut_GRAY_hog_L1.npy'))
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hog_output_correctness_l1_norm(dtype):
+    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L1',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
-    assert_almost_equal(output, correct_output)
+    float_dtype = _supported_float_type(dtype)
+    assert output.dtype == float_dtype
+    decimal = 7 if float_dtype == np.float64 else 5
+    assert_almost_equal(output, correct_output, decimal=decimal)
 
 
-def test_hog_output_correctness_l2hys_norm():
-    img = color.rgb2gray(data.astronaut())
-    correct_output = np.load(
-        os.path.join(data_dir, 'astronaut_GRAY_hog_L2-Hys.npy'))
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hog_output_correctness_l2hys_norm(dtype):
+    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
                          cells_per_block=(3, 3), block_norm='L2-Hys',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
-    assert_almost_equal(output, correct_output)
+    float_dtype = _supported_float_type(dtype)
+    assert output.dtype == float_dtype
+    decimal = 7 if float_dtype == np.float64 else 5
+    assert_almost_equal(output, correct_output, decimal=decimal)
 
 
 def test_hog_image_size_cell_size_mismatch():
@@ -49,6 +53,20 @@ def test_hog_image_size_cell_size_mismatch():
     fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1), block_norm='L1')
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
+
+
+def test_hog_odd_cell_size():
+    img = np.zeros((3, 3))
+    img[2, 2] = 1
+
+    correct_output = np.zeros((9, ))
+    correct_output[0] = 0.5
+    correct_output[4] = 0.5
+
+    output = feature.hog(img, pixels_per_cell=(3, 3),
+                         cells_per_block=(1, 1), block_norm='L1')
+
+    assert_almost_equal(output, correct_output, decimal=1)
 
 
 def test_hog_basic_orientations_and_data_types():
@@ -161,9 +179,9 @@ def test_hog_orientations_circle():
     width = height = 100
 
     image = np.zeros((height, width))
-    rr, cc = draw.circle(int(height / 2), int(width / 2), int(width / 3))
+    rr, cc = draw.disk((int(height / 2), int(width / 2)), int(width / 3))
     image[rr, cc] = 100
-    image = ndi.gaussian_filter(image, 2)
+    image = filters.gaussian(image, 2, mode='reflect')
 
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,
@@ -233,27 +251,49 @@ def test_hog_visualization_orientation():
 
 def test_hog_block_normalization_incorrect_error():
     img = np.eye(4)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError):
         feature.hog(img, block_norm='Linf')
 
 
-@testing.parametrize("shape,multichannel", [
+@pytest.mark.parametrize("shape,multichannel", [
     ((3, 3, 3), False),
     ((3, 3), True),
     ((3, 3, 3, 3), True),
 ])
 def test_hog_incorrect_dimensions(shape, multichannel):
     img = np.zeros(shape)
-    with testing.raises(ValueError):
-        feature.hog(img, multichannel=multichannel, block_norm='L1')
+    with pytest.raises(ValueError):
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            feature.hog(img, multichannel=multichannel, block_norm='L1')
 
 
-def test_hog_output_equivariance_multichannel():
+def test_hog_output_equivariance_deprecated_multichannel():
     img = data.astronaut()
     img[:, :, (1, 2)] = 0
-    hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
+    with expected_warnings(["`multichannel` is a deprecated argument"]):
+        hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
 
     for n in (1, 2):
-        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
-                               block_norm='L1')
+        with expected_warnings(["`multichannel` is a deprecated argument"]):
+            hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
+                                   block_norm='L1')
+        assert_almost_equal(hog_ref, hog_fact)
+
+        # repeat prior test, but check for positional multichannel warning
+        with expected_warnings(["Providing the `multichannel` argument"]):
+            hog_fact = feature.hog(np.roll(img, n, axis=2), 9, (8, 8), (3, 3),
+                                   'L1', False, False, True, True)
+        assert_almost_equal(hog_ref, hog_fact)
+
+
+@pytest.mark.parametrize('channel_axis', [0, 1, -1, -2])
+def test_hog_output_equivariance_channel_axis(channel_axis):
+    img = data.astronaut()[:64, :32]
+    img[:, :, (1, 2)] = 0
+    img = np.moveaxis(img, -1, channel_axis)
+    hog_ref = feature.hog(img, channel_axis=channel_axis, block_norm='L1')
+
+    for n in (1, 2):
+        hog_fact = feature.hog(np.roll(img, n, axis=channel_axis),
+                               channel_axis=channel_axis, block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)

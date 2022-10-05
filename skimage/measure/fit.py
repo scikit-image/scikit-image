@@ -1,8 +1,11 @@
 import math
+from warnings import warn
+
 import numpy as np
-from numpy.linalg import inv, pinv
-from scipy import optimize
-from .._shared.utils import check_random_state
+from numpy.linalg import inv
+from scipy import optimize, spatial
+
+_EPSILON = np.spacing(1)
 
 
 def _check_data_dim(data, dim):
@@ -13,11 +16,6 @@ def _check_data_dim(data, dim):
 def _check_data_atleast_2D(data):
     if data.ndim < 2 or data.shape[1] < 2:
         raise ValueError('Input data must be at least 2D.')
-
-
-def _norm_along_axis(x, axis):
-    """NumPy < 1.8 does not support the `axis` argument for `np.linalg.norm`."""
-    return np.sqrt(np.einsum('ij,ij->i', x, x))
 
 
 class BaseModel(object):
@@ -47,18 +45,18 @@ class LineModelND(BaseModel):
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
-    >>> lm.estimate(np.array([x, y]).T)
+    >>> lm.estimate(np.stack([x, y], axis=-1))
     True
     >>> tuple(np.round(lm.params, 5))
-    (array([ 1.5 ,  5.25]), array([ 0.5547 ,  0.83205]))
-    >>> res = lm.residuals(np.array([x, y]).T)
+    (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
+    >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     >>> np.round(lm.predict_y(x[:5]), 3)
-    array([ 4.5  ,  4.562,  4.625,  4.688,  4.75 ])
+    array([4.5  , 4.562, 4.625, 4.688, 4.75 ])
     >>> np.round(lm.predict_x(y[:5]), 3)
-    array([ 1.   ,  1.042,  1.083,  1.125,  1.167])
+    array([1.   , 1.042, 1.083, 1.125, 1.167])
 
     """
 
@@ -93,7 +91,7 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            raise ValueError('At least 2 input points needed.')
+            return False
 
         self.params = (origin, direction)
 
@@ -119,15 +117,16 @@ class LineModelND(BaseModel):
         """
         _check_data_atleast_2D(data)
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
         origin, direction = params
         res = (data - origin) - \
               ((data - origin) @ direction)[..., np.newaxis] * direction
-        return _norm_along_axis(res, axis=1)
+        return np.linalg.norm(res, axis=1)
 
     def predict(self, x, axis=0, params=None):
         """Predict intersection of the estimated line model with a hyperplane
@@ -153,8 +152,9 @@ class LineModelND(BaseModel):
             If the line is parallel to the given axis.
         """
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
@@ -235,6 +235,18 @@ class CircleModel(BaseModel):
     params : tuple
         Circle model parameters in the following order `xc`, `yc`, `r`.
 
+    Notes
+    -----
+    The estimation is carried out using a 2D version of the spherical
+    estimation given in [1]_.
+
+    References
+    ----------
+    .. [1] Jekel, Charles F. Obtaining non-linear orthotropic material models
+           for pvc-coated polyester via inverse bubble inflation.
+           Thesis (MEng), Stellenbosch University, 2016. Appendix A, pp. 83-87.
+           https://hdl.handle.net/10019.1/98627
+
     Examples
     --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
@@ -246,9 +258,8 @@ class CircleModel(BaseModel):
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
-
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     """
 
     def estimate(self, data):
@@ -268,27 +279,28 @@ class CircleModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
-        x = data[:, 0]
-        y = data[:, 1]
+        # to prevent integer overflow, cast data to float, if it isn't already
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
 
-        # http://www.had2know.com/academics/best-fit-circle-least-squares.html
-        x2y2 = (x ** 2 + y ** 2)
-        sum_x = np.sum(x)
-        sum_y = np.sum(y)
-        sum_xy = np.sum(x * y)
-        m1 = np.array([[np.sum(x ** 2), sum_xy, sum_x],
-                       [sum_xy, np.sum(y ** 2), sum_y],
-                       [sum_x, sum_y, float(len(x))]])
-        m2 = np.array([[np.sum(x * x2y2),
-                        np.sum(y * x2y2),
-                        np.sum(x2y2)]]).T
-        a, b, c = pinv(m1) @ m2
-        a, b, c = a[0], b[0], c[0]
-        xc = a / 2
-        yc = b / 2
-        r = np.sqrt(4 * c + a ** 2 + b ** 2) / 2
+        # Adapted from a spherical estimator covered in a blog post by Charles
+        # Jeckel (see also reference 1 above):
+        # https://jekel.me/2015/Least-Squares-Sphere-Fit/
+        A = np.append(data * 2,
+                      np.ones((data.shape[0], 1), dtype=float_type),
+                      axis=1)
+        f = np.sum(data ** 2, axis=1)
+        C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
-        self.params = (xc, yc, r)
+        if rank != 3:
+            warn("Input does not contain enough significant data points.")
+            return False
+
+        center = C[0:2]
+        distances = spatial.minkowski_distance(center, data)
+        r = np.sqrt(np.mean(distances ** 2))
+
+        self.params = tuple(center) + (r,)
 
         return True
 
@@ -380,10 +392,10 @@ class EllipseModel(BaseModel):
     >>> ellipse.estimate(xy)
     True
     >>> np.round(ellipse.params, 2)
-    array([ 10.  ,  15.  ,   4.  ,   8.  ,   0.52])
+    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     """
 
     def estimate(self, data):
@@ -412,13 +424,17 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        # to prevent integer overflow, cast data to float, if it isn't already
+        float_type = np.promote_types(data.dtype, np.float32)
+        data = data.astype(float_type, copy=False)
+
         x = data[:, 0]
         y = data[:, 1]
 
         # Quadratic part of design matrix [eqn. 15] from [1]
         D1 = np.vstack([x ** 2, x * y, y ** 2]).T
         # Linear part of design matrix [eqn. 16] from [1]
-        D2 = np.vstack([x, y, np.ones(len(x))]).T
+        D2 = np.vstack([x, y, np.ones_like(x)]).T
 
         # forming scatter matrix [eqn. 17] from [1]
         S1 = D1.T @ D1
@@ -527,7 +543,7 @@ class EllipseModel(BaseModel):
         #                                + b * ctheta * ct)
         #     return [dfx_t + dfy_t]
 
-        residuals = np.empty((N, ), dtype=np.double)
+        residuals = np.empty((N, ), dtype=np.float64)
 
         # initial guess for parameter t of closest point on ellipse
         t0 = np.arctan2(y - yc, x - xc) - theta
@@ -579,6 +595,7 @@ class EllipseModel(BaseModel):
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     """Determine number trials such that at least one outlier-free subset is
     sampled for the given inlier/outlier ratio.
+
     Parameters
     ----------
     n_inliers : int
@@ -589,37 +606,26 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         Minimum number of samples chosen randomly from original data.
     probability : float
         Probability (confidence) that one outlier-free sample is generated.
+
     Returns
     -------
     trials : int
         Number of trials.
     """
+    if probability == 0:
+        return 0
     if n_inliers == 0:
         return np.inf
-
-    nom = 1 - probability
-    if nom == 0:
-        return np.inf
-
-    inlier_ratio = n_inliers / float(n_samples)
-    denom = 1 - inlier_ratio ** min_samples
-    if denom == 0:
-        return 1
-    elif denom == 1:
-        return np.inf
-
-    nom = np.log(nom)
-    denom = np.log(denom)
-    if denom == 0:
-        return 0
-
-    return int(np.ceil(nom / denom))
+    inlier_ratio = n_inliers / n_samples
+    nom = max(_EPSILON, 1 - probability)
+    denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
+    return np.ceil(np.log(nom) / np.log(denom))
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None):
+           stop_probability=1, random_state=None, initial_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -646,9 +652,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     Parameters
     ----------
-    data : [list, tuple of] (N, D) array
+    data : [list, tuple of] (N, ...) array
         Data set to which the model is fitted, where N is the number of data
-        points and D the dimensionality of the data.
+        points and the remaining dimension are depending on model requirements.
         If the model class requires multiple input data arrays (e.g. source and
         destination coordinates of  ``skimage.transform.AffineTransform``),
         they can be optionally passed as tuple or list. Note, that in this case
@@ -664,9 +670,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int
+    min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
-    residual_threshold : float
+    residual_threshold : float larger than 0
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
         This function is called with the randomly selected data before the
@@ -690,13 +696,17 @@ def ransac(data, model_class, min_samples, residual_threshold,
             N >= log(1 - probability) / log(1 - e**m)
 
         where the probability (confidence) is typically set to a high value
-        such as 0.99, and e is the current fraction of inliers w.r.t. the
-        total number of samples.
-    random_state : int, RandomState instance or None, optional
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`.
+        such as 0.99, e is the current fraction of inliers w.r.t. the
+        total number of samples, and m is the min_samples value.
+    random_state : {None, int, `numpy.random.Generator`}, optional
+        If `random_state` is None the `numpy.random.Generator` singleton is
+        used.
+        If `random_state` is an int, a new ``Generator`` instance is used,
+        seeded with `random_state`.
+        If `random_state` is already a ``Generator`` instance then that
+        instance is used.
+    initial_inliers : array-like of bool, shape (N,), optional
+        Initial samples selection for model estimation
 
 
     Returns
@@ -721,8 +731,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> x = xc + a * np.cos(t)
     >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
-    >>> np.random.seed(seed=1234)
-    >>> data += np.random.normal(size=data.shape)
+    >>> rng = np.random.default_rng(203560)  # do not copy this value
+    >>> data += rng.normal(size=data.shape)
 
     Add some faulty data:
 
@@ -743,8 +753,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
     >>> abs(np.round(ransac_model.params))
-    array([ 20.,  30.,   5.,  10.,   0.])
-    >>> inliers # doctest: +SKIP
+    array([20., 30., 10.,  6.,  2.])
+    >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -754,110 +764,136 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> sum(inliers) > 40
     True
 
-    Robustly estimate geometric transformation:
+    RANSAC can be used to robustly estimate a geometric
+    transformation. In this section, we also show how to use a
+    proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
-    >>> np.random.seed(0)
-    >>> src = 100 * np.random.rand(50, 2)
+    >>> rng = np.random.default_rng()
+    >>> src = 100 * rng.random((50, 2))
     >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
     ...                              translation=(10, 20))
     >>> dst = model0(src)
     >>> dst[0] = (10000, 10000)
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, 2, 10)
-    >>> inliers
+    >>> ratio = 0.5  # use half of the samples
+    >>> min_samples = int(ratio * len(src))
+    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples,
+    ...                         10,
+    ...                         initial_inliers=np.ones(len(src), dtype=bool))
+    >>> inliers  # doctest: +SKIP
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
-            True,  True,  True,  True,  True], dtype=bool)
+            True,  True,  True,  True,  True])
 
     """
 
-    best_model = None
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
-    best_inliers = None
+    best_inliers = []
+    validate_model = is_model_valid is not None
+    validate_data = is_data_valid is not None
 
-    random_state = check_random_state(random_state)
+    random_state = np.random.default_rng(random_state)
 
-    if min_samples < 0:
-        raise ValueError("`min_samples` must be greater than zero")
+    # in case data is not pair of input and output, male it like it
+    if not isinstance(data, (tuple, list)):
+        data = (data, )
+    num_samples = len(data[0])
+
+    if not (0 < min_samples < num_samples):
+        raise ValueError(f"`min_samples` must be in range (0, {num_samples})")
+
+    if residual_threshold < 0:
+        raise ValueError("`residual_threshold` must be greater than zero")
 
     if max_trials < 0:
         raise ValueError("`max_trials` must be greater than zero")
 
-    if stop_probability < 0 or stop_probability > 1:
+    if not (0 <= stop_probability <= 1):
         raise ValueError("`stop_probability` must be in range [0, 1]")
 
-    if not isinstance(data, list) and not isinstance(data, tuple):
-        data = [data]
+    if initial_inliers is not None and len(initial_inliers) != num_samples:
+        raise ValueError(
+            f"RANSAC received a vector of initial inliers (length "
+            f"{len(initial_inliers)}) that didn't match the number of "
+            f"samples ({num_samples}). The vector of initial inliers should "
+            f"have the same length as the number of samples and contain only "
+            f"True (this sample is an initial inlier) and False (this one "
+            f"isn't) values.")
 
-    # make sure data is list and not tuple, so it can be modified below
-    data = list(data)
-    # number of samples
-    num_samples = data[0].shape[0]
+    # for the first run use initial guess of inliers
+    spl_idxs = (initial_inliers if initial_inliers is not None
+                else random_state.choice(num_samples, min_samples,
+                                         replace=False))
 
-    for num_trials in range(max_trials):
+    # estimate model for current random sample set
+    model = model_class()
 
-        # choose random sample set
-        samples = []
-        random_idxs = random_state.randint(0, num_samples, min_samples)
-        for d in data:
-            samples.append(d[random_idxs])
+    num_trials = 0
+    # max_trials can be updated inside the loop, so this cannot be a for-loop
+    while num_trials < max_trials:
+        num_trials += 1
 
-        # check if random sample set is valid
-        if is_data_valid is not None and not is_data_valid(*samples):
+        # do sample selection according data pairs
+        samples = [d[spl_idxs] for d in data]
+
+        # for next iteration choose random sample set and be sure that
+        # no samples repeat
+        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
+
+        # optional check if random sample set is valid
+        if validate_data and not is_data_valid(*samples):
             continue
 
-        # estimate model for current random sample set
-        sample_model = model_class()
-
-        success = sample_model.estimate(*samples)
-
-        if success is not None:  # backwards compatibility
-            if not success:
-                continue
-
-        # check if estimated model is valid
-        if is_model_valid is not None \
-                and not is_model_valid(sample_model, *samples):
+        success = model.estimate(*samples)
+        # backwards compatibility
+        if success is not None and not success:
             continue
 
-        sample_model_residuals = np.abs(sample_model.residuals(*data))
+        # optional check if estimated model is valid
+        if validate_model and not is_model_valid(model, *samples):
+            continue
+
+        residuals = np.abs(model.residuals(*data))
         # consensus set / inliers
-        sample_model_inliers = sample_model_residuals < residual_threshold
-        sample_model_residuals_sum = np.sum(sample_model_residuals**2)
+        inliers = residuals < residual_threshold
+        residuals_sum = residuals.dot(residuals)
 
         # choose as new best model if number of inliers is maximal
-        sample_inlier_num = np.sum(sample_model_inliers)
+        inliers_count = np.count_nonzero(inliers)
         if (
             # more inliers
-            sample_inlier_num > best_inlier_num
+            inliers_count > best_inlier_num
             # same number of inliers but less "error" in terms of residuals
-            or (sample_inlier_num == best_inlier_num
-                and sample_model_residuals_sum < best_inlier_residuals_sum)
-        ):
-            best_model = sample_model
-            best_inlier_num = sample_inlier_num
-            best_inlier_residuals_sum = sample_model_residuals_sum
-            best_inliers = sample_model_inliers
-            if (
-                best_inlier_num >= stop_sample_num
-                or best_inlier_residuals_sum <= stop_residuals_sum
-                or num_trials
-                    >= _dynamic_max_trials(best_inlier_num, num_samples,
-                                           min_samples, stop_probability)
-            ):
+            or (inliers_count == best_inlier_num
+                and residuals_sum < best_inlier_residuals_sum)):
+            best_inlier_num = inliers_count
+            best_inlier_residuals_sum = residuals_sum
+            best_inliers = inliers
+            max_trials = min(max_trials,
+                             _dynamic_max_trials(best_inlier_num,
+                                                 num_samples,
+                                                 min_samples,
+                                                 stop_probability))
+            if (best_inlier_num >= stop_sample_num
+                    or best_inlier_residuals_sum <= stop_residuals_sum):
                 break
 
     # estimate final model using all inliers
-    if best_inliers is not None:
+    if any(best_inliers):
         # select inliers for each data array
-        for i in range(len(data)):
-            data[i] = data[i][best_inliers]
-        best_model.estimate(*data)
+        data_inliers = [d[best_inliers] for d in data]
+        model.estimate(*data_inliers)
+        if validate_model and not is_model_valid(model, *data_inliers):
+            warn("Estimated model is not valid. Try increasing max_trials.")
+    else:
+        model = None
+        best_inliers = None
+        warn("No inliers found. Model not fitted")
 
-    return best_model, best_inliers
+    return model, best_inliers
