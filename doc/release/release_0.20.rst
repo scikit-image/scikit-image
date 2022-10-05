@@ -14,16 +14,16 @@ https://scikit-image.org
 
 New features and improvements
 -----------------------------
-- Several footprint generating and consuming functions in ``skimage.morphology`` now support footprint decomposition.
+- Add support for footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
-  The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a tuple of a footprint and the number of times it should be applied iteratively.
+  The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a sequence of smaller footprints that are applied consecutively as well. See the respective docstrings for more details.
   (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
-- Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` which performs better than the directed Hausdorff Distance (HD).
+- Add support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
+  The MHD can be more robust against outliers than the directed Hausdorff Distance (HD).
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
-- Added support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method`` .
-  (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
-- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``. (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_)
+- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``.
+  (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_)
 
 Changes and new deprecations
 ----------------------------
@@ -31,8 +31,8 @@ Changes and new deprecations
 Completed deprecations
 ----------------------
 
-Bugfixes
---------
+Bug fixes
+---------
 
 Documentation
 -------------
@@ -41,7 +41,7 @@ Documentation
 
 Other and development related updates
 -------------------------------------
-- Added benchmarks for ``morphology.local_maxima``. (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
+- Add benchmarks for ``morphology.local_maxima``. (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
 - Fix the autogeneration of API docs for lazy loaded subpackages. (`#6075 <https://github.com/scikit-image/scikit-image/pull/6075>`_)
 - Checkout gh-pages with a shallow clone. (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_)
 
