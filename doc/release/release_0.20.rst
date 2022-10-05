@@ -17,13 +17,18 @@ New features and improvements
 - Add support for footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
-  The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a sequence of smaller footprints that are applied consecutively as well. See the respective docstrings for more details.
-  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
+  The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a sequence of smaller footprints that are applied consecutively as well. See the respective docstrings for more details
+  (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
-  The MHD can be more robust against outliers than the directed Hausdorff Distance (HD).
-  (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_)
-- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``.
-  (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_)
+  The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
+  (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
+- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``
+  (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_).
+- Incorporate RANSAC improvements from scikit-learn into ``skimage.measure.ransac`` which should lower iteration times
+  (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_).
+- Add the new parameter ``use_gaussian_derivatives`` to ``skimage.feature.hessian_matrix`` which allows the computation of the Hessian matrix by convolving with Gaussian derivatives
+  (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_).
+
 
 Changes and new deprecations
 ----------------------------
@@ -37,31 +42,23 @@ Bug fixes
 Documentation
 -------------
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
-  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_)
+  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
+- Fix minor typos in perimeters gallery example
+  (`#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 
 Other and development related updates
 -------------------------------------
-- Add benchmarks for ``morphology.local_maxima``. (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
-- Fix the autogeneration of API docs for lazy loaded subpackages. (`#6075 <https://github.com/scikit-image/scikit-image/pull/6075>`_)
-- Checkout gh-pages with a shallow clone. (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_)
+- Add benchmarks for ``morphology.local_maxima``
+  (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_).
+- Fix the autogeneration of API docs for lazy loaded subpackages
+  (`#6075 <https://github.com/scikit-image/scikit-image/pull/6075>`_).
+- Checkout gh-pages with a shallow clone
+  (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_).
+- Fix dev doc build
+  (`#6091 <https://github.com/scikit-image/scikit-image/pull/6091>`_).
 
 TODO
 ----
-- Transplant the change of scikit-learn into scikit-image for RANSAC  (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_)
-- Skip tests requiring fetched data (`#6089 <https://github.com/scikit-image/scikit-image/pull/6089>`_)
-- Fix dev doc build (`#6091 <https://github.com/scikit-image/scikit-image/pull/6091>`_)
-- forward port of `#6098 <https://github.com/scikit-image/scikit-image/pull/6098>`_ (fix MacOS arm64 wheels and Windows Python 3.10 AMD64 wheel) (`#6101 <https://github.com/scikit-image/scikit-image/pull/6101>`_)
-- make rank filter test comparisons robust across architectures (`#6103 <https://github.com/scikit-image/scikit-image/pull/6103>`_)
-- pass a specific random_state into ransac in test_ransac_geometric (`#6105 <https://github.com/scikit-image/scikit-image/pull/6105>`_)
-- Add linker flags to strip debug symbols during wheel building (`#6109 <https://github.com/scikit-image/scikit-image/pull/6109>`_)
-- relax test condition to make it more robust to variable CI load (`#6114 <https://github.com/scikit-image/scikit-image/pull/6114>`_)
-- respect SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL setting in tests.yml (`#6118 <https://github.com/scikit-image/scikit-image/pull/6118>`_)
-- Fixed minor typos in perimeters example (`#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_)
-- bump deprecated Azure windows environment (`#6130 <https://github.com/scikit-image/scikit-image/pull/6130>`_)
-- Update user warning message for viewer module. (`#6133 <https://github.com/scikit-image/scikit-image/pull/6133>`_)
-- fix phase_cross_correlation typo (`#6139 <https://github.com/scikit-image/scikit-image/pull/6139>`_)
-- deprecate n_iter_max (should be max_num_iter) (`#6148 <https://github.com/scikit-image/scikit-image/pull/6148>`_)
-- Update of Meijering algorithm (resumed) (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_)
 - Implement 2D ellipse footprint decomposition (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
 - specify python version used by mybinder.org for gallery demos (`#6152 <https://github.com/scikit-image/scikit-image/pull/6152>`_)
 - remove skimage.viewer (`#6160 <https://github.com/scikit-image/scikit-image/pull/6160>`_)
