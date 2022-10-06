@@ -1,6 +1,6 @@
 numpy>=1.19
 scipy>=1.5
-networkx>=2.5
+networkx>=2.8
 pillow>=9.0.1
 imageio>=2.4.1
 tifffile>=2019.7.26
