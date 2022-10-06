@@ -23,7 +23,7 @@ repos:
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.38.2
+    rev: v3.0.0
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
@@ -41,7 +41,7 @@ repos:
         types: [pyi]
 
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.4
+    rev: 5.0.4
     hooks:
       - id: flake8
         pass_filenames: true
