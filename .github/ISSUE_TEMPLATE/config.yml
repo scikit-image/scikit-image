@@ -1,12 +1,25 @@
 blank_issues_enabled: true
 contact_links:
-  - name: "Questions, Help and Support"
-    url: https://github.com/scikit-image/scikit-image/blob/main/.github/SUPPORT.md
+  - name: "Ask for help and support"
+    url: https://forum.image.sc/tag/scikit-image
     about: >
-      If you have a question, please look at the listed resources available on
-      our support page.
-  - name: "StackOverflow"
+      Ask for help in using scikit-image or how to solve a particular image
+      analysis problem on the Image.sc forum. It involves a large image analysis
+      community across multiple software packages, that has likely worked on a
+      similar problem.
+  - name: "Ask on StackOverflow"
     url: https://stackoverflow.com/questions/tagged/scikit-image
     about: >
-      The "scikit-image" tag on StackOverflow is also a good place to get
-      answers on specific tasks.
+      Ask a question on StackOverflow using the "scikit-image" tag. This is a
+      good way to get answers on a specific task.
+  - name: "Chat with us"
+    url: https://skimage.zulipchat.com/
+    about: >
+      Chat with us on Zulip. Feel free to ask questions there or just say hello
+      and let us know how you are using scikit-image!
+  - name: "Discuss development and contributions"
+    url: https://discuss.scientific-python.org/c/contributor/skimage
+    about: >
+      Discuss the development of scikit-image on the Scientific Python Discourse
+      forum. This is a good place for longer-form discussions, project-wide
+      topics, decision making and more general discussion of contributions.
