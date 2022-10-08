@@ -28,13 +28,30 @@ New features and improvements
   (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_).
 - Add the new parameter ``use_gaussian_derivatives`` to ``skimage.feature.hessian_matrix`` which allows the computation of the Hessian matrix by convolving with Gaussian derivatives
   (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_).
-
+- Allow footprints with non-adjacent pixels as neighbors in ``skimage.morphology.flood_fill``
+  (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
+- Add new parameters ``squared_butterworth`` and ``npad`` to ``skimage.filters.butterworth``, which add support for squaring the filter and edge padding
+  (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
+- Add support for n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
+  (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
 
 Changes and new deprecations
 ----------------------------
 
 Completed deprecations
 ----------------------
+- Remove ``skimage.viewer`` which was scheduled for the postponed version 1.0
+  (`#6160 <https://github.com/scikit-image/scikit-image/pull/6160>`_).
+- Remove deprecated parameter ``indices`` from ``skimage.feature.peak_local_max``
+  (`#6161 <https://github.com/scikit-image/scikit-image/pull/6161>`_).
+- Remove ``skimage.feature.structure_tensor_eigvals`` (it was replaced by ``skimage.feature.structure_tensor_eigenvalues``) and change the default parameter value in ``skimage.feature.structure_tensor`` to ``order="rc"``
+  (`#6162 <https://github.com/scikit-image/scikit-image/pull/6162>`_).
+- Remove deprecated parameter ``array`` in favor of ``image`` from ``skimage.measure.find_contours``
+  (`#6163 <https://github.com/scikit-image/scikit-image/pull/6163>`_).
+- Remove deprecated Qt IO plugin and the ``skivi`` console script
+  (`#6164 <https://github.com/scikit-image/scikit-image/pull/6164>`_).
+- Remove deprecated parameter value ``method='_lorensen'`` in ``skimage.measure.marching_cubes``
+  (`#6230 <https://github.com/scikit-image/scikit-image/pull/6230>`_).
 
 Bug fixes
 ---------
@@ -43,8 +60,25 @@ Documentation
 -------------
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
-- Fix minor typos in perimeters gallery example
-  (`#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
+- Add new gallery example on decomposing flat footprints
+  (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
+- Add a new and gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
+  (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
+- Improve the the gallery example "Measure perimeters with different estimators"
+  (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
+- Add ``SUPPORT.md`` to repository to help users from GitHub find appropriate support
+  resources
+  (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_).
+- Add ``CITATION.bib`` to repository to help with citing scikit-image
+  (`#6195 <https://github.com/scikit-image/scikit-image/pull/6195>`_).
+- Remove references to the ``git://`` connection protocol
+  (`#6201 <https://github.com/scikit-image/scikit-image/pull/6201>`_).
+- Fix formatting in the docstring of ``skimage.metrics.hausdorff_distance``
+  (`#6203 <https://github.com/scikit-image/scikit-image/pull/6203>`_).
+- Change "neighbour" to EN-US spelling "neighbor"
+  (`#6204 <https://github.com/scikit-image/scikit-image/pull/6204>`_).
+- Update scikit-image's mailing addresses to the new domain discuss.scientific-python.org
+  (`#6255 <https://github.com/scikit-image/scikit-image/pull/6255>`_).
 
 Other and development related updates
 -------------------------------------
@@ -56,46 +90,11 @@ Other and development related updates
   (`#6085 <https://github.com/scikit-image/scikit-image/pull/6085>`_).
 - Fix dev doc build
   (`#6091 <https://github.com/scikit-image/scikit-image/pull/6091>`_).
+- Expand reviewer guidelines in pull request template
+  (`#6208 <https://github.com/scikit-image/scikit-image/pull/6208>`_).
 
 TODO
 ----
-- Implement 2D ellipse footprint decomposition (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_)
-- specify python version used by mybinder.org for gallery demos (`#6152 <https://github.com/scikit-image/scikit-image/pull/6152>`_)
-- remove skimage.viewer (`#6160 <https://github.com/scikit-image/scikit-image/pull/6160>`_)
-- remove deprecated indices kwarg from peak_local_max (`#6161 <https://github.com/scikit-image/scikit-image/pull/6161>`_)
-- remove structure_tensor_eigvals and change default structure_tensor order (`#6162 <https://github.com/scikit-image/scikit-image/pull/6162>`_)
-- remove deprecate_kwarg decorator from find_contours (`#6163 <https://github.com/scikit-image/scikit-image/pull/6163>`_)
-- Remove deprecated Qt IO plugin and skivi script (`#6164 <https://github.com/scikit-image/scikit-image/pull/6164>`_)
-- Fix unintended change to output dtype of match_histograms (`#6169 <https://github.com/scikit-image/scikit-image/pull/6169>`_)
-- add SUPPORT.md (helps point users from GitHub to appropriate support resources) (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_)
-- Fix decorators warnings stacklevel (`#6183 <https://github.com/scikit-image/scikit-image/pull/6183>`_)
-- Fix SIFT wrong octave indices + typo (`#6184 <https://github.com/scikit-image/scikit-image/pull/6184>`_)
-- Fix issue6190 - inconsistent default parameters in pyramids.py (`#6191 <https://github.com/scikit-image/scikit-image/pull/6191>`_)
-- Adding CITATION.bib (`#6195 <https://github.com/scikit-image/scikit-image/pull/6195>`_)
-- Improve writing for perimeter estimation example. (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_)
-- Removing references to git connection protocol (`#6201 <https://github.com/scikit-image/scikit-image/pull/6201>`_)
-- DOC: Minor cosmetic fixup to address UserWarning. (`#6203 <https://github.com/scikit-image/scikit-image/pull/6203>`_)
-- Changing occurrences of "neighbour" to EN-US spelling, "neighbor" (`#6204 <https://github.com/scikit-image/scikit-image/pull/6204>`_)
-- Always set params to nan when ProjectiveTransform.estimate fails (`#6207 <https://github.com/scikit-image/scikit-image/pull/6207>`_)
-- expand reviewer guidelines in pull request template (`#6208 <https://github.com/scikit-image/scikit-image/pull/6208>`_)
-- PiecewiseAffineTransform.estimate return should reflect underlying transforms (`#6211 <https://github.com/scikit-image/scikit-image/pull/6211>`_)
-- EuclideanTransform.estimate should return False when NaNs are present (`#6214 <https://github.com/scikit-image/scikit-image/pull/6214>`_)
-- Allow the output_shape argument to be any iterable for resize and resize_local_mean (`#6219 <https://github.com/scikit-image/scikit-image/pull/6219>`_)
-- Update filename in testing instructions. (`#6223 <https://github.com/scikit-image/scikit-image/pull/6223>`_)
-- Fix calculation of Z normal in marching cubes (`#6227 <https://github.com/scikit-image/scikit-image/pull/6227>`_)
-- Remove redundant testing on Appveyor (`#6229 <https://github.com/scikit-image/scikit-image/pull/6229>`_)
-- remove deprecated marching_cubes '_lorensen' option (`#6230 <https://github.com/scikit-image/scikit-image/pull/6230>`_)
-- Update imports/refs from deprecated scipy.ndimage.filters namespace (`#6231 <https://github.com/scikit-image/scikit-image/pull/6231>`_)
-- Include Cython sources via package_data (`#6232 <https://github.com/scikit-image/scikit-image/pull/6232>`_)
-- Allow non-adjacent footprints in flood_fill. (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_)
-- DOC: fix SciPy intersphinx (`#6239 <https://github.com/scikit-image/scikit-image/pull/6239>`_)
-- Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (`#6242 <https://github.com/scikit-image/scikit-image/pull/6242>`_)
-- Fowardport PR `#6249 <https://github.com/scikit-image/scikit-image/pull/6249>`_ on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
-- improve butterworth docstring and add new kwargs and gallery example (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_)
-- Forward port v0.19.1 and v0.19.2 release notes (`#6253 <https://github.com/scikit-image/scikit-image/pull/6253>`_)
-- Update skimage mailing addresses (`#6255 <https://github.com/scikit-image/scikit-image/pull/6255>`_)
-- implement nD skimage.filters.farid (Farid & Simoncelli filter) (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_)
-- Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
 - Fix inpaint_biharmonic for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
 - Fix balance in example code (`#6265 <https://github.com/scikit-image/scikit-image/pull/6265>`_)
 - Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
@@ -208,6 +207,9 @@ TODO
 
 Pull Requests in this release
 -----------------------------
+
+Includes backported changes to earlier versions.
+
 - Add benchmarks for morphology.local_maxima (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_)
 - Add textbook-like tutorial on measuring fluorescence at nuclear envelope. (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_)
 - Footprint decomposition for faster morphology (part 1) (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_)
