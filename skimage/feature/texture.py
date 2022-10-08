@@ -169,10 +169,12 @@ def graycoprops(P, prop='contrast'):
     - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
     - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`
+    - 'mean': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}i`
     - 'energy': :math:`\\sqrt{ASM}`
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
+
 
     Each GLCM is normalized to have a sum of 1 before the computation of
     texture properties.
@@ -189,7 +191,7 @@ def graycoprops(P, prop='contrast'):
         occurs at a distance d and at an angle theta from
         gray-level i.
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
-            'correlation', 'ASM'}, optional
+            'correlation', 'ASM', 'mean'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
 
     Returns
@@ -246,7 +248,7 @@ def graycoprops(P, prop='contrast'):
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
         weights = 1. / (1. + (I - J) ** 2)
-    elif prop in ['ASM', 'energy', 'correlation']:
+    elif prop in ['ASM', 'energy', 'correlation', 'mean']:
         pass
     else:
         raise ValueError('%s is an invalid property' % (prop))
@@ -257,12 +259,18 @@ def graycoprops(P, prop='contrast'):
         results = np.sqrt(asm)
     elif prop == 'ASM':
         results = np.sum(P ** 2, axis=(0, 1))
-    elif prop == 'correlation':
+    elif prop in ['correlation', 'mean']:
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
         J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
-        diff_i = I - np.sum(I * P, axis=(0, 1))
-        diff_j = J - np.sum(J * P, axis=(0, 1))
+
+        mean_i = np.sum(I * P, axis=(0, 1))
+        if prop == 'mean':
+            return mean_i
+
+        mean_j = np.sum(J * P, axis=(0, 1))
+        diff_i = I - mean_i
+        diff_j = J - mean_j
 
         std_i = np.sqrt(np.sum(P * (diff_i) ** 2, axis=(0, 1)))
         std_j = np.sqrt(np.sum(P * (diff_j) ** 2, axis=(0, 1)))
