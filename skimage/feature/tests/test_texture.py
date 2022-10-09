@@ -210,6 +210,12 @@ class TestGLCM():
         np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
         np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
 
+    def test_mean(self):
+        result = graycomatrix(self.image, [1, 2], [0], 4, normed=True,
+                              symmetric=True)
+        mean = graycoprops(result, 'mean')
+        np.testing.assert_almost_equal(mean[0, 0], 1.2916666)
+
     def test_uniform_properties(self):
         im = np.ones((4, 4), dtype=np.uint8)
         result = graycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=True,
