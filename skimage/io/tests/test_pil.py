@@ -67,7 +67,7 @@ def test_imread_separate_channels():
     with NamedTemporaryFile(suffix='.tif') as f:
         fname = f.name
 
-    imsave(fname, x)
+    imsave(fname, x, photometric='rgb', planarconfig='separate')
     img = imread(fname)
     os.remove(fname)
     assert img.shape == (16, 8, 3), img.shape
