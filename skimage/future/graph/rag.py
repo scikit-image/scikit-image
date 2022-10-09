@@ -378,7 +378,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         elif mode == 'distance':
             d['weight'] = diff
         else:
-            raise ValueError("The mode '%s' is not recognised" % mode)
+            raise ValueError(f"The mode '{mode}' is not recognised")
 
     return graph
 

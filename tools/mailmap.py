@@ -63,7 +63,7 @@ for key, value in list(mailmap.items()):
 entries = []
 for name, emails in mailmap.items():
     entries.append([name])
-    entries[-1].extend(['<{}>'.format(email) for email in emails])
+    entries[-1].extend([f'<{email}>' for email in emails])
 
 entries = sorted(entries, key=lambda x: x[0].split()[-1])
 for entry in entries:

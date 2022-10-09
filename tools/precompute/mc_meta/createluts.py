@@ -77,7 +77,7 @@ def get_table(lines1, needle, i):
     cdes = lines1[ii].rstrip(' {=')
 
     # Write name
-    lines2.append('%s = np.array([' % name)
+    lines2.append(f'{name} = np.array([')
 
     # Get elements
     for i in range(ii+1, ii+1+9999999):
@@ -103,11 +103,10 @@ def get_table(lines1, needle, i):
     array = eval(code)
     array64 = base64.encodebytes(array.tostring()).decode('utf-8')
     # Reverse: bytes = base64.decodebytes(text.encode('utf-8'))
-    text = '%s = %s, """\n%s"""' % (name, str(array.shape), array64)
+    text = f'{name} = {array.shape}, """\n{array64}"""'
 
     # Build actual lines
     lines2 = []
-    #lines2.append( '# %s -> %s %s' % (cdes, str(array.dtype), str(array.shape)) )
     lines2.append( '#' + cdes)
     lines2.append(text)
     lines2.append('')

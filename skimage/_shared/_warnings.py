@@ -140,7 +140,7 @@ def expected_warnings(matching):
                     if match in remaining:
                         remaining.remove(match)
             if strict_warnings and not found:
-                raise ValueError('Unexpected warning: %s' % str(warn.message))
+                raise ValueError(f'Unexpected warning: {str(warn.message)}')
         if strict_warnings and (len(remaining) > 0):
-            msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
+            msg = f"No warning raised matching:\n{{'\n'.join(remaining)}}"
             raise ValueError(msg)

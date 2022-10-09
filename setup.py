@@ -37,14 +37,14 @@ with open('README.md', encoding='utf-8') as f:
 
 if sys.version_info < (3, 8):
 
-    error = """Python {py} detected.
+    error = f"""Python {'.'.join([str(v) for v in sys.version_info[:3]])} detected.
 
 scikit-image supports only Python 3.8 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
  $ pip install 'scikit-image<0.15'
-""".format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+"""
 
     sys.stderr.write(error + "\n")
     sys.exit(1)

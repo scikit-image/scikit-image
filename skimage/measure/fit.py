@@ -10,7 +10,7 @@ _EPSILON = np.spacing(1)
 
 def _check_data_dim(data, dim):
     if data.ndim != 2 or data.shape[1] != dim:
-        raise ValueError('Input data must have shape (N, %d).' % dim)
+        raise ValueError(f"Input data must have shape (N, {dim}).")
 
 
 def _check_data_atleast_2D(data):
@@ -162,7 +162,7 @@ class LineModelND(BaseModel):
 
         if direction[axis] == 0:
             # line parallel to axis
-            raise ValueError('Line parallel to axis %s' % axis)
+            raise ValueError(f'Line parallel to axis {axis}')
 
         l = (x - origin[axis]) / direction[axis]
         data = origin + l[..., np.newaxis] * direction

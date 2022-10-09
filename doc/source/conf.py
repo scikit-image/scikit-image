@@ -224,7 +224,7 @@ html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'skimage v%s docs' % version
+html_title = f'skimage v{version} docs'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -448,10 +448,10 @@ def linkcode_resolve(domain, info):
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "main/skimage/%s%s" % (fn, linespec))
+                f"main/skimage/{fn}{linespec}")
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+                f"v{skimage.__version__}/skimage/{fn}{linespec}")
 
 
 # ----------------------------------------------------------------------------

@@ -81,7 +81,7 @@ class Notebook(object):
             # assign value to the last cell
             cells[-1][key] = value
         else:
-            warnings.warn('Ignoring unsupported cell type (%s)' % cell_type)
+            warnings.warn(f'Ignoring unsupported cell type ({cell_type})')
 
     def json(self):
         """Return a JSON representation of the notebook.

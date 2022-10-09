@@ -358,8 +358,7 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError("There are only %s images in the collection"
-                             % num)
+            raise IndexError(f"There are only {num} images in the collection")
         return n
 
     def __iter__(self):

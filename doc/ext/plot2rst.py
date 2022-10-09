@@ -244,15 +244,14 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     if not os.path.exists(gallery_template):
         print(src_dir)
         print(80*'_')
-        print('Example directory %s does not have a %s file'
-                        % (src_dir, index_name))
+        print(f'Example directory {src_dir} does not have a {index_name} file')
         print('Skipping this directory')
         print(80*'_')
         return
 
     with open(gallery_template) as f:
         gallery_description = f.read()
-    gallery_index.write('\n\n%s\n\n' % gallery_description)
+    gallery_index.write(f'\n\n{gallery_description}\n\n')
 
     rst_dir.makedirs()
     examples = [fname for fname in sorted(src_dir.listdir(), key=_plots_first)
@@ -263,7 +262,7 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     else:
         sub_dir_list = src_dir.psplit()[-depth:]
         sub_dir = Path('/'.join(sub_dir_list) + '/')
-    joiner = '\n   %s' % sub_dir
+    joiner = f'\n   {sub_dir}'
     gallery_index.write(TOCTREE_TEMPLATE % (sub_dir + joiner.join(ex_names)))
 
     for src_name in examples:
@@ -272,7 +271,7 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
             write_example(src_name, src_dir, rst_dir, cfg)
         except Exception:
             print("Exception raised while running:")
-            print("%s in %s" % (src_name, src_dir))
+            print(f"{src_name} in {src_dir}")
             print('~' * 60)
             traceback.print_exc()
             print('~' * 60)
@@ -341,13 +340,13 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         notebook_path.exists:
         return
 
-    print('plot2rst: %s' % basename)
+    print(f'plot2rst: {basename}')
 
     blocks = split_code_and_text_blocks(example_file)
     if blocks[0][2].startswith('#!'):
         blocks.pop(0) # don't add shebang line to rst file.
 
-    rst_link = '.. _example_%s:\n\n' % (last_dir + src_name)
+    rst_link = f'.. _example_{last_dir + src_name}:\n\n'
     figure_list, rst = process_blocks(blocks, src_path, image_path, cfg)
 
     has_inline_plots = any(cfg.plot2rst_plot_tag in b[2] for b in blocks)

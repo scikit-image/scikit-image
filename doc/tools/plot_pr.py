@@ -47,13 +47,14 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
                   'repo': repo,
                   'params': urllib.urlencode(params)}
 
-        fetch_status = ('Fetching page %(page)d (state=%(state)s)' % params +
-                        ' from %(user)s/%(repo)s...' % config)
+        fetch_status = (
+            f"Fetching page {params['page']} (state={params['state']})"
+            f" from {config['user']}/{config['repo']}..."
+        )
         print(fetch_status)
 
         f = urllib.urlopen(
-            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s'
-            % config
+            f"https://api.github.com/repos/{config['user']}/{{config['repos']}}/pulls?{config['params']}"
         )
 
         params['page'] += 1
@@ -62,7 +63,7 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
 
         if 'message' in page_data and page_data['message'] == "Not Found":
             page_data = []
-            print('Warning: Repo not found (%(user)s/%(repo)s)' % config)
+            print(f"Warning: Repo not found ({config['user']}/{config['repo']})")
         else:
             data.extend(page_data)
 
@@ -107,7 +108,7 @@ except IOError:
     cf.flush()
 
 nrs = [pr['number'] for pr in PRs]
-print('Processing %d pull requests...' % len(nrs))
+print(f'Processing {len(nrs)} pull requests...')
 
 dates = [dateutil.parser.parse(pr['created_at']) for pr in PRs]
 

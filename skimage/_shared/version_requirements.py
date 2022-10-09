@@ -101,7 +101,7 @@ def is_installed(name, version=None):
         if not symb:
             symb = '='
         assert symb in ('>=', '>', '=', '<'),\
-            "Invalid version condition '%s'" % symb
+            f"Invalid version condition '{symb}'"
         version = version[match.start():]
         return _check_version(actver, version, symb)
 
@@ -135,10 +135,9 @@ def require(name, version=None):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
             else:
-                msg = '"%s" in "%s" requires "%s'
-                msg = msg % (obj, obj.__module__, name)
+                msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
                 if not version is None:
-                    msg += " %s" % version
+                    msg += f" {version}"
                 raise ImportError(msg + '"')
         return func_wrapped
     return decorator

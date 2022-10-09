@@ -13,7 +13,7 @@ from apigen import ApiDocWriter
 #*****************************************************************************
 
 def abort(error):
-    print('*WARNING* API documentation not generated: %s' % error)
+    print(f'*WARNING* API documentation not generated: {error}')
     exit()
 
 if __name__ == '__main__':
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
-    print('%d files written' % len(docwriter.written_modules))
+    print(f'{len(docwriter.written_modules)} files written')

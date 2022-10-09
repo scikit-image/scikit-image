@@ -275,7 +275,7 @@ class ApiDocWriter(object):
 
         # Make a shorter version of the uri that omits the package name for
         # titles
-        uri_short = re.sub(r'^%s\.' % self.package_name,'',uri)
+        uri_short = re.sub(rf'^{self.package_name}\.','',uri)
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
@@ -348,8 +348,7 @@ class ApiDocWriter(object):
         elif match_type == 'package':
             patterns = self.package_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"'
-                             % match_type)
+            raise ValueError(f'Cannot interpret match type "{match_type}"')
         # Match to URI without package name
         L = len(self.package_name)
         if matchstr[:L] == self.package_name:
@@ -505,4 +504,4 @@ class ApiDocWriter(object):
             w('.. toctree::\n')
             w('   :maxdepth: 2\n\n')
             for f in self.written_modules:
-                w('   %s\n' % os.path.join(relpath, f))
+                w(f'   {os.path.join(relpath, f)}\n')

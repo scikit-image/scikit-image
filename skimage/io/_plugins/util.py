@@ -41,9 +41,10 @@ class WindowManager(object):
 
     def acquire(self, kit):
         if self._gui_lock:
-            raise GuiLockError(\
-            'The gui lock can only be acquired by one toolkit per session. \
-            The lock is already acquired by %s' % self._guikit)
+            raise GuiLockError(
+                "The gui lock can only be acquired by one toolkit per session."
+                f"The lock is already acquired by {self._guikit}"
+            )
         else:
             self._gui_lock = True
             self._guikit = str(kit)

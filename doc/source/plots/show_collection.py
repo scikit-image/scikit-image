@@ -20,7 +20,7 @@ grid = AxesGrid(fig,
 # Plot the layers on the image grid
 for i, frame in enumerate(img):
     grid[i].imshow(frame, cmap=plt.cm.gray)
-    grid[i].set_xlabel('Frame %s' % i)
+    grid[i].set_xlabel(f'Frame {i}')
     grid[i].set_xticks([])
     grid[i].set_yticks([])
 
