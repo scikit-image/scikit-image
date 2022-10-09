@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -135,20 +135,25 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: 3.9
+          - python-version: "3.9"
             OPTIONAL_DEPS: 0
           - python-version: "3.10"
+            OPTIONAL_DEPS: 0
+          - python-version: "3.11-dev"
             OPTIONAL_DEPS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
-          - python-version: 3.9
+          - python-version: "3.9"
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.10 wheels
           - python-version: "3.10"
+            OPTIONAL_DEPS: 1
+          # a number of optional deps don't yet have Python 3.11 wheels
+          - python-version: "3.11-dev"
             OPTIONAL_DEPS: 1
     env:
       BUILD_DOCS: 1
@@ -179,6 +184,7 @@ jobs:
         run: |
           set -ex
           source tools/github/before_install.sh
+          pip install -U pip setuptools wheel
           python setup.py sdist
           pip install -vv --no-build-isolation -e .;
 
