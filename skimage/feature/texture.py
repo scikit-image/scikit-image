@@ -171,6 +171,8 @@ def graycoprops(P, prop='contrast'):
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`
     - 'mean': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}i`
     - 'energy': :math:`\\sqrt{ASM}`
+    - 'variance':
+        .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}(i-\\mu_i)^2
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
@@ -191,7 +193,7 @@ def graycoprops(P, prop='contrast'):
         occurs at a distance d and at an angle theta from
         gray-level i.
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
-            'correlation', 'ASM', 'mean'}, optional
+            'correlation', 'ASM', 'mean', 'variance'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
 
     Returns
@@ -248,7 +250,7 @@ def graycoprops(P, prop='contrast'):
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
         weights = 1. / (1. + (I - J) ** 2)
-    elif prop in ['ASM', 'energy', 'correlation', 'mean']:
+    elif prop in ['ASM', 'energy', 'correlation', 'mean', 'variance']:
         pass
     else:
         raise ValueError('%s is an invalid property' % (prop))
@@ -259,11 +261,12 @@ def graycoprops(P, prop='contrast'):
         results = np.sqrt(asm)
     elif prop == 'ASM':
         results = np.sum(P ** 2, axis=(0, 1))
-    elif prop in ['correlation', 'mean']:
+    elif prop in ['correlation', 'mean', 'variance']:
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
         J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
 
+        # it does not matter if we use i or j
         mean_i = np.sum(I * P, axis=(0, 1))
         if prop == 'mean':
             return mean_i
@@ -272,8 +275,15 @@ def graycoprops(P, prop='contrast'):
         diff_i = I - mean_i
         diff_j = J - mean_j
 
-        std_i = np.sqrt(np.sum(P * (diff_i) ** 2, axis=(0, 1)))
-        std_j = np.sqrt(np.sum(P * (diff_j) ** 2, axis=(0, 1)))
+        # it does not matter if we use i or j
+        var_i = np.sum(P * (diff_i) ** 2, axis=(0, 1))
+        if prop == 'variance':
+            return var_i
+
+        var_j = np.sum(P * (diff_j) ** 2, axis=(0, 1))
+
+        std_i = np.sqrt(var_i)
+        std_j = np.sqrt(var_j)
         cov = np.sum(P * (diff_i * diff_j), axis=(0, 1))
 
         # handle the special case of standard deviations near zero
