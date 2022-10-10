@@ -57,7 +57,7 @@ class TestSave:
 
         if use_pathlib:
             fname = pathlib.Path(fname)
-        imsave(fname, x, check_contrast=False)
+        imsave(fname, x, check_contrast=False, photometric = 'minisblack')
         y = imread(fname)
         assert_array_equal(x, y)
 
