@@ -137,6 +137,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
         OPTIONAL_DEPS: [1]
+        BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
         include:
           - python-version: "3.9"
@@ -145,6 +146,7 @@ jobs:
             OPTIONAL_DEPS: 0
           - python-version: "3.11-dev"
             OPTIONAL_DEPS: 0
+            BUILD_DOCS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: "3.9"
@@ -155,8 +157,8 @@ jobs:
           # a number of optional deps don't yet have Python 3.11 wheels
           - python-version: "3.11-dev"
             OPTIONAL_DEPS: 1
+            BUILD_DOCS: 1
     env:
-      BUILD_DOCS: 1
       TEST_EXAMPLES: 0
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
@@ -190,9 +192,10 @@ jobs:
 
       - name: Run tests
         env:
-          # Note: BUILD_DOCS and TEST_EXAMPLES are not in the matrix.
-          #       They get inherited from the job-level env.
+          # Note: TEST_EXAMPLES is not in the matrix.
+          #       It gets inherited from the job-level env.
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
         run: |
           pip install $PIP_FLAGS -r requirements/test.txt
           export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
