@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: 3298ddab3c13dd77d6ce1fc0baf97691430d84b0  # v4.3.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -16,20 +16,20 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+    rev: 50c5478ed9e10bf360335449280cf2a67f4edb7a  # v2.7.1
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.0.0
+    rev: d50ce21fc45d014790d4ecf71d1b1d7ccc450526  # v3.1.0
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1  # v5.10.1
     hooks:
       - id: isort
         name: isort (python)
@@ -40,8 +40,8 @@ repos:
         name: isort (pyi)
         types: [pyi]
 
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 5.0.4
+  - repo: https://github.com/pycqa/flake8
+    rev: 6027577d325b0dd8bf1e465ebd29b71b5f0d005b  # v5.0.4
     hooks:
       - id: flake8
         pass_filenames: true
