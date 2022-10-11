@@ -11,7 +11,7 @@ dependencies = [
     # https://github.com/FFY00/meson-python/issues/29
     "numpy>=1.19.2",
 ]
-readme = "README.md"
+readme = "README.rst"
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
