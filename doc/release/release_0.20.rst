@@ -34,6 +34,11 @@ New features and improvements
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Add support for n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
   (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
+- Support the construction of ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
+  (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
+- Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
+  Applying the function to floating-point images may give unexpected results when small numerical differences between adjacent pixels are present
+  (`#6272 <https://github.com/scikit-image/scikit-image/pull/6272>`_).
 
 Changes and new deprecations
 ----------------------------
@@ -55,6 +60,8 @@ Completed deprecations
 
 Bug fixes
 ---------
+- Fix round-off error in ``skimage.exposure.adjust_gamma``
+  (`#6285 <https://github.com/scikit-image/scikit-image/pull/6285>`_).
 
 Documentation
 -------------
@@ -66,19 +73,27 @@ Documentation
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Improve the the gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
+- Adapt the gallery example "Build image pyramids" to more diversified shaped images and downsample factors
+  (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
 - Add ``SUPPORT.md`` to repository to help users from GitHub find appropriate support
   resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
   (`#6195 <https://github.com/scikit-image/scikit-image/pull/6195>`_).
-- Remove references to the ``git://`` connection protocol
-  (`#6201 <https://github.com/scikit-image/scikit-image/pull/6201>`_).
+- Stop using the ``git://`` connection protocol and remove references to it
+  (`#6201 <https://github.com/scikit-image/scikit-image/pull/6201>`_, `#6283 <https://github.com/scikit-image/scikit-image/pull/6283>`_).
 - Fix formatting in the docstring of ``skimage.metrics.hausdorff_distance``
   (`#6203 <https://github.com/scikit-image/scikit-image/pull/6203>`_).
+- Tweak ``balance`` in the docstring example of ``skimage.restoration.wiener`` for a less blurry result
+  (`#6265 <https://github.com/scikit-image/scikit-image/pull/6265>`_).
 - Change "neighbour" to EN-US spelling "neighbor"
   (`#6204 <https://github.com/scikit-image/scikit-image/pull/6204>`_).
 - Update scikit-image's mailing addresses to the new domain discuss.scientific-python.org
   (`#6255 <https://github.com/scikit-image/scikit-image/pull/6255>`_).
+- Clarify that the enabled ``watershed_line`` parameter will not catch borders between adjacent marker regions in ``skimage.segmentation.watershed``
+  (`#6280 <https://github.com/scikit-image/scikit-image/pull/6280>`_).
+- Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
+  (`#6290 <https://github.com/scikit-image/scikit-image/pull/6290>`_, `#6292 <https://github.com/scikit-image/scikit-image/pull/6292>`_).
 
 Other and development related updates
 -------------------------------------
@@ -93,20 +108,18 @@ Other and development related updates
 - Expand reviewer guidelines in pull request template
   (`#6208 <https://github.com/scikit-image/scikit-image/pull/6208>`_).
 
+
+TODO Milestone 1.0?
+-------------------
+- Fix inpaint_biharmonic for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
+- Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
+
+Backported 0.19.x
+---------------
+- hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
+
 TODO
 ----
-- Fix inpaint_biharmonic for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
-- Fix balance in example code (`#6265 <https://github.com/scikit-image/scikit-image/pull/6265>`_)
-- Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
-- hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
-- add warning on non-integer image inputs to local_binary_pattern (`#6272 <https://github.com/scikit-image/scikit-image/pull/6272>`_)
-- More flexible collections with custom load_func. (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_)
-- clarify behavior of watershed segmentation line with touching markers (`#6280 <https://github.com/scikit-image/scikit-image/pull/6280>`_)
-- Stop using `git://` for submodules (`#6283 <https://github.com/scikit-image/scikit-image/pull/6283>`_)
-- Fix adjust_gamma round-off error (`#6285 <https://github.com/scikit-image/scikit-image/pull/6285>`_)
-- Update for the `MultiImage` docstring. (`#6290 <https://github.com/scikit-image/scikit-image/pull/6290>`_)
-- Polish the `MultiImage` docstring. (`#6292 <https://github.com/scikit-image/scikit-image/pull/6292>`_)
-- Update plot_pyramid.py demo to work for diversified shaped images and downsample factors (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_)
 - remove extraneous function in createluts.py (and move mc_meta reference code) (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_)
 - Add spacing to regionprops and moments. (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_)
 - Update data urls to point to a specific commit (`#6297 <https://github.com/scikit-image/scikit-image/pull/6297>`_)
