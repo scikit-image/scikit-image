@@ -27,22 +27,3 @@ repos:
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
-
-  - repo: https://github.com/pycqa/isort
-    rev: c5e8fa75dda5f764d20f66a215d71c21cfa198e1  # v5.10.1
-    hooks:
-      - id: isort
-        name: isort (python)
-      - id: isort
-        name: isort (cython)
-        types: [cython]
-      - id: isort
-        name: isort (pyi)
-        types: [pyi]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6027577d325b0dd8bf1e465ebd29b71b5f0d005b  # v5.0.4
-    hooks:
-      - id: flake8
-        pass_filenames: true
-        exclude: __init__.py
