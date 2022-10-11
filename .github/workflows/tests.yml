@@ -74,9 +74,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
 
-      - name: Install ninja
-        run: sudo apt-get install -y ninja-build
-
       - name: Build package
         env:
           # Set variables here that are used by the build script below
