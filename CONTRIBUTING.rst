@@ -44,6 +44,11 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
+   * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
+     when you type ``git commit``::
+
+       pre-commit install
+
 .. note::
 
     Although our code is hosted on `github
@@ -152,11 +157,7 @@ Which displays a message like::
 
 Inside the conflicted file, you'll find sections like these::
 
-   <<<<<<< HEAD
    The way the text looks in your branch
-   =======
-   The way the text looks in the main branch
-   >>>>>>> main
 
 Choose one version of the text that should be kept, and delete the
 rest::
