@@ -165,7 +165,7 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class GeometricTransform(object):
+class GeometricTransform:
     """Base class for geometric transformations.
 
     """

@@ -1,11 +1,10 @@
-Glossary
-========
+# Glossary
 
 Work in progress
 
 ```{glossary}
 
-array 
+array
     Numerical array, provided by the {class}`numpy.ndarray` object. In
     ``scikit-image``, images are NumPy arrays with dimensions that
     correspond to spatial dimensions of the image, and color channels for
@@ -42,7 +41,7 @@ float
     Representation of real numbers, for example as {obj}`np.float32` or
     {obj}`np.float64`. See {ref}`data_types`. Some operations on images
     need a float datatype (such as multiplying image values with
-    exponential prefactors in {func}`filters.gaussian`), so that 
+    exponential prefactors in {func}`filters.gaussian`), so that
     images of integer type are often converted to float type internally. Also
     see {term}`int` values.
 
@@ -61,7 +60,7 @@ int
     which needs to be represented. In ``scikit-image``, the most common
     integer types are {obj}`np.int64` (for large integer values) and
     {obj}`np.uint8` (for small integer values, typically images of labels
-    with less than 255 labels). See {ref}`data_types`. 
+    with less than 255 labels). See {ref}`data_types`.
 
 int values
     See {term}`int`.

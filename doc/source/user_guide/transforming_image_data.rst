@@ -194,5 +194,3 @@ gradients across the image. See the example
 .. topic:: Examples:
 
   * :ref:`sphx_glr_auto_examples_color_exposure_plot_equalize.py`
-
-

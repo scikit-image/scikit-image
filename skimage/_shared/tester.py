@@ -7,7 +7,7 @@ def _show_skimage_info():
     print(f"skimage version {skimage.__version__}")
 
 
-class PytestTester(object):
+class PytestTester:
     """
     Pytest test runner.
 

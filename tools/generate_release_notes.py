@@ -89,7 +89,7 @@ all_commits = list(tqdm(repository.get_commits(sha=args.to_commit,
                                                since=previous_tag_date),
                         desc=f'Getting all commits between {args.from_commit} '
                              f'and {args.to_commit}'))
-all_hashes = set(c.sha for c in all_commits)
+all_hashes = {c.sha for c in all_commits}
 
 authors = set()
 reviewers = set()

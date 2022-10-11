@@ -18,7 +18,7 @@ class GuiLockError(Exception):
         return self.msg
 
 
-class WindowManager(object):
+class WindowManager:
     ''' A class to keep track of spawned windows,
     and make any needed callback once all the windows,
     are closed.'''
@@ -178,7 +178,7 @@ def histograms(image, nbins):
 
 class ImgThread(threading.Thread):
     def __init__(self, func, *args):
-        super(ImgThread, self).__init__()
+        super().__init__()
         self.func = func
         self.args = args
 
@@ -186,7 +186,7 @@ class ImgThread(threading.Thread):
         self.func(*self.args)
 
 
-class ThreadDispatch(object):
+class ThreadDispatch:
     def __init__(self, img, stateimg, func, *args):
 
         height = img.shape[0]
@@ -226,7 +226,7 @@ class ThreadDispatch(object):
             t.join()
 
 
-class ColorMixer(object):
+class ColorMixer:
     ''' a class to manage mixing colors in an image.
     The input array must be an RGB uint8 image.
 

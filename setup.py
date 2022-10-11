@@ -84,7 +84,7 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
 
         try:
             os.chdir(tmpdir)
-            with open(fname, 'wt') as fobj:
+            with open(fname, 'w') as fobj:
                 fobj.write(code)
             try:
                 objects = cc.compile([fname],
@@ -124,7 +124,7 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
                 ext.extra_compile_args += compile_flags
                 ext.extra_link_args += link_flags
 
-        super(ConditionalOpenMP, self).build_extensions()
+        super().build_extensions()
 
 
 with open('skimage/__init__.py', encoding='utf-8') as fid:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # skimage documentation build configuration file, created by
 # sphinx-quickstart on Sat Aug 22 13:00:30 2009.
@@ -300,8 +299,8 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'scikit-image.tex', u'The scikit-image Documentation',
-   u'scikit-image development team', 'manual'),
+  ('index', 'scikit-image.tex', 'The scikit-image Documentation',
+   'scikit-image development team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

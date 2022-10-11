@@ -394,7 +394,7 @@ def test_ransac_invalid_input():
 
 
 def test_ransac_sample_duplicates():
-    class DummyModel(object):
+    class DummyModel:
 
         """Dummy model to check for duplicates."""
 

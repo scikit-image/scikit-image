@@ -32,7 +32,7 @@ skeleton_nb = """{
 }"""
 
 
-class Notebook(object):
+class Notebook:
     """
     Notebook object for building an IPython notebook cell-by-cell.
     """
@@ -93,5 +93,3 @@ class Notebook(object):
 
         """
         return json.dumps(self.template, indent=2)
-
-

@@ -38,7 +38,7 @@ def _pad(data, shape):
     return out
 
 
-class LPIFilter2D(object):
+class LPIFilter2D:
     """Linear Position-Invariant Filter (2-dimensional)
 
     """

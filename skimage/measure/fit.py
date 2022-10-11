@@ -18,7 +18,7 @@ def _check_data_atleast_2D(data):
         raise ValueError('Input data must be at least 2D.')
 
 
-class BaseModel(object):
+class BaseModel:
 
     def __init__(self):
         self.params = None

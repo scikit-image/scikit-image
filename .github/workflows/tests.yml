@@ -7,7 +7,6 @@ permissions:
   contents: read
 
 jobs:
-
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
     runs-on: ubuntu-latest
@@ -16,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, '3.10']
+        python-version: [3.8, 3.9, "3.10"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -77,57 +76,56 @@ jobs:
 
       - name: Build package
         env:
-            # Set variables here that are used by the build script below
-            # (including those used within tools/github/before_install.sh)
-            MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
-            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-            INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+          # Set variables here that are used by the build script below
+          # (including those used within tools/github/before_install.sh)
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
-            set -ex
-            source tools/github/before_install.sh
-            set -ex
-            python setup.py sdist
-            if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-                pip uninstall cython -y;
-                pip install dist/scikit-image-*.tar.gz;
-            else
-                pip install -vv -e .;
-            fi
+          set -ex
+          source tools/github/before_install.sh
+          set -ex
+          python setup.py sdist
+          if [[ $INSTALL_FROM_SDIST == "1" ]]; then
+              pip uninstall cython -y;
+              pip install dist/scikit-image-*.tar.gz;
+          else
+              pip install -vv -e .;
+          fi
 
       - name: Run tests
         env:
-            # Set variables here that are used by the run script below
-            # (including those used within tools/github/script.sh)
-            # Also includes the EAGER_IMPORT and
-            # SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL env vars that skimage checks.
-            PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-            BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-            TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
-            OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-            INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
-            EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: ${{ matrix.SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL }}
-            WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+          # Set variables here that are used by the run script below
+          # (including those used within tools/github/script.sh)
+          # Also includes the EAGER_IMPORT and
+          # SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL env vars that skimage checks.
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
+          TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+          SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: ${{ matrix.SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL }}
+          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
-            echo $PIP_FLAGS
-            pip install $PIP_FLAGS -r requirements/test.txt
-            export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-            mkdir -p ${MPL_DIR}
-            touch ${MPL_DIR}/matplotlibrc
-            if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-                pip install -r ./requirements/optional.txt
-                if [[ "${EXTRA_DEPS}" == "1" ]]; then
-                # Extra deps need compilation, and it may not always be possible to
-                # compile them easily on all platforms
-                    pip install -r ./requirements/extras.txt
-                fi
-            fi
-            source tools/github/script.sh
+          echo $PIP_FLAGS
+          pip install $PIP_FLAGS -r requirements/test.txt
+          export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+          mkdir -p ${MPL_DIR}
+          touch ${MPL_DIR}/matplotlibrc
+          if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+              pip install -r ./requirements/optional.txt
+              if [[ "${EXTRA_DEPS}" == "1" ]]; then
+              # Extra deps need compilation, and it may not always be possible to
+              # compile them easily on all platforms
+                  pip install -r ./requirements/extras.txt
+              fi
+          fi
+          source tools/github/script.sh
 
       - name: Check benchmarks
         run: |
           asv check -v -E existing
-
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -137,30 +135,30 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, '3.10']
+        python-version: [3.8, 3.9, "3.10"]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
           - python-version: 3.9
             OPTIONAL_DEPS: 0
-          - python-version: '3.10'
+          - python-version: "3.10"
             OPTIONAL_DEPS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: 3.9
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.10 wheels
-          - python-version: '3.10'
+          - python-version: "3.10"
             OPTIONAL_DEPS: 1
     env:
-        BUILD_DOCS: 1
-        TEST_EXAMPLES: 0
-        CC: /usr/bin/clang
-        CXX: /usr/bin/clang++
-        CPPFLAGS: "-Xpreprocessor -fopenmp"
-        CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-        CXXFLAGS: "-I/usr/local/opt/libomp/include"
-        LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+      BUILD_DOCS: 1
+      TEST_EXAMPLES: 0
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
+      CPPFLAGS: "-Xpreprocessor -fopenmp"
+      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
+      CXXFLAGS: "-I/usr/local/opt/libomp/include"
+      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
     steps:
       - name: Checkout scikit-image
@@ -173,32 +171,32 @@ jobs:
 
       - name: OSX configuration
         run: |
-            # OpenMP is not present on macOS by default
-            set -ex
-            brew install libomp
+          # OpenMP is not present on macOS by default
+          set -ex
+          brew install libomp
 
       - name: Build package
         run: |
-            set -ex
-            source tools/github/before_install.sh
-            python setup.py sdist
-            pip install -vv --no-build-isolation -e .;
+          set -ex
+          source tools/github/before_install.sh
+          python setup.py sdist
+          pip install -vv --no-build-isolation -e .;
 
       - name: Run tests
         env:
-            # Note: BUILD_DOCS and TEST_EXAMPLES are not in the matrix.
-            #       They get inherited from the job-level env.
-            OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          # Note: BUILD_DOCS and TEST_EXAMPLES are not in the matrix.
+          #       They get inherited from the job-level env.
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
-            pip install $PIP_FLAGS -r requirements/test.txt
-            export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-            mkdir -p ${MPL_DIR}
-            touch ${MPL_DIR}/matplotlibrc
-            if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-                pip install -r ./requirements/optional.txt
-                pip install -r ./requirements/extras.txt
-            fi
-            source tools/github/script.sh
+          pip install $PIP_FLAGS -r requirements/test.txt
+          export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+          mkdir -p ${MPL_DIR}
+          touch ${MPL_DIR}/matplotlibrc
+          if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+              pip install -r ./requirements/optional.txt
+              pip install -r ./requirements/extras.txt
+          fi
+          source tools/github/script.sh
 
       - name: Check benchmarks
         run: |

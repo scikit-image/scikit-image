@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ Create lookup tables for the marching cubes algorithm, by parsing
 the file "LookUpTable.h". This prints a text to the stdout which
 can then be copied to luts.py.

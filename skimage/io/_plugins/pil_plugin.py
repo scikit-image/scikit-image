@@ -61,7 +61,7 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
     try:
         # this will raise an IOError if the file is not readable
         image.getdata()[0]
-    except IOError as e:
+    except OSError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
         error_message = (f"Could not load '{image.filename}' \n"
