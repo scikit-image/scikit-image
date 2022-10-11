@@ -2,8 +2,8 @@ version: 2
 
 jobs:
   doc:
-    docker:
-      - image: cimg/python:3.8
+    machine:
+      image: ubuntu-2204
     steps:
       - checkout
       - run:
