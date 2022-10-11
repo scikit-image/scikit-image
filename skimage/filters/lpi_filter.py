@@ -168,7 +168,7 @@ def filter_forward(data, impulse_response=None, filter_params={},
 
 
 @deprecated(alt_func='skimage.filters.lpi_filter.filter_inverse',
-            removed_version='1.0')
+            removed_version='0.21')
 def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
             predefined_filter=None):
     return filter_inverse(data, impulse_response, filter_params,
