@@ -44,14 +44,53 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
+   * Next, you need to set up your build environment.
+     Here are instructions for two popular environment managers:
+
+     * ``venv`` (pip based)
+
+       ::
+
+         # Create a virtualenv named ``skimage-dev`` that lives in the directory of
+         # the same name
+         python -m venv skimage-dev
+         # Activate it
+         source skimage-dev/bin/activate
+         # Install main development and runtime dependencies of networkx
+         pip install -r requirements.txt
+         # Build and install scikit-image from source
+         pip install -e .
+         # Test your installation
+         pytest --pyargs skimage
+
+     * ``conda`` (Anaconda or Miniconda)
+
+       ::
+
+         # Create a conda environment named ``skimage-dev``
+         conda create --name skimage-dev
+         # Activate it
+         conda activate skimage-dev
+         # Install main development and runtime dependencies of networkx
+         conda install -c conda-forge --file requirements.txt
+         # Install scikit-image from source
+         pip install -e .
+         # Test your installation
+         pytest --pyargs skimage
+
+   * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
+     when you do a ``git commit``::
+
+       pre-commit install
+
 .. note::
 
     Although our code is hosted on `github
-    <https://github.com/scikit-image/>`_, our dataset is stored on `gitlab
+    <https://github.com/scikit-image/>`_, our datasets are stored on `gitlab
     <https://gitlab.com/scikit-image/data>`_ and fetched with `pooch
-    <https://github.com/fatiando/pooch>`_. New data must be submitted on
+    <https://github.com/fatiando/pooch>`_. New datasets must be submitted on
     gitlab. Once merged, the data registry ``skimage/data/_registry.py``
-    in the main codebase on github must be updated.
+    in the main Github repository can be updated.
 
 2. Develop your contribution:
 
@@ -152,11 +191,7 @@ Which displays a message like::
 
 Inside the conflicted file, you'll find sections like these::
 
-   <<<<<<< HEAD
    The way the text looks in your branch
-   =======
-   The way the text looks in the main branch
-   >>>>>>> main
 
 Choose one version of the text that should be kept, and delete the
 rest::
@@ -206,7 +241,7 @@ Stylistic Guidelines
 --------------------
 
 * Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <https://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+  <https://www.python.org/dev/peps/pep-0008/>`__.
 
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).

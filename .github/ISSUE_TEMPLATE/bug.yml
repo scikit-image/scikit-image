@@ -4,59 +4,59 @@ title: "<Comprehensive title summarizing the bug>"
 labels: [":bug: Bug"]
 
 body:
-- type: markdown
-  attributes:
-    value: >
-      Thank you for reporting an issue!
-      Before creating a new issue, please check the
-      [issue tracker](https://github.com/scikit-image/scikit-image/issues?q=label%3A%22%3Abug%3A+Bug%22)
-      for existing issues about the bug. 
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for reporting an issue!
+        Before creating a new issue, please check the
+        [issue tracker](https://github.com/scikit-image/scikit-image/issues?q=label%3A%22%3Abug%3A+Bug%22)
+        for existing issues about the bug.
 
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: "Description:"
-    description: >
-      Describe your issue with all necessary detail.
-      What kind of behavior are you experiencing?
-      What would you expect instead?
-      Upload all necessary images and files here too!
-    placeholder: |
-      Your description...
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: "Description:"
+      description: >
+        Describe your issue with all necessary detail.
+        What kind of behavior are you experiencing?
+        What would you expect instead?
+        Upload all necessary images and files here too!
+      placeholder: |
+        Your description...
 
-- type: textarea
-  attributes:
-    label: "Way to reproduce:"
-    description: >
-      Provide a short, self-contained code example that reproduces the issue, 
-      i.e., can be copy-pasted into the Python interpreter.
-    placeholder: |
-      import numpy as np
-      import skimage
-      # Your code here...
-    render: Python
+  - type: textarea
+    attributes:
+      label: "Way to reproduce:"
+      description: >
+        Provide a short, self-contained code example that reproduces the issue,
+        i.e., can be copy-pasted into the Python interpreter.
+      placeholder: |
+        import numpy as np
+        import skimage
+        # Your code here...
+      render: Python
 
-- type: textarea
-  attributes:
-    label: "Traceback or output:"
-    description: >
-      Include the full error message, traceback or output, if any.
-    placeholder: |
-      Full error (starting from Traceback) or output..
-    render: Shell
+  - type: textarea
+    attributes:
+      label: "Traceback or output:"
+      description: >
+        Include the full error message, traceback or output, if any.
+      placeholder: |
+        Full error (starting from Traceback) or output..
+      render: Shell
 
-- type: textarea
-  attributes:
-    label: "Version information:"
-    description: |
-      Paste the output after running the following Python commands
-      ```python
-      import sys; print(sys.version)
-      import platform; print(platform.platform())
-      import skimage; print(f'scikit-image version: {skimage.__version__}')
-      import numpy; print(f'numpy version: {numpy.__version__}')
-      ```
-    placeholder: |
-      Version information...
-    render: Shell
+  - type: textarea
+    attributes:
+      label: "Version information:"
+      description: |
+        Paste the output after running the following Python commands
+        ```python
+        import sys; print(sys.version)
+        import platform; print(platform.platform())
+        import skimage; print(f'scikit-image version: {skimage.__version__}')
+        import numpy; print(f'numpy version: {numpy.__version__}')
+        ```
+      placeholder: |
+        Version information...
+      render: Shell
