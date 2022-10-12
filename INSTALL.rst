@@ -300,11 +300,11 @@ When using ``venv``, you may find the following bash commands useful:
   # Make sure that pip is up to date
   pip install --upgrade pip
   # Install all development and runtime dependencies of scikit-image
-  pip install -r <(cat requirements/*.txt)
+  pip install -r requirements.txt
   # Build and install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
 
@@ -328,9 +328,9 @@ before you get started.
   # Install major development and runtime dependencies of scikit-image
   conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
   # Install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -463,6 +463,10 @@ Full requirements list
 **Documentation Requirements**
 
 .. include:: ../../requirements/docs.txt
+   :literal:
+
+**Developer Requirements**
+.. include:: ../../requirements/developer.txt
    :literal:
 
 **Optional Requirements**
