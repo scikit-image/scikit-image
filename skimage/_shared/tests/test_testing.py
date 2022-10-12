@@ -121,4 +121,3 @@ def test_expected_warnings_noop():
         # This should behave as a no-op
         with expected_warnings(None):
             warn('Expected warnings test')
-

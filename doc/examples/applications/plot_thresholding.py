@@ -218,15 +218,15 @@ ax[0].axis('off')
 
 fig.colorbar(ax[1].imshow(local_otsu, cmap=plt.cm.gray),
              ax=ax[1], orientation='horizontal')
-ax[1].set_title('Local Otsu (radius=%d)' % radius)
+ax[1].set_title(f'Local Otsu (radius={radius})')
 ax[1].axis('off')
 
 ax[2].imshow(img >= local_otsu, cmap=plt.cm.gray)
-ax[2].set_title('Original >= Local Otsu' % threshold_global_otsu)
+ax[2].set_title('Original >= Local Otsu')
 ax[2].axis('off')
 
 ax[3].imshow(global_otsu, cmap=plt.cm.gray)
-ax[3].set_title('Global Otsu (threshold = %d)' % threshold_global_otsu)
+ax[3].set_title('Global Otsu (threshold = {threshold_global_otsu})')
 ax[3].axis('off')
 
 plt.show()

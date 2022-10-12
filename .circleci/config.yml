@@ -11,21 +11,21 @@ jobs:
           command: cat requirements/*.txt > requirements/all_requirements
       - restore_cache:
           keys:
-              - data-v1-{{ checksum "skimage/data/_registry.py" }}
+            - data-v1-{{ checksum "skimage/data/_registry.py" }}
       - restore_cache:
           keys:
-              - packages-v1-{{ checksum "requirements/all_requirements" }}
+            - packages-v1-{{ checksum "requirements/all_requirements" }}
       - run:
           name: install dependencies and package
           command: |
-              python -m venv skimage_venv
-              source skimage_venv/bin/activate
-              python -m pip install --upgrade pip
-              python -m pip install -r requirements/build.txt
-              python -m pip install -e . -vv
-              python -m pip install -r requirements/default.txt
-              python -m pip install -r requirements/docs.txt
-              export
+            python -m venv skimage_venv
+            source skimage_venv/bin/activate
+            python -m pip install --upgrade pip
+            python -m pip install -r requirements/build.txt
+            python -m pip install -e . -vv
+            python -m pip install -r requirements/default.txt
+            python -m pip install -r requirements/docs.txt
+            export
       - save_cache:
           key: packages-v1-{{ checksum "requirements/all_requirements" }}
           paths:
@@ -34,10 +34,10 @@ jobs:
           name: build doc
           no_output_timeout: 50m
           command: |
-              source skimage_venv/bin/activate
-              cd doc
-              make clean
-              SPHINXOPTS="-j 1" make html
+            source skimage_venv/bin/activate
+            cd doc
+            make clean
+            SPHINXOPTS="-j 1" make html
       - save_cache:
           key: data-v1-{{ checksum "skimage/data/_registry.py" }}
           paths:

@@ -4,8 +4,8 @@
 name: Mark dormant issues
 on:
   schedule:
-    - cron: "15 2 * * *"  # trigger every day at 2:15
-  workflow_dispatch:  # or run manually
+    - cron: "15 2 * * *" # trigger every day at 2:15
+  workflow_dispatch: # or run manually
 permissions:
   issues: write
   pull-requests: write
@@ -13,10 +13,10 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@3de2653986ebd134983c79fe2be5d45cc3d9f4e1  # v6.0.0
+      - uses: actions/stale@3de2653986ebd134983c79fe2be5d45cc3d9f4e1 # v6.0.0
         with:
           days-before-stale: 180
-          days-before-close: -1  # never close
+          days-before-close: -1 # never close
           stale-issue-label: ":sleeping: Dormant"
           stale-pr-label: ":sleeping: Dormant"
           remove-stale-when-updated: true
@@ -31,12 +31,12 @@ jobs:
             some point (either way, it will be done manually).
             In any case, thank you for your contributions so far!
           stale-pr-message: >
-            Hey, there hasn't been any activity on this pull request for more 
+            Hey, there hasn't been any activity on this pull request for more
             than 180 days. For now, we have marked it as "dormant" until
             there is some new activity. You are welcome to reach out to people
             by mentioning them here or on our
             [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
-            if you need more feedback! Otherwise, we would be thankful for a 
+            if you need more feedback! Otherwise, we would be thankful for a
             short update, for example if you would like to continue or if you
             are okay with someone else doing so.
             In any case, thank you for your contributions so far!

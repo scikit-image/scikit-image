@@ -133,7 +133,7 @@ class RAG(nx.Graph):
 
     def __init__(self, label_image=None, connectivity=1, data=None, **attr):
 
-        super(RAG, self).__init__(data, **attr)
+        super().__init__(data, **attr)
         if self.number_of_nodes() == 0:
             self.max_id = 0
         else:
@@ -228,7 +228,7 @@ class RAG(nx.Graph):
             attr_dict = attr
         else:
             attr_dict.update(attr)
-        super(RAG, self).add_node(n, **attr_dict)
+        super().add_node(n, **attr_dict)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
@@ -239,14 +239,14 @@ class RAG(nx.Graph):
             attr_dict = attr
         else:
             attr_dict.update(attr)
-        super(RAG, self).add_edge(u, v, **attr_dict)
+        super().add_edge(u, v, **attr_dict)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
         """Copy the graph with its max node id.
 
         .. seealso:: :func:`networkx.Graph.copy`."""
-        g = super(RAG, self).copy()
+        g = super().copy()
         g.max_id = self.max_id
         return g
 
@@ -290,7 +290,7 @@ class RAG(nx.Graph):
         This is a convenience method used internally.
 
         .. seealso:: :func:`networkx.Graph.add_node`."""
-        super(RAG, self).add_node(n)
+        super().add_node(n)
 
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
@@ -378,7 +378,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         elif mode == 'distance':
             d['weight'] = diff
         else:
-            raise ValueError("The mode '%s' is not recognised" % mode)
+            raise ValueError(f"The mode '{mode}' is not recognised")
 
     return graph
 

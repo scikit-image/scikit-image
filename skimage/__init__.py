@@ -124,9 +124,9 @@ def _raise_build_error(e):
         # Picking up the local install: this will work only if the
         # install is an 'inplace build'
         msg = _INPLACE_MSG
-    raise ImportError("""%s
-It seems that scikit-image has not been built correctly.
-%s""" % (e, msg))
+    raise ImportError(
+        f"{e}\nIt seems that scikit-image has not been built correctly.\n{msg}"
+    )
 
 
 try:

@@ -36,8 +36,8 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     offset = np.r_[1, 1, 1] * np.r_[spacing]
 
     # Calculate limits, and ensure output volume is odd & symmetric
-    low = np.ceil((- np.r_[a, b, c] - offset))
-    high = np.floor((np.r_[a, b, c] + offset + 1))
+    low = np.ceil(- np.r_[a, b, c] - offset)
+    high = np.floor(np.r_[a, b, c] + offset + 1)
 
     for dim in range(3):
         if (high[dim] - low[dim]) % 2 == 0:

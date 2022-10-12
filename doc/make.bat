@@ -45,7 +45,7 @@ if "%1" == "clean" (
 
 if "%1" == "html" (
 	mkdir source/api
-	%PYTHON% tools/build_modref_templates.py 
+	%PYTHON% tools/build_modref_templates.py
 	cd source && %PYTHON% random_gallery.py
 	cd ..
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
@@ -117,7 +117,7 @@ if "%1" == "epub" (
 
 if "%1" == "latex" (
 	mkdir source/api
-	%PYTHON% tools/build_modref_templates.py 
+	%PYTHON% tools/build_modref_templates.py
 	%SPHINXBUILD% -b latex %ALLSPHINXOPTS% %BUILDDIR%/latex
 	echo.
 	echo.Build finished; the LaTeX files are in %BUILDDIR%/latex.

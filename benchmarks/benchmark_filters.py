@@ -30,7 +30,7 @@ class FiltersSobel3D:
         _ = filters.sobel(self.image3d)
 
 
-class MultiOtsu(object):
+class MultiOtsu:
     """Benchmarks for MultiOtsu threshold."""
     param_names = ['classes']
     params = [3, 4, 5]

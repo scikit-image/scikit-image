@@ -117,17 +117,16 @@ if __name__ == '__main__':
         status = sh2('git status | head -1')
         branch = re.match(b'On branch (.*)$', status).group(1)
         if branch != b'gh-pages':
-            e = 'On %r, git branch is %r, MUST be "gh-pages"' % (pages_dir,
-                                                                 branch)
+            e = f'On {pages_dir!r}, git branch is {branch!r}, MUST be "gh-pages"'
             raise RuntimeError(e)
         sh("touch .nojekyll")
         sh('git add .nojekyll')
         sh('git add index.html')
-        sh('git add --all %s' % tag)
+        sh(f'git add --all {tag}')
 
         status = sh2('git status | tail -1')
         if not re.match(b'nothing to commit', status):
-            sh2('git commit -m"Updated doc release: %s"' % tag)
+            sh2(f'git commit -m"Updated doc release: {tag}"')
         else:
             print('\n! Note: no changes to commit\n')
 
@@ -138,5 +137,5 @@ if __name__ == '__main__':
         cd(startdir)
 
     print('')
-    print('Now verify the build in: %r' % dest)
+    print(f'Now verify the build in: {dest!r}')
     print("If everything looks good, run 'git push' inside doc/gh-pages.")

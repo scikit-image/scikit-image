@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # skimage documentation build configuration file, created by
 # sphinx-quickstart on Sat Aug 22 13:00:30 2009.
@@ -224,7 +223,7 @@ html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'skimage v%s docs' % version
+html_title = f'skimage v{version} docs'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -300,8 +299,8 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'scikit-image.tex', u'The scikit-image Documentation',
-   u'scikit-image development team', 'manual'),
+  ('index', 'scikit-image.tex', 'The scikit-image Documentation',
+   'scikit-image development team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -448,10 +447,10 @@ def linkcode_resolve(domain, info):
 
     if 'dev' in skimage.__version__:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "main/skimage/%s%s" % (fn, linespec))
+                f"main/skimage/{fn}{linespec}")
     else:
         return ("https://github.com/scikit-image/scikit-image/blob/"
-                "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
+                f"v{skimage.__version__}/skimage/{fn}{linespec}")
 
 
 # ----------------------------------------------------------------------------

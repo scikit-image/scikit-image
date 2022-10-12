@@ -3,11 +3,11 @@
 <!-- If this is a bug-fix or enhancement, state the issue # it closes -->
 <!-- If this is a new feature, reference what paper it implements. -->
 
-
 ## Checklist
 
 <!-- It's fine to submit PRs which are a work in progress! -->
 <!-- But before they are merged, all PRs should provide: -->
+
 - [Docstrings for all functions](https://github.com/numpy/numpy/blob/master/doc/example.py)
 - Gallery example in `./doc/examples` (new features only)
 - Benchmark in `./benchmarks`, if your changes aren't covered by an
@@ -23,6 +23,7 @@
 ## For reviewers
 
 <!-- Don't remove the checklist below. -->
+
 - Check that the PR title is short, concise, and will make sense 1 year
   later.
 - Check that new functions are imported in corresponding `__init__.py`.
