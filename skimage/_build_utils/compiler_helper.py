@@ -6,6 +6,7 @@ import os
 import sys
 from numpy.distutils.system_info import dict_append
 
+
 def try_compile(compiler, code=None, flags=[], ext=None):
     """Returns True if the compiler is able to compile the given code"""
     from distutils.errors import CompileError
@@ -20,7 +21,7 @@ def try_compile(compiler, code=None, flags=[], ext=None):
     ext = ext or compiler.src_extensions[0]
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        fname = os.path.join(temp_dir, 'main'+ext)
+        fname = os.path.join(temp_dir, 'main' + ext)
         with open(fname, 'w') as f:
             f.write(code)
 
@@ -46,7 +47,7 @@ def get_cxx_std_flag(compiler):
     flags_by_cc = {
         'msvc': ['/std:c++14', None],
         'intelw': ['/Qstd=c++14', '/Qstd=c++11'],
-        'intelem': ['-std=c++14', '-std=c++11']
+        'intelem': ['-std=c++14', '-std=c++11'],
     }
     flags = flags_by_cc.get(compiler.compiler_type, gnu_flags)
 
@@ -58,6 +59,7 @@ def get_cxx_std_flag(compiler):
             return flag
 
     from numpy.distutils import log
+
     log.warn('Could not detect c++ standard flag')
     return None
 
@@ -65,11 +67,7 @@ def get_cxx_std_flag(compiler):
 def get_c_std_flag(compiler):
     """Detects compiler flag to enable C99"""
     gnu_flag = '-std=c99'
-    flag_by_cc = {
-        'msvc': None,
-        'intelw': '/Qstd=c99',
-        'intelem': '-std=c99'
-    }
+    flag_by_cc = {'msvc': None, 'intelw': '/Qstd=c99', 'intelem': '-std=c99'}
     flag = flag_by_cc.get(compiler.compiler_type, gnu_flag)
 
     if flag is None:
@@ -79,13 +77,14 @@ def get_c_std_flag(compiler):
         return flag
 
     from numpy.distutils import log
+
     log.warn('Could not detect c99 standard flag')
     return None
 
 
 def try_add_flag(args, compiler, flag, ext=None):
     """Appends flag to the list of arguments if supported by the compiler"""
-    if try_compile(compiler, flags=args+[flag], ext=ext):
+    if try_compile(compiler, flags=args + [flag], ext=ext):
         args.append(flag)
 
 
@@ -129,5 +128,4 @@ def set_cxx_flags_clib_hook(build_clib, build_info):
             new_args.append(min_macos_flag)
             new_link_args.append(min_macos_flag)
 
-    dict_append(build_info, extra_compiler_args=new_args,
-                extra_link_args=new_link_args)
+    dict_append(build_info, extra_compiler_args=new_args, extra_link_args=new_link_args)
