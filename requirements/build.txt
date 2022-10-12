@@ -1,6 +1,6 @@
 meson-python>=0.8.0
 ninja
-Cython>=0.29.21,!=0.29.18
+Cython>=0.29.21
 packaging>=20.0
 pythran
 wheel
