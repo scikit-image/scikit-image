@@ -4,8 +4,10 @@ How to contribute to scikit-image
 =================================
 
 Developing Open Source is great fun! Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
-which of the following challenges you'd like to solve.
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
+or mail `skimage@discuss.scientific-python.org
+<mailto:skimage@discuss.scientific-python.org>`_ and tell us which of the
+following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
 * If you're looking for something to implement or to fix, you can browse the
@@ -122,7 +124,9 @@ Here's the long and short of it:
      button -- click it.
 
    * If you want, post on the `developer forum
-     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
+     <https://discuss.scientific-python.org/c/contributor/skimage>`_ or mail
+     `skimage@discuss.scientific-python.org
+     <mailto:skimage@discuss.scientific-python.org>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
@@ -233,8 +237,10 @@ Guidelines
   likely to be controversial, two reviews should still be encouraged. The
   second case is that of minor fixes which restore CI to a working state,
   because these should be merged fairly quickly. Reach out on the
-  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ if
-  you get no response to your pull request.
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
+  or mail `skimage@discuss.scientific-python.org
+  <mailto:skimage@discuss.scientific-python.org>`_ if you get no response to
+  your pull request.
   **Never merge your own pull request.**
 
 Stylistic Guidelines

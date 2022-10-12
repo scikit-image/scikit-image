@@ -25,4 +25,8 @@ scikit-image!
 ### Developer Discussion
 
 Discussions related to scikit-image development can also be raised with the
-scikit-image tag on the [Scientific Python Discourse forum](https://discuss.scientific-python.org/c/contributor/skimage).
+scikit-image tag on the
+[Scientific Python Discourse forum](https://discuss.scientific-python.org/c/contributor/skimage).
+If you don't have an account there yet, you can also reach out by mailing
+[skimage@discuss.scientific-python.org](mailto:skimage@discuss.scientific-python.org)
+which will create a new forum topic.
