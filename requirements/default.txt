@@ -7,3 +7,4 @@ imageio>=2.4.1
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
 packaging>=20.0
+lazy_loader>=0.1
