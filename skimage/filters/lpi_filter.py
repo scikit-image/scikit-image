@@ -6,7 +6,7 @@
 import numpy as np
 import scipy.fft as fft
 
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import _supported_float_type, check_nD, deprecated
 
 
 def _min_limit(x, val=np.finfo(float).eps):
@@ -14,8 +14,8 @@ def _min_limit(x, val=np.finfo(float).eps):
     x[mask] = np.sign(x[mask]) * val
 
 
-def _centre(x, oshape):
-    """Return an array of oshape from the centre of x.
+def _center(x, oshape):
+    """Return an array of shape ``oshape`` from the center of array ``x``.
 
     """
     start = (np.array(x.shape) - np.array(oshape)) // 2 + 1
@@ -120,23 +120,23 @@ class LPIFilter2D:
 
         Parameters
         ----------
-        data : (M,N) ndarray
+        data : (M, N) ndarray
 
         """
         check_nD(data, 2, 'data')
         F, G = self._prepare(data)
         out = fft.ifftn(F * G)
-        out = np.abs(_centre(out, data.shape))
+        out = np.abs(_center(out, data.shape))
         return out
 
 
-def forward(data, impulse_response=None, filter_params={},
-            predefined_filter=None):
+def filter_forward(data, impulse_response=None, filter_params={},
+                   predefined_filter=None):
     """Apply the given filter to data.
 
     Parameters
     ----------
-    data : (M,N) ndarray
+    data : (M, N) ndarray
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
@@ -158,7 +158,7 @@ def forward(data, impulse_response=None, filter_params={},
     ...     return np.exp(-np.hypot(r, c)/1)
     >>>
     >>> from skimage import data
-    >>> filtered = forward(data.coins(), filt_func)
+    >>> filtered = filter_forward(data.coins(), filt_func)
 
     """
     check_nD(data, 2, 'data')
@@ -167,8 +167,16 @@ def forward(data, impulse_response=None, filter_params={},
     return predefined_filter(data)
 
 
+@deprecated(alt_func='skimage.filters.lpi_filter.filter_inverse',
+            removed_version='0.21')
 def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
             predefined_filter=None):
+    return filter_inverse(data, impulse_response, filter_params,
+                          max_gain, predefined_filter)
+
+
+def filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
+                   predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
     Parameters
@@ -204,7 +212,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     mask = np.abs(F) > max_gain
     F[mask] = np.sign(F[mask]) * max_gain
 
-    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
+    return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
 def wiener(data, impulse_response=None, filter_params={}, K=0.25,
@@ -246,9 +254,4 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
-    return _centre(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
-
-
-def constrained_least_squares(data, lam, impulse_response=None,
-                              filter_params={}):
-    raise NotImplementedError
+    return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
