@@ -131,4 +131,3 @@ def set_cxx_flags_clib_hook(build_clib, build_info):
 
     dict_append(build_info, extra_compiler_args=new_args,
                 extra_link_args=new_link_args)
-
