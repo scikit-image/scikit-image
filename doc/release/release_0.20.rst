@@ -124,7 +124,7 @@ TODO Milestone 1.0?
 - Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
 
 Backported 0.19.x
----------------
+-----------------
 - hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
 
 TODO
