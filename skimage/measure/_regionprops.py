@@ -219,8 +219,9 @@ def only2d(method):
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
-            raise NotImplementedError('Property %s is not implemented for '
-                                      '3D images' % method.__name__)
+            raise NotImplementedError(
+                f"Property {method.__name__} is not implemented for 3D images"
+            )
         return method(self, *args, **kwargs)
     return func2d
 

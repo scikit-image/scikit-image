@@ -2,14 +2,13 @@ name: Build Wheels and Release
 on:
   push:
     tags:
-      - 'v*'
-      - 'buildwheels*'
+      - "v*"
+      - "buildwheels*"
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-
 
 permissions:
   contents: read
@@ -22,9 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: [ "cp38-*", "cp39-*"]
-        cibw_manylinux: [ manylinux2014 ]
-        cibw_arch: [ "x86_64", "i686" ]
+        cibw_python: ["cp38-*", "cp39-*"]
+        cibw_manylinux: [manylinux2014]
+        cibw_arch: ["x86_64", "i686"]
         include:
           - os: ubuntu-latest
             cibw_python: "cp310-*"
@@ -38,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
@@ -65,8 +64,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: [ "cp38-*" , "cp39-*" , "cp310-*" ]
-        cibw_manylinux: [ manylinux2014 ]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
+        cibw_manylinux: [manylinux2014]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -74,7 +73,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -107,9 +106,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        cibw_python: [ "cp38-*", "cp39-*", "cp310-*" ]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
         # TODO: add "universal2" once a universal2 libomp is available
-        cibw_arch: [ "x86_64", "arm64"]
+        cibw_arch: ["x86_64", "arm64"]
 
     steps:
       - uses: actions/checkout@v3
@@ -119,7 +118,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install cibuildwheel
         run: |
@@ -193,7 +192,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       # install choco package manager
       - uses: crazy-max/ghaction-chocolatey@v1
@@ -277,9 +276,15 @@ jobs:
 
   deploy:
     permissions:
-      contents: write  # for softprops/action-gh-release to create GitHub release
+      contents: write # for softprops/action-gh-release to create GitHub release
     name: Release
-    needs: [build_linux_37_and_above_wheels, build_linux_aarch64_wheels, build_macos_wheels, build_windows_wheels]
+    needs:
+      [
+        build_linux_37_and_above_wheels,
+        build_linux_aarch64_wheels,
+        build_macos_wheels,
+        build_windows_wheels,
+      ]
     if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
     runs-on: ubuntu-latest
     steps:
@@ -289,7 +294,7 @@ jobs:
       - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Twine
         run: |
@@ -302,7 +307,7 @@ jobs:
         with:
           name: wheels
           path: ./dist
-    
+
       - name: Publish the source distribution on PyPI
         run: |
           SK_VERSION=$(git describe --tags)
@@ -315,7 +320,7 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-              
+
       - name: Github release
         uses: softprops/action-gh-release@v1
         env:

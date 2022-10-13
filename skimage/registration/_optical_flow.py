@@ -1,4 +1,3 @@
-# coding: utf-8
 """TV-L1 optical flow algorithm implementation.
 
 """

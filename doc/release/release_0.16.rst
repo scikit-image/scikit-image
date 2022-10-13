@@ -185,7 +185,7 @@ Deprecations
 - The function `skimage.transform.match_histogram` is deprecated in favor of
   `skimage.exposure.match_histogram` (#4107)
 - The parameter ``neighbors`` of `skimage.morphology.convex_hull_object` is
-  deprecated. 
+  deprecated.
 - The `skimage.transform.randon_tranform` function will convert input image
   of integer type to float by default in 0.18. To preserve current behaviour,
   set the new argument ``preserve_range`` to True. (#4131)
@@ -421,4 +421,3 @@ Reviewers for this release
 - Sebastian Berg
 - Stefan van der Walt
 - Uwe Schmidt
-

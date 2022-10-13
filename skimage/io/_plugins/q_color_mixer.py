@@ -37,8 +37,7 @@ class IntelligentSlider(QWidget):
         self.name_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.value_label = QLabel()
-        self.value_label.setText('%2.2f' % (self.slider.value() * self.a
-                                             + self.b))
+        self.value_label.setText(f'{self.slider.value() * self.a + self.b:2.2f}')
         self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.layout = QGridLayout(self)
@@ -61,7 +60,7 @@ class IntelligentSlider(QWidget):
     def set_value(self, val):
         self.manually_triggered = True
         self.slider.setValue(int((val - self.b) / self.a))
-        self.value_label.setText('%2.2f' % val)
+        self.value_label.setText(f'{val:2.2f}')
         self.manually_triggered = False
 
     def val(self):

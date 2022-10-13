@@ -1,6 +1,10 @@
 on: [status]
+permissions:
+  contents: read
 jobs:
   circleci_artifacts_redirector_job:
+    permissions:
+      statuses: write
     runs-on: ubuntu-latest
     name: Run CircleCI artifacts redirector
     steps:

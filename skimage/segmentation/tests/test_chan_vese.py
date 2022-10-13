@@ -76,7 +76,7 @@ def test_chan_vese_gap_closing():
     ref = np.zeros((20, 20))
     ref[8:15, :] = np.ones((7, 20))
     img = ref.copy()
-    img[:, 6] = np.zeros((20))
+    img[:, 6] = np.zeros(20)
     result = chan_vese(img, mu=0.7, tol=1e-3, max_num_iter=1000, dt=1000,
                        init_level_set="disk").astype(float)
     assert_array_equal(result, ref)

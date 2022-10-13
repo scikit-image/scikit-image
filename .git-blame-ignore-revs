@@ -1,3 +1,6 @@
 # .git-blame-ignore-revs
 # Applied codespell to the codebase
 025757f8d5a1ece2687781000560aad79047b6c3
+
+# Applied linting (gh-6568)
+f4978b11499e499cc006c417b3bf0ccf245ca72c

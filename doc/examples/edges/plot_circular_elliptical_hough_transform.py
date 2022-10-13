@@ -117,7 +117,7 @@ result.sort(order='accumulator')
 
 # Estimated parameters for the ellipse
 best = list(result[-1])
-yc, xc, a, b = [int(round(x)) for x in best[1:5]]
+yc, xc, a, b = (int(round(x)) for x in best[1:5])
 orientation = best[5]
 
 # Draw the ellipse on the original image
