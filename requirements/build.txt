@@ -1,5 +1,4 @@
 meson-python>=0.10.0
-ninja
 Cython>=0.29.21
 packaging>=20.0
 pythran

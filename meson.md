@@ -2,7 +2,7 @@
 
 ### Developer build
 
-**Install build tools:** `pip install meson ninja cython pythran`
+**Install build tools:** `pip install meson-python cython pythran`
 
 **Generate ninja make files:** `meson build --prefix=$PWD/build`
 
@@ -30,6 +30,15 @@ pip install --no-build-isolation .
 
 Note, however, that `pip install -e .` (in-place developer install) does not!
 See "Developer build" above.
+
+### sdist and wheel
+
+The Python `build` module calls Meson and ninja as necessary to
+produce an sdist and a wheel:
+
+```
+python -m build --no-isolation
+```
 
 ## Notes
 
