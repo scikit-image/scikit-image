@@ -19,6 +19,12 @@ New features and improvements
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
   The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a sequence of smaller footprints that are applied consecutively as well. See the respective docstrings for more details
   (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
+- Add support for anisotropic images with different voxel spacings.
+  Spacings can be defined with the new parameter ``spacing`` of the following functions in ``skimage.measure``: ``regionprops``, ``regionprops_table``, ``moments``, ``moments_central``, ``moments_normalized``, ``centroid``, ``inertia_tensor``, and ``inertia_tensor_eigvals``.
+  Voxel spacing is taken into account for the following existing properties in ``skimage.measure.regionprops``: ``area``, ``area_bbox``, ``centroid``, ``area_convex``, ``extent``, ``feret_diameter_max``, ``area_filled``, ``inertia_tensor``, ``moments``, ``moments_central``, ``moments_hu``, ``moments_normalized``, ``perimeter``, ``perimeter_crofton``, ``solidity``, ``moments_weighted_central``, and ``moments_weighted_hu``.
+  The new properties ``num_pixels`` and ``coords_scaled`` are available as well.
+  See the respective docstrings for more details
+  (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_).
 - Add support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
@@ -107,7 +113,10 @@ Other and development related updates
   (`#6091 <https://github.com/scikit-image/scikit-image/pull/6091>`_).
 - Expand reviewer guidelines in pull request template
   (`#6208 <https://github.com/scikit-image/scikit-image/pull/6208>`_).
-
+- Move ``skimage/measure/mc_meta`` folder into ``tools/precompute/`` folder to avoid its unnecessary distribution to users
+  (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_).
+- Remove unused function ``getLutNames`` in ``tools/precompute/mc_meta/createluts.py``
+  (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_).
 
 TODO Milestone 1.0?
 -------------------
@@ -120,8 +129,6 @@ Backported 0.19.x
 
 TODO
 ----
-- remove extraneous function in createluts.py (and move mc_meta reference code) (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_)
-- Add spacing to regionprops and moments. (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_)
 - Update data urls to point to a specific commit (`#6297 <https://github.com/scikit-image/scikit-image/pull/6297>`_)
 - New thumbnails for General-purpose images and scientific images (`#6298 <https://github.com/scikit-image/scikit-image/pull/6298>`_)
 - New thumbnail for "Datasets" example  by adjusting contrast (`#6300 <https://github.com/scikit-image/scikit-image/pull/6300>`_)
@@ -485,4 +492,3 @@ Includes backported changes to earlier versions.
 - Stefan van der Walt
 - Thomas Voigtmann
 - Tim-Oliver Buchholz
-
