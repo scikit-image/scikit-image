@@ -3,26 +3,34 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import sys
+import inspect
 import os
-import skimage
-from matplotlib.sphinxext import plot_directive
-from sphinx_gallery.sorting import ExplicitOrder
+import sys
+from os.path import dirname, relpath
 from warnings import filterwarnings
-filterwarnings('ignore', message="Matplotlib is currently using agg",
-               category=UserWarning)
+
+import plotly.io as pio
+import skimage
+from packaging.version import parse
+from plotly.io._sg_scraper import plotly_sg_scraper
+from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.utils import _has_optipng
+
+filterwarnings(
+    "ignore", message="Matplotlib is currently using agg", category=UserWarning
+)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'skimage'
-copyright = '2013, the scikit-image team'
+project = "skimage"
+copyright = "2013, the scikit-image team"
 
-with open('../../skimage/__init__.py') as f:
+with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
-version = 'vUndefined'
+version = "vUndefined"
 for l in setup_lines:
-    if l.startswith('__version__'):
+    if l.startswith("__version__"):
         version = l.split("'")[1]
         break
 
@@ -32,106 +40,97 @@ release = version
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 curpath = os.path.dirname(__file__)
-sys.path.append(os.path.join(curpath, '..', 'ext'))
+sys.path.append(os.path.join(curpath, "..", "ext"))
 
-
-extensions = ['sphinx_copybutton',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.mathjax',
-              'numpydoc',
-              'doi_role',
-              'matplotlib.sphinxext.plot_directive',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery',
-              'myst_parser',
-              ]
+extensions = [
+    "sphinx_copybutton",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "numpydoc",
+    "doi_role",
+    "matplotlib.sphinxext.plot_directive",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
+    "sphinx_gallery.gen_gallery",
+    "myst_parser",
+]
 
 autosummary_generate = True
-templates_path = ['_templates']
-source_suffix = '.rst'
+templates_path = ["_templates"]
+source_suffix = ".rst"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-
-# List of directories, relative to source directory, that shouldn't be searched
-# for source files.
 exclude_trees = []
-
-# The reST default role (used for this markup: `text`) to use for all documents.
 default_role = "autolink"
+pygments_style = "sphinx"
 
-
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
-
-#------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 # Sphinx-gallery configuration
-#------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
-from packaging.version import parse
+
 v = parse(release)
 if v.release is None:
     raise ValueError(
-        f'Ill-formed version: {version!r}. Version should follow '
-        f'PEP440')
+        f"Ill-formed version: {version!r}. Version should follow " f"PEP440"
+    )
 
 if v.is_devrelease:
-    binder_branch = 'main'
+    binder_branch = "main"
 else:
     major, minor = v.release[:2]
-    binder_branch = f'v{major}.{minor}.x'
+    binder_branch = f"v{major}.{minor}.x"
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
-import plotly.io as pio
-pio.renderers.default = 'sphinx_gallery_png'
-from plotly.io._sg_scraper import plotly_sg_scraper
-image_scrapers = ('matplotlib', plotly_sg_scraper,)
+
+pio.renderers.default = "sphinx_gallery_png"
+
+image_scrapers = (
+    "matplotlib",
+    plotly_sg_scraper,
+)
 
 sphinx_gallery_conf = {
-    'doc_module': ('skimage',),
-    # path to your examples scripts
-    'examples_dirs': '../examples',
-    # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples',
-    'backreferences_dir': 'api',
-    'reference_url': {'skimage': None},
-    'image_scrapers': image_scrapers,
-    # Default thumbnail size (400, 280)
-    # Default CSS rescales (160, 112)
-    # Size is decreased to reduce webpage loading time
-    'thumbnail_size': (280, 196),
-    'subsection_order': ExplicitOrder([
-        '../examples/data',
-        '../examples/numpy_operations',
-        '../examples/color_exposure',
-        '../examples/edges',
-        '../examples/transform',
-        '../examples/registration',
-        '../examples/filters',
-        '../examples/features_detection',
-        '../examples/segmentation',
-        '../examples/applications',
-        '../examples/developers',
-    ]),
-    'binder': {
+    "doc_module": ("skimage",),
+    "examples_dirs": "../examples",
+    "gallery_dirs": "auto_examples",
+    "backreferences_dir": "api",
+    "reference_url": {"skimage": None},
+    "image_scrapers": image_scrapers,
+    "thumbnail_size": (280, 196),
+    "subsection_order": ExplicitOrder(
+        [
+            "../examples/data",
+            "../examples/numpy_operations",
+            "../examples/color_exposure",
+            "../examples/edges",
+            "../examples/transform",
+            "../examples/registration",
+            "../examples/filters",
+            "../examples/features_detection",
+            "../examples/segmentation",
+            "../examples/applications",
+            "../examples/developers",
+        ]
+    ),
+    "binder": {
         # Required keys
-        'org': 'scikit-image',
-        'repo': 'scikit-image',
-        'branch': binder_branch,  # Can be any branch, tag, or commit hash
-        'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': ['../../.binder/requirements.txt',
-                         '../../.binder/runtime.txt'],
+        "org": "scikit-image",
+        "repo": "scikit-image",
+        "branch": binder_branch,  # Can be any branch, tag, or commit hash
+        "binderhub_url": "https://mybinder.org",  # Any URL of a binderhub.
+        "dependencies": ["../../.binder/requirements.txt", "../../.binder/runtime.txt"],
         # Optional keys
-        'use_jupyter_lab': False
-     },
+        "use_jupyter_lab": False,
+    },
     # Remove sphinx_gallery_thumbnail_number from generated files
-    'remove_config_comments':True,
+    "remove_config_comments": True,
 }
 
-from sphinx_gallery.utils import _has_optipng
+
 if _has_optipng():
     # This option requires optipng to compress images
     # Optimization level between 0-7
@@ -139,39 +138,43 @@ if _has_optipng():
     # optipng default: -o2
     # We choose -o1 as it produces a sufficient optimization
     # See #4800
-    sphinx_gallery_conf['compress_images'] = ('images', 'thumbnails', '-o1')
+    sphinx_gallery_conf["compress_images"] = ("images", "thumbnails", "-o1")
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'scikit-image'
-html_theme_path = ['themes']
-html_title = f'skimage v{version} docs'
-html_favicon = '_static/favicon.ico'
-html_static_path = ['_static']
+html_theme = "scikit-image"
+html_theme_path = ["themes"]
+html_title = f"skimage v{version} docs"
+html_favicon = "_static/favicon.ico"
+html_static_path = ["_static"]
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-   '**': ['searchbox.html',
-          'navigation.html',
-          'localtoc.html',
-          'versions.html'],
+    "**": ["searchbox.html", "navigation.html", "localtoc.html", "versions.html"],
 }
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'scikitimagedoc'
+htmlhelp_basename = "scikitimagedoc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
 
-latex_font_size = '10pt'
+latex_font_size = "10pt"
 latex_documents = [
-  ('index', 'scikit-image.tex', 'The scikit-image Documentation',
-   'scikit-image development team', 'manual'),
+    (
+        "index",
+        "scikit-image.tex",
+        "The scikit-image Documentation",
+        "scikit-image development team",
+        "manual",
+    ),
 ]
 latex_elements = {}
-latex_elements['preamble'] = r'''
+latex_elements[
+    "preamble"
+] = r"""
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -190,7 +193,7 @@ latex_elements['preamble'] = r'''
 \titlespacing*{\paragraph}{0pt}{1ex}{0pt}
 \makeatother
 
-'''
+"""
 latex_domain_indices = False
 
 # -----------------------------------------------------------------------------
@@ -225,35 +228,39 @@ matplotlib.rcParams.update({
 
 """
 plot_include_source = True
-plot_formats = [('png', 100), ('pdf', 100)]
+plot_formats = [("png", 100), ("pdf", 100)]
 
-plot2rst_index_name = 'README'
-plot2rst_rcparams = {'image.cmap' : 'gray',
-                     'image.interpolation' : 'none'}
+plot2rst_index_name = "README"
+plot2rst_rcparams = {"image.cmap": "gray", "image.interpolation": "none"}
 
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
-_python_version_str = f'{sys.version_info.major}.{sys.version_info.minor}'
-_python_doc_base = 'https://docs.python.org/' + _python_version_str
+_python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
+_python_doc_base = "https://docs.python.org/" + _python_version_str
 intersphinx_mapping = {
-    'python': (_python_doc_base, None),
-    'numpy': ('https://numpy.org/doc/stable',
-              (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('https://docs.scipy.org/doc/scipy/',
-              (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('https://scikit-learn.org/stable',
-                (None, './_intersphinx/sklearn-objects.inv')),
-    'matplotlib': ('https://matplotlib.org/',
-                   (None, './_intersphinx/matplotlib-objects.inv'))
+    "python": (_python_doc_base, None),
+    "numpy": (
+        "https://numpy.org/doc/stable",
+        (None, "./_intersphinx/numpy-objects.inv"),
+    ),
+    "scipy": (
+        "https://docs.scipy.org/doc/scipy/",
+        (None, "./_intersphinx/scipy-objects.inv"),
+    ),
+    "sklearn": (
+        "https://scikit-learn.org/stable",
+        (None, "./_intersphinx/sklearn-objects.inv"),
+    ),
+    "matplotlib": (
+        "https://matplotlib.org/",
+        (None, "./_intersphinx/matplotlib-objects.inv"),
+    ),
 }
 
 # ----------------------------------------------------------------------------
 # Source code links
 # ----------------------------------------------------------------------------
-
-import inspect
-from os.path import relpath, dirname
 
 
 # Function courtesy of NumPy to return URLs containing line numbers
@@ -261,18 +268,18 @@ def linkcode_resolve(domain, info):
     """
     Determine the URL corresponding to Python object
     """
-    if domain != 'py':
+    if domain != "py":
         return None
 
-    modname = info['module']
-    fullname = info['fullname']
+    modname = info["module"]
+    fullname = info["fullname"]
 
     submod = sys.modules.get(modname)
     if submod is None:
         return None
 
     obj = submod
-    for part in fullname.split('.'):
+    for part in fullname.split("."):
         try:
             obj = getattr(obj, part)
         except:
@@ -294,16 +301,20 @@ def linkcode_resolve(domain, info):
         linespec = ""
     else:
         stop_line = start_line + len(source) - 1
-        linespec = f'#L{start_line}-L{stop_line}'
+        linespec = f"#L{start_line}-L{stop_line}"
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
-    if 'dev' in skimage.__version__:
-        return ("https://github.com/scikit-image/scikit-image/blob/"
-                f"main/skimage/{fn}{linespec}")
+    if "dev" in skimage.__version__:
+        return (
+            "https://github.com/scikit-image/scikit-image/blob/"
+            f"main/skimage/{fn}{linespec}"
+        )
     else:
-        return ("https://github.com/scikit-image/scikit-image/blob/"
-                f"v{skimage.__version__}/skimage/{fn}{linespec}")
+        return (
+            "https://github.com/scikit-image/scikit-image/blob/"
+            f"v{skimage.__version__}/skimage/{fn}{linespec}"
+        )
 
 
 # ----------------------------------------------------------------------------
