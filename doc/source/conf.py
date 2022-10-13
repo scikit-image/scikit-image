@@ -3,14 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import inspect
 import os
 import sys
-from os.path import dirname, relpath
 from warnings import filterwarnings
 
 import plotly.io as pio
-import skimage
 from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
@@ -43,16 +40,16 @@ curpath = os.path.dirname(__file__)
 sys.path.append(os.path.join(curpath, "..", "ext"))
 
 extensions = [
-    "sphinx_copybutton",
     "sphinx.ext.autodoc",
-    "sphinx.ext.mathjax",
-    "numpydoc",
-    "doi_role",
-    "matplotlib.sphinxext.plot_directive",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.linkcode",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "doi_role",
+    "numpydoc",
+    "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
 
@@ -67,10 +64,7 @@ exclude_trees = []
 default_role = "autolink"
 pygments_style = "sphinx"
 
-# ------------------------------------------------------------------------
-# Sphinx-gallery configuration
-# ------------------------------------------------------------------------
-
+# -- Sphinx-gallery configuration --------------------------------------------
 
 v = parse(release)
 if v.release is None:
@@ -88,18 +82,13 @@ else:
 
 pio.renderers.default = "sphinx_gallery_png"
 
-image_scrapers = (
-    "matplotlib",
-    plotly_sg_scraper,
-)
-
 sphinx_gallery_conf = {
     "doc_module": ("skimage",),
     "examples_dirs": "../examples",
     "gallery_dirs": "auto_examples",
     "backreferences_dir": "api",
     "reference_url": {"skimage": None},
-    "image_scrapers": image_scrapers,
+    "image_scrapers": ("matplotlib", "plotly_sg_scraper"),
     "thumbnail_size": (280, 196),
     "subsection_order": ExplicitOrder(
         [
@@ -196,7 +185,7 @@ latex_elements[
 """
 latex_domain_indices = False
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Numpy extensions
 # -----------------------------------------------------------------------------
 numpydoc_show_class_members = False
@@ -230,9 +219,6 @@ matplotlib.rcParams.update({
 plot_include_source = True
 plot_formats = [("png", 100), ("pdf", 100)]
 
-plot2rst_index_name = "README"
-plot2rst_rcparams = {"image.cmap": "gray", "image.interpolation": "none"}
-
 # -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
@@ -241,7 +227,7 @@ _python_doc_base = "https://docs.python.org/" + _python_version_str
 intersphinx_mapping = {
     "python": (_python_doc_base, None),
     "numpy": (
-        "https://numpy.org/doc/stable",
+        "https://numpy.org/doc/stable/",
         (None, "./_intersphinx/numpy-objects.inv"),
     ),
     "scipy": (
@@ -249,72 +235,14 @@ intersphinx_mapping = {
         (None, "./_intersphinx/scipy-objects.inv"),
     ),
     "sklearn": (
-        "https://scikit-learn.org/stable",
+        "https://scikit-learn.org/stable/",
         (None, "./_intersphinx/sklearn-objects.inv"),
     ),
     "matplotlib": (
-        "https://matplotlib.org/",
+        "https://matplotlib.org/stable/",
         (None, "./_intersphinx/matplotlib-objects.inv"),
     ),
 }
-
-# ----------------------------------------------------------------------------
-# Source code links
-# ----------------------------------------------------------------------------
-
-
-# Function courtesy of NumPy to return URLs containing line numbers
-def linkcode_resolve(domain, info):
-    """
-    Determine the URL corresponding to Python object
-    """
-    if domain != "py":
-        return None
-
-    modname = info["module"]
-    fullname = info["fullname"]
-
-    submod = sys.modules.get(modname)
-    if submod is None:
-        return None
-
-    obj = submod
-    for part in fullname.split("."):
-        try:
-            obj = getattr(obj, part)
-        except:
-            return None
-
-    # Strip decorators which would resolve to the source of the decorator
-    obj = inspect.unwrap(obj)
-
-    try:
-        fn = inspect.getsourcefile(obj)
-    except:
-        fn = None
-    if not fn:
-        return None
-
-    try:
-        source, start_line = inspect.getsourcelines(obj)
-    except:
-        linespec = ""
-    else:
-        stop_line = start_line + len(source) - 1
-        linespec = f"#L{start_line}-L{stop_line}"
-
-    fn = relpath(fn, start=dirname(skimage.__file__))
-
-    if "dev" in skimage.__version__:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"main/skimage/{fn}{linespec}"
-        )
-    else:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"v{skimage.__version__}/skimage/{fn}{linespec}"
-        )
 
 
 # ----------------------------------------------------------------------------
