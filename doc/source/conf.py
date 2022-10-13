@@ -192,34 +192,6 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 # -----------------------------------------------------------------------------
-# Plots
-# -----------------------------------------------------------------------------
-plot_basedir = os.path.join(curpath, "plots")
-plot_pre_code = """
-import numpy as np
-import matplotlib.pyplot as plt
-
-import matplotlib
-matplotlib.rcParams.update({
-    'font.size': 14,
-    'axes.titlesize': 12,
-    'axes.labelsize': 10,
-    'xtick.labelsize': 8,
-    'ytick.labelsize': 8,
-    'legend.fontsize': 10,
-    'figure.subplot.bottom': 0.2,
-    'figure.subplot.left': 0.2,
-    'figure.subplot.right': 0.9,
-    'figure.subplot.top': 0.85,
-    'figure.subplot.wspace': 0.4,
-    'text.usetex': False,
-})
-
-"""
-plot_include_source = True
-plot_formats = [("png", 100), ("pdf", 100)]
-
-# -----------------------------------------------------------------------------
 # intersphinx
 # -----------------------------------------------------------------------------
 _python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
