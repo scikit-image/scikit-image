@@ -78,13 +78,13 @@ the appropriate point in main and the following instructions are still apt.
   and testing of the wheels by CI is to your satisfaction.
 
 
-  1. Add a tag in git that starts with the string "buildwheel"::
+  1. Add a tag in git that starts with the string "buildwheels"::
 
-    git tag -m <github_release_message> buildwheel_<major>.<minor>.0test
+    git tag -m <github_release_message> buildwheels_<major>.<minor>.0test
 
   2. Push the new tag to GitHub (you can delete these after if you wish)::
 
-    git push upstream buildwheel_<major>.<minor>.0test
+    git push upstream buildwheels_<major>.<minor>.0test
 
         (where ``upstream`` is the name of the
         ``github.com:scikit-image/scikit-image`` repository.)

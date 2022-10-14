@@ -280,7 +280,7 @@ jobs:
     name: Release
     needs:
       [
-        build_linux_37_and_above_wheels,
+        build_linux_38_and_above_wheels,
         build_linux_aarch64_wheels,
         build_macos_wheels,
         build_windows_wheels,
