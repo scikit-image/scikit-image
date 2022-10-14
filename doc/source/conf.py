@@ -69,7 +69,7 @@ pygments_style = "sphinx"
 v = parse(release)
 if v.release is None:
     raise ValueError(
-        f"Ill-formed version: {version!r}. Version should follow " f"PEP440"
+        f"Ill-formed version: {version!r}. Version should follow PEP440"
     )
 
 if v.is_devrelease:
