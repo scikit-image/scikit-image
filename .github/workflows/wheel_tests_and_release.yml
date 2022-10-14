@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  build_linux_37_and_above_wheels:
+  build_linux_38_and_above_wheels:
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -26,7 +26,7 @@ jobs:
         cibw_arch: ["x86_64", "i686"]
         include:
           - os: ubuntu-latest
-            cibw_python: "cp310-*"
+            cibw_python: ["cp310-*", "cp311-*"]
             cibw_manylinux: manylinux2014
             cibw_arch: x86_64
             # exclude i686 on Python 3.10 (No NumPy or SciPy wheels available)
@@ -64,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
         cibw_manylinux: [manylinux2014]
     steps:
       - uses: actions/checkout@v3
@@ -106,7 +106,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
         # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
@@ -178,10 +178,10 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64", "x86"]
-        cibw_python: ["cp38-*", "cp39-*", "cp310-*"]
+        cibw_python: ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
         exclude:
           - os: windows-latest
-            cibw_python: "cp310-*"
+            cibw_python: ["cp310-*", "cp311-*"]
             cibw_arch: x86
 
     steps:
