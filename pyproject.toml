@@ -56,7 +56,7 @@ requires = [
     "lazy_loader>=0.1",
 
     # We follow scipy for much of these pinnings
-    # https://github.com/scipy/scipy/blob/master/pyproject.toml
+    # https://github.com/scipy/scipy/blob/main/pyproject.toml
 
     # On Windows we need to avoid 1.21.6, 1.22.0 and 1.22.1 because they were
     # built with vc142. 1.22.3 is the first version that has 32-bit Windows
