@@ -585,7 +585,6 @@ def test_umfpack_import():
 
 
 def test_empty_labels():
-    from skimage.segmentation import random_walker
     image = np.random.random((5, 5))
     labels = np.zeros((5, 5), dtype=int)
 
