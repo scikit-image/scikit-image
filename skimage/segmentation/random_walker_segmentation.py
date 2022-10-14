@@ -207,6 +207,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
 def _preprocess(labels):
 
     label_values, inv_idx = np.unique(labels, return_inverse=True)
+    if max(label_values) <= 0:
+        raise ValueError('No seeds provided in label image: please ensure '
+                         'it contains at least one positive value')
 
     if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '
@@ -466,10 +469,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         data = img_as_float(data)
         if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
             data = data[:, :, np.newaxis, :]
-
-    if np.all(labels <= 0):
-        raise ValueError('No seeds provided in label image: please ensure '
-                         'it contains at least one positive value')
 
     labels_shape = labels.shape
     labels_dtype = labels.dtype
