@@ -10,7 +10,6 @@ import shutil
 from packaging import version
 
 from ..util.dtype import img_as_bool
-from ._binary_blobs import binary_blobs
 from ._registry import registry, legacy_registry, registry_urls
 
 from .. import __version__

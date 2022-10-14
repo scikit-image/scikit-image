@@ -47,7 +47,7 @@ __all__ = [
 from ._binary_blobs import binary_blobs
 from ._fetchers import (create_image_fetcher, data_dir, download_all,
                         file_hash, image_fetcher, astronaut,
-                        binary_blobs, brain, brick, camera, cat,
+                        brain, brick, camera, cat,
                         cell, cells3d, checkerboard, chelsea, clock,
                         coffee, coins, colorwheel, eagle, grass,
                         gravel, horse, hubble_deep_field, human_mitosis,
