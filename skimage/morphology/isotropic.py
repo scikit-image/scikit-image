@@ -97,7 +97,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
         :DOI:`10.1016/0167-8655(92)90055-5`
     """
 
-    dist = ndi.distance_transform_edt(image == 0, sampling=spacing)
+    dist = ndi.distance_transform_edt(np.logical_not(image), sampling=spacing)
     return np.less_equal(dist, radius, out=out)
 
 
