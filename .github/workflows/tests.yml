@@ -142,17 +142,12 @@ jobs:
         include:
           - python-version: "3.9"
             OPTIONAL_DEPS: 0
-          - python-version: "3.10"
-            OPTIONAL_DEPS: 0
           - python-version: "3.11-dev"
             OPTIONAL_DEPS: 0
             BUILD_DOCS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: "3.9"
-            OPTIONAL_DEPS: 1
-          # a number of optional deps don't yet have Python 3.10 wheels
-          - python-version: "3.10"
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.11 wheels
           - python-version: "3.11-dev"
