@@ -151,7 +151,7 @@ class BinaryMorphology3D:
         morphology.binary_erosion(self.image, self.footprint)
 
 
-class IsotropicMorphology2D(object):
+class IsotropicMorphology2D:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "radius"]
