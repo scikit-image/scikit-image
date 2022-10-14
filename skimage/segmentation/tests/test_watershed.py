@@ -457,7 +457,7 @@ def test_no_markers():
 
 def test_connectivity():
     """
-    Watershed segmentation should output different result for 
+    Watershed segmentation should output different result for
     different connectivity
     when markers are calculated where None is supplied.
     Issue = 5084

@@ -131,6 +131,7 @@ def FITSFactory(image_ext):
 
     if data is None:
         raise RuntimeError(
-            "Extension %d of %s has no data" % (extnum, filename))
+            f"Extension {extnum} of {filename} has no data"
+        )
 
     return data

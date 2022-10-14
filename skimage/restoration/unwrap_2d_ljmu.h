@@ -6,4 +6,3 @@ void unwrap2D(
         int wrap_around_x, int wrap_around_y,
         char use_seed, unsigned int seed
         );
-

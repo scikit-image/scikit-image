@@ -614,7 +614,7 @@ def skeletonize_3d(image):
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
-                         "got image.ndim = %s instead." % image.ndim)
+                         f"got image.ndim = {image.ndim} instead.")
     image = np.ascontiguousarray(image)
     image = img_as_ubyte(image, force_copy=False)
 

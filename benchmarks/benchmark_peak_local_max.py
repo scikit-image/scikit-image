@@ -13,7 +13,7 @@ if 'indices' in parameters and parameters['indices'].default:
     peak_kwargs = {'indices': False}
 
 
-class PeakLocalMaxSuite(object):
+class PeakLocalMaxSuite:
 
     def setup(self):
         mask = np.zeros([500, 500], dtype=bool)

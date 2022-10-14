@@ -124,7 +124,7 @@ def test_2d_cg_mg(dtype):
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
     anticipated_warnings = [
-        'scipy.sparse.sparsetools|%s' % PYAMG_OR_SCIPY_WARNING,
+        f'scipy.sparse.sparsetools|{PYAMG_OR_SCIPY_WARNING}',
         NUMPY_MATRIX_WARNING]
     with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')

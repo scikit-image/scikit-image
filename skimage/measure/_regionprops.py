@@ -219,8 +219,9 @@ def only2d(method):
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
-            raise NotImplementedError('Property %s is not implemented for '
-                                      '3D images' % method.__name__)
+            raise NotImplementedError(
+                f"Property {method.__name__} is not implemented for 3D images"
+            )
         return method(self, *args, **kwargs)
     return func2d
 
@@ -1283,9 +1284,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
-                    'use skimage.measure.label to label the connected'
-                    'components of label_image,'
-                    'or label_image.astype(np.uint8) to interpret'
+                    'use skimage.measure.label to label the connected '
+                    'components of label_image, '
+                    'or label_image.astype(np.uint8) to interpret '
                     'the True values as a single label.')
         else:
             raise TypeError(

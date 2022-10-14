@@ -11,4 +11,3 @@ if len(sys.argv) > 1:
     header = header.replace('.', ' ')
     print('*', header.center(screen_width - 4), '*')
     print('*' * screen_width)
-

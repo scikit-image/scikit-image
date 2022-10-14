@@ -54,6 +54,8 @@ Bugfixes
 Deprecations
 ------------
 
+- The function ``filters.inverse`` was deprecated. Please use
+  ``filters.filter_inverse``.
 
 
 Contributors to this release

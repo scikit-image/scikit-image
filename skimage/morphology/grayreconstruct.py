@@ -155,7 +155,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         pad_value = np.max(seed)
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
-                         "or 'dilation'. Got '%s'." % method)
+                         f"or 'dilation'. Got '{method}'.")
     float_dtype = _supported_float_type(mask.dtype)
     images = np.full(dims, pad_value, dtype=float_dtype)
     images[(0, *inside_slices)] = seed
