@@ -3,11 +3,13 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import inspect
 import os
 import sys
 from warnings import filterwarnings
 
 import plotly.io as pio
+import skimage
 from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
@@ -43,8 +45,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "doi_role",
@@ -68,9 +70,7 @@ pygments_style = "sphinx"
 
 v = parse(release)
 if v.release is None:
-    raise ValueError(
-        f"Ill-formed version: {version!r}. Version should follow PEP440"
-    )
+    raise ValueError(f"Ill-formed version: {version!r}. Version should follow PEP440")
 
 if v.is_devrelease:
     binder_branch = "main"
@@ -185,15 +185,11 @@ latex_elements[
 """
 latex_domain_indices = False
 
-# ----------------------------------------------------------------------------
-# Numpy extensions
-# -----------------------------------------------------------------------------
+# -- numpydoc extension -------------------------------------------------------
 numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
-# -----------------------------------------------------------------------------
-# intersphinx
-# -----------------------------------------------------------------------------
+# -- intersphinx --------------------------------------------------------------
 _python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
 _python_doc_base = "https://docs.python.org/" + _python_version_str
 intersphinx_mapping = {
@@ -216,11 +212,64 @@ intersphinx_mapping = {
     ),
 }
 
+# -- Source code links -------------------------------------------------------
 
-# ----------------------------------------------------------------------------
-# MyST
-# ----------------------------------------------------------------------------
+# Function courtesy of NumPy to return URLs containing line numbers
+def linkcode_resolve(domain, info):
 
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != "py":
+        return None
+
+    modname = info["module"]
+    fullname = info["fullname"]
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split("."):
+        try:
+            obj = getattr(obj, part)
+        except:
+            return None
+
+    # Strip decorators which would resolve to the source of the decorator
+    obj = inspect.unwrap(obj)
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, start_line = inspect.getsourcelines(obj)
+    except:
+        linespec = ""
+    else:
+        stop_line = start_line + len(source) - 1
+        linespec = f"#L{start_line}-L{stop_line}"
+
+    fn = os.path.relpath(fn, start=os.path.dirname(skimage.__file__))
+
+    if "dev" in skimage.__version__:
+        return (
+            "https://github.com/scikit-image/scikit-image/blob/"
+            f"main/skimage/{fn}{linespec}"
+        )
+    else:
+        return (
+            "https://github.com/scikit-image/scikit-image/blob/"
+            f"v{skimage.__version__}/skimage/{fn}{linespec}"
+        )
+
+
+# -- MyST --------------------------------------------------------------------
 myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
