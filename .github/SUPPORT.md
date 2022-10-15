@@ -1,28 +1,24 @@
-## Support for scikit-image
+## Technical support
 
 Welcome to scikit-image! We use GitHub for tracking bugs and feature requests.
 When you report an [issue](https://github.com/scikit-image/scikit-image/issues),
-you may apply a label to it to specify its type: bug, feature request, performance,
+go ahead and apply the appropriate label: bug, feature request, performance,
 infrastructure, documentation, etc.
-If you need support for using
-scikit-image, please reach out to the developers and the community
-using the following resources.
 
-### Support
+Discussions related to development take place on our [developer
+forum](https://discuss.scientific-python.org/c/contributor/skimage).
 
-[image.sc forum](https://forum.image.sc/tag/scikit-image): This is the
-recommended place to post questions on how to perform a particular image
-analysis task. The image.sc forum involves a larger image analysis community
-across multiple software packages and thus has a better chance of finding
-someone who has worked on a similar problem.
+## User support
+
+### Forum
+
+[image.sc forum](https://forum.image.sc/tag/scikit-image): Here, you may ask
+how to perform a particular image analysis task.
+The image.sc forum comprises a large image analysis community
+across multiple software languages and packages.
 
 ### Real-time Chat
 
-For chat, we have the [skimage zulip](https://skimage.zulipchat.com). Feel free
-to ask questions there or just say hello and let us know how you are using
+[skimage zulip](https://skimage.zulipchat.com): Our real-time chat forum.
+Drop in to ask questions, say hello, or tell us know how you are using
 scikit-image!
-
-### Developer Discussion
-
-Discussions related to scikit-image development can also be raised with the
-scikit-image tag on the [Scientific Python Discourse forum](https://discuss.scientific-python.org/c/contributor/skimage).
