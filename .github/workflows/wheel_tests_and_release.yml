@@ -171,6 +171,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
+        compiler: clang
         cibw_arch: ["AMD64", "x86"]
         cibw_python: ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
         exclude:
@@ -191,28 +192,9 @@ jobs:
         with:
           python-version: "3.9"
 
-      # install choco package manager
-      - uses: crazy-max/ghaction-chocolatey@v1
-        name: Install chocolatey
-        with:
-          args: -h
-
-      # install x86 clang-cl (needed for Pythran)
-      - name: Install x86 clang-cl
-        if: matrix.cibw_arch == 'x86'
-        run: |
-          choco install --force --x86 llvm
-
-      - name: Install x64 clang-cl
-        if: matrix.cibw_arch == 'AMD64'
-        run: |
-          choco install --force llvm
-
       - name: Install cibuildwheel and add clang-cl to path
         run: |
           python -m pip install cibuildwheel
-          SET PATH="C:\\Program Files\\LLVM\\bin;%PATH%"
-          SET PATH="C:\\Program Files (x86)\\LLVM\\bin;%PATH%"
 
       - name: Build x86 Windows wheels for CPython
         if: matrix.cibw_arch == 'x86'
