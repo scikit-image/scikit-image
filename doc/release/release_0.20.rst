@@ -45,6 +45,12 @@ New features and improvements
 - Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
   Applying the function to floating-point images may give unexpected results when small numerical differences between adjacent pixels are present
   (`#6272 <https://github.com/scikit-image/scikit-image/pull/6272>`_).
+- Use the minimal required unsigned integer size in ``skimage.filters.rank_order`` which allows to operate the function with higher precision or on larger arrays.
+  Previously, the returned ``labels`` and and ``original_values`` were always of type uint32.
+  (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
+- Use the minimal required unsigned integer internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
+  Previously, int32 was used.
+  (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 
 Changes and new deprecations
 ----------------------------
@@ -135,6 +141,8 @@ Other and development related updates
   (`#6323 <https://github.com/scikit-image/scikit-image/pull/6323>`_).
 - Avoid unnecessary copying in ``skimage.morphology.skeletonize`` and update code style and tests
   (`#6327 <https://github.com/scikit-image/scikit-image/pull/6327>`_).
+- Add draft of SKIP 4 "Transitioning to scikit-image 2.0"
+  (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_).
 
 TODO Milestone 1.0?
 -------------------
@@ -145,13 +153,11 @@ Backported 0.19.x
 -----------------
 - hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
 - Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304) (`#6306 <https://github.com/scikit-image/scikit-image/pull/6306>`_)
+- Fix issue with newer versions of matplotlib in manual segmentation (`#6328 <https://github.com/scikit-image/scikit-image/pull/6328>`_)
+- warp/rotate: fixed a bug with clipping when cval is not in the input range (`#6335 <https://github.com/scikit-image/scikit-image/pull/6335>`_)
 
 TODO
 ----
-- Fix issue with newer versions of matplotlib in manual segmentation (`#6328 <https://github.com/scikit-image/scikit-image/pull/6328>`_)
-- warp/rotate: fixed a bug with clipping when cval is not in the input range (`#6335 <https://github.com/scikit-image/scikit-image/pull/6335>`_)
-- Add skip-4 draft (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_)
-- add int64 support to `filters.rank_order` and `morphology.reconstruction` (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_)
 - avoid warnings about change to v3 API from imageio (`#6343 <https://github.com/scikit-image/scikit-image/pull/6343>`_)
 - Fix smoothed image computation when mask is None in canny (`#6348 <https://github.com/scikit-image/scikit-image/pull/6348>`_)
 - Fix channel_axis default for cycle_spin (`#6352 <https://github.com/scikit-image/scikit-image/pull/6352>`_)
