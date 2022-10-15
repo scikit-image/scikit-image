@@ -17,9 +17,8 @@ Python source code enables one to modify quickly the example into a case
 closer to one's image processing applications.
 
 Users are warmly encouraged to report on their use of ``skimage`` on the
-:ref:`mailing_list`, in order to propose more examples in the future.
-Contributing examples to the gallery can be done on github (see
-:doc:`../contribute`).
+`forum <https://discuss.scientific-python.org/c/contributor/skimage>`_, in
+order to propose more examples in the future.
 
 Search field
 ------------
@@ -58,17 +57,13 @@ starting with a ``Parameters`` section for the arguments and a
 functions include one or more examples.
 
 
-.. _mailing_list:
-
-Mailing-list
+Ask for help
 ------------
 
-Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
-This mailing-list is shared by users and developers, and it is the right
-place to ask any question about ``skimage``, or in general, image
-processing using Python.  Posting snippets of code with minimal examples
-ensures to get more relevant and focused answers.
+If you still have questions, reach out through
 
-We would love to hear from how you use ``skimage`` for your work on the
-mailing-list!
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_
+- our `developer forum
+  <https://discuss.scientific-python.org/c/contributor/skimage>`_
+- our `chat channel <https://skimage.zulipchat.com/>`_
+- `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
