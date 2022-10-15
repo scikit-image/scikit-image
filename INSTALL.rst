@@ -221,13 +221,9 @@ Additional help
 If you still have questions, reach out through
 
 - our `user forum <https://forum.image.sc/tags/scikit-image>`_
-- our `developer forum
-  <https://discuss.scientific-python.org/c/contributor/skimage>`_
-  or by email at `skimage@discuss.scientific-python.org
-  <mailto:skimage@discuss.scientific-python.org>`_
+- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 - our `chat channel <https://skimage.zulipchat.com/>`_
 - `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
-
 
 
 To suggest a change in these instructions,
