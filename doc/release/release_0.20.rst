@@ -100,6 +100,10 @@ Documentation
   (`#6280 <https://github.com/scikit-image/scikit-image/pull/6280>`_).
 - Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
   (`#6290 <https://github.com/scikit-image/scikit-image/pull/6290>`_, `#6292 <https://github.com/scikit-image/scikit-image/pull/6292>`_).
+- Use gridded thumbnails in our gallery to demonstrate the different images and datasets available in ``skimage.data``
+  (`#6298 <https://github.com/scikit-image/scikit-image/pull/6298>`_, `#6300 <https://github.com/scikit-image/scikit-image/pull/6300>`_, `#6301 <https://github.com/scikit-image/scikit-image/pull/6301>`_).
+- Clarify that ``skimage.morphology.skeletonize`` accepts an ``image`` of any input type
+  (`#6322 <https://github.com/scikit-image/scikit-image/pull/6322>`_).
 
 Other and development related updates
 -------------------------------------
@@ -117,6 +121,20 @@ Other and development related updates
   (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_).
 - Remove unused function ``getLutNames`` in ``tools/precompute/mc_meta/createluts.py``
   (`#6294 <https://github.com/scikit-image/scikit-image/pull/6294>`_).
+- Point urls for data files to a specific commit
+  (`#6297 <https://github.com/scikit-image/scikit-image/pull/6297>`_).
+- Drop Codecov badge from project README
+  (`#6302 <https://github.com/scikit-image/scikit-image/pull/6302>`_).
+- Use ``cnp.float32_t`` and ``cnp.float64_t`` over ``float`` and ``double`` in Cython code
+  (`#6303 <https://github.com/scikit-image/scikit-image/pull/6303>`_).
+- Remove undefined reference to ``'python_to_notebook'`` in ``doc/ext/notebook_doc.py``
+  (`#6307 <https://github.com/scikit-image/scikit-image/pull/6307>`_).
+- Fix CI by excluding Pillow 9.1.0
+  (`#6315 <https://github.com/scikit-image/scikit-image/pull/6315>`_).
+- Parameterize tests in ``skimage.measure.tests.test_moments``
+  (`#6323 <https://github.com/scikit-image/scikit-image/pull/6323>`_).
+- Avoid unnecessary copying in ``skimage.morphology.skeletonize`` and update code style and tests
+  (`#6327 <https://github.com/scikit-image/scikit-image/pull/6327>`_).
 
 TODO Milestone 1.0?
 -------------------
@@ -126,21 +144,10 @@ TODO Milestone 1.0?
 Backported 0.19.x
 -----------------
 - hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
+- Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304) (`#6306 <https://github.com/scikit-image/scikit-image/pull/6306>`_)
 
 TODO
 ----
-- Update data urls to point to a specific commit (`#6297 <https://github.com/scikit-image/scikit-image/pull/6297>`_)
-- New thumbnails for General-purpose images and scientific images (`#6298 <https://github.com/scikit-image/scikit-image/pull/6298>`_)
-- New thumbnail for "Datasets" example  by adjusting contrast (`#6300 <https://github.com/scikit-image/scikit-image/pull/6300>`_)
-- New thumbnail for Specific images (`#6301 <https://github.com/scikit-image/scikit-image/pull/6301>`_)
-- drop codecov badge from README (`#6302 <https://github.com/scikit-image/scikit-image/pull/6302>`_)
-- Cython style: prefer cnp.float32_t and cnp.float64_t for clarity (`#6303 <https://github.com/scikit-image/scikit-image/pull/6303>`_)
-- Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (`#6304 <https://github.com/scikit-image/scikit-image/pull/6304>`_) (`#6306 <https://github.com/scikit-image/scikit-image/pull/6306>`_)
-- Remove undefined 'python_to_notebook' in doc/ext/notebook_doc.py (`#6307 <https://github.com/scikit-image/scikit-image/pull/6307>`_)
-- Fix CI by pinning to Pillow!=9.1.0 (`#6315 <https://github.com/scikit-image/scikit-image/pull/6315>`_)
-- Fix skeletonize behavior (`#6322 <https://github.com/scikit-image/scikit-image/pull/6322>`_)
-- parameterize moments tests (`#6323 <https://github.com/scikit-image/scikit-image/pull/6323>`_)
-- skeletonize maintenance (`#6327 <https://github.com/scikit-image/scikit-image/pull/6327>`_)
 - Fix issue with newer versions of matplotlib in manual segmentation (`#6328 <https://github.com/scikit-image/scikit-image/pull/6328>`_)
 - warp/rotate: fixed a bug with clipping when cval is not in the input range (`#6335 <https://github.com/scikit-image/scikit-image/pull/6335>`_)
 - Add skip-4 draft (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_)
