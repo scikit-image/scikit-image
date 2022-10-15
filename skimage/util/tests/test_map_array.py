@@ -50,4 +50,3 @@ def test_arraymap_bool_index():
     positive[0] = False
     m[positive] += 1
     assert np.all(m[image] >= 1)
-

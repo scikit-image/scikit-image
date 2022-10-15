@@ -195,8 +195,10 @@ def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
         # left-handed
         faces = np.fliplr(faces)
     elif not gradient_direction == 'ascent':
-        raise ValueError("Incorrect input %s in `gradient_direction`, see "
-                         "docstring." % (gradient_direction))
+        raise ValueError(
+            f"Incorrect input {gradient_direction} in `gradient_direction`, "
+            "see docstring."
+        )
     if not np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 

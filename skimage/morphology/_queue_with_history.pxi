@@ -52,8 +52,8 @@ cdef struct QueueWithHistory:
 
 cdef inline void queue_init(QueueWithHistory* self, Py_ssize_t buffer_size) nogil:
     """Initialize the queue and its buffer size.
-    
-    The size is defined as the number of queue items to fit into the initial 
+
+    The size is defined as the number of queue items to fit into the initial
     buffer, thus its true memory size is `buffer_size * sizeof(QueueItem)`. Be
     sure to call `queue_exit` after calling this function to free the allocated
     memory!
@@ -78,7 +78,7 @@ cdef inline void queue_push(QueueWithHistory* self, QueueItem* item_ptr) nogil:
 cdef inline unsigned char queue_pop(QueueWithHistory* self,
                                     QueueItem* item_ptr) nogil:
     """If not empty pop an item and return 1 otherwise return 0.
-    
+
     The item is still preserved in the internal buffer and can be restored with
     `queue_restore`. To truly clear the internal buffer use `queue_clear`.
     """
@@ -91,7 +91,7 @@ cdef inline unsigned char queue_pop(QueueWithHistory* self,
 
 cdef inline void queue_restore(QueueWithHistory* self) nogil:
     """Restore all consumed items to the queue.
-    
+
     The order of the restored queue is the same as previous one, meaning older
     items are popped first.
     """
@@ -100,7 +100,7 @@ cdef inline void queue_restore(QueueWithHistory* self) nogil:
 
 cdef inline void queue_clear(QueueWithHistory* self) nogil:#
     """Remove all consumable items.
-    
+
     After this the old items can't be restored with `queue_restore`.
     """
     self._index_consumed = -1
@@ -109,7 +109,7 @@ cdef inline void queue_clear(QueueWithHistory* self) nogil:#
 
 cdef inline void queue_exit(QueueWithHistory* self) nogil:
     """Free the buffer of the queue.
-    
+
     Don't use the queue after this command unless `queue_init` is called again.
     """
     free(self._buffer_ptr)

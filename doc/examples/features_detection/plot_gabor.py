@@ -94,7 +94,7 @@ for theta in (0, 1):
     theta = theta / 4. * np.pi
     for frequency in (0.1, 0.4):
         kernel = gabor_kernel(frequency, theta=theta)
-        params = 'theta=%d,\nfrequency=%.2f' % (theta * 180 / np.pi, frequency)
+        params = f"theta={theta * 180 / np.pi},\nfrequency={frequency:.2f}"
         kernel_params.append(params)
         # Save kernel and the power image for each image
         results.append((kernel, [power(img, kernel) for img in images]))

@@ -10,7 +10,7 @@ def main():
 
     for requirement_file in requirements_dir.glob('*.txt'):
         print(requirement_file.name)
-        with open(str(requirement_file), 'r') as f:
+        with open(str(requirement_file)) as f:
             for req in f:
                 # Remove trailing and leading whitespace.
                 req = req.strip()

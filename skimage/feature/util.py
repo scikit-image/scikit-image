@@ -4,7 +4,7 @@ from ..util import img_as_float
 from .._shared.utils import _supported_float_type, check_nD
 
 
-class FeatureDetector(object):
+class FeatureDetector:
 
     def __init__(self):
         self.keypoints_ = np.array([])
@@ -21,7 +21,7 @@ class FeatureDetector(object):
         raise NotImplementedError()
 
 
-class DescriptorExtractor(object):
+class DescriptorExtractor:
 
     def __init__(self):
         self.descriptors_ = np.array([])

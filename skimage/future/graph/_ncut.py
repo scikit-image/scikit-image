@@ -22,7 +22,7 @@ def DW_matrices(graph):
         joining `i` to `j`.
     """
     # sparse.eighsh is most efficient with CSC-formatted input
-    W = nx.to_scipy_sparse_matrix(graph, format='csc')
+    W = nx.to_scipy_sparse_array(graph, format='csc')
     entries = W.sum(axis=0)
     D = sparse.dia_matrix((entries, 0), shape=W.shape).tocsc()
 
