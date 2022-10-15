@@ -51,6 +51,9 @@ New features and improvements
 - Use the minimal required unsigned integer internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
   Previously, int32 was used.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
+- Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
+  (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
+
 
 Changes and new deprecations
 ----------------------------
@@ -142,7 +145,9 @@ Other and development related updates
 - Avoid unnecessary copying in ``skimage.morphology.skeletonize`` and update code style and tests
   (`#6327 <https://github.com/scikit-image/scikit-image/pull/6327>`_).
 - Add draft of SKIP 4 "Transitioning to scikit-image 2.0"
-  (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_).
+  (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_, `#6353 <https://github.com/scikit-image/scikit-image/pull/6353>`_).
+- Add benchmarks for ``skimage.morphology.reconstruction``
+  (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 
 TODO Milestone 1.0?
 -------------------
@@ -155,14 +160,12 @@ Backported 0.19.x
 - Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304) (`#6306 <https://github.com/scikit-image/scikit-image/pull/6306>`_)
 - Fix issue with newer versions of matplotlib in manual segmentation (`#6328 <https://github.com/scikit-image/scikit-image/pull/6328>`_)
 - warp/rotate: fixed a bug with clipping when cval is not in the input range (`#6335 <https://github.com/scikit-image/scikit-image/pull/6335>`_)
-
-TODO
-----
 - avoid warnings about change to v3 API from imageio (`#6343 <https://github.com/scikit-image/scikit-image/pull/6343>`_)
 - Fix smoothed image computation when mask is None in canny (`#6348 <https://github.com/scikit-image/scikit-image/pull/6348>`_)
 - Fix channel_axis default for cycle_spin (`#6352 <https://github.com/scikit-image/scikit-image/pull/6352>`_)
-- Fix SKIP4 header and links (`#6353 <https://github.com/scikit-image/scikit-image/pull/6353>`_)
-- Improve histogram matching performance on unsigned integer data (resume `#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_) (`#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_)
+
+TODO
+----
 - remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
 - Document support for Path objects in io functions (`#6361 <https://github.com/scikit-image/scikit-image/pull/6361>`_)
 - Add 3D rotation and translation properties for EuclideanTransform object, and 3D scale for SimilarityTransform (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_)
@@ -447,6 +450,7 @@ Includes backported changes to earlier versions.
 - Juan DF
 - Juan Nunez-Iglesias
 - Judd Storrs
+- kwikwag (kwikwag)
 - Larry Bradley
 - Lars Grüter
 - Lucas Johnson
