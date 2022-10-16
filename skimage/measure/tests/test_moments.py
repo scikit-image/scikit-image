@@ -29,6 +29,16 @@ def compare_moments(m1, m2, thresh=1e-8):
     """
     m1 = m1.copy()
     m2 = m2.copy()
+
+    # make sure location of any NaN values match and then ignore the NaN values
+    # in the subsequent comparisons
+    nan_idx1 = np.where(np.isnan(m1.ravel()))[0]
+    nan_idx2 = np.where(np.isnan(m2.ravel()))[0]
+    assert len(nan_idx1) == len(nan_idx2)
+    assert np.all(nan_idx1 == nan_idx2)
+    m1[np.isnan(m1)] = 0
+    m2[np.isnan(m2)] = 0
+
     max_val = np.abs(m1[m1 != 0]).max()
     for orders in itertools.product(*((range(m1.shape[0]),) * m1.ndim)):
         if sum(orders) > m1.shape[0] - 1:
@@ -81,7 +91,7 @@ def test_moments_central(anisotropic):
         # check for proper centroid computation
         mu_calc_centroid = moments_central(image, spacing=spacing)
 
-    assert_allclose(mu, mu_calc_centroid, rtol=1e-14)
+    compare_moments(mu, mu_calc_centroid, thresh=1e-14)
 
     # shift image by dx=2, dy=2
     image2 = np.zeros((20, 20), dtype=np.double)
@@ -98,7 +108,7 @@ def test_moments_central(anisotropic):
             spacing=spacing
         )
     # central moments must be translation invariant
-    assert_allclose(mu, mu2, rtol=1e-14)
+    compare_moments(mu, mu2, thresh=1e-14)
 
 
 def test_moments_coords():
@@ -188,7 +198,7 @@ def test_moments_normalized_spacing(anisotropic):
     nu2 = moments_normalized(mu2, spacing=spacing2)
 
     # result should be invariant to absolute scale of spacing
-    assert_almost_equal(nu, nu2)
+    compare_moments(nu, nu2)
 
 
 def test_moments_normalized_3d():
