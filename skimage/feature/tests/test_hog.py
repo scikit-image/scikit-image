@@ -203,7 +203,7 @@ def test_hog_orientations_circle():
             plt.imshow(hog_img)
             plt.colorbar()
             plt.title('HOG result visualisation, '
-                      'orientations=%d' % (orientations))
+                      f'orientations={orientations}')
             plt.show()
 
         # reshape resulting feature vector to matrix with N columns (each

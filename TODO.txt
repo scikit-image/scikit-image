@@ -1,4 +1,4 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
@@ -18,6 +18,8 @@ Version 1.0
   function in `skimage/measure/_label.py`
 * Change the warning about poorly conditioned data to a ValueError within
   `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+* In ``skimage/filters/lpi_filter.py``, remove the deprecated function
+  inverse().
 
 Other (2022)
 ------------

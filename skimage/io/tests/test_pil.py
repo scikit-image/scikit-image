@@ -41,9 +41,9 @@ def setup_module(self):
 
 
 def test_png_round_trip():
-    f = NamedTemporaryFile(suffix='.png')
-    fname = f.name
-    f.close()
+    with NamedTemporaryFile(suffix='.png') as f:
+        fname = f.name
+
     I = np.eye(3)
     imsave(fname, I)
     Ip = img_as_float(imread(fname))
@@ -64,9 +64,9 @@ def test_imread_separate_channels():
     # Test that imread returns RGBA values contiguously even when they are
     # stored in separate planes.
     x = np.random.rand(3, 16, 8)
-    f = NamedTemporaryFile(suffix='.tif')
-    fname = f.name
-    f.close()
+    with NamedTemporaryFile(suffix='.tif') as f:
+        fname = f.name
+
     imsave(fname, x)
     img = imread(fname)
     os.remove(fname)
@@ -269,9 +269,9 @@ def test_cmyk():
     img = Image.open(fetch('data/color.png'))
     img = img.convert('CMYK')
 
-    f = NamedTemporaryFile(suffix='.jpg')
-    fname = f.name
-    f.close()
+    with NamedTemporaryFile(suffix='.jpg') as f:
+        fname = f.name
+
     img.save(fname)
     try:
         img.close()

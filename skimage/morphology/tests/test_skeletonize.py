@@ -19,7 +19,7 @@ class TestSkeletonize():
         assert_array_equal(result, np.zeros((5, 5)))
 
     def test_skeletonize_wrong_dim1(self):
-        im = np.zeros((5))
+        im = np.zeros(5)
         with pytest.raises(ValueError):
             skeletonize(im)
 
@@ -151,7 +151,7 @@ class TestThin():
         assert_array_equal(result, expected)
 
     def test_baddim(self):
-        for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
+        for ii in [np.zeros(3), np.zeros((3, 3, 3))]:
             with pytest.raises(ValueError):
                 thin(ii)
 

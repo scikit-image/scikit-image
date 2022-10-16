@@ -145,6 +145,7 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=32)',
 # `order`. This can be seen in the following images which appear a bit sharper
 # in the lowpass case than their squared Butterworth counterparts above.
 
+
 lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=False,
                                      npad=32)
 

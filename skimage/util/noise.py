@@ -159,8 +159,10 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     for key in kwargs:
         if key not in allowedkwargs[allowedtypes[mode]]:
-            raise ValueError('%s keyword not in allowed keywords %s' %
-                             (key, allowedkwargs[allowedtypes[mode]]))
+            raise ValueError(
+                f"{key} keyword not in allowed keywords "
+                f"{allowedkwargs[allowedtypes[mode]]}"
+            )
 
     # Set kwarg defaults
     for kw in allowedkwargs[allowedtypes[mode]]:

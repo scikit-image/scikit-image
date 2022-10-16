@@ -400,7 +400,7 @@ class channel_as_last_axis:
                 channel_axis = (channel_axis,)
             if len(channel_axis) > 1:
                 raise ValueError(
-                    "only a single channel axis is currently suported")
+                    "only a single channel axis is currently supported")
 
             if channel_axis == (-1,) or channel_axis == -1:
                 return func(*args, **kwargs)
@@ -457,14 +457,12 @@ class deprecated:
 
         alt_msg = ''
         if self.alt_func is not None:
-            alt_msg = ' Use ``%s`` instead.' % self.alt_func
+            alt_msg = f' Use ``{self.alt_func}`` instead.'
         rmv_msg = ''
         if self.removed_version is not None:
-            rmv_msg = (' and will be removed in version %s' %
-                       self.removed_version)
+            rmv_msg = f' and will be removed in version {self.removed_version}'
 
-        msg = ('Function ``%s`` is deprecated' % func.__name__ +
-               rmv_msg + '.' + alt_msg)
+        msg = f'Function ``{func.__name__}`` is deprecated{rmv_msg}.{alt_msg}'
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -723,7 +721,7 @@ def _validate_interpolation_order(image_dtype, order):
     if image_dtype == bool and order != 0:
         raise ValueError(
             "Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
+             "with bool data type. Please set order to 0 or explicitly "
              "cast input image to another data type.")
 
     return order
@@ -745,10 +743,10 @@ def _to_ndimage_mode(mode):
                                  wrap='wrap')
     if mode not in mode_translation_dict:
         raise ValueError(
-            (f"Unknown mode: '{mode}', or cannot translate mode. The "
+            f"Unknown mode: '{mode}', or cannot translate mode. The "
              f"mode should be one of 'constant', 'edge', 'symmetric', "
              f"'reflect', or 'wrap'. See the documentation of numpy.pad for "
-             f"more info."))
+             f"more info.")
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 

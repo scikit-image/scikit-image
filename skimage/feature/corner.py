@@ -301,7 +301,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
         warn("use_gaussian_derivatives currently defaults to False, but will "
-             "change to True in a future version. Please specficy this "
+             "change to True in a future version. Please specify this "
              "argument explicitly to maintain the current behavior",
              category=FutureWarning, stacklevel=2)
 
@@ -371,14 +371,9 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
         return np.linalg.det(hessian_mat_array)
 
 
-def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
-    l1 = (M00 + M11) / 2 + np.sqrt(4 * M01 ** 2 + (M00 - M11) ** 2) / 2
-    l2 = (M00 + M11) / 2 - np.sqrt(4 * M01 ** 2 + (M00 - M11) ** 2) / 2
-    return l1, l2
-
-
 def _symmetric_compute_eigenvalues(S_elems):
-    """Compute eigenvalues from the upperdiagonal entries of a symmetric matrix
+    """Compute eigenvalues from the upper-diagonal entries of a symmetric
+    matrix.
 
     Parameters
     ----------
@@ -394,15 +389,20 @@ def _symmetric_compute_eigenvalues(S_elems):
         ith-largest eigenvalue at position (j, k).
     """
 
-    if len(S_elems) == 3:  # Use fast Cython code for 2D
-        eigs = np.stack(_image_orthogonal_matrix22_eigvals(*S_elems))
+    if len(S_elems) == 3:  # Fast explicit formulas for 2D.
+        M00, M01, M11 = S_elems
+        eigs = np.empty((2, *M00.shape), M00.dtype)
+        eigs[:] = (M00 + M11) / 2
+        hsqrtdet = np.sqrt(M01 ** 2 + ((M00 - M11) / 2) ** 2)
+        eigs[0] += hsqrtdet
+        eigs[1] -= hsqrtdet
+        return eigs
     else:
         matrices = _symmetric_image(S_elems)
         # eigvalsh returns eigenvalues in increasing order. We want decreasing
         eigs = np.linalg.eigvalsh(matrices)[..., ::-1]
         leading_axes = tuple(range(eigs.ndim - 1))
-        eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
-    return eigs
+        return np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
 
 
 def _symmetric_image(S_elems):

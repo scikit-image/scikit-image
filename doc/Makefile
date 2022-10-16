@@ -56,7 +56,6 @@ release_notes:
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
-	cp -r source/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
 	$(PYTHON) source/random_gallery.py

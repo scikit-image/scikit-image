@@ -30,7 +30,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     # We ravel the input array for simplicity of iteration in Cython:
     orig_shape = input_arr.shape
     # NumPy docs for `np.ravel()` says:
-    # "When a view is desired in as many cases as possible, 
+    # "When a view is desired in as many cases as possible,
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
@@ -115,7 +115,7 @@ class ArrayMap:
 
     def __array__(self, dtype=None):
         """Return an array that behaves like the arraymap when indexed.
-        
+
         This array can be very large: it is the size of the largest value
         in the ``in_vals`` array, plus one.
         """

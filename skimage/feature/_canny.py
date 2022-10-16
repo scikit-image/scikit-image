@@ -11,7 +11,6 @@ import scipy.ndimage as ndi
 from ..util.dtype import dtype_limits
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
-from ..filters._gaussian import gaussian
 from ._canny_cy import _nonmaximum_suppression_bilinear
 
 
@@ -137,7 +136,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
 
     See also
     --------
-    skimage.sobel
+    skimage.filters.sobel
 
     Notes
     -----
@@ -231,7 +230,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         isobel, jsobel, magnitude, eroded_mask, low_threshold
     )
 
-    # Double thresholding and edge traking
+    # Double thresholding and edge tracking
     #
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them
