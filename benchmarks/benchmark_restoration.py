@@ -118,7 +118,7 @@ class DeconvolutionSuite:
                                     **rl_iter_kwarg)
 
 
-class RollingBall(object):
+class RollingBall:
     """Benchmark Rolling Ball algorithm."""
 
     timeout = 120
@@ -171,7 +171,7 @@ class RollingBall(object):
     time_rollingball_threads.param_names = ["threads"]
 
 
-class Inpaint(object):
+class Inpaint:
     """Benchmark inpainting algorithm."""
 
     def setup(self):
@@ -195,7 +195,7 @@ class Inpaint(object):
         rstate = np.random.RandomState(0)
         for radius in [0, 2, 4]:
             # larger defects are less common
-            thresh = 2.75 + 0.25 * radius  # larger defects are less commmon
+            thresh = 2.75 + 0.25 * radius  # larger defects are less common
             tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
             if radius > 0:
                 tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))

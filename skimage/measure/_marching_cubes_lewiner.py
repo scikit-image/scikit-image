@@ -195,8 +195,10 @@ def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
         # left-handed
         faces = np.fliplr(faces)
     elif not gradient_direction == 'ascent':
-        raise ValueError("Incorrect input %s in `gradient_direction`, see "
-                         "docstring." % (gradient_direction))
+        raise ValueError(
+            f"Incorrect input {gradient_direction} in `gradient_direction`, "
+            "see docstring."
+        )
     if not np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 
@@ -215,7 +217,7 @@ def _to_array(args):
     return ar
 
 
-# Map an edge-index to two relative pixel positions. The ege index
+# Map an edge-index to two relative pixel positions. The edge index
 # represents a point that lies somewhere in between these pixels.
 # Linear interpolation should be used to determine where it is exactly.
 #   0

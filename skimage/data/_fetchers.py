@@ -10,7 +10,6 @@ import shutil
 from packaging import version
 
 from ..util.dtype import img_as_bool
-from ._binary_blobs import binary_blobs
 from ._registry import registry, legacy_registry, registry_urls
 
 from .. import __version__
@@ -877,7 +876,7 @@ def clock():
     """Motion blurred clock.
 
     This photograph of a wall clock was taken while moving the camera in an
-    aproximately horizontal direction.  It may be used to illustrate
+    approximately horizontal direction.  It may be used to illustrate
     inverse filters and deconvolution.
 
     Released into the public domain by the photographer (Stefan van der Walt).

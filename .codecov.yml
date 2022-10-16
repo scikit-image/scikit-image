@@ -9,7 +9,7 @@ coverage:
     project:
       default:
         # Drops on the order 0.01% are typical even when no change occurs
-        # Having this threshold set a little higher (0.1%) than that makes it 
+        # Having this threshold set a little higher (0.1%) than that makes it
         # a little more tolerant to fluctuations
         threshold: 0.1%
 

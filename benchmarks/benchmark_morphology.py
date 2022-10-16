@@ -10,7 +10,7 @@ import skimage
 from skimage import data, morphology, util
 
 
-class Skeletonize3d(object):
+class Skeletonize3d:
 
     def setup(self, *args):
         try:
@@ -51,7 +51,7 @@ class Skeletonize3d(object):
 # For binary morphology all functions ultimately are based on a single erosion
 # function in the scipy.ndimage C code, so only benchmark binary_erosion here.
 
-class BinaryMorphology2D(object):
+class BinaryMorphology2D:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
@@ -112,7 +112,7 @@ class BinaryMorphology2D(object):
         morphology.binary_erosion(self.image, self.footprint)
 
 
-class BinaryMorphology3D(object):
+class BinaryMorphology3D:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
@@ -170,7 +170,7 @@ class GrayMorphology3D(BinaryMorphology3D):
         morphology.erosion(self.image, self.footprint)
 
 
-class GrayReconstruction(object):
+class GrayReconstruction:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "dtype"]
@@ -220,3 +220,31 @@ class GrayReconstruction(object):
     def peakmem_reconstruction(self, shape, dtype):
         morphology.reconstruction(self.seed, self.mask)
 
+
+class LocalMaxima:
+
+    param_names = ["connectivity", "allow_borders"]
+    params = [(1, 2), (False, True)]
+
+    def setup(self, *args):
+        # Natural image with small extrema
+        self.image = data.moon()
+
+    def time_2d(self, connectivity, allow_borders):
+        morphology.local_maxima(
+            self.image, connectivity=connectivity,
+            allow_borders=allow_borders
+        )
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        .. [1] https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_2d(self,connectivity, allow_borders):
+        morphology.local_maxima(
+            self.image, connectivity=connectivity,
+            allow_borders=allow_borders
+        )

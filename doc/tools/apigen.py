@@ -27,7 +27,7 @@ from types import BuiltinFunctionType, FunctionType, ModuleType
 DEBUG = True
 
 
-class ApiDocWriter(object):
+class ApiDocWriter:
     ''' Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format'''
 
@@ -179,9 +179,9 @@ class ApiDocWriter(object):
             print(filename, 'erk')
             # nothing that we could handle here.
             return ([],[])
-        f = open(filename, 'rt')
-        functions, classes = self._parse_lines(f)
-        f.close()
+        with open(filename) as f:
+            functions, classes = self._parse_lines(f)
+
         return functions, classes
 
     def _parse_module_with_import(self, uri):
@@ -275,7 +275,7 @@ class ApiDocWriter(object):
 
         # Make a shorter version of the uri that omits the package name for
         # titles
-        uri_short = re.sub(r'^%s\.' % self.package_name,'',uri)
+        uri_short = re.sub(rf'^{self.package_name}\.','',uri)
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
@@ -348,8 +348,7 @@ class ApiDocWriter(object):
         elif match_type == 'package':
             patterns = self.package_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"'
-                             % match_type)
+            raise ValueError(f'Cannot interpret match type "{match_type}"')
         # Match to URI without package name
         L = len(self.package_name)
         if matchstr[:L] == self.package_name:
@@ -414,9 +413,8 @@ class ApiDocWriter(object):
             # write out to file
             outfile = os.path.join(outdir,
                                    m + self.rst_extension)
-            fileobj = open(outfile, 'wt')
-            fileobj.write(api_str)
-            fileobj.close()
+            with open(outfile, 'w') as fileobj:
+                fileobj.write(api_str)
             written_modules.append(m)
         self.written_modules = written_modules
 
@@ -469,40 +467,41 @@ class ApiDocWriter(object):
         else:
             relpath = outdir
         print("outdir: ", relpath)
-        idx = open(path,'wt')
-        w = idx.write
-        w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
+        with open(path, 'w') as idx:
+            w = idx.write
+            w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        # We look at the module name.  If it is `skimage`, display, if `skimage.submodule`, only show `submodule`,
-        # if it is `skimage.submodule.subsubmodule`, ignore.
+            # We look at the module name.
+            # If it is `skimage`, display,
+            # if `skimage.submodule`, only show `submodule`,
+            # if it is `skimage.submodule.subsubmodule`, ignore.
 
-        title = "API Reference for skimage |version|"
-        w(title + "\n")
-        w("=" * len(title) + "\n\n")
+            title = "API Reference for skimage |version|"
+            w(title + "\n")
+            w("=" * len(title) + "\n\n")
 
-        subtitle = "Submodules"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodules"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        for f in self.written_modules:
-            module_name = f.split('.')
-            if len(module_name) > 2:
-                continue
-            elif len(module_name) == 1:
-                module_name = module_name[0]
-                prefix = "-"
-            elif len(module_name) == 2:
-                module_name = module_name[1]
-                prefix = "\n  -"
-            w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
-        w('\n')
+            for f in self.written_modules:
+                module_name = f.split('.')
+                if len(module_name) > 2:
+                    continue
+                elif len(module_name) == 1:
+                    module_name = module_name[0]
+                    prefix = "-"
+                elif len(module_name) == 2:
+                    module_name = module_name[1]
+                    prefix = "\n  -"
+                w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
+            w('\n')
 
-        subtitle = "Submodule Contents"
-        w(subtitle + "\n")
-        w("-" * len(subtitle) + "\n\n")
+            subtitle = "Submodule Contents"
+            w(subtitle + "\n")
+            w("-" * len(subtitle) + "\n\n")
 
-        w('.. toctree::\n')
-        w('   :maxdepth: 2\n\n')
-        for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath,f))
-        idx.close()
+            w('.. toctree::\n')
+            w('   :maxdepth: 2\n\n')
+            for f in self.written_modules:
+                w(f'   {os.path.join(relpath, f)}\n')

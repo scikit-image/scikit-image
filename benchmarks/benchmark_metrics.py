@@ -7,7 +7,7 @@ except ImportError:
     pass
 
 
-class SetMetricsSuite(object):
+class SetMetricsSuite:
     shape = (6, 6)
     coords_a = np.zeros(shape, dtype=bool)
     coords_b = np.zeros(shape, dtype=bool)
