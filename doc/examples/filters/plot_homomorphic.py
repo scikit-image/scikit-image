@@ -5,7 +5,7 @@ Homomorphic Filtering
 
 Homomorphic filtering can be used to reduce variations in illumination from an
 image. Specifically, consider an image model where the observed `image` is the
-product of a desired image, `im_true` and some spatially varying
+product of a desired image, `im_true`, and some spatially varying
 `illumination`.
 
 Specifically::
@@ -16,9 +16,9 @@ If we now take the logarithm we get::
 
 ``np.log(image) = np.log(im_true) + np.log(illumination)``
 
-This has changed the multiplicative term into an additive one. Now, if we
+This has changed the multiplicative factor into an additive term. Now, if we
 assume that the non-uniform illumination is slowly varying, we can remove this
-slowly component via high-pass filtering. Followed by that we can take the
+slowly varying component via high-pass filtering. Followed by that we can take the
 exponent of the filtered result to get back an image with more uniform
 illumination.
 """

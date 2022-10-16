@@ -27,7 +27,7 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
     squared_butterworth : bool, optional
         When True, the square of the Butterworth filter is used.
     amplitude_range : 2-tuple of float, optional
-        The Frequency response will have amplitudes in the specified range.
+        The frequency response will have amplitudes in the specified range.
 
     Returns
     -------
