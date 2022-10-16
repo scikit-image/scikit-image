@@ -220,7 +220,7 @@ def test_analytical_moments_calculation(dtype, order, ndim):
         x = rng.standard_normal(shape, dtype=dtype)
     # setting center=None will use the analytical expressions
     m1 = moments_central(x, center=None, order=order)
-    # providing explicit centroid will bypass the analytic code path
+    # providing explicit centroid will bypass the analytical code path
     m2 = moments_central(x, center=centroid(x), order=order)
     # ensure numeric and analytical central moments are close
     thresh = 1e-4 if x.dtype == np.float32 else 1e-9
