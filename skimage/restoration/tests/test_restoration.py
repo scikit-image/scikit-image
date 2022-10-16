@@ -110,11 +110,10 @@ def test_unsupervised_wiener_deprecated_user_param():
     data = convolve2d(test_img, psf, 'same')
     otf = uft.ir2tf(psf, data.shape, is_real=False)
     _, laplacian = uft.laplacian(2, data.shape)
-    with expected_warnings(["`max_iter` is a deprecated key",
-                            "`min_iter` is a deprecated key"]):
+    with expected_warnings(["`min_iter` is a deprecated key"]):
         restoration.unsupervised_wiener(
             data, otf, reg=laplacian, is_real=False,
-            user_params={"max_iter": 200, "min_iter": 30}, random_state=5
+            user_params={"min_iter": 30}, random_state=5
         )
 
 

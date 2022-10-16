@@ -242,11 +242,6 @@ def test_denoise_tv_bregman_3d_multichannel_deprecation():
     assert_array_equal(denoised0, denoised[..., 0])
 
 
-def test_denoise_tv_bregman_max_iter_deprecation():
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        restoration.denoise_tv_bregman(astro_gray, weight=60.0, max_iter=5)
-
-
 def test_denoise_tv_bregman_multichannel():
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise

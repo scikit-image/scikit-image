@@ -110,8 +110,6 @@ def _get_grid_centroids(image, n_centroids):
 
 @utils.channel_as_last_axis(multichannel_output=False)
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19")
 def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,

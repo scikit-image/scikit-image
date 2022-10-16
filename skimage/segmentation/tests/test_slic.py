@@ -31,12 +31,6 @@ def test_color_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-def test_max_iter_kwarg_deprecation():
-    img = np.zeros((20, 21, 3))
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        slic(img, max_iter=10, start_label=0)
-
-
 def test_multichannel_2d():
     rnd = np.random.default_rng(0)
     img = np.zeros((20, 20, 8))
