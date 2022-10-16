@@ -1,5 +1,3 @@
-from .._shared.utils import deprecated
-
 from ._canny import canny
 from ._cascade import Cascade
 from ._daisy import daisy
@@ -30,27 +28,12 @@ from .haar import (haar_like_feature, haar_like_feature_coord,
 from ._basic_features import multiscale_basic_features
 
 
-@deprecated(alt_func='skimage.feature.graycomatrix',
-            removed_version='1.0')
-def greycomatrix(image, distances, angles, levels=None, symmetric=False,
-                 normed=False):
-    return graycomatrix(image, distances, angles, levels, symmetric, normed)
-
-
-@deprecated(alt_func='skimage.feature.graycoprops',
-            removed_version='1.0')
-def greycoprops(P, prop='contrast'):
-    return graycoprops(P, prop)
-
-
 __all__ = ['canny',
            'Cascade',
            'daisy',
            'hog',
            'graycomatrix',
            'graycoprops',
-           'greycomatrix',
-           'greycoprops',
            'local_binary_pattern',
            'multiblock_lbp',
            'draw_multiblock_lbp',
