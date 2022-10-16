@@ -25,7 +25,9 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
     real : bool
         Whether the FFT is of a real (True) or complex (False) image
     squared_butterworth : bool, optional
-        When True, the square of the Butterworth filter is used.
+        When True, the square of the Butterworth filter is used. If False, the
+        traditional signal processing definition of the Butterworth filter is
+        used.
     amplitude_range : 2-tuple of float, optional
         The frequency response will have amplitudes in the specified range.
 
@@ -101,7 +103,8 @@ def butterworth(
         (default) then all axes are assumed to be spatial dimensions.
     squared_butterworth : bool, optional
         When True, the square of a Butterworth filter is used. See notes below
-        for more details.
+        for more details. If False, the traditional signal processing
+        definition of the Butterworth filter is used.
     npad : int, optional
         Pad each edge of the image by `npad` pixels using `numpy.pad`'s
         ``mode='edge'`` extension. Try increasing `npad` if boundary artifacts
