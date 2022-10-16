@@ -117,12 +117,11 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=0)',
 # Avoiding boundary artifacts
 # ===========================
 #
-# It can be seen in the images above that there are artifacts near the edge of
-# the images (particularly for the smaller cutoff values). This is due to the
-# periodic nature of the DFT and can be reduced by applying some amount of
-# padding to the edges prior to filtering so that there are not sharp eges in
-# the periodic extension of the image. This can be done via the ``npad``
-# argument to ``butterworth``.
+# There are artifacts near the edge of the images above, particularly for the
+# smaller cutoff values. This is due to the periodic nature of the DFT and can
+# be reduced by applying some amount of padding to the edges prior to filtering
+# so that there are not sharp eges in the periodic extension of the image. This
+# can be done via the ``npad`` argument to ``butterworth``.
 #
 # Note that with padding, the undesired shading at the image edges is
 # substantially reduced.
@@ -140,13 +139,11 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=32)',
 # True Butterworth filter
 # =======================
 #
-# To use the traditional signal processing defintion of the Butterworth filter,
-# set ``squared_butterworth=False``. This variant has an amplitude profile in
-# the frequency domain that is the square root of the default case. This causes
-# the transition from the passband to the stopband to be more gradual at any
-# given `order`. This can be seen in the following images which appear a bit
-# sharper in the lowpass case than their squared Butterworth counterparts
-# above.
+# This Butterworth filter variant has an amplitude profile in the frequency
+# domain that is the square root of the default case. This causes the
+# transition from the passband to the stopband to be more gradual at any given
+# `order`. This can be seen in the following images which appear a bit sharper
+# in the lowpass case than their squared Butterworth counterparts above.
 
 lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=False,
                                      npad=32)
@@ -156,3 +153,6 @@ fig.text(0.5, 0.95, 'Butterworth filtering (order=3.0, npad=32)',
          fontdict=titledict, horizontalalignment='center')
 
 plt.show()
+
+# To use the traditional signal processing definition of the Butterworth
+# filter, set ``squared_butterworth=False``.
