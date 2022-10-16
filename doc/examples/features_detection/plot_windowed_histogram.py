@@ -84,7 +84,7 @@ img = img_as_ubyte(data.coins())
 quantized_img = img // 16
 
 # Select the coin from the 4th column, second row.
-# Co-ordinate ordering: [x1,y1,x2,y2]
+# Coordinate ordering: [x1,y1,x2,y2]
 coin_coords = [184, 100, 228, 148]   # 44 x 44 region
 coin = quantized_img[coin_coords[1]:coin_coords[3],
                      coin_coords[0]:coin_coords[2]]

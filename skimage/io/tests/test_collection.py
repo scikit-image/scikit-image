@@ -35,7 +35,7 @@ def test_imagecollection_input():
     """
     # Ensure that these images are part of the legacy datasets
     # this means they will always be available in the user's install
-    # regarless of the availability of pooch
+    # regardless of the availability of pooch
     pattern = [os.path.join(data_dir, pic)
                for pic in ['coffee.png',
                            'chessboard_GRAY.png',
@@ -94,6 +94,19 @@ class TestImageCollection():
             self.images.files = f
         with testing.raises(AttributeError):
             set_files('newfiles')
+
+    def test_custom_load_func_sequence(self):
+        filename = fetch('data/no_time_for_that_tiny.gif')
+
+        def reader(frameno):
+            vid = imageio.get_reader(filename)
+            return vid.get_data(frameno)
+
+        ic = ImageCollection(range(24), load_func=reader)
+        # the length of ic should be that of the given load_pattern sequence
+        assert len(ic) == 24
+        # GIF file has frames of size 25x14 with 4 channels (RGBA)
+        assert ic[0].shape == (25, 14, 4)
 
     def test_custom_load_func_w_kwarg(self):
         load_pattern = fetch('data/no_time_for_that_tiny.gif')

@@ -211,7 +211,7 @@ def _local_binary_pattern(cnp.float64_t[:, ::1] image,
                         #
                         # 2. Other uniform patterns are indexed considering the
                         # value of n_ones, and an index called 'rot_index'
-                        # reprenting the number of circular right shifts
+                        # representing the number of circular right shifts
                         # required to obtain the pattern starting from a
                         # reference position (corresponding to all zeros stacked
                         # on the right). This number of rotations (or circular

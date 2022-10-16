@@ -16,6 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['corner_cy.pyx',
             'censure_cy.pyx',
             'orb_cy.pyx',
+            '_canny_cy.pyx',
             '_texture.pyx',
             '_hoghistogram.pyx',
             '_sift.pyx',
@@ -24,6 +25,9 @@ def configuration(parent_package='', top_path=None):
     cython(['_cascade.pyx',
             '_haar.pyx'], working_path=base_path)
 
+    config.add_extension('_canny_cy', sources=['_canny_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()],
+                         language="c")
     config.add_extension('_cascade', sources=['_cascade.cpp'],
                          include_dirs=[get_numpy_include_dirs()],
                          language="c++")

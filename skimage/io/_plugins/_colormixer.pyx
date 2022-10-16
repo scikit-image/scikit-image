@@ -125,7 +125,7 @@ def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     factor : float
         Multiplication factor.
     offset : int
-        Ammount to add to each channel.
+        Amount to add to each channel.
 
     """
 
@@ -440,11 +440,11 @@ def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     stateimg : (M, N, 3) ndarray of uint8
         Input image.
     h_amt : float
-        Ammount to add to H channel.
+        Amount to add to H channel.
     s_amt : float
-        Ammount to add to S channel.
+        Amount to add to S channel.
     v_amt : float
-        Ammount to add to V channel.
+        Amount to add to V channel.
 
 
     """
@@ -510,11 +510,11 @@ def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     stateimg : (M, N, 3) ndarray of uint8
         Input image.
     h_amt : float
-        Ammount to add to H channel.
+        Amount to add to H channel.
     s_amt : float
-        Ammount by which to multiply S channel.
+        Amount by which to multiply S channel.
     v_amt : float
-        Ammount by which to multiply V channel.
+        Amount by which to multiply V channel.
 
 
     """

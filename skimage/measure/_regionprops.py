@@ -89,11 +89,6 @@ PROPS = {
     'weighted_moments_normalized': 'moments_weighted_normalized',
 }
 
-OBJECT_COLUMNS = {
-    'image', 'coords', 'image_convex', 'slice',
-    'image_filled', 'image_intensity'
-}
-
 COL_DTYPES = {
     'area': float,
     'area_bbox': float,
@@ -136,6 +131,8 @@ COL_DTYPES = {
     'slice': object,
     'solidity': float,
 }
+
+OBJECT_COLUMNS = [col for col, dtype in COL_DTYPES.items() if dtype == object]
 
 PROP_VALS = set(PROPS.values())
 
@@ -222,8 +219,9 @@ def only2d(method):
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
-            raise NotImplementedError('Property %s is not implemented for '
-                                      '3D images' % method.__name__)
+            raise NotImplementedError(
+                f"Property {method.__name__} is not implemented for 3D images"
+            )
         return method(self, *args, **kwargs)
     return func2d
 
@@ -231,9 +229,9 @@ def only2d(method):
 def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
 
-    Paramters
+    Parameters
     ---------
-    inertia_tensor_eigvals : seqeunce of float
+    inertia_tensor_eigvals : sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
     Returns
@@ -908,7 +906,7 @@ def regionprops_table(label_image, intensity_image=None,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
@@ -1070,7 +1068,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
@@ -1286,9 +1284,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
-                    'use skimage.measure.label to label the connected'
-                    'components of label_image,'
-                    'or label_image.astype(np.uint8) to interpret'
+                    'use skimage.measure.label to label the connected '
+                    'components of label_image, '
+                    'or label_image.astype(np.uint8) to interpret '
                     'the True values as a single label.')
         else:
             raise TypeError(

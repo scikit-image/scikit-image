@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 from skimage.color import rgb2gray
 from skimage import data, img_as_float
 
-# guard against import of a non-existant registration module in older skimage
+# guard against import of a non-existent registration module in older skimage
 try:
     from skimage import registration
 except ImportError:
@@ -21,7 +21,7 @@ except ImportError:
         phase_cross_correlation = None
 
 
-class RegistrationSuite(object):
+class RegistrationSuite:
     """Benchmark for registration routines in scikit-image."""
     param_names = ["dtype"]
     params = [(np.float32, np.float64)]

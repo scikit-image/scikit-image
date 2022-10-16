@@ -16,16 +16,16 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
-       Input degraded image
+    image : ndarray
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        Point Spread Function. This is assumed to be the impulse
        response (input image space) if the data-type is real, or the
        transfer function (Fourier space) if the data-type is
        complex. There is no constraints on the shape of the impulse
-       response. The transfer function must be of shape `(M, N)` if
-       `is_real is True`, `(M, N // 2 + 1)` otherwise (see
-       `np.fft.rfftn`).
+       response. The transfer function must be of shape
+       `(N1, N2, ..., ND)` if `is_real is True`,
+       `(N1, N2, ..., ND // 2 + 1)` otherwise (see `np.fft.rfftn`).
     balance : float
        The regularisation parameter value that tunes the balance
        between the data adequacy that improve frequency restoration
@@ -128,10 +128,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
                                            balance * np.abs(reg) ** 2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
                              shape=image.shape)
     else:
-        deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+        deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
     if clip:
         deconv[deconv > 1] = 1
@@ -374,7 +374,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     Parameters
     ----------
     image : ndarray
-       Input degraded image (can be N dimensional).
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        The point spread function.
     num_iter : int, optional

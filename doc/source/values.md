@@ -18,7 +18,8 @@ Python. We accomplish this by:
 
 (sec:values)=
 Our values
-----------
+
+---
 
 - We are inclusive. We continue to welcome and mentor newcomers who are
   making their first contribution.
@@ -40,10 +41,9 @@ Our values
   Core developers take an active role in finishing documentation examples.
 - We don't do magic. We use NumPy arrays instead of fancy façade objects
   [^np], and we prefer to educate users rather than make decisions on their
-  behalf.  This does not preclude [sensible defaults][defaults].
+  behalf. This does not preclude [sensible defaults][defaults].
 
-This document
--------------
+## This document
 
 Much in the same way that the [Zen of Python][zen] and PEP8 guide style and
 implementation details in most Python code, this guide is meant to guide
@@ -51,8 +51,7 @@ decisions about the future of scikit-image, be it in terms of code style,
 whether to accept new functionality, or whether to take on new dependencies,
 among other things.
 
-References
-----------
+## References
 
 To find out more about the history of this document, please read the following:
 
@@ -75,14 +74,14 @@ To find out more about the history of this document, please read the following:
 [cc0]: https://creativecommons.org/publicdomain/zero/1.0/
 [ccby]: https://dancohen.org/2013/11/26/cc0-by/
 
-Copyright
----------
+## Copyright
 
 This document is dedicated to the public domain with the Creative Commons CC0
 [license][cc0]. Attribution to this source is encouraged where appropriate, as per
 [CC0+BY][ccby].
 
-[^np]: The use of NumPy arrays was the most supported of the statement's
-       components, together with the points about inclusivity, mentorship, and
-       documentation. We had +1s from Mark Harfouche, Royi Avital, and Greg Lee,
-       among others.
+[^np]:
+    The use of NumPy arrays was the most supported of the statement's
+    components, together with the points about inclusivity, mentorship, and
+    documentation. We had +1s from Mark Harfouche, Royi Avital, and Greg Lee,
+    among others.

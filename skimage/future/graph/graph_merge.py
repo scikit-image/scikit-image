@@ -110,7 +110,7 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
 
         # Ensure popped edge is valid, if not, the edge is discarded
         if valid:
-            # Invalidate all neigbors of `src` before its deleted
+            # Invalidate all neighbors of `src` before its deleted
 
             for nbr in rag.neighbors(n1):
                 _invalidate_edge(rag, n1, nbr)

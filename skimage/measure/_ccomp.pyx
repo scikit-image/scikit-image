@@ -34,7 +34,7 @@ cdef void get_bginfo(background_val, bginfo *ret) except *:
     else:
         ret.background_val = background_val
 
-    # The node -999 doesn't exist, it will get subsituted by a meaningful value
+    # The node -999 doesn't exist, it will get substituted by a meaningful value
     # upon the first background pixel occurrence
     ret.background_node = BG_NODE_NULL
     ret.background_label = 0
@@ -438,7 +438,7 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                  bginfo *bg) nogil:
     """
     Settle all background pixels now and don't bother with them later.
-    Since this only requires one linar sweep through the array, it is fast
+    Since this only requires one linear sweep through the array, it is fast
     and it makes sense to do it separately.
 
     The purpose of this function is update of forest_p and bg parameter inplace.

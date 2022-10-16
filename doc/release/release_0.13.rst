@@ -231,7 +231,7 @@ Pull requests merged in this release
 - Warn if user tries to build with older Cython version (#1986)
 - Remove lena image from test suite (#1985)
 - Add inpaint to module init (#1987)
-- Pre-calculate tempate mean (#1980)
+- Pre-calculate template mean (#1980)
 - rgb2grey -> grey2rgb (#1989)
 - Also expose rgb2gray as rgb2grey (#1990)
 - Remove all .md5 files on clean (#1992)
@@ -349,7 +349,7 @@ Pull requests merged in this release
 - Adding colors to the IHC (#2279)
 - FIX: select num_peaks if labels is specified  (#2098)
 - [MRG+1] Add felzenszwalb shape validation (#2286)
-- [MRG+1] more closesly match the BayesShrink paper in _wavelet_threshold (#2241)
+- [MRG+1] more closely match the BayesShrink paper in _wavelet_threshold (#2241)
 - Remove usages of ``subplots_adjust`` (#2289)
 - [MRG+1] Change documentation page favicon (#2291)
 - [MRG+1] TST: prefer ``assert_`` from numpy.testing over assert (#2298)
@@ -459,4 +459,3 @@ Pull requests merged in this release
 - Fix typo in ylabel of GLCM demo (#2576)
 - Detection of local extrema from morphology (#2449)
 - Add extrema functions to ``__init__`` (#2588)
-

@@ -238,7 +238,7 @@ def test_label2rgb_nd(image_type):
     labels[2:-2, 1:3] = 1
     labels[3:-3, 6:9] = 2
 
-    # label in the 2D case (correct 2D output is tested in other funcitons)
+    # label in the 2D case (correct 2D output is tested in other functions)
     labeled_2d = label2rgb(labels, image=img, bg_label=0)
 
     # labeling a single line gives an equivalent result

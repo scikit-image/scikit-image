@@ -10,12 +10,12 @@ The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github
 
 We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time). `asv continuous` will:
 
-* Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `mamba` is used to create the build environments.
-* Run the benchmark suite for both commits, _twice_  (since `processes=2` by default).
-* Generate a report table with performance ratios:
-    * `ratio=1.0` -> performance didn't change.
-    * `ratio<1.0` -> PR made it slower.
-    * `ratio>1.0` -> PR made it faster.
+- Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `mamba` is used to create the build environments.
+- Run the benchmark suite for both commits, _twice_ (since `processes=2` by default).
+- Generate a report table with performance ratios:
+  - `ratio=1.0` -> performance didn't change.
+  - `ratio<1.0` -> PR made it slower.
+  - `ratio>1.0` -> PR made it faster.
 
 Due to the sensitivity of the test, we cannot guarantee that false positives are not produced. In practice, values between `(0.7, 1.5)` are to be considered part of the measurement noise. When in doubt, running the benchmark suite one more time will provide more information about the test being a false positive or not.
 
@@ -30,12 +30,12 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 The CI job will also generate an artifact. This is the `.asv/results` directory compressed in a zip file. Its contents include:
 
-* `fv-xxxxx-xx/`. A directory for the machine that ran the suite. It contains three files:
-    * `<baseline>.json`, `<contender>.json`: the benchmark results for each commit, with stats.
-    * `machine.json`: details about the hardware.
-* `benchmarks.json`: metadata about the current benchmark suite.
-* `benchmarks.log`: the CI logs for this run.
-* This README.
+- `fv-xxxxx-xx/`. A directory for the machine that ran the suite. It contains three files:
+  - `<baseline>.json`, `<contender>.json`: the benchmark results for each commit, with stats.
+  - `machine.json`: details about the hardware.
+- `benchmarks.json`: metadata about the current benchmark suite.
+- `benchmarks.log`: the CI logs for this run.
+- This README.
 
 ## Re-running the analysis
 

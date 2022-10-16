@@ -54,7 +54,7 @@ pull requests! scikit-image is a community-based project and we are happy that
 this number includes first-time contributors to scikit-image.
 
 Special thanks for the release to the Cython team, who helped us make our code
-compatible with their coming Cython 3.0 release. 
+compatible with their coming Cython 3.0 release.
 
 New Features
 ------------
@@ -90,7 +90,7 @@ Improvements
 
 - scikit-image aims at being fully compatible with 3D arrays, and when possible
   with nD arrays. nD support has been added to color conversion functions
-  (#4418), to the CLAHE `exposure.equalize_adapthist` algorithm (#4598) 
+  (#4418), to the CLAHE `exposure.equalize_adapthist` algorithm (#4598)
   and to the Sobel, Scharr, and Prewitt filters (#4347).
 - Multichannel support for denoise_tv_bregman (#4446)
 - The memory footprint of `segmentation.relabel_sequential` has been reduced in
@@ -419,4 +419,3 @@ Other Pull Requests
 - Fix ArrayMap test (#4645)
 - Remove copy of tifffile; install from pip (#4235)
 - Refactor/move neighborhood utility functions in morphology (#4209)
-

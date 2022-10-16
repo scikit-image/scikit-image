@@ -4,7 +4,7 @@ Interact with 3D images (of kidney tissue)
 ==========================================
 
 In this tutorial, we explore interactively a biomedical image which has three
-spatial dimensions and three colour dimensions (channels).
+spatial dimensions and three color dimensions (channels).
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
 The data we use here correspond to kidney tissue which was
@@ -54,7 +54,7 @@ ax.imshow(data[n_plane // 2])
 
 #####################################################################
 # According to the warning message, the range of values is unexpected. The
-# image rendering is clearly not satisfactory colour-wise.
+# image rendering is clearly not satisfactory color-wise.
 
 vmin, vmax = data.min(), data.max()
 print(f'range: ({vmin}, {vmax})')
@@ -89,7 +89,7 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# What is the range of values for each colour channel?
+# What is the range of values for each color channel?
 # We check by taking the min and max across all non-channel
 # axes.
 

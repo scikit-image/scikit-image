@@ -1,4 +1,5 @@
 (skip_list)=
+
 # scikit-image proposals (SKIPS)
 
 SKIPs document any major changes or proposals to the scikit-image project.
