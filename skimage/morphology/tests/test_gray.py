@@ -295,15 +295,6 @@ def test_deprecated_import():
 
 
 @pytest.mark.parametrize(
-    'function', ['erosion', 'dilation', 'closing', 'opening', 'white_tophat',
-                 'black_tophat'],
-)
-def test_selem_kwarg_deprecation(function):
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(gray, function)(np.zeros((4, 4)), selem=np.ones((3, 3)))
-
-
-@pytest.mark.parametrize(
     "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
                  "black_tophat"],
 )
