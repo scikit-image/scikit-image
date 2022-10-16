@@ -130,8 +130,7 @@ def test_clear_border_non_binary_inplace():
                       [3, 4, 5, 4, 2],
                       [3, 3, 2, 1, 2]])
 
-    with expected_warnings(["in_place argument is deprecated"]):
-        result = clear_border(image, in_place=True)
+    result = clear_border(image, out=image)
     expected = np.array([[0, 0, 0, 0, 0],
                          [0, 0, 5, 4, 0],
                          [0, 4, 5, 4, 0],
@@ -157,8 +156,7 @@ def test_clear_border_non_binary_inplace_3d():
           [3, 3, 2, 1, 2]],
          ])
 
-    with expected_warnings(["in_place argument is deprecated"]):
-        result = clear_border(image3d, in_place=True)
+    result = clear_border(image3d, out=image3d)
     expected = np.array(
         [[[0, 0, 0, 0, 0],
           [0, 0, 0, 0, 0],
