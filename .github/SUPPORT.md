@@ -1,11 +1,12 @@
 ## Technical support
 
 Welcome to scikit-image! We use GitHub for tracking bugs and feature requests.
-When you report an [issue](https://github.com/scikit-image/scikit-image/issues),
-go ahead and apply the appropriate label: bug, feature request, performance,
-infrastructure, documentation, etc.
+Before [creating a new
+issue](https://github.com/scikit-image/scikit-image/issues/new/choose), please
+check the [issue tracker](https://github.com/scikit-image/scikit-image/issues)
+for existing similar issues.
 
-Discussions related to development take place on our [developer
+Other development related discussions take place on our [developer
 forum](https://discuss.scientific-python.org/c/contributor/skimage).
 
 ## User support
@@ -20,5 +21,5 @@ across multiple software languages and packages.
 ### Real-time Chat
 
 [skimage zulip](https://skimage.zulipchat.com): Our real-time chat forum.
-Drop in to ask questions, say hello, or tell us know how you are using
+Drop in to ask questions, say hello, or let us know how you are using
 scikit-image!

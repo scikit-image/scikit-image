@@ -29,7 +29,7 @@ rescaling, denoising, etc.) in the documentation.
 API Discovery
 -------------
 
-We provides a ``lookfor`` function to search API functions::
+We provide a ``lookfor`` function to search API functions::
 
    import skimage as ski
    ski.lookfor('eigenvector')
