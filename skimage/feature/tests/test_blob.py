@@ -142,8 +142,8 @@ def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     assert abs(math.sqrt(3) * b[5] - r) < 1.1
 
 
-@pytest.mark.parametrize("disc_center", [(5,5), (5, 20)])
-@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4,15)])
+@pytest.mark.parametrize("disc_center", [(5, 5), (5, 20)])
+@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4, 15)])
 def test_blob_dog_exclude_border(disc_center, exclude_border):
     # Testing exclude border
 
@@ -170,7 +170,7 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
         exclude_border=exclude_border,
     )
     
-    if disc_center == (5, 20) and exclude_border == (4,15):
+    if disc_center == (5, 20) and exclude_border == (4, 15):
         assert blobs.shape[0] == 1, "one blob should have been detected"
         b = blobs[0]
         assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
@@ -339,8 +339,8 @@ def test_blob_log_3d_anisotropic():
     assert abs(math.sqrt(3) * b[4] - r) < 1
     assert abs(math.sqrt(3) * b[5] - r) < 1
 
-@pytest.mark.parametrize("disc_center", [(5,5), (5, 20)])
-@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4,15)])
+@pytest.mark.parametrize("disc_center", [(5, 5), (5, 20)])
+@pytest.mark.parametrize("exclude_border", [6, (6, 6), (4, 15)])
 def test_blob_log_exclude_border(disc_center, exclude_border):
     # image where blob is disc_center px from borders, radius 5
     img = np.ones((512, 512))
@@ -364,7 +364,7 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
         exclude_border=exclude_border,
     )
     
-    if disc_center == (5, 20) and exclude_border == (4,15):
+    if disc_center == (5, 20) and exclude_border == (4, 15):
         assert blobs.shape[0] == 1, "one blob should have been detected"
         b = blobs[0]
         assert b[0] == disc_center[0], f"blob should be {disc_center[0]} px from x border"
