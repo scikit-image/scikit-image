@@ -22,14 +22,13 @@ def imsave(fname, arr, **kwargs):
     Provided by the tifffile library [1]_, and supports many
     advanced image types including multi-page and floating-point.
 
-    This implementation will set `photomotric='RGB'` when writing if the first
-    or last axis of arr has length 3 or 4. To override this, explicitly
-    pass the photometric kwarg.
+    This implementation will set ``photometric='RGB'`` when writing if the first
+    or last axis of `arr` has length 3 or 4. To override this, explicitly
+    pass the ``photometric`` kwarg.
 
-    This implementation will set `planarconfig='SEPARATE'` when writing if the
+    This implementation will set ``planarconfig='SEPARATE'`` when writing if the
     first axis of arr has length 3 or 4. To override this, explicitly
-    specify the planarconfig kwarg.
-
+    specify the ``planarconfig`` kwarg.
 
     References
     ----------
