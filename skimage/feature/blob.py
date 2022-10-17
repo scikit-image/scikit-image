@@ -202,7 +202,7 @@ def _format_exclude_border(img_ndim, exclude_border):
                 raise ValueError(
                     "exclude border, when expressed as a tuple, must only "
                     "contain ints.")
-        return exclude_border
+        return exclude_border + (0,)
     elif isinstance(exclude_border, int):
         return (exclude_border,) * img_ndim + (0,)
     elif exclude_border is True:
