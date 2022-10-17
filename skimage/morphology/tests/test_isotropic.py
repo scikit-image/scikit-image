@@ -21,6 +21,7 @@ def test_isotropic_erosion():
     binary_res = img_as_bool(binary.binary_erosion(bw_img, morphology.disk(3)))
     assert_array_equal(isotropic_res, binary_res)
 
+
 def _disk_with_spacing(radius, dtype=np.uint8, *, strict_radius=True, spacing=None):
     # Identical to morphology.disk, but with a spacing parameter and without decomposition.
     # This is different from morphology.ellipse which produces a slightly different footprint.
@@ -34,6 +35,7 @@ def _disk_with_spacing(radius, dtype=np.uint8, *, strict_radius=True, spacing=No
     if not strict_radius:
         radius += 0.5
     return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
+
 
 def test_isotropic_erosion_spacing():
     isotropic_res = isotropic.isotropic_dilation(bw_img, 6, spacing=(1,2))
