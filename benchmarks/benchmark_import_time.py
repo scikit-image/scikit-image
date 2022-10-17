@@ -9,6 +9,7 @@ class ImportSuite:
         'skimage.feature',
         'skimage.morphology',
         'skimage.color',
+        'skimage.io',
     ]
     param_names = ["package_name"]
     def setup(self, package_name):
