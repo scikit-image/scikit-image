@@ -6,7 +6,7 @@ issue](https://github.com/scikit-image/scikit-image/issues/new/choose), please
 check the [issue tracker](https://github.com/scikit-image/scikit-image/issues)
 for existing similar issues.
 
-Other development related discussions take place on our [developer
+Other development-related discussions take place on our [developer
 forum](https://discuss.scientific-python.org/c/contributor/skimage).
 
 ## User support
