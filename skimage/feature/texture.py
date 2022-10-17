@@ -249,7 +249,7 @@ def graycoprops(P, prop='contrast'):
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
-        raise ValueError('%s is an invalid property' % (prop))
+        raise ValueError(f'{prop} is an invalid property')
 
     # compute property for each GLCM
     if prop == 'energy':

@@ -41,7 +41,7 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
     if real:
         limit = d // 2 + 1
         ranges[-1] = ranges[-1][:limit]
-    # q2 = squared Euclidian distance grid
+    # q2 = squared Euclidean distance grid
     q2 = functools.reduce(
             np.add, np.meshgrid(*ranges, indexing="ij", sparse=True)
             )

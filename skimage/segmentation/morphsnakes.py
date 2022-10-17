@@ -13,7 +13,7 @@ __all__ = ['morphological_chan_vese',
            ]
 
 
-class _fcycle(object):
+class _fcycle:
 
     def __init__(self, iterable):
         """Call functions from the iterable each time it is called."""

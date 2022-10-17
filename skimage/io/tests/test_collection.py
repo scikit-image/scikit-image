@@ -35,7 +35,7 @@ def test_imagecollection_input():
     """
     # Ensure that these images are part of the legacy datasets
     # this means they will always be available in the user's install
-    # regarless of the availability of pooch
+    # regardless of the availability of pooch
     pattern = [os.path.join(data_dir, pic)
                for pic in ['coffee.png',
                            'chessboard_GRAY.png',

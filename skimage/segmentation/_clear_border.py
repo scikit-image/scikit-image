@@ -67,7 +67,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None,
            [0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
     """
-    if any((buffer_size >= s for s in labels.shape)) and mask is None:
+    if any(buffer_size >= s for s in labels.shape) and mask is None:
         # ignore buffer_size if mask
         raise ValueError("buffer size may not be greater than labels size")
 

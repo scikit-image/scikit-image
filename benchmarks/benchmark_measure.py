@@ -16,7 +16,7 @@ def init_regionprops_data():
     return label_image, intensity_image
 
 
-class RegionpropsTableIndividual(object):
+class RegionpropsTableIndividual:
 
     param_names = ['prop']
     params = sorted(list(PROP_VALS))
@@ -36,7 +36,7 @@ class RegionpropsTableIndividual(object):
     # omit peakmem tests to save time (memory usage was minimal)
 
 
-class RegionpropsTableAll(object):
+class RegionpropsTableAll:
 
     param_names = ['cache']
     params = (False, True)

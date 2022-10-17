@@ -24,11 +24,11 @@ releases = OrderedDict([
     #('0.1', u'2009-10-07 13:52:19 +0200'),
     #('0.2', u'2009-11-12 14:48:45 +0200'),
     #('0.3', u'2011-10-10 03:28:47 -0700'),
-    ('0.4', u'2011-12-03 14:31:32 -0800'),
-    ('0.5', u'2012-02-26 21:00:51 -0800'),
-    ('0.6', u'2012-06-24 21:37:05 -0700'),
-    ('0.7', u'2012-09-29 18:08:49 -0700'),
-    ('0.8', u'2013-03-04 20:46:09 +0100')])
+    ('0.4', '2011-12-03 14:31:32 -0800'),
+    ('0.5', '2012-02-26 21:00:51 -0800'),
+    ('0.6', '2012-06-24 21:37:05 -0700'),
+    ('0.7', '2012-09-29 18:08:49 -0700'),
+    ('0.8', '2013-03-04 20:46:09 +0100')])
 
 
 month_duration = 24
@@ -47,13 +47,14 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
                   'repo': repo,
                   'params': urllib.urlencode(params)}
 
-        fetch_status = ('Fetching page %(page)d (state=%(state)s)' % params +
-                        ' from %(user)s/%(repo)s...' % config)
+        fetch_status = (
+            f"Fetching page {params['page']} (state={params['state']})"
+            f" from {config['user']}/{config['repo']}..."
+        )
         print(fetch_status)
 
         f = urllib.urlopen(
-            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s'
-            % config
+            f"https://api.github.com/repos/{config['user']}/{{config['repos']}}/pulls?{config['params']}"
         )
 
         params['page'] += 1
@@ -62,7 +63,7 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
 
         if 'message' in page_data and page_data['message'] == "Not Found":
             page_data = []
-            print('Warning: Repo not found (%(user)s/%(repo)s)' % config)
+            print(f"Warning: Repo not found ({config['user']}/{config['repo']})")
         else:
             data.extend(page_data)
 
@@ -94,10 +95,10 @@ for r in releases:
 
 
 try:
-    PRs = json.loads(open(cache, 'r').read())
+    PRs = json.loads(open(cache).read())
     print('Loaded PRs from cache...')
 
-except IOError:
+except OSError:
     PRs = fetch_PRs(user='stefanv', repo='scikits.image', state='closed')
     PRs.extend(fetch_PRs(state='open'))
     PRs.extend(fetch_PRs(state='closed'))
@@ -107,7 +108,7 @@ except IOError:
     cf.flush()
 
 nrs = [pr['number'] for pr in PRs]
-print('Processing %d pull requests...' % len(nrs))
+print(f'Processing {len(nrs)} pull requests...')
 
 dates = [dateutil.parser.parse(pr['created_at']) for pr in PRs]
 

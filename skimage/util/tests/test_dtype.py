@@ -45,7 +45,7 @@ def test_range(dtype, f_and_dt):
         omin = 0
         imin = 0
 
-    _verify_range("From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
+    _verify_range(f"From {np.dtype(dtype)} to {np.dtype(dt)}",
                   y, omin, omax, np.dtype(dt))
 
 
@@ -72,7 +72,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     y = _convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
-    _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
+    _verify_range(f"From {np.dtype(dtype_in)} to {np.dtype(dt)}",
                   y, omin, omax, np.dtype(dt))
 
 
@@ -152,7 +152,7 @@ float_dtype_list = [float, float, np.float64, np.single, np.float32,
 
 
 def test_float_conversion_dtype():
-    """Test any convertion from a float dtype to an other."""
+    """Test any conversion from a float dtype to an other."""
     x = np.array([-1, 1])
 
     # Test all combinations of dtypes conversions
