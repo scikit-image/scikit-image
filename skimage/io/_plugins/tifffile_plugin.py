@@ -10,9 +10,9 @@ def imsave(fname, arr, **kwargs):
     Parameters
     ----------
     fname : str or file
-        File name or file-like-object.
+        File name or file-like object.
     arr : ndarray
-        The array to write
+        The array to write.
     kwargs : keyword pairs, optional
         Additional keyword arguments to pass through (see ``tifffile``'s
         ``imwrite`` function).
@@ -20,14 +20,14 @@ def imsave(fname, arr, **kwargs):
     Notes
     -----
     Provided by the tifffile library [1]_, and supports many
-    advanced image types including multi-page and floating point.
+    advanced image types including multi-page and floating-point.
 
     This implementation will set `photomotric='RGB'` when writing if the first
-    or last axis of arr has shape 3 or 4. To override this, explicitly
-    specify the photometric kwarg.
+    or last axis of arr has length 3 or 4. To override this, explicitly
+    pass the photometric kwarg.
 
     This implementation will set `planarconfig='SEPARATE'` when writing if the
-    first axis of arr has shape 3 or 4. To override this, explicitly
+    first axis of arr has length 3 or 4. To override this, explicitly
     specify the planarconfig kwarg.
 
 

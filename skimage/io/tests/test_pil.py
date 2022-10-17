@@ -69,7 +69,7 @@ def test_imread_separate_channels(explicit_kwargs):
 
     # Tifffile is used as backend whenever suffix is .tif or .tiff
     # To avoid pending changes to tifffile defaults, we must specify this is an
-    # RGB image with separate planes (i.e. channel_axis=0).
+    # RGB image with separate planes (i.e., channel_axis=0).
     if explicit_kwargs:
         kwargs = {'photometric': 'RGB', 'planarconfig': 'SEPARATE'}
     else:
