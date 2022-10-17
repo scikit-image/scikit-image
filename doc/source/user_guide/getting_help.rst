@@ -31,7 +31,7 @@ rescaling, denoising, etc.).
 API Discovery
 -------------
 
-NumPy provides a ``lookfor`` function to search API functions. 
+NumPy provides a ``lookfor`` function to search API functions.
 By default ``lookfor`` will search the NumPy API.
 NumPy lookfor example:
 ```np.lookfor('eigenvector') ```

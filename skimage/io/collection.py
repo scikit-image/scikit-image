@@ -106,7 +106,7 @@ def _is_multipattern(input_pattern):
     return is_multipattern
 
 
-class ImageCollection(object):
+class ImageCollection:
     """Load and manage a collection of image files.
 
     Parameters
@@ -263,7 +263,7 @@ class ImageCollection(object):
                 try:
                     im = Image.open(fname)
                     im.seek(0)
-                except (IOError, OSError):
+                except OSError:
                     continue
                 i = 0
                 while True:
@@ -358,8 +358,7 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError("There are only %s images in the collection"
-                             % num)
+            raise IndexError(f"There are only {num} images in the collection")
         return n
 
     def __iter__(self):
@@ -485,7 +484,7 @@ class MultiImage(ImageCollection):
         from ._io import imread
 
         self._filename = filename
-        super(MultiImage, self).__init__(filename, conserve_memory,
+        super().__init__(filename, conserve_memory,
                                          load_func=imread, **imread_kwargs)
 
     @property

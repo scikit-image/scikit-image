@@ -81,4 +81,3 @@ To query a plugin's capabilities, use ``plugin_info``::
   >>>
   {'description': 'Image reading via the Python Imaging Library',
    'provides': 'imread, imsave'}
-

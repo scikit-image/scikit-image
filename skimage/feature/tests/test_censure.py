@@ -15,8 +15,8 @@ def test_censure_on_rectangular_images():
     """Censure feature detector should work on 2D image of any shape."""
     rect_image = np.random.rand(300, 200)
     square_image = np.random.rand(200, 200)
-    CENSURE().detect((square_image))
-    CENSURE().detect((rect_image))
+    CENSURE().detect(square_image)
+    CENSURE().detect(rect_image)
 
 
 def test_keypoints_censure_color_image_unsupported_error():

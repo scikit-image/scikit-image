@@ -38,7 +38,7 @@ def pixel_graph(
     Pixels where the mask is True are nodes in the returned graph, and they are
     connected by edges to their neighbors according to the connectivity
     parameter. By default, the *value* of an edge when a mask is given, or when
-    the image is itself the mask, is the euclidean distance betwene the pixels.
+    the image is itself the mask, is the euclidean distance between the pixels.
 
     However, if an int- or float-valued image is given with no mask, the value
     of the edges is the absolute difference in intensity between adjacent
@@ -58,7 +58,7 @@ def pixel_graph(
         distance.
     connectivity : int
         The square connectivity of the pixel neighborhood: the number of
-        orthogonal steps allowed to consider a pixel a neigbor. See
+        orthogonal steps allowed to consider a pixel a neighbor. See
         `scipy.ndimage.generate_binary_structure` for details.
     spacing : tuple of float
         The spacing between pixels along each axis.

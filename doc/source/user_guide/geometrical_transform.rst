@@ -11,7 +11,7 @@ Images being NumPy arrays (as described in the :ref:`numpy` section), cropping
 an image can be done with simple slicing operations. Below we crop a 100x100
 square corresponding to the top-left corner of the astronaut image. Note that
 this operation is done for all color channels (the color dimension is the last,
-third dimension):: 
+third dimension)::
 
    >>> from skimage import data
    >>> img = data.astronaut()
@@ -49,7 +49,7 @@ parameters (e.g. scale, shear, rotation and translation)::
    from skimage import data
    from skimage import transform
    from skimage import img_as_float
-   
+
    tform = transform.EuclideanTransform(
       rotation=np.pi / 12.,
       translation = (100, -20)
@@ -60,7 +60,7 @@ or the full transformation matrix::
    from skimage import data
    from skimage import transform
    from skimage import img_as_float
-   
+
    matrix = np.array([[np.cos(np.pi/12), -np.sin(np.pi/12), 100],
                       [np.sin(np.pi/12), np.cos(np.pi/12), -20],
                       [0, 0, 1]])
@@ -110,10 +110,10 @@ of points (the source and the destination), as explained in the
 The ``estimate`` method uses least-squares optimization to minimize the distance
 between source and optimization.
 Source and destination points can be determined manually, or using the
-different methods for feature detection available in :mod:`skimage.feature`, 
+different methods for feature detection available in :mod:`skimage.feature`,
 such as
 
- * :ref:`sphx_glr_auto_examples_features_detection_plot_corner.py`,  
+ * :ref:`sphx_glr_auto_examples_features_detection_plot_corner.py`,
  * :ref:`sphx_glr_auto_examples_features_detection_plot_orb.py`,
  * :ref:`sphx_glr_auto_examples_features_detection_plot_brief.py`,
  * etc.
@@ -133,7 +133,7 @@ Examples showing applications of transformation estimation are
 
  * stereo matching
    :ref:`sphx_glr_auto_examples_transform_plot_fundamental_matrix.py` and
- * image rectification :ref:`sphx_glr_auto_examples_transform_plot_geometric.py`  
+ * image rectification :ref:`sphx_glr_auto_examples_transform_plot_geometric.py`
 
 The ``estimate`` method is point-based, that is, it uses only a set of points
 from the source and destination images. For estimating translations (shifts),

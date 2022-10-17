@@ -39,7 +39,7 @@ def _sift_read(filelike, mode='SIFT'):
 
     """
     if isinstance(filelike, str):
-        f = open(filelike, 'r')
+        f = open(filelike)
         filelike_is_str = True
     else:
         f = filelike
@@ -60,7 +60,7 @@ def _sift_read(filelike, mode='SIFT'):
 
     data = np.fromfile(f, sep=' ')
     if data.size != nr_features * datatype.itemsize / np.dtype(float).itemsize:
-        raise IOError(f'Invalid {mode} feature file.')
+        raise OSError(f'Invalid {mode} feature file.')
 
     # If `filelike` is passed to the function as filename - close the file
     if filelike_is_str:

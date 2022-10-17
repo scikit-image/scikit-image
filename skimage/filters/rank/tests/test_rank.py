@@ -388,7 +388,7 @@ class TestRank():
             assert_equal(out_u, out_f)
 
     def test_compare_8bit_unsigned_vs_signed(self):
-        # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+        # filters applied on 8-bit image or 16-bit image (having only real 8-bit
         # of dynamic) should be identical
 
         # Create signed int8 image that and convert it to uint8
@@ -410,7 +410,7 @@ class TestRank():
             assert_equal(out_u, out_s)
 
     def test_compare_8bit_unsigned_vs_signed_3d(self):
-        # filters applied on 8-bit volume ore 16-bit volume (having only real 8-bit
+        # filters applied on 8-bit volume or 16-bit volume (having only real 8-bit
         # of dynamic) should be identical
 
         # Create signed int8 volume that and convert it to uint8
@@ -439,7 +439,7 @@ class TestRank():
                    'enhance_contrast', 'pop', 'threshold']
     )
     def test_compare_8bit_vs_16bit(self, method):
-        # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+        # filters applied on 8-bit image or 16-bit image (having only real 8-bit
         # of dynamic) should be identical
         image8 = util.img_as_ubyte(data.camera())[::2, ::2]
         image16 = image8.astype(np.uint16)

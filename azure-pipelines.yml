@@ -6,210 +6,209 @@ variables:
   SKIMAGE_DATA_CACHE_FOLDER: C:\Users\VssAdministrator\AppData\Local\scikit-image\scikit-image\Cache
 
 jobs:
-- job: 'Default'
-  pool:
-    vmImage: 'windows-latest'
-  strategy:
-    maxParallel: 10
-    matrix:
-      Python38:
-        PYTHON_VERSION: '3.8'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python38-x64:
-        PYTHON_VERSION: '3.8'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        BUILD_DOCS: 'true'
-      # build pre release packages on Python 3.8 since it has been out long
-      # enough for wheels to be built for packages that need to be compiled.
-      Python38-x64-pre:
-        PYTHON_VERSION: '3.8'
-        ARCH: 'x64'
-        PIP_FLAGS: '--pre'
-      Python39:
-        PYTHON_VERSION: '3.9'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python39-x64:
-        PYTHON_VERSION: '3.9'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
-        # NOTE(honles): winpty is required by one of the doc dependencies,
-        #               but does not provide a wheel for Python 3.9
-        # TEST_EXAMPLES: 'true'
-  continueOnError: false
-  timeoutInMinutes: 60
+  - job: "Default"
+    pool:
+      vmImage: "windows-latest"
+    strategy:
+      maxParallel: 10
+      matrix:
+        Python38:
+          PYTHON_VERSION: "3.8"
+          ARCH: "x86"
+          PIP_FLAGS: ""
+        Python38-x64:
+          PYTHON_VERSION: "3.8"
+          ARCH: "x64"
+          PIP_FLAGS: ""
+          BUILD_DOCS: "true"
+        # build pre release packages on Python 3.8 since it has been out long
+        # enough for wheels to be built for packages that need to be compiled.
+        Python38-x64-pre:
+          PYTHON_VERSION: "3.8"
+          ARCH: "x64"
+          PIP_FLAGS: "--pre"
+        Python39:
+          PYTHON_VERSION: "3.9"
+          ARCH: "x86"
+          PIP_FLAGS: ""
+        Python39-x64:
+          PYTHON_VERSION: "3.9"
+          ARCH: "x64"
+          PIP_FLAGS: ""
+          TEST_EXAMPLES: "true"
+          # NOTE(honles): winpty is required by one of the doc dependencies,
+          #               but does not provide a wheel for Python 3.9
+          # TEST_EXAMPLES: 'true'
+    continueOnError: false
+    timeoutInMinutes: 60
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(PYTHON_VERSION)'
-      architecture: '$(ARCH)'
-    name: python
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "$(PYTHON_VERSION)"
+          architecture: "$(ARCH)"
+        name: python
 
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
-  - task: Cache@2
-    inputs:
-      key: '"skimage_data" | skimage/data/_registry.py'
-      path: $(SKIMAGE_DATA_CACHE_FOLDER)
-    displayName: Cache scikit-image data files
-    # the line below (continueOnError: true) can be removed when the following issue is addressed:
-    # https://github.com/scikit-image/scikit-image/issues/6048
-    continueOnError: true
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops
+      - task: Cache@2
+        inputs:
+          key: '"skimage_data" | skimage/data/_registry.py'
+          path: $(SKIMAGE_DATA_CACHE_FOLDER)
+        displayName: Cache scikit-image data files
+        # the line below (continueOnError: true) can be removed when the following issue is addressed:
+        # https://github.com/scikit-image/scikit-image/issues/6048
+        continueOnError: true
 
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
-  - task: Cache@2
-    inputs:
-      key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
-      restoreKeys: |
-        "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
-        "Python$(PYTHON_VERSION)-$(ARCH)"
-      path: $(PIP_CACHE_DIR)
-    displayName: Cache pip packages
-    # the line below (continueOnError: true) can be removed when the following issue is addressed:
-    # https://github.com/scikit-image/scikit-image/issues/6048
-    continueOnError: true
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#pythonpip
+      - task: Cache@2
+        inputs:
+          key: '"Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)" | requirements/build.txt | requirements/default.txt | requirements/test.txt | requirements/docs.txt'
+          restoreKeys: |
+            "Python$(PYTHON_VERSION)-$(ARCH)" | "$(Agent.OS)"
+            "Python$(PYTHON_VERSION)-$(ARCH)"
+          path: $(PIP_CACHE_DIR)
+        displayName: Cache pip packages
+        # the line below (continueOnError: true) can be removed when the following issue is addressed:
+        # https://github.com/scikit-image/scikit-image/issues/6048
+        continueOnError: true
 
-  - script: |
-      choco install --$(ARCH) -y llvm
-      set PATH=C:\Program Files\LLVM\bin;%PATH%
-      set PATH=C:\Program Files (x86)\LLVM\bin;%PATH%
-      echo '##vso[task.setvariable variable=PATH]%PATH%'
-    displayName: 'Install clang-cl'
+      - script: |
+          choco install --$(ARCH) -y llvm
+          set PATH=C:\Program Files\LLVM\bin;%PATH%
+          set PATH=C:\Program Files (x86)\LLVM\bin;%PATH%
+          echo '##vso[task.setvariable variable=PATH]%PATH%'
+        displayName: "Install clang-cl"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
 
-      # Update pip
-      $PYTHON -m pip install -U pip setuptools wheel
+          # Update pip
+          $PYTHON -m pip install -U pip setuptools wheel
 
-      # print out the pip cache dir followed by the variable defined above
-      # to confirm that they match
-      $PYTHON -m pip cache dir
-      echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
+          # print out the pip cache dir followed by the variable defined above
+          # to confirm that they match
+          $PYTHON -m pip cache dir
+          echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
-      # Check that we have the expected version and architecture for Python
-      $PYTHON --version
-      $PYTHON -m pip --version
-      $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-      $PYTHON -m pip list
+          # Check that we have the expected version and architecture for Python
+          $PYTHON --version
+          $PYTHON -m pip --version
+          $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+          $PYTHON -m pip list
 
-      # Install the build and runtime dependencies of the project
-      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
+          # Install the build and runtime dependencies of the project
+          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
 
-      # Disable C99 complex if PyWavelets needs to be built from source.
-      # The compiler used will be MSVC, but C99 may be detected improperly
-      USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
+          # Disable C99 complex if PyWavelets needs to be built from source.
+          # The compiler used will be MSVC, but C99 may be detected improperly
+          USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
 
-      $PYTHON -m pip list
-    displayName: 'Pre-installation'
+          $PYTHON -m pip list
+        displayName: "Pre-installation"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
-      if [ "$(ARCH)" = "x86" ] ; then
-          export CXXFLAGS="-m32"
-      fi
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
+          if [ "$(ARCH)" = "x86" ] ; then
+              export CXXFLAGS="-m32"
+          fi
 
-      # Compile the package and build the wheel
-      $PYTHON setup.py bdist_wheel
+          # Compile the package and build the wheel
+          $PYTHON setup.py bdist_wheel
 
-      # Install the generated wheel package
-      ls dist
-      $PYTHON -m pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
-    displayName: 'Installation'
+          # Install the generated wheel package
+          ls dist
+          $PYTHON -m pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
+        displayName: "Installation"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
 
-      # Install the test dependencies
-      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/test.txt
-      $PYTHON -m pip list
+          # Install the test dependencies
+          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/test.txt
+          $PYTHON -m pip list
 
-      # Set non-UI Matplotlib backend
-      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
-      echo "backend : Agg" > matplotlibrc
-    displayName: 'Pre-testing'
+          # Set non-UI Matplotlib backend
+          cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+          echo "backend : Agg" > matplotlibrc
+        displayName: "Pre-testing"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
 
-      # Change the working directory in order to run the tests
-      # on the installed version of skimage
-      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+          # Change the working directory in order to run the tests
+          # on the installed version of skimage
+          cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
 
-      # Show the info about the installed scikit-image
-      $PYTHON -c "import skimage; print(skimage.__path__)"
+          # Show the info about the installed scikit-image
+          $PYTHON -c "import skimage; print(skimage.__path__)"
 
-      # Show the path pooch is using for the data cache
-      # (this should match the SKIMAGE_DATA_CACHE_FOLDER variable above)
-      $PYTHON -c "import pooch; print(pooch.os_cache('scikit-image'))"
-      echo "SKIMAGE_DATA_CACHE_FOLDER: $SKIMAGE_DATA_CACHE_FOLDER"
+          # Show the path pooch is using for the data cache
+          # (this should match the SKIMAGE_DATA_CACHE_FOLDER variable above)
+          $PYTHON -c "import pooch; print(pooch.os_cache('scikit-image'))"
+          echo "SKIMAGE_DATA_CACHE_FOLDER: $SKIMAGE_DATA_CACHE_FOLDER"
 
-      # Force matplotlib to use the prepared config
-      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+          # Force matplotlib to use the prepared config
+          export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
-      # Run unit tests with pytest
-      # We don't test docstring examples (--doctest-modules) on
-      # Windows due to inconsistent ndarray formatting in `numpy`.
-      # For more details, see https://github.com/numpy/numpy/issues/13468
-      export TEST_ARGS="-v --cov=skimage"
-      $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
-    displayName: 'Package testing'
+          # Run unit tests with pytest
+          # We don't test docstring examples (--doctest-modules) on
+          # Windows due to inconsistent ndarray formatting in `numpy`.
+          # For more details, see https://github.com/numpy/numpy/issues/13468
+          export TEST_ARGS="-v --cov=skimage"
+          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
+        displayName: "Package testing"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
-      $PYTHON -m asv check -v -E existing
-    displayName: Check benchmarks
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
+          $PYTHON -m asv check -v -E existing
+        displayName: Check benchmarks
 
-  - bash: |
-      set -ex
-      export PYTHON="$(python.pythonLocation)\\python.exe"
+      - bash: |
+          set -ex
+          export PYTHON="$(python.pythonLocation)\\python.exe"
 
-      # Install the doc dependencies
-      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-      $PYTHON -m pip list
+          # Install the doc dependencies
+          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
+          $PYTHON -m pip list
 
-      # Build the documentation
-      choco install optipng
-      export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-      export SPHINXOPTS=-W
-      make -C doc html
-    condition: eq(variables['BUILD_DOCS'], 'true')
-    displayName: 'Documentation testing'
+          # Build the documentation
+          choco install optipng
+          export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
+          export SPHINXOPTS=-W
+          make -C doc html
+        condition: eq(variables['BUILD_DOCS'], 'true')
+        displayName: "Documentation testing"
 
-  - bash: |
-      set -ex
-      PYTHON="$(python.pythonLocation)\\python.exe"
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
 
-      # Install the doc dependencies
-      $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-      $PYTHON -m pip list
+          # Install the doc dependencies
+          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
+          $PYTHON -m pip list
 
-      # Force matplotlib to use the prepared config
-      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+          # Force matplotlib to use the prepared config
+          export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
-      # Run example applications
-      for f in doc/examples/*/*.py; do
-        # Comment out any plotly.io.show() calls before running the example.
-        # Plotly opens a web browser, which often seemed to cause the CI to
-        # hang and timeout.
-        sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
+          # Run example applications
+          for f in doc/examples/*/*.py; do
+            # Comment out any plotly.io.show() calls before running the example.
+            # Plotly opens a web browser, which often seemed to cause the CI to
+            # hang and timeout.
+            sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
 
-        $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
-        if [ $? -ne 0 ]; then
-          exit 1
-        fi
-      done
-    condition: eq(variables['TEST_EXAMPLES'], 'true')
-    displayName: 'Gallery testing'
-
+            $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
+          done
+        condition: eq(variables['TEST_EXAMPLES'], 'true')
+        displayName: "Gallery testing"
 #  - bash: |
 #      # -- Publish the .whl artifacts
 #      # -- Upload the content of dist/*.whl to a public wheelhouse

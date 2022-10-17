@@ -50,10 +50,11 @@ def test_imread_handle():
 
 
 class TestSave:
+
     def roundtrip(self, dtype, x, use_pathlib=False, **kwargs):
-        f = NamedTemporaryFile(suffix='.tif')
-        fname = f.name
-        f.close()
+        with NamedTemporaryFile(suffix='.tif') as f:
+            fname = f.name
+
         if use_pathlib:
             fname = pathlib.Path(fname)
         imsave(fname, x, check_contrast=False, **kwargs)
