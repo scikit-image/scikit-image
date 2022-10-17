@@ -74,6 +74,10 @@ def binary_erosion(image, footprint=None, out=None):
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
+    See also
+    --------
+    skimage.morphology.isotropic_erosion
+
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
@@ -131,6 +135,10 @@ def binary_dilation(image, footprint=None, out=None):
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
+    See also
+    --------
+    skimage.morphology.isotropic_dilation
+
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
@@ -186,6 +194,10 @@ def binary_opening(image, footprint=None, out=None):
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
+    See also
+    --------
+    skimage.morphology.isotropic_opening
+
     """
     eroded = binary_erosion(image, footprint)
     out = binary_dilation(eroded, footprint, out=out)
@@ -235,6 +247,10 @@ def binary_closing(image, footprint=None, out=None):
     computational cost. Most of the builtin footprints such as
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_closing
 
     """
     dilated = binary_dilation(image, footprint)
