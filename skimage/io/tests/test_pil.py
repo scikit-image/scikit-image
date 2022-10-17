@@ -61,7 +61,7 @@ def test_imread_as_gray():
 
 @pytest.mark.parametrize('explicit_kwargs', [False, True])
 def test_imread_separate_channels(explicit_kwargs):
-    # Test that imread returns RGBA values contiguously even when they are
+    # Test that imread returns RGB(A) values contiguously even when they are
     # stored in separate planes.
     x = np.random.rand(3, 16, 8)
     with NamedTemporaryFile(suffix='.tif') as f:
