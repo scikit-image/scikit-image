@@ -195,7 +195,7 @@ def normalized_mutual_information(image0, image1, *, bins=100):
 
     The normalized mutual information of :math:`A` and :math:`B` is given by::
 
-    ..math::
+    .. math::
 
         Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 

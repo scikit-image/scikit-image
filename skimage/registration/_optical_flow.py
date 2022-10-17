@@ -1,4 +1,3 @@
-# coding: utf-8
 """TV-L1 optical flow algorithm implementation.
 
 """
@@ -32,7 +31,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
         the smoother is the solutions.
     tightness : float
         Tightness parameter. It should have a small value in order to
-        maintain attachement and regularization parts in
+        maintain attachment and regularization parts in
         correspondence.
     num_warp : int
         Number of times moving_image is warped.
@@ -162,7 +161,7 @@ def optical_flow_tvl1(reference_image, moving_image,
         this parameter is, the smoother the returned result will be.
     tightness : float, optional
         Tightness parameter (:math:`\tau` in [1]_). It should have
-        a small value in order to maintain attachement and
+        a small value in order to maintain attachment and
         regularization parts in correspondence.
     num_warp : int, optional
         Number of times moving_image is warped.

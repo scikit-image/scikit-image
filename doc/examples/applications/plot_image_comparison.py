@@ -4,7 +4,7 @@ Visual image comparison
 =======================
 
 Image comparison is particularly useful when performing image processing tasks
-such as exposure manipulations, filtering, and restauration.
+such as exposure manipulations, filtering, and restoration.
 
 This example shows how to easily compare two images with various approaches.
 

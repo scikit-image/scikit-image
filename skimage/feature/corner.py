@@ -301,7 +301,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
         warn("use_gaussian_derivatives currently defaults to False, but will "
-             "change to True in a future version. Please specficy this "
+             "change to True in a future version. Please specify this "
              "argument explicitly to maintain the current behavior",
              category=FutureWarning, stacklevel=2)
 

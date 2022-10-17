@@ -149,7 +149,9 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     mtx = linalg.circulant(
         [1, *[alpha] * (image.ndim - 1)]).astype(image.dtype)
 
-    filtered = []
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
@@ -164,8 +166,9 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
         max_val = vals.max()
         if max_val > 0:
             vals /= max_val
-        filtered.append(vals)
-    return np.max(filtered, axis=0)  # Return pixel-wise max over all sigmas.
+        filtered_max = np.maximum(filtered_max, vals)
+
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
@@ -221,7 +224,9 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     if not black_ridges:  # Normalize to black ridges.
         image = -image
 
-    filtered = []
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
@@ -232,8 +237,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
         eigvals = eigvals[:-1]
         vals = (sigma ** 2
                 * np.prod(np.maximum(eigvals, 0), 0) ** (1 / len(eigvals)))
-        filtered.append(vals)
-    return np.max(filtered, axis=0)  # Return pixel-wise max over all sigmas.
+        filtered_max = np.maximum(filtered_max, vals)
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
@@ -318,7 +323,9 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     if not black_ridges:  # Normalize to black ridges.
         image = -image
 
-    filtered = []
+    # Generate empty array for storing maximum value
+    # from different (sigma) scales
+    filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
         eigvals = hessian_matrix_eigvals(hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
@@ -345,8 +352,8 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
         vals = 1.0 - np.exp(-r_a**2 / (2 * alpha**2))  # plate sensitivity
         vals *= np.exp(-r_b**2 / (2 * beta**2))  # blobness
         vals *= 1.0 - np.exp(-s**2 / (2 * gamma**2))  # structuredness
-        filtered.append(vals)
-    return np.max(filtered, axis=0)  # Return pixel-wise max over all sigmas.
+        filtered_max = np.maximum(filtered_max, vals)
+    return filtered_max  # Return pixel-wise max over all sigmas.
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,

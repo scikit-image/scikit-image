@@ -33,7 +33,7 @@ video. The files are numbered with five digits, padded on the left with zeros.
 
    ffmpeg -i "video.mov" -f image2 "video-frame%05d.png"
 
-More information is available in an `FFmpeg tutorial on image sequences 
+More information is available in an `FFmpeg tutorial on image sequences
 <https://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
 
 Generating an image sequence has disadvantages: they can be large and unwieldy,

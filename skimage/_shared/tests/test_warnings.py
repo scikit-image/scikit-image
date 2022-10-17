@@ -30,7 +30,7 @@ def test_strict_warning_true(setup, strictness):
 
 @pytest.mark.parametrize('strictness', ['0', 'false', 'False', 'FALSE'])
 def test_strict_warning_false(setup, strictness):
-    # If the user doesnn't wish to be strict about warnigns
+    # If the user doesn't wish to be strict about warnings
     # the following shouldn't raise any error
     os.environ['SKIMAGE_TEST_STRICT_WARNINGS'] = strictness
     with expected_warnings(['some warnings']):

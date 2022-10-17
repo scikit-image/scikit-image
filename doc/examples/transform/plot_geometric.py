@@ -117,7 +117,7 @@ plt.show()
 
 ######################################################################
 # The above estimation relies on accurate knowledge of the location of points
-# and an accurate selection of their correspondance. If point locations have
+# and an accurate selection of their correspondence. If point locations have
 # an uncertainty associated with them, then weighting can be provided so that
 # the resulting transform prioritises an accurate fit to those points with the
 # highest weighting.

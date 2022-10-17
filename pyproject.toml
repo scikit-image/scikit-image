@@ -5,12 +5,11 @@ requires = [
     "packaging",
     "Cython>=0.29.24,<3.0",
     "pythran",
+    "lazy_loader>=0.1",
 
     # We follow scipy for much of these pinnings
     # https://github.com/scipy/scipy/blob/master/pyproject.toml
-    # numpy 1.19 was the first minor release to provide aarch64 wheels, but
-    # wheels require fixes contained in numpy 1.19.2
-    "numpy==1.19.2; python_version=='3.8' and platform_machine=='aarch64'",
+    "numpy==1.20.0; python_version=='3.8' and platform_machine=='aarch64'",
     # aarch64 for py39 and py310 are covered by the default requirement below
 
     # arm64 on Darwin supports Python 3.8 and above requires numpy>=1.20.0
@@ -24,12 +23,9 @@ requires = [
     "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
 
     # default numpy requirements
-    "numpy==1.17.3; python_version=='3.8' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
-    "numpy==1.19.3; python_version=='3.9' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_python_implementation != 'PyPy'",
-    # Note that 1.21.3 was the first version with a complete set of 3.10 wheels,
-    # however macOS was broken and it's safe C API/ABI-wise to build against 1.21.6
-    # (see oldest-supported-numpy issues gh-28 and gh-45)
-    "numpy==1.21.6; python_version=='3.10' and (platform_system!='Windows' and platform_machine!='loongarch64') and platform_python_implementation != 'PyPy'",
+    "numpy==1.20.0; python_version=='3.8' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_machine!='aarch64' and platform_python_implementation != 'PyPy'",
+    "numpy==1.20.0; python_version=='3.9' and (platform_machine!='arm64' or platform_system!='Darwin') and platform_python_implementation != 'PyPy'",
+    "numpy==1.21.4; python_version=='3.10' and platform_python_implementation != 'PyPy'",
     "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
 
     # For Python versions which aren't yet officially supported,

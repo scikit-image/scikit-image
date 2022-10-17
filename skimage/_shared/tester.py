@@ -4,10 +4,10 @@ import sys
 
 def _show_skimage_info():
     import skimage
-    print("skimage version %s" % skimage.__version__)
+    print(f"skimage version {skimage.__version__}")
 
 
-class PytestTester(object):
+class PytestTester:
     """
     Pytest test runner.
 
@@ -102,7 +102,7 @@ class PytestTester(object):
             pytest_args += ["-m", label]
 
         if durations >= 0:
-            pytest_args += ["--durations=%s" % durations]
+            pytest_args += [f"--durations={durations}"]
 
         if tests is None:
             tests = [self.module_name]

@@ -4,7 +4,7 @@ Datasets with 3 or more spatial dimensions
 ==========================================
 
 Most scikit-image functions are compatible with 3D datasets, i.e., images with
-3 spatial dimensions (to be distinguished from 2D multichannel images, which 
+3 spatial dimensions (to be distinguished from 2D multichannel images, which
 are also arrays with
 three axes). :func:`skimage.data.cells3d` returns a 3D fluorescence microscopy
 image of cells. The returned dataset is a 3D multichannel image with dimensions

@@ -16,5 +16,4 @@ class ImportSuite:
 
     def time_import(self, package_name):
         results = run(executable + ' -c "import ' + package_name + '"',
-            stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True)
-
+            capture_output=True, stdin=PIPE, shell=True)
