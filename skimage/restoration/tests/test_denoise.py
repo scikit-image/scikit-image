@@ -91,21 +91,6 @@ def test_denoise_tv_chambolle_multichannel(channel_axis):
     assert_array_equal(denoised[_at(0)], denoised0)
 
 
-def test_denoise_tv_chambolle_multichannel_deprecation():
-    denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)
-
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        restoration.denoise_tv_chambolle(astro, weight=0.1,
-                                         multichannel=True)
-
-    # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        denoised = restoration.denoise_tv_chambolle(astro, 0.1, 2e-4, 200,
-                                                    True)
-
-    assert_array_equal(denoised[..., 0], denoised0)
-
-
 def test_denoise_tv_chambolle_float_result_range():
     # astronaut image
     img = astro_gray
@@ -219,16 +204,6 @@ def test_denoise_tv_bregman_3d_multichannel(channel_axis):
     _at = functools.partial(slice_at_axis,
                             axis=channel_axis % img_astro.ndim)
     assert_array_equal(denoised0, denoised[_at(0)])
-
-
-def test_denoise_tv_bregman_3d_multichannel_deprecation():
-    img_astro = astro.copy()
-    denoised0 = restoration.denoise_tv_bregman(img_astro[..., 0], weight=60.0)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised = restoration.denoise_tv_bregman(img_astro, weight=60.0,
-                                                  multichannel=True)
-
-    assert_array_equal(denoised0, denoised[..., 0])
 
 
 def test_denoise_tv_bregman_multichannel():
@@ -358,26 +333,6 @@ def test_denoise_bilateral_color(channel_axis):
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
-def test_denoise_bilateral_multichannel_deprecation():
-    img = checkerboard.copy()[:50, :50]
-    # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
-    img = np.clip(img, 0, 1)
-
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                             sigma_spatial=10,
-                                             multichannel=True)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
-                                             sigma_spatial=20,
-                                             multichannel=True)
-
-    # make sure noise is reduced in the checkerboard cells
-    assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
-    assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
-
-
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
     with pytest.raises(ValueError):
@@ -463,32 +418,6 @@ def test_denoise_nl_means_2d_multichannel(fast_mode, n_channels, dtype):
 
         # make sure noise is reduced
         assert psnr_denoised > psnr_noisy
-
-
-def test_denoise_nl_means_2d_multichannel_deprecated():
-    # reduce image size because nl means is slow
-    img = np.copy(astro[:50, :50])
-
-    # add some random noise
-    sigma = 0.1
-    imgn = img + sigma * np.random.standard_normal(img.shape)
-    imgn = np.clip(imgn, 0, 1)
-
-    psnr_noisy = peak_signal_noise_ratio(img, imgn)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised = restoration.denoise_nl_means(imgn,
-                                                3, 5, h=0.75 * sigma,
-                                                multichannel=True,
-                                                sigma=sigma)
-    psnr_denoised = peak_signal_noise_ratio(denoised, img)
-
-    # make sure noise is reduced
-    assert psnr_denoised > psnr_noisy
-
-    # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        restoration.denoise_nl_means(imgn, 3, 5, 0.75 * sigma, True,
-                                     sigma=sigma)
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
@@ -680,19 +609,17 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
 
 
 @pytest.mark.parametrize(
-    'img, multichannel, convert2ycbcr',
-    [(astro_gray, False, False),
-     (astro_gray_odd, False, False),
-     (astro_odd, True, False),
-     (astro_odd, True, True)]
+    'img, channel_axis, convert2ycbcr',
+    [(astro_gray, None, False),
+     (astro_gray_odd, None, False),
+     (astro_odd, -1, False),
+     (astro_odd, -1, True)]
 )
-def test_wavelet_denoising(img, multichannel, convert2ycbcr):
+def test_wavelet_denoising(img, channel_axis, convert2ycbcr):
     rstate = np.random.default_rng(1234)
     sigma = 0.1
     noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
-
-    channel_axis = -1 if multichannel else None
 
     # Verify that SNR is improved when true sigma is used
     denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
@@ -752,28 +679,6 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
     psnr_noisy = peak_signal_noise_ratio(img, noisy)
     psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert psnr_denoised > psnr_noisy
-
-
-def test_wavelet_denoising_deprecated():
-    rstate = np.random.default_rng(1234)
-    sigma = 0.1
-    img = astro_odd
-    noisy = img + sigma * rstate.standard_normal(img.shape)
-    noisy = np.clip(noisy, 0, 1)
-
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        # Verify that SNR is improved when true sigma is used
-        denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                               multichannel=True,
-                                               rescale_sigma=True)
-    psnr_noisy = peak_signal_noise_ratio(img, noisy)
-    psnr_denoised = peak_signal_noise_ratio(img, denoised)
-    assert psnr_denoised > psnr_noisy
-
-    # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        restoration.denoise_wavelet(noisy, sigma, 'db1', 'soft', None, True,
-                                    rescale_sigma=True)
 
 
 @pytest.mark.parametrize(
@@ -1018,25 +923,6 @@ def test_estimate_sigma_color(channel_axis):
         assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 
-def test_estimate_sigma_color_deprecated_multichannel():
-    rstate = np.random.default_rng(1234)
-    # astronaut image
-    img = astro.copy()
-    sigma = 0.1
-    # add noise to astronaut
-    img += sigma * rstate.standard_normal(img.shape)
-
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        sigma_est = restoration.estimate_sigma(img, multichannel=True,
-                                               average_sigmas=True)
-    assert_array_almost_equal(sigma, sigma_est, decimal=2)
-
-    # providing multichannel argument positionally also warns
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        sigma_est = restoration.estimate_sigma(img, True, True)
-    assert_array_almost_equal(sigma, sigma_est, decimal=2)
-
-
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_args(rescale_sigma):
     """
@@ -1179,42 +1065,3 @@ def test_cycle_spinning_num_workers():
                                         num_workers=None)
     assert_array_almost_equal(dn_cc1, dn_cc2)
     assert_array_almost_equal(dn_cc1, dn_cc3)
-
-
-def test_cycle_spinning_num_workers_deprecated_multichannel():
-    img = astro_gray[:32, :32]
-    sigma = 0.1
-    rstate = np.random.default_rng(1234)
-    noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
-
-    denoise_func = restoration.denoise_wavelet
-
-    func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
-
-    mc_warn_str = "`multichannel` is a deprecated argument"
-
-    # same results are expected whether using 1 worker or multiple workers
-    with expected_warnings([mc_warn_str]):
-        dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                        func_kw=func_kw, multichannel=False,
-                                        num_workers=1)
-
-    if DASK_NOT_INSTALLED_WARNING is None:
-        exp_warn = [mc_warn_str]
-    else:
-        exp_warn = [mc_warn_str, DASK_NOT_INSTALLED_WARNING]
-    with expected_warnings(exp_warn):
-        dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                        func_kw=func_kw, multichannel=False,
-                                        num_workers=2)
-    assert_array_almost_equal(dn_cc1, dn_cc2)
-
-    # providing multichannel argument positionally also warns
-    mc_warn_str = "Providing the `multichannel` argument"
-    if DASK_NOT_INSTALLED_WARNING is None:
-        exp_warn = [mc_warn_str]
-    else:
-        exp_warn = [mc_warn_str, DASK_NOT_INSTALLED_WARNING]
-
-    with expected_warnings(exp_warn):
-        restoration.cycle_spin(noisy, denoise_func, 1, 1, None, False)

@@ -9,13 +9,11 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared import utils
 from .._shared.utils import _supported_float_type, convert_to_float, warn
 
 
-@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             multichannel=None, preserve_range=False, truncate=4.0, *,
+             preserve_range=False, truncate=4.0, *,
              channel_axis=None):
     """Multi-dimensional Gaussian filter.
 
@@ -38,13 +36,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
-    multichannel : bool, optional (default: None)
-        Whether the last axis of the image is to be interpreted as multiple
-        channels. If True, each channel is filtered separately (channels are
-        not mixed together). Only 3 channels are supported. If ``None``,
-        the function will attempt to guess this, and raise a warning if
-        ambiguous, when the array has shape (M, N, 3).
-        This argument is deprecated: specify `channel_axis` instead.
     preserve_range : bool, optional
         If True, keep the original range of values. Otherwise, the input
         ``image`` is converted according to the conventions of ``img_as_float``
