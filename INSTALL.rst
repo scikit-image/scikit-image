@@ -178,9 +178,6 @@ or call ``download_all()`` in your favourite interactive Python environment
 Other platforms
 ------------------------------------------------------------------------------
 
-We still support Windows 32-bit on x86 processors but urge switching
-to Windows 64-bit.
-
 Unsupported platforms include:
 
 1. Linux on 32-bit x86 processors.
@@ -199,83 +196,47 @@ Unsupported platforms include:
 3. Linux on 64-bit ARM processors (Nvidia Jetson):
 
    - Follow the conversation on
-     `issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
+     `issue 4705
+     <https://github.com/scikit-image/scikit-image/issues/4705>`_.
 
-Although these platforms lack official support, many of the core
-developers have experience with them and can help with questions.
+4. Windows 32-bit
+
+   SciPy and some other dependencies no longer provide wheels for win32.
 
 If you want to install on an unsupported platform, try
 `building from source <#building-from-source>`_.
 
-Tell us which other platforms you'd like to see ``scikit-image`` on!
-We are very interested in how ``scikit-image`` gets
-`used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
-
-If you'd like to package ``scikit-image`` for an as-yet-unsupported platform,
-`reach out on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
+If you'd like to package ``scikit-image`` for an as-yet-unsupported
+platform, reach out on our
+`developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`__.
 
 
 Additional help
 ------------------------------------------------------------------------------
 
-If you still have questions, reach out through
+If you still have questions, we have a:
 
-- our `user forum <https://forum.image.sc/tags/scikit-image>`_
-- our `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
-- our `chat channel <https://skimage.zulipchat.com/>`_
-- `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
-
-
-To suggest a change in these instructions,
-`please open an issue on GitHub <https://github.com/scikit-image/scikit-image/issues/new>`_.
-
+- `user forum <https://forum.image.sc/tags/scikit-image>`_,
+- `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_,
+- `chat channel <https://skimage.zulipchat.com/>`_, and a
+- `Stack Overflow tag <https://stackoverflow.com/questions/tagged/scikit-image>`_.
 
 Installing scikit-image for contributors
 ========================================
 
-We are assuming that you have a default Python environment already configured on
-your computer and that you intend to install ``scikit-image`` inside of it.
+We are assuming that you have a Python virtual environment already
+configured and that you intend to install ``scikit-image`` inside
+of it.
 
-We also make a few more assumptions about your system:
+We also assume that you:
 
-- You have a C compiler set up.
-- You have a C++ compiler set up.
-- You are running a version of Python compatible with our system as listed
-  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/main/setup.py#L212>`_.
-- You've cloned the git repository into a directory called ``scikit-image``.
-  You have set up the `upstream` remote to point to our repository and `origin`
-  to point to your fork.
-
-
-This directory contains the following files:
-
-.. code-block::
-
-    scikit-image
-    ├── asv.conf.json
-    ├── azure-pipelines.yml
-    ├── benchmarks
-    ├── CODE_OF_CONDUCT.md
-    ├── CONTRIBUTING.rst
-    ├── CONTRIBUTORS.txt
-    ├── doc
-    ├── INSTALL.rst
-    ├── LICENSE.txt
-    ├── Makefile
-    ├── MANIFEST.in
-    ├── README.md
-    ├── RELEASE.txt
-    ├── requirements
-    ├── requirements.txt
-    ├── setup.cfg
-    ├── setup.py
-    ├── skimage
-    ├── TODO.txt
-    ├── tools
-
-All commands below are assumed to be running from the ``scikit-image``
-directory containing the files above.
-
+- Have C and C++ compilers.
+- Are running a version of Python compatible with our dependencies as listed
+  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/main/setup.py#L38>`_.
+- Have cloned the git repository into a directory called
+  ``scikit-image``. All commands below are executed inside that directory.
+- Have set the git `upstream` remote to point to our repository and `origin`
+  to point to your own fork.
 
 Build environment setup
 ------------------------------------------------------------------------------
@@ -334,14 +295,7 @@ before you get started.
   # Test your installation
   pytest skimage
 
-On Windows, use backslashes when referring to files in the folder
-`requirements`:
-
-.. code-block:: sh
-
-  conda install --file requirements\default.txt
-  conda install --file requirements\build.txt
-  conda install --file requirements\test.txt
+On Windows, use backslashes instead of forward slashes in paths.
 
 Updating the installation
 ------------------------------------------------------------------------------
