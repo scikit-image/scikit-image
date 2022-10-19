@@ -53,7 +53,9 @@ New features and improvements
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 - Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
-
+- Add support for three dimensions for the properties ``rotation`` and ``translation``
+  in ``skimage.transform.EuclideanTransform`` as well as for ``skimage.transform.SimilarityTransform.scale``
+  (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_).
 
 Changes and new deprecations
 ----------------------------
@@ -113,6 +115,10 @@ Documentation
   (`#6298 <https://github.com/scikit-image/scikit-image/pull/6298>`_, `#6300 <https://github.com/scikit-image/scikit-image/pull/6300>`_, `#6301 <https://github.com/scikit-image/scikit-image/pull/6301>`_).
 - Clarify that ``skimage.morphology.skeletonize`` accepts an ``image`` of any input type
   (`#6322 <https://github.com/scikit-image/scikit-image/pull/6322>`_).
+- Document support for Path objects in ``skimage.io.imread`` and ``skimage.io.imsave``
+  (`#6361 <https://github.com/scikit-image/scikit-image/pull/6361>`_).
+- Improve error message in ``skimage.filters.threshold_multiotsu`` if the discretized image cannot be thresholded
+  (`#6375 <https://github.com/scikit-image/scikit-image/pull/6375>`_).
 
 Other and development related updates
 -------------------------------------
@@ -148,6 +154,8 @@ Other and development related updates
   (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_, `#6353 <https://github.com/scikit-image/scikit-image/pull/6353>`_).
 - Add benchmarks for ``skimage.morphology.reconstruction``
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
+- Fixing typo in ``_probabilistic_hough_line``
+  (`#6373 <https://github.com/scikit-image/scikit-image/pull/6373>`_).
 
 TODO Milestone 1.0?
 -------------------
@@ -163,14 +171,10 @@ Backported 0.19.x
 - avoid warnings about change to v3 API from imageio (`#6343 <https://github.com/scikit-image/scikit-image/pull/6343>`_)
 - Fix smoothed image computation when mask is None in canny (`#6348 <https://github.com/scikit-image/scikit-image/pull/6348>`_)
 - Fix channel_axis default for cycle_spin (`#6352 <https://github.com/scikit-image/scikit-image/pull/6352>`_)
+- remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
 
 TODO
 ----
-- remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
-- Document support for Path objects in io functions (`#6361 <https://github.com/scikit-image/scikit-image/pull/6361>`_)
-- Add 3D rotation and translation properties for EuclideanTransform object, and 3D scale for SimilarityTransform (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_)
--  Fixing typo in _probabilistic_hough_line (`#6373 <https://github.com/scikit-image/scikit-image/pull/6373>`_)
-- Improve multi-Otsu error message and maintenance of threshold.py (`#6375 <https://github.com/scikit-image/scikit-image/pull/6375>`_)
 - Removing reference to `marching_cubes_lewiner` from `plot_marching_cubes.py`  (`#6377 <https://github.com/scikit-image/scikit-image/pull/6377>`_)
 - pin to pip<22.1 (`#6379 <https://github.com/scikit-image/scikit-image/pull/6379>`_)
 - Update GH actions (`#6382 <https://github.com/scikit-image/scikit-image/pull/6382>`_)
