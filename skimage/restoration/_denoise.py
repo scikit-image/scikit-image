@@ -309,8 +309,8 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
     multichannel : bool, optional
-        Whether to apply total variation denoising separately to each channel.
-        Should be ``True`` for color images, otherwise the denoising is
+        Whether or not to apply denoising separately to each channel.
+        Should always be set to ``True`` for color images, otherwise the denoising is
         also applied in the channels dimension. This argument is deprecated:
         specify `channel_axis` instead.
 
@@ -321,7 +321,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
 
     Notes
     -----
-    Make sure to set the `channel_axis` parameter appropriately for color
+    Ensure that `channel_axis` parameter is set appropriately for color
     images.
 
     The principle of total variation denoising is explained in [4]_.
@@ -508,7 +508,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         also applied in the channels dimension. This argument is deprecated:
         specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be grayscale (single-channel).
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
