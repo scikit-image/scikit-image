@@ -243,18 +243,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://hal.archives-ouvertes.fr/hal-00674508
     """
-
-    if user_params is not None:
-        for s in ('max', 'min'):
-            if (s + '_iter') in user_params:
-                warning_msg = (
-                    f'`{s}_iter` is a deprecated key for `user_params`. '
-                    f'It will be removed in version 1.0. '
-                    f'Use `{s}_num_iter` instead.'
-                )
-                warnings.warn(warning_msg, FutureWarning)
-                user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
-
     params = {'threshold': 1e-4, 'max_num_iter': 200,
               'min_num_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
