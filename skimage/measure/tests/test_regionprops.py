@@ -669,8 +669,7 @@ def test_perimeter():
     per = regionprops(SAMPLE, spacing=(2, 2))[0].perimeter
     assert_almost_equal(per, 2 * target_per)
 
-    with expected_warnings(["`neighbourhood` is a deprecated argument name"]):
-        per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    per = perimeter(SAMPLE.astype('double'), neighborhood=8)
     assert_almost_equal(per, 46.8284271247)
 
     with testing.raises(NotImplementedError):
