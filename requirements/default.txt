@@ -1,6 +1,5 @@
 numpy>=1.20
-scipy>=1.8,<1.9.2; python_version<="3.9"
-scipy>=1.8; python_version>"3.9"
+scipy>=1.8
 networkx>=2.8
 pillow>=9.0.1
 imageio>=2.4.1
