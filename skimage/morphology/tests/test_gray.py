@@ -288,12 +288,6 @@ def test_1d_erosion():
     assert_array_equal(eroded, expected)
 
 
-def test_deprecated_import():
-    msg = "Importing from skimage.morphology.grey is deprecated."
-    with expected_warnings([msg + r"|\A\Z"]):
-        from skimage.morphology.grey import erosion  # noqa
-
-
 @pytest.mark.parametrize(
     "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
                  "black_tophat"],

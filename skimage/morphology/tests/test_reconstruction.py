@@ -151,9 +151,3 @@ def test_offset_not_none():
     assert_array_almost_equal(
         reconstruction(seed, mask, method='dilation',
                        footprint=np.ones(3), offset=np.array([0])), expected)
-
-
-def test_deprecated_import():
-    msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
-    with expected_warnings([msg + r"|\A\Z"]):
-        from skimage.morphology.greyreconstruct import reconstruction
