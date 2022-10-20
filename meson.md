@@ -2,7 +2,7 @@
 
 ### Developer build
 
-**Install build tools:** `pip install meson-python cython pythran`
+**Install build tools:** `pip install -r requirements/build.txt`
 
 **Generate ninja make files:** `meson build --prefix=$PWD/build`
 

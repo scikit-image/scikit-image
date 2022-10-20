@@ -38,7 +38,6 @@ python_sources = [
   '_warnings.py',
   'coord.py',
   'filters.py',
-  'lazy.py',
   'tester.py',
   'testing.py',
   'utils.py',
