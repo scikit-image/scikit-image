@@ -179,13 +179,12 @@ fig.add_shape(
 plotly.io.show(fig)
 
 #####################################################################
-# By applying the overlaying the same bounding box onto the the 0th raw
-# image, we can see how the lower bounds align with the bottom of the
-# S-L interface. The reason we use the 0th image instead of the 1st image
-# is because this bounding box was calculated from the image delta between
-# the 0th and 1st images, and the bottom-most region of the image
-# delta corresponds to the location of the interface at the earlier image
-# in time (0th) because the interface is moving upward.
+# We can see how the lower bounds of the box align with the bottom of the
+# S-L interface by overlaying the same bounding box onto the 0th raw image.
+# This bounding box was calculated from the image delta between
+# the 0th and 1st images, but the bottom-most region of the box
+# corresponds to the location of the interface earlier
+# in time (0th image) because the interface is moving upward.
 
 fig = px.imshow(image_sequence[0, :, :], binary_string=True)
 fig.add_shape(
