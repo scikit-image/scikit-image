@@ -129,7 +129,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
@@ -848,7 +848,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         .. versionadded:: 0.16
            ``rescale_sigma`` was introduced in 0.16
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
@@ -1000,7 +1000,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
         Estimate sigma separately for each channel. This argument is
         deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
