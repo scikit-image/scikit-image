@@ -266,7 +266,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
                        multichannel=False):
     r"""Perform total variation denoising using split-Bregman optimization.
 
-    Given :math:`f` a noisy image (input data),
+    Given :math:`f`, a noisy image (input data),
     total variation denoising (also known as total variation regularization)
     aims to find an image :math:`u` with less total variation than :math:`f`,
     under the constraint that :math:`u` remain similar to :math:`f`.
@@ -467,7 +467,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
                          multichannel=False, *, channel_axis=None):
     r"""Perform total variation denoising in nD.
 
-    Given :math:`f` a noisy image (input data),
+    Given :math:`f`, a noisy image (input data),
     total variation denoising (also known as total variation regularization)
     aims to find an image :math:`u` with less total variation than :math:`f`,
     under the constraint that :math:`u` remain similar to :math:`f`.
