@@ -302,7 +302,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
     channel_axis : int or None, optional
-        If None, the image is assumed to be grayscale (single-channel).
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
