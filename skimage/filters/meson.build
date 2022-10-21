@@ -14,6 +14,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_fft_based.py',
   '_gabor.py',
   '_gaussian.py',

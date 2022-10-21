@@ -70,6 +70,7 @@ numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_build.py',
   'conftest.py'
 ]
