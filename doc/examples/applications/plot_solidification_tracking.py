@@ -100,9 +100,9 @@ plotly.io.show(fig)
 #####################################################################
 # Invert and denoise
 # ==================
-# Next, we invert the ``clipped`` images so the regions of highest intensity
-# will correspond to the region we are interested in tracking (i.e., the
-# S-L interface). We now apply a total variation denoising filter to reduce
+# We invert the ``clipped`` images so the regions of highest intensity
+# will include the region we are interested in tracking (i.e., the
+# S-L interface). Then, we apply a total variation denoising filter to reduce
 # noise beyond the interface.
 
 inverted = 1 - clipped
@@ -147,38 +147,41 @@ plotly.io.show(fig)
 # In our binary images, the S-L interface appears as the largest region of
 # connected pixels. For this step of the workflow, we will operate on each
 # 2D image separately, as opposed to the entire 3D dataset, because we are
-# only interested in a single moment in time for each region.
+# interested in a single moment in time for each region.
 #
-# We select the largest region in each image
+# We apply :func:`skimage.measure.label()` on the binary images so that each
+# region has its own label. Then, we select the largest region in each image
 # by computing region properties, including the ``area`` property, and
 # sorting by ``area`` values. Function
 # :func:`skimage.measure.regionprops_table()` returns a table of region
 # properties which can be read into a Pandas ``DataFrame``.
+# To begin with, let us consider the first image delta at this stage of the
+# workflow, ``binarized[0, :, :]``.
 
+labeled_0 = measure.label(binarized[0, :, :])
 props_0 = measure.regionprops_table(
-        measure.label(binarized[0, :, :]), properties=('label', 'area', 'bbox'))
+        labeled_0, properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
 # Show top five rows
 props_0_df.head()
 
 #####################################################################
-# We can visualize the largest region in the 0th image with its
-# bounding box (bbox) by first labeling the binary image and selecting
-# the labels that correspond to the largest region.
+# We can thus select the largest region by matching its label with the one
+# found in the first row of the above (sorted) table. Let us visualize it,
+# along with its bounding box (bbox) in red.
 
-labeled_0 = measure.label(binarized[0, :, :])
 largest_region_0 = labeled_0 == props_0_df.iloc[0]['label']
 minr, minc, maxr, maxc = [props_0_df.iloc[0][f'bbox-{i}'] for i in range(4)]
 fig = px.imshow(largest_region_0, binary_string=True)
 fig.add_shape(
-        type="rect", x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color="Red"))
+        type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
 plotly.io.show(fig)
 
 #####################################################################
-# Next we find the largest region in each image for all images in the
-# dataset into a 3D NumPy array ``largest_region``. We'll also store
-# the bbox information for each image, which will be used to track the
+# We are now ready to perform this selection for all image deltas in the
+# sequence. We shall also store
+# the bbox information, which will be used to track the
 # position of the S-L interface.
 
 largest_region = np.empty_like(binarized)
@@ -205,17 +208,18 @@ plotly.io.show(fig)
 # =================================
 # The final step in this analysis is to plot the location of the S-L
 # interfaces over time. This can be achieved by plotting ``maxr``
-# over time since this value shows the y location of the bottom of
-# the interface. The pixel size in this experiment was 1.93 microns per
-# pixel and the framerate was 80,000 frames per second, so these values
+# (third element in bbox) 
+# over time since this value shows the `y` location of the bottom of
+# the interface. The pixel size in this experiment was 1.93 microns
+# and the framerate was 80,000 frames per second, so these values
 # are used to convert pixels and image number to physical units.
 # We calculate the average solidfication velocity by fitting a linear
-# polynomial to the scatter plot. The velocity is the first order-coefficient.
+# polynomial to the scatter plot. The velocity is the first-order coefficient.
 
 ums_per_pixel = 1.93
 fps = 80000
 interface_y_um = [ums_per_pixel * bbox[2] for bbox in bboxes]
-time_us = 1E6 / fps * np.arange(len(interface_y_um))
+time_us = 1e6 / fps * np.arange(len(interface_y_um))
 fig, ax = plt.subplots(dpi=100)
 ax.scatter(time_us, interface_y_um)
 c0, c1 = np.polynomial.polynomial.polyfit(time_us, interface_y_um, 1)
