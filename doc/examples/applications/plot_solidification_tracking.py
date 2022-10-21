@@ -179,6 +179,20 @@ fig.add_shape(
 plotly.io.show(fig)
 
 #####################################################################
+# By applying the overlaying the same bounding box onto the the 0th raw
+# image, we can see how the lower bounds align with the bottom of the
+# S-L interface. The reason we use the 0th image instead of the 1st image
+# is because this bounding box was calculated from the image delta between
+# the 0th and 1st images, and the bottom-most region of the image
+# delta corresponds to the location of the interface at the earlier image
+# in time (0th) because the interface is moving upward.
+
+fig = px.imshow(image_sequence[0, :, :], binary_string=True)
+fig.add_shape(
+        type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
+plotly.io.show(fig)
+
+#####################################################################
 # We are now ready to perform this selection for all image deltas in the
 # sequence. We shall also store
 # the bbox information, which will be used to track the
@@ -208,7 +222,7 @@ plotly.io.show(fig)
 # =================================
 # The final step in this analysis is to plot the location of the S-L
 # interfaces over time. This can be achieved by plotting ``maxr``
-# (third element in bbox) 
+# (third element in bbox)
 # over time since this value shows the `y` location of the bottom of
 # the interface. The pixel size in this experiment was 1.93 microns
 # and the framerate was 80,000 frames per second, so these values
