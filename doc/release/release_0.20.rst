@@ -14,18 +14,18 @@ https://scikit-image.org
 
 New features and improvements
 -----------------------------
-- Add support for footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
+- Support footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
   The ``footprint`` parameter of the functions ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` now accepts a sequence of smaller footprints that are applied consecutively as well. See the respective docstrings for more details
   (`#5482 <https://github.com/scikit-image/scikit-image/pull/5482>`_, `#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
-- Add support for anisotropic images with different voxel spacings.
+- Support anisotropic images with different voxel spacings.
   Spacings can be defined with the new parameter ``spacing`` of the following functions in ``skimage.measure``: ``regionprops``, ``regionprops_table``, ``moments``, ``moments_central``, ``moments_normalized``, ``centroid``, ``inertia_tensor``, and ``inertia_tensor_eigvals``.
   Voxel spacing is taken into account for the following existing properties in ``skimage.measure.regionprops``: ``area``, ``area_bbox``, ``centroid``, ``area_convex``, ``extent``, ``feret_diameter_max``, ``area_filled``, ``inertia_tensor``, ``moments``, ``moments_central``, ``moments_hu``, ``moments_normalized``, ``perimeter``, ``perimeter_crofton``, ``solidity``, ``moments_weighted_central``, and ``moments_weighted_hu``.
   The new properties ``num_pixels`` and ``coords_scaled`` are available as well.
   See the respective docstrings for more details
   (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_).
-- Add support for the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
+- Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
 - Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``
@@ -38,7 +38,7 @@ New features and improvements
   (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
 - Add new parameters ``squared_butterworth`` and ``npad`` to ``skimage.filters.butterworth``, which add support for squaring the filter and edge padding
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
-- Add support for n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
+- Support n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
   (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
 - Support the construction of ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
   (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
@@ -53,12 +53,19 @@ New features and improvements
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 - Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
-- Add support for three dimensions for the properties ``rotation`` and ``translation``
-  in ``skimage.transform.EuclideanTransform`` as well as for ``skimage.transform.SimilarityTransform.scale``
+- Support three dimensions for the properties ``rotation`` and ``translation`` in ``skimage.transform.EuclideanTransform`` as well as for ``skimage.transform.SimilarityTransform.scale``
   (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_).
+- Improve performance of ``skimage.feature.canny`` by porting a part of its implementation to Cython
+  (`#6387 <https://github.com/scikit-image/scikit-image/pull/6387>`_).
 
 Changes and new deprecations
 ----------------------------
+- Update minimal supported dependency to ``matplotlib>=3.3``
+  (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
+- Update minimal supported dependencies to ``numpy>=1.19``, ``scipy>=1.5``, and ``networkx>=2.5``
+  (`#6385 <https://github.com/scikit-image/scikit-image/pull/6385>`_).
+- Update minimal supported dependency to ``pillow>=9.0.1``
+  (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
 
 Completed deprecations
 ----------------------
@@ -119,6 +126,12 @@ Documentation
   (`#6361 <https://github.com/scikit-image/scikit-image/pull/6361>`_).
 - Improve error message in ``skimage.filters.threshold_multiotsu`` if the discretized image cannot be thresholded
   (`#6375 <https://github.com/scikit-image/scikit-image/pull/6375>`_).
+- Show original unlabeled image as well in the gallery example "Expand segmentation labels without overlap"
+  (`#6396 <https://github.com/scikit-image/scikit-image/pull/6396>`_).
+- Add missing copyrights to LICENSE.txt and use formatting according to SPDX identifiers
+  (`#6419 <https://github.com/scikit-image/scikit-image/pull/6419>`_).
+- Document the refactoring of ``grey*`` to ``skimage.feature.graymatrix`` and ``skimage.feature.graycoprops`` in the release 0.19
+  (`#6420 <https://github.com/scikit-image/scikit-image/pull/6420>`_).
 
 Other and development related updates
 -------------------------------------
@@ -156,6 +169,31 @@ Other and development related updates
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 - Fixing typo in ``_probabilistic_hough_line``
   (`#6373 <https://github.com/scikit-image/scikit-image/pull/6373>`_).
+- Remove reference to ``marching_cubes_lewiner`` from ``plot_marching_cubes.py``
+  (`#6377 <https://github.com/scikit-image/scikit-image/pull/6377>`_).
+- Pin pip pip to <22.1 in ``tools/github/before_install.sh``
+  (`#6379 <https://github.com/scikit-image/scikit-image/pull/6379>`_).
+- Update GH actions from v2 to v3
+  (`#6382 <https://github.com/scikit-image/scikit-image/pull/6382>`_).
+- Exclude pillow 9.1.1 from supported requirements
+  (`#6384 <https://github.com/scikit-image/scikit-image/pull/6384>`_).
+- Derive OBJECT_COLUMNS from COL_DTYPES in ``skimage.measure._regionprops``
+  (`#6389 <https://github.com/scikit-image/scikit-image/pull/6389>`_).
+- Support ``loadtxt`` of NumPy 1.23 with ``skimage/feature/orb_descriptor_positions.txt``
+  (`#6400 <https://github.com/scikit-image/scikit-image/pull/6400>`_).
+- Update to supported CircleCI images
+  (`#6401 <https://github.com/scikit-image/scikit-image/pull/6401>`_).
+- Use artifact-redirector
+  (`#6407 <https://github.com/scikit-image/scikit-image/pull/6407>`_).
+- Use the same numpy version dependencies for building as used by default
+  (`#6409 <https://github.com/scikit-image/scikit-image/pull/6409>`_).
+- Forward-port 0.19.3 release notes
+  (`#6416 <https://github.com/scikit-image/scikit-image/pull/6416>`_).
+- Forward-port gh-6369: Fix windows wheels: use vsdevcmd.bat to make sure rc.exe is on the path
+  (`#6417 <https://github.com/scikit-image/scikit-image/pull/6417>`_).
+- Use "center" in favor of "centre", and "color" in favor of "colour" gallery examples
+  (`#6421 <https://github.com/scikit-image/scikit-image/pull/6421>`_, `#6422 <https://github.com/scikit-image/scikit-image/pull/6422>`_).
+
 
 TODO Milestone 1.0?
 -------------------
@@ -172,31 +210,11 @@ Backported 0.19.x
 - Fix smoothed image computation when mask is None in canny (`#6348 <https://github.com/scikit-image/scikit-image/pull/6348>`_)
 - Fix channel_axis default for cycle_spin (`#6352 <https://github.com/scikit-image/scikit-image/pull/6352>`_)
 - remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
+- In newer PIL, palette may contain <256 entries (`#6405 <https://github.com/scikit-image/scikit-image/pull/6405>`_)
+- Fix computation of histogram bins for multichannel integer-valued images (`#6413 <https://github.com/scikit-image/scikit-image/pull/6413>`_)
 
 TODO
 ----
-- Removing reference to `marching_cubes_lewiner` from `plot_marching_cubes.py`  (`#6377 <https://github.com/scikit-image/scikit-image/pull/6377>`_)
-- pin to pip<22.1 (`#6379 <https://github.com/scikit-image/scikit-image/pull/6379>`_)
-- Update GH actions (`#6382 <https://github.com/scikit-image/scikit-image/pull/6382>`_)
-- Update matplotlib minimum version (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_)
-- Don't use pillow 9.1.1 (`#6384 <https://github.com/scikit-image/scikit-image/pull/6384>`_)
-- Update minimum supported numpy, scipy, and networkx (`#6385 <https://github.com/scikit-image/scikit-image/pull/6385>`_)
-- Canny: cythonize non-maximum suppression (`#6387 <https://github.com/scikit-image/scikit-image/pull/6387>`_)
-- derive OBJECT_COLUMNS from COL_DTYPES in regionprops (`#6389 <https://github.com/scikit-image/scikit-image/pull/6389>`_)
-- DOC: add original plot in examples/segmentation/plot_expand_labels.py (`#6396 <https://github.com/scikit-image/scikit-image/pull/6396>`_)
-- Add support for NumPy 1.23 (`#6400 <https://github.com/scikit-image/scikit-image/pull/6400>`_)
-- Use supported circleci images (`#6401 <https://github.com/scikit-image/scikit-image/pull/6401>`_)
-- Update minimum pillow dependency (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_)
-- In newer PIL, palette may contain <256 entries (`#6405 <https://github.com/scikit-image/scikit-image/pull/6405>`_)
-- Use artifact-redirector (`#6407 <https://github.com/scikit-image/scikit-image/pull/6407>`_)
-- Sync numpy minimum version (`#6409 <https://github.com/scikit-image/scikit-image/pull/6409>`_)
-- Fix computation of histogram bins for multichannel integer-valued images (`#6413 <https://github.com/scikit-image/scikit-image/pull/6413>`_)
-- forward-port 0.19.3 release notes (`#6416 <https://github.com/scikit-image/scikit-image/pull/6416>`_)
-- forwardport gh-6369: Fix windows wheels: use vsdevcmd.bat to make sure rc.exe is on the path (`#6417 <https://github.com/scikit-image/scikit-image/pull/6417>`_)
-- Adding missing copyrights to LICENSE.txt, formatting according to SPDX identifiers (`#6419 <https://github.com/scikit-image/scikit-image/pull/6419>`_)
-- Document refactoring from grey* to graymatrix and graycoprops in 0.19 with versionchanged directive (`#6420 <https://github.com/scikit-image/scikit-image/pull/6420>`_)
-- [MINOR] centre -> center in doc/examples/applications/plot_morphology.py (`#6421 <https://github.com/scikit-image/scikit-image/pull/6421>`_)
-- [MINOR] colour -> color in doc/examples/applications/plot_3d_interaction.py (`#6422 <https://github.com/scikit-image/scikit-image/pull/6422>`_)
 - Restrict GitHub Actions permissions only for required ones (`#6426 <https://github.com/scikit-image/scikit-image/pull/6426>`_)
 - Exclude submodules of doc from package install (`#6428 <https://github.com/scikit-image/scikit-image/pull/6428>`_)
 - Substitute vertices with simplices in `transform/_geometric.py` (`#6430 <https://github.com/scikit-image/scikit-image/pull/6430>`_)
