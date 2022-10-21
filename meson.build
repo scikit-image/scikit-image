@@ -1,9 +1,9 @@
 project(
   'scikit-image',
   'c', 'cpp',
-  # Note that the git commit hash cannot be added dynamically here (it is added
-  # in the dynamically generated and installed `scikit-image/version.py` though
-  # - see tools/version_utils.py
+  # Note that the git commit hash cannot be added dynamically here
+  # That only happens when importing from a git repository.
+  # See `skimage/__init__.py`
   version: '0.20.0.dev0',
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
