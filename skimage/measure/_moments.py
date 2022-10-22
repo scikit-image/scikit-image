@@ -1,7 +1,10 @@
+import itertools
+
 import numpy as np
+
 from .._shared.utils import _supported_float_type, check_nD
 from . import _moments_cy
-import itertools
+from ._moments_analytical import moments_raw_to_central
 
 
 def moments_coords(coords, order=3):
@@ -245,7 +248,10 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
            [ 0.,  0.,  0.,  0.]])
     """
     if center is None:
-        center = centroid(image, spacing=spacing)
+        # Note: No need for an explicit call to centroid.
+        #       The centroid will be obtained from the raw moments.
+        moments_raw = moments(image, order=order, spacing=spacing)
+        return moments_raw_to_central(moments_raw)
     if spacing is None:
         spacing = np.ones(image.ndim)
     float_dtype = _supported_float_type(image.dtype)
@@ -358,8 +364,8 @@ def moments_hu(nu):
     >>> mu = moments_central(image)
     >>> nu = moments_normalized(mu)
     >>> moments_hu(nu)
-    array([7.45370370e-01, 3.51165981e-01, 1.04049179e-01, 4.06442107e-02,
-           2.64312299e-03, 2.40854582e-02, 4.33680869e-19])
+    array([0.74537037, 0.35116598, 0.10404918, 0.04064421, 0.00264312,
+           0.02408546, 0.        ])
     """
     dtype = np.float32 if nu.dtype == 'float32' else np.float64
     return _moments_cy.moments_hu(nu.astype(dtype, copy=False))
