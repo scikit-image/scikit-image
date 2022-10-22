@@ -1,5 +1,4 @@
-scikit-image: image processing in Python
-========================================
+# scikit-image: image processing in Python
 
 [scikit-image](https://scikit-image.org) builds on
 [scipy.ndimage](https://docs.scipy.org/doc/scipy/reference/ndimage.html) to
@@ -14,22 +13,22 @@ Read about our {doc}`mission, vision, and values <values>` and how we
 
 Major proposals to the project are documented in {doc}`SKIPs <skips/index>`.
 
-Homepage
---------
+## Homepage
+
 <https://scikit-image.org>
 
-User Forum
-----------
+## User Forum
+
 <https://forum.image.sc/tags/scikit-image>
 
-Developer Forum
----------------
+## Developer Forum
+
 <https://discuss.scientific-python.org/c/contributor/skimage>
 
-Source, bugs, and patches
--------------------------
+## Source, bugs, and patches
+
 <https://github.com/scikit-image/scikit-image>
 
-Contact
--------
+## Contact
+
 Stefan van der Walt `<stefanv at berkeley.edu>`

@@ -1,0 +1,29 @@
+# Install pre-commit hooks via
+# pre-commit install
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3298ddab3c13dd77d6ce1fc0baf97691430d84b0 # v4.3.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: debug-statements
+      - id: check-ast
+      - id: mixed-line-ending
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-added-large-files
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: 50c5478ed9e10bf360335449280cf2a67f4edb7a # v2.7.1
+    hooks:
+      - id: prettier
+        files: \.(md|rst|yml|yaml)
+        args: [--prose-wrap=preserve]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: d50ce21fc45d014790d4ecf71d1b1d7ccc450526 # v3.1.0
+    hooks:
+      - id: pyupgrade
+        args: [--py38-plus]

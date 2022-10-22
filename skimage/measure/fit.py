@@ -12,7 +12,7 @@ _EPSILON = np.spacing(1)
 
 def _check_data_dim(data, dim):
     if data.ndim != 2 or data.shape[1] != dim:
-        raise ValueError('Input data must have shape (N, %d).' % dim)
+        raise ValueError(f"Input data must have shape (N, {dim}).")
 
 
 def _check_data_atleast_2D(data):
@@ -20,7 +20,7 @@ def _check_data_atleast_2D(data):
         raise ValueError('Input data must be at least 2D.')
 
 
-class BaseModel(object):
+class BaseModel:
 
     def __init__(self):
         self.params = None
@@ -93,7 +93,7 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            raise ValueError('At least 2 input points needed.')
+            return False
 
         self.params = (origin, direction)
 
@@ -164,7 +164,7 @@ class LineModelND(BaseModel):
 
         if direction[axis] == 0:
             # line parallel to axis
-            raise ValueError('Line parallel to axis %s' % axis)
+            raise ValueError(f'Line parallel to axis {axis}')
 
         l = (x - origin[axis]) / direction[axis]
         data = origin + l[..., np.newaxis] * direction
@@ -295,8 +295,8 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input data does not contain enough significant data points. "
-                 "In scikit-image 1.0, this warning will become a ValueError.")
+            warn("Input does not contain enough significant data points.")
+            return False
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
@@ -545,7 +545,7 @@ class EllipseModel(BaseModel):
         #                                + b * ctheta * ct)
         #     return [dfx_t + dfy_t]
 
-        residuals = np.empty((N, ), dtype=np.double)
+        residuals = np.empty((N, ), dtype=np.float64)
 
         # initial guess for parameter t of closest point on ellipse
         t0 = np.arctan2(y - yc, x - xc) - theta

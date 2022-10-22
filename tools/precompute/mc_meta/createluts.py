@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """ Create lookup tables for the marching cubes algorithm, by parsing
 the file "LookUpTable.h". This prints a text to the stdout which
 can then be copied to luts.py.
@@ -77,7 +75,7 @@ def get_table(lines1, needle, i):
     cdes = lines1[ii].rstrip(' {=')
 
     # Write name
-    lines2.append('%s = np.array([' % name)
+    lines2.append(f'{name} = np.array([')
 
     # Get elements
     for i in range(ii+1, ii+1+9999999):
@@ -103,11 +101,10 @@ def get_table(lines1, needle, i):
     array = eval(code)
     array64 = base64.encodebytes(array.tostring()).decode('utf-8')
     # Reverse: bytes = base64.decodebytes(text.encode('utf-8'))
-    text = '%s = %s, """\n%s"""' % (name, str(array.shape), array64)
+    text = f'{name} = {array.shape}, """\n{array64}"""'
 
     # Build actual lines
     lines2 = []
-    #lines2.append( '# %s -> %s %s' % (cdes, str(array.dtype), str(array.shape)) )
     lines2.append( '#' + cdes)
     lines2.append(text)
     lines2.append('')
@@ -121,23 +118,6 @@ def search_line(lines, refline, start=0):
     return -1
 
 
-
-def getLutNames(prefix):
-    aa = []
-    for a in dir(luts):
-        if a.startswith(prefix): aa.append(a)
-
-    def sortkey(x):
-        fullnr = x.split(prefix)[1]
-        nr, us, subnr = fullnr.partition('_')
-        if len(nr) == 1:
-            nr = '0'+nr
-        return nr + us + subnr
-
-    return [a for a in sorted(aa, key=sortkey)]
-
-
-
 if __name__ == '__main__':
     import os
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
@@ -146,6 +126,8 @@ if __name__ == '__main__':
         f.write('# -*- coding: utf-8 -*-\n')
         f.write(
             '# This file was auto-generated from `mc_meta/LookUpTable.h` by\n'
-            '# `mc_meta/createluts.py`.\n\n'
+            '# `mc_meta/createluts.py`. The `mc_meta` scripts are not\n'
+            '# distributed with scikit-image, but are available in the\n'
+            '# repository under tools/precompute/mc_meta.\n\n'
         )
         f.write(create_luts(fname))

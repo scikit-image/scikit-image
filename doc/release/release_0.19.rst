@@ -1,3 +1,71 @@
+Announcement: scikit-image 0.19.3
+=================================
+
+We're happy to announce the release of scikit-image v0.19.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+For more information, examples, and documentation, please visit our website:
+
+https://scikit-image.org
+
+Bugs Fixed
+----------
+- Revert unintentional change to default multichannel behavior introduced in v0.19.0 for ``skimage.restoration.cycle_spin`` (now defaults to single channel again)
+- Fix corner case with an optimal angle of 0 degrees in hough_line_peaks
+- Fixed the gallery example involving registration with log-polar transformations
+- Update test suite for compatibility with the most recent ``tifffile`` release.
+- warp/rotate: fixed a bug with clipping when cval is not in the input range
+- Fix computation of histogram bins for multichannel integer-valued images
+
+General Maintenance
+-------------------
+- Update ``skimage.future.manual_polygon_segmentation`` to work with Matplotlib 3.5.
+- Update ``skimage.io.imread`` to avoid warnings when using ``imageio``>=2.16.2.
+- Now compatible with Pillow >= 9.1 (palette may contain <256 entries)
+- Added support for NumPy 1.23
+
+Pull Requests Included
+----------------------
+- Backport PR #6306 on branch v0.19.x (Fix for error in 'Using Polar and Log-Polar Transformations for Registration') (#6312)
+- Backport PR #6271 on branch v0.19.x (hough_line_peaks fix for corner case with optimal angle=0) (#6313)
+- Backport PR #6261 on branch v0.19.x (Ignore sparse matrix deprecation warning) (#6316)
+- backport PR 6328: Fix issue with newer versions of matplotlib in manual segmentation (#6334)
+- Backport PR #6343 on branch v0.19.x (avoid warnings about change to v3 API from imageio) (#6344)
+- Backport PR #6355 on branch v0.19.x (remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough`) (#6357)
+- Backport PR #6352 on branch v0.19.x (Fix channel_axis default for cycle_spin) (#6358)
+- Backport PR #6348 on branch v0.19.x (Fix smoothed image computation when mask is None in canny) (#6359)
+- Backport PR #6361 on branch v0.19.x (Document support for Path objects in io functions) (#6363)
+- Backport PR #6400 on branch v0.19.x (Add support for NumPy 1.23) (#6403)
+- Backport PR #6335 on branch v0.19.x (warp/rotate: fixed a bug with clipping when cval is not in the input range) (#6411)
+- Backport PR #6413 on branch v0.19.x (Fix computation of histogram bins for multichannel integer-valued images) (#6414)
+
+10 authors added to this release [alphabetical by first name or login]
+----------------------------------------------------------------------
+- Albert Y. Shih
+- Bartłomiej Śmietanka
+- Dave Mellert
+- Gregory Lee
+- Graham Inggs
+- Jarrod Millman
+- John Hagen
+- Mark Harfouche
+- Riadh Fezzani
+- Stefan van der Walt
+
+7 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Gregory Lee
+- Jarrod Millman
+- Juan Nunez-Iglesias
+- Lars Grüter
+- Mark Harfouche
+- Riadh Fezzani
+
+
 scikit-image 0.19.2
 ===================
 
@@ -143,6 +211,10 @@ keep Cython support as well going forward, so developers are free to use either
 one as appropriate. For those curious about Pythran, a good overview was given
 in the SciPy 2021 presentation, "Building SciPy Kernels with Pythran" (https://www.youtube.com/watch?v=6a9D9WL6ZjQ).
 
+This release now supports Python 3.7-3.10. Apple M1 architecture (arm64)
+support is new to this release. MacOS 12 wheels are provided for
+Python 3.8-3.10.
+
 
 New Features
 ------------
@@ -211,7 +283,7 @@ Documentation
 - Single out docs-only PRs in review process.
 - Use matplotlib's infinite axline to demonstrate hough transform.
 - Clarify disk documentation inconsistency regarding 'shape'.
-- docs: fix simple typo, convertions -> conversions.
+- docs: fix simple typo, conversions -> conversions.
 - Fixes to linspace in example.
 - Minor fixes to Hough line transform code and examples.
 - Added 1/2 pixel bounds to extent of displayed images in several examples.
@@ -309,6 +381,7 @@ Improvements
 - replace use of scipy.ndimage.gaussian_filter with skimage.filters.gaussian
   (gh-5872)
 - add channel_axis argument to quickshift (gh-5987)
+- add MacOS arm64 wheels (gh-6068)
 
 
 API Changes
@@ -489,7 +562,7 @@ Newly introduced deprecations:
   ``skimage.segmentation.clear_border``
 - The ``input`` argument of ``skimage.measure.label`` has been renamed
   ``label_image``. The old name is deprecated.
-- standardize on ``num_iter`` for paramters describing the number of iterations
+- standardize on ``num_iter`` for parameters describing the number of iterations
   and ``max_num_iter`` for parameters specifying an iteration limit. Functions
   where the old argument names have now been deprecated are::
 

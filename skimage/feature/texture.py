@@ -1,15 +1,14 @@
 """
 Methods to characterize image textures.
 """
+import warnings
 
 import numpy as np
 
 from .._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
-from ._texture import (_glcm_loop,
-                       _local_binary_pattern,
-                       _multiblock_lbp)
+from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
 def graycomatrix(image, distances, angles, levels=None, symmetric=False,
@@ -18,6 +17,9 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     A gray level co-occurrence matrix is a histogram of co-occurring
     grayscale values at a given offset over an image.
+
+    .. versionchanged:: 0.19
+               `greymatrix` was renamed to `graymatrix` in 0.19.
 
     Parameters
     ----------
@@ -175,6 +177,9 @@ def graycoprops(P, prop='contrast'):
     Each GLCM is normalized to have a sum of 1 before the computation of
     texture properties.
 
+    .. versionchanged:: 0.19
+           `greycoprops` was renamed to `graycoprops` in 0.19.
+
     Parameters
     ----------
     P : ndarray
@@ -244,7 +249,7 @@ def graycoprops(P, prop='contrast'):
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
-        raise ValueError('%s is an invalid property' % (prop))
+        raise ValueError(f'{prop} is an invalid property')
 
     # compute property for each GLCM
     if prop == 'energy':
@@ -339,7 +344,13 @@ def local_binary_pattern(image, P, R, method='default'):
         'nri_uniform': ord('N'),
         'var': ord('V')
     }
-    image = np.ascontiguousarray(image, dtype=np.double)
+    if np.issubdtype(image.dtype, np.floating):
+        warnings.warn(
+            "Applying `local_binary_pattern` to floating-point images may "
+            "give unexpected results when small numerical differences between "
+            "adjacent pixels are present. It is recommended to use this "
+            "function with images of integer dtype.")
+    image = np.ascontiguousarray(image, dtype=np.float64)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 

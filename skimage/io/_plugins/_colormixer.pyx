@@ -65,7 +65,7 @@ def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 
 def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
              cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-             Py_ssize_t channel, float amount):
+             Py_ssize_t channel, cnp.float32_t amount):
     """Multiply a color channel of `stateimg` by a certain amount, and
     store the result in `img`.  Overflow is clipped.
 
@@ -84,9 +84,9 @@ def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
     cdef Py_ssize_t k = channel
-    cdef float n = amount
+    cdef cnp.float32_t n = amount
 
-    cdef float op_result
+    cdef cnp.float32_t op_result
 
     cdef cnp.uint8_t lut[256]
 
@@ -110,8 +110,8 @@ def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 
 
 def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
-             cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-             float factor, Py_ssize_t offset):
+               cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
+               cnp.float32_t factor, Py_ssize_t offset):
     """Modify the brightness of an image.
     'factor' is multiplied to all channels, which are
     then added by 'amount'. Overflow is clipped.
@@ -125,14 +125,14 @@ def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     factor : float
         Multiplication factor.
     offset : int
-        Ammount to add to each channel.
+        Amount to add to each channel.
 
     """
 
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 
-    cdef float op_result
+    cdef cnp.float32_t op_result
     cdef cnp.uint8_t lut[256]
 
     cdef Py_ssize_t i, j, k
@@ -157,15 +157,15 @@ def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 
 def sigmoid_gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
                   cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-                  float alpha, float beta):
+                  cnp.float32_t alpha, cnp.float32_t beta):
 
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 
     cdef Py_ssize_t i, j, k
 
-    cdef float c1 = 1 / (1 + exp(beta))
-    cdef float c2 = 1 / (1 + exp(beta - alpha)) - c1
+    cdef cnp.float32_t c1 = 1 / (1 + exp(beta))
+    cdef cnp.float32_t c2 = 1 / (1 + exp(beta - alpha)) - c1
 
     cdef cnp.uint8_t lut[256]
 
@@ -184,7 +184,7 @@ def sigmoid_gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 
 def gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
           cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-          float gamma):
+          cnp.float32_t gamma):
 
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
@@ -210,8 +210,8 @@ def gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
-    cdef float R, G, B, H, S, V, MAX, MIN
+cdef void rgb_2_hsv(cnp.float32_t* RGB, cnp.float32_t* HSV) nogil:
+    cdef cnp.float32_t R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
     G = RGB[1]
     B = RGB[2]
@@ -273,9 +273,9 @@ cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     HSV[2] = V
 
 
-cdef void hsv_2_rgb(float* HSV, float* RGB) nogil:
-    cdef float H, S, V
-    cdef float f, p, q, t, r, g, b
+cdef void hsv_2_rgb(cnp.float32_t* HSV, cnp.float32_t* RGB) nogil:
+    cdef cnp.float32_t H, S, V
+    cdef cnp.float32_t f, p, q, t, r, g, b
     cdef Py_ssize_t hi
 
     H = HSV[0]
@@ -362,8 +362,8 @@ def py_hsv_2_rgb(H, S, V):
     https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
-    cdef float HSV[3]
-    cdef float RGB[3]
+    cdef cnp.float32_t HSV[3]
+    cdef cnp.float32_t RGB[3]
 
     HSV[0] = H
     HSV[1] = S
@@ -401,8 +401,8 @@ def py_rgb_2_hsv(R, G, B):
     https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
-    cdef float HSV[3]
-    cdef float RGB[3]
+    cdef cnp.float32_t HSV[3]
+    cdef cnp.float32_t RGB[3]
 
     RGB[0] = R
     RGB[1] = G
@@ -419,7 +419,7 @@ def py_rgb_2_hsv(R, G, B):
 
 def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
             cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-            float h_amt, float s_amt, float v_amt):
+            cnp.float32_t h_amt, cnp.float32_t s_amt, cnp.float32_t v_amt):
     """Modify the image color by specifying additive HSV Values.
 
     Since the underlying images are RGB, all three values HSV
@@ -440,11 +440,11 @@ def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     stateimg : (M, N, 3) ndarray of uint8
         Input image.
     h_amt : float
-        Ammount to add to H channel.
+        Amount to add to H channel.
     s_amt : float
-        Ammount to add to S channel.
+        Amount to add to S channel.
     v_amt : float
-        Ammount to add to V channel.
+        Amount to add to V channel.
 
 
     """
@@ -452,8 +452,8 @@ def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 
-    cdef float HSV[3]
-    cdef float RGB[3]
+    cdef cnp.float32_t HSV[3]
+    cdef cnp.float32_t RGB[3]
 
     cdef Py_ssize_t i, j
 
@@ -484,7 +484,8 @@ def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
 
 def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
                  cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
-                 float h_amt, float s_amt, float v_amt):
+                 cnp.float32_t h_amt, cnp.float32_t s_amt,
+                 cnp.float32_t v_amt):
     """Modify the image color by specifying multiplicative HSV Values.
 
     Since the underlying images are RGB, all three values HSV
@@ -509,11 +510,11 @@ def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     stateimg : (M, N, 3) ndarray of uint8
         Input image.
     h_amt : float
-        Ammount to add to H channel.
+        Amount to add to H channel.
     s_amt : float
-        Ammount by which to multiply S channel.
+        Amount by which to multiply S channel.
     v_amt : float
-        Ammount by which to multiply V channel.
+        Amount by which to multiply V channel.
 
 
     """
@@ -521,8 +522,8 @@ def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
 
-    cdef float HSV[3]
-    cdef float RGB[3]
+    cdef cnp.float32_t HSV[3]
+    cdef cnp.float32_t RGB[3]
 
     cdef Py_ssize_t i, j
 

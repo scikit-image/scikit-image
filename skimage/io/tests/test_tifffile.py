@@ -4,7 +4,6 @@ from tempfile import NamedTemporaryFile
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
-
 from skimage._shared.testing import fetch
 from skimage.io import imread, imsave, reset_plugins, use_plugin
 
@@ -38,9 +37,7 @@ def test_imread_multipage_rgb_tif():
 
 
 def test_tifffile_kwarg_passthrough ():
-    img = imread(fetch('data/multipage.tif'), key=[1],
-                 multifile=False, multifile_close=True, fastij=True,
-                 is_ome=True)
+    img = imread(fetch('data/multipage.tif'), key=[1], is_ome=True)
     assert img.shape == (15, 10), img.shape
 
 
@@ -53,13 +50,14 @@ def test_imread_handle():
 
 
 class TestSave:
-    def roundtrip(self, dtype, x, use_pathlib=False):
-        f = NamedTemporaryFile(suffix='.tif')
-        fname = f.name
-        f.close()
+
+    def roundtrip(self, dtype, x, use_pathlib=False, **kwargs):
+        with NamedTemporaryFile(suffix='.tif') as f:
+            fname = f.name
+
         if use_pathlib:
             fname = pathlib.Path(fname)
-        imsave(fname, x, check_contrast=False)
+        imsave(fname, x, check_contrast=False, **kwargs)
         y = imread(fname)
         assert_array_equal(x, y)
 
@@ -69,11 +67,17 @@ class TestSave:
     @pytest.mark.parametrize("shape", shapes)
     @pytest.mark.parametrize("dtype", dtypes)
     @pytest.mark.parametrize("use_pathlib", [False, True])
-    def test_imsave_roundtrip(self, shape, dtype, use_pathlib):
+    @pytest.mark.parametrize('explicit_photometric_kwarg', [False, True])
+    def test_imsave_roundtrip(self, shape, dtype, use_pathlib,
+                              explicit_photometric_kwarg):
         x = np.random.rand(*shape)
 
         if not np.issubdtype(dtype, np.floating):
             x = (x * np.iinfo(dtype).max).astype(dtype)
         else:
             x = x.astype(dtype)
-        self.roundtrip(dtype, x, use_pathlib)
+        if explicit_photometric_kwarg and x.shape[-1] in [3, 4]:
+            kwargs = {'photometric': 'rgb'}
+        else:
+            kwargs = {}
+        self.roundtrip(dtype, x, use_pathlib, **kwargs)

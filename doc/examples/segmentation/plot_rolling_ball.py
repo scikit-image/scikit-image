@@ -173,7 +173,7 @@ plt.show()
 #
 # Note: The radius is equal to the length of a semi-axis of an
 # ellipsis, which is *half* a full axis. Hence, the kernel shape is
-# multipled by two.
+# multiplied by two.
 
 normalized_radius = 70.5 / 255
 image = util.img_as_float(data.coins())

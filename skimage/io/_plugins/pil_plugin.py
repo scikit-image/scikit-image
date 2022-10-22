@@ -61,13 +61,12 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
     try:
         # this will raise an IOError if the file is not readable
         image.getdata()[0]
-    except IOError as e:
+    except OSError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
-        error_message = ('Could not load "%s" \n'
-                         'Reason: "%s"\n'
-                         'Please see documentation at: %s'
-                         % (image.filename, pillow_error_message, site))
+        error_message = (f"Could not load '{image.filename}' \n"
+                         f"Reason: '{pillow_error_message}'\n"
+                         f"Please see documentation at: {site}")
         raise ValueError(error_message)
     frames = []
     grayscale = None
@@ -134,7 +133,7 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
     elif frames:
         return frames[0]
     elif img_num:
-        raise IndexError('Could not find image  #%s' % img_num)
+        raise IndexError(f'Could not find image  #{img_num}')
 
 
 def _palette_is_grayscale(pil_image):
@@ -153,7 +152,8 @@ def _palette_is_grayscale(pil_image):
     if pil_image.mode != 'P':
         raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
-    palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
+    # Starting in pillow 9.1 palettes may have less than 256 entries
+    palette = np.asarray(pil_image.getpalette()).reshape((-1, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
     valid_palette = palette[start:stop + 1]
@@ -261,7 +261,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
         arr = arr.astype(np.uint8)
 
     if arr.ndim not in (2, 3):
-        raise ValueError("Invalid shape for image array: %s" % (arr.shape, ))
+        raise ValueError(f"Invalid shape for image array: {arr.shape}")
 
     if arr.ndim == 3:
         if arr.shape[2] not in (3, 4):

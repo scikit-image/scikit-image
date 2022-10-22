@@ -16,16 +16,16 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
-       Input degraded image
+    image : ndarray
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        Point Spread Function. This is assumed to be the impulse
        response (input image space) if the data-type is real, or the
        transfer function (Fourier space) if the data-type is
        complex. There is no constraints on the shape of the impulse
-       response. The transfer function must be of shape `(M, N)` if
-       `is_real is True`, `(M, N // 2 + 1)` otherwise (see
-       `np.fft.rfftn`).
+       response. The transfer function must be of shape
+       `(N1, N2, ..., ND)` if `is_real is True`,
+       `(N1, N2, ..., ND // 2 + 1)` otherwise (see `np.fft.rfftn`).
     balance : float
        The regularisation parameter value that tunes the balance
        between the data adequacy that improve frequency restoration
@@ -60,7 +60,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     >>> img = convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
     >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
-    >>> deconvolved_img = restoration.wiener(img, psf, 1100)
+    >>> deconvolved_img = restoration.wiener(img, psf, 0.1)
 
     Notes
     -----
@@ -86,7 +86,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     those coming from noise), and the regularization.
 
     These methods are then specific to a prior model. Consequently,
-    the application or the true image nature must corresponds to the
+    the application or the true image nature must correspond to the
     prior model. By default, the prior model (Laplacian) introduce
     image smoothness or pixel correlation. It can also be interpreted
     as high-frequency penalization to compensate the instability of
@@ -94,7 +94,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     amplification or "explosive" solution).
 
     Finally, the use of Fourier space implies a circulant property of
-    :math:`H`, see [Hunt].
+    :math:`H`, see [2]_.
 
     References
     ----------
@@ -105,7 +105,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
@@ -128,10 +128,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
                                            balance * np.abs(reg) ** 2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
                              shape=image.shape)
     else:
-        deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+        deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
     if clip:
         deconv[deconv > 1] = 1
@@ -229,7 +229,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     posterior law. The practical idea is to only draw highly probable
     images since they have the biggest contribution to the mean. At the
     opposite, the less probable images are drawn less often since
-    their contribution is low. Finally the empirical mean of these
+    their contribution is low. Finally, the empirical mean of these
     samples give us an estimation of the mean, and an exact
     computation with an infinite sample set.
 
@@ -242,7 +242,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
-           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+           https://hal.archives-ouvertes.fr/hal-00674508
     """
 
     if user_params is not None:
@@ -375,7 +375,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     Parameters
     ----------
     image : ndarray
-       Input degraded image (can be N dimensional).
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        The point spread function.
     num_iter : int, optional

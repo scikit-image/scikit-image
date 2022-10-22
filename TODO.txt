@@ -1,24 +1,10 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
 
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.20
-------------
-
-* In ``skimage/feature/peak.py``, remove the `indices` argument and
-  the decorator `remove_arg`.
-* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
-  decorator from `find_contours`.
-* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
-  `structure_tensor`.
-* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
-  function.
 
 Version 1.0
 -----------
@@ -32,11 +18,15 @@ Version 1.0
   function in `skimage/measure/_label.py`
 * Change the warning about poorly conditioned data to a ValueError within
   `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+* In ``skimage/filters/lpi_filter.py``, remove the deprecated function
+  inverse().
 
 Other (2022)
 ------------
 * Remove pillow version related warning for CVE when pillow > 8.1.2 in
   `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
+* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
+  to (sparse) matricies (instead of arrays).
 
 Other (2023)
 ------------

@@ -5,7 +5,7 @@ from numpy.testing import assert_, assert_equal
 
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera
-from skimage.filters.lpi_filter import LPIFilter2D, inverse, wiener
+from skimage.filters.lpi_filter import LPIFilter2D, filter_inverse, wiener
 
 have_scipy_fft = np.lib.NumpyVersion(scipy.__version__) >= '1.4.0'
 
@@ -30,31 +30,31 @@ class TestLPIFilter2D:
     @pytest.mark.parametrize(
         'dtype', [np.uint8, np.float16, np.float32, np.float64]
     )
-    def test_inverse(self, dtype):
+    def test_filter_inverse(self, dtype):
         img = self.img.astype(dtype, copy=False)
 
         if have_scipy_fft:
             # scipy.fft will preserve single precision
             expected_dtype = _supported_float_type(dtype)
         else:
-            # numpy FFTs will convert to double precison
+            # numpy FFTs will convert to double precision
             expected_dtype = np.float64
 
         F = self.f(img)
         assert F.dtype == expected_dtype
 
-        g = inverse(F, predefined_filter=self.f)
+        g = filter_inverse(F, predefined_filter=self.f)
         assert g.dtype == expected_dtype
         assert_equal(g.shape, self.img.shape)
 
-        g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
+        g1 = filter_inverse(F[::-1, ::-1], predefined_filter=self.f)
         assert_((g - g1[::-1, ::-1]).sum() < 55)
 
         # test cache
-        g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
+        g1 = filter_inverse(F[::-1, ::-1], predefined_filter=self.f)
         assert_((g - g1[::-1, ::-1]).sum() < 55)
 
-        g1 = inverse(F[::-1, ::-1], self.filt_func)
+        g1 = filter_inverse(F[::-1, ::-1], self.filt_func)
         assert_((g - g1[::-1, ::-1]).sum() < 55)
 
     @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ class TestLPIFilter2D:
             # scipy.fft will preserve single precision
             expected_dtype = _supported_float_type(dtype)
         else:
-            # numpy FFTs will convert to double precison
+            # numpy FFTs will convert to double precision
             expected_dtype = np.float64
 
         F = self.f(img)

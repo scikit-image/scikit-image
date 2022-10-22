@@ -29,7 +29,7 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
 def _filter_image(image, min_scale, max_scale, mode):
 
     response = np.zeros((image.shape[0], image.shape[1],
-                         max_scale - min_scale + 1), dtype=np.double)
+                         max_scale - min_scale + 1), dtype=np.float64)
 
     if mode == 'dob':
 

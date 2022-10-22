@@ -45,7 +45,7 @@ def all_warnings():
     # Since this is a testing only function, we lazy import inspect.
     import inspect
     # Whenever a warning is triggered, Python adds a __warningregistry__
-    # member to the *calling* module.  The exercize here is to find
+    # member to the *calling* module.  The exercise here is to find
     # and eradicate all those breadcrumbs that were left lying around.
     #
     # We proceed by first searching all parent calling frames and explicitly
@@ -140,7 +140,7 @@ def expected_warnings(matching):
                     if match in remaining:
                         remaining.remove(match)
             if strict_warnings and not found:
-                raise ValueError('Unexpected warning: %s' % str(warn.message))
+                raise ValueError(f'Unexpected warning: {str(warn.message)}')
         if strict_warnings and (len(remaining) > 0):
-            msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
+            msg = f"No warning raised matching:\n{{'\n'.join(remaining)}}"
             raise ValueError(msg)

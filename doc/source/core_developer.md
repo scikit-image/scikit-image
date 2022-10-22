@@ -1,35 +1,33 @@
 (core_dev)=
 
-Core Developer Guide
-====================
+# Core Developer Guide
 
-Welcome, new core developer!  The core team appreciate the quality of
+Welcome, new core developer! The core team appreciate the quality of
 your work, and enjoy working with you; we have therefore invited you
-to join us.  Thank you for your numerous contributions to the project
+to join us. Thank you for your numerous contributions to the project
 so far.
 
-This document offers guidelines for your new role.  First and
+This document offers guidelines for your new role. First and
 foremost, you should familiarize yourself with the project's
-{doc}`mission, vision, and values <values>`.  When in
+{doc}`mission, vision, and values <values>`. When in
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
 other contributors through the review process; here are some
 guidelines.
 
-All Contributors Are Treated The Same
--------------------------------------
+## All Contributors Are Treated The Same
 
 You now have the ability to push changes directly to the main
 branch, but should never do so; instead, continue making pull requests
-as before and in accordance with the 
+as before and in accordance with the
 {doc}`general contributor guide <contribute>`.
 
 As a core contributor, you gain the ability to merge or approve
-other contributors' pull requests.  Much like nuclear launch keys, it
-is a shared power: you must merge *only after* another core has
-approved the pull request, *and* after you yourself have carefully
-reviewed it.  (See {ref}`sec:reviewing` and especially
+other contributors' pull requests. Much like nuclear launch keys, it
+is a shared power: you must merge _only after_ another core has
+approved the pull request, _and_ after you yourself have carefully
+reviewed it. (See {ref}`sec:reviewing` and especially
 {ref}`sec:understand` below.) To ensure a clean git history,
 use GitHub's [Squash and Merge][gh_sqmrg]
 feature to merge, unless you have a good reason not to do so.
@@ -37,18 +35,18 @@ feature to merge, unless you have a good reason not to do so.
 [gh_sqmrg]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/merging-a-pull-request#merging-a-pull-request-on-github
 
 (sec:reviewing)=
-Reviewing
----------
+
+## Reviewing
 
 ### How to Conduct A Good Review
 
-*Always* be kind to contributors. Nearly all of `scikit-image` is
+_Always_ be kind to contributors. Nearly all of `scikit-image` is
 volunteer work, for which we are tremendously grateful. Provide
 constructive criticism on ideas and implementations, and remind
 yourself of how it felt when your own work was being evaluated as a
 novice.
 
-`scikit-image` strongly values mentorship in code review.  New users
+`scikit-image` strongly values mentorship in code review. New users
 often need more handholding, having little to no git
 experience. Repeat yourself liberally, and, if you don’t recognize a
 contributor, point them to our development guide, or other GitHub
@@ -64,26 +62,41 @@ When reviewing, focus on the following:
    `scikit-image`. APIs are difficult to change once released, so
    should be simple, [functional][wiki_functional] (i.e. not
    carry state), consistent with other parts of the library, and
-   should avoid modifying input variables.  Please familiarize
+   should avoid modifying input variables. Please familiarize
    yourself with the project's [deprecation policy][dep_pol]
 
 2. **Documentation:** Any new feature should have a gallery
    example, that not only illustrates but explains it.
 
 3. **The algorithm:** You should understand the code being modified or
-   added before approving it.  (See {ref}`sec:understand`
+   added before approving it. (See {ref}`sec:understand`
    below.) Implementations should do what they claim,
    and be simple, readable, and efficient.
 
-4. **Tests:** All contributions to the library *must* be tested, and
+4. **Tests:** All contributions to the library _must_ be tested, and
    each added line of code should be covered by at least one test. Good
-   tests not only execute the code, but explores corner cases.  It is tempting
+   tests not only execute the code, but explores corner cases. It is tempting
    not to review tests, but please do so.
+
+5. **Licensing:** New contributions should be available under the same license
+   as or be compatible with {doc}`scikit-image's license <license>`.
+   Examples of BSD-compatible licenses are the [MIT License][mit_license] and
+   [Apache License 2.0][apache_2-2]. When in doubt, ask the team for help.
+   If you, the contributor, are not the copyright holder of the submitted
+   code, please ask the original authors for approval and include their names
+   in `LICENSE.txt`. You can use the other entries in that file as templates.
+
+6. **Established methods:** In general, we are looking to include algorithms
+   and methods which are established, well documented in the literature and
+   widely used by the imaging community. While this is not a hard requirement,
+   new contributions should be consistent with {doc}`our mission <values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
 [dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
+[mit_license]: https://spdx.org/licenses/MIT.html
+[apache_2-2]: https://spdx.org/licenses/Apache-2.0.html
 
-Other changes may be *nitpicky*: spelling mistakes, formatting,
+Other changes may be _nitpicky_: spelling mistakes, formatting,
 etc. Do not ask contributors to make these changes, and instead
 make the changes by [pushing to their branch][gh_push]
 or using GitHub’s [suggestion][gh_suggest] [feature][gh_feedback].
@@ -95,12 +108,12 @@ whether to accept the changes.)
 [gh_feedback]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request
 
 Our default merge policy is to squash all PR commits into a single
-commit. Users who wish to bring the latest changes from ``main``
-into their branch should be advised to merge, not to rebase.  Even
+commit. Users who wish to bring the latest changes from `main`
+into their branch should be advised to merge, not to rebase. Even
 when merge conflicts arise, don’t ask for a rebase unless you know
 that a contributor is experienced with git. Instead, rebase the branch
 yourself, force-push to their branch, and advise the contributor on
-how to force-pull.  If the contributor is no longer active, you may
+how to force-pull. If the contributor is no longer active, you may
 take over their branch by submitting a new pull request and closing
 the original. In doing so, ensure you communicate that you are not
 throwing the contributor's work away!
@@ -109,20 +122,21 @@ Please add a note to a pull request after you push new changes; GitHub
 does not send out notifications for these.
 
 (sec:understand)=
+
 ### Merge Only Changes You Understand
 
-*Long-term maintainability* is an important concern.  Code doesn't
-merely have to *work*, but should be *understood* by multiple core
-developers.  Changes will have to be made in the future, and the
+_Long-term maintainability_ is an important concern. Code doesn't
+merely have to _work_, but should be _understood_ by multiple core
+developers. Changes will have to be made in the future, and the
 original contributor may have moved on.
 
-Therefore, *do not merge a code change unless you understand it*. Ask
+Therefore, _do not merge a code change unless you understand it_. Ask
 for help freely: we have a long history of consulting community
 members, or even external developers, for added insight where needed,
 and see this as a great learning opportunity.
 
 While we collectively "own" any patches (and bugs!) that become part
-of the code base, you are vouching for changes you merge.  Please take
+of the code base, you are vouching for changes you merge. Please take
 that responsibility seriously.
 
 In practice, if you are the second core developer reviewing and approving a
@@ -142,8 +156,7 @@ description from the PR itself, and delete lines such as "pep8 fix",
 "apply review comments", etc. Please retain all Co-authored-by
 entries.
 
-Closing issues and pull requests
---------------------------------
+## Closing issues and pull requests
 
 Sometimes, an issue must be closed that was not fully resolved. This can be
 for a number of reasons:
@@ -185,23 +198,22 @@ closing, your message should:
 These points help ensure that all contributors feel welcome and empowered to
 keep contributing, regardless of the outcome of past contributions.
 
-Further resources
------------------
+## Further resources
 
 As a core member, you should be familiar with community and developer
 resources such as:
 
--  Our {doc}`contributor guide <contribute>`
--  Our [community guidelines](https://scikit-image.org/community_guidelines.html)
--  [PEP8](https://www.python.org/dev/peps/pep-0008/) for Python style
--  [PEP257](https://www.python.org/dev/peps/pep-0257/) and the
-   [NumPy documentation guide][numpydoc]
-   for docstrings. (NumPy docstrings are a superset of PEP257. You
-   should read both.)
--  The scikit-image [tag on StackOverflow][so_tag]
--  The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
--  Our [developer forum][ml]
--  Our [chat room](https://skimage.zulipchat.com/)
+- Our {doc}`contributor guide <contribute>`
+- Our [community guidelines](https://scikit-image.org/community_guidelines.html)
+- [PEP8](https://www.python.org/dev/peps/pep-0008/) for Python style
+- [PEP257](https://www.python.org/dev/peps/pep-0257/) and the
+  [NumPy documentation guide][numpydoc]
+  for docstrings. (NumPy docstrings are a superset of PEP257. You
+  should read both.)
+- The scikit-image [tag on StackOverflow][so_tag]
+- The scikit-image [tag on forum.image.sc](https://forum.image.sc/tags/scikit-image)
+- Our [developer forum][ml]
+- Our [chat room](https://skimage.zulipchat.com/)
 
 [numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
@@ -209,30 +221,27 @@ resources such as:
 
 You are not required to monitor all of the social resources.
 
-Inviting New Core Members
--------------------------
+## Inviting New Core Members
 
 Any core member may nominate other contributors to join the core team.
 Nominations happen on a private email list,
-<skimage-core@python.org>. As of this writing, there is no hard-and-fast
+<skimage-core@discuss.scientific-python.org>. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have: been
 part of the project for at least six months, contributed
 significant changes of their own, contributed to the discussion and
 review of others' work, and collaborated in a way befitting our
 community values.
 
-Contribute To This Guide!
--------------------------
+## Contribute To This Guide!
 
-This guide reflects the experience of the current core developers.  We
+This guide reflects the experience of the current core developers. We
 may well have missed things that, by now, have become second
 nature—things that you, as a new team member, will spot more easily.
 Please ask the other core developers if you have any questions, and
 submit a pull request with insights gained.
 
-Conclusion
-----------
+## Conclusion
 
-We are excited to have you on board!  We look forward to your
-contributions to the code base and the community.  Thank you in
+We are excited to have you on board! We look forward to your
+contributions to the code base and the community. Thank you in
 advance!

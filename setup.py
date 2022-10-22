@@ -37,14 +37,14 @@ with open('README.md', encoding='utf-8') as f:
 
 if sys.version_info < (3, 8):
 
-    error = """Python {py} detected.
+    error = f"""Python {'.'.join([str(v) for v in sys.version_info[:3]])} detected.
 
 scikit-image supports only Python 3.8 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support release using:
 
  $ pip install 'scikit-image<0.15'
-""".format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+"""
 
     sys.stderr.write(error + "\n")
     sys.exit(1)
@@ -84,7 +84,7 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
 
         try:
             os.chdir(tmpdir)
-            with open(fname, 'wt') as fobj:
+            with open(fname, 'w') as fobj:
                 fobj.write(code)
             try:
                 objects = cc.compile([fname],
@@ -124,7 +124,7 @@ class ConditionalOpenMP(pythran_build_ext[npy_build_ext]):
                 ext.extra_compile_args += compile_flags
                 ext.extra_link_args += link_flags
 
-        super(ConditionalOpenMP, self).build_extensions()
+        super().build_extensions()
 
 
 with open('skimage/__init__.py', encoding='utf-8') as fid:
@@ -142,7 +142,7 @@ def parse_requirements_file(filename):
 
 
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
-# The `requirements/extras.txt` file is explicitely omitted because
+# The `requirements/extras.txt` file is explicitly omitted because
 # it contains requirements that do not have wheels uploaded to pip
 # for the platforms we wish to support.
 extras_require = {
@@ -245,10 +245,11 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         extras_require=extras_require,
         python_requires='>=3.8',
-        packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
+        packages=setuptools.find_packages(
+            exclude=['doc', 'doc.*', 'benchmarks']),
         package_data={
             # distribute Cython source files in the wheel
-            "": ["*.pyx", "*.pxd", "*.pxi", ""],
+            "": ["*.pyx", "*.pxd", "*.pxi", "*.pyi", ""],
             # tests dirs have an __init__.py so are automatically included
         },
         include_package_data=False,

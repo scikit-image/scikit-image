@@ -209,8 +209,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
 
 
     # distort `a` based on average chroma
-    # then convert to lch coordines from distorted `a`
-    # all subsequence calculations are in the new coordiantes
+    # then convert to lch coordinates from distorted `a`
+    # all subsequence calculations are in the new coordinates
     # (often denoted "prime" in the literature)
     Cbar = 0.5 * (np.hypot(a1, b1) + np.hypot(a2, b2))
     c7 = Cbar ** 7
@@ -218,7 +218,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
     scale = 1 + G
     C1, h1 = _cart2polar_2pi(a1 * scale, b1)
     C2, h2 = _cart2polar_2pi(a2 * scale, b2)
-    # recall that c, h are polar coordiantes.  c==r, h==theta
+    # recall that c, h are polar coordinates.  c==r, h==theta
 
     # cide2000 has four terms to delta_e:
     # 1) Luminance term
@@ -233,7 +233,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
     L_term = (L2 - L1) / (kL * SL)
 
     # chroma term
-    Cbar = 0.5 * (C1 + C2)  # new coordiantes
+    Cbar = 0.5 * (C1 + C2)  # new coordinates
     SC = 1 + 0.045 * Cbar
     C_term = (C2 - C1) / (kC * SC)
 
