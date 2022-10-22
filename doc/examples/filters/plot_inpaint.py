@@ -53,7 +53,7 @@ mask[365:368, 60:130] = 1
 rstate = np.random.default_rng(0)
 for radius in [0, 2, 4]:
     # larger defects are less common
-    thresh = 3 + 0.25 * radius  # make larger defects less commmon
+    thresh = 3 + 0.25 * radius  # make larger defects less common
     tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
     if radius > 0:
         tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))

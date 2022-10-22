@@ -13,6 +13,7 @@ from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
+                                          _require_intensity_image,
                                           euler_number, perimeter,
                                           perimeter_crofton, regionprops,
                                           regionprops_table)
@@ -1120,6 +1121,18 @@ def test_extra_properties_intensity():
                          extra_properties=(intensity_median,)
                          )[0]
     assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+
+
+@pytest.mark.parametrize('intensity_prop', _require_intensity_image)
+def test_intensity_image_required(intensity_prop):
+    region = regionprops(SAMPLE)[0]
+    with pytest.raises(AttributeError) as e:
+        getattr(region, intensity_prop)
+    expected_error = (
+        f"Attribute '{intensity_prop}' unavailable when `intensity_image` has "
+        f"not been specified."
+    )
+    assert expected_error == str(e.value)
 
 
 def test_extra_properties_no_intensity_provided():

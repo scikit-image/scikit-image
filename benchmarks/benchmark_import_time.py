@@ -9,6 +9,7 @@ class ImportSuite:
         'skimage.feature',
         'skimage.morphology',
         'skimage.color',
+        'skimage.io',
     ]
     param_names = ["package_name"]
     def setup(self, package_name):
@@ -16,5 +17,4 @@ class ImportSuite:
 
     def time_import(self, package_name):
         results = run(executable + ' -c "import ' + package_name + '"',
-            stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True)
-
+            capture_output=True, stdin=PIPE, shell=True)

@@ -236,7 +236,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
     return extension
 
 
-# _max_tree_local_maxima cacluates the local maxima from the max-tree
+# _max_tree_local_maxima calculates the local maxima from the max-tree
 # representation this is interesting if the max-tree representation has
 # already been calculated for other reasons. Otherwise, it is not the most
 # efficient method. If the parameter label is True, the minima are labeled.

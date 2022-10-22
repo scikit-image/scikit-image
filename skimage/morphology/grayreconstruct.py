@@ -1,14 +1,3 @@
-"""
-This morphological reconstruction routine was adapted from CellProfiler, code
-licensed under both GPL and BSD licenses.
-
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-
-"""
 import numpy as np
 
 from .._shared.utils import _supported_float_type, deprecate_kwarg
@@ -166,7 +155,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         pad_value = np.max(seed)
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
-                         "or 'dilation'. Got '%s'." % method)
+                         f"or 'dilation'. Got '{method}'.")
     float_dtype = _supported_float_type(mask.dtype)
     images = np.full(dims, pad_value, dtype=float_dtype)
     images[(0, *inside_slices)] = seed

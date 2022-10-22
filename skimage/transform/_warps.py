@@ -118,6 +118,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         to downsampling. It is crucial to filter when downsampling
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when downsampling an image whose data type is not bool.
+        It is also set to False when using nearest neighbor interpolation
+        (``order`` == 0) with integer input data type.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
@@ -150,8 +152,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = (not input_type == bool and
-                         any(x < y for x, y in zip(output_shape, input_shape)))
+        anti_aliasing = (
+            not input_type == bool and
+            not (np.issubdtype(input_type, np.integer) and order == 0) and
+            any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")

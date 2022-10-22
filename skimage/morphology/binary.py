@@ -71,8 +71,12 @@ def binary_erosion(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automically generate a
+    ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_erosion
 
     """
     if out is None:
@@ -128,8 +132,12 @@ def binary_dilation(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automically generate a
+    ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_dilation
 
     """
     if out is None:
@@ -183,8 +191,12 @@ def binary_opening(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automically generate a
+    ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_opening
 
     """
     eroded = binary_erosion(image, footprint)
@@ -233,8 +245,12 @@ def binary_closing(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automically generate a
+    ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_closing
 
     """
     dilated = binary_dilation(image, footprint)

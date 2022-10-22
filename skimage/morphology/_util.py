@@ -96,7 +96,7 @@ def _raveled_offsets_and_distances(
         Linear offsets to a samples neighbors in the raveled image, sorted by
         their distance from the center.
     distances : ndarray
-        The pixel distances correspoding to each offset.
+        The pixel distances corresponding to each offset.
 
     Notes
     -----

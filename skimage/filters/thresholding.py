@@ -81,7 +81,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
         try:
             ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
-            ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
+            ax[i].text(0.5, 0.5, f"{type(e).__name__}",
                        ha="center", va="center", transform=ax[i].transAxes)
         i += 1
         if verbose:

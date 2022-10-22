@@ -1,9 +1,5 @@
 {
-    // The version of the config file format.  Do not change, unless
-    // you know what you are doing.
     "version": 1,
-    // For other options, see the documentation
-    // https://asv.readthedocs.io/en/stable/reference.html
 
     "project": "scikit-image",
     "project_url": "https://scikit-image.org/",
@@ -15,12 +11,12 @@
     "install_timeout": 1200,
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
-    "pythons": ["3.8"],
+    "pythons": ["3.10"],
     "matrix": {
          "virtualenv": [],
          "cython": [],
          "pythran": [],
-         "numpy": ["1.17"],
+         "numpy": ["1.23"],
          "scipy": [],
          "pooch": []
     },

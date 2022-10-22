@@ -447,7 +447,7 @@ def test_denoise_nl_means_2d(fast_mode):
         # make sure noise is reduced
         assert img.std() > denoised_f32.std()
 
-        # Sheck single precision result
+        # Check single precision result
         assert np.allclose(denoised_f32, denoised, atol=1e-2)
 
 
