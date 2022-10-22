@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from skimage.measure import (pearson_corr_coeff, manders_coloc_coeff,
-                             manders_overlap_coeff, intersection_coeff)
+from skimage.measure import (intersection_coeff, manders_coloc_coeff,
+                             manders_overlap_coeff, pearson_corr_coeff)
 
 
 def test_invalid_input():

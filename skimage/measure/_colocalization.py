@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import pearsonr
+
 from .._shared.utils import check_shape_equality, is_binary_ndarray
 
 __all__ = ['pearson_corr_coeff',
