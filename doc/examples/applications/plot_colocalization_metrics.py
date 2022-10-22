@@ -73,11 +73,11 @@ ax[1, 1].set_title('Protein A segmentation')
 
 ax[2, 0].imshow(proteinA, cmap=black_magenta)
 ax[2, 0].imshow(nucleus_seg, cmap=plt.cm.gray, alpha=0.2)
-ax[2, 0].set_title('Protein A with nucleus overlaid')
+ax[2, 0].set_title('Protein A\nwith nucleus overlaid')
 
 ax[2, 1].imshow(proteinA_seg, cmap=black_magenta)
 ax[2, 1].imshow(nucleus_seg, cmap=plt.cm.gray, alpha=0.2)
-ax[2, 1].set_title('Protein A segmentation with nucleus overlaid')
+ax[2, 1].set_title('Protein A segmentation\nwith nucleus overlaid')
 
 for a in ax.ravel():
     a.set_axis_off()
@@ -145,21 +145,20 @@ ax[1].set_title('Protein B')
 
 for a in ax.ravel():
     a.set_axis_off()
-plt.show()
 
 # plot pixel intensity scatter
+plt.figure()
 plt.scatter(proteinA, proteinB)
 plt.title('Pixel intensity')
 plt.xlabel('Protein A intensity')
 plt.ylabel('Protein B intensity')
-plt.show()
 
 #####################################################################
 # The intensities look linearly correlated so Pearson's Correlation Coefficient
 # would give us a good measure of how strong the association is.
 
 pcc, pval = measure.pearson_corr_coeff(proteinA, proteinB)
-print(f"PCC: {pcc}, p-val: {pval}")
+print(f"PCC: {pcc:0.3g}, p-val: {pval:0.3g}")
 
 #####################################################################
 # Sometimes the intensities are correlated but not in a linear way. A rank-based
@@ -167,3 +166,4 @@ print(f"PCC: {pcc}, p-val: {pval}")
 # <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html>`_
 # might give a more accurate measure of the non-linear relationship in that
 # case.
+plt.show()
