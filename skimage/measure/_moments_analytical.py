@@ -140,7 +140,7 @@ def moments_raw_to_central(moments_raw):
     # The nested loops below are an n-dimensional extension of the 2D formula
     # given at https://en.wikipedia.org/wiki/Image_moment#Central_moments
 
-    # iterate overall [0, order] (inclusive) on each axis
+    # iterate over all [0, order] (inclusive) on each axis
     for orders in itertools.product(*((range(order + 1),) * ndim)):
         # `orders` here is the index into the `moments_central` output array
         if sum(orders) > order:

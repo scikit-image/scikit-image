@@ -18,11 +18,11 @@ from skimage.measure import (centroid, inertia_tensor, inertia_tensor_eigvals,
 def compare_moments(m1, m2, thresh=1e-8):
     """Compare two moments arrays.
 
-    Compares only values in the upper-left triangle of m1, m2 to account since
+    Compares only values in the upper-left triangle of m1, m2 since
     values below the diagonal exceed the specified order and are not computed
     when the analytical computation is used.
 
-    Also, there the first order central moments will be exactly zero with the
+    Also, there the first-order central moments will be exactly zero with the
     analytical calculation, but will not be zero due to limited floating point
     precision when using a numerical computation. Here we just specify the
     tolerance as a fraction of the maximum absolute value in the moments array.
