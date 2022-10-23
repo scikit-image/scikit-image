@@ -40,6 +40,8 @@ New features and improvements
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Support n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
   (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
+- Support n-dimensional images in ``skimage.restoration.wiener``
+  (`#6454 <https://github.com/scikit-image/scikit-image/pull/6454>`_).
 - Support the construction of ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
   (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
 - Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
@@ -55,11 +57,25 @@ New features and improvements
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
 - Support three dimensions for the properties ``rotation`` and ``translation`` in ``skimage.transform.EuclideanTransform`` as well as for ``skimage.transform.SimilarityTransform.scale``
   (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_).
-- Improve performance of ``skimage.feature.canny`` by porting a part of its implementation to Cython
+- Improve performance (~2x speedup) of ``skimage.feature.canny`` by porting a part of its implementation to Cython
   (`#6387 <https://github.com/scikit-image/scikit-image/pull/6387>`_).
+- Improve performance (~2x speedup) of ``skimage.feature.hessian_matrix_eigvals`` and 2D ``skimage.feature.structure_tensor_eigenvalues``
+  (`#6441 <https://github.com/scikit-image/scikit-image/pull/6441>`_).
+- Add new parameter ``alpha`` to ``skimage.metrics.adapted_rand_error`` allowing control over the weight given to precision and recall
+  (`#6472 <https://github.com/scikit-image/scikit-image/pull/6472>`_).
 
 Changes and new deprecations
 ----------------------------
+- Rewrite ``skimage.filters.meijering``, ``skimage.filters.sato``,
+  ``skimage.filters.frangi``, and ``skimage.filters.hessian`` to match the published algorithms more closely.
+  This change is backward incompatible and will lead to different output values compared to the previous implementation.
+  The Hessian matrix calculation is now done more accurately.
+  The filters will now correctly be set to zero whenever one of the hessian eigenvalues has a sign which is incompatible with a ridge of the desired polarity.
+  The gamma constant of the Frangi filter is now set adaptively based on the maximum Hessian norm
+  (`#6446 <https://github.com/scikit-image/scikit-image/pull/6446>`_).
+- Return ``False`` in ``skimage.measure.LineModelND.estimate`` instead of raising an error if the model is under-determined.
+  Return ``False`` in ``skimage.measure.CircleModel.estimate`` instead of warning if the model is under-determined
+  (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
 - Update minimal supported dependency to ``matplotlib>=3.3``
   (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
 - Update minimal supported dependencies to ``numpy>=1.19``, ``scipy>=1.5``, and ``networkx>=2.5``
@@ -95,6 +111,8 @@ Documentation
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add a new and gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
+- Add a new gallery example "Render text onto an image"
+  (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
 - Improve the the gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt the gallery example "Build image pyramids" to more diversified shaped images and downsample factors
@@ -193,10 +211,29 @@ Other and development related updates
   (`#6417 <https://github.com/scikit-image/scikit-image/pull/6417>`_).
 - Use "center" in favor of "centre", and "color" in favor of "colour" gallery examples
   (`#6421 <https://github.com/scikit-image/scikit-image/pull/6421>`_, `#6422 <https://github.com/scikit-image/scikit-image/pull/6422>`_).
+- Restrict GitHub Actions permissions to required ones
+  (`#6426 <https://github.com/scikit-image/scikit-image/pull/6426>`_).
+- Exclude submodules of ``doc.*`` from package install
+  (`#6428 <https://github.com/scikit-image/scikit-image/pull/6428>`_).
+- Substitute deprecated ``vertices`` with ``simplices`` in ``skimage.transform._geometric``
+  (`#6430 <https://github.com/scikit-image/scikit-image/pull/6430>`_).
+- Fix minor typo in ``skimage.filters.sato``
+  (`#6434 <https://github.com/scikit-image/scikit-image/pull/6434>`_).
+- Simplify sort-by-absolute-value in ridge filters
+  (`#6440 <https://github.com/scikit-image/scikit-image/pull/6440>`_).
+- Removed completed items in ``TODO.txt``
+  (`#6442 <https://github.com/scikit-image/scikit-image/pull/6442>`_).
+- Fix broken links in SKIP 3
+  (`#6445 <https://github.com/scikit-image/scikit-image/pull/6445>`_).
+- Remove duplicate import in ``skimage.feature._canny``
+  (`#6457 <https://github.com/scikit-image/scikit-image/pull/6457>`_).
+- Use ``with open(...) as f`` instead of ``f = open(...)``
+  (`#6458 <https://github.com/scikit-image/scikit-image/pull/6458>`_).
+- Fix broken link in docstring of ``skimage.filters.sobel``
+  (`#6474 <https://github.com/scikit-image/scikit-image/pull/6474>`_).
 
-
-TODO Milestone 1.0?
--------------------
+TODO merged in milestone 0.21?
+------------------------------
 - Fix inpaint_biharmonic for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
 - Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
 
@@ -215,23 +252,6 @@ Backported 0.19.x
 
 TODO
 ----
-- Restrict GitHub Actions permissions only for required ones (`#6426 <https://github.com/scikit-image/scikit-image/pull/6426>`_)
-- Exclude submodules of doc from package install (`#6428 <https://github.com/scikit-image/scikit-image/pull/6428>`_)
-- Substitute vertices with simplices in `transform/_geometric.py` (`#6430 <https://github.com/scikit-image/scikit-image/pull/6430>`_)
-- example to render text onto an image (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_)
-- Fix minor typo in sato() implemntation. (`#6434 <https://github.com/scikit-image/scikit-image/pull/6434>`_)
-- Simplify sort-by-absolute-value in ridge filters. (`#6440 <https://github.com/scikit-image/scikit-image/pull/6440>`_)
-- Speedup ~2x hessian_matrix_eigvals and 2D structure_tensor_eigenvalues. (`#6441 <https://github.com/scikit-image/scikit-image/pull/6441>`_)
-- removed the completed items in 0.2 (`#6442 <https://github.com/scikit-image/scikit-image/pull/6442>`_)
-- doc: replaced broken links (`#6445 <https://github.com/scikit-image/scikit-image/pull/6445>`_)
-- Rewrite the meijering, sato, and frangi ridge filters. (`#6446 <https://github.com/scikit-image/scikit-image/pull/6446>`_)
-- No valueerror for underdetermined (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_)
-- Make Wiener restoration N-d (`#6454 <https://github.com/scikit-image/scikit-image/pull/6454>`_)
-- Remove repeated import in canny_py (`#6457 <https://github.com/scikit-image/scikit-image/pull/6457>`_)
-- Refactor occurences of `f = open(...)` using `with open(...) as f` instead (`#6458 <https://github.com/scikit-image/scikit-image/pull/6458>`_)
-- Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_)
-- Add `alpha` argument to `adapted_rand_error`  (`#6472 <https://github.com/scikit-image/scikit-image/pull/6472>`_)
-- Fix broken link to skimage.filters.sobel. (`#6474 <https://github.com/scikit-image/scikit-image/pull/6474>`_)
 - Use broadcast_to instead of as_strided to generate broadcasted arrays. (`#6476 <https://github.com/scikit-image/scikit-image/pull/6476>`_)
 - Update Ubuntu LTS version on Actions workflows (`#6478 <https://github.com/scikit-image/scikit-image/pull/6478>`_)
 - changed image1 to moving_image in tvl1 parameter docs (`#6480 <https://github.com/scikit-image/scikit-image/pull/6480>`_)

@@ -35,15 +35,6 @@ API Changes
 Backward Incompatible Changes
 -----------------------------
 
-- ``skimage.filters.meijering``, ``skimage.filters.sato``,
-  ``skimage.filters.frangi``, and ``skimage.filters.hessian`` have all been
-  rewritten to match more closely the published algorithms; the output values
-  will be different from previously.  The Hessian matrix calculation is now
-  done more accurately.  The filters will now correctly be set to zero whenever
-  one of the hessian eigenvalues has a sign incompatible with a ridge of the
-  desired polarity.  The gamma constant of the Frangi filter is now set
-  adaptively based on the maximum Hessian norm.
-
 
 Bugfixes
 --------
