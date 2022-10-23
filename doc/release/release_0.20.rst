@@ -63,6 +63,12 @@ New features and improvements
   (`#6441 <https://github.com/scikit-image/scikit-image/pull/6441>`_).
 - Add new parameter ``alpha`` to ``skimage.metrics.adapted_rand_error`` allowing control over the weight given to precision and recall
   (`#6472 <https://github.com/scikit-image/scikit-image/pull/6472>`_).
+- Add new parameter ``binarize`` to ``skimage.measure.grid_points_in_poly`` to optionally return labels that tell whether a pixel is inside, outside or on the border of the polygon
+  (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
+  Add new parameter ``include_borders`` to ``skimage.measure.convex_hull_image`` to optionally exclude vertices or edges from the final hull mask
+  (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
+- Reduce the memory footprint of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
+  (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_).
 
 Changes and new deprecations
 ----------------------------
@@ -102,6 +108,13 @@ Bug fixes
 ---------
 - Fix round-off error in ``skimage.exposure.adjust_gamma``
   (`#6285 <https://github.com/scikit-image/scikit-image/pull/6285>`_).
+- Round and convert output coordinates of ``skimage.draw.rectangle`` to ``int`` even if the input coordinates use ``float``.
+  This fix ensures that the output can be used for indexing similar to other draw functions
+  (`#6501 <https://github.com/scikit-image/scikit-image/pull/6501>`_).
+- Avoid unexpected exclusion of peaks near the image border in ``skimage.feature.peak_local_max`` if the peak value is smaller 0
+  (`#6502 <https://github.com/scikit-image/scikit-image/pull/6502>`_).
+- Avoid anti-aliasing in ``skimage.transform.resize`` by default when using nearest neighbor interpolation (``order == 0``) with an integer input data type
+  (`#6503 <https://github.com/scikit-image/scikit-image/pull/6503>`_).
 
 Documentation
 -------------
@@ -150,6 +163,8 @@ Documentation
   (`#6419 <https://github.com/scikit-image/scikit-image/pull/6419>`_).
 - Document the refactoring of ``grey*`` to ``skimage.feature.graymatrix`` and ``skimage.feature.graycoprops`` in the release 0.19
   (`#6420 <https://github.com/scikit-image/scikit-image/pull/6420>`_).
+- Document inclusion criteria for new functionality in core developer guide
+  (`#6488 <https://github.com/scikit-image/scikit-image/pull/6488>`_).
 
 Other and development related updates
 -------------------------------------
@@ -231,6 +246,26 @@ Other and development related updates
   (`#6458 <https://github.com/scikit-image/scikit-image/pull/6458>`_).
 - Fix broken link in docstring of ``skimage.filters.sobel``
   (`#6474 <https://github.com/scikit-image/scikit-image/pull/6474>`_).
+- Use ``broadcast_to`` instead of ``as_strided`` to generate broadcasted arrays
+  (`#6476 <https://github.com/scikit-image/scikit-image/pull/6476>`_).
+- Update to Ubuntu LTS version on Actions workflows
+  (`#6478 <https://github.com/scikit-image/scikit-image/pull/6478>`_).
+- Use ``moving_image`` in docstring of ``skimage.registration._optical_flow._tvl1``
+  (`#6480 <https://github.com/scikit-image/scikit-image/pull/6480>`_).
+- Use ``matplotlib.colormaps`` instead of deprecated ``cm.get_cmap`` in ``skimage.future.graph.show_rag``
+  (`#6483 <https://github.com/scikit-image/scikit-image/pull/6483>`_).
+- Use ``pyplot.get_cmap`` for compatiblity with matplotlib 3.3 to 3.6 in in ``skimage.future.graph.show_rag``
+  (`#6490 <https://github.com/scikit-image/scikit-image/pull/6490>`_).
+- Use context manager when possible
+  (`#6484 <https://github.com/scikit-image/scikit-image/pull/6484>`_).
+- Replace reference to ``api_changes.rst`` with ``release_dev.rst``
+  (`#6495 <https://github.com/scikit-image/scikit-image/pull/6495>`_).
+- Add Github actions/stale to label "dormant" issues and PRs
+  (`#6506 <https://github.com/scikit-image/scikit-image/pull/6506>`_).
+- Clarify header pointing to notes for latest version released
+  (`#6508 <https://github.com/scikit-image/scikit-image/pull/6508>`_).
+- Update benchmark environment to Python 3.10 and NumPy 1.23
+  (`#6511 <https://github.com/scikit-image/scikit-image/pull/6511>`_).
 
 TODO merged in milestone 0.21?
 ------------------------------
@@ -252,22 +287,6 @@ Backported 0.19.x
 
 TODO
 ----
-- Use broadcast_to instead of as_strided to generate broadcasted arrays. (`#6476 <https://github.com/scikit-image/scikit-image/pull/6476>`_)
-- Update Ubuntu LTS version on Actions workflows (`#6478 <https://github.com/scikit-image/scikit-image/pull/6478>`_)
-- changed image1 to moving_image in tvl1 parameter docs (`#6480 <https://github.com/scikit-image/scikit-image/pull/6480>`_)
-- Use matplotlib.colormaps instead of deprecated cm.get_cmap in show_rag (`#6483 <https://github.com/scikit-image/scikit-image/pull/6483>`_)
-- Use context manager when possible (`#6484 <https://github.com/scikit-image/scikit-image/pull/6484>`_)
-- Document inclusion criteria for new functionality in core developer guide (`#6488 <https://github.com/scikit-image/scikit-image/pull/6488>`_)
-- Use pyplot.get_cmap for compatiblity with matplotlib 3.3 to 3.6 in in show_rag (`#6490 <https://github.com/scikit-image/scikit-image/pull/6490>`_)
-- Replace reference to api_changes.rst with release_dev.rst (`#6495 <https://github.com/scikit-image/scikit-image/pull/6495>`_)
-- Support float input to skimage.draw.rectangle() [`#4283 <https://github.com/scikit-image/scikit-image/pull/4283>`_] (`#6501 <https://github.com/scikit-image/scikit-image/pull/6501>`_)
-- Find peaks at border with `peak_local_max with `exclude_border=0` (`#6502 <https://github.com/scikit-image/scikit-image/pull/6502>`_)
-- Fix resize anti_aliazing default value when input dtype is integer and order == 0 (`#6503 <https://github.com/scikit-image/scikit-image/pull/6503>`_)
-- Add Github actions/stale to label "dormant" issues and PRs (`#6506 <https://github.com/scikit-image/scikit-image/pull/6506>`_)
-- Clarify header pointing to notes for latest version released. (`#6508 <https://github.com/scikit-image/scikit-image/pull/6508>`_)
-- Reduce ridge filters memory footprints (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_)
-- Update benchmark environment to recent Python and NumPy versions (`#6511 <https://github.com/scikit-image/scikit-image/pull/6511>`_)
-- Add new flag to convex_hull_image and grid_points_in_poly (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_)
 - relax label name comparison in benchmarks.yaml (`#6520 <https://github.com/scikit-image/scikit-image/pull/6520>`_)
 - update plot_euler_number.py for maplotlib 3.6 compatibility (`#6522 <https://github.com/scikit-image/scikit-image/pull/6522>`_)
 - Use mask during rescaling in segmentation.slic and improve handling of error cases (`#6525 <https://github.com/scikit-image/scikit-image/pull/6525>`_)
