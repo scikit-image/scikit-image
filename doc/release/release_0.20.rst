@@ -115,6 +115,11 @@ Bug fixes
   (`#6502 <https://github.com/scikit-image/scikit-image/pull/6502>`_).
 - Avoid anti-aliasing in ``skimage.transform.resize`` by default when using nearest neighbor interpolation (``order == 0``) with an integer input data type
   (`#6503 <https://github.com/scikit-image/scikit-image/pull/6503>`_).
+- Use mask during rescaling in ``skimage.segmentation.slic``.
+  Previously, the mask was ignored when rescaling the image to make choice of compactness insensitive to the image values.
+  The new behavior makes it possible to mask values such as `numpy.nan` or `numpy.infinity`.
+  Additionally, raise an error if the input ``image`` has two dimensions and a ``channel_axis`` is specified - indicating that the image is multi-channel
+  (`#6525 <https://github.com/scikit-image/scikit-image/pull/6525>`_).
 
 Documentation
 -------------
@@ -165,6 +170,10 @@ Documentation
   (`#6420 <https://github.com/scikit-image/scikit-image/pull/6420>`_).
 - Document inclusion criteria for new functionality in core developer guide
   (`#6488 <https://github.com/scikit-image/scikit-image/pull/6488>`_).
+- Fix description of ``connectivity`` parameter in the docstring of ``skimage.morphology.flood``
+  (`#6534 <https://github.com/scikit-image/scikit-image/pull/6534>`_).
+- Print the number of segments after applying the Watershed in the gallery example "Comparison of segmentation and superpixel algorithms"
+  (`#6535 <https://github.com/scikit-image/scikit-image/pull/6535>`_).
 
 Other and development related updates
 -------------------------------------
@@ -266,6 +275,28 @@ Other and development related updates
   (`#6508 <https://github.com/scikit-image/scikit-image/pull/6508>`_).
 - Update benchmark environment to Python 3.10 and NumPy 1.23
   (`#6511 <https://github.com/scikit-image/scikit-image/pull/6511>`_).
+- Relax label name comparison in benchmarks.yaml
+  (`#6520 <https://github.com/scikit-image/scikit-image/pull/6520>`_).
+- Update ``plot_euler_number.py`` for maplotlib 3.6 compatibility
+  (`#6522 <https://github.com/scikit-image/scikit-image/pull/6522>`_).
+- Make non-functional change to build.txt to fix cache issue on CircleCI
+  (`#6528 <https://github.com/scikit-image/scikit-image/pull/6528>`_).
+- Update deprecated field ``license_file`` to ``license_files`` in ``setup.cfg``
+  (`#6529 <https://github.com/scikit-image/scikit-image/pull/6529>`_).
+- Ignore codespell fixes with git blame
+  (`#6539 <https://github.com/scikit-image/scikit-image/pull/6539>`_).
+- Update "Mark dormant issues" workflow
+  (`#6546 <https://github.com/scikit-image/scikit-image/pull/6546>`_).
+- Add missing spaces to error mesage in ``skimage.measure.regionprops``
+  (`#6545 <https://github.com/scikit-image/scikit-image/pull/6545>`_).
+- Apply codespell to fix common spelling mistakes
+  (`#6537 <https://github.com/scikit-image/scikit-image/pull/6537>`_).
+- Add missing space in math directive in normalized_mutual_information's docstring
+  (`#6549 <https://github.com/scikit-image/scikit-image/pull/6549>`_).
+- Add missing option stale-pr-label for "Mark dormant issues" workflow
+  (`#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_).
+- Remove FUNDING.yml in preference of org version
+  (`#6553 <https://github.com/scikit-image/scikit-image/pull/6553>`_).
 
 TODO merged in milestone 0.21?
 ------------------------------
@@ -284,23 +315,6 @@ Backported 0.19.x
 - remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
 - In newer PIL, palette may contain <256 entries (`#6405 <https://github.com/scikit-image/scikit-image/pull/6405>`_)
 - Fix computation of histogram bins for multichannel integer-valued images (`#6413 <https://github.com/scikit-image/scikit-image/pull/6413>`_)
-
-TODO
-----
-- relax label name comparison in benchmarks.yaml (`#6520 <https://github.com/scikit-image/scikit-image/pull/6520>`_)
-- update plot_euler_number.py for maplotlib 3.6 compatibility (`#6522 <https://github.com/scikit-image/scikit-image/pull/6522>`_)
-- Use mask during rescaling in segmentation.slic and improve handling of error cases (`#6525 <https://github.com/scikit-image/scikit-image/pull/6525>`_)
-- make non-functional change to build.txt to fix cache issue on CircleCI (`#6528 <https://github.com/scikit-image/scikit-image/pull/6528>`_)
-- update setup.cfg field from license_file to license_files (`#6529 <https://github.com/scikit-image/scikit-image/pull/6529>`_)
-- Fix wrong doc on connected pixels in flood (`#6534 <https://github.com/scikit-image/scikit-image/pull/6534>`_)
-- Minor doc fix: add missing print statement in the `plot_segmentations.py` example (`#6535 <https://github.com/scikit-image/scikit-image/pull/6535>`_)
-- Apply codespell to fix common spelling mistakes (`#6537 <https://github.com/scikit-image/scikit-image/pull/6537>`_)
-- Ignore codespell fixes with git blame (`#6539 <https://github.com/scikit-image/scikit-image/pull/6539>`_)
-- Add missing spaces to regionprops error message. (`#6545 <https://github.com/scikit-image/scikit-image/pull/6545>`_)
-- Update "Mark dormant issues" workflow (`#6546 <https://github.com/scikit-image/scikit-image/pull/6546>`_)
-- Add missing space in math directive in normalized_mutual_information's docstring (`#6549 <https://github.com/scikit-image/scikit-image/pull/6549>`_)
-- Add missing option stale-pr-label for "Mark dormant issues" workflow (`#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_)
-- Remove FUNDING.yml in preference of org version (`#6553 <https://github.com/scikit-image/scikit-image/pull/6553>`_)
 
 Pull Requests in this release
 -----------------------------
