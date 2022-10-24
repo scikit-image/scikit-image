@@ -89,15 +89,19 @@ Changes and new deprecations
 - Return ``False`` in ``skimage.measure.LineModelND.estimate`` instead of raising an error if the model is under-determined.
   Return ``False`` in ``skimage.measure.CircleModel.estimate`` instead of warning if the model is under-determined
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
-- Update minimal supported dependency to ``matplotlib>=3.3``
-  (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
-- Update minimal supported dependencies to ``numpy>=1.19``, ``scipy>=1.5``, and ``networkx>=2.5``
-  (`#6385 <https://github.com/scikit-image/scikit-image/pull/6385>`_).
-- Update minimal supported dependency to ``pillow>=9.0.1``
-  (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
 - Rename ``skimage.filter.inverse`` to ``skimage.filter.inverse_filter``.
   ``skimage.filter.inverse`` is deprecated and will be removed in the next release
   (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_).
+- Update minimal supported dependencies to ``numpy>=1.20``
+  (`#6565 <https://github.com/scikit-image/scikit-image/pull/6565>`_).
+- Update minimal supported dependencies to ``scipy>=1.8``
+  (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_).
+- Update minimal supported dependencies to ``networkx>=2.8``
+  (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_).
+- Update minimal supported dependency to ``pillow>=9.0.1``
+  (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
+- Update optional, minimal supported dependency to ``matplotlib>=3.3``
+  (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
 
 Completed deprecations
 ----------------------
@@ -132,6 +136,12 @@ Bug fixes
   (`#6525 <https://github.com/scikit-image/scikit-image/pull/6525>`_).
 - Fix unexpected error when passing a tuple to the parameter ``exclude_border`` in ``skimage.feature.blog_dog`` and ``skimage.feature.blob_log``
   (`#6533 <https://github.com/scikit-image/scikit-image/pull/6533>`_).
+- Raise a specific error message in ``skimage.segmentation.random_walker`` if no seeds are provided as positive values in the parameter ``labels``
+  (`#6562 <https://github.com/scikit-image/scikit-image/pull/6562>`_).
+- Raise a specific error message when accessing region properties from ``skimage.measure.regionprops`` when the required  ``intensity_image`` is unavailable
+  (`#6584 <https://github.com/scikit-image/scikit-image/pull/6584>`_).
+- Avoid errors in ``skimage.feature.ORB.detect_and_extract`` by breaking early if the octave image is too small
+  (`#6590 <https://github.com/scikit-image/scikit-image/pull/6590>`_).
 
 Documentation
 -------------
@@ -194,6 +204,12 @@ Documentation
   (`#6532 <https://github.com/scikit-image/scikit-image/pull/6532>`_).
 - List only the two primary OS-independent methods of installing scikit-image
   (`#6557 <https://github.com/scikit-image/scikit-image/pull/6557>`_, `#6560 <https://github.com/scikit-image/scikit-image/pull/6560>`_).
+- Remove references to deprecated mailing list in ``doc/source/user_guide/getting_help.rst``
+  (`#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
+- Update support page on GitHub (``.github/SUPPORT.md``)
+  (`#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
+- Correct note about return type in the docstring of ``skimage.exposure.rescale_intensity``
+  (`#6582 <https://github.com/scikit-image/scikit-image/pull/6582>`_).
 
 Other and development related updates
 -------------------------------------
@@ -322,7 +338,27 @@ Other and development related updates
 - Handle pending changes to ``tifffile.imwrite`` defaults and avoid test warnings
   (`#6460 <https://github.com/scikit-image/scikit-image/pull/6460>`_).
 - Replace issue templates with issue forms
-  (`#6554 <https://github.com/scikit-image/scikit-image/pull/6554>`_).
+  (`#6554 <https://github.com/scikit-image/scikit-image/pull/6554>`_, `#6576 <https://github.com/scikit-image/scikit-image/pull/6576>`_).
+- Add linting via pre-commit
+  (`#6563 <https://github.com/scikit-image/scikit-image/pull/6563>`_).
+- Handle deprecation by updating to ``networkx.to_scipy_sparse_array``
+  (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_).
+- Update minimum supported numpy, scipy, and networkx
+  (`#6385 <https://github.com/scikit-image/scikit-image/pull/6385>`_).
+- Add CI tests for Python 3.11
+  (`#6566 <https://github.com/scikit-image/scikit-image/pull/6566>`_).
+- Fix CI for Scipy 1.9.2
+  (`#6567 <https://github.com/scikit-image/scikit-image/pull/6567>`_).
+- Apply linting results after enabling pre-commit in CI
+  (`#6568 <https://github.com/scikit-image/scikit-image/pull/6568>`_).
+- Refactor lazy loading to use stubs & lazy_loader package
+  (`#6577 <https://github.com/scikit-image/scikit-image/pull/6577>`_).
+- Provide pre-commit PR instructions
+  (`#6578 <https://github.com/scikit-image/scikit-image/pull/6578>`_).
+- Update sphinx configuration
+  (`#6579 <https://github.com/scikit-image/scikit-image/pull/6579>`_).
+- Test optional Py 3.10  dependencies on MacOS
+  (`#6580 <https://github.com/scikit-image/scikit-image/pull/6580>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
@@ -375,25 +411,6 @@ Backported 0.19.x
 - Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (`#6242 <https://github.com/scikit-image/scikit-image/pull/6242>`_)
 - Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
 - Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
-
-TODO
-----
-- Do not try to perform random walker segmentation without seed points (`#6562 <https://github.com/scikit-image/scikit-image/pull/6562>`_)
-- Add linting via pre-commit (`#6563 <https://github.com/scikit-image/scikit-image/pull/6563>`_)
-- Handle deprecation warning by updating to_scipy_sparse_array function (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_)
-- Drop Numpy 1.19 (`#6565 <https://github.com/scikit-image/scikit-image/pull/6565>`_)
-- Test on Python 3.11 (`#6566 <https://github.com/scikit-image/scikit-image/pull/6566>`_)
-- Fix CI for Scipy1.9.2 (`#6567 <https://github.com/scikit-image/scikit-image/pull/6567>`_)
-- Linter reformatting patch (`#6568 <https://github.com/scikit-image/scikit-image/pull/6568>`_)
-- Remove reference to deprecated mailing list in getting_help.rst (`#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_)
-- Update order of links in issue selection dialog (`#6576 <https://github.com/scikit-image/scikit-image/pull/6576>`_)
-- Refactor lazy loading to use stubs & lazy_loader package (`#6577 <https://github.com/scikit-image/scikit-image/pull/6577>`_)
-- Provide pre-commit PR instructions (`#6578 <https://github.com/scikit-image/scikit-image/pull/6578>`_)
-- Update sphinx configuration (`#6579 <https://github.com/scikit-image/scikit-image/pull/6579>`_)
-- Test optional Py 3.10  dependencies on MacOS (`#6580 <https://github.com/scikit-image/scikit-image/pull/6580>`_)
-- Fix rescale_intensity docstring (`#6582 <https://github.com/scikit-image/scikit-image/pull/6582>`_)
-- add informative error message for region properties requiring `intensity_image` (`#6584 <https://github.com/scikit-image/scikit-image/pull/6584>`_)
-- ORB: Break early if octave image is too small (`#6590 <https://github.com/scikit-image/scikit-image/pull/6590>`_)
 
 56 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
