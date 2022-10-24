@@ -1489,8 +1489,9 @@ def _sort_rays(rays_formulae, max_crest_y, tolerance=1e-3):
 
     # Sort the rays formulae according to their distance to the maximum crest
     # on the `y` axis.
-    sorted_indices = sorted(map(lambda y_i:
-                                (math.fabs(y_i[1][0][1] - max_crest_y), y_i),
+    sorted_indices = sorted(map(lambda ray_i_y:
+                                (math.fabs(ray_i_y[1][0][1] - max_crest_y),
+                                 ray_i_y[0]),
                                 enumerate(rays_formulae)))
     sorted_rays_formulae = [rays_formulae[i] for _, i in sorted_indices]
 
