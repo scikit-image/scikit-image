@@ -55,6 +55,8 @@ New features and improvements
   (`#6367 <https://github.com/scikit-image/scikit-image/pull/6367>`_).
 - Allow footprints with non-adjacent pixels as neighbors in ``skimage.morphology.flood_fill``
   (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
+- Support array-likes consistently in ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``GeometricTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``, ``ProjectiveTransform``, ``SimilarityTransform``, ``estimate_transform``, and ``matrix_transform`` in ``skimage.transform``
+  (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
 
 Performance
 ~~~~~~~~~~~
@@ -150,6 +152,7 @@ Bug fixes
   (`#6584 <https://github.com/scikit-image/scikit-image/pull/6584>`_).
 - Avoid errors in ``skimage.feature.ORB.detect_and_extract`` by breaking early if the octave image is too small
   (`#6590 <https://github.com/scikit-image/scikit-image/pull/6590>`_).
+- Fix ``skimage.restoration.inpaint_biharmonic`` for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
 
 Documentation
 -------------
@@ -383,11 +386,6 @@ CI & automation
   (`#6580 <https://github.com/scikit-image/scikit-image/pull/6580>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
-
-TODO merged in milestone 0.21?
-------------------------------
-- Fix inpaint_biharmonic for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
-- Support array-likes consistently in geometric transforms (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
 
 Backported 0.19.x (remove before merging!)
 ------------------------------------------
