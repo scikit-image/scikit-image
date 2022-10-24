@@ -1487,11 +1487,12 @@ def _sort_rays(rays_formulae, max_crest_y, tolerance=1e-3):
     if len(rays_formulae) == 1:
         return rays_formulae
 
-    sorted_rays_formulae = [rays_formulae[i]
-                            for i in np.array(
-                                list(map(lambda ray:
-                                         math.fabs(ray[0][1] - max_crest_y),
-                                         rays_formulae))).argsort()]
+    # Sort the rays formulae according to their distance to the maximum crest
+    # on the `y` axis.
+    sorted_indices = sorted(map(lambda y_i:
+                                (math.fabs(y_i[1][0][1] - max_crest_y), y_i),
+                                enumerate(rays_formulae)))
+    sorted_rays_formulae = [rays_formulae[i] for _, i in sorted_indices]
 
     curr_id = len(sorted_rays_formulae) - 1
     while curr_id > 0:
