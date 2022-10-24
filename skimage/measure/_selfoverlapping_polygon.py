@@ -1716,7 +1716,7 @@ def separate_selfoverlapping_polygon(coords):
 
     The separation algorithm implemented in this function is based on the idea
     that a complex curve can be compressed, without twisting it, into a two
-    dimensional disk. Therefore, a set of non trivial chords (cuts) separate
+    dimensional disk. Therefore, a set of non-trivial chords (cuts) separate
     the disk into mutually exclusive segments [1]_. These segments, in the
     original complex curve, are the set of resulting non self-overlapping sub
     polygons.
