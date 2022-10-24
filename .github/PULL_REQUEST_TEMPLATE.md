@@ -1,3 +1,19 @@
+<!--
+Please use `pre-commit` to format code.
+
+```
+pip install pre-commit  # install the package
+pre-commit install  # install git commit hook
+```
+
+Now, formatting checks will be run on each commit.
+You can also run `pre-commit` manually:
+
+```
+pre-commit run -a
+```
+-->
+
 ## Description
 
 <!-- If this is a bug-fix or enhancement, state the issue # it closes -->

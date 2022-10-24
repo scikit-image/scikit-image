@@ -582,3 +582,19 @@ def test_umfpack_import():
     except ImportError:
         assert UmfpackContext is None
     return
+
+
+def test_empty_labels():
+    image = np.random.random((5, 5))
+    labels = np.zeros((5, 5), dtype=int)
+
+    with testing.raises(ValueError, match="No seeds provided"):
+        random_walker(image, labels)
+
+    labels[1, 1] = -1
+    with testing.raises(ValueError, match="No seeds provided"):
+        random_walker(image, labels)
+
+    # Once seeds are provided, it should run without error
+    labels[3, 3] = 1
+    random_walker(image, labels)

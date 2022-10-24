@@ -1,25 +1,24 @@
 import os
-import numpy as np
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 
-from ... import img_as_float
-from .. import imread, imsave, use_plugin, reset_plugins
-
+import numpy as np
+import pytest
 from PIL import Image
-from .._plugins.pil_plugin import (
-    pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...color import rgb2lab
-
 from skimage._shared import testing
-from skimage._shared.testing import (mono_check, color_check,
-                                     assert_equal, assert_array_equal,
-                                     assert_array_almost_equal,
-                                     assert_allclose, fetch)
-from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
-
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_allclose,
+                                     assert_array_almost_equal,
+                                     assert_array_equal, assert_equal,
+                                     color_check, fetch, mono_check)
 from skimage.metrics import structural_similarity
+
+from ... import img_as_float
+from ...color import rgb2lab
+from .. import imread, imsave, reset_plugins, use_plugin
+from .._plugins.pil_plugin import (_palette_is_grayscale, ndarray_to_pil,
+                                   pil_to_ndarray)
 
 
 def setup():
@@ -60,12 +59,21 @@ def test_imread_as_gray():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-def test_imread_separate_channels():
-    # Test that imread returns RGBA values contiguously even when they are
+@pytest.mark.parametrize('explicit_kwargs', [False, True])
+def test_imread_separate_channels(explicit_kwargs):
+    # Test that imread returns RGB(A) values contiguously even when they are
     # stored in separate planes.
     x = np.random.rand(3, 16, 8)
     with NamedTemporaryFile(suffix='.tif') as f:
         fname = f.name
+
+    # Tifffile is used as backend whenever suffix is .tif or .tiff
+    # To avoid pending changes to tifffile defaults, we must specify this is an
+    # RGB image with separate planes (i.e., channel_axis=0).
+    if explicit_kwargs:
+        kwargs = {'photometric': 'RGB', 'planarconfig': 'SEPARATE'}
+    else:
+        kwargs = {}
 
     imsave(fname, x)
     img = imread(fname)

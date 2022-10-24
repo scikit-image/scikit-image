@@ -249,7 +249,7 @@ if __name__ == "__main__":
             exclude=['doc', 'doc.*', 'benchmarks']),
         package_data={
             # distribute Cython source files in the wheel
-            "": ["*.pyx", "*.pxd", "*.pxi", ""],
+            "": ["*.pyx", "*.pxd", "*.pxi", "*.pyi", ""],
             # tests dirs have an __init__.py so are automatically included
         },
         include_package_data=False,

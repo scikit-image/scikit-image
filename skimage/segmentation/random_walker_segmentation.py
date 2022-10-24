@@ -207,6 +207,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
 def _preprocess(labels):
 
     label_values, inv_idx = np.unique(labels, return_inverse=True)
+    if max(label_values) <= 0:
+        raise ValueError('No seeds provided in label image: please ensure '
+                         'it contains at least one positive value')
 
     if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '

@@ -2,6 +2,8 @@ from .binary import (binary_closing, binary_dilation, binary_erosion,
                      binary_opening)
 from .gray import (black_tophat, closing, dilation, erosion, opening,
                    white_tophat)
+from .isotropic import (isotropic_erosion, isotropic_dilation,
+                        isotropic_opening, isotropic_closing)
 from .footprints import (ball, cube, diamond, disk, ellipse,
                          footprint_from_sequence, octagon, octahedron,
                          rectangle, square, star)
@@ -40,6 +42,10 @@ __all__ = ['area_closing',
            'footprint_from_sequence',
            'h_maxima',
            'h_minima',
+           'isotropic_closing',
+           'isotropic_dilation',
+           'isotropic_erosion',
+           'isotropic_opening',
            'label',
            'local_maxima',
            'local_minima',
