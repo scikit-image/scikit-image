@@ -434,7 +434,7 @@ Backported 0.19.x (remove before merging!)
 - Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
 - Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
 
-56 authors added to this release [alphabetical by first name or login]
+58 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
@@ -451,6 +451,7 @@ Backported 0.19.x (remove before merging!)
 - Dudu Lasry
 - Elena Pascal
 - Fabian Schneider
+- forgeRW
 - Frank A. Krueger
 - Gregory Lee
 - Hande Gözükan
@@ -460,12 +461,13 @@ Backported 0.19.x (remove before merging!)
 - Jan-Hendrik Müller
 - Jan-Lukas Wynen
 - Jarrod Millman
+- Jeremy Muhlich
 - johnthagen
 - Joshua Newton
 - Juan DF
 - Juan Nunez-Iglesias
 - Judd Storrs
-- kwikwag (kwikwag)
+- kwikwag
 - Larry Bradley
 - Lars Grüter
 - Lucas Johnson
@@ -475,12 +477,14 @@ Backported 0.19.x (remove before merging!)
 - Marvin Albert
 - Miles Lucas
 - Naveen
+- Oren Amsalem
 - Preston Buscay
 - Peter Bell
 - Ray Bell
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
+- samtygier
 - Sandeep N Menon
 - Sanghyeok Hyun
 - Sebastian Wallkötter
@@ -492,7 +496,7 @@ Backported 0.19.x (remove before merging!)
 - Tyler Reddy
 
 
-30 reviewers added to this release [alphabetical by first name or login]
+32 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Abhijeet Parida
 - Albert Y. Shih
@@ -515,12 +519,14 @@ Backported 0.19.x (remove before merging!)
 - Marianne Corvellec
 - Mark Harfouche
 - Marvin Albert
+- Oren Amsalem
 - Riadh Fezzani
 - Robert Haase
 - Robin Thibaut
 - Sandeep N Menon
 - Sanghyeok Hyun
 - Sebastian Wallkötter
+- Simon-Martin Schröder
 - Stefan van der Walt
 - Thomas Voigtmann
 - Tim-Oliver Buchholz
