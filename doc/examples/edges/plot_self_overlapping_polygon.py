@@ -7,6 +7,13 @@ This example shows how to separate a self-overlapping polygon into non
 self-overlapping sub polygons using the method [1]_.
 Each sub polygon can then be drawn or analyzed separately.
 
+A self-overlapping polygon is a surface enclosed by a curve in a way that only
+one face of such surface points upwards. That polygon can self-intersect but
+not twist the surface. An example of a self-overlapping polygon is the loop
+formed by an exit ramp on a highway. The road overlaps, but does not twist in
+any segment. Conversely, a folded sheet of paper is self-intersecting but not
+self-overlapping, since two faces of the paper end pointing upwards.
+
 .. [1] Uddipan Mukherjee, "Self-overlapping curves: Analysis and applications,"
     Computer-Aided Design, 2014, 46, 227-232.
     :DOI:`10.1016/j.cad.2013.08.037`

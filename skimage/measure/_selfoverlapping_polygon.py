@@ -1,23 +1,24 @@
-"""_selfoverlapping_polygon.py - a selfoverlapping polygon separation algorithm
+"""_selfoverlapping_polygon.py - a self-overlapping polygon separation
+algorithm.
 
-This module provides a function to separate a selfoverlapping polygon.
-Selfoverlapping polygons are defined as curves that can be obtained from
-stretching a two dimensional disk without twisting it. Therefore, not all self
-intersecting polygons are selfoverlapping, even when they contain overlapping
-sections.
+This module provides a function to separate a self-overlapping polygon.
+Self-overlapping polygons are defined as curves that can be obtained from
+stretching a two dimensional disk without twisting it. Therefore, not all
+self-intersecting polygons are self-overlapping, even when they contain
+overlapping sections.
 
-An example of a selfintesecting polygon that is not selfoverlapping is a sheet
-of paper that has been folded at least one time. That would casue to have two
-faces of the same sheet pointing upwards. On the other hand, an example of a
-selfoverlapping polygon is the loop formed by an exit ramp on a highway.
+An example of a self-intesecting polygon that is not sel-foverlapping is a
+sheet of paper that has been folded at least one time. That would casue two
+faces of the same sheet to point upwards. Conversely, an example of
+a self-overlapping polygon is the loop formed by an exit ramp on a highway.
 
-This function is an implementation of the method proposed in
+This code is an implementation of the method proposed in
 Mukherjee, "Self-overlapping curves: Analysis and applications", Computer-Aided
 Design 46 (2014) 227-232.
 """
-import numpy as np
-import math
 from functools import reduce
+import math
+import numpy as np
 
 
 def _shift_indices(a1, a2, n_vertices, ex_start=True, ex_end=True):
@@ -1237,7 +1238,12 @@ def _get_root_indices(vert_info):
 
 def _get_crest_ids(vertices, tolerance=1e-3):
     """Find the positional indices of the crest points.
-    Only crests where there is a left turn on the polygon are considered.
+    Only crests where there is a `left turn` on the polygon are considered.
+
+    A crest is a vertex which `y` coordinate represents a local maximum in the
+    polygon. The curve takes a `left turn` when there is a crest point and its
+    surrounding sequence of vertices have a direction from right to left in the
+    `x` axis.
 
     Parameters
     ----------
@@ -1703,7 +1709,7 @@ def separate_selfoverlapping_polygon(coords):
 
     Notes
     -----
-    A selfoverlapping polygon is a complex curve that can be separated into
+    A self-overlapping polygon is a complex curve that can be separated into
     simpler mutually exclusive curves using non trivial lines. That excludes
     polygons that self intersect by twisting their edges and exposing two faces
     at the same time.
@@ -1712,7 +1718,7 @@ def separate_selfoverlapping_polygon(coords):
     that a complex curve can be compressed, without twisting it, into a two
     dimensional disk. Therefore, a set of non trivial chords (cuts) separate
     the disk into mutually exclusive segments [1]_. These segments, in the
-    original complex curve, are the set of resulting non selfoverlapping sub
+    original complex curve, are the set of resulting non self-overlapping sub
     polygons.
 
     Examples
