@@ -14,6 +14,9 @@ https://scikit-image.org
 
 New features and improvements
 -----------------------------
+- Add the isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
+  These function return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
+  (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
 - Support footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
@@ -69,6 +72,10 @@ New features and improvements
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
 - Reduce the memory footprint of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
   (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_).
+- Improve performance of ``skimage.measure.moments_central`` by avoiding redundant computations
+  (`#6188 <https://github.com/scikit-image/scikit-image/pull/6188>`_).
+- Reduce import time of ``skimage.io`` by loading the matplotlib plugin only when required
+  (`#6550 <https://github.com/scikit-image/scikit-image/pull/6550>`_).
 
 Changes and new deprecations
 ----------------------------
@@ -88,6 +95,9 @@ Changes and new deprecations
   (`#6385 <https://github.com/scikit-image/scikit-image/pull/6385>`_).
 - Update minimal supported dependency to ``pillow>=9.0.1``
   (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
+- Rename ``skimage.filter.inverse`` to ``skimage.filter.inverse_filter``.
+  ``skimage.filter.inverse`` is deprecated and will be removed in the next release
+  (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_).
 
 Completed deprecations
 ----------------------
@@ -120,6 +130,8 @@ Bug fixes
   The new behavior makes it possible to mask values such as `numpy.nan` or `numpy.infinity`.
   Additionally, raise an error if the input ``image`` has two dimensions and a ``channel_axis`` is specified - indicating that the image is multi-channel
   (`#6525 <https://github.com/scikit-image/scikit-image/pull/6525>`_).
+- Fix unexpected error when passing a tuple to the parameter ``exclude_border`` in ``skimage.feature.blog_dog`` and ``skimage.feature.blob_log``
+  (`#6533 <https://github.com/scikit-image/scikit-image/pull/6533>`_).
 
 Documentation
 -------------
@@ -174,6 +186,14 @@ Documentation
   (`#6534 <https://github.com/scikit-image/scikit-image/pull/6534>`_).
 - Print the number of segments after applying the Watershed in the gallery example "Comparison of segmentation and superpixel algorithms"
   (`#6535 <https://github.com/scikit-image/scikit-image/pull/6535>`_).
+- Include ``skimage.morphology.footprint_from_sequence`` in the public API documentation
+  (`#6555 <https://github.com/scikit-image/scikit-image/pull/6555>`_).
+- Fix typo in docstring of ``skimage.measure.moments_hu``
+  (`#6016 <https://github.com/scikit-image/scikit-image/pull/6016>`_).
+- Fix formatting of mode parameter in ``skimage.util.random_noise``
+  (`#6532 <https://github.com/scikit-image/scikit-image/pull/6532>`_).
+- List only the two primary OS-independent methods of installing scikit-image
+  (`#6557 <https://github.com/scikit-image/scikit-image/pull/6557>`_, `#6560 <https://github.com/scikit-image/scikit-image/pull/6560>`_).
 
 Other and development related updates
 -------------------------------------
@@ -236,7 +256,7 @@ Other and development related updates
 - Use "center" in favor of "centre", and "color" in favor of "colour" gallery examples
   (`#6421 <https://github.com/scikit-image/scikit-image/pull/6421>`_, `#6422 <https://github.com/scikit-image/scikit-image/pull/6422>`_).
 - Restrict GitHub Actions permissions to required ones
-  (`#6426 <https://github.com/scikit-image/scikit-image/pull/6426>`_).
+  (`#6426 <https://github.com/scikit-image/scikit-image/pull/6426>`_, `#6504 <https://github.com/scikit-image/scikit-image/pull/6504>`_).
 - Exclude submodules of ``doc.*`` from package install
   (`#6428 <https://github.com/scikit-image/scikit-image/pull/6428>`_).
 - Substitute deprecated ``vertices`` with ``simplices`` in ``skimage.transform._geometric``
@@ -297,6 +317,14 @@ Other and development related updates
   (`#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_).
 - Remove FUNDING.yml in preference of org version
   (`#6553 <https://github.com/scikit-image/scikit-image/pull/6553>`_).
+- Forward port v0.19.1 and v0.19.2 release notes
+  (`#6253 <https://github.com/scikit-image/scikit-image/pull/6253>`_).
+- Handle pending changes to ``tifffile.imwrite`` defaults and avoid test warnings
+  (`#6460 <https://github.com/scikit-image/scikit-image/pull/6460>`_).
+- Replace issue templates with issue forms
+  (`#6554 <https://github.com/scikit-image/scikit-image/pull/6554>`_).
+
+.. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
 TODO merged in milestone 0.21?
 ------------------------------
@@ -315,10 +343,6 @@ Backported 0.19.x
 - remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
 - In newer PIL, palette may contain <256 entries (`#6405 <https://github.com/scikit-image/scikit-image/pull/6405>`_)
 - Fix computation of histogram bins for multichannel integer-valued images (`#6413 <https://github.com/scikit-image/scikit-image/pull/6413>`_)
-
-TODO
-----
-- Fix typo in moments_hu docstring (`#6016 <https://github.com/scikit-image/scikit-image/pull/6016>`_)
 - Skip tests requiring fetched data (`#6089 <https://github.com/scikit-image/scikit-image/pull/6089>`_)
 - Preserve backwards compatibility for `channel_axis` parameter in transform functions (`#6095 <https://github.com/scikit-image/scikit-image/pull/6095>`_)
 - restore non-underscore functions in skimage.data (`#6097 <https://github.com/scikit-image/scikit-image/pull/6097>`_)
@@ -337,7 +361,6 @@ TODO
 - Fix unintended change to output dtype of match_histograms (`#6169 <https://github.com/scikit-image/scikit-image/pull/6169>`_)
 - Fix decorators warnings stacklevel (`#6183 <https://github.com/scikit-image/scikit-image/pull/6183>`_)
 - Fix SIFT wrong octave indices + typo (`#6184 <https://github.com/scikit-image/scikit-image/pull/6184>`_)
-- Avoid redundant computations during central moments calculation (`#6188 <https://github.com/scikit-image/scikit-image/pull/6188>`_)
 - Fix issue6190 - inconsistent default parameters in pyramids.py (`#6191 <https://github.com/scikit-image/scikit-image/pull/6191>`_)
 - Always set params to nan when ProjectiveTransform.estimate fails (`#6207 <https://github.com/scikit-image/scikit-image/pull/6207>`_)
 - PiecewiseAffineTransform.estimate return should reflect underlying transforms (`#6211 <https://github.com/scikit-image/scikit-image/pull/6211>`_)
@@ -351,20 +374,10 @@ TODO
 - DOC: fix SciPy intersphinx (`#6239 <https://github.com/scikit-image/scikit-image/pull/6239>`_)
 - Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (`#6242 <https://github.com/scikit-image/scikit-image/pull/6242>`_)
 - Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
-- Forward port v0.19.1 and v0.19.2 release notes (`#6253 <https://github.com/scikit-image/scikit-image/pull/6253>`_)
 - Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
-- Refactoring LPI filter API (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_)
-- Handle pending changes to `tifffile` defaults and avoid test warnings (`#6460 <https://github.com/scikit-image/scikit-image/pull/6460>`_)
-- Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_)
-- Implement isotropic versions of binary morphologic operators (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_)
-- GitHub Workflows security hardening (`#6504 <https://github.com/scikit-image/scikit-image/pull/6504>`_)
-- Fix formatting of mode parameter in util.random_noise (`#6532 <https://github.com/scikit-image/scikit-image/pull/6532>`_)
-- fix exclude_border for the case of multidim input (`#6533 <https://github.com/scikit-image/scikit-image/pull/6533>`_)
-- Use lazy imports for matplotlib in skimage.io (`#6550 <https://github.com/scikit-image/scikit-image/pull/6550>`_)
-- Replace issue templates with issue forms (`#6554 <https://github.com/scikit-image/scikit-image/pull/6554>`_)
-- Add footprint_from_sequence to public API in skimage.morphology (`#6555 <https://github.com/scikit-image/scikit-image/pull/6555>`_)
-- List only the two primary methods of installing skimage (`#6557 <https://github.com/scikit-image/scikit-image/pull/6557>`_)
-- Call it what it is: pip and conda (`#6560 <https://github.com/scikit-image/scikit-image/pull/6560>`_)
+
+TODO
+----
 - Do not try to perform random walker segmentation without seed points (`#6562 <https://github.com/scikit-image/scikit-image/pull/6562>`_)
 - Add linting via pre-commit (`#6563 <https://github.com/scikit-image/scikit-image/pull/6563>`_)
 - Handle deprecation warning by updating to_scipy_sparse_array function (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_)
