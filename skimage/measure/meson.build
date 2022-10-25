@@ -24,6 +24,7 @@ python_sources = [
   '_marching_cubes_lewiner.py',
   '_marching_cubes_lewiner_luts.py',
   '_moments.py',
+  '_moments_analytical.py',
   '_polygon.py',
   '_regionprops.py',
   '_regionprops_utils.py',

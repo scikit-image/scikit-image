@@ -46,6 +46,7 @@ python_sources = [
   'grayreconstruct.py',
   'grey.py',
   'greyreconstruct.py',
+  'isotropic.py',
   'max_tree.py',
   'misc.py',
   'selem.py'

@@ -6,6 +6,7 @@ python_sources = [
   'test_flood_fill.py',
   'test_footprints.py',
   'test_gray.py',
+  'test_isotropic.py',
   'test_max_tree.py',
   'test_misc.py',
   'test_reconstruction.py',
