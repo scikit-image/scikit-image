@@ -114,7 +114,6 @@ def test_2d_cg(dtype):
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
-    return data, labels_cg
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -136,7 +135,6 @@ def test_2d_cg_mg(dtype):
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
-    return data, labels_cg_mg
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -167,7 +165,6 @@ def test_types():
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels_cg_mg
 
 
 def test_reorder_labels():
@@ -179,7 +176,6 @@ def test_reorder_labels():
         labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels_bf
 
 
 def test_2d_inactive():
@@ -192,7 +188,6 @@ def test_2d_inactive():
         labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels
 
 
 def test_2d_laplacian_size():
@@ -210,7 +205,6 @@ def test_2d_laplacian_size():
                                   [1, 1, -1]])
     labels = random_walker(data, markers, beta=10)
     np.testing.assert_array_equal(labels, expected_labels)
-    return data, labels
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])
@@ -224,7 +218,6 @@ def test_3d(dtype):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
-    return data, labels
 
 
 def test_3d_inactive():
@@ -239,7 +232,6 @@ def test_3d_inactive():
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
-    return data, labels, old_labels, after_labels
 
 
 @testing.parametrize('channel_axis', [0, 1, -1])

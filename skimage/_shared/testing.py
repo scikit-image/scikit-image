@@ -314,8 +314,6 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.join()
 
-                return result
-
         return inner
 
     return wrapper
