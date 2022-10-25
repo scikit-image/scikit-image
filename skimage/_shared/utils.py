@@ -16,14 +16,6 @@ __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
            'reshape_nd', 'identity', 'slice_at_axis']
 
 
-class skimage_deprecation(Warning):
-    """Create our own deprecation class, since Python >= 2.7
-    silences deprecations by default.
-
-    """
-    pass
-
-
 def _get_stack_rank(func):
     """Return function rank in the call stack."""
     if _is_wrapped(func):
@@ -468,13 +460,12 @@ class deprecated:
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
                 func_code = func.__code__
-                warnings.simplefilter('always', skimage_deprecation)
                 warnings.warn_explicit(msg,
-                                       category=skimage_deprecation,
+                                       category=FutureWarning,
                                        filename=func_code.co_filename,
                                        lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
-                raise skimage_deprecation(msg)
+                raise FutureWarning(msg)
             return func(*args, **kwargs)
 
         # modify doc string to display deprecation warning
