@@ -1,5 +1,5 @@
-import inspect
 import functools
+import inspect
 import sys
 import warnings
 from collections.abc import Iterable
@@ -10,8 +10,7 @@ from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
-
-__all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
+__all__ = ['deprecate_func', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
            'reshape_nd', 'identity', 'slice_at_axis']
 
@@ -424,52 +423,52 @@ class channel_as_last_axis:
         return fixed_func
 
 
-class deprecated:
-    """Decorator to mark deprecated functions with warning.
+class deprecate_func(_DecoratorBaseClass):
+    """Decorator a deprecated functions and warn when it is called.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
 
     Parameters
     ----------
-    alt_func : str
-        If given, tell user what function to use instead.
-    behavior : {'warn', 'raise'}
-        Behavior during call to deprecated function: 'warn' = warn user that
-        function is deprecated; 'raise' = raise error.
+    deprecated_version : str
+        The package version during which the deprecation was introduced.
     removed_version : str
         The package version in which the deprecated function will be removed.
+    hint : str, optional
+        A hint on how to address this deprecation.
+        E.g. "Use `skimage.submodule.alternative_func` instead."
     """
 
-    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
-        self.alt_func = alt_func
-        self.behavior = behavior
+    def __init__(self, *, deprecated_version, removed_version=None, hint=None):
+        self.deprecated_version=deprecated_version
         self.removed_version = removed_version
+        self.hint = hint
 
     def __call__(self, func):
+        message = (
+            f"`{func.__name__}` is deprecated since version "
+            f"{self.deprecated_version}"
+        )
+        if self.deprecated_version:
+            message += f" and will be removed in version {self.removed_version}."
+        if self.hint:
+            # Prepend space and make sure it closes with "."
+            message += f" {self.hint.rstrip('.')}."
 
-        alt_msg = ''
-        if self.alt_func is not None:
-            alt_msg = f' Use ``{self.alt_func}`` instead.'
-        rmv_msg = ''
-        if self.removed_version is not None:
-            rmv_msg = f' and will be removed in version {self.removed_version}'
-
-        msg = f'Function ``{func.__name__}`` is deprecated{rmv_msg}.{alt_msg}'
+        stack_rank = _get_stack_rank(func)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            if self.behavior == 'warn':
-                func_code = func.__code__
-                warnings.warn_explicit(msg,
-                                       category=FutureWarning,
-                                       filename=func_code.co_filename,
-                                       lineno=func_code.co_firstlineno + 1)
-            elif self.behavior == 'raise':
-                raise FutureWarning(msg)
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
+            warnings.warn(
+                message,
+                category=FutureWarning,
+                stacklevel=stacklevel
+            )
             return func(*args, **kwargs)
 
         # modify doc string to display deprecation warning
-        doc = '**Deprecated function**.' + alt_msg
+        doc = f'**Deprecated:** {message}'
         if wrapped.__doc__ is None:
             wrapped.__doc__ = doc
         else:
