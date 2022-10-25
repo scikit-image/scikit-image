@@ -90,7 +90,7 @@ jobs:
               python setup.py sdist
               pip install dist/scikit-image-*.tar.gz
           else
-              pip install -vv -e .;
+              pip install -vv --no-build-isolation .;
           fi
 
       - name: Run tests
@@ -183,7 +183,7 @@ jobs:
           source tools/github/before_install.sh
           pip install -U pip setuptools wheel
           python setup.py sdist
-          pip install -vv --no-build-isolation -e .;
+          pip install -vv --no-build-isolation .;
 
       - name: Run tests
         env:
