@@ -151,7 +151,7 @@ class remove_arg(_DecoratorBaseClass):
         return fixed_func
 
 
-def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
+def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
     Parameters
@@ -274,8 +274,8 @@ class deprecate_kwarg(_DecoratorBaseClass):
             return func(*args, **kwargs)
 
         if func.__doc__ is not None:
-            newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
-                                              self.deprecated_version)
+            newdoc = _docstring_add_deprecated(func, self.kwarg_mapping,
+                                               self.deprecated_version)
             fixed_func.__doc__ = newdoc
         return fixed_func
 
@@ -340,7 +340,7 @@ class deprecate_multichannel_kwarg(deprecate_kwarg):
             return func(*args, **kwargs)
 
         if func.__doc__ is not None:
-            newdoc = docstring_add_deprecated(
+            newdoc = _docstring_add_deprecated(
                 func, {'multichannel': 'channel_axis'}, '0.19')
             fixed_func.__doc__ = newdoc
         return fixed_func
