@@ -289,7 +289,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
     Parameters
     ----------
     image : ndarray
-        Input image to be denoised (converted using :ref:`~.img_as_float`).
+        Input image to be denoised (converted using :func:`~.img_as_float`).
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{\lambda}{2}`. Therefore,
         the smaller the `weight`, the more denoising (at
@@ -491,7 +491,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
     ----------
     image : ndarray
         Input image to be denoised. If its dtype is not float, it gets
-        converted with :ref:`~.img_as_float`.
+        converted with :func:`~.img_as_float`.
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{1}{\lambda}`. Therefore,
         the greater the `weight`, the more denoising (at the expense of
