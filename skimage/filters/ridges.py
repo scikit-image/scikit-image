@@ -14,8 +14,80 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import _supported_float_type, check_nD, deprecated
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+from ..util import img_as_float
+
+
+@deprecated(removed_version="0.21")
+def compute_hessian_eigenvalues(image, sigma, sorting='none',
+                                mode='constant', cval=0,
+                                use_gaussian_derivatives=False):
+    """
+    Compute Hessian eigenvalues of nD images.
+
+    For 2D images, the computation uses a more efficient, skimage-based
+    algorithm.
+
+    Parameters
+    ----------
+    image : (N, ..., M) ndarray
+        Array with input image data.
+    sigma : float
+        Smoothing factor of image for detection of structures at different
+        (sigma) scales.
+    sorting : {'val', 'abs', 'none'}, optional
+        Sorting of eigenvalues by values ('val') or absolute values ('abs'),
+        or without sorting ('none'). Default is 'none'.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    use_gaussian_derivatives : boolean, optional
+        Indicates whether the Hessian is computed by convolving with Gaussian
+        derivatives, or by a simple finite-difference operation.
+
+    Returns
+    -------
+    eigenvalues : (D, N, ..., M) ndarray
+        Array with (sorted) eigenvalues of Hessian eigenvalues for each pixel
+        of the input image.
+    """
+
+    # Convert image to float
+    float_dtype = _supported_float_type(image.dtype)
+    # rescales integer images to [-1, 1]
+    image = img_as_float(image)
+    # make sure float16 gets promoted to float32
+    image = image.astype(float_dtype, copy=False)
+
+    # Make nD hessian
+    hessian_matrix_kwargs = dict(
+        sigma=sigma, order='rc', mode=mode, cval=cval,
+        use_gaussian_derivatives=use_gaussian_derivatives
+    )
+    hessian_elements = hessian_matrix(image, **hessian_matrix_kwargs)
+    if not use_gaussian_derivatives:
+        # Kept to preserve legacy behavior
+        hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
+
+    # Compute Hessian eigenvalues
+    hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
+
+    if sorting == 'abs':
+
+        # Sort eigenvalues by absolute values in ascending order
+        hessian_eigenvalues = np.take_along_axis(
+            hessian_eigenvalues, abs(hessian_eigenvalues).argsort(0), 0)
+
+    elif sorting == 'val':
+
+        # Sort eigenvalues by values in ascending order
+        hessian_eigenvalues = np.sort(hessian_eigenvalues, axis=0)
+
+    # Return Hessian eigenvalues
+    return hessian_eigenvalues
 
 
 def meijering(image, sigmas=range(1, 10, 2), alpha=None,
