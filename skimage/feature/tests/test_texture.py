@@ -161,14 +161,14 @@ class TestGLCM():
     def test_greycomatrix_and_greycoprops_deprecations(self):
         expected = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
                                 normed=True, symmetric=True)
-        with expected_warnings(["Function ``greycomatrix``"]):
+        with expected_warnings(["`greycomatrix` is deprecated"]):
             result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                                   normed=True, symmetric=True)
         np.testing.assert_array_equal(expected, result)
 
         result = np.round(result, 3)
         dissimilarity_expected = graycoprops(result, 'dissimilarity')
-        with expected_warnings(["Function ``greycoprops``"]):
+        with expected_warnings(["`greycoprops` is deprecated"]):
             dissimilarity_result = greycoprops(result, 'dissimilarity')
         np.testing.assert_array_equal(
             dissimilarity_expected, dissimilarity_result
