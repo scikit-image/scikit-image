@@ -6,7 +6,7 @@
 import numpy as np
 import scipy.fft as fft
 
-from .._shared.utils import _supported_float_type, check_nD, deprecated
+from .._shared.utils import _supported_float_type, check_nD, deprecate_func
 
 
 def _min_limit(x, val=np.finfo(float).eps):
@@ -167,8 +167,9 @@ def filter_forward(data, impulse_response=None, filter_params={},
     return predefined_filter(data)
 
 
-@deprecated(alt_func='skimage.filters.lpi_filter.filter_inverse',
-            removed_version='0.21')
+@deprecate_func(hint='Use `skimage.filters.filter_inverse` instead.',
+                deprecated_version='0.20',
+                removed_version='0.21')
 def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
             predefined_filter=None):
     return filter_inverse(data, impulse_response, filter_params,
