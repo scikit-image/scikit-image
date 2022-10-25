@@ -264,7 +264,6 @@ def test_multispectral_2d(dtype, channel_axis):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
 
 
 def test_multispectral_2d_deprecated():
@@ -295,7 +294,6 @@ def test_multispectral_2d_deprecated():
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])
@@ -315,7 +313,6 @@ def test_multispectral_3d(dtype):
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
 
 
 def test_spacing_0():
@@ -581,7 +578,6 @@ def test_umfpack_import():
         assert UmfpackContext is not None
     except ImportError:
         assert UmfpackContext is None
-    return
 
 
 def test_empty_labels():
