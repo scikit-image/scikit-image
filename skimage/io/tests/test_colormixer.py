@@ -6,7 +6,7 @@ from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
 
 
 class ColorMixerTest:
-    def setup(self):
+    def setup_method(self):
         self.state = np.full((18, 33, 3), 200, dtype=np.uint8)
         self.img = np.zeros_like(self.state)
 
@@ -51,7 +51,7 @@ class TestColorMixerMul(ColorMixerTest):
 
 class TestColorMixerBright:
 
-    def setup(self):
+    def setup_method(self):
         self.state = np.ones((18, 33, 3), dtype=np.uint8) * 200
         self.img = np.zeros_like(self.state)
 
@@ -74,7 +74,7 @@ class TestColorMixerBright:
 
 class TestColorMixer:
 
-    def setup(self):
+    def setup_method(self):
         self.state = np.ones((18, 33, 3), dtype=np.uint8) * 50
         self.img = np.zeros_like(self.state)
 

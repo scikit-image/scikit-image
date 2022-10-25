@@ -9,7 +9,7 @@ from skimage.transform import integral_image
 
 class TestGLCM():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[0, 0, 1, 1],
                                [0, 0, 1, 1],
                                [0, 2, 2, 2],
@@ -221,7 +221,7 @@ class TestGLCM():
 
 class TestLBP():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[255,   6, 255,   0,  141,   0],
                                [ 48, 250, 204, 166,  223,  63],
                                [  8,   0, 159,  50,  255,  30],

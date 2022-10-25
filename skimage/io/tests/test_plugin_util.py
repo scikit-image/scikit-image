@@ -37,11 +37,10 @@ class TestPrepareForDisplay(TestCase):
             prepare_for_display(np.random.rand(10, 10, 5))
 
 
-class TestWindowManager(TestCase):
+class TestWindowManager:
     callback_called = False
 
-    @testing.fixture(autouse=True)
-    def setup(self):
+    def setup_method(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
 
