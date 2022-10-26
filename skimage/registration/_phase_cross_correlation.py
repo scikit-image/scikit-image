@@ -177,8 +177,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
     error : float
         Translation invariant normalized RMS error between
         ``reference_image`` and ``moving_image``. For masked cross-correlation
-         this error is not available and NaN is returned if ``return_error``
-         is "always".
+        this error is not available and NaN is returned if ``return_error``
+        is "always".
     phasediff : float
         Global phase difference between the two images (should be
         zero if images are non-negative). For masked cross-correlation
