@@ -360,7 +360,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
-    image_cube = np.empty(shape=image.shape + tuple([len(k)]))
+    image_cube = np.empty(shape=image.shape + tuple([k]))
     for i in range(k):
         image_cube[...,i] = (gaussian_images[i] - gaussian_images[i + 1]) * sf
 
