@@ -110,7 +110,7 @@ cdef void _set_var_btwcls_lut(cnp.float32_t [::1] prob,
     cdef cnp.float32_t zeroth_moment_ij, first_moment_ij
 
     zeroth_moment[0] = prob[0]
-    first_moment[0] = prob[0]
+    first_moment[0] = 0
     for i in range(1, nbins):
         zeroth_moment[i] = zeroth_moment[i - 1] + prob[i]
         first_moment[i] = first_moment[i - 1] + i * prob[i]
@@ -310,7 +310,7 @@ cdef void _set_moments_lut_first_row(cnp.float32_t [::1] prob,
     cdef cnp.intp_t i
 
     zeroth_moment[0] = prob[0]
-    first_moment[0] = prob[0]
+    first_moment[0] = 0
     for i in range(1, nbins):
         zeroth_moment[i] = zeroth_moment[i - 1] + prob[i]
         first_moment[i] = first_moment[i - 1] + i * prob[i]
