@@ -20,6 +20,7 @@ def structural_similarity(im1, im2,
                           gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
+    Please pay attention to the `data_range` parameter.
 
     Parameters
     ----------
@@ -34,7 +35,9 @@ def structural_similarity(im1, im2,
     data_range : float, optional
         The data range of the input image (distance between minimum and
         maximum possible values). By default, this is estimated from the image
-        data-type.
+        data-type. This estimate is most likely wrong for floating-point image
+        data. Therefore it is recommended to always explicitly specify this
+        value. (See the note below.)
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -76,8 +79,20 @@ def structural_similarity(im1, im2,
 
     Notes
     -----
+    If the `data_range` is not specified, the range is automatically guessed
+    based on the image data type. However for floating-point image data, this
+    estimate yields a result double the value of the desired range, as the 
+    `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
+    +1. This yields an estimate of 2, instead of 1, which is most often
+    required when working with image data (as negative light intentsities are
+    nonsensical). In case of working with YCbCr-like color data, note that
+    these ranges are different per channel (Cb and Cr have double the range
+    of Y), so one cannot calculate a channel-averaged SSIM with a single call
+    to this function, as identical ranges are assumed for each channel.
+    
     To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
-    to True, `sigma` to 1.5, and `use_sample_covariance` to False.
+    to True, `sigma` to 1.5, and `use_sample_covariance` to False, and
+    specify the `data_range` argument.
 
     .. versionchanged:: 0.16
         This function was renamed from ``skimage.measure.compare_ssim`` to
