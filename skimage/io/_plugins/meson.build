@@ -17,14 +17,12 @@ python_sources = [
   '__init__.py',
   'fits_plugin.py',
   'gdal_plugin.py',
-  'gtk_plugin.py',
   'imageio_plugin.py',
   'imread_plugin.py',
   'matplotlib_plugin.py',
   'pil_plugin.py',
   'simpleitk_plugin.py',
-  'tifffile_plugin.py',
-  'util.py'
+  'tifffile_plugin.py'
 ]
 
 ini_files = [

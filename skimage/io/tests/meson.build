@@ -10,7 +10,6 @@ python_sources = [
   'test_multi_image.py',
   'test_pil.py',
   'test_plugin.py',
-  'test_plugin_util.py',
   'test_sift.py',
   'test_simpleitk.py',
   'test_tifffile.py'
