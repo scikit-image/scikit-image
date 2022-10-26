@@ -36,6 +36,7 @@ py3.install_sources([
   'logo.png',
   'microaneurysms.png',
   'moon.png',
+  'multipage.tif',
   'no_time_for_that_tiny.gif',
   'page.png',
   'text.png',
