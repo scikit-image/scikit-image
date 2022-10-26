@@ -1,7 +1,6 @@
 python_sources = [
   '__init__.py',
   'test_collection.py',
-  'test_colormixer.py',
   'test_fits.py',
   'test_histograms.py',
   'test_imageio.py',

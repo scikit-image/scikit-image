@@ -22,8 +22,6 @@ python_sources = [
   'imread_plugin.py',
   'matplotlib_plugin.py',
   'pil_plugin.py',
-  'q_color_mixer.py',
-  'q_histogram.py',
   'simpleitk_plugin.py',
   'tifffile_plugin.py',
   'util.py'
