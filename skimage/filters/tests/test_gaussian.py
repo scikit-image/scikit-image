@@ -171,3 +171,33 @@ def test_dog_invalid_sigma2():
         difference_of_gaussians(image, 3, 2)
     with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 5), (2, 4))
+
+
+def test_deprecated_automatic_channel_detection():
+    rgb = np.zeros((5, 5, 3))
+    rgb[1, 1] = np.arange(1, 4)
+    gray = np.pad(rgb, pad_width=((0, 0), (0, 0), (1, 0)))
+
+    # Warning is raised if channel_axis is not set and shape is (M, N, 3)
+    with pytest.warns(
+        FutureWarning,
+        match="Automatic detection .* was deprecated .* Set `channel_axis=-1`"
+    ):
+        filtered_rgb = gaussian(rgb, sigma=1, mode="reflect")
+    # Check that the mean value is conserved in each channel
+    # (color channels are not mixed together)
+    assert np.allclose(filtered_rgb.mean(axis=(0, 1)), rgb.mean(axis=(0, 1)))
+
+    # No warning if channel_axis is not set and shape is not (M, N, 3)
+    filtered_gray = gaussian(gray, sigma=1, mode="reflect")
+
+    # No warning is raised if channel_axis is explicitly set
+    filtered_rgb2 = gaussian(rgb, sigma=1, mode="reflect", channel_axis=-1)
+    assert np.array_equal(filtered_rgb, filtered_rgb2)
+    filtered_gray2 = gaussian(gray, sigma=1, mode="reflect", channel_axis=None)
+    assert np.array_equal(filtered_gray, filtered_gray2)
+    assert not np.array_equal(filtered_rgb, filtered_gray)
+
+    # Check how the proxy value shows up in the rendered function signature
+    from skimage._shared.filters import ChannelAxisNotSet
+    assert repr(ChannelAxisNotSet) == "<ChannelAxisNotSet>"

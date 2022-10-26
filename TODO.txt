@@ -17,6 +17,12 @@ Version 0.21
 ------------
 * In ``skimage/filters/lpi_filter.py``, remove the deprecated function
   inverse().
+* Set `channel_axis=None` in `skimage._shared.filters.gaussian` and remove
+  `skimage._shared.filters._PatchClassRepr`,
+  `skimage/_shared/filters.ChannelAxisNotSet`, and
+  `skimage.filters.tests.test_gaussian.test_deprecated_automatic_channel_detection`.
+  Also remove the associated warning in `skimage._shared.filters.gaussian`'s
+  docstring.
 
 Other (2022)
 ------------
