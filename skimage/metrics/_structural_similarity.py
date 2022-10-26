@@ -81,7 +81,7 @@ def structural_similarity(im1, im2,
     -----
     If the `data_range` is not specified, the range is automatically guessed
     based on the image data type. However for floating-point image data, this
-    estimate yields a result double the value of the desired range, as the 
+    estimate yields a result double the value of the desired range, as the
     `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
     +1. This yields an estimate of 2, instead of 1, which is most often
     required when working with image data (as negative light intentsities are
@@ -89,7 +89,7 @@ def structural_similarity(im1, im2,
     these ranges are different per channel (Cb and Cr have double the range
     of Y), so one cannot calculate a channel-averaged SSIM with a single call
     to this function, as identical ranges are assumed for each channel.
-    
+
     To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
     to True, `sigma` to 1.5, and `use_sample_covariance` to False, and
     specify the `data_range` argument.
