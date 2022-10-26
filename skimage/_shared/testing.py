@@ -276,6 +276,7 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
+@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
@@ -317,10 +318,3 @@ def test_parallel(num_threads=2, warnings_matching=None):
         return inner
 
     return wrapper
-
-
-if __name__ == '__main__':
-    color_check('pil')
-    mono_check('pil')
-    mono_check('pil', 'bmp')
-    mono_check('pil', 'tiff')
