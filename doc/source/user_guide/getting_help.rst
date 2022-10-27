@@ -2,74 +2,52 @@
 Getting help on using ``skimage``
 =================================
 
-Besides the user guide, there exist other opportunities to get help on
-using ``skimage``.
+API Reference
+-------------
+
+Keep the `reference guide <https://scikit-image.org/docs/stable/>`__
+handy while programming with scikit-image.
+Select the docs that match the version of skimage you are using.
 
 Examples gallery
 ----------------
 
-The :ref:`examples_gallery` gallery provides graphical examples of
-typical image processing tasks. By a quick glance at the different
-thumbnails, the user may find an example close to a typical use case of
-interest. Each graphical example page displays an introductory paragraph,
-a figure, and the source code that generated the figure. Downloading the
-Python source code enables one to modify quickly the example into a case
-closer to one's image processing applications.
+The :ref:`examples_gallery` gallery provides graphical examples and
+code snippets of typical image processing tasks. There, you may find
+an example that is close to your use case.
 
-Users are warmly encouraged to report on their use of ``skimage`` on the
-:ref:`mailing_list`, in order to propose more examples in the future.
-Contributing examples to the gallery can be done on github (see
-:doc:`../contribute`).
+Feel free to suggest new gallery examples on our `developer forum
+<https://discuss.scientific-python.org/c/contributor/skimage>`__.
 
 Search field
 ------------
 
-The ``quick search`` field located in the navigation bar of the html
-documentation can be used to search for specific keywords (segmentation,
-rescaling, denoising, etc.).
+Use the ``quick search`` field in the navigation bar of the online
+documentation to find mentions of keywords (segmentation,
+rescaling, denoising, etc.) in the documentation.
 
 API Discovery
 -------------
 
-NumPy provides a ``lookfor`` function to search API functions. 
-By default ``lookfor`` will search the NumPy API.
-NumPy lookfor example:
-```np.lookfor('eigenvector') ```
+We provide a ``lookfor`` function to search API functions::
 
-But it can be used to search in modules, by passing in the module
-name as a string:
+   import skimage as ski
+   ski.lookfor('eigenvector')
 
-``` np.lookfor('boundaries', 'skimage') ```
+Also see NumPy's ``lookfor``.
 
-or the module itself.
-```
-> import skimage
-> np.lookfor('boundaries', skimage)
-```
-
-Docstrings
-----------
-
-Docstrings of ``skimage`` functions are formatted using `Numpy's
-documentation standard
-<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_,
-starting with a ``Parameters`` section for the arguments and a
-``Returns`` section for the objects returned by the function. Also, most
-functions include one or more examples.
-
-
-.. _mailing_list:
-
-Mailing-list
+Ask for help
 ------------
 
-The scikit-image mailing-list is scikit-image@python.org (users
-should `join
-<https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ before posting). This
-mailing-list is shared by users and developers, and it is the right
-place to ask any question about ``skimage``, or in general, image
-processing using Python.  Posting snippets of code with minimal examples
-ensures to get more relevant and focused answers.
+Still stuck? We are here to help! Reach out through:
 
-We would love to hear from how you use ``skimage`` for your work on the
-mailing-list!
+- our `user forum <https://forum.image.sc/tags/scikit-image>`_ for
+  image processing and usage questions;
+- our `developer forum
+  <https://discuss.scientific-python.org/c/contributor/skimage>`_
+  for technical questions and suggestions;
+- our `chat channel <https://skimage.zulipchat.com/>`_ for real-time
+  interaction; or
+- `Stack Overflow
+  <https://stackoverflow.com/questions/tagged/scikit-image>`_ for
+  coding questions.

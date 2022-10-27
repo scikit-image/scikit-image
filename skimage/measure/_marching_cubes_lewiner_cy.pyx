@@ -21,18 +21,18 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 
 # Cython specific imports
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 import cython
-np.import_array()
+cnp.import_array()
 
 # Enable low level memory management
 from libc.stdlib cimport malloc, free
 
 # Define tiny winy number
-cdef double FLT_EPSILON = np.spacing(1.0) #0.0000001
+cdef cnp.float64_t FLT_EPSILON = np.spacing(1.0) #0.0000001
 
 # Define abs function for doubles
-cdef inline double dabs(double a): return a if a>=0 else -a
+cdef inline cnp.float64_t dabs(cnp.float64_t a): return a if a>=0 else -a
 cdef inline int imin(int a, int b): return a if a<b else b
 
 # todo: allow dynamic isovalue?
@@ -44,8 +44,8 @@ def remove_degenerate_faces(vertices, faces, *arrays):
     vertices_map1 = vertices_map0.copy()
     faces_ok = np.ones(len(faces), dtype=np.int32)
 
-    cdef float [:, :] vertices_ = vertices
-    cdef float [:] v1, v2, v3
+    cdef cnp.float32_t [:, :] vertices_ = vertices
+    cdef cnp.float32_t [:] v1, v2, v3
     cdef int [:, :]  faces_ = faces
 
     cdef int [:] vertices_map1_ = vertices_map1
@@ -128,31 +128,31 @@ cdef class Cell:
     cdef int step
 
     # Values of cube corners (isovalue subtracted)
-    cdef double v0
-    cdef double v1
-    cdef double v2
-    cdef double v3
-    cdef double v4
-    cdef double v5
-    cdef double v6
-    cdef double v7
+    cdef cnp.float64_t v0
+    cdef cnp.float64_t v1
+    cdef cnp.float64_t v2
+    cdef cnp.float64_t v3
+    cdef cnp.float64_t v4
+    cdef cnp.float64_t v5
+    cdef cnp.float64_t v6
+    cdef cnp.float64_t v7
 
     # Small arrays to store the above values in (allowing indexing)
     # and also the gradient at these points
-    cdef double *vv
-    cdef double *vg
+    cdef cnp.float64_t *vv
+    cdef cnp.float64_t *vg
 
     # Max value of the eight corners
-    cdef double vmax
+    cdef cnp.float64_t vmax
 
     # Vertex position of center of cube (only calculated if needed)
-    cdef double v12_x
-    cdef double v12_y
-    cdef double v12_z
+    cdef cnp.float64_t v12_x
+    cdef cnp.float64_t v12_y
+    cdef cnp.float64_t v12_z
     # And corresponding gradient
-    cdef double v12_xg
-    cdef double v12_yg
-    cdef double v12_zg
+    cdef cnp.float64_t v12_xg
+    cdef cnp.float64_t v12_yg
+    cdef cnp.float64_t v12_zg
     cdef int v12_calculated # a boolean
 
     # The index value, our magic 256 bit word
@@ -169,9 +169,9 @@ cdef class Cell:
     cdef int *faceLayer2 # The actual second face layer
 
     # Stuff to store the output vertices
-    cdef float *_vertices
-    cdef float *_normals
-    cdef float *_values
+    cdef cnp.float32_t *_vertices
+    cdef cnp.float32_t *_normals
+    cdef cnp.float32_t *_values
     cdef int _vertexCount
     cdef int _vertexMaxCount
 
@@ -205,8 +205,8 @@ cdef class Cell:
     def __cinit__(self):
 
         # Init tiny arrays for vertices and gradients at the vertices
-        self.vv = <double *>malloc(8 * sizeof(double))
-        self.vg = <double *>malloc(8*3 * sizeof(double))
+        self.vv = <cnp.float64_t *>malloc(8 * sizeof(cnp.float64_t))
+        self.vg = <cnp.float64_t *>malloc(8*3 * sizeof(cnp.float64_t))
 
         # Init face layers
         self.faceLayer1 = NULL
@@ -215,9 +215,9 @@ cdef class Cell:
         # Init vertices
         self._vertexCount = 0
         self._vertexMaxCount = 8
-        self._vertices = <float *>malloc(self._vertexMaxCount*3 * sizeof(float))
-        self._normals = <float *>malloc(self._vertexMaxCount*3 * sizeof(float))
-        self._values = <float *>malloc(self._vertexMaxCount * sizeof(float))
+        self._vertices = <cnp.float32_t *>malloc(self._vertexMaxCount*3 * sizeof(cnp.float32_t))
+        self._normals = <cnp.float32_t *>malloc(self._vertexMaxCount*3 * sizeof(cnp.float32_t))
+        self._values = <cnp.float32_t *>malloc(self._vertexMaxCount * sizeof(cnp.float32_t))
         # Clear normals and values
         cdef int i, j
         if self._values is not NULL and self._normals is not NULL:
@@ -248,9 +248,9 @@ cdef class Cell:
         """
         # Allocate new array
         cdef int newMaxCount = self._vertexMaxCount * 2
-        cdef float *newVertices = <float *>malloc(newMaxCount*3 * sizeof(float))
-        cdef float *newNormals = <float *>malloc(newMaxCount*3 * sizeof(float))
-        cdef float *newValues = <float *>malloc(newMaxCount * sizeof(float))
+        cdef cnp.float32_t *newVertices = <cnp.float32_t *>malloc(newMaxCount*3 * sizeof(cnp.float32_t))
+        cdef cnp.float32_t *newNormals = <cnp.float32_t *>malloc(newMaxCount*3 * sizeof(cnp.float32_t))
+        cdef cnp.float32_t *newValues = <cnp.float32_t *>malloc(newMaxCount * sizeof(cnp.float32_t))
         if newVertices is NULL or newNormals is NULL or newValues is NULL:
             free(newVertices)
             free(newNormals)
@@ -295,7 +295,8 @@ cdef class Cell:
 
     ## Adding results
 
-    cdef int add_vertex(self, float x, float y, float z):
+    cdef int add_vertex(self, cnp.float32_t x, cnp.float32_t y,
+                        cnp.float32_t z):
         """ Add a vertex to the result. Return index in vertex array.
         """
         # Check if array is large enough
@@ -309,7 +310,8 @@ cdef class Cell:
         return self._vertexCount -1
 
 
-    cdef void add_gradient(self, int vertexIndex, float gx, float gy, float gz):
+    cdef void add_gradient(self, int vertexIndex, cnp.float32_t gx,
+                           cnp.float32_t gy, cnp.float32_t gz):
         """ Add a gradient value to the vertex corresponding to the given index.
         """
         self._normals[vertexIndex*3+0] += gx
@@ -317,12 +319,14 @@ cdef class Cell:
         self._normals[vertexIndex*3+2] += gz
 
 
-    cdef void add_gradient_from_index(self, int vertexIndex, int i, float strength):
+    cdef void add_gradient_from_index(self, int vertexIndex, int i,
+                                      cnp.float32_t strength):
         """ Add a gradient value to the vertex corresponding to the given index.
         vertexIndex is the index in the large array of vertices that is returned.
         i is the index of the array of vertices 0-7 for the current cell.
         """
-        self.add_gradient(vertexIndex, self.vg[i*3+0] * strength, self.vg[i*3+1] * strength, self.vg[i*3+2] * strength)
+        self.add_gradient(vertexIndex, self.vg[i*3+0] * strength,
+                          self.vg[i*3+1] * strength, self.vg[i*3+2] * strength)
 
 
     cdef add_face(self, int index):
@@ -345,7 +349,7 @@ cdef class Cell:
         """ Get the final vertex array.
         """
         vertices = np.empty((self._vertexCount,3), np.float32)
-        cdef float [:, :] vertices_ = vertices
+        cdef cnp.float32_t [:, :] vertices_ = vertices
         cdef int i, j
         for i in range(self._vertexCount):
             for j in range(3):
@@ -357,10 +361,10 @@ cdef class Cell:
         The normals are normalized to unit length.
         """
         normals = np.empty((self._vertexCount,3), np.float32)
-        cdef float [:, :] normals_ = normals
+        cdef cnp.float32_t [:, :] normals_ = normals
 
         cdef int i, j
-        cdef double length, dtmp
+        cdef cnp.float64_t length, dtmp
         for i in range(self._vertexCount):
             length = 0.0
             for j in range(3):
@@ -382,7 +386,7 @@ cdef class Cell:
 
     def get_values(self):
         values = np.empty((self._vertexCount,), np.float32)
-        cdef float [:] values_ = values
+        cdef cnp.float32_t [:] values_ = values
         cdef int i, j
         for i in range(self._vertexCount):
             values_[i] = self._values[i]
@@ -403,9 +407,9 @@ cdef class Cell:
             self.faceLayer2[i] = -1
 
 
-    cdef void set_cube(self,    double isovalue, int x, int y, int z, int step,
-                                double v0, double v1, double v2, double v3,
-                                double v4, double v5, double v6, double v7):
+    cdef void set_cube(self,    cnp.float64_t isovalue, int x, int y, int z, int step,
+                                cnp.float64_t v0, cnp.float64_t v1, cnp.float64_t v2, cnp.float64_t v3,
+                                cnp.float64_t v4, cnp.float64_t v5, cnp.float64_t v6, cnp.float64_t v7):
         """ Set the cube to the new location.
 
         Set the values of the cube corners. The isovalue is subtracted
@@ -500,9 +504,9 @@ cdef class Cell:
         cdef int dx1, dy1, dz1
         cdef int dx2, dy2, dz2
         cdef int index1, index2
-        cdef double tmpf1, tmpf2
-        cdef double fx, fy, fz, ff
-        cdef double stp = <double>self.step
+        cdef cnp.float64_t tmpf1, tmpf2
+        cdef cnp.float64_t fx, fy, fz, ff
+        cdef cnp.float64_t stp = <cnp.float64_t>self.step
 
         # Get index in the face layer and corresponding vertex number
         indexInFaceLayer = self.get_index_in_facelayer(vi)
@@ -553,14 +557,14 @@ cdef class Cell:
             else:
                 # Interpolate by applying a kind of center-of-mass method
                 fx, fy, fz, ff = 0.0, 0.0, 0.0, 0.0
-                fx += <double>dx1 * tmpf1;  fy += <double>dy1 * tmpf1;  fz += <double>dz1 * tmpf1;  ff += tmpf1
-                fx += <double>dx2 * tmpf2;  fy += <double>dy2 * tmpf2;  fz += <double>dz2 * tmpf2;  ff += tmpf2
+                fx += <cnp.float64_t>dx1 * tmpf1;  fy += <cnp.float64_t>dy1 * tmpf1;  fz += <cnp.float64_t>dz1 * tmpf1;  ff += tmpf1
+                fx += <cnp.float64_t>dx2 * tmpf2;  fy += <cnp.float64_t>dy2 * tmpf2;  fz += <cnp.float64_t>dz2 * tmpf2;  ff += tmpf2
 
                 # Add vertex
                 indexInVertexArray = self.add_vertex(
-                                <double>self.x + stp*fx/ff,
-                                <double>self.y + stp*fy/ff,
-                                <double>self.z + stp*fz/ff )
+                                <cnp.float64_t>self.x + stp*fx/ff,
+                                <cnp.float64_t>self.y + stp*fy/ff,
+                                <cnp.float64_t>self.z + stp*fz/ff )
                 # Update face layer
                 self.faceLayer[indexInFaceLayer] = indexInVertexArray
                 # Add face and gradient
@@ -672,7 +676,7 @@ cdef class Cell:
         self.vv[7] = self.v6#
 
         # Calculate max
-        cdef double vmin, vmax
+        cdef cnp.float64_t vmin, vmax
         vmin, vmax = 0.0, 0.0
         for i in range(8):
             if self.vv[i] > vmax:
@@ -699,8 +703,8 @@ cdef class Cell:
     cdef void calculate_center_vertex(self):
         """ Calculate interpolated center vertex and its gradient.
         """
-        cdef double v0, v1, v2, v3, v4, v5, v6, v7
-        cdef double fx, fy, fz, ff
+        cdef cnp.float64_t v0, v1, v2, v3, v4, v5, v6, v7
+        cdef cnp.float64_t fx, fy, fz, ff
         fx, fy, fz, ff = 0.0, 0.0, 0.0, 0.0
 
         # Define "strength" of each corner of the cube that we need
@@ -724,7 +728,7 @@ cdef class Cell:
         fx += 0.0*v7;  fy += 1.0*v7;  fz += 1.0*v7;  ff += v7
 
         # Store
-        cdef double stp = <double>self.step
+        cdef cnp.float64_t stp = <cnp.float64_t>self.step
         self.v12_x = self.x + stp * fx / ff
         self.v12_y = self.y + stp * fy / ff
         self.v12_z = self.z + stp * fz / ff
@@ -930,10 +934,10 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-def marching_cubes(float[:, :, :] im not None, double isovalue,
+def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
                    LutProvider luts, int st=1, int classic=0,
-                   np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
-    """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
+                   cnp.ndarray[cnp.npy_bool, ndim=3, cast=True] mask=None):
+    """ marching_cubes(im, cnp.float64_t isovalue, LutProvider luts, int st=1, int classic=0)
     Main entry to apply marching cubes.
 
     Masked version of marching cubes. This function will check a
@@ -1284,7 +1288,7 @@ cdef int test_face(Cell cell, int face):
         absFace *= -1
 
     # Get values of corners A B C D
-    cdef double A, B, C, D
+    cdef cnp.float64_t A, B, C, D
     if absFace == 1:
         A, B, C, D = cell.v0, cell.v4, cell.v5, cell.v1
     elif absFace == 2:
@@ -1299,7 +1303,7 @@ cdef int test_face(Cell cell, int face):
         A, B, C, D = cell.v4, cell.v7, cell.v6, cell.v5
 
     # Return sign
-    cdef double AC_BD = A*C - B*D
+    cdef cnp.float64_t AC_BD = A*C - B*D
     if AC_BD > - FLT_EPSILON and AC_BD < FLT_EPSILON:
         return face >= 0
     else:
@@ -1311,7 +1315,7 @@ cdef int test_internal(Cell cell, LutProvider luts, int case, int config, int su
     """
 
     # Typedefs
-    cdef double t, At, Bt, Ct, Dt, a, b
+    cdef cnp.float64_t t, At, Bt, Ct, Dt, a, b
     cdef int test = 0
     cdef int edge = -1 # reference edge of the triangulation
 

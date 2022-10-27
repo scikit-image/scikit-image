@@ -14,7 +14,7 @@ from ..util import img_as_float64
 cnp.import_array()
 
 
-def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
+def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
     """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
@@ -30,7 +30,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     image : (N, M, C) ndarray
         Input image.
     scale : float, optional (default 1)
-        Sets the obervation level. Higher means larger clusters.
+        Sets the observation level. Higher means larger clusters.
     sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
@@ -67,7 +67,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
 	                               (image[1:, 1:, :] - image[:height-1, :width-1, :]), axis=-1))
     uright_cost = np.sqrt(np.sum((image[1:, :width-1, :] - image[:height-1, 1:, :]) *
     	                           (image[1:, :width-1, :] - image[:height-1, 1:, :]), axis=-1))
-    cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([
+    cdef cnp.ndarray[cnp.float64_t, ndim=1] costs = np.hstack([
     	right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(float)
 
@@ -88,14 +88,14 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     costs = np.ascontiguousarray(costs[edge_queue])
     cdef cnp.intp_t *segments_p = <cnp.intp_t*>segments.data
     cdef cnp.intp_t *edges_p = <cnp.intp_t*>edges.data
-    cdef cnp.float_t *costs_p = <cnp.float_t*>costs.data
+    cdef cnp.float64_t *costs_p = <cnp.float64_t*>costs.data
     cdef cnp.ndarray[cnp.intp_t, ndim=1] segment_size \
             = np.ones(width * height, dtype=np.intp)
 
     # inner cost of segments
-    cdef cnp.ndarray[cnp.float_t, ndim=1] cint = np.zeros(width * height)
+    cdef cnp.ndarray[cnp.float64_t, ndim=1] cint = np.zeros(width * height)
     cdef cnp.intp_t seg0, seg1, seg_new, e
-    cdef float cost, inner_cost0, inner_cost1
+    cdef cnp.float32_t cost, inner_cost0, inner_cost1
     cdef Py_ssize_t num_costs = costs.size
 
     with nogil:

@@ -15,7 +15,7 @@ from editdistance import eval as dist
 threshold = 5
 
 def call(cmd):
-    return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
+    return subprocess.check_output(shlex.split(cmd), text=True).split('\n')
 
 
 def _clean_email(email):
@@ -63,7 +63,7 @@ for key, value in list(mailmap.items()):
 entries = []
 for name, emails in mailmap.items():
     entries.append([name])
-    entries[-1].extend(['<{}>'.format(email) for email in emails])
+    entries[-1].extend([f'<{email}>' for email in emails])
 
 entries = sorted(entries, key=lambda x: x[0].split()[-1])
 for entry in entries:

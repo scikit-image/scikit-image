@@ -1,14 +1,3 @@
-"""
-
-Sobel and Prewitt filters originally part of CellProfiler, code licensed under
-both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-
-"""
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import binary_erosion, convolve
@@ -36,9 +25,9 @@ VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 # 2D-only filter weights
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
-                               [0, -1]], dtype=np.double)
+                               [0, -1]], dtype=np.float64)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
-                               [-1, 0]], dtype=np.double)
+                               [-1, 0]], dtype=np.float64)
 
 # These filter weights can be found in Farid & Simoncelli (2004),
 # Table 1 (3rd and 4th row). Additional decimal places were computed

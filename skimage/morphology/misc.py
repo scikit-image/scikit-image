@@ -4,7 +4,6 @@ import functools
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 from .._shared.utils import warn, remove_arg
-from .footprints import _default_footprint
 from ._util import _resolve_neighborhood, _raveled_offsets_and_distances
 from ._near_objects_cy import _remove_near_objects
 
@@ -39,7 +38,7 @@ def default_footprint(func):
     @functools.wraps(func)
     def func_out(image, footprint=None, *args, **kwargs):
         if footprint is None:
-            footprint = _default_footprint(image.ndim)
+            footprint = ndi.generate_binary_structure(image.ndim, 1)
         return func(image, footprint=footprint, *args, **kwargs)
 
     return func_out
@@ -49,7 +48,7 @@ def _check_dtype_supported(ar):
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
         raise TypeError("Only bool or integer image types are supported. "
-                        "Got %s." % ar.dtype)
+                        f"Got {ar.dtype}.")
 
 
 @remove_arg("in_place", changed_version="1.0",

@@ -207,7 +207,7 @@ def disk(center, radius, *, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
@@ -829,7 +829,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     return coords
 
 
-@require("matplotlib", ">=3.0.3")
+@require("matplotlib", ">=3.3")
 def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     """Generate coordinates of pixels that are exactly around a rectangle.
 
@@ -924,6 +924,9 @@ def _rectangle_slice(start, end=None, extent=None):
         end = np.asarray(start) + np.asarray(extent)
     top_left = np.minimum(start, end)
     bottom_right = np.maximum(start, end)
+
+    top_left = np.round(top_left).astype(int)
+    bottom_right = np.round(bottom_right).astype(int)
 
     if extent is None:
         bottom_right += 1

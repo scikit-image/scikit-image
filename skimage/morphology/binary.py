@@ -49,11 +49,9 @@ def binary_erosion(image, footprint=None, out=None):
         Binary input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
-        in ``skimage.morphology.footprints``.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -63,6 +61,22 @@ def binary_erosion(image, footprint=None, out=None):
     eroded : ndarray of bool or uint
         The result of the morphological erosion taking values in
         ``[False, True]``.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automatically generate a
+    footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_erosion
 
     """
     if out is None:
@@ -94,12 +108,11 @@ def binary_dilation(image, footprint=None, out=None):
     ----------
     image : ndarray
         Binary input image.
-    footprint : ndarray, optional
+    footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -109,6 +122,23 @@ def binary_dilation(image, footprint=None, out=None):
     dilated : ndarray of bool or uint
         The result of the morphological dilation with values in
         ``[False, True]``.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automatically generate a
+    footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_dilation
+
     """
     if out is None:
         out = np.empty(image.shape, dtype=bool)
@@ -138,12 +168,11 @@ def binary_opening(image, footprint=None, out=None):
     ----------
     image : ndarray
         Binary input image.
-    footprint : ndarray, optional
+    footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -152,6 +181,22 @@ def binary_opening(image, footprint=None, out=None):
     -------
     opening : ndarray of bool
         The result of the morphological opening.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automatically generate a
+    footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_opening
 
     """
     eroded = binary_erosion(image, footprint)
@@ -177,12 +222,11 @@ def binary_closing(image, footprint=None, out=None):
     ----------
     image : ndarray
         Binary input image.
-    footprint : ndarray, optional
+    footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). This can also
-        be a sequence of 2-tuples where the first element of each 2-tuple is a
-        footprint and the second element as an integer describing the number of
-        times it should be iterated.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
@@ -191,6 +235,22 @@ def binary_closing(image, footprint=None, out=None):
     -------
     closing : ndarray of bool
         The result of the morphological closing.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    ``skimage.morphology.disk`` provide an option to automatically generate a
+    footprint sequence of this type.
+
+    See also
+    --------
+    skimage.morphology.isotropic_closing
 
     """
     dilated = binary_dilation(image, footprint)

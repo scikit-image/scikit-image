@@ -929,6 +929,37 @@ def test_rectangle_end():
     assert_array_equal(img, expected)
 
 
+def test_rectangle_float_input():
+    expected = np.array([[0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    start = (0.2, 0.8)
+    end = (3.1, 2.9)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(start, end=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # Swap start and end
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(end=start, start=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # Bottom left and top right
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(start=(3.1, 0.8), end=(0.2, 2.9), shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(end=(3.1, 0.8), start=(0.2, 2.9), shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
 def test_rectangle_extent():
     expected = np.array([[0, 0, 0, 0, 0],
                          [0, 1, 1, 1, 0],

@@ -106,7 +106,7 @@ def _is_multipattern(input_pattern):
     return is_multipattern
 
 
-class ImageCollection(object):
+class ImageCollection:
     """Load and manage a collection of image files.
 
     Parameters
@@ -157,7 +157,24 @@ class ImageCollection(object):
       x = ic[0]  # calls vidread_step(video_file, step=3)
       x[5]  # is the sixth element of a list of length 8 (24 / 3)
 
-    Another use of ``load_func`` would be to convert all images to ``uint8``::
+    Alternatively, if `load_func` is provided and `load_pattern` is a
+    sequence, an `ImageCollection` of corresponding length will be created,
+    and the individual images will be loaded by calling `load_func` with the
+    matching element of the `load_pattern` as its first argument. In this
+    case, the elements of the sequence do not need to be names of existing
+    files (or strings at all). For example, to create an `ImageCollection`
+    containing 500 images from a video::
+
+      class vidread_random:
+          def __init__ (self, f):
+              self.vid = imageio.get_reader(f)
+          def __call__ (self, frameno):
+              return self.vid.get_data(frameno)
+      ic = ImageCollection(range(500), load_func=vidread_random('movie.mp4'))
+
+      ic  # is an ImageCollection object of length 500
+
+    Another use of `load_func` would be to convert all images to ``uint8``::
 
       def imread_convert(f):
           return imread(f).astype(np.uint8)
@@ -166,6 +183,7 @@ class ImageCollection(object):
 
     Examples
     --------
+    >>> import imageio
     >>> import skimage.io as io
     >>> from skimage import data_dir
 
@@ -175,7 +193,18 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    >>> image_col = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+
+    >>> class multiread:
+    ...     def __init__ (self, f):
+    ...         self.vid = imageio.get_reader(f)
+    ...     def __call__ (self, frameno):
+    ...         return self.vid.get_data(frameno)
+    ...
+    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
+    >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> len(image_col)
+    24
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
@@ -186,12 +215,14 @@ class ImageCollection(object):
                 load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
         elif isinstance(load_pattern, str):
             self._files.extend(glob(load_pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
+        elif isinstance(load_pattern, Sequence) and load_func is not None:
+            self._files = list(load_pattern)
         else:
             raise TypeError('Invalid pattern as input.')
-
-        self._files = sorted(self._files, key=alphanumeric_key)
 
         if load_func is None:
             from ._io import imread
@@ -232,7 +263,7 @@ class ImageCollection(object):
                 try:
                     im = Image.open(fname)
                     im.seek(0)
-                except (IOError, OSError):
+                except OSError:
                     continue
                 i = 0
                 while True:
@@ -327,8 +358,7 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError("There are only %s images in the collection"
-                             % num)
+            raise IndexError(f"There are only {num} images in the collection")
         return n
 
     def __iter__(self):
@@ -416,39 +446,36 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned can be used as a list of image-data objects,
-    where each entry in the list represents one image. In this regard it is
-    very similar to `ImageCollection`, but the two differ in the treatment
-    of multi-frame images.
+    `MultiImage` returns a list of image-data arrays. In this
+    regard, it is very similar to `ImageCollection`, but the two differ in
+    their treatment of multi-frame images.
 
     For a TIFF image containing N frames of size WxH, `MultiImage` stores
-    all frames of that image as a single entry of shape `(N, W, H)` in the
-    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
+    all frames of that image as a single element of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N elements of shape `(W, H)`.
 
-    For an animated GIF image, `MultiImage` in the current implementation
-    will only read one frame, while `ImageCollection` by default will read
-    all of them.
+    For an animated GIF image, `MultiImage` reads only the first frame, while
+    `ImageCollection` reads all frames by default.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> img = MultiImage(multipage_tiff)
-    >>> len(img) # img contains one file
+    >>> multi_img = MultiImage(multipage_tiff)
+    >>> len(multi_img)  # multi_img contains one element
     1
-    >>> img[0].shape # this image contains two frames of size (15, 10)
+    >>> multi_img[0].shape  # this element is a two-frame image of shape:
     (2, 15, 10)
 
-    >>> ic = ImageCollection(multipage_tiff)
-    >>> len(ic) # ic contains two images
+    >>> image_col = ImageCollection(multipage_tiff)
+    >>> len(image_col)  # image_col contains two elements
     2
-    >>> for frame in ic:
-    ...     print (frame.shape)
+    >>> for frame in image_col:
+    ...     print(frame.shape)  # each element is a frame of shape (15, 10)
     ...
     (15, 10)
     (15, 10)
-
     """
 
     def __init__(self, filename, conserve_memory=True, dtype=None,
@@ -457,7 +484,7 @@ class MultiImage(ImageCollection):
         from ._io import imread
 
         self._filename = filename
-        super(MultiImage, self).__init__(filename, conserve_memory,
+        super().__init__(filename, conserve_memory,
                                          load_func=imread, **imread_kwargs)
 
     @property

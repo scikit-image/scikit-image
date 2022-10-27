@@ -91,11 +91,11 @@ install packages and are using a
 <https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_\
 ).
 
-While it is possible to use pip without a virtual environment, it is not advised: 
-virtual environments create a clean Python environment that does not interfere 
+While it is possible to use pip without a virtual environment, it is not advised:
+virtual environments create a clean Python environment that does not interfere
 with any existing system installation, can be easily removed, and contain only
 the package versions your application needs. They help avoid a common
-challenge known as 
+challenge known as
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
 To install the current ``scikit-image`` you'll need at least Python 3.6. If

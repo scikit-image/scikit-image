@@ -11,7 +11,7 @@ except ImportError:
         pass
 
 
-class TrainableSegmenter(object):
+class TrainableSegmenter:
     """Estimator for classifying pixels.
 
     Parameters

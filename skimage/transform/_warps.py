@@ -118,6 +118,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         to downsampling. It is crucial to filter when downsampling
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when downsampling an image whose data type is not bool.
+        It is also set to False when using nearest neighbor interpolation
+        (``order`` == 0) with integer input data type.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
@@ -150,8 +152,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = (not input_type == bool and
-                         any(x < y for x, y in zip(output_shape, input_shape)))
+        anti_aliasing = (
+            not input_type == bool and
+            not (np.issubdtype(input_type, np.integer) and order == 0) and
+            any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")
@@ -202,7 +206,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         else:
             # 3 control points necessary to estimate exact AffineTransform
             src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
             # take into account that 0th pixel is at position (0.5, 0.5)
             dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
             dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
@@ -717,19 +721,31 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
 
     """
     if clip:
-        min_val = input_image.min()
-        max_val = input_image.max()
+        min_val = np.min(input_image)
+        if np.isnan(min_val):
+            # NaNs detected, use NaN-safe min/max
+            min_func = np.nanmin
+            max_func = np.nanmax
+            min_val = min_func(input_image)
+        else:
+            min_func = np.min
+            max_func = np.max
+        max_val = max_func(input_image)
 
-        preserve_cval = (mode == 'constant' and not
-                         (min_val <= cval <= max_val))
+        # Check if cval has been used such that it expands the effective input
+        # range
+        preserve_cval = (mode == 'constant'
+                         and not min_val <= cval <= max_val
+                         and min_func(output_image) <= cval <= max_func(output_image))
 
+        # expand min/max range to account for cval
         if preserve_cval:
-            cval_mask = output_image == cval
+            # cast cval to the same dtype as the input image
+            cval = input_image.dtype.type(cval)
+            min_val = min(min_val, cval)
+            max_val = max(max_val, cval)
 
         np.clip(output_image, min_val, max_val, out=output_image)
-
-        if preserve_cval:
-            output_image[cval_mask] = cval
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,

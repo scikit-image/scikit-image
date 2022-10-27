@@ -1,41 +1,97 @@
-import pytest
+import itertools
+
 import numpy as np
+import pytest
 from scipy import ndimage as ndi
+
 from skimage import draw
-from skimage.measure import (moments, moments_central, moments_coords,
-                             moments_coords_central, moments_normalized,
-                             moments_hu, centroid, inertia_tensor,
-                             inertia_tensor_eigvals)
-
 from skimage._shared import testing
-from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_allclose)
+from skimage._shared.testing import (assert_allclose, assert_almost_equal,
+                                     assert_equal)
 from skimage._shared.utils import _supported_float_type
+from skimage.measure import (centroid, inertia_tensor, inertia_tensor_eigvals,
+                             moments, moments_central, moments_coords,
+                             moments_coords_central, moments_hu,
+                             moments_normalized)
 
 
-def test_moments():
-    image = np.zeros((20, 20), dtype=np.double)
+def compare_moments(m1, m2, thresh=1e-8):
+    """Compare two moments arrays.
+
+    Compares only values in the upper-left triangle of m1, m2 since
+    values below the diagonal exceed the specified order and are not computed
+    when the analytical computation is used.
+
+    Also, there the first-order central moments will be exactly zero with the
+    analytical calculation, but will not be zero due to limited floating point
+    precision when using a numerical computation. Here we just specify the
+    tolerance as a fraction of the maximum absolute value in the moments array.
+    """
+    m1 = m1.copy()
+    m2 = m2.copy()
+
+    # make sure location of any NaN values match and then ignore the NaN values
+    # in the subsequent comparisons
+    nan_idx1 = np.where(np.isnan(m1.ravel()))[0]
+    nan_idx2 = np.where(np.isnan(m2.ravel()))[0]
+    assert len(nan_idx1) == len(nan_idx2)
+    assert np.all(nan_idx1 == nan_idx2)
+    m1[np.isnan(m1)] = 0
+    m2[np.isnan(m2)] = 0
+
+    max_val = np.abs(m1[m1 != 0]).max()
+    for orders in itertools.product(*((range(m1.shape[0]),) * m1.ndim)):
+        if sum(orders) > m1.shape[0] - 1:
+            m1[orders] = 0
+            m2[orders] = 0
+            continue
+        abs_diff = abs(m1[orders] - m2[orders])
+        rel_diff = abs_diff / max_val
+        assert rel_diff < thresh
+
+
+@pytest.mark.parametrize('anisotropic', [False, True, None])
+def test_moments(anisotropic):
+    image = np.zeros((20, 20), dtype=np.float64)
     image[14, 14] = 1
     image[15, 15] = 1
     image[14, 15] = 0.5
     image[15, 14] = 0.5
-    m = moments(image)
+    if anisotropic:
+        spacing = (1.4, 2)
+    else:
+        spacing = (1, 1)
+    if anisotropic is None:
+        m = moments(image)
+    else:
+        m = moments(image, spacing=spacing)
     assert_equal(m[0, 0], 3)
-    assert_almost_equal(m[1, 0] / m[0, 0], 14.5)
-    assert_almost_equal(m[0, 1] / m[0, 0], 14.5)
+    assert_almost_equal(m[1, 0] / m[0, 0], 14.5 * spacing[0])
+    assert_almost_equal(m[0, 1] / m[0, 0], 14.5 * spacing[1])
 
 
-def test_moments_central():
-    image = np.zeros((20, 20), dtype=np.double)
+@pytest.mark.parametrize('anisotropic', [False, True, None])
+def test_moments_central(anisotropic):
+    image = np.zeros((20, 20), dtype=np.float64)
     image[14, 14] = 1
     image[15, 15] = 1
     image[14, 15] = 0.5
     image[15, 14] = 0.5
-    mu = moments_central(image, (14.5, 14.5))
+    if anisotropic:
+        spacing = (2, 1)
+    else:
+        spacing = (1, 1)
+    if anisotropic is None:
+        mu = moments_central(image, (14.5, 14.5))
+        # check for proper centroid computation
+        mu_calc_centroid = moments_central(image)
+    else:
+        mu = moments_central(image, (14.5 * spacing[0], 14.5 * spacing[1]),
+                             spacing=spacing)
+        # check for proper centroid computation
+        mu_calc_centroid = moments_central(image, spacing=spacing)
 
-    # check for proper centroid computation
-    mu_calc_centroid = moments_central(image)
-    assert_equal(mu, mu_calc_centroid)
+    compare_moments(mu, mu_calc_centroid, thresh=1e-14)
 
     # shift image by dx=2, dy=2
     image2 = np.zeros((20, 20), dtype=np.double)
@@ -43,18 +99,25 @@ def test_moments_central():
     image2[17, 17] = 1
     image2[16, 17] = 0.5
     image2[17, 16] = 0.5
-    mu2 = moments_central(image2, (14.5 + 2, 14.5 + 2))
+    if anisotropic is None:
+        mu2 = moments_central(image2, (14.5 + 2, 14.5 + 2))
+    else:
+        mu2 = moments_central(
+            image2,
+            ((14.5 + 2) * spacing[0], (14.5 + 2) * spacing[1]),
+            spacing=spacing
+        )
     # central moments must be translation invariant
-    assert_equal(mu, mu2)
+    compare_moments(mu, mu2, thresh=1e-14)
 
 
 def test_moments_coords():
-    image = np.zeros((20, 20), dtype=np.double)
+    image = np.zeros((20, 20), dtype=np.float64)
     image[13:17, 13:17] = 1
     mu_image = moments(image)
 
     coords = np.array([[r, c] for r in range(13, 17)
-                       for c in range(13, 17)], dtype=np.double)
+                       for c in range(13, 17)], dtype=np.float64)
     mu_coords = moments_coords(coords)
     assert_almost_equal(mu_coords, mu_image)
 
@@ -77,12 +140,12 @@ def test_moments_coords_dtype(dtype):
 
 
 def test_moments_central_coords():
-    image = np.zeros((20, 20), dtype=np.double)
+    image = np.zeros((20, 20), dtype=np.float64)
     image[13:17, 13:17] = 1
     mu_image = moments_central(image, (14.5, 14.5))
 
     coords = np.array([[r, c] for r in range(13, 17)
-                       for c in range(13, 17)], dtype=np.double)
+                       for c in range(13, 17)], dtype=np.float64)
     mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
 
@@ -91,28 +154,51 @@ def test_moments_central_coords():
     assert_almost_equal(mu_coords_calc_centroid, mu_coords)
 
     # shift image by dx=3 dy=3
-    image = np.zeros((20, 20), dtype=np.double)
+    image = np.zeros((20, 20), dtype=np.float64)
     image[16:20, 16:20] = 1
     mu_image = moments_central(image, (14.5, 14.5))
 
     coords = np.array([[r, c] for r in range(16, 20)
-                       for c in range(16, 20)], dtype=np.double)
+                       for c in range(16, 20)], dtype=np.float64)
     mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
 
 
 def test_moments_normalized():
-    image = np.zeros((20, 20), dtype=np.double)
+    image = np.zeros((20, 20), dtype=np.float64)
     image[13:17, 13:17] = 1
     mu = moments_central(image, (14.5, 14.5))
     nu = moments_normalized(mu)
-    # shift image by dx=-3, dy=-3 and scale by 0.5
-    image2 = np.zeros((20, 20), dtype=np.double)
-    image2[11:13, 11:13] = 1
+    # shift image by dx=-2, dy=-2 and scale non-zero extent by 0.5
+    image2 = np.zeros((20, 20), dtype=np.float64)
+    # scale amplitude by 0.7
+    image2[11:13, 11:13] = 0.7
     mu2 = moments_central(image2, (11.5, 11.5))
     nu2 = moments_normalized(mu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(nu, nu2, decimal=1)
+
+
+@pytest.mark.parametrize('anisotropic', [False, True])
+def test_moments_normalized_spacing(anisotropic):
+    image = np.zeros((20, 20), dtype=np.double)
+    image[13:17, 13:17] = 1
+
+    if not anisotropic:
+        spacing1 = (1, 1)
+        spacing2 = (3, 3)
+    else:
+        spacing1 = (1, 2)
+        spacing2 = (2, 4)
+
+    mu = moments_central(image, spacing=spacing1)
+    nu = moments_normalized(mu, spacing=spacing1)
+
+    mu2 = moments_central(image, spacing=spacing2)
+    nu2 = moments_normalized(mu2, spacing=spacing2)
+
+    # result should be invariant to absolute scale of spacing
+    compare_moments(nu, nu2)
 
 
 def test_moments_normalized_3d():
@@ -124,7 +210,31 @@ def test_moments_normalized_3d():
 
     coords = np.where(image)
     mu_coords = moments_coords_central(coords)
-    assert_almost_equal(mu_coords, mu_image)
+    assert_almost_equal(mu_image, mu_coords)
+
+
+@pytest.mark.parametrize('dtype', [np.uint8, np.int32, np.float32, np.float64])
+@pytest.mark.parametrize('order', [1, 2, 3, 4])
+@pytest.mark.parametrize('ndim', [2, 3, 4])
+def test_analytical_moments_calculation(dtype, order, ndim):
+    if ndim == 2:
+        shape = (256, 256)
+    elif ndim == 3:
+        shape = (64, 64, 64)
+    else:
+        shape = (16, ) * ndim
+    rng = np.random.default_rng(1234)
+    if np.dtype(dtype).kind in 'iu':
+        x = rng.integers(0, 256, shape, dtype=dtype)
+    else:
+        x = rng.standard_normal(shape, dtype=dtype)
+    # setting center=None will use the analytical expressions
+    m1 = moments_central(x, center=None, order=order)
+    # providing explicit centroid will bypass the analytical code path
+    m2 = moments_central(x, center=centroid(x), order=order)
+    # ensure numeric and analytical central moments are close
+    thresh = 1e-4 if x.dtype == np.float32 else 1e-9
+    compare_moments(m1, m2, thresh=thresh)
 
 
 def test_moments_normalized_invalid():
@@ -135,13 +245,13 @@ def test_moments_normalized_invalid():
 
 
 def test_moments_hu():
-    image = np.zeros((20, 20), dtype=np.double)
+    image = np.zeros((20, 20), dtype=np.float64)
     image[13:15, 13:17] = 1
     mu = moments_central(image, (13.5, 14.5))
     nu = moments_normalized(mu)
     hu = moments_hu(nu)
     # shift image by dx=2, dy=3, scale by 0.5 and rotate by 90deg
-    image2 = np.zeros((20, 20), dtype=np.double)
+    image2 = np.zeros((20, 20), dtype=np.float64)
     image2[11, 11:13] = 1
     image2 = image2.T
     mu2 = moments_central(image2, (11.5, 11))

@@ -124,7 +124,7 @@ def test_2d_cg_mg(dtype):
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
     anticipated_warnings = [
-        'scipy.sparse.sparsetools|%s' % PYAMG_OR_SCIPY_WARNING,
+        f'scipy.sparse.sparsetools|{PYAMG_OR_SCIPY_WARNING}',
         NUMPY_MATRIX_WARNING]
     with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
@@ -438,7 +438,7 @@ def test_trivial_cases():
     with expected_warnings(["All unlabeled pixels are isolated"]):
             output_labels = random_walker(img, markers)
     assert np.all(output_labels[markers == 1] == 1)
-    # Here 0-labeled pixels could not be determined (no connexion to seed)
+    # Here 0-labeled pixels could not be determined (no connection to seed)
     assert np.all(output_labels[markers == 0] == -1)
     with expected_warnings(["All unlabeled pixels are isolated"]):
         test = random_walker(img, markers, return_full_prob=True)
@@ -582,3 +582,19 @@ def test_umfpack_import():
     except ImportError:
         assert UmfpackContext is None
     return
+
+
+def test_empty_labels():
+    image = np.random.random((5, 5))
+    labels = np.zeros((5, 5), dtype=int)
+
+    with testing.raises(ValueError, match="No seeds provided"):
+        random_walker(image, labels)
+
+    labels[1, 1] = -1
+    with testing.raises(ValueError, match="No seeds provided"):
+        random_walker(image, labels)
+
+    # Once seeds are provided, it should run without error
+    labels[3, 3] = 1
+    random_walker(image, labels)

@@ -5,11 +5,14 @@ on:
     types: [labeled]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   benchmark:
-    if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    if: contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch'
     name: Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       CCACHE_BASEDIR: "${{ github.workspace }}"
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
@@ -20,14 +23,14 @@ jobs:
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: "3.10"
 
       - name: Setup some dependencies
         shell: bash -l {0}
@@ -48,7 +51,7 @@ jobs:
           ccache -z
 
       - name: "Restore ccache"
-        uses: actions/cache@v1.1.0
+        uses: actions/cache@v3
         with:
           path: .ccache
           key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
@@ -95,7 +98,7 @@ jobs:
         if: always()
         run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: asv-benchmark-results-${{ runner.os }}

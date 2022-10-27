@@ -38,6 +38,9 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    # add precomputed footprint decomposition data
+    config.add_data_files('ball_decompositions.npy',
+                          'disk_decompositions.npy')
     config.add_extension('_near_objects_cy', sources=['_near_objects_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
           author='Damian Eads',
-          maintainer_email='scikit-image@python.org',
+          maintainer_email='skimage@discuss.scientific-python.org',
           description='Morphology Wrapper',
           url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',

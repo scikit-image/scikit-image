@@ -4,7 +4,7 @@ Datasets with 3 or more spatial dimensions
 ==========================================
 
 Most scikit-image functions are compatible with 3D datasets, i.e., images with
-3 spatial dimensions (to be distinguished from 2D multichannel images, which 
+3 spatial dimensions (to be distinguished from 2D multichannel images, which
 are also arrays with
 three axes). :func:`skimage.data.cells3d` returns a 3D fluorescence microscopy
 image of cells. The returned dataset is a 3D multichannel image with dimensions
@@ -17,10 +17,23 @@ to test the various functions of scikit-image.
 from skimage import data
 import plotly
 import plotly.express as px
+import numpy as np
 
 img = data.cells3d()[20:]
-fig = px.imshow(img, facet_col=1, animation_frame=0,
-                binary_string=True, binary_format='jpg')
-fig.layout.annotations[0]['text'] = 'Cell membranes'
-fig.layout.annotations[1]['text'] = 'Nuclei'
+
+# omit some slices that are partially empty
+img = img[5:26]
+
+upper_limit = 1.5 * np.percentile(img, q=99)
+img = np.clip(img, 0, upper_limit)
+
+fig = px.imshow(
+    img,
+    facet_col=1,
+    animation_frame=0,
+    binary_string=True,
+    binary_format="jpg",
+)
+fig.layout.annotations[0]["text"] = "Cell membranes"
+fig.layout.annotations[1]["text"] = "Nuclei"
 plotly.io.show(fig)

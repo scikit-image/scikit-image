@@ -8,7 +8,7 @@ from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
 
 
-class DummyNNClassifier(object):
+class DummyNNClassifier:
     def fit(self, X, labels):
         self.X = X
         self.labels = labels
