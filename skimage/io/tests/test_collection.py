@@ -12,12 +12,11 @@ from skimage._shared.testing import assert_equal, assert_allclose, fetch
 import pytest
 
 
-has_pooch = False
 try:
     import pooch
     has_pooch = True
-except ImportError:
-    pass
+except ModuleNotFoundError:
+    has_pooch = False
 
 
 def test_string_split():
