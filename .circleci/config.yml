@@ -22,7 +22,7 @@ jobs:
             source skimage_venv/bin/activate
             python -m pip install --upgrade pip
             python -m pip install -r requirements/build.txt
-            python -m pip install -e . -vv
+            python -m pip install -vv --no-build-isolation .
             python -m pip install -r requirements/default.txt
             python -m pip install -r requirements/docs.txt
             export
