@@ -113,10 +113,10 @@ cdef inline void _remove_object(
     QueueWithHistory* queue_ptr,
 ):
     """Remove single connected object.
-    
+
     Performs a flood-fill on the object with the value 0. Samples with a label
     id == 0 and an image value != 0 are considered to be inside the evaluated
-    object. 
+    object.
 
     Parameters
     ----------
