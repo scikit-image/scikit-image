@@ -10,7 +10,7 @@ BG = 0  # background value
 
 
 class TestConnectedComponents:
-    def setup(self):
+    def setup_method(self):
         self.x = np.array([
             [0, 0, 3, 2, 1, 9],
             [0, 1, 1, 9, 2, 9],
@@ -120,7 +120,7 @@ class TestConnectedComponents:
 
 
 class TestConnectedComponents3d:
-    def setup(self):
+    def setup_method(self):
         self.x = np.zeros((3, 4, 5), int)
         self.x[0] = np.array([[0, 3, 2, 1, 9],
                               [0, 1, 9, 2, 9],

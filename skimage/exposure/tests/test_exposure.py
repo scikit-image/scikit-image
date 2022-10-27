@@ -452,7 +452,6 @@ def test_adapthist_color():
     full_scale = exposure.rescale_intensity(img)
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 1)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.02, 2)
-    return data, adapted
 
 
 def test_adapthist_alpha():
