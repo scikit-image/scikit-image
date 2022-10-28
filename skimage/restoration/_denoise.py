@@ -295,7 +295,7 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
         the smaller the `weight`, the more denoising (at
         the expense of less similarity to `image`).
     eps : float, optional
-        Parameter :math:`\varepsilon > 0` for the stop criterion:
+        Tolerance :math:`\varepsilon > 0` for the stop criterion:
         The algorithm stops when :math:`\|u_n - u_{n-1}\|_2 < \varepsilon`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
@@ -497,7 +497,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         the greater the `weight`, the more denoising (at the expense of
         fidelity to `image`).
     eps : float, optional
-        Parameter :math:`\varepsilon > 0` for the stop criterion (compares to
+        Tolerance :math:`\varepsilon > 0` for the stop criterion (compares to
         absolute value of relative difference of the cost function :math:`E`):
         The algorithm stops when :math:`|E_{n-1} - E_n| < \varepsilon * E_0`.
     max_num_iter : int, optional
