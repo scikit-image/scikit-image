@@ -123,24 +123,3 @@ def test_bad_input():
         active_contour(img, init, boundary_condition='wrong')
     with pytest.raises(ValueError):
         active_contour(img, init, max_num_iter=-15)
-
-
-def test_coord_raises():
-    img = rgb2gray(data.astronaut())
-    s = np.linspace(0, 2*np.pi, 400)
-    x = 100 + 100*np.sin(s)
-    y = 220 + 100*np.cos(s)
-    init = np.array([x, y]).T
-    # coordinates='xy' is not valid
-    with pytest.raises(ValueError):
-        active_contour(gaussian(img, 3), init,
-                       boundary_condition='periodic', alpha=0.015,
-                       beta=10, w_line=0, w_edge=1, gamma=0.001,
-                       max_num_iter=100, coordinates='xy')
-
-    # coordinates=None is not valid
-    with pytest.raises(ValueError):
-        active_contour(gaussian(img, 3), init,
-                       boundary_condition='periodic', alpha=0.015,
-                       beta=10, w_line=0, w_edge=1, gamma=0.001,
-                       max_num_iter=100, coordinates=None)
