@@ -20,7 +20,7 @@ def structural_similarity(im1, im2,
                           gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
-    Please pay attention to the `data_range` parameter.
+    Please pay attention to the `data_range` parameter with floating-point images.
 
     Parameters
     ----------
@@ -35,9 +35,9 @@ def structural_similarity(im1, im2,
     data_range : float, optional
         The data range of the input image (distance between minimum and
         maximum possible values). By default, this is estimated from the image
-        data-type. This estimate is most likely wrong for floating-point image
-        data. Therefore it is recommended to always explicitly specify this
-        value. (See the note below.)
+        data type. This estimate may be wrong for floating-point image data.
+        Therefore it is recommended to always pass this value explicitly
+        (see note below).
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -79,7 +79,7 @@ def structural_similarity(im1, im2,
 
     Notes
     -----
-    If the `data_range` is not specified, the range is automatically guessed
+    If `data_range` is not specified, the range is automatically guessed
     based on the image data type. However for floating-point image data, this
     estimate yields a result double the value of the desired range, as the
     `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
@@ -90,8 +90,8 @@ def structural_similarity(im1, im2,
     of Y), so one cannot calculate a channel-averaged SSIM with a single call
     to this function, as identical ranges are assumed for each channel.
 
-    To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
-    to True, `sigma` to 1.5, and `use_sample_covariance` to False, and
+    To match the implementation of Wang et al. [1]_, set `gaussian_weights`
+    to True, `sigma` to 1.5, `use_sample_covariance` to False, and
     specify the `data_range` argument.
 
     .. versionchanged:: 0.16
