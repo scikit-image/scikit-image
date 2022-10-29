@@ -59,6 +59,7 @@ fig = px.imshow(
     animation_frame=0,
     zmin=vmin,
     zmax=vmax,
+    binary_string=True,
     labels={'animation_frame': 'time point', 'facet_col': 'channel'}
 )
 plotly.io.show(fig)
