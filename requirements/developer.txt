@@ -1,1 +1,2 @@
 pre-commit
+git+https://github.com/scientific-python/dev.py@main#egg=dev.py
