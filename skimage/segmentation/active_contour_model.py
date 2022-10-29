@@ -11,8 +11,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                    max_px_move=1.0,
                    max_num_iter=2500, convergence=0.1,
                    *,
-                   boundary_condition='periodic',
-                   coordinates='rc'):
+                   boundary_condition='periodic'):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -56,11 +55,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         be combined by parsing 'fixed-free', 'free-fixed'. Parsing
         'fixed-fixed' or 'free-free' yields same behaviour as 'fixed' and
         'free', respectively.
-    coordinates : {'rc'}, optional
-        This option remains for compatibility purpose only and has no effect.
-        It was introduced in 0.16 with the ``'xy'`` option, but since 0.18,
-        only the ``'rc'`` option is valid.
-        Coordinates must be set in a row-column format.
 
     Returns
     -------
@@ -98,9 +92,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    if coordinates != 'rc':
-        raise ValueError('Coordinate values must be set in a row column '
-                         'format. `coordinates` must be set to "rc".')
     max_num_iter = int(max_num_iter)
     if max_num_iter <= 0:
         raise ValueError("max_num_iter should be >0.")

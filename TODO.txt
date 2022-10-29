@@ -8,8 +8,6 @@ Version 0.17
 
 Version 0.20
 ------------
-* consider removing the argument `coordinates` in
-  `skimage.segmentation.active_contour`, which has not effect.
 * Change the warning about poorly conditioned data to a ValueError within
   `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
 
