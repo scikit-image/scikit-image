@@ -179,6 +179,8 @@ Improved & updated
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt the gallery example "Build image pyramids" to more diversified shaped images and downsample factors
   (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
+- Clarify the meaning of the ``weights`` term and rewrite docstrings of ``skimage.restoration.denoise_tv_bregman`` and ``skimage.restoration.denoise_tv_chambolle``
+  (`#6544 <https://github.com/scikit-image/scikit-image/pull/6544>`_).
 - Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
   (`#6290 <https://github.com/scikit-image/scikit-image/pull/6290>`_, `#6292 <https://github.com/scikit-image/scikit-image/pull/6292>`_).
 - Clarify that the enabled ``watershed_line`` parameter will not catch borders between adjacent marker regions in ``skimage.segmentation.watershed``
@@ -264,6 +266,8 @@ Governance & planning
 
 Maintenance
 ~~~~~~~~~~~
+- Add and test an alternative build system based on Meson as an alternative to the deprecated distutils system
+  (`#6536 <https://github.com/scikit-image/scikit-image/pull/6536>`_).
 - Use ``cnp.float32_t`` and ``cnp.float64_t`` over ``float`` and ``double`` in Cython code
   (`#6303 <https://github.com/scikit-image/scikit-image/pull/6303>`_).
 - Move ``skimage/measure/mc_meta`` folder into ``tools/precompute/`` folder to avoid its unnecessary distribution to users
@@ -475,6 +479,7 @@ Backported 0.19.x (remove before merging!)
 - Marianne Corvellec
 - Mark Harfouche
 - Marvin Albert
+- Matthew Brett
 - Miles Lucas
 - Naveen
 - Oren Amsalem
@@ -506,6 +511,7 @@ Backported 0.19.x (remove before merging!)
 - Carlo
 - Chris Roat
 - Dudu Lasry
+- Eli Schwartz
 - François Boulogne
 - Gregory Lee
 - Jacob Rosenthal
@@ -520,6 +526,7 @@ Backported 0.19.x (remove before merging!)
 - Mark Harfouche
 - Marvin Albert
 - Oren Amsalem
+- Ralf Gommers
 - Riadh Fezzani
 - Robert Haase
 - Robin Thibaut
