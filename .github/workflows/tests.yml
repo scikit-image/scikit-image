@@ -85,12 +85,12 @@ jobs:
           set -ex
           source tools/github/before_install.sh
           set -ex
-          python setup.py sdist
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-              pip uninstall cython -y;
-              pip install dist/scikit-image-*.tar.gz;
+              pip uninstall cython -y
+              python setup.py sdist
+              pip install dist/scikit-image-*.tar.gz
           else
-              pip install -vv -e .;
+              pip install -vv --no-build-isolation .;
           fi
 
       - name: Run tests
@@ -142,17 +142,12 @@ jobs:
         include:
           - python-version: "3.9"
             OPTIONAL_DEPS: 0
-          - python-version: "3.10"
-            OPTIONAL_DEPS: 0
           - python-version: "3.11-dev"
             OPTIONAL_DEPS: 0
             BUILD_DOCS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: "3.9"
-            OPTIONAL_DEPS: 1
-          # a number of optional deps don't yet have Python 3.10 wheels
-          - python-version: "3.10"
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.11 wheels
           - python-version: "3.11-dev"
@@ -188,7 +183,7 @@ jobs:
           source tools/github/before_install.sh
           pip install -U pip setuptools wheel
           python setup.py sdist
-          pip install -vv --no-build-isolation -e .;
+          pip install -vv --no-build-isolation .;
 
       - name: Run tests
         env:

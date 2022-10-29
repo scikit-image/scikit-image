@@ -136,6 +136,19 @@ OBJECT_COLUMNS = [col for col, dtype in COL_DTYPES.items() if dtype == object]
 
 PROP_VALS = set(PROPS.values())
 
+_require_intensity_image = (
+    'image_intensity',
+    'intensity_max',
+    'intensity_mean',
+    'intensity_min',
+    'moments_weighted',
+    'moments_weighted_central',
+    'centroid_weighted',
+    'centroid_weighted_local',
+    'moments_weighted_hu',
+    'moments_weighted_normalized',
+)
+
 
 def _infer_number_of_required_args(func):
     """Infer the number of required arguments for a function
@@ -320,6 +333,11 @@ class RegionProperties:
             }
 
     def __getattr__(self, attr):
+        if self._intensity_image is None and attr in _require_intensity_image:
+            raise AttributeError(
+                f"Attribute '{attr}' unavailable when `intensity_image` "
+                f"has not been specified."
+            )
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
             n_args = _infer_number_of_required_args(func)
@@ -346,6 +364,14 @@ class RegionProperties:
                     f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
         elif attr in PROPS and attr.lower() == attr:
+            if (
+                self._intensity_image is None
+                and PROPS[attr] in _require_intensity_image
+            ):
+                raise AttributeError(
+                    f"Attribute '{attr}' unavailable when `intensity_image` "
+                    f"has not been specified."
+            )
             # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
         else:
@@ -679,17 +705,7 @@ class RegionProperties:
         props = PROP_VALS
 
         if self._intensity_image is None:
-            unavailable_props = ('image_intensity',
-                                 'intensity_max',
-                                 'intensity_mean',
-                                 'intensity_min',
-                                 'moments_weighted',
-                                 'moments_weighted_central',
-                                 'centroid_weighted',
-                                 'centroid_weighted_local',
-                                 'moments_weighted_hu',
-                                 'moments_weighted_normalized')
-
+            unavailable_props = _require_intensity_image
             props = props.difference(unavailable_props)
 
         return iter(sorted(props))

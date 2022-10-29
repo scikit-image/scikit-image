@@ -212,23 +212,6 @@ def setup_test():
 
         warnings.simplefilter('error')
 
-        # do not error on specific warnings from the skimage.io module
-        # https://github.com/scikit-image/scikit-image/issues/5337
-        warnings.filterwarnings(
-            'default', message='TiffFile:', category=DeprecationWarning
-        )
-
-        warnings.filterwarnings(
-            'default', message='TiffWriter:', category=DeprecationWarning
-        )
-        # newer tifffile change the start of the warning string
-        # e.g. <tifffile.TiffWriter.write> data with shape ...
-        warnings.filterwarnings(
-            'default',
-            message='<tifffile.',
-            category=DeprecationWarning
-        )
-
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
         )
@@ -293,6 +276,7 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
+@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
@@ -331,15 +315,6 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.join()
 
-                return result
-
         return inner
 
     return wrapper
-
-
-if __name__ == '__main__':
-    color_check('pil')
-    mono_check('pil')
-    mono_check('pil', 'bmp')
-    mono_check('pil', 'tiff')
