@@ -6,11 +6,6 @@ Version 0.17
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.20
-------------
-* Change the warning about poorly conditioned data to a ValueError within
-  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
-
 Version 0.21
 ------------
 * In ``skimage/filters/lpi_filter.py``, remove the deprecated function
