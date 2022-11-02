@@ -9,7 +9,7 @@ requires-python = ">=3.8"
 dependencies = [
     # TODO: update to "pin-compatible" once possible, see
     # https://github.com/FFY00/meson-python/issues/29
-    "numpy>=1.21.1,
+    "numpy>=1.21.1",
 ]
 readme = "README.md"
 classifiers = [
