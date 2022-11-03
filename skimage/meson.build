@@ -11,7 +11,10 @@ if is_windows
   add_global_arguments('-D__USE_MINGW_ANSI_STDIO=1', language: ['c', 'cpp'])
   # Manual add of MS_WIN64 macro when not using MSVC.
   # https://bugs.python.org/issue28267
-  bitness = run_command('_build_utils/gcc_build_bitness.py').stdout().strip()
+  bitness = run_command(
+    '_build_utils/gcc_build_bitness.py',
+    check: true
+  ).stdout().strip()
   if bitness == '64'
     add_global_arguments('-DMS_WIN64', language: ['c', 'cpp'])
   endif
