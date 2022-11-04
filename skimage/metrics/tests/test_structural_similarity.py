@@ -87,13 +87,15 @@ def test_structural_similarity_dtype(dtype):
     X = np.random.rand(N, N)
     Y = np.random.rand(N, N)
     if np.dtype(dtype).kind in 'iub':
+        data_range = 255.0
         X = (X * 255).astype(np.uint8)
         Y = (X * 255).astype(np.uint8)
     else:
+        data_range = 1.0
         X = X.astype(dtype, copy=False)
         Y = Y.astype(dtype, copy=False)
 
-    S1 = structural_similarity(X, Y)
+    S1 = structural_similarity(X, Y, data_range=data_range)
     assert S1.dtype == np.float64
 
     assert S1 < 0.1
@@ -150,7 +152,8 @@ def test_structural_similarity_multichannel_deprecated():
     Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
     Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
     with expected_warnings(["`multichannel` is a deprecated argument"]):
-        S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3)
+        S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3,
+                data_range=255)
     assert_almost_equal(S1, S2)
 
 
@@ -163,7 +166,7 @@ def test_structural_similarity_nD(dtype):
         X = (np.random.rand(*xsize) * 255).astype(dtype)
         Y = (np.random.rand(*xsize) * 255).astype(dtype)
 
-        mssim = structural_similarity(X, Y, win_size=3)
+        mssim = structural_similarity(X, Y, win_size=3, data_range=255.0)
         assert mssim.dtype == np.float64
         assert mssim < 0.05
 
@@ -204,28 +207,44 @@ def test_gaussian_structural_similarity_vs_IPOL():
     https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
     """
     mssim_IPOL = 0.357959091663361
+    assert cam.dtype == np.uint8
+    assert cam_noisy.dtype == np.uint8
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
 
 
-def test_mssim_vs_legacy():
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+)
+def test_mssim_vs_legacy(dtype):
     # check that ssim with default options matches skimage 0.17 result
     mssim_skimage_0pt17 = 0.3674518327910367
-    mssim = structural_similarity(cam, cam_noisy)
+    assert cam.dtype == np.uint8
+    assert cam_noisy.dtype == np.uint8
+    mssim = structural_similarity(cam.astype(dtype),
+                                  cam_noisy.astype(dtype), data_range=255)
     assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
-def test_mssim_mixed_dtype():
+def test_ssim_warns_about_data_range():
     mssim = structural_similarity(cam, cam_noisy)
-    with expected_warnings(['Inputs have mismatched dtype']):
-        mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.float32))
-    assert_almost_equal(mssim, mssim_mixed)
+    with expected_warnings(['Setting data_range based on im1.dtype']):
+        mssim_uint16 = structural_similarity(cam.astype(np.uint16),
+                                             cam_noisy.astype(np.uint16))
+    with expected_warnings(['Setting data_range based on im1.dtype',
+                            'Inputs have mismatched dtype']):
+        mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.int32))
 
     # no warning when user supplies data_range
     mssim_mixed = structural_similarity(
         cam, cam_noisy.astype(np.float32), data_range=255)
+
     assert_almost_equal(mssim, mssim_mixed)
+
+    # This is a wrong value, based on the fact that the data type led
+    # to infer the wrong data_range. But we issued a warning.
+    assert mssim_uint16 > 0.99
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -233,10 +252,16 @@ def test_structural_similarity_small_image(dtype):
     X = np.zeros((5, 5), dtype=dtype)
     # structural_similarity can be computed for small images if win_size is
     # a) odd and b) less than or equal to the images' smaller side
-    assert_equal(structural_similarity(X, X, win_size=3), 1.0)
-    assert_equal(structural_similarity(X, X, win_size=5), 1.0)
+    assert_equal(structural_similarity(X, X, win_size=3, data_range=1.0), 1.0)
+    assert_equal(structural_similarity(X, X, win_size=5, data_range=1.0), 1.0)
     # structural_similarity errors for small images if user doesn't specify
     # win_size
+    with pytest.raises(ValueError):
+        structural_similarity(X, X)
+
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+def test_structural_similarity_errors_on_float_without_data_range(dtype):
+    X = np.zeros((64, 64), dtype=dtype)
     with pytest.raises(ValueError):
         structural_similarity(X, X)
 
