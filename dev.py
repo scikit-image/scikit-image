@@ -14,6 +14,8 @@ try:
 except ImportError:
     print("Cannot import dev.py; please install it using")
     print()
-    print("  pip install dev.py")
+    print(
+        "  pip install git+https://github.com/scientific-python/dev.py@main#egg=dev.py"
+    )
     print()
     sys.exit(1)
