@@ -51,7 +51,7 @@ requires = [
     "wheel",
     "setuptools<=65.5",
     "packaging",
-    "Cython>=0.29.24,<3.0",
+    "Cython>=0.29.24",
     "pythran",
     "lazy_loader>=0.1",
 
