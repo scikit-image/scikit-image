@@ -1,4 +1,5 @@
 import inspect
+import re
 from functools import wraps
 from math import atan2
 from math import pi as PI
@@ -497,6 +498,8 @@ class RegionProperties:
     @property
     @_cached
     def inertia_tensor_eigvals(self):
+        if self.label == 1:
+            raise FileExistsError('dummy')
         return _moments.inertia_tensor_eigvals(self.image,
                                                T=self.inertia_tensor)
 
@@ -736,7 +739,8 @@ class RegionProperties:
 _RegionProperties = RegionProperties
 
 
-def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
+def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
+                   errors='raise', fill_value=None):
     """Convert image region properties list into a column dictionary.
 
     Parameters
@@ -759,6 +763,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
+    errors: {'ignore', 'raise'}, optional
+        If 'ignore' suppress error when computing property and return 
+        `fill_value` for that property. Default is 'raise'.
+    fill_value: float or None, optional
+        If `errors='ignore'` return `fill_value` if computing a property raises 
+        an error.
 
     Returns
     -------
@@ -819,6 +829,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 
     out = {}
     n = len(regions)
+    # Keep info about missing properties due to ignored errors (`errors='ignore'`)
+    missing_props_info = {}
     for prop in properties:
         r = regions[0]
         # Copy the original property name so the output will have the
@@ -826,7 +838,36 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         orig_prop = prop
         # determine the current property name for any deprecated property.
         prop = PROPS.get(prop, prop)
-        rp = getattr(r, prop)
+        if errors == 'raise':
+            rp = getattr(r, prop)
+        else:
+            # Try to compute `rp` for all objects to get one that doesn't raise
+            # exceptions
+            for _region in regions:
+                try:
+                    rp = getattr(_region, prop)
+                    break
+                except Exception as err:
+                    continue
+            else:
+                # break was never called --> all objects raise exceptions
+                rp = None
+
+        if rp is None:
+            # Error was raised on all the objects -->
+            # rp is None and `errors='ignore'` --> we do not add the property 
+            # now since we don't know if it would have been a scalar, array or 
+            # tuple property
+            for i in range(n):
+                region = regions[i]
+                label_prop = PROPS.get('label', 'label')
+                label = getattr(region, label_prop)
+                if label not in missing_props_info:
+                    missing_props_info[label] = [prop]
+                else:
+                    missing_props_info[label].append(prop)
+            continue
+
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
         else:
@@ -843,7 +884,13 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
             column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
-                column_buffer[i] = regions[i][prop]
+                try:
+                    column_buffer[i] = regions[i][prop]
+                except Exception as err:
+                    if errors == 'raise':
+                        raise err
+                    else:
+                        column_buffer[i] = fill_value
             out[orig_prop] = np.copy(column_buffer)
         else:
             if isinstance(rp, np.ndarray):
@@ -864,20 +911,128 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             n_columns = len(locs)
             column_data = np.empty((n, n_columns), dtype=dtype)
             for k in range(n):
-                rp = regions[k][prop]
+                try:
+                    rp = regions[k][prop]
+                except Exception as err:
+                    if errors == 'raise':
+                        raise err
+                    else:
+                        rp = [fill_value]*n_columns
                 for i, loc in enumerate(locs):
                     column_data[k, i] = rp[loc]
 
             # add the columns to the output dictionary
             for i, modified_prop in enumerate(modified_props):
                 out[modified_prop] = column_data[:, i]
+    
+    if errors == 'ignore':
+        out = _props_to_dict_fill_value_errors(
+            out, fill_value, missing_props_info, separator)
     return out
 
+def _props_to_dict_fill_value_errors(out, fill_value, missing_props_info, separator):
+    """Insert `fill_value` where the property was missing because it raised an 
+    error.
+
+    Parameters
+    ----------
+    out : dict
+        Dictionary mapping property names to an array of values of that
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
+    fill_value : float or None
+        Value used to fill properties that raised an error (`errors = 'ignore'`)
+        in `regionprops_table`.
+    missing_props_info : dict
+        Dictionary mapping the labels to a list of the property names that 
+        raised an error
+    separator : str, optional
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+        and ``inertia_tensor-1-1`` (where the separator is ``-``).
+
+        Object columns are those that cannot be split in this way because the
+        number of columns would change depending on the object. For example,
+        ``image`` and ``coords``.
+
+    Returns
+    -------
+    out : dict
+        Dictionary mapping property names to an array of values of that
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
+
+        The array of values where the property was missing contains the `fill_value`
+    
+    Notes
+    -----
+    This function is needed only when all objects in `label_image` raised 
+    an error. Since we don't know whether the property is a scalar, a tuple, or
+    an array, the property is missing entirely and we need to insert it with the
+    requested `fill_value`.
+    """    
+    labels = list(out['label'])
+    for label, missing_props in missing_props_info.items():
+        try:
+            label_idx = labels.index(label)
+        except IndexError:
+            # This label raised errors on ALL regionprops --> missing entirely
+            # I don't think this scenario is possible since `label` should never
+            # raise errors.
+            continue
+        for missing_prop in missing_props:
+            norm_missing_prop = _normalize_prop(missing_prop, separator)
+            found_props = [
+                prop for prop in out 
+                if _normalize_prop(prop, separator) == norm_missing_prop
+            ]
+            if found_props:
+                found_prop = found_props[0]
+                out[found_prop] = np.insert(out[found_prop], label_idx, fill_value)
+            else:
+                out[missing_prop] = np.array([fill_value])
+    return out
+
+def _normalize_prop(prop, separator):
+    """Normalise the property name by removing the separator and the integers
+    from the modified property name.
+
+    Parameters
+    ----------
+    prop : str
+        Property name. It can be the modified name like `inertia_tensor_eigvals-1`
+    separator : str, optional
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+        and ``inertia_tensor-1-1`` (where the separator is ``-``).
+
+        Object columns are those that cannot be split in this way because the
+        number of columns would change depending on the object. For example,
+        ``image`` and ``coords``.
+
+    Returns
+    -------
+    str
+        Normalised property name with integers and separators replaced 
+        by empty charachter
+    """    
+    prop = prop.replace(separator, '')
+    prop = re.sub(r'(\d+)', '', prop)
+    return prop
 
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-', extra_properties=None, spacing=None):
+                      cache=True, separator='-', extra_properties=None, 
+                      spacing=None, errors='raise', fill_value=None):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -928,6 +1083,12 @@ def regionprops_table(label_image, intensity_image=None,
         accept the intensity image as the second argument.
     spacing: tuple of float, shape (ndim, )
         The pixel spacing along each axis of the image.
+    errors: {'ignore', 'raise'}, optional
+        If 'ignore' suppress error when computing property and return 
+        `fill_value` for that property. Default is 'raise'.
+    fill_value: float or None, optional
+        If `errors='ignore'` return `fill_value` if computing a property raises 
+        an error.
 
     Returns
     -------
@@ -1031,11 +1192,13 @@ def regionprops_table(label_image, intensity_image=None,
                               cache=cache, extra_properties=extra_properties, spacing=spacing)
 
         out_d = _props_to_dict(regions, properties=properties,
-                               separator=separator)
+                               separator=separator, errors=errors,
+                               fill_value=fill_value)
         return {k: v[:0] for k, v in out_d.items()}
 
     return _props_to_dict(
-        regions, properties=properties, separator=separator
+        regions, properties=properties, separator=separator,
+        errors=errors, fill_value=fill_value
     )
 
 
