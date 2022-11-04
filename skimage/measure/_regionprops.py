@@ -498,8 +498,6 @@ class RegionProperties:
     @property
     @_cached
     def inertia_tensor_eigvals(self):
-        if self.label == 1:
-            raise FileExistsError('dummy')
         return _moments.inertia_tensor_eigvals(self.image,
                                                T=self.inertia_tensor)
 
@@ -764,10 +762,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
     errors: {'ignore', 'raise'}, optional
-        If 'ignore' suppress error when computing property and return 
+        If 'ignore' suppress error when computing property and return
         `fill_value` for that property. Default is 'raise'.
     fill_value: float or None, optional
-        If `errors='ignore'` return `fill_value` if computing a property raises 
+        If `errors='ignore'` return `fill_value` if computing a property raises
         an error.
 
     Returns
@@ -855,8 +853,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
         if rp is None:
             # Error was raised on all the objects -->
-            # rp is None and `errors='ignore'` --> we do not add the property 
-            # now since we don't know if it would have been a scalar, array or 
+            # rp is None and `errors='ignore'` --> we do not add the property
+            # now since we don't know if it would have been a scalar, array or
             # tuple property
             for i in range(n):
                 region = regions[i]
@@ -924,14 +922,14 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
             # add the columns to the output dictionary
             for i, modified_prop in enumerate(modified_props):
                 out[modified_prop] = column_data[:, i]
-    
+
     if errors == 'ignore':
         out = _props_to_dict_fill_value_errors(
             out, fill_value, missing_props_info, separator)
     return out
 
 def _props_to_dict_fill_value_errors(out, fill_value, missing_props_info, separator):
-    """Insert `fill_value` where the property was missing because it raised an 
+    """Insert `fill_value` where the property was missing because it raised an
     error.
 
     Parameters
@@ -945,7 +943,7 @@ def _props_to_dict_fill_value_errors(out, fill_value, missing_props_info, separa
         Value used to fill properties that raised an error (`errors = 'ignore'`)
         in `regionprops_table`.
     missing_props_info : dict
-        Dictionary mapping the labels to a list of the property names that 
+        Dictionary mapping the labels to a list of the property names that
         raised an error
     separator : str, optional
         For non-scalar properties not listed in OBJECT_COLUMNS, each element
@@ -968,14 +966,14 @@ def _props_to_dict_fill_value_errors(out, fill_value, missing_props_info, separa
         regions to rows.
 
         The array of values where the property was missing contains the `fill_value`
-    
+
     Notes
     -----
-    This function is needed only when all objects in `label_image` raised 
+    This function is needed only when all objects in `label_image` raised
     an error. Since we don't know whether the property is a scalar, a tuple, or
     an array, the property is missing entirely and we need to insert it with the
     requested `fill_value`.
-    """    
+    """
     labels = list(out['label'])
     for label, missing_props in missing_props_info.items():
         try:
@@ -988,7 +986,7 @@ def _props_to_dict_fill_value_errors(out, fill_value, missing_props_info, separa
         for missing_prop in missing_props:
             norm_missing_prop = _normalize_prop(missing_prop, separator)
             found_props = [
-                prop for prop in out 
+                prop for prop in out
                 if _normalize_prop(prop, separator) == norm_missing_prop
             ]
             if found_props:
@@ -1021,9 +1019,9 @@ def _normalize_prop(prop, separator):
     Returns
     -------
     str
-        Normalised property name with integers and separators replaced 
+        Normalised property name with integers and separators replaced
         by empty charachter
-    """    
+    """
     prop = prop.replace(separator, '')
     prop = re.sub(r'(\d+)', '', prop)
     return prop
@@ -1031,7 +1029,7 @@ def _normalize_prop(prop, separator):
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-', extra_properties=None, 
+                      cache=True, separator='-', extra_properties=None,
                       spacing=None, errors='raise', fill_value=None):
     """Compute image properties and return them as a pandas-compatible table.
 
@@ -1084,10 +1082,10 @@ def regionprops_table(label_image, intensity_image=None,
     spacing: tuple of float, shape (ndim, )
         The pixel spacing along each axis of the image.
     errors: {'ignore', 'raise'}, optional
-        If 'ignore' suppress error when computing property and return 
+        If 'ignore' suppress error when computing property and return
         `fill_value` for that property. Default is 'raise'.
     fill_value: float or None, optional
-        If `errors='ignore'` return `fill_value` if computing a property raises 
+        If `errors='ignore'` return `fill_value` if computing a property raises
         an error.
 
     Returns
