@@ -79,4 +79,4 @@ requires = [
 
 [tool.dev.py]
 package = 'skimage'
-commands = ["dev.py.build", "dev.py.test", "dev.py.shell", "dev.py.ipython", "dev.py.python", "custom/__init__.py:example"]
+commands = ["dev.py.build", "dev.py.test", "dev.py.shell", "dev.py.ipython", "dev.py.python"]
