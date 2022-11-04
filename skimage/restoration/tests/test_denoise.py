@@ -28,8 +28,13 @@ np.random.seed(1234)
 
 astro = img_as_float(data.astronaut()[:128, :128])
 astro_gray = color.rgb2gray(astro)
+# Make sure that all tests below that rely on 0-1 range are valid:
+assert np.max(astro_gray) <= 1.0
+
 checkerboard_gray = img_as_float(data.checkerboard())
 checkerboard = color.gray2rgb(checkerboard_gray)
+assert np.max(checkerboard_gray) <= 1.0
+
 # versions with one odd-sized dimension
 astro_gray_odd = astro_gray[:, :-1]
 astro_odd = astro[:, :-1]
@@ -170,14 +175,20 @@ def test_denoise_tv_chambolle_weighting():
     img2d += 0.15 * rstate.standard_normal(img2d.shape)
     img2d = np.clip(img2d, 0, 1)
 
+    ssim_noisy = structural_similarity(astro_gray, img2d, data_range=1.0)
+
     # generate 4D image by tiling
     img4d = np.tile(img2d[..., None, None], (1, 1, 2, 2))
 
     w = 0.2
     denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
     denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
-    assert structural_similarity(denoised_2d,
-                                 denoised_4d[:, :, 0, 0]) > 0.99
+    assert denoised_2d.dtype == np.float64
+    assert denoised_4d.dtype == np.float64
+    ssim_2d = structural_similarity(denoised_2d, astro_gray, data_range=1.0)
+    ssim = structural_similarity(denoised_2d, denoised_4d[:, :, 0, 0], data_range=1.0)
+    assert ssim > 0.98
+    assert ssim_2d > ssim_noisy # Quality must increase after denoising
 
 
 def test_denoise_tv_bregman_2d():
