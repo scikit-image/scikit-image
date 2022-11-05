@@ -852,8 +852,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
                 rp = None
 
         if rp is None:
-            # Error was raised on all the objects so we add the property 
-            # without modified name --> we cannot modify the name because 
+            # Error was raised on all the objects so we add the property
+            # without modified name --> we cannot modify the name because
             # we do not know the type of the property
             out[prop] = np.full(n, fill_value, dtype=float)
             continue
