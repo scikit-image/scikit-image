@@ -826,8 +826,6 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
     out = {}
     n = len(regions)
-    # Keep info about missing properties due to ignored errors (`errors='ignore'`)
-    missing_props_info = {}
     for prop in properties:
         r = regions[0]
         # Copy the original property name so the output will have the
