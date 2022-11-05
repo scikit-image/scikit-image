@@ -526,7 +526,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # computing gaussian laplace
     # average s**2 provides scale invariance
     image_cube = np.empty(shape=image.shape + tuple([len(sigma_list)]))
-    for j,s in enumerate(sigma_list):
+    for j, s in enumerate(sigma_list):
         image_cube[...,j] = -ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
@@ -666,7 +666,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     image_cube = np.empty(shape=image.shape + tuple([len(sigma_list)]))
-    for j,s in enumerate(sigma_list):
+    for j, s in enumerate(sigma_list):
         image_cube[...,j] = _hessian_matrix_det(image, s)
 
     local_maxima = peak_local_max(image_cube,
