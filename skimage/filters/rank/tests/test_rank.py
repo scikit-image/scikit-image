@@ -59,8 +59,8 @@ ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
 ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
-class TestRank():
-    def setup(self):
+class TestRank:
+    def setup_method(self):
         np.random.seed(0)
         # This image is used along with @test_parallel
         # to ensure that the same seed is used for each thread.

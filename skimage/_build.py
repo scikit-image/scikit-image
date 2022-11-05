@@ -1,3 +1,6 @@
+# We need this file for the numpy.distutils build.  Remove when we
+# no longer support numpy.distutils.
+
 import sys
 import os
 from packaging import version
@@ -34,6 +37,8 @@ def cython(pyx_files, working_path=''):
         The input .pyx files.
 
     """
+    # We need this file for the numpy.distutils build.  Remove when we
+    # no longer support numpy.distutils.
     # Do not build cython files if target is clean
     if len(sys.argv) >= 2 and sys.argv[1] == 'clean':
         return

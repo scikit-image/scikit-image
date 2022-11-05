@@ -1,5 +1,6 @@
-Cython>=0.29.21,!=0.29.18
+meson-python>=0.10.0
+Cython>=0.29.21
 packaging>=20.0
 pythran
 wheel
-numpy>=1.20
+numpy>=1.21.1

@@ -129,7 +129,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         channels or another spatial dimension. This argument is deprecated:
         specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
@@ -264,59 +264,87 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
                        isotropic=True, *, channel_axis=None,
                        multichannel=False):
-    """Perform total-variation denoising using split-Bregman optimization.
+    r"""Perform total variation denoising using split-Bregman optimization.
 
-    Total-variation denoising (also know as total-variation regularization)
-    tries to find an image with less total-variation under the constraint
-    of being similar to the input image, which is controlled by the
-    regularization parameter ([1]_, [2]_, [3]_, [4]_).
+    Given :math:`f`, a noisy image (input data),
+    total variation denoising (also known as total variation regularization)
+    aims to find an image :math:`u` with less total variation than :math:`f`,
+    under the constraint that :math:`u` remain similar to :math:`f`.
+    This can be expressed by the Rudin--Osher--Fatemi (ROF) minimization
+    problem:
+
+    .. math::
+
+        \min_{u} \sum_{i=0}^{N-1} \left( \left| \nabla{u_i} \right| + \frac{\lambda}{2}(f_i - u_i)^2 \right)
+
+    where :math:`\lambda` is a positive parameter.
+    The first term of this cost function is the total variation;
+    the second term represents data fidelity. As :math:`\lambda \to 0`,
+    the total variation term dominates, forcing the solution to have smaller
+    total variation, at the expense of looking less like the input data.
+
+    This code is an implementation of the split Bregman algorithm of Goldstein
+    and Osher to solve the ROF problem ([1]_, [2]_, [3]_).
 
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using img_as_float`).
-    weight : float
-        Denoising weight. The smaller the `weight`, the more denoising (at
-        the expense of less similarity to the `input`). The regularization
-        parameter `lambda` is chosen as `2 * weight`.
+        Input image to be denoised (converted using :func:`~.img_as_float`).
+    weight : float, optional
+        Denoising weight. It is equal to :math:`\frac{\lambda}{2}`. Therefore,
+        the smaller the `weight`, the more denoising (at
+        the expense of less similarity to `image`).
     eps : float, optional
-        Relative difference of the value of the cost function that determines
-        the stop criterion. The algorithm stops when::
-
-            SUM((u(n) - u(n-1))**2) < eps
-
+        Tolerance :math:`\varepsilon > 0` for the stop criterion:
+        The algorithm stops when :math:`\|u_n - u_{n-1}\|_2 < \varepsilon`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
     multichannel : bool, optional
-        Apply total-variation denoising separately for each channel. This
-        option should be true for color images, otherwise the denoising is
-        also applied in the channels dimension. This argument is deprecated:
-        specify `channel_axis` instead.
+        Whether or not to apply denoising separately to each channel.
+        Should always be set to ``True`` for color images, otherwise the
+        denoising is also applied in the channels dimension.
+        This argument is deprecated: specify `channel_axis` instead.
 
     Returns
     -------
     u : ndarray
         Denoised image.
 
+    Notes
+    -----
+    Ensure that `channel_axis` parameter is set appropriately for color
+    images.
+
+    The principle of total variation denoising is explained in [4]_.
+    It is about minimizing the total variation of an image,
+    which can be roughly described as
+    the integral of the norm of the image gradient. Total variation
+    denoising tends to produce cartoon-like images, that is,
+    piecewise-constant images.
+
+    See Also
+    --------
+    denoise_tv_chambolle : Perform total variation denoising in nD.
+
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Total_variation_denoising
-    .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
+    .. [1] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
            Regularized Problems",
-           ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
-    .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
+           https://ww3.math.ucla.edu/camreport/cam08-29.pdf
+    .. [2] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
            https://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
-    .. [4] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+    .. [3] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+    .. [4] https://en.wikipedia.org/wiki/Total_variation_denoising
 
     """
     image = np.atleast_3d(img_as_float(image))
@@ -437,32 +465,50 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
 @utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
                          multichannel=False, *, channel_axis=None):
-    """Perform total-variation denoising on n-dimensional images.
+    r"""Perform total variation denoising in nD.
+
+    Given :math:`f`, a noisy image (input data),
+    total variation denoising (also known as total variation regularization)
+    aims to find an image :math:`u` with less total variation than :math:`f`,
+    under the constraint that :math:`u` remain similar to :math:`f`.
+    This can be expressed by the Rudin--Osher--Fatemi (ROF) minimization
+    problem:
+
+    .. math::
+
+        \min_{u} \sum_{i=0}^{N-1} \left( \left| \nabla{u_i} \right| + \frac{\lambda}{2}(f_i - u_i)^2 \right)
+
+    where :math:`\lambda` is a positive parameter.
+    The first term of this cost function is the total variation;
+    the second term represents data fidelity. As :math:`\lambda \to 0`,
+    the total variation term dominates, forcing the solution to have smaller
+    total variation, at the expense of looking less like the input data.
+
+    This code is an implementation of the algorithm proposed by Chambolle
+    in [1]_ to solve the ROF problem.
 
     Parameters
     ----------
-    image : ndarray of ints, uints or floats
-        Input data to be denoised. `image` can be of any numeric type,
-        but it is cast into an ndarray of floats for the computation
-        of the denoised image.
+    image : ndarray
+        Input image to be denoised. If its dtype is not float, it gets
+        converted with :func:`~.img_as_float`.
     weight : float, optional
-        Denoising weight. The greater `weight`, the more denoising (at
-        the expense of fidelity to `input`).
+        Denoising weight. It is equal to :math:`\frac{1}{\lambda}`. Therefore,
+        the greater the `weight`, the more denoising (at the expense of
+        fidelity to `image`).
     eps : float, optional
-        Relative difference of the value of the cost function that
-        determines the stop criterion. The algorithm stops when:
-
-            (E_(n-1) - E_n) < eps * E_0
-
+        Tolerance :math:`\varepsilon > 0` for the stop criterion (compares to
+        absolute value of relative difference of the cost function :math:`E`):
+        The algorithm stops when :math:`|E_{n-1} - E_n| < \varepsilon * E_0`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
     multichannel : bool, optional
-        Apply total-variation denoising separately for each channel. This
-        option should be true for color images, otherwise the denoising is
-        also applied in the channels dimension. This argument is deprecated:
-        specify `channel_axis` instead.
+        Whether or not to apply denoising separately to each channel.
+        Should always be set to ``True`` for color images, otherwise the
+        denoising is also applied in the channels dimension.
+        This argument is deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
@@ -471,30 +517,32 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
 
     Returns
     -------
-    out : ndarray
+    u : ndarray
         Denoised image.
 
     Notes
     -----
-    Make sure to set the multichannel parameter appropriately for color images.
+    Make sure to set the `channel_axis` parameter appropriately for color
+    images.
 
-    The principle of total variation denoising is explained in
-    https://en.wikipedia.org/wiki/Total_variation_denoising
-
-    The principle of total variation denoising is to minimize the
-    total variation of the image, which can be roughly described as
+    The principle of total variation denoising is explained in [2]_.
+    It is about minimizing the total variation of an image,
+    which can be roughly described as
     the integral of the norm of the image gradient. Total variation
-    denoising tends to produce "cartoon-like" images, that is,
+    denoising tends to produce cartoon-like images, that is,
     piecewise-constant images.
 
-    This code is an implementation of the algorithm of Rudin, Fatemi and Osher
-    that was proposed by Chambolle in [1]_.
+    See Also
+    --------
+    denoise_tv_bregman : Perform total variation denoising using split-Bregman
+        optimization.
 
     References
     ----------
     .. [1] A. Chambolle, An algorithm for total variation minimization and
            applications, Journal of Mathematical Imaging and Vision,
            Springer, 2004, 20, 89-97.
+    .. [2] https://en.wikipedia.org/wiki/Total_variation_denoising
 
     Examples
     --------
@@ -800,7 +848,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         .. versionadded:: 0.16
            ``rescale_sigma`` was introduced in 0.16
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
@@ -952,7 +1000,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
         Estimate sigma separately for each channel. This argument is
         deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 

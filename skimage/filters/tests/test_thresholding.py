@@ -31,7 +31,7 @@ from skimage.filters.thresholding import (_cross_entropy, _mean_std,
 
 
 class TestSimpleImage():
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[0, 0, 1, 3, 5],
                                [0, 1, 4, 3, 4],
                                [1, 2, 5, 4, 1],
