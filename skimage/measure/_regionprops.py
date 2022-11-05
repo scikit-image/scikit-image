@@ -1,5 +1,4 @@
 import inspect
-import re
 from functools import wraps
 from math import atan2
 from math import pi as PI
