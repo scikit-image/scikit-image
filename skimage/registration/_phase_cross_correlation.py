@@ -114,6 +114,37 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
 
 
 def _disambiguate_shift(reference_image, moving_image, shifts):
+    """Determine the correct real-space shift based on periodic shift.
+
+    When determining a translation shift from phase cross-correlation in
+    Fourier space, the shift is only correct to within a period of the image
+    size along each axis, resulting in $2^n$ possible shifts, where $n$ is the
+    number of dimensions of the image. This function checks the
+    cross-correlation in real space for each of those shifts, and returns the
+    one with the highest cross-correlation.
+
+    The strategy we use is to perform the shift on the moving image *using the
+    'grid-wrap' mode* in `scipy.ndimage`. The original image borders then
+    define $2^n$ quadrants, which we cross-correlate with the reference image
+    in turn using slicing. The entire operation is thus $O(2^n + m)$, where
+    $m$ is the number of pixels in the image (and typically dominates).
+
+    Parameters
+    ----------
+    reference_image : numpy array
+        The reference (non-moving) image.
+    moving_image : numpy array
+        The moving image: applying the shift to this image overlays it on the
+        reference image. Must be the same shape as the reference image.
+    shifts : tuple of float
+        The shifts to apply to each axis of the moving image, *modulo* image
+        size. The length of ``shifts`` must be equal to ``moving_image.ndim``.
+
+    Returns
+    -------
+    real_shift : tuple of float
+        The shifts disambiguated in real space.
+    """
     shape = reference_image.shape
     positive_shifts = [shift % s for shift, s in zip(shifts, shape)]
     negative_shifts = [shift - s for shift, s in zip(positive_shifts, shape)]
