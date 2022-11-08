@@ -160,15 +160,21 @@ def _disambiguate_shift(reference_image, moving_image, shifts):
     for test_slice in itertools.product(*splits_per_dim):
         reference_tile = np.reshape(reference_image[test_slice], -1)
         moving_tile = np.reshape(shifted[test_slice], -1)
-        corr, _ = stats.pearsonr(reference_tile, moving_tile)
+        corr = -1.0
+        if reference_tile.size > 2:
+            corr, _ = stats.pearsonr(reference_tile, moving_tile)
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
-    real_shift = []
+    real_shift_acc = []
     for sl, pos_shift, neg_shift in zip(
             max_slice, positive_shifts, negative_shifts
             ):
-        real_shift.append(neg_shift if sl.start == 0 else pos_shift)
+        real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
+    if not subpixel:
+        real_shift = tuple(map(int, real_shift_acc))
+    else:
+        real_shift = tuple(real_shift_acc)
     return real_shift
 
 

@@ -204,3 +204,17 @@ def test_disambiguate_2d(shift0, shift1):
             reference, moving, disambiguate=True, return_error=False
             )
     np.testing.assert_equal(shift, computed_shift)
+
+
+def test_disambiguate_zero_shift():
+    """When the shift is 0, disambiguation becomes degenerate.
+
+    Some quadrants become size 0, which prevents computation of
+    cross-correlation. This test ensures that nothing bad happens in that
+    scenario.
+    """
+    image = camera()
+    computed_shift = phase_cross_correlation(
+            image, image, disambiguate=True, return_error=False
+            )
+    assert computed_shift == (0, 0)
