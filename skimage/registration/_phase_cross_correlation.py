@@ -3,8 +3,12 @@ Port of Manuel Guizar's code from:
 http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-image-registration-by-cross-correlation
 """
 
+import itertools
+
 import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
+from scipy import ndimage as ndi
+from scipy import stats
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
@@ -109,8 +113,37 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
+def _disambiguate_shift(reference_image, moving_image, shifts):
+    shape = reference_image.shape
+    positive_shifts = [shift % s for shift, s in zip(shifts, shape)]
+    negative_shifts = [shift - s for shift, s in zip(positive_shifts, shape)]
+    subpixel = np.any(np.array(shifts) % 1 != 0)
+    interp_order = 3 if subpixel else 0
+    shifted = ndi.shift(
+            moving_image, shifts, mode='grid-wrap', order=interp_order
+            )
+    indices = np.round(positive_shifts).astype(int)
+    splits_per_dim = [(slice(0, i), slice(i, None)) for i in indices]
+    max_corr = -1.0
+    max_slice = None
+    for test_slice in itertools.product(*splits_per_dim):
+        reference_tile = np.reshape(reference_image[test_slice], -1)
+        moving_tile = np.reshape(shifted[test_slice], -1)
+        corr, _ = stats.pearsonr(reference_tile, moving_tile)
+        if corr > max_corr:
+            max_corr = corr
+            max_slice = test_slice
+    real_shift = []
+    for sl, pos_shift, neg_shift in zip(
+            max_slice, positive_shifts, negative_shifts
+            ):
+        real_shift.append(neg_shift if sl.start == 0 else pos_shift)
+    return real_shift
+
+
 def phase_cross_correlation(reference_image, moving_image, *,
                             upsample_factor=1, space="real",
+                            disambiguate=False,
                             return_error=True, reference_mask=None,
                             moving_mask=None, overlap_ratio=0.3,
                             normalization="phase"):
@@ -141,6 +174,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
         data will bypass FFT of input data. Case insensitive. Not
         used if any of ``reference_mask`` or ``moving_mask`` is not
         None.
+    disambiguate : bool
+        The shifts returned by this function are only accurate *modulo* the
+        image shape, due to the periodic nature of the Fourier transform. If
+        this is set to ``True``, the *real* space cross-correlation is
+        computed for each possible shift, and the shift with the highest
+        cross-correlation of the overlapping area is returned.
     return_error : bool, optional
         Returns error and phase difference if on, otherwise only
         shifts are returned. Has noeffect if any of ``reference_mask`` or
@@ -295,6 +334,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
     for dim in range(src_freq.ndim):
         if shape[dim] == 1:
             shifts[dim] = 0
+
+    if disambiguate:
+        if space.lower() != 'real':
+            reference_image = ifftn(reference_image)
+            moving_image = ifftn(moving_image)
+        shifts = _disambiguate_shift(reference_image, moving_image, shifts)
 
     if return_error:
         # Redirect user to masked_phase_cross_correlation if NaNs are observed
