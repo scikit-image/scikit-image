@@ -153,7 +153,7 @@ def test_structural_similarity_multichannel_deprecated():
     Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
     with expected_warnings(["`multichannel` is a deprecated argument"]):
         S2 = structural_similarity(Xc, Yc, multichannel=True, win_size=3,
-                data_range=255)
+                                   data_range=255)
     assert_almost_equal(S1, S2)
 
 
@@ -232,8 +232,13 @@ def test_ssim_warns_about_data_range():
     with expected_warnings(['Setting data_range based on im1.dtype']):
         mssim_uint16 = structural_similarity(cam.astype(np.uint16),
                                              cam_noisy.astype(np.uint16))
+        # The value computed for mssim_uint16 is wrong, because the
+        # dtype of im1 led to infer an erroneous data_range. The user
+        # is getting a warning about avoiding mistakes.
+        assert mssim_uint16 > 0.99
+
     with expected_warnings(['Setting data_range based on im1.dtype',
-                            'Inputs have mismatched dtype']):
+                            'Inputs have mismatched dtypes']):
         mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.int32))
 
     # no warning when user supplies data_range
@@ -242,9 +247,6 @@ def test_ssim_warns_about_data_range():
 
     assert_almost_equal(mssim, mssim_mixed)
 
-    # This is a wrong value, based on the fact that the data type led
-    # to infer the wrong data_range. But we issued a warning.
-    assert mssim_uint16 > 0.99
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

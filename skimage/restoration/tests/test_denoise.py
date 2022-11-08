@@ -187,8 +187,8 @@ def test_denoise_tv_chambolle_weighting():
     assert denoised_4d.dtype == np.float64
     ssim_2d = structural_similarity(denoised_2d, astro_gray, data_range=1.0)
     ssim = structural_similarity(denoised_2d, denoised_4d[:, :, 0, 0], data_range=1.0)
-    assert ssim > 0.98
-    assert ssim_2d > ssim_noisy # Quality must increase after denoising
+    assert ssim > 0.98 # clsoe to 1.0
+    assert ssim_2d > ssim_noisy # quality must increase after denoising
 
 
 def test_denoise_tv_bregman_2d():

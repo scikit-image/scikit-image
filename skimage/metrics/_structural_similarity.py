@@ -197,13 +197,13 @@ def structural_similarity(im1, im2,
         if (np.issubdtype(im1.dtype, np.floating) or
             np.issubdtype(im2.dtype, np.floating)):
             raise ValueError(
-                'Since image dtype is floating point, the data_range '
-                'parameter must be specified. Carefully read the '
-                'documentation (including the note). It is recommended '
-                'to always specify the data_range anyway.')
+                'Since image dtype is floating point, you must specify '
+                'the data_range parameter. Please read the documentation '
+                'carefully (including the note). It is recommended that '
+                'you always specify the data_range anyway.')
         if im1.dtype != im2.dtype:
-            warn("Inputs have mismatched dtype. Setting data_range based on im1.dtype.",
-                    stacklevel=2)
+            warn("Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
+                 stacklevel=2)
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
         if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
