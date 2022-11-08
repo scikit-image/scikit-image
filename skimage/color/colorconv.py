@@ -1065,6 +1065,17 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
     .. [2] https://en.wikipedia.org/wiki/Lab_color_space
     """
+    xyz, n_invalid = _lab2xyz(lab, illuminant, observer, channel_axis=channel_axis)
+    if n_invalid:
+        warn(f"Color data out of range: Z < 0 in {n_invalid} pixels", stacklevel=3)
+    return xyz
+
+
+def _lab2xyz(lab, illuminant, observer, *, channel_axis=-1):
+    """
+    Like lab2xyz, but return the invalid pixels in the z channel
+    as a separate array for correct warning propagation.
+    """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
 
     L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -1072,10 +1083,10 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     x = (a / 500.) + y
     z = y - (b / 200.)
 
-    if np.any(z < 0):
-        invalid = np.nonzero(z < 0)
-        warn(f'Color data out of range: Z < 0 in {invalid[0].size} pixels',
-             stacklevel=3)
+    invalid = np.atleast_1d(z < 0).nonzero()
+    n_invalid = invalid[0].size
+    if n_invalid:
+        # warning will be emitted by caller.
         z[invalid] = 0
 
     out = np.stack([x, y, z], axis=-1)
@@ -1087,7 +1098,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     # rescale to the reference white (illuminant)
     xyz_ref_white = get_xyz_coords(illuminant, observer)
     out *= xyz_ref_white
-    return out
+    return out, n_invalid
 
 
 @channel_as_last_axis()
@@ -1180,7 +1191,15 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
     """
-    return xyz2rgb(lab2xyz(lab, illuminant, observer))
+    xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
+    if n_invalid != 0:
+        warn(
+            "Color conversion from LAB to RGB via negative Z values. "
+            "{n_invalid} z-values have been clipped to zero.",
+            stacklevel=3,
+        )
+
+    return xyz2rgb(xyz)
 
 
 @channel_as_last_axis()
