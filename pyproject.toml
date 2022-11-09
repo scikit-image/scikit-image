@@ -77,6 +77,6 @@ requires = [
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
 
-[tool.dev.py]
+[tool.devpy]
 package = 'skimage'
-commands = ["dev.py.build", "dev.py.test", "dev.py.shell", "dev.py.ipython", "dev.py.python"]
+commands = ["devpy.build", "devpy.test", "devpy.shell", "devpy.ipython", "devpy.python"]
