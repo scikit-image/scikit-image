@@ -56,12 +56,16 @@ Here's the long and short of it:
          python -m venv skimage-dev
          # Activate it
          source skimage-dev/bin/activate
-         # Install main development and runtime dependencies of networkx
+         # Install main development and runtime dependencies
          pip install -r requirements.txt
-         # Build and install scikit-image from source
-         pip install -e .
+         # Install build dependencies of scikit-image
+         pip install -r requirements/build.txt
+         # Build scikit-image from source
+         ./dev.py build
          # Test your installation
-         pytest --pyargs skimage
+         ./dev.py test
+         # Try the new version in IPython
+         ./dev.py ipython
 
      * ``conda`` (Anaconda or Miniconda)
 
@@ -71,12 +75,18 @@ Here's the long and short of it:
          conda create --name skimage-dev
          # Activate it
          conda activate skimage-dev
-         # Install main development and runtime dependencies of networkx
+         # Install main development and runtime dependencies
          conda install -c conda-forge --file requirements.txt
-         # Install scikit-image from source
-         pip install -e .
+         # Install build dependencies of scikit-image
+         conda install -c conda-forge --file requirements/build.txt
+         # Build scikit-image from source
+         ./dev.py build
          # Test your installation
-         pytest --pyargs skimage
+         ./dev.py test
+         # Try the new version in IPython
+         ./dev.py ipython
+
+   * For more information about building and using the dev.py package, see ``meson.md``.
 
    * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
      when you do a ``git commit``::
