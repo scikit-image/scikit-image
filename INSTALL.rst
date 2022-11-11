@@ -108,6 +108,7 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
+To access the full selection of demo datasets, use ``scikit-image[data]``.
 To include a selection of other scientific Python packages that expand
 ``scikit-image``'s capabilities to include, e.g., parallel processing, you
 can install the package ``scikit-image[optional]``:
@@ -166,7 +167,8 @@ Downloading all demo datasets
 Some of the data used in our examples is hosted online and is not installed
 by default by the procedures explained above. Data are downloaded once, at the
 first call, but this requires an internet connection. If you prefer downloading
-all the demo datasets to be able to work offline, you can run this command:
+all the demo datasets to be able to work offline, ensure that package ``pooch``
+is installed and then run this command:
 
 .. code-block:: sh
 
@@ -468,6 +470,14 @@ Full requirements list
 **Developer Requirements**
 
 .. include:: ../../requirements/developer.txt
+   :literal:
+
+**Data Requirements**
+
+The full selection of demo datasets is only available with the
+following installed:
+
+.. include:: ../../requirements/data.txt
    :literal:
 
 **Optional Requirements**
