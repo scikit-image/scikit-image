@@ -4,4 +4,4 @@ packaging>=20.0
 pythran
 wheel
 numpy>=1.21.1
-git+https://github.com/scientific-python/devpy
+git+https://github.com/scientific-python/devpy@main#egg=devpy
