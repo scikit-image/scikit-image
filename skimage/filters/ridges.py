@@ -40,7 +40,8 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
         Sorting of eigenvalues by values ('val') or absolute values ('abs'),
         or without sorting ('none'). Default is 'none'.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -115,7 +116,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -194,7 +196,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -280,7 +283,8 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -390,7 +394,8 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Modes match the
+        behavior of :func:`scipy.ndimage.convolve`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.

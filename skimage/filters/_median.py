@@ -28,7 +28,8 @@ def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
     mode : {'reflect', 'constant', 'nearest', 'mirror','‘wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         ``cval`` is the value when mode is equal to 'constant'.
-        Default is 'nearest'.
+        Default is 'nearest'. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
 
         .. versionadded:: 0.15
            ``mode`` is used when ``behavior='ndimage'``.

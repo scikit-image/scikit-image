@@ -69,7 +69,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     return image, output_shape
 
 
-def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
+def resize(image, output_shape, order=None, mode='mirror', cval=0, clip=True,
            preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
@@ -99,9 +99,12 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         The order of the spline interpolation, default is 0 if
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -168,8 +171,11 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     # Save input value range for clip
     img_bounds = np.array([image.min(), image.max()]) if clip else None
 
-    # Translate modes used by np.pad to those used by scipy.ndimage
-    ndi_mode = _to_ndimage_mode(mode)
+    if mode == 'constant':
+        # scipy.ndimage's 'grid-constant' is like _warp_fast's 'constant'
+        ndi_mode = 'grid-constant'
+    else:
+        ndi_mode = mode
     if anti_aliasing:
         if anti_aliasing_sigma is None:
             anti_aliasing_sigma = np.maximum(0, (factors - 1) / 2)
@@ -243,7 +249,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 @channel_as_last_axis()
 @deprecate_multichannel_kwarg(multichannel_position=7)
-def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
+def rescale(image, scale, order=None, mode='mirror', cval=0, clip=True,
             preserve_range=False, multichannel=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
             channel_axis=None):
@@ -273,9 +279,12 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         The order of the spline interpolation, default is 0 if
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -379,9 +388,12 @@ def rotate(image, angle, resize=False, center=None, order=None,
         The order of the spline interpolation, default is 0 if
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -529,7 +541,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=None, mode='reflect', cval=0, clip=True,
+          output_shape=None, order=None, mode='mirror', cval=0, clip=True,
           preserve_range=False):
     """Perform a swirl transformation.
 
@@ -561,10 +573,12 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         The order of the spline interpolation, default is 0 if
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode, with 'constant' used as the default. Modes match
-        the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -708,9 +722,12 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
 
     Other parameters
     ----------------
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -804,9 +821,12 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
          - 5: Bi-quintic
 
          Default is 0 if image.dtype is bool and 1 otherwise.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.
+        to the given mode.  Modes match the behaviour of
+        :func:`scipy.ndimage.zoom` with the exception that 'constant' is
+        internally converted to 'grid-constant' for consistency with legacy
+        skimage Cython code.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -944,22 +964,36 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         if matrix is not None:
             matrix = matrix.astype(image.dtype)
             ctype = 'float32_t' if image.dtype == np.float32 else 'float64_t'
+
+            # convert from scipy.ndimage name to numpy.pad name
+            np_mode_translation_dict = {
+                'nearest': 'edge',
+                'reflect': 'symmetric',
+                'symmetric': 'reflect'
+            }
+
+            np_mode = np_mode_translation_dict.get(mode, mode)
             if image.ndim == 2:
                 warped = _warp_fast[ctype](image, matrix,
                                            output_shape=output_shape,
-                                           order=order, mode=mode, cval=cval)
+                                           order=order, mode=np_mode,
+                                           cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
                     dims.append(_warp_fast[ctype](image[..., dim], matrix,
                                                   output_shape=output_shape,
-                                                  order=order, mode=mode,
+                                                  order=order, mode=np_mode,
                                                   cval=cval))
                 warped = np.dstack(dims)
 
     if warped is None:
         # use ndi.map_coordinates
-
+        if mode == 'constant':
+            # scipy.ndimage's 'grid-constant' is like _warp_fast's 'constant'
+            ndi_mode = 'grid-constant'
+        else:
+            ndi_mode = mode
         if (isinstance(inverse_map, np.ndarray) and
                 inverse_map.shape == (3, 3)):
             # inverse_map is a transformation matrix as numpy array,
@@ -994,7 +1028,6 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
 
-        ndi_mode = _to_ndimage_mode(mode)
         warped = ndi.map_coordinates(image, coords, prefilter=prefilter,
                                      mode=ndi_mode, order=order, cval=cval)
 

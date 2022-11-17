@@ -385,7 +385,7 @@ def test_order_angles_golden_ratio():
 def test_iradon_sart():
     debug = False
 
-    image = rescale(PHANTOM, 0.8, mode='reflect',
+    image = rescale(PHANTOM, 0.8, mode='mirror',
                     channel_axis=None, anti_aliasing=False)
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)

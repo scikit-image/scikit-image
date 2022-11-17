@@ -40,7 +40,7 @@ row_coords, col_coords = np.meshgrid(np.arange(nr), np.arange(nc),
                                      indexing='ij')
 
 image1_warp = warp(image1, np.array([row_coords + v, col_coords + u]),
-                   mode='edge')
+                   mode='nearest')
 
 # build an RGB image with the unregistered sequence
 seq_im = np.zeros((nr, nc, 3))

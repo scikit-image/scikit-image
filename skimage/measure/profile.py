@@ -28,7 +28,8 @@ def profile_line(image, src, dst, linewidth=1,
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
-        How to compute any values falling outside of the image.
+        How to compute any values falling outside of the image. Modes match the
+        behaviour of :func:`scipy.ndimage.zoom`.
     cval : float, optional
         If `mode` is 'constant', what constant value to use outside the image.
     reduce_func : callable, optional

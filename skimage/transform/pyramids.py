@@ -31,7 +31,7 @@ def _check_factor(factor):
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False,
+                   mode='mirror', cval=0, multichannel=False,
                    preserve_range=False, *, channel_axis=None):
     """Smooth and then downsample image.
 
@@ -50,7 +50,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         `skimage.transform.warp` for detail.
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
+        cval is the value when mode is equal to 'constant'. Modes match the
+        behaviour of :func:`scipy.ndimage.zoom`.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
@@ -104,7 +105,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False,
+                   mode='mirror', cval=0, multichannel=False,
                    preserve_range=False, *, channel_axis=None):
     """Upsample and then smooth image.
 
@@ -123,7 +124,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         `skimage.transform.warp` for detail.
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
+        cval is the value when mode is equal to 'constant'. Modes match the
+        behaviour of :func:`scipy.ndimage.zoom`.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
@@ -176,7 +178,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=False,
+                     mode='mirror', cval=0, multichannel=False,
                      preserve_range=False, *, channel_axis=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
@@ -206,7 +208,8 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         `skimage.transform.warp` for detail.
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
+        cval is the value when mode is equal to 'constant'. Modes match the
+        behaviour of :func:`scipy.ndimage.zoom`.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional
@@ -267,7 +270,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
 @utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0, multichannel=False,
+                      mode='mirror', cval=0, multichannel=False,
                       preserve_range=False, *, channel_axis=None):
     """Yield images of the laplacian pyramid formed by the input image.
 
@@ -300,7 +303,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         `skimage.transform.warp` for detail.
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
+        cval is the value when mode is equal to 'constant'. Modes match the
+        behaviour of :func:`scipy.ndimage.zoom`.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     multichannel : bool, optional

@@ -150,7 +150,8 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
     mode : str or sequence of str, optional
         The boundary mode for the convolution. See `scipy.ndimage.convolve`
         for a description of the modes. This can be either a single boundary
-        mode or one boundary mode per axis.
+        mode or one boundary mode per axis. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         When `mode` is ``'constant'``, this is the constant used in values
         outside the boundary of the image data.
@@ -207,7 +208,8 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     mode : str or sequence of str, optional
         The boundary mode for the convolution. See `scipy.ndimage.convolve`
         for a description of the modes. This can be either a single boundary
-        mode or one boundary mode per axis.
+        mode or one boundary mode per axis. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         When `mode` is ``'constant'``, this is the constant used in values
         outside the boundary of the image data.
@@ -323,7 +325,8 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     mode : str or sequence of str, optional
         The boundary mode for the convolution. See `scipy.ndimage.convolve`
         for a description of the modes. This can be either a single boundary
-        mode or one boundary mode per axis.
+        mode or one boundary mode per axis. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         When `mode` is ``'constant'``, this is the constant used in values
         outside the boundary of the image data.
@@ -453,7 +456,8 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     mode : str or sequence of str, optional
         The boundary mode for the convolution. See `scipy.ndimage.convolve`
         for a description of the modes. This can be either a single boundary
-        mode or one boundary mode per axis.
+        mode or one boundary mode per axis. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         When `mode` is ``'constant'``, this is the constant used in values
         outside the boundary of the image data.
@@ -722,7 +726,8 @@ def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     mode : str or sequence of str, optional
         The boundary mode for the convolution. See `scipy.ndimage.convolve`
         for a description of the modes. This can be either a single boundary
-        mode or one boundary mode per axis.
+        mode or one boundary mode per axis. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : float, optional
         When `mode` is ``'constant'``, this is the constant used in values
         outside the boundary of the image data.

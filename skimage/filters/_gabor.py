@@ -146,7 +146,8 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     offset : float, optional
         Phase offset of harmonic function in radians.
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
-        Mode used to convolve image with a kernel, passed to `ndi.convolve`
+        Mode used to convolve image with a kernel. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` of convolution is
         'constant'. The parameter is passed to `ndi.convolve`.

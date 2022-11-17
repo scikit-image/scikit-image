@@ -118,9 +118,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     bins : int
         Number of discrete values for Gaussian weights of color filtering.
         A larger value results in improved accuracy.
-    mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
-        How to handle values outside the image borders. See
-        `numpy.pad` for detail.
+    mode : {'constant', 'nearest', 'mirror', 'reflect', 'wrap'}
+        How to handle values outside the image borders. For details, see
+        :func:`scipy.ndimage.convolve`.
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -248,6 +248,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     if min_value < 0:
         image = image - min_value
         max_value -= min_value
+
+    mode = utils._to_np_mode(mode)
     _denoise_bilateral(image, max_value, win_size, sigma_color, sigma_spatial,
                        bins, mode, cval, color_lut, range_lut, empty_dims, out)
     # need to drop the added channels axis for grayscale images

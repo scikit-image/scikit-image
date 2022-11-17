@@ -187,7 +187,8 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'.
+        Default is 'reflect'. Modes match the behavior of
+        :func:`scipy.ndimage.convolve`.
     param : {int, function}, optional
         Either specify sigma for 'gaussian' method or function object for
         'generic' method. This functions takes the flat array of local
