@@ -23,6 +23,7 @@ doc/source/api
 doc/build
 source/api
 build
+build-install
 dist
 skimage/version.py
 *.swp

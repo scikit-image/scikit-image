@@ -335,8 +335,7 @@ To rebuild a full clean documentation, run:
 
 .. code:: sh
 
-    ./dev.py clean --docs
-    ./dev.py docs
+    ./dev.py docs --clean
 
 Requirements
 ~~~~~~~~~~~~

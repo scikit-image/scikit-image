@@ -81,6 +81,6 @@ requires = [
 package = 'skimage'
 commands = [
     "devpy.build", "devpy.test", "devpy.shell", "devpy.ipython",
-    "devpy.python", ".devpy/cmds.py:clean", ".devpy/cmds.py:docs",
+    "devpy.python", ".devpy/cmds.py:docs",
     ".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"
 ]

@@ -10,32 +10,18 @@ from devpy import util
 @click.option(
     "--build-dir", default="build", help="Build directory; default is `$PWD/build`"
 )
-@click.option("--docs", is_flag=True, help="Remove only documentation build")
-def clean(build_dir, docs=False):
-    """🧹 Remove build directory.
-    """
-    if not docs:
-        if os.path.isdir(build_dir):
-            print(f"Removing `{build_dir}`")
-            shutil.rmtree(build_dir)
-        else:
-            print(f"Build directory `{build_dir}` does not exist.")
-
-    doc_dir = "./doc/build"
-    if os.path.isdir(doc_dir):
-        print(f"Removing `{doc_dir}`")
-        shutil.rmtree(doc_dir)
-    else:
-        print(f"Documentation build `{doc_dir}` does not exist.")
-
-
-@click.command()
 @click.option(
-    "--build-dir", default="build", help="Build directory; default is `$PWD/build`"
+    "--clean", is_flag=True, help="Clean previously built docs before building"
 )
-def docs(build_dir):
+def docs(build_dir, clean=False):
     """📖 Build documentation
     """
+    if clean:
+        doc_dir = "./doc/build"
+        if os.path.isdir(doc_dir):
+            print(f"Removing `{doc_dir}`")
+            shutil.rmtree(doc_dir)
+
     site_path = util.get_site_packages(build_dir)
     if site_path is None:
         print("No built scikit-image found; run `./dev.py build` first.")
