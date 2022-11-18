@@ -1075,7 +1075,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     if np.any(z < 0):
         invalid = np.nonzero(z < 0)
         warn(f'Color data out of range: Z < 0 in {invalid[0].size} pixels',
-             stacklevel=2)
+             stacklevel=3)
         z[invalid] = 0
 
     out = np.stack([x, y, z], axis=-1)
