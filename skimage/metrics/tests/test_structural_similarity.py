@@ -248,7 +248,6 @@ def test_ssim_warns_about_data_range():
     assert_almost_equal(mssim, mssim_mixed)
 
 
-
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structural_similarity_small_image(dtype):
     X = np.zeros((5, 5), dtype=dtype)
@@ -260,6 +259,7 @@ def test_structural_similarity_small_image(dtype):
     # win_size
     with pytest.raises(ValueError):
         structural_similarity(X, X)
+
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structural_similarity_errors_on_float_without_data_range(dtype):
