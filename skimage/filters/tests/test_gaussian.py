@@ -86,8 +86,7 @@ def test_multichannel(channel_axis):
 def test_preserve_range():
     """Test preserve_range parameter."""
     ones = np.ones((2, 2), dtype=np.int64)
-    filtered_ones = gaus
-    sian(ones, preserve_range=False)
+    filtered_ones = gaussian(ones, preserve_range=False)
     assert np.all(filtered_ones == filtered_ones[0, 0])
     assert filtered_ones[0, 0] < 1e-10
 
