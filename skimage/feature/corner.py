@@ -211,7 +211,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
 
     # 2.) apply the derivative along another axis as well
     axes = range(ndim)
-    if order == 'rc':
+    if order == 'xy':
         axes = reversed(axes)
     H_elems = [gaussian_(gradients[ax0], order=orders[ax1])
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
@@ -314,7 +314,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
 
-    if order == 'rc':
+    if order == 'xy':
         axes = reversed(axes)
 
     H_elems = [np.gradient(gradients[ax0], axis=ax1)

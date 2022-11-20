@@ -116,11 +116,11 @@ def test_hessian_matrix(dtype):
                                    use_gaussian_derivatives=False)
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (Hrr, Hrc, Hcc))
-    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
+    assert_almost_equal(Hrr, np.array([[0, 0,  2, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [2, 0, -2, 0, 2],
+                                       [0, 0, -2, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0,  0, 0, 0]]))
+                                       [0, 0,  2, 0, 0]]))
 
     assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
                                        [0,  1, 0, -1, 0],
@@ -128,11 +128,11 @@ def test_hessian_matrix(dtype):
                                        [0, -1, 0,  1, 0],
                                        [0,  0, 0,  0, 0]]))
 
-    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
+    assert_almost_equal(Hcc, np.array([[0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0, -2, 0, 0],
+                                       [2, 0, -2, 0, 2],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0,  2, 0, 0]]))
+                                       [0, 0,  0, 0, 0]]))
 
     with expected_warnings(["use_gaussian_derivatives currently defaults"]):
         # FutureWarning warning when use_gaussian_derivatives is not
