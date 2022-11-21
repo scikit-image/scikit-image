@@ -84,7 +84,7 @@ jobs:
           PYTHON="$(python.pythonLocation)\\python.exe"
 
           # Update pip
-          $PYTHON -m pip install -U pip setuptools<=65.5 wheel
+          $PYTHON -m pip install -U pip "setuptools<=65.5" wheel
 
           # print out the pip cache dir followed by the variable defined above
           # to confirm that they match
