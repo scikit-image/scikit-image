@@ -51,7 +51,7 @@ requires = [
     "wheel",
     "setuptools<=65.5",
     "packaging",
-    "Cython>=0.29.24,<3.0",
+    "Cython>=0.29.24",
     "pythran",
     "lazy_loader>=0.1",
 
@@ -75,4 +75,12 @@ requires = [
     # become available.
     "numpy; python_version>='3.12'",
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
+]
+
+[tool.devpy]
+package = 'skimage'
+commands = [
+    "devpy.build", "devpy.test", "devpy.shell", "devpy.ipython",
+    "devpy.python", ".devpy/cmds.py:docs",
+    ".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"
 ]
