@@ -44,7 +44,8 @@ tracker = "https://github.com/scikit-image/scikit-image/issues"
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    "meson-python>=0.10.0",
+    "meson-python>=0.11.0",
+    "ninja",
     # `wheel` is needed for non-isolated builds, given that `meson-python`
     # doesn't list it as a runtime requirement (at least in 0.10.0)
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
