@@ -78,7 +78,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
             Automatic detection of the color channel based on the old deprecated
             `multichannel=None` was broken in version 0.19. In 0.20 this
-            behavior is recovered. The last axis of an `image` with dimensions
+            behavior is fixed. The last axis of an `image` with dimensions
             (M, N, 3) is interpreted as a color channel if `channel_axis` is not
             set. Starting with 0.21, `channel_axis=None` will be used as the
             new default value.
