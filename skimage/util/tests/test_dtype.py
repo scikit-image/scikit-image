@@ -109,17 +109,13 @@ def test_copy():
 
 def test_bool():
     img_ = np.zeros((10, 10), bool)
-    img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
-    img8[1, 1] = True
     for (func, dt) in [(img_as_int, np.int16),
                        (img_as_float, np.float64),
                        (img_as_uint, np.uint16),
                        (img_as_ubyte, np.ubyte)]:
         converted_ = func(img_)
         assert np.sum(converted_) == dtype_range[dt][1]
-        converted8 = func(img8)
-        assert np.sum(converted8) == dtype_range[dt][1]
 
 
 def test_clobber():

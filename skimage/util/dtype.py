@@ -24,7 +24,6 @@ _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
                    for t in _integer_types}
 dtype_range = {bool: (False, True),
                np.bool_: (False, True),
-               np.bool8: (False, True),
                float: (-1, 1),
                np.float_: (-1, 1),
                np.float16: (-1, 1),
