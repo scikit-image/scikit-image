@@ -175,7 +175,6 @@ def test_2d_cropped_camera_image():
     a_black = crop(camera(), ((200, 212), (100, 312)))
     a_white = invert(a_black)
 
-    zeros = np.zeros((100, 100))
     ones = np.ones((100, 100))
 
     assert_allclose(meijering(a_black, black_ridges=True),
@@ -218,7 +217,6 @@ def test_3d_cropped_camera_image(uniform_stack):
         tol = 1e-10
     a_white = invert(a_black)
 
-    zeros = np.zeros(a_black.shape)
     ones = np.ones(a_black.shape)
 
     assert_allclose(meijering(a_black, black_ridges=True),

@@ -442,7 +442,7 @@ def _symmetric_compute_eigenvalues(S_elems, sort='descending', abs_sort=False):
         leading_axes = tuple(range(eigs.ndim - 1))
         eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
         if abs_sort:
-            eigs = cp.take_along_axis(eigs, cp.abs(eigs).argsort(0), 0)
+            eigs = np.take_along_axis(eigs, np.abs(eigs).argsort(0), 0)
         if sort == 'descending':
             eigs = eigs[::-1, ...]
         return eigs
