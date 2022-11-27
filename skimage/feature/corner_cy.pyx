@@ -29,7 +29,7 @@ def _real_symmetric_2x2_evs(
     else:
         dtype = np.float64
 
-    cdef np_floats[:, :, ::1] evals = np.zeros((2, rows, cols), dtype=dtype)
+    cdef np_floats[:, :, ::1] evals = np.empty((2, rows, cols), dtype=dtype)
 
     with nogil:
         for r in range(rows):
@@ -107,7 +107,7 @@ def _real_symmetric_3x3_evs(
     else:
         dtype = np.float64
 
-    cdef np_floats[:, :, :, ::1] evals = np.zeros((3, planes, rows, cols),
+    cdef np_floats[:, :, :, ::1] evals = np.empty((3, planes, rows, cols),
                                                   dtype=dtype)
 
     with nogil:
@@ -134,6 +134,7 @@ def _real_symmetric_3x3_evs(
                     x2 += 9 * (tmpc * d_sq + tmpb * f_sq + tmpa * e_sq)
                     x2 -= 54 * d * e * f
                     x1 = a*a + b*b + c*c - a*b - a*c - b*c + 3 * (d_sq + e_sq + f_sq)
+                    x1 = fmax(x1, 0.0)
 
                     if x2 == 0.0:
                         phi = M_PI / 2.0
