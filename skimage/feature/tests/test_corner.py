@@ -14,6 +14,7 @@ from skimage.feature import (corner_fast, corner_foerstner, corner_harris,
                              hessian_matrix_det, hessian_matrix_eigvals,
                              peak_local_max, shape_index, structure_tensor,
                              structure_tensor_eigenvalues)
+from skimage.feature.corner import _symmetric_image
 from skimage.morphology import cube, octagon
 
 
@@ -229,12 +230,72 @@ def test_hessian_matrix_eigvals_3d(im3d, dtype):
     assert np.max(response0) > 0
 
 
+def _reference_eigvals_computation(S_elems):
+    """Legacy eigenvalue implementation based on np.linalg.eigvalsh.
+
+    Used for testing 2D and 3D analytical cython eigenvalue computations.
+    """
+    matrices = _symmetric_image(S_elems)
+    # eigvalsh returns eigenvalues in increasing order. We want decreasing
+    eigs = np.linalg.eigvalsh(matrices)[..., ::-1]
+    leading_axes = tuple(range(eigs.ndim - 1))
+    eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
+    return eigs
+
+
+@pytest.mark.parametrize(
+    'shape', [(64, 64), (512, 1024), (8, 16, 24)]
+)
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hessian_eigvals_analytical(shape, dtype):
+    rng = np.random.default_rng(seed=5)
+    img = rng.integers(0, 256, shape)
+    H = hessian_matrix(img)
+    H = tuple(h.astype(dtype, copy=False) for h in H)
+    evs1 = _reference_eigvals_computation(H)
+    evs2 = hessian_matrix_eigvals(H)
+    atol = 1e-10
+    np.testing.assert_allclose(evs1, evs2, atol=atol)
+
+
 @test_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
     assert_almost_equal(det, 0, decimal=3)
+
+
+def _reference_det_computation(image, sigma):
+    """numpy-based reference for hessian determinants.
+
+    Used for testing 2D and 3D analytical determinant computations.
+    """
+    H = hessian_matrix(image, sigma, use_gaussian_derivatives=False)
+    hessian_mat_array = _symmetric_image(H)
+    return np.linalg.det(hessian_mat_array)
+
+
+@pytest.mark.parametrize('ndim', [2, 3])
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.float16, np.float32, np.float64]
+)
+@pytest.mark.parametrize('approximate', [False, True])
+def test_hessian_matrix_det_analytical(ndim, dtype, approximate):
+    sigma = 1.5
+    rng = np.random.default_rng(5)
+    if np.dtype(dtype).kind in 'iu':
+        image = rng.integers(0, 256, (16,) * ndim, dtype=dtype)
+    else:
+        image = rng.standard_normal((16,) * ndim).astype(dtype=dtype)
+    float_type = _supported_float_type(image.dtype)
+    det = hessian_matrix_det(image, sigma, approximate=approximate)
+    assert det.dtype == float_type
+    if not approximate:
+        # check that analytical kernel matches result using numpy.linalg.
+        expected = _reference_det_computation(image, sigma)
+        tol = 1e-12 if det.dtype == np.float64 else 1e-6
+        np.testing.assert_allclose(det, expected, rtol=tol, atol=tol)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

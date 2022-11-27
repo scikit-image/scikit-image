@@ -11,7 +11,9 @@ from .._shared.utils import _supported_float_type, safe_as_int, warn
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
-from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
+from .corner_cy import (_corner_fast, _corner_moravec, _corner_orientations,
+                        _real_symmetric_2x2_evs, _real_symmetric_3x3_evs,
+                        _real_symmetric_2x2_det, _real_symmetric_3x3_det)
 from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
 
@@ -363,15 +365,25 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     image = image.astype(float_dtype, copy=False)
     if image.ndim == 2 and approximate:
         integral = integral_image(image)
-        return np.array(_hessian_matrix_det(integral, sigma))
-    else:  # slower brute-force implementation for nD images
-        hessian_mat_array = _symmetric_image(
-            hessian_matrix(image, sigma, use_gaussian_derivatives=False)
+        return np.array(
+            _hessian_matrix_det(integral, sigma), dtype=float_dtype
         )
-        return np.linalg.det(hessian_mat_array)
+    else:  # slower brute-force implementation for nD images
+        H = hessian_matrix(image, sigma, use_gaussian_derivatives=False)
+        if image.ndim in [2, 3]:
+            if image.ndim == 2:
+                det_func = _real_symmetric_2x2_det
+            else:
+                det_func = _real_symmetric_3x3_det
+            det = det_func(*H)
+        else:
+            # general, n-dimensional case (warning: high memory usage)
+            hessian_mat_array = _symmetric_image(H)
+            det = np.linalg.det(hessian_mat_array)
+        return det
 
 
-def _symmetric_compute_eigenvalues(S_elems):
+def _symmetric_compute_eigenvalues(S_elems, sort='descending', abs_sort=False):
     """Compute eigenvalues from the upper-diagonal entries of a symmetric
     matrix.
 
@@ -380,29 +392,60 @@ def _symmetric_compute_eigenvalues(S_elems):
     S_elems : list of ndarray
         The upper-diagonal elements of the matrix, as returned by
         `hessian_matrix` or `structure_tensor`.
+    sort : {"ascending", "descending"}, optional
+        Eigenvalues should be sorted in the specified order.
+    abs_sort : boolean, optional
+        If ``True``, sort based on the absolute values.
 
     Returns
     -------
     eigs : ndarray
-        The eigenvalues of the matrix, in decreasing order. The eigenvalues are
-        the leading dimension. That is, ``eigs[i, j, k]`` contains the
-        ith-largest eigenvalue at position (j, k).
-    """
+        The eigenvalues of the matrix, sorted in the specified order. The
+        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
+        contains the ith eigenvalue at position (j, k).
 
-    if len(S_elems) == 3:  # Fast explicit formulas for 2D.
-        M00, M01, M11 = S_elems
-        eigs = np.empty((2, *M00.shape), M00.dtype)
-        eigs[:] = (M00 + M11) / 2
-        hsqrtdet = np.sqrt(M01 ** 2 + ((M00 - M11) / 2) ** 2)
-        eigs[0] += hsqrtdet
-        eigs[1] -= hsqrtdet
-        return eigs
+    Notes
+    -----
+    In 2D and 3D, analytical formulas as given in [1]_ are used, with
+    simplification to handle real-valued matrices only. For the nD case, the
+    NumPy's general symmetric eigenvalue solver, ``np.linalg.eigvalsh`` is
+    used. This involves large intermediate matrices, so memory usage will be
+    high for images with more than three dimensions.
+
+    References
+    ----------
+    .. [1] C. Deledalle, L. Denis, S. Tabti, F. Tupin. Closed-form expressions
+        of the eigen decomposition of 2 x 2 and 3 x 3 Hermitian matrices.
+        [Research Report] Université de Lyon. 2017.
+        https://hal.archives-ouvertes.fr/hal-01501221/file/matrix_exp_and_log_formula.pdf
+    """
+    n_terms = len(S_elems)
+    if sort == 'ascending':
+        ascending = True
+    elif sort == 'descending':
+        ascending = False
+    else:
+        raise ValueError(f"unrecognized value for sort: {sort}")
+    if n_terms in [3, 6]:
+        # Fast explicit formulas for 2D and 3D eigenvalues
+        if n_terms == 3:
+            ev_func = _real_symmetric_2x2_evs
+        elif n_terms == 6:
+            ev_func = _real_symmetric_3x3_evs
+        return ev_func(
+            *S_elems, ascending=ascending, abs_sort=abs_sort
+        )
     else:
         matrices = _symmetric_image(S_elems)
         # eigvalsh returns eigenvalues in increasing order. We want decreasing
-        eigs = np.linalg.eigvalsh(matrices)[..., ::-1]
+        eigs = np.linalg.eigvalsh(matrices)
         leading_axes = tuple(range(eigs.ndim - 1))
-        return np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
+        eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
+        if abs_sort:
+            eigs = cp.take_along_axis(eigs, cp.abs(eigs).argsort(0), 0)
+        if sort == 'descending':
+            eigs = eigs[::-1, ...]
+        return eigs
 
 
 def _symmetric_image(S_elems):
