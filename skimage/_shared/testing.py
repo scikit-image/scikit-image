@@ -256,6 +256,14 @@ def setup_test():
             category=DeprecationWarning
         )
 
+        # ignore dtype deprecation warning from NumPy arising from use of SciPy
+        # as a reference in test_watershed09
+        warnings.filterwarnings(
+            'default',
+            message=('`np.int0` is a deprecated alias for `np.intp`'),
+            category=DeprecationWarning
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
