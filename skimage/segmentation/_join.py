@@ -142,10 +142,15 @@ def relabel_sequential(label_field, offset=1):
     if input_type.itemsize < required_type.itemsize:
         output_type = required_type
     else:
-        if input_type.type(out_vals[-1]) == out_vals[-1]:
-            output_type = input_type
-        else:
-            output_type = required_type
+        with warnings.catch_warnings():
+            # Ignore RuntimeWarning from NumPy>=1.24 on the potentially invalid
+            # cast we are checking for here.
+            warnings.filterwarnings('ignore', category=RuntimeWarning)
+
+            if input_type.type(out_vals[-1]) == out_vals[-1]:
+                output_type = input_type
+            else:
+                output_type = required_type
     out_array = np.empty(label_field.shape, dtype=output_type)
     out_vals = out_vals.astype(output_type)
     map_array(label_field, in_vals, out_vals, out=out_array)
