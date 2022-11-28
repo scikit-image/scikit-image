@@ -909,7 +909,7 @@ cdef class Cascade:
                 feature_number = int(internal_nodes[0])
                 # list() is for Python3 fix here
                 lut_array = list(map(lambda x: int(x), internal_nodes[1:]))
-                lut = np.asarray(lut_array, dtype='uint32')
+                lut = np.array(lut_array).astype(np.uint32)
 
                 # Copy array to the main LUT array
                 for i in range(8):

@@ -142,7 +142,7 @@ def relabel_sequential(label_field, offset=1):
     if input_type.itemsize < required_type.itemsize:
         output_type = required_type
     else:
-        if input_type.type(out_vals[-1]) == out_vals[-1]:
+        if np.cast[input_type](out_vals[-1]) == out_vals[-1]:
             output_type = input_type
         else:
             output_type = required_type
