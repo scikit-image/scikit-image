@@ -114,7 +114,7 @@ def test_relabel_sequential_signed_overflow():
 
 
 def test_very_large_labels():
-    imax = np.iinfo(np.int64).max
+    imax = np.iinfo(np.int32).max
     labels = np.array([0, 1, imax, 42, 42], dtype=np.int64)
     output, fw, inv = relabel_sequential(labels, offset=imax)
     assert np.max(output) == imax + 2
