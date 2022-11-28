@@ -1,4 +1,7 @@
+import warnings
+
 import numpy as np
+
 from ..util._map_array import map_array, ArrayMap
 
 
