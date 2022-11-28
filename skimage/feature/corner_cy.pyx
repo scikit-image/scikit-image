@@ -76,9 +76,10 @@ def _real_symmetric_3x3_evs(
 
     Parameters
     ----------
-    a, d, f, b, e, c : cp.ndarray
-        Images corresponding to the individual components of the matrix, `M`,
-        shown above. For example, ``d = M[0, 1]``.
+    M00, M01, M02, M11, M12, M22 : cp.ndarray
+        Images corresponding to the individual components of the symmteric,
+        real-valued matrix M. `M01`, for instance, represents entry ``M[0, 1]``
+        (equivalent to ``M[1, 0]`` by symmetry).
     sort : {"ascending", "descending"}, optional
         Eigenvalues should be sorted in the specified order.
     abs_sort : boolean, optional
