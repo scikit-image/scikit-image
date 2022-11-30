@@ -250,7 +250,7 @@ def _reference_eigvals_computation(S_elems):
 def test_hessian_eigvals_analytical(shape, dtype):
     rng = np.random.default_rng(seed=5)
     img = rng.integers(0, 256, shape)
-    H = hessian_matrix(img)
+    H = hessian_matrix(img, use_gaussian_derivatives=False)
     H = tuple(h.astype(dtype, copy=False) for h in H)
     evs1 = _reference_eigvals_computation(H)
     evs2 = hessian_matrix_eigvals(H)
