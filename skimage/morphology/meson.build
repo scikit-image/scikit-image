@@ -44,12 +44,9 @@ python_sources = [
   'footprints.py',
   'gray.py',
   'grayreconstruct.py',
-  'grey.py',
-  'greyreconstruct.py',
   'isotropic.py',
   'max_tree.py',
   'misc.py',
-  'selem.py'
 ]
 
 data_files = [

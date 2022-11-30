@@ -30,8 +30,7 @@ def test_ciede2000_dE(dtype, channel_axis):
     dE2 = deltaE_ciede2000(lab1, lab2, channel_axis=channel_axis)
     assert dE2.dtype == _supported_float_type(dtype)
 
-    rtol = 1e-2 if dtype == np.float32 else 1e-4
-    assert_allclose(dE2, data['dE'], rtol=rtol)
+    assert_allclose(dE2, data['dE'], rtol=1e-2)
 
 
 def load_ciede2000_data():

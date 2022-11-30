@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type, deprecate_kwarg
+from .._shared.utils import _supported_float_type
 from . import uft
 
 
@@ -243,18 +243,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://hal.archives-ouvertes.fr/hal-00674508
     """
-
-    if user_params is not None:
-        for s in ('max', 'min'):
-            if (s + '_iter') in user_params:
-                warning_msg = (
-                    f'`{s}_iter` is a deprecated key for `user_params`. '
-                    f'It will be removed in version 1.0. '
-                    f'Use `{s}_num_iter` instead.'
-                )
-                warnings.warn(warning_msg, FutureWarning)
-                user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
-
     params = {'threshold': 1e-4, 'max_num_iter': 200,
               'min_num_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
@@ -366,8 +354,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 

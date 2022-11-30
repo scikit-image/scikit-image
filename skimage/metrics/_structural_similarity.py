@@ -12,11 +12,10 @@ from ..util.dtype import dtype_range
 __all__ = ['structural_similarity']
 
 
-@utils.deprecate_multichannel_kwarg()
 def structural_similarity(im1, im2,
                           *,
                           win_size=None, gradient=False, data_range=None,
-                          channel_axis=None, multichannel=False,
+                          channel_axis=None,
                           gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
@@ -45,10 +44,6 @@ def structural_similarity(im1, im2,
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
-    multichannel : bool, optional
-        If True, treat the last dimension of the array as channels. Similarity
-        calculations are done independently for each channel then averaged.
-        This argument is deprecated: specify `channel_axis` instead.
     gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
