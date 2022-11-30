@@ -5,7 +5,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -244,8 +244,6 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def thin(image, max_num_iter=None):
     """
     Perform morphological thinning of a binary image.

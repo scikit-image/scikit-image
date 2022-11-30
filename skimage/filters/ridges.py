@@ -19,7 +19,7 @@ from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 from ..util import img_as_float
 
 
-@deprecated(removed_version="1.0")
+@deprecated(removed_version="0.21")
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
                                 use_gaussian_derivatives=False):

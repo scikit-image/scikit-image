@@ -7,9 +7,8 @@ __all__ = ['montage']
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg()
 def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
-            padding_width=0, multichannel=False, *, channel_axis=None):
+            padding_width=0, *, channel_axis=None):
     """Create a montage of several single- or multichannel images.
 
     Create a rectangular montage from an input array representing an ensemble
@@ -49,10 +48,6 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
         The size of the spacing between the tiles and between the tiles and
         the borders. If non-zero, makes the boundaries of individual images
         easier to perceive.
-    multichannel : boolean, optional
-        If True, the last `arr_in` dimension is threated as a color channel,
-        otherwise as spatial. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

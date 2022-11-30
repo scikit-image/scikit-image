@@ -1,7 +1,5 @@
 import numpy
 
-from .._shared.utils import channel_as_last_axis, deprecate_multichannel_kwarg
-
 __all__ = ['apply_parallel']
 
 
@@ -56,11 +54,9 @@ def _ensure_dask_array(array, chunks=None):
     return da.from_array(array, chunks=chunks)
 
 
-@deprecate_multichannel_kwarg()
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
-                   compute=None, channel_axis=None,
-                   multichannel=False):
+                   compute=None, channel_axis=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -113,17 +109,6 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
-    multichannel : bool, optional
-        If `chunks` is None and `multichannel` is True, this function will keep
-        only a single chunk along the channels axis. When `depth` is specified
-        as a scalar value, that depth will be applied only to the non-channels
-        axes (a depth of 0 will be used along the channels axis). If the user
-        manually specified both `chunks` and a `depth` tuple, then this
-        argument will have no effect. This argument is deprecated: specify
-        `channel_axis` instead.
-
-        .. versionadded:: 0.18
-           ``multichannel`` was added in 0.18.
 
     Returns
     -------
