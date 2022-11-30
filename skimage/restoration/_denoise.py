@@ -93,9 +93,8 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=7)
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=False,
+                      bins=10000, mode='constant', cval=0,
                       *, channel_axis=None):
     """Denoise image using bilateral filter.
 
@@ -124,10 +123,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    multichannel : bool
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     channel_axis : int or None, optional
         If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -182,7 +177,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     if channel_axis is not None:
         if image.ndim != 3:
             if image.ndim == 2:
-                raise ValueError("Use ``multichannel=False`` for 2D grayscale "
+                raise ValueError("Use ``channel_axis=None`` for 2D grayscale "
                                  "images. The last axis of the input image "
                                  "must be multiple color channels not another "
                                  "spatial dimension.")
@@ -258,12 +253,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg()
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19")
 def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
-                       isotropic=True, *, channel_axis=None,
-                       multichannel=False):
+                       isotropic=True, *, channel_axis=None):
     r"""Perform total variation denoising using split-Bregman optimization.
 
     Given :math:`f`, a noisy image (input data),
@@ -308,11 +299,6 @@ def denoise_tv_bregman(image, weight=5.0, max_num_iter=100, eps=1e-3,
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
-    multichannel : bool, optional
-        Whether or not to apply denoising separately to each channel.
-        Should always be set to ``True`` for color images, otherwise the
-        denoising is also applied in the channels dimension.
-        This argument is deprecated: specify `channel_axis` instead.
 
     Returns
     -------
@@ -460,11 +446,8 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
     return out
 
 
-@utils.deprecate_kwarg({'n_iter_max': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19.2")
-@utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
-                         multichannel=False, *, channel_axis=None):
+                         *, channel_axis=None):
     r"""Perform total variation denoising in nD.
 
     Given :math:`f`, a noisy image (input data),
@@ -502,11 +485,6 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
         The algorithm stops when :math:`|E_{n-1} - E_n| < \varepsilon * E_0`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
-    multichannel : bool, optional
-        Whether or not to apply denoising separately to each channel.
-        Should always be set to ``True`` for color images, otherwise the
-        denoising is also applied in the channels dimension.
-        This argument is deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
         If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -758,7 +736,7 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel,
             sigma = [sigma] * image.shape[-1]
         elif len(sigma) != image.shape[-1]:
             raise ValueError(
-                "When multichannel is True, sigma must be a scalar or have "
+                "When channel_axis is not None, sigma must be a scalar or have "
                 "length equal to the number of channels")
     if image.dtype.kind != 'f':
         if rescale_sigma:
@@ -801,9 +779,8 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
-                    wavelet_levels=None, multichannel=False,
+                    wavelet_levels=None,
                     convert2ycbcr=False, method='BayesShrink',
                     rescale_sigma=True, *, channel_axis=None):
     """Perform wavelet denoising on an image.
@@ -829,12 +806,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     wavelet_levels : int or None, optional
         The number of wavelet decomposition levels to use.  The default is
         three less than the maximum number of possible decomposition levels.
-    multichannel : bool, optional
-        Apply wavelet denoising separately for each channel (where channels
-        correspond to the final axis of the array). This argument is
-        deprecated: specify `channel_axis` instead.
     convert2ycbcr : bool, optional
-        If True and multichannel True, do the wavelet denoising in the YCbCr
+        If True and channel_axis is set, do the wavelet denoising in the YCbCr
         colorspace instead of the RGB color space. This typically results in
         better performance for RGB images.
     method : {'BayesShrink', 'VisuShrink'}, optional
@@ -930,7 +903,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     clip_output = image.dtype.kind != 'f'
 
     if convert2ycbcr and not multichannel:
-        raise ValueError("convert2ycbcr requires multichannel == True")
+        raise ValueError("convert2ycbcr requires channel_axis to be set")
 
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,
@@ -983,8 +956,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     return out
 
 
-@utils.deprecate_multichannel_kwarg(multichannel_position=2)
-def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
+def estimate_sigma(image, average_sigmas=False, *,
                    channel_axis=None):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
@@ -996,9 +968,6 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False, *,
     average_sigmas : bool, optional
         If true, average the channel estimates of `sigma`.  Otherwise return
         a list of sigmas corresponding to each channel.
-    multichannel : bool
-        Estimate sigma separately for each channel. This argument is
-        deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
         If ``None``, the image is assumed to be grayscale (single-channel).
         Otherwise, this parameter indicates which axis of the array corresponds
