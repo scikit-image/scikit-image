@@ -1,12 +1,9 @@
 import numpy as np
 
 from ..measure import label
-from .._shared.utils import remove_arg
 
 
-@remove_arg("in_place", changed_version="1.0",
-            help_msg="Please use out argument instead.")
-def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None,
+def clear_border(labels, buffer_size=0, bgval=0, mask=None,
                  *, out=None):
     """Clear objects connected to the label image border.
 
@@ -19,9 +16,6 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None,
         that touch the outside of the image are removed.
     bgval : float or int, optional
         Cleared objects are set to this value.
-    in_place : bool, optional
-        Whether or not to manipulate the labels array in-place.
-        Deprecated since version 0.19. Please use `out` instead.
     mask : ndarray of bool, same shape as `image`, optional.
         Image data mask. Objects in labels image overlapping with
         False pixels of mask will be removed. If defined, the
@@ -71,14 +65,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None,
         # ignore buffer_size if mask
         raise ValueError("buffer size may not be greater than labels size")
 
-    if out is not None:
-        np.copyto(out, labels, casting='no')
-        in_place = True
-
-    if not in_place:
+    if out is None:
         out = labels.copy()
-    elif out is None:
-        out = labels
 
     if mask is not None:
         err_msg = (f'labels and mask should have the same shape but '

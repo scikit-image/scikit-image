@@ -20,15 +20,6 @@ def test_non_square_image():
     assert_array_equal(binary_res, gray_res)
 
 
-@pytest.mark.parametrize(
-    'function',
-    ['binary_erosion', 'binary_dilation', 'binary_closing', 'binary_opening']
-)
-def test_selem_kwarg_deprecation(function):
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(binary, function)(bw_img, selem=morphology.square(3))
-
-
 def test_binary_erosion():
     footprint = morphology.square(3)
     binary_res = binary.binary_erosion(bw_img, footprint)

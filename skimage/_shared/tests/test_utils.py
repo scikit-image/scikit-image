@@ -11,8 +11,6 @@ from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    change_default_value, remove_arg,
                                    _supported_float_type,
                                    channel_as_last_axis)
-from skimage.feature import hog
-from skimage.transform import pyramid_gaussian
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -280,23 +278,17 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size == x.shape[channel_axis]
 
 
-def test_decorator_warnings():
-    """Assert that warning message issued by decorator points to
-    expected file and line number.
+@deprecate_kwarg({"old_kwarg": "new_kwarg"}, deprecated_version="x.y.z")
+def _function_with_deprecated_kwarg(*, new_kwarg):
+    pass
+
+
+def test_deprecate_kwarg_location():
+    """Assert that warning message issued by deprecate_kwarg points to
+    file and line number where decorated function is called.
     """
-
     with pytest.warns(FutureWarning) as record:
-        pyramid_gaussian(None, multichannel=True)
+        _function_with_deprecated_kwarg(old_kwarg=True)
         expected_lineno = inspect.currentframe().f_lineno - 1
-
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__
-
-    img = np.random.rand(100, 100, 3)
-
-    with pytest.warns(FutureWarning) as record:
-        hog(img, multichannel=True)
-        expected_lineno = inspect.currentframe().f_lineno - 1
-
     assert record[0].lineno == expected_lineno
     assert record[0].filename == __file__

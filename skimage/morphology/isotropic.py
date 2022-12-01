@@ -36,7 +36,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
         ``[False, True]``.
 
     References
-    ---------------
+    ----------
     .. [1] Cuisenaire, O. and Macq, B., "Fast Euclidean morphological operators
         using local distance transformation by propagation, and applications,"
         Image Processing And Its Applications, 1999. Seventh International
@@ -84,7 +84,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
         ``[False, True]``.
 
     References
-    ---------------
+    ----------
     .. [1] Cuisenaire, O. and Macq, B., "Fast Euclidean morphological operators
         using local distance transformation by propagation, and applications,"
         Image Processing And Its Applications, 1999. Seventh International
@@ -130,7 +130,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
         The result of the morphological opening.
 
     References
-    ---------------
+    ----------
     .. [1] Cuisenaire, O. and Macq, B., "Fast Euclidean morphological operators
         using local distance transformation by propagation, and applications,"
         Image Processing And Its Applications, 1999. Seventh International
@@ -176,7 +176,7 @@ def isotropic_closing(image, radius, out=None, spacing=None):
         The result of the morphological closing.
 
     References
-    ---------------
+    ----------
     .. [1] Cuisenaire, O. and Macq, B., "Fast Euclidean morphological operators
         using local distance transformation by propagation, and applications,"
         Image Processing And Its Applications, 1999. Seventh International

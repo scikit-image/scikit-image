@@ -12,11 +12,10 @@ from ..util.dtype import dtype_range
 __all__ = ['structural_similarity']
 
 
-@utils.deprecate_multichannel_kwarg()
 def structural_similarity(im1, im2,
                           *,
                           win_size=None, gradient=False, data_range=None,
-                          channel_axis=None, multichannel=False,
+                          channel_axis=None,
                           gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
@@ -45,10 +44,6 @@ def structural_similarity(im1, im2,
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
-    multichannel : bool, optional
-        If True, treat the last dimension of the array as channels. Similarity
-        calculations are done independently for each channel then averaged.
-        This argument is deprecated: specify `channel_axis` instead.
     gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
@@ -194,11 +189,22 @@ def structural_similarity(im1, im2,
         raise ValueError('Window size must be odd.')
 
     if data_range is None:
+        if (np.issubdtype(im1.dtype, np.floating) or
+            np.issubdtype(im2.dtype, np.floating)):
+            raise ValueError(
+                'Since image dtype is floating point, you must specify '
+                'the data_range parameter. Please read the documentation '
+                'carefully (including the note). It is recommended that '
+                'you always specify the data_range anyway.')
         if im1.dtype != im2.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im1.dtype.", stacklevel=2)
+            warn("Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
+                 stacklevel=2)
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
+        if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
+            warn("Setting data_range based on im1.dtype. " +
+                 ("data_range = %.0f. " % data_range) +
+                 "Please specify data_range explicitly to avoid mistakes.", stacklevel=2)
 
     ndim = im1.ndim
 
