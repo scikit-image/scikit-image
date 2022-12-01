@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from skimage._shared._warnings import expected_warnings
 from skimage.segmentation import (disk_level_set,
                                   inverse_gaussian_gradient,
                                   morphological_chan_vese,
@@ -58,22 +57,6 @@ def test_morphsnakes_black():
     assert_array_equal(gac_ls2, ref_ones)
 
     assert acwe_ls.dtype == gac_ls.dtype == gac_ls2.dtype == np.int8
-
-
-def test_morphsnakes_iterations_kwarg_deprecation():
-    img = np.zeros((11, 11))
-    ls = disk_level_set(img.shape, center=(5, 5), radius=3)
-
-    ref_zeros = np.zeros(img.shape, dtype=np.int8)
-
-    with expected_warnings(["`iterations` is a deprecated argument"]):
-        acwe_ls = morphological_chan_vese(img, iterations=6, init_level_set=ls)
-    assert_array_equal(acwe_ls, ref_zeros)
-
-    with expected_warnings(["`iterations` is a deprecated argument"]):
-        gac_ls = morphological_geodesic_active_contour(img, iterations=6,
-                                                       init_level_set=ls)
-    assert_array_equal(gac_ls, ref_zeros)
 
 
 def test_morphsnakes_simple_shape_chan_vese():

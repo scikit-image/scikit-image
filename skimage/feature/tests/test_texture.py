@@ -2,14 +2,14 @@ import numpy as np
 import pytest
 
 from skimage._shared.testing import expected_warnings, test_parallel
-from skimage.feature import (graycomatrix, graycoprops, greycomatrix,
-                             greycoprops, local_binary_pattern, multiblock_lbp)
+from skimage.feature import (graycomatrix, graycoprops,
+                             local_binary_pattern, multiblock_lbp)
 from skimage.transform import integral_image
 
 
 class TestGLCM():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[0, 0, 1, 1],
                                [0, 0, 1, 1],
                                [0, 2, 2, 2],
@@ -158,22 +158,6 @@ class TestGLCM():
         dissimilarity = graycoprops(result, 'dissimilarity')
         np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
 
-    def test_greycomatrix_and_greycoprops_deprecations(self):
-        expected = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
-                                normed=True, symmetric=True)
-        with expected_warnings(["Function ``greycomatrix``"]):
-            result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
-                                  normed=True, symmetric=True)
-        np.testing.assert_array_equal(expected, result)
-
-        result = np.round(result, 3)
-        dissimilarity_expected = graycoprops(result, 'dissimilarity')
-        with expected_warnings(["Function ``greycoprops``"]):
-            dissimilarity_result = greycoprops(result, 'dissimilarity')
-        np.testing.assert_array_equal(
-            dissimilarity_expected, dissimilarity_result
-        )
-
     def test_dissimilarity_2(self):
         result = graycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
@@ -221,7 +205,7 @@ class TestGLCM():
 
 class TestLBP():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[255,   6, 255,   0,  141,   0],
                                [ 48, 250, 204, 166,  223,  63],
                                [  8,   0, 159,  50,  255,  30],

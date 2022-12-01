@@ -360,11 +360,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
-    dog_images = [
-        (gaussian_images[i] - gaussian_images[i + 1]) * sf for i in range(k)
-    ]
-
-    image_cube = np.stack(dog_images, axis=-1)
+    image_cube = np.empty(shape=image.shape + (k,), dtype=float_dtype)
+    for i in range(k):
+        image_cube[..., i] = (gaussian_images[i] - gaussian_images[i + 1]) * sf
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
@@ -527,10 +525,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # computing gaussian laplace
     # average s**2 provides scale invariance
-    gl_images = [-ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
-                 for s in sigma_list]
-
-    image_cube = np.stack(gl_images, axis=-1)
+    image_cube = np.empty(shape=image.shape + (len(sigma_list),), dtype=float_dtype)
+    for j, s in enumerate(sigma_list):
+        image_cube[..., j] = -ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
@@ -668,8 +665,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
-    hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
-    image_cube = np.dstack(hessian_images)
+    image_cube = np.empty(shape=image.shape + (len(sigma_list),), dtype=float_dtype)
+    for j, s in enumerate(sigma_list):
+        image_cube[..., j] = _hessian_matrix_det(image, s)
 
     local_maxima = peak_local_max(image_cube,
                                   threshold_abs=threshold,
