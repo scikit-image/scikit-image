@@ -16,8 +16,8 @@ def ensure_python_version(min_version):
 You are running scikit-image on an unsupported version of Python.
 
 Unfortunately, scikit-image 0.15 and above no longer work with your installed
-version of Python (%s).  You therefore have two options: either upgrade to
-Python %s, or install an older version of scikit-image.
+version of Python ({}).  You therefore have two options: either upgrade to
+Python {}, or install an older version of scikit-image.
 
 For Python 2.7 or Python 3.4, use
 
@@ -29,7 +29,7 @@ Please also consider updating `pip` and `setuptools`:
 
 Newer versions of these tools avoid installing packages incompatible
 with your version of Python.
-""" % (python_version(), '.'.join([str(v) for v in min_version])))
+""".format(python_version(), '.'.join([str(v) for v in min_version])))
 
 
 def _check_version(actver, version, cmp_op):
@@ -101,7 +101,7 @@ def is_installed(name, version=None):
         if not symb:
             symb = '='
         assert symb in ('>=', '>', '=', '<'),\
-            "Invalid version condition '%s'" % symb
+            f"Invalid version condition '{symb}'"
         version = version[match.start():]
         return _check_version(actver, version, symb)
 
@@ -135,10 +135,9 @@ def require(name, version=None):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
             else:
-                msg = '"%s" in "%s" requires "%s'
-                msg = msg % (obj, obj.__module__, name)
+                msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
                 if not version is None:
-                    msg += " %s" % version
+                    msg += f" {version}"
                 raise ImportError(msg + '"')
         return func_wrapped
     return decorator

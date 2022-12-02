@@ -1,9 +1,5 @@
 {
-    // The version of the config file format.  Do not change, unless
-    // you know what you are doing.
     "version": 1,
-    // For other options, see the documentation
-    // https://asv.readthedocs.io/en/stable/reference.html
 
     "project": "scikit-image",
     "project_url": "https://scikit-image.org/",

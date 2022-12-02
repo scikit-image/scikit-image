@@ -4,7 +4,6 @@ from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
 
 from skimage import draw
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.io import imread
 from skimage.morphology import medial_axis, skeletonize, thin
@@ -19,7 +18,7 @@ class TestSkeletonize():
         assert_array_equal(result, np.zeros((5, 5)))
 
     def test_skeletonize_wrong_dim1(self):
-        im = np.zeros((5))
+        im = np.zeros(5)
         with pytest.raises(ValueError):
             skeletonize(im)
 
@@ -133,12 +132,6 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert_array_equal(result, expected)
 
-    def test_max_iter_kwarg_deprecation(self):
-        result1 = thin(self.input_image, max_num_iter=1).astype(np.uint8)
-        with expected_warnings(["`max_iter` is a deprecated argument name"]):
-            result2 = thin(self.input_image, max_iter=1).astype(np.uint8)
-        assert_array_equal(result1, result2)
-
     def test_noiter(self):
         result = thin(self.input_image).astype(np.uint8)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -151,7 +144,7 @@ class TestThin():
         assert_array_equal(result, expected)
 
     def test_baddim(self):
-        for ii in [np.zeros((3)), np.zeros((3, 3, 3))]:
+        for ii in [np.zeros(3), np.zeros((3, 3, 3))]:
             with pytest.raises(ValueError):
                 thin(ii)
 

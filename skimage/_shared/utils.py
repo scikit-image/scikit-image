@@ -288,72 +288,6 @@ class deprecate_kwarg(_DecoratorBaseClass):
         return fixed_func
 
 
-class deprecate_multichannel_kwarg(deprecate_kwarg):
-    """Decorator for deprecating multichannel keyword in favor of channel_axis.
-
-    Parameters
-    ----------
-    removed_version : str
-        The package version in which the deprecated argument will be
-        removed.
-
-    """
-
-    def __init__(self, removed_version='1.0', multichannel_position=None):
-        super().__init__(
-            kwarg_mapping={'multichannel': 'channel_axis'},
-            deprecated_version='0.19',
-            warning_msg=None,
-            removed_version=removed_version)
-        self.position = multichannel_position
-
-    def __call__(self, func):
-
-        stack_rank = _get_stack_rank(func)
-
-        @functools.wraps(func)
-        def fixed_func(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
-
-            if self.position is not None and len(args) > self.position:
-                warning_msg = (
-                    "Providing the `multichannel` argument positionally to "
-                    "{func_name} is deprecated. Use the `channel_axis` kwarg "
-                    "instead."
-                )
-                warnings.warn(warning_msg.format(func_name=func.__name__),
-                              FutureWarning,
-                              stacklevel=stacklevel)
-                if 'channel_axis' in kwargs:
-                    raise ValueError(
-                        "Cannot provide both a `channel_axis` kwarg and a "
-                        "positional `multichannel` value."
-                    )
-                else:
-                    channel_axis = -1 if args[self.position] else None
-                    kwargs['channel_axis'] = channel_axis
-
-            if 'multichannel' in kwargs:
-                #  warn that the function interface has changed:
-                warnings.warn(self.warning_msg.format(
-                    old_arg='multichannel', func_name=func.__name__,
-                    new_arg='channel_axis'), FutureWarning,
-                    stacklevel=stacklevel)
-
-                # multichannel = True -> last axis corresponds to channels
-                convert = {True: -1, False: None}
-                kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
-
-            # Call the function with the fixed arguments
-            return func(*args, **kwargs)
-
-        if func.__doc__ is not None:
-            newdoc = docstring_add_deprecated(
-                func, {'multichannel': 'channel_axis'}, '0.19')
-            fixed_func.__doc__ = newdoc
-        return fixed_func
-
-
 class channel_as_last_axis:
     """Decorator for automatically making channels axis last for all arrays.
 
@@ -457,14 +391,12 @@ class deprecated:
 
         alt_msg = ''
         if self.alt_func is not None:
-            alt_msg = ' Use ``%s`` instead.' % self.alt_func
+            alt_msg = f' Use ``{self.alt_func}`` instead.'
         rmv_msg = ''
         if self.removed_version is not None:
-            rmv_msg = (' and will be removed in version %s' %
-                       self.removed_version)
+            rmv_msg = f' and will be removed in version {self.removed_version}'
 
-        msg = ('Function ``%s`` is deprecated' % func.__name__ +
-               rmv_msg + '.' + alt_msg)
+        msg = f'Function ``{func.__name__}`` is deprecated{rmv_msg}.{alt_msg}'
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -745,10 +677,10 @@ def _to_ndimage_mode(mode):
                                  wrap='wrap')
     if mode not in mode_translation_dict:
         raise ValueError(
-            (f"Unknown mode: '{mode}', or cannot translate mode. The "
+            f"Unknown mode: '{mode}', or cannot translate mode. The "
              f"mode should be one of 'constant', 'edge', 'symmetric', "
              f"'reflect', or 'wrap'. See the documentation of numpy.pad for "
-             f"more info."))
+             f"more info.")
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 

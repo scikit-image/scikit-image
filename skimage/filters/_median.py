@@ -1,15 +1,11 @@
-
 from warnings import warn
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import deprecate_kwarg
 from .rank import generic
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
            behavior='ndimage'):
     """Return local median of an image.

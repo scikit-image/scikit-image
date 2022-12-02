@@ -1,4 +1,3 @@
-# coding: utf-8
 """Common tools to optical flow algorithms.
 
 """

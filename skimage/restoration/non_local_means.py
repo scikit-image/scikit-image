@@ -10,9 +10,8 @@ from ._nl_means_denoising import (_nl_means_denoising_2d,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=4)
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
-                     multichannel=False, fast_mode=True, sigma=0., *,
+                     fast_mode=True, sigma=0., *,
                      preserve_range=False, channel_axis=None):
     """Perform non-local means denoising on 2D-4D grayscale or RGB images.
 
@@ -20,7 +19,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     ----------
     image : 2D or 3D ndarray
         Input image to be denoised, which can be 2D or 3D, and grayscale
-        or RGB (for 2D images only, see ``multichannel`` parameter). There can
+        or RGB (for 2D images only, see ``channel_axis`` parameter). There can
         be any number of channels (does not strictly have to be RGB).
     patch_size : int, optional
         Size of patches used for denoising.
@@ -32,10 +31,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         at the expense of blurring features. For a Gaussian noise of standard
         deviation sigma, a rule of thumb is to choose the value of h to be
         sigma of slightly less.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     fast_mode : bool, optional
         If True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is

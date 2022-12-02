@@ -98,7 +98,7 @@ class MaskSlicSegmentation(SlicSegmentation):
                           mask=self.msk_slice, **_channel_kwarg(True))
 
 
-class Watershed(object):
+class Watershed:
 
     param_names = ["seed_count", "connectivity", "compactness"]
     params = [(5, 500), (1, 2), (0, 0.01)]

@@ -182,6 +182,10 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             octave_image = np.ascontiguousarray(pyramid[octave])
 
+            if np.squeeze(octave_image).ndim < 2:
+                # No further keypoints can be detected if the image is not really 2d
+                break
+
             keypoints, orientations, responses = self._detect_octave(
                 octave_image)
 
@@ -300,6 +304,10 @@ class ORB(FeatureDetector, DescriptorExtractor):
         for octave in range(len(pyramid)):
 
             octave_image = np.ascontiguousarray(pyramid[octave])
+
+            if np.squeeze(octave_image).ndim < 2:
+                # No further keypoints can be detected if the image is not really 2d
+                break
 
             keypoints, orientations, responses = self._detect_octave(
                 octave_image)

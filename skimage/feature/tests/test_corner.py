@@ -145,8 +145,7 @@ def test_hessian_matrix_3d():
     cube[2, 2, 2] = 4
     Hs = hessian_matrix(cube, sigma=0.1, order='rc',
                         use_gaussian_derivatives=False)
-    assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
-                          len(Hs))
+    assert len(Hs) == 6, (f"incorrect number of Hessian images ({len(Hs)}) for 3D")
     assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
                                                   [0,  1,  0, -1,  0],
                                                   [0,  0,  0,  0,  0],

@@ -16,6 +16,7 @@ https://scikit-image.org
 New Features
 ------------
 
+- Add isotropic versions of binary morphological operators (gh-6492)
 
 
 Improvements
@@ -53,6 +54,8 @@ Bugfixes
 Deprecations
 ------------
 
+- The function ``filters.inverse`` was deprecated. Please use
+  ``filters.filter_inverse``.
 
 
 Contributors to this release

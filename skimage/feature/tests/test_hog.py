@@ -4,7 +4,6 @@ from numpy.testing import assert_almost_equal
 
 from skimage import color, data, draw, feature, img_as_float
 from skimage._shared import filters
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 
@@ -203,7 +202,7 @@ def test_hog_orientations_circle():
             plt.imshow(hog_img)
             plt.colorbar()
             plt.title('HOG result visualisation, '
-                      'orientations=%d' % (orientations))
+                      f'orientations={orientations}')
             plt.show()
 
         # reshape resulting feature vector to matrix with N columns (each
@@ -255,34 +254,25 @@ def test_hog_block_normalization_incorrect_error():
         feature.hog(img, block_norm='Linf')
 
 
-@pytest.mark.parametrize("shape,multichannel", [
-    ((3, 3, 3), False),
-    ((3, 3), True),
-    ((3, 3, 3, 3), True),
+@pytest.mark.parametrize("shape,channel_axis", [
+    ((3, 3, 3), None),
+    ((3, 3), -1),
+    ((3, 3, 3, 3), -1),
 ])
-def test_hog_incorrect_dimensions(shape, multichannel):
+def test_hog_incorrect_dimensions(shape, channel_axis):
     img = np.zeros(shape)
     with pytest.raises(ValueError):
-        with expected_warnings(["`multichannel` is a deprecated argument"]):
-            feature.hog(img, multichannel=multichannel, block_norm='L1')
+        feature.hog(img, channel_axis=channel_axis, block_norm='L1')
 
 
 def test_hog_output_equivariance_deprecated_multichannel():
     img = data.astronaut()
     img[:, :, (1, 2)] = 0
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
+    hog_ref = feature.hog(img, channel_axis=-1, block_norm='L1')
 
     for n in (1, 2):
-        with expected_warnings(["`multichannel` is a deprecated argument"]):
-            hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
-                                   block_norm='L1')
-        assert_almost_equal(hog_ref, hog_fact)
-
-        # repeat prior test, but check for positional multichannel warning
-        with expected_warnings(["Providing the `multichannel` argument"]):
-            hog_fact = feature.hog(np.roll(img, n, axis=2), 9, (8, 8), (3, 3),
-                                   'L1', False, False, True, True)
+        hog_fact = feature.hog(np.roll(img, n, axis=2), channel_axis=-1,
+                               block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)
 
 

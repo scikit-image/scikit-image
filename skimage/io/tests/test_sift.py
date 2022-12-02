@@ -32,7 +32,7 @@ def test_load_sift():
     # Check whether loading by filename works
     load_sift(fname)
 
-    with open(fname, 'r') as f:
+    with open(fname) as f:
         features = load_sift(f)
     os.remove(fname)
 
@@ -56,7 +56,7 @@ def test_load_surf():
     # Check whether loading by filename works
     load_surf(fname)
 
-    with open(fname, 'r') as f:
+    with open(fname) as f:
         features = load_surf(f)
     os.remove(fname)
 

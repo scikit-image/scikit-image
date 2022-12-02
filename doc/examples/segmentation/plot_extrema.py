@@ -75,6 +75,6 @@ ax[1].set_title('Local Maxima')
 ax[1].axis('off')
 
 ax[2].imshow(overlay_h)
-ax[2].set_title('h maxima for h = %.2f' % h)
+ax[2].set_title(f'h maxima for h = {h:.2f}')
 ax[2].axis('off')
 plt.show()

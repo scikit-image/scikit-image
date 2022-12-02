@@ -56,4 +56,3 @@ def test_are():
         adapted_rand_error(im_true, im_test, alpha=1.01)
     with pytest.raises(ValueError):
         adapted_rand_error(im_true, im_test, alpha=-0.01)
-

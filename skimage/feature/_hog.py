@@ -46,10 +46,9 @@ def _hog_channel_gradient(channel):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=8)
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         block_norm='L2-Hys', visualize=False, transform_sqrt=False,
-        feature_vector=True, multichannel=None, *, channel_axis=None):
+        feature_vector=True, *, channel_axis=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -98,10 +97,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     feature_vector : bool, optional
         Return the data as a feature vector by calling .ravel() on the result
         just before returning.
-    multichannel : boolean, optional
-        If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

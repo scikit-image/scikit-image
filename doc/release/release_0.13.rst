@@ -459,4 +459,3 @@ Pull requests merged in this release
 - Fix typo in ylabel of GLCM demo (#2576)
 - Detection of local extrema from morphology (#2449)
 - Add extrema functions to ``__init__`` (#2588)
-

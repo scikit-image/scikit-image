@@ -51,14 +51,14 @@ clip_limit = 0.9
 
 # Perform histogram equalization
 im_orig_he, im_degraded_he = \
-    [exposure.equalize_hist(im)
-     for im in [im_orig, im_degraded]]
+    (exposure.equalize_hist(im)
+     for im in [im_orig, im_degraded])
 
 im_orig_ahe, im_degraded_ahe = \
-    [exposure.equalize_adapthist(im,
+    (exposure.equalize_adapthist(im,
                                  kernel_size=kernel_size,
                                  clip_limit=clip_limit)
-     for im in [im_orig, im_degraded]]
+     for im in [im_orig, im_degraded])
 
 
 # Define functions to help plot the data

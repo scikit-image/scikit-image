@@ -158,4 +158,3 @@ Contributors to this release
 - John Wiggins
 - Robin Wilson
 - Olivia Wilson
-

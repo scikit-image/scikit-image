@@ -249,11 +249,11 @@ def iradon(radon_image, theta=None, output_size=None,
 
     interpolation_types = ('linear', 'nearest', 'cubic')
     if interpolation not in interpolation_types:
-        raise ValueError("Unknown interpolation: %s" % interpolation)
+        raise ValueError(f"Unknown interpolation: {interpolation}")
 
     filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
     if filter_name not in filter_types:
-        raise ValueError("Unknown filter: %s" % filter_name)
+        raise ValueError(f"Unknown filter: {filter_name}")
 
     radon_image = convert_to_float(radon_image, preserve_range)
     dtype = radon_image.dtype
@@ -464,18 +464,16 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         theta = np.linspace(0, 180, radon_image.shape[1],
                             endpoint=False, dtype=dtype)
     elif len(theta) != radon_image.shape[1]:
-        raise ValueError('Shape of theta (%s) does not match the '
-                         'number of projections (%d)'
-                         % (len(theta), radon_image.shape[1]))
+        raise ValueError(f'Shape of theta ({len(theta)}) does not match the '
+                         f'number of projections ({radon_image.shape[1]})')
     else:
         theta = np.asarray(theta, dtype=dtype)
 
     if image is None:
         image = np.zeros(reconstructed_shape, dtype=dtype)
     elif image.shape != reconstructed_shape:
-        raise ValueError('Shape of image (%s) does not match first dimension '
-                         'of radon_image (%s)'
-                         % (image.shape, reconstructed_shape))
+        raise ValueError(f'Shape of image ({image.shape}) does not match first dimension '
+                         f'of radon_image ({reconstructed_shape})')
     elif image.dtype != dtype:
         warn(f'image dtype does not match output dtype: '
              f'image is cast to {dtype}')
@@ -485,9 +483,8 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     if projection_shifts is None:
         projection_shifts = np.zeros((radon_image.shape[1],), dtype=dtype)
     elif len(projection_shifts) != radon_image.shape[1]:
-        raise ValueError('Shape of projection_shifts (%s) does not match the '
-                         'number of projections (%d)'
-                         % (len(projection_shifts), radon_image.shape[1]))
+        raise ValueError(f'Shape of projection_shifts ({len(projection_shifts)}) does not match the '
+                         f'number of projections ({radon_image.shape[1]})')
     else:
         projection_shifts = np.asarray(projection_shifts, dtype=dtype)
     if clip is not None:

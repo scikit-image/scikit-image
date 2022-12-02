@@ -38,13 +38,13 @@ def unique_rows(ar):
     """
     if ar.ndim != 2:
         raise ValueError("unique_rows() only makes sense for 2D arrays, "
-                         "got %dd" % ar.ndim)
+                         f"got {ar.ndim}")
     # the view in the next line only works if the array is C-contiguous
     ar = np.ascontiguousarray(ar)
     # np.unique() finds identical items in a raveled array. To make it
     # see each row as a single item, we create a view of each row as a
     # byte string of length itemsize times number of columns in `ar`
-    ar_row_view = ar.view('|S%d' % (ar.itemsize * ar.shape[1]))
+    ar_row_view = ar.view(f"|S{ar.itemsize * ar.shape[1]}")
     _, unique_row_indices = np.unique(ar_row_view, return_index=True)
     ar_out = ar[unique_row_indices]
     return ar_out
