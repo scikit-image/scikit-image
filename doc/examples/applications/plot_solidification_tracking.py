@@ -172,7 +172,7 @@ props_0_df.head()
 # along with its bounding box (bbox) in red.
 
 largest_region_0 = labeled_0 == props_0_df.iloc[0]['label']
-minr, minc, maxr, maxc = [props_0_df.iloc[0][f'bbox-{i}'] for i in range(4)]
+minr, minc, maxr, maxc = (props_0_df.iloc[0][f'bbox-{i}'] for i in range(4))
 fig = px.imshow(largest_region_0, binary_string=True)
 fig.add_shape(
         type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
