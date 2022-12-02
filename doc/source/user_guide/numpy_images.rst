@@ -4,8 +4,8 @@
 A crash course on NumPy for images
 ==================================
 
-Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many 
-common operations can be achieved using standard NumPy methods for 
+Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many
+common operations can be achieved using standard NumPy methods for
 manipulating arrays::
 
     >>> from skimage import data
@@ -205,7 +205,7 @@ syntax can be used::
     >>> from skimage import filters
     >>> edges = np.empty_like(im3d)
     >>> for pln, image in enumerate(im3d):
-    ...     # Iterate over the leading dimension 
+    ...     # Iterate over the leading dimension
     ...     edges[pln] = filters.sobel(image)
 
 

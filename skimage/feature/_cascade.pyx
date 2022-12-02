@@ -7,8 +7,8 @@
 
 import numpy as np
 cimport numpy as cnp
-cimport safe_openmp as openmp
-from safe_openmp cimport have_openmp
+from . cimport safe_openmp as openmp
+from .safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
@@ -536,7 +536,7 @@ cdef class Cascade:
             Py_ssize_t stumps_number
             Py_ssize_t first_stump_idx
             Py_ssize_t lut_idx
-            Py_ssize_t r, c, widht, height
+            Py_ssize_t r, c, width, height
             cnp.uint32_t[::1] current_lut
             Stage current_stage
             MBLBPStump current_stump
@@ -587,9 +587,9 @@ cdef class Cascade:
 
         Parameters
         ----------
-        min_size : typle (int, int)
+        min_size : tuple (int, int)
             Minimum size of window for which to search the scale factor.
-        max_size : typle (int, int)
+        max_size : tuple (int, int)
             Maximum size of window for which to search the scale factor.
         scale_step : cnp.float32_t
             The scale by which the search window is multiplied
@@ -671,9 +671,9 @@ cdef class Cascade:
             slow. By setting this parameter to higher values the results will
             be worse but the computation will be much faster. Usually, values
             in the interval [1, 1.5] give good results.
-        min_size : typle (int, int)
+        min_size : tuple (int, int)
             Minimum size of the search window.
-        max_size : typle (int, int)
+        max_size : tuple (int, int)
             Maximum size of the search window.
         min_neighbor_number : int
             Minimum amount of intersecting detections in order for detection
@@ -909,7 +909,9 @@ cdef class Cascade:
                 feature_number = int(internal_nodes[0])
                 # list() is for Python3 fix here
                 lut_array = list(map(lambda x: int(x), internal_nodes[1:]))
-                lut = np.asarray(lut_array, dtype='uint32')
+                # Cast via astype to avoid warning about integer wraparound.
+                # see: https://github.com/scikit-image/scikit-image/issues/6638
+                lut = np.asarray(lut_array).astype(np.uint32)
 
                 # Copy array to the main LUT array
                 for i in range(8):

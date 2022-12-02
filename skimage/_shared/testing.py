@@ -52,14 +52,14 @@ else:
         _error_on_warnings = False
 
 def assert_less(a, b, msg=None):
-    message = "%r is not lower than %r" % (a, b)
+    message = f"{a!r} is not lower than {b!r}"
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
 def assert_greater(a, b, msg=None):
-    message = "%r is not greater than %r" % (a, b)
+    message = f"{a!r} is not greater than {b!r}"
     if msg is not None:
         message += ": " + msg
     assert a > b, message
@@ -116,9 +116,8 @@ def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     if '.' not in suffix:
         suffix = '.' + suffix
-    temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    fname = temp_file.name
-    temp_file.close()
+    with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
+        fname = temp_file.name
     io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
@@ -213,23 +212,6 @@ def setup_test():
 
         warnings.simplefilter('error')
 
-        # do not error on specific warnings from the skimage.io module
-        # https://github.com/scikit-image/scikit-image/issues/5337
-        warnings.filterwarnings(
-            'default', message='TiffFile:', category=DeprecationWarning
-        )
-
-        warnings.filterwarnings(
-            'default', message='TiffWriter:', category=DeprecationWarning
-        )
-        # newer tifffile change the start of the warning string
-        # e.g. <tifffile.TiffWriter.write> data with shape ...
-        warnings.filterwarnings(
-            'default',
-            message='<tifffile.',
-            category=DeprecationWarning
-        )
-
         warnings.filterwarnings(
             'default', message='unclosed file', category=ResourceWarning
         )
@@ -274,6 +256,15 @@ def setup_test():
             category=DeprecationWarning
         )
 
+        # ignore dtype deprecation warning from NumPy arising from use of SciPy
+        # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
+        # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
+        warnings.filterwarnings(
+            'default',
+            message=('`np.int0` is a deprecated alias for `np.intp`'),
+            category=DeprecationWarning
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
@@ -294,6 +285,7 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
+@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
@@ -332,15 +324,6 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.join()
 
-                return result
-
         return inner
 
     return wrapper
-
-
-if __name__ == '__main__':
-    color_check('pil')
-    mono_check('pil')
-    mono_check('pil', 'bmp')
-    mono_check('pil', 'tiff')

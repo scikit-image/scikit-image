@@ -31,12 +31,6 @@ def test_color_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-def test_max_iter_kwarg_deprecation():
-    img = np.zeros((20, 21, 3))
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        slic(img, max_iter=10, start_label=0)
-
-
 def test_multichannel_2d():
     rnd = np.random.default_rng(0)
     img = np.zeros((20, 20, 8))
@@ -77,29 +71,14 @@ def test_gray_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-def test_gray_2d_deprecated_multichannel():
-    rnd = np.random.default_rng(0)
+def test_gray2d_default_channel_axis():
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
-    img[10:, :10] = 0.67
-    img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
-    img[img > 1] = 1
-    img[img < 0] = 0
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        seg = slic(img, sigma=0, n_segments=4, compactness=1,
-                   multichannel=False, convert2lab=False, start_label=0)
-
-    assert_equal(len(np.unique(seg)), 4)
-    assert_equal(seg.shape, img.shape)
-    assert_equal(seg[:10, :10], 0)
-    assert_equal(seg[10:, :10], 2)
-    assert_equal(seg[:10, 10:], 1)
-    assert_equal(seg[10:, 10:], 3)
-
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        seg = slic(img, 4, 1, 10, 0, None, False, convert2lab=False,
-                   start_label=0)
+    with pytest.raises(
+            ValueError, match="channel_axis=-1 indicates multichannel"
+    ):
+        slic(img)
+    slic(img, channel_axis=None)
 
 
 def _check_segment_labels(seg1, seg2, allowed_mismatch_ratio=0.1):
@@ -115,14 +94,18 @@ def test_slic_consistency_across_image_magnitude():
     img_uint16 = 256 * img_uint8.astype(np.uint16)
     img_float32 = img_as_float(img_uint8)
     img_float32_norm = img_float32 / img_float32.max()
+    img_float32_offset = img_float32 + 1000
 
     seg1 = slic(img_uint8)
     seg2 = slic(img_uint16)
     seg3 = slic(img_float32)
     seg4 = slic(img_float32_norm)
+    seg5 = slic(img_float32_offset)
 
     np.testing.assert_array_equal(seg1, seg2)
     np.testing.assert_array_equal(seg1, seg3)
+    # Assert that offset has no impact on result
+    np.testing.assert_array_equal(seg4, seg5)
     # Floating point cases can have mismatch due to floating point error
     # exact match was observed on x86_64, but mismatches seen no i686.
     # For now just verify that a similar number of superpixels are present in
@@ -220,10 +203,12 @@ def test_enforce_connectivity():
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
-                              convert2lab=False, start_label=0)
+                              convert2lab=False, start_label=0,
+                              channel_axis=None)
     segments_disconnected = slic(img, 2, compactness=0.0001,
                                  enforce_connectivity=False,
-                                 convert2lab=False, start_label=0)
+                                 convert2lab=False, start_label=0,
+                                 channel_axis=None)
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
@@ -231,7 +216,8 @@ def test_enforce_connectivity():
                                       enforce_connectivity=True,
                                       convert2lab=False,
                                       max_size_factor=0.8,
-                                      start_label=0)
+                                      start_label=0,
+                                      channel_axis=None)
 
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
@@ -407,17 +393,18 @@ def test_enforce_connectivity_mask():
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
-                              convert2lab=False, mask=msk)
+                              convert2lab=False, mask=msk, channel_axis=None)
     segments_disconnected = slic(img, 2, compactness=0.0001,
                                  enforce_connectivity=False,
-                                 convert2lab=False, mask=msk)
+                                 convert2lab=False, mask=msk, channel_axis=None)
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
     segments_connected_low_max = slic(img, 2, compactness=0.0001,
                                       enforce_connectivity=True,
                                       convert2lab=False,
-                                      max_size_factor=0.8, mask=msk)
+                                      max_size_factor=0.8, mask=msk,
+                                      channel_axis=None)
 
     result_connected = np.array([[0, 1, 1, 2, 2, 0],
                                  [0, 1, 1, 2, 2, 0],
@@ -537,7 +524,7 @@ def test_dtype_support(dtype):
     img = np.random.rand(28, 28).astype(dtype)
 
     # Simply run the function to assert that it runs without error
-    slic(img, start_label=1)
+    slic(img, start_label=1, channel_axis=None)
 
 
 def test_start_label_fix():
@@ -558,3 +545,24 @@ def test_start_label_fix():
                   n_segments=6, compactness=0.01, enforce_connectivity=True,
                   max_num_iter=10)
     assert superp.min() == start_label
+
+
+def test_raises_ValueError_if_input_has_NaN():
+    img = np.zeros((4,5), dtype=float)
+    img[2, 3] = np.NaN
+    with pytest.raises(ValueError):
+        slic(img, channel_axis=None)
+
+    mask = ~np.isnan(img)
+    slic(img, mask=mask, channel_axis=None)
+
+
+@pytest.mark.parametrize("inf", [-np.inf, np.inf])
+def test_raises_ValueError_if_input_has_inf(inf):
+    img = np.zeros((4,5), dtype=float)
+    img[2, 3] = inf
+    with pytest.raises(ValueError):
+        slic(img, channel_axis=None)
+
+    mask = np.isfinite(img)
+    slic(img, mask=mask, channel_axis=None)

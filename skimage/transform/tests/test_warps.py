@@ -309,20 +309,6 @@ def test_rescale_multichannel():
     assert scaled.shape == (16, 16, 16, 6)
 
 
-def test_rescale_multichannel_deprecated_multiscale():
-    x = np.zeros((5, 5, 3), dtype=np.float64)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        scaled = rescale(x, (2, 1), order=0, multichannel=True,
-                         anti_aliasing=False, mode='constant')
-    assert scaled.shape == (10, 5, 3)
-
-    # repeat prior test, but check for positional multichannel _warnings
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        scaled = rescale(x, (2, 1), 0, 'constant', 0, True, False, True,
-                         anti_aliasing=False)
-    assert scaled.shape == (10, 5, 3)
-
-
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_rescale_channel_axis_multiscale(channel_axis):
     x = np.zeros((5, 5, 3), dtype=np.float64)
@@ -984,6 +970,17 @@ def test_resize_local_mean_dtype():
                              preserve_range=False).dtype == x_f32.dtype
     assert resize_local_mean(x_f32, (10, 10),
                              preserve_range=True).dtype == x_f32.dtype
+
+
+def test_nn_resize_int_img():
+    """Issue #6467"""
+    img = np.zeros((12, 12), dtype=np.int16)
+    img[4:8, 1:4] = 5
+    img[4:8, 7:10] = 7
+
+    resized = resize(img, (8, 8), order=0)
+
+    assert np.array_equal(np.unique(resized), np.unique(img))
 
 
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])

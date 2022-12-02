@@ -3,10 +3,8 @@ from collections.abc import Sequence
 from numbers import Integral
 
 import numpy as np
-from scipy import ndimage as ndi
 
 from .. import draw
-from .._shared.utils import deprecate_kwarg
 from skimage import morphology
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -174,9 +172,6 @@ def _decompose_size(size, kernel_size=3):
     return 1 + (size - kernel_size) // (kernel_size - 1)
 
 
-@deprecate_kwarg({'height': 'ncols', 'width': 'nrows'},
-                 deprecated_version='0.18.0',
-                 removed_version='0.20.0')
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -200,7 +195,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
         given an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        axis. Whether 'sequence' or 'separable' is computationally faster may
         be architecture-dependent.
 
     Returns

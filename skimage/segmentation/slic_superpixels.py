@@ -109,11 +109,8 @@ def _get_grid_centroids(image, n_centroids):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=6)
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19")
 def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
-         spacing=None, multichannel=True, convert2lab=None,
+         spacing=None, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False, start_label=1, mask=None, *,
          channel_axis=-1):
@@ -151,10 +148,6 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         each spatial dimension).
         This parameter controls the weights of the distances along the
         spatial dimensions during k-means clustering.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. The input image *must* be RGB. Highly recommended.
@@ -203,6 +196,12 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         dimension is not of length 3.
     ValueError
         If ``start_label`` is not 0 or 1.
+    ValueError
+        If ``image`` contains unmasked NaN values.
+    ValueError
+        If ``image`` contains unmasked infinite values.
+    ValueError
+        If ``image`` is 2D but ``channel_axis`` is -1 (the default).
 
     Notes
     -----
@@ -214,7 +213,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
       and ``spacing=[5, 1, 1]``, the effective `sigma` is ``[0.2, 1, 1]``. This
       ensures sensible smoothing for anisotropic images.
 
-    * The image is rescaled to be in [0, 1] prior to processing.
+    * The image is rescaled to be in [0, 1] prior to processing (masked
+      values are ignored).
 
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
@@ -247,6 +247,12 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     >>> segments = slic(img, n_segments=100, compactness=20)
 
     """
+    if image.ndim == 2 and channel_axis is not None:
+        raise ValueError(
+            f"channel_axis={channel_axis} indicates multichannel, which is not "
+            "supported for a two-dimensional image; use channel_axis=None if "
+            "the image is grayscale"
+        )
 
     image = img_as_float(image)
     float_dtype = utils._supported_float_type(image.dtype)
@@ -254,12 +260,29 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     # function input
     image = image.astype(float_dtype, copy=True)
 
+    if mask is not None:
+        # Create masked_image to rescale while ignoring masked values
+        mask = np.ascontiguousarray(mask, dtype=bool)
+        if channel_axis is not None:
+            mask_ = np.expand_dims(mask, axis=channel_axis)
+            mask_ = np.broadcast_to(mask_, image.shape)
+        else:
+            mask_ = mask
+        image_values = image[mask_]
+    else:
+        image_values = image
+
     # Rescale image to [0, 1] to make choice of compactness insensitive to
     # input image scale.
-    image -= image.min()
-    imax = image.max()
-    if imax != 0:
-        image /= imax
+    imin = image_values.min()
+    imax = image_values.max()
+    if np.isnan(imin):
+        raise ValueError("unmasked NaN values in image are not supported")
+    if np.isinf(imin) or np.isinf(imax):
+        raise ValueError("unmasked infinite values in image are not supported")
+    image -= imin
+    if imax != imin:
+        image /= (imax - imin)
 
     use_mask = mask is not None
     dtype = image.dtype
@@ -291,7 +314,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.ascontiguousarray(mask, dtype=bool).view('uint8')
+        mask = mask.view('uint8')
         if mask.ndim == 2:
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:

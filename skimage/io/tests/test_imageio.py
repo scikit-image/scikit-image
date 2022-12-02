@@ -43,9 +43,9 @@ def test_imageio_truncated_jpg():
 class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
+        with NamedTemporaryFile(suffix='.png') as f:
+            fname = f.name
+
         imsave(fname, x)
         y = imread(fname)
 
@@ -64,9 +64,9 @@ class TestSave(TestCase):
                 yield self.roundtrip, x
 
     def test_bool_array_save(self):
-        f = NamedTemporaryFile(suffix='.png')
-        fname = f.name
-        f.close()
+        with NamedTemporaryFile(suffix='.png') as f:
+            fname = f.name
+
         with expected_warnings(['.* is a boolean image']):
             a = np.zeros((5, 5), bool)
             a[2, 2] = True

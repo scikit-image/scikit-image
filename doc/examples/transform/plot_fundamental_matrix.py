@@ -3,12 +3,12 @@
 Fundamental matrix estimation
 =============================
 
-This example demonstrates how to robustly estimate 
-`epipolar geometry <https://en.wikipedia.org/wiki/Epipolar_geometry>` 
+This example demonstrates how to robustly estimate
+`epipolar geometry <https://en.wikipedia.org/wiki/Epipolar_geometry>`
 (the geometry of stereo vision) between two views using sparse ORB feature
 correspondences.
 
-The `fundamental matrix <https://en.wikipedia.org/wiki/Fundamental_matrix_(computer_vision)>`_ 
+The `fundamental matrix <https://en.wikipedia.org/wiki/Fundamental_matrix_(computer_vision)>`_
 relates corresponding points between a pair of
 uncalibrated images. The matrix transforms homogeneous image points in one image
 to epipolar lines in the other image.

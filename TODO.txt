@@ -1,4 +1,4 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
+Remember to list any API changes below in `doc/release/release_dev.rst`.
 
 Version 0.17
 ------------
@@ -6,18 +6,16 @@ Version 0.17
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 1.0
------------
-
-* consider removing the argument `coordinates` in
-  `skimage.segmentation.active_contour`, which has not effect.
-* In ``skimage/morphology/misc.py`` remove the deprecated parameter
-  ``in_place`` in remove_small_holes(), remove_small_objects() and
-  clear_border(), and update the tests.
-* Remove the deprecation warning for `input` kwarg of the `label`
-  function in `skimage/measure/_label.py`
-* Change the warning about poorly conditioned data to a ValueError within
-  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
+Version 0.21
+------------
+* In ``skimage/filters/lpi_filter.py``, remove the deprecated function
+  inverse().
+* Set `channel_axis=None` in `skimage._shared.filters.gaussian` and remove
+  `skimage._shared.filters._PatchClassRepr`,
+  `skimage/_shared/filters.ChannelAxisNotSet`, and
+  `skimage.filters.tests.test_gaussian.test_deprecated_automatic_channel_detection`.
+  Also remove the associated warning in `skimage._shared.filters.gaussian`'s
+  docstring.
 
 Other (2022)
 ------------

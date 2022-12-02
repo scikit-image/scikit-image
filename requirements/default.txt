@@ -1,8 +1,10 @@
-numpy>=1.19
-scipy>=1.5
-networkx>=2.5
+numpy>=1.21.1
+scipy>=1.8,<1.9.2; python_version<="3.9"
+scipy>=1.8; python_version>"3.9"
+networkx>=2.8
 pillow>=9.0.1
 imageio>=2.4.1
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
 packaging>=20.0
+lazy_loader>=0.1

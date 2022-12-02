@@ -136,7 +136,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
 
     See also
     --------
-    skimage.sobel
+    skimage.filters.sobel
 
     Notes
     -----
@@ -230,7 +230,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         isobel, jsobel, magnitude, eroded_mask, low_threshold
     )
 
-    # Double thresholding and edge traking
+    # Double thresholding and edge tracking
     #
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them

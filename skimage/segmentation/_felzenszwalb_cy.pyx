@@ -30,7 +30,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
     image : (N, M, C) ndarray
         Input image.
     scale : float, optional (default 1)
-        Sets the obervation level. Higher means larger clusters.
+        Sets the observation level. Higher means larger clusters.
     sigma : float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.

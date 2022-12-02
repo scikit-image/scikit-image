@@ -70,8 +70,7 @@ plt.show()
 
 
 def make_ax(grid=False):
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
+    ax = plt.figure().add_subplot(projection='3d')
     ax.grid(grid)
     ax.set_axis_off()
     return ax

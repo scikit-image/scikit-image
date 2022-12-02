@@ -48,9 +48,8 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=5)
 def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
-               multichannel=False, func_kw={}, *, channel_axis=None):
+               func_kw={}, *, channel_axis=None):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
@@ -72,10 +71,6 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     num_workers : int or None, optional
         The number of parallel threads to use during cycle spinning. If set to
         ``None``, the full set of available cores are used.
-    multichannel : bool, optional
-        Whether to treat the final axis as channels (no cycle shifts are
-        performed over the channels axis). This argument is deprecated: specify
-        `channel_axis` instead.
     func_kw : dict, optional
         Additional keyword arguments to supply to ``func``.
     channel_axis : int or None, optional

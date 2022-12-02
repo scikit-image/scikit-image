@@ -1,7 +1,5 @@
 from collections import namedtuple
 import numpy as np
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ..._shared.utils import warn
@@ -146,6 +144,7 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         The `AxesImage` object returned by `plt.imshow`.
     """
     import matplotlib.pyplot as plt
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     lo, hi, cmap = _get_display_range(image)
 
@@ -200,7 +199,9 @@ def imshow_collection(ic, *args, **kwargs):
     return fig
 
 
-imread = matplotlib.image.imread
+def imread(*args, **kwargs):
+    import matplotlib.image
+    return matplotlib.image.imread(*args, **kwargs)
 
 
 def _app_show():

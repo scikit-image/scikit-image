@@ -5,8 +5,7 @@ from .._shared import utils
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=4)
-def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, *,
+def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *,
                  channel_axis=-1):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
@@ -33,10 +32,6 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, *,
         Width (standard deviation) of Gaussian kernel used in preprocessing.
     min_size : int
         Minimum component size. Enforced using postprocessing.
-    multichannel : bool, optional (default: True)
-        Whether the last axis of the image is to be interpreted as multiple
-        channels. A value of False, for a 3D image, is not currently supported.
-        This argument is deprecated: specify `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

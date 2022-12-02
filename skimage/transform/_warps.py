@@ -11,8 +11,7 @@ from ..measure import block_reduce
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
                              _validate_interpolation_order,
-                             channel_as_last_axis,
-                             deprecate_multichannel_kwarg)
+                             channel_as_last_axis)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -118,6 +117,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         to downsampling. It is crucial to filter when downsampling
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when downsampling an image whose data type is not bool.
+        It is also set to False when using nearest neighbor interpolation
+        (``order`` == 0) with integer input data type.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
@@ -150,8 +151,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = (not input_type == bool and
-                         any(x < y for x, y in zip(output_shape, input_shape)))
+        anti_aliasing = (
+            not input_type == bool and
+            not (np.issubdtype(input_type, np.integer) and order == 0) and
+            any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")
@@ -238,9 +241,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=False,
+            preserve_range=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
             channel_axis=None):
     """Scale image by a certain factor.
@@ -284,10 +286,6 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         image is converted according to the conventions of `img_as_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
@@ -1062,9 +1060,8 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg()
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
-               scaling='linear', multichannel=False, channel_axis=None,
+               scaling='linear', channel_axis=None,
                **kwargs):
     """Remap image to polar or log-polar coordinates space.
 
@@ -1084,11 +1081,6 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     scaling : {'linear', 'log'}, optional
         Specify whether the image warp is polar or log-polar. Defaults to
         'linear'.
-    multichannel : bool, optional
-        Whether the image is a 3-D array in which the third axis is to be
-        interpreted as multiple channels. If set to `False` (default), only 2-D
-        arrays are accepted. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

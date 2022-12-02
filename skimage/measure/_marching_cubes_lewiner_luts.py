@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # This file was auto-generated from `mc_meta/LookUpTable.h` by
 # `mc_meta/createluts.py`. The `mc_meta` scripts are not
 # distributed with scikit-image, but are available in the
-# respository under tools/precompute/mc_meta.
+# repository under tools/precompute/mc_meta.
 
 #static const char casesClassic[256][16]
 CASESCLASSIC = (256, 16), """

@@ -139,3 +139,9 @@ def test_no_descriptors_extracted_orb():
     detector_extractor = ORB()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+def test_img_too_small_orb():
+    img = data.brick()[:64,:64]
+    detector_extractor = ORB(downscale=2, n_scales=8)
+    detector_extractor.detect(img)
+    detector_extractor.detect_and_extract(img)

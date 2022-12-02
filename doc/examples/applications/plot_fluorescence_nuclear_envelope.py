@@ -51,10 +51,15 @@ print(f'shape: {image_sequence.shape}')
 #####################################################################
 # The dataset is a 2D image stack with 15 frames (time points) and 2 channels.
 
+vmin, vmax = 0, image_sequence.max()
+
 fig = px.imshow(
     image_sequence,
     facet_col=1,
     animation_frame=0,
+    zmin=vmin,
+    zmax=vmax,
+    binary_string=True,
     labels={'animation_frame': 'time point', 'facet_col': 'channel'}
 )
 plotly.io.show(fig)
