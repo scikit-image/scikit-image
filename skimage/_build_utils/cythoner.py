@@ -1,4 +1,4 @@
-#!python3
+#!python
 """ Scipy variant of Cython command
 
 Cython, as applied to single pyx file.

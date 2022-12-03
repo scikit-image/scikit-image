@@ -12,10 +12,10 @@ class RankSuite:
 
     def setup(self, filter_func, shape):
         self.image = np.random.randint(0, 255, size=shape, dtype=np.uint8)
-        self.selem = disk(1)
+        self.footprint = disk(1)
 
     def time_filter(self, filter_func, shape):
-        getattr(rank, filter_func)(self.image, self.selem)
+        getattr(rank, filter_func)(self.image, self.footprint)
 
 
 class Rank3DSuite:
@@ -25,7 +25,7 @@ class Rank3DSuite:
 
     def setup(self, filter3d, shape3d):
         self.volume = np.random.randint(0, 255, size=shape3d, dtype=np.uint8)
-        self.selem_3d = ball(1)
+        self.footprint_3d = ball(1)
 
     def time_3d_filters(self, filter3d, shape3d):
-        getattr(rank, filter3d)(self.volume, self.selem_3d)
+        getattr(rank, filter3d)(self.volume, self.footprint_3d)

@@ -44,14 +44,14 @@ tracker = "https://github.com/scikit-image/scikit-image/issues"
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    "meson-python>=0.10.0",
+    "meson-python>=0.11.0",
     # `wheel` is needed for non-isolated builds, given that `meson-python`
     # doesn't list it as a runtime requirement (at least in 0.10.0)
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
     "wheel",
     "setuptools<=65.5",
     "packaging",
-    "Cython>=0.29.24,<3.0",
+    "Cython>=0.29.24",
     "pythran",
     "lazy_loader>=0.1",
 
@@ -76,3 +76,12 @@ requires = [
     "numpy; python_version>='3.12'",
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
+
+[tool.devpy]
+package = 'skimage'
+
+[tool.devpy.commands]
+"Build" = ["devpy.build", "devpy.test"]
+"Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
+"Documentation" = [".devpy/cmds.py:docs"]
+"Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]

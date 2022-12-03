@@ -15,14 +15,16 @@ def main():
                 # Remove trailing and leading whitespace.
                 req = req.strip()
 
-                if not req:
+                if (not req) or req.startswith('#'):
                     # skip empty or white space only lines
-                    continue
-                elif req.startswith('#'):
                     continue
 
                 # Get the name of the package
-                req = re.split('<|>|=|!|;', req)[0]
+                if req.startswith('git+http'):
+                    req = req.split('/')[-1]
+                else:
+                    req = re.split('<|>|=|!|;', req)[0]
+
                 try:
                     # use pkg_resources to reliably get the version at install
                     # time by package name. pkg_resources needs the name of the

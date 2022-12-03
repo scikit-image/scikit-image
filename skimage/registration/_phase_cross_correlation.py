@@ -3,6 +3,8 @@ Port of Manuel Guizar's code from:
 http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-image-registration-by-cross-correlation
 """
 
+import warnings
+
 import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 
@@ -141,10 +143,10 @@ def phase_cross_correlation(reference_image, moving_image, *,
         data will bypass FFT of input data. Case insensitive. Not
         used if any of ``reference_mask`` or ``moving_mask`` is not
         None.
-    return_error : bool, optional
-        Returns error and phase difference if on, otherwise only
-        shifts are returned. Has noeffect if any of ``reference_mask`` or
-        ``moving_mask`` is not None. In this case only shifts is returned.
+    return_error : bool, {"always"}, optional
+        Returns error and phase difference if "always" is given. If False, or
+        either ``reference_mask`` or ``moving_mask`` are given, only shifts are
+        returned.
     reference_mask : ndarray
         Boolean mask for ``reference_image``. The mask should evaluate
         to ``True`` (or 1) on valid pixels. ``reference_mask`` should
@@ -174,10 +176,14 @@ def phase_cross_correlation(reference_image, moving_image, *,
         numpy (e.g. Z, Y, X)
     error : float
         Translation invariant normalized RMS error between
-        ``reference_image`` and ``moving_image``.
+        ``reference_image`` and ``moving_image``. For masked cross-correlation
+        this error is not available and NaN is returned if ``return_error``
+        is "always".
     phasediff : float
         Global phase difference between the two images (should be
-        zero if images are non-negative).
+        zero if images are non-negative). For masked cross-correlation
+        this phase difference is not available and NaN is returned if
+        ``return_error`` is "always".
 
     Notes
     -----
@@ -215,10 +221,27 @@ def phase_cross_correlation(reference_image, moving_image, *,
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
     """
+    def warn_return_error():
+        warnings.warn(
+            "In scikit-image 0.21, phase_cross_correlation will start "
+            "returning a tuple or 3 items (shift, error, phasediff) always. "
+            "To enable the new return behavior and silence this warning, use "
+            "return_error='always'.",
+            category=FutureWarning,
+            stacklevel=3,
+        )
+
     if (reference_mask is not None) or (moving_mask is not None):
-        return _masked_phase_cross_correlation(reference_image, moving_image,
-                                               reference_mask, moving_mask,
-                                               overlap_ratio)
+        shifts = _masked_phase_cross_correlation(
+            reference_image, moving_image,
+            reference_mask, moving_mask,
+            overlap_ratio
+        )
+        if return_error == "always":
+            return shifts, np.nan, np.nan
+        else:
+            warn_return_error()
+            return shifts
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
@@ -310,4 +333,5 @@ def phase_cross_correlation(reference_image, moving_image, *,
         return shifts, _compute_error(CCmax, src_amp, target_amp),\
             _compute_phasediff(CCmax)
     else:
+        warn_return_error()
         return shifts

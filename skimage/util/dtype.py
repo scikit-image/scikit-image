@@ -1,5 +1,7 @@
-import numpy as np
+import warnings
 from warnings import warn
+
+import numpy as np
 
 
 __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
@@ -24,12 +26,19 @@ _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
                    for t in _integer_types}
 dtype_range = {bool: (False, True),
                np.bool_: (False, True),
-               np.bool8: (False, True),
                float: (-1, 1),
                np.float_: (-1, 1),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
                np.float64: (-1, 1)}
+
+with warnings.catch_warnings():
+    warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+    # np.bool8 is a deprecated alias of np.bool_
+    if hasattr(np, 'bool8'):
+        dtype_range[np.bool8] = (False, True)
+
 dtype_range.update(_integer_ranges)
 
 _supported_types = list(dtype_range.keys())
