@@ -6,7 +6,7 @@ on:
       - "buildwheels*"
 env:
   CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: "-r requirements/test.txt"
+  CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
 
@@ -171,16 +171,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        compiler: clang
-        cibw_arch: ["AMD64", "x86"]
+        cibw_arch: ["AMD64"]
         cibw_python: ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
-        exclude:
-          - os: windows-latest
-            cibw_python: "cp310-*"
-            cibw_arch: x86
-          - os: windows-latest
-            cibw_python: "cp311-*"
-            cibw_arch: x86
 
     steps:
       - uses: actions/checkout@v3
@@ -195,32 +187,6 @@ jobs:
       - name: Install cibuildwheel and add clang-cl to path
         run: |
           python -m pip install cibuildwheel
-
-      - name: Build x86 Windows wheels for CPython
-        if: matrix.cibw_arch == 'x86'
-        # To avoid "LINK : fatal error LNK1158: cannot run 'rc.exe'"
-        # we explicitly add rc.exe to path using the method from:
-        # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
-        # with additional -arch=x86 flag to vsdevcmd.bat
-        run: |
-          function Invoke-VSDevEnvironment {
-            $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-              $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
-              $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
-            & "${env:COMSPEC}" /s /c "`"$Command`" -arch=x86 -no_logo && set" | Foreach-Object {
-                  if ($_ -match '^([^=]+)=(.*)') {
-                      [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-                  }
-              }
-          }
-          Invoke-VSDevEnvironment
-          Get-Command rc.exe | Format-Table -AutoSize
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
-          LDFLAGS: "-Wl,-S"
 
       - name: Build AMD64 Windows wheels for CPython
         if: matrix.cibw_arch == 'AMD64'
@@ -243,6 +209,9 @@ jobs:
           Get-Command rc.exe | Format-Table -AutoSize
           python -m cibuildwheel --output-dir dist
         env:
+          # define CC, CXX so meson will use clang-cl instead of MSVC
+          CC: clang-cl
+          CXX: clang-cl
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
           # -Wl,-S equivalent to gcc's -Wl,--strip-debug
