@@ -37,7 +37,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
     -----
     Pearson's Correlation Coefficient (PCC) measures the linear correlation
     between the pixel intensities of the two images. Its value ranges from -1
-    for perfect linear anti-correlation and +1 for perfect linear correlation.
+    for perfect linear anti-correlation to +1 for perfect linear correlation.
     The calculation of the p-value assumes that the intensities of pixels in
     each input image are normally distributed.
 
@@ -63,7 +63,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
     involving segmentation masks (e.g. MCC or intersection coefficient) may be
     more suitable [3]_ [4]_.
 
-    Providing the mask of only relevant sections of the image (e.g. cells, or
+    Providing the mask of only relevant sections of the image (e.g., cells, or
     particular cellular compartments) and removing noise is important as the
     PCC is sensitive to these measures [3]_ [4]_.
 

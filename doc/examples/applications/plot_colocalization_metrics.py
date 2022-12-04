@@ -7,7 +7,7 @@ In this example, we demonstrate the use of different metrics to assess the
 colocalization of two different image channels.
 
 Colocalization can be split into two different concepts:
-1. Co-occurence: What proportion of a substance is localised to a particular
+1. Co-occurence: What proportion of a substance is localized to a particular
 area?
 2. Correlation: What is the relationship in intensity between two substances?
 
@@ -22,9 +22,9 @@ area?
 # control?
 
 # We begin by segmenting the nucleus of a sample image as described in another
-# `example <https://scikit-image.org/docs/stable/auto_examples/applications/plot_fluorescence_nuclear_envelope.html#sphx-glr-auto-examples-applications-plot-fluorescence-nuclear-envelope-py>`_
+# `example <https://scikit-image.org/docs/stable/auto_examples/applications/plot_fluorescence_nuclear_envelope.html>`_
 # and assume that whatever is not in the nucleus is in the cytoplasm.
-# The protein, "Protein A", will be simulated as blobs and segmented.
+# The protein, "protein A", will be simulated as blobs and segmented.
 
 import random
 
@@ -93,19 +93,19 @@ for a in ax.ravel():
 measure.intersection_coeff(proteinA_seg, nucleus_seg)
 
 #####################################################################
-# Mander's Colocalization Coefficient (MCC)
+# Manders' Colocalization Coefficient (MCC)
 # =========================================
 #
 # The overlap coefficient assumes that the area of protein segmentation
 # corresponds to the concentration of that protein - with larger areas
 # indicating more protein. As the resolution of images are usually too small to
 # make out individual proteins, they can clump together within one pixel,
-# making the intensity of that pixel brighter. So to better capture the the
+# making the intensity of that pixel brighter. So, to better capture the
 # protein concentration, we may choose to determine what proportion of the
 # *intensity* of the protein channel is inside the nucleus. This metric is
 # known as Manders' Colocalization Coefficient.
 #
-# In this image, while there are a lot of Protein A spots within the nucleus
+# In this image, while there are a lot of protein A spots within the nucleus
 # they are dim compared to some of the spots outside the nucleus, so the MCC is
 # much lower than the overlap coefficient.
 
@@ -126,7 +126,7 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 #
 # Now, imagine that we want to know how closely related two proteins are.
 #
-# First, we will generate Protein B and plot intensities of the two proteins in
+# First, we will generate protein B and plot intensities of the two proteins in
 # every pixel to see the relationship between them.
 
 # generating protein B data that is correlated to protein A for demo
