@@ -72,8 +72,10 @@ Performance
   (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_).
 - Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
-- Reduce the memory footprint of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
+- Reduce the memory consumption of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
   (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_).
+- Reduce the memory consumption of ``blob_dog``, ``blob_log``, and ``blob_doh`` in ``skimage.feature``
+  (`#6597 <https://github.com/scikit-image/scikit-image/pull/6597>`_).
 - Use the minimal required unsigned integer size internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
   Previously, int32 was used.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
@@ -110,6 +112,10 @@ Changes and new deprecations
 - Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
   Applying the function to floating-point images may give unexpected results when small numerical differences between adjacent pixels are present
   (`#6272 <https://github.com/scikit-image/scikit-image/pull/6272>`_).
+- Warn if ``skimage.registration.phase_cross_correlation`` returns only the shift vector.
+  Starting with the next release this function will always return a tuple of three (shift vector, error, phase difference).
+  Use ``return_error="always"`` to silence this warning and switch to this new behavior
+  (`#6543 <https://github.com/scikit-image/scikit-image/pull/6543>`_).
 
 Completed deprecations
 ----------------------
@@ -166,6 +172,8 @@ New
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Add a new gallery example "Render text onto an image"
   (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
+- Add a new gallery example "Track solidification of a metallic alloy"
+  (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_).
 - Add support page (``.github/SUPPORT.md``) to help users from GitHub find appropriate support resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
@@ -207,6 +215,10 @@ Improved & updated
   (`#6208 <https://github.com/scikit-image/scikit-image/pull/6208>`_).
 - Provide pre-commit PR instructions in pull request template
   (`#6578 <https://github.com/scikit-image/scikit-image/pull/6578>`_).
+- Warn about and explain the handling of floating-point data in the docstring of ``skimage.metricts.structural_similarity``
+  (`#6595 <https://github.com/scikit-image/scikit-image/pull/6595>`_).
+- Fix intensity autoscaling in animated ``imshow`` in gallery example "Measure fluorescence intensity at the nuclear envelope"
+  (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_).
 
 Fixes, spelling & minor tweaks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -340,6 +352,8 @@ Maintenance
   (`#6577 <https://github.com/scikit-image/scikit-image/pull/6577>`_).
 - Update sphinx configuration
   (`#6579 <https://github.com/scikit-image/scikit-image/pull/6579>`_).
+- Update pyproject.toml to support Python 3.11 and to fix 32-bit pinned packages on Windows
+  (`#6519 <https://github.com/scikit-image/scikit-image/pull/6519>`_).
 
 Benchmarks
 ~~~~~~~~~~
@@ -440,13 +454,7 @@ Backported 0.19.x (remove before merging!)
 
 To do
 -----
-- Add solidification demo (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_)
-- Update pyproject.toml for Python 3.11 support and to fix 32-bit Windows pinnings (`#6519 <https://github.com/scikit-image/scikit-image/pull/6519>`_)
-- Start deprecation of inconsistency in phase_cross_correlation output count (`#6543 <https://github.com/scikit-image/scikit-image/pull/6543>`_)
 - Complete deprecations targeting release 0.20 or 1.0 (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_)
-- Improve SSIM documentation and warn about data range. (`#6595 <https://github.com/scikit-image/scikit-image/pull/6595>`_)
-- Reduce memory consumption in blob_* functions with preallocation (`#6597 <https://github.com/scikit-image/scikit-image/pull/6597>`_)
-- Fix intensity autoscaling in animated imshow. (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_)
 - Add dev.py usage instructions (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_)
 - Set `check: true` for `run_command` (`#6606 <https://github.com/scikit-image/scikit-image/pull/6606>`_)
 - Update OpenBLAS to v0.3.17 (`#6607 <https://github.com/scikit-image/scikit-image/pull/6607>`_)
