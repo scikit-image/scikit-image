@@ -516,6 +516,7 @@ To do
 - Mark Harfouche
 - Martijn Courteaux
 - Marvin Albert
+- Matthew Brett
 - Matthias Bussonnier
 - Miles Lucas
 - Naveen
@@ -524,7 +525,6 @@ To do
 - Peter Sobolewski
 - Peter Bell
 - Ray Bell
-- Riadh
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
