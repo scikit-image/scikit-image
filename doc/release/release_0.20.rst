@@ -68,7 +68,7 @@ Performance
   (`#6188 <https://github.com/scikit-image/scikit-image/pull/6188>`_).
 - Reduce import time of ``skimage.io`` by loading the matplotlib plugin only when required
   (`#6550 <https://github.com/scikit-image/scikit-image/pull/6550>`_).
-- Incorporate RANSAC improvements from scikit-learn into ``skimage.measure.ransac`` which should lower iteration times
+- Incorporate RANSAC improvements from scikit-learn into ``skimage.measure.ransac`` which decrease the number of iterations
   (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_).
 - Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
