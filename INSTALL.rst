@@ -108,6 +108,7 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
+To access the full selection of demo datasets, use ``scikit-image[data]``.
 To include a selection of other scientific Python packages that expand
 ``scikit-image``'s capabilities to include, e.g., parallel processing, you
 can install the package ``scikit-image[optional]``:
@@ -166,7 +167,8 @@ Downloading all demo datasets
 Some of the data used in our examples is hosted online and is not installed
 by default by the procedures explained above. Data are downloaded once, at the
 first call, but this requires an internet connection. If you prefer downloading
-all the demo datasets to be able to work offline, you can run this command:
+all the demo datasets to be able to work offline, ensure that package ``pooch``
+is installed and then run this command:
 
 .. code-block:: sh
 
@@ -300,11 +302,11 @@ When using ``venv``, you may find the following bash commands useful:
   # Make sure that pip is up to date
   pip install --upgrade pip
   # Install all development and runtime dependencies of scikit-image
-  pip install -r <(cat requirements/*.txt)
+  pip install -r requirements.txt
   # Build and install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
 
@@ -328,9 +330,9 @@ before you get started.
   # Install major development and runtime dependencies of scikit-image
   conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
   # Install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -463,6 +465,19 @@ Full requirements list
 **Documentation Requirements**
 
 .. include:: ../../requirements/docs.txt
+   :literal:
+
+**Developer Requirements**
+
+.. include:: ../../requirements/developer.txt
+   :literal:
+
+**Data Requirements**
+
+The full selection of demo datasets is only available with the
+following installed:
+
+.. include:: ../../requirements/data.txt
    :literal:
 
 **Optional Requirements**

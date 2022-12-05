@@ -323,7 +323,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     -----
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
-    """
+    """  # noqa: E501
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -352,23 +352,23 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     sigma_list = np.array([min_sigma * (sigma_ratio ** i)
                            for i in range(k + 1)])
 
-    gaussian_images = [gaussian(image, s, mode='reflect') for s in sigma_list]
-
-    # normalization factor for consistency in DoG magnitude
-    sf = 1 / (sigma_ratio - 1)
-
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
-    dog_images = [
-        (gaussian_images[i] - gaussian_images[i + 1]) * sf for i in range(k)
-    ]
+    dog_image_cube = np.empty(image.shape + (k,), dtype=float_dtype)
+    gaussian_previous = gaussian(image, sigma_list[0], mode='reflect')
+    for i, s in enumerate(sigma_list[1:]):
+        gaussian_current = gaussian(image, s, mode='reflect')
+        dog_image_cube[..., i] = gaussian_previous - gaussian_current
+        gaussian_previous = gaussian_current
 
-    image_cube = np.stack(dog_images, axis=-1)
+    # normalization factor for consistency in DoG magnitude
+    sf = 1 / (sigma_ratio - 1)
+    dog_image_cube *= sf
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
-        image_cube,
+        dog_image_cube,
         threshold_abs=threshold,
         threshold_rel=threshold_rel,
         exclude_border=exclude_border,
@@ -497,7 +497,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     -----
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
-    """
+    """  # noqa: E501
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -526,11 +526,10 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     # computing gaussian laplace
-    # average s**2 provides scale invariance
-    gl_images = [-ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
-                 for s in sigma_list]
-
-    image_cube = np.stack(gl_images, axis=-1)
+    image_cube = np.empty(image.shape + (len(sigma_list),), dtype=float_dtype)
+    for i, s in enumerate(sigma_list):
+        # average s**2 provides scale invariance
+        image_cube[..., i] = -ndi.gaussian_laplace(image, s) * np.mean(s)**2
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
@@ -616,7 +615,6 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_determinant_of_the_Hessian
-
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
            ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
@@ -653,7 +651,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
-    """
+    """  # noqa: E501
     check_nD(image, 2)
 
     image = img_as_float(image)
@@ -668,8 +666,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
-    hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
-    image_cube = np.dstack(hessian_images)
+    image_cube = np.empty(shape=image.shape + (len(sigma_list),), dtype=float_dtype)
+    for j, s in enumerate(sigma_list):
+        image_cube[..., j] = _hessian_matrix_det(image, s)
 
     local_maxima = peak_local_max(image_cube,
                                   threshold_abs=threshold,

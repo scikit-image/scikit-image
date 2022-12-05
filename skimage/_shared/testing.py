@@ -256,6 +256,15 @@ def setup_test():
             category=DeprecationWarning
         )
 
+        # ignore dtype deprecation warning from NumPy arising from use of SciPy
+        # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
+        # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
+        warnings.filterwarnings(
+            'default',
+            message=('`np.int0` is a deprecated alias for `np.intp`'),
+            category=DeprecationWarning
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
@@ -276,6 +285,7 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
+@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
@@ -314,15 +324,6 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.join()
 
-                return result
-
         return inner
 
     return wrapper
-
-
-if __name__ == '__main__':
-    color_check('pil')
-    mono_check('pil')
-    mono_check('pil', 'bmp')
-    mono_check('pil', 'tiff')

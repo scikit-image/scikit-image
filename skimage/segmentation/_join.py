@@ -1,4 +1,5 @@
 import numpy as np
+
 from ..util._map_array import map_array, ArrayMap
 
 
@@ -128,6 +129,8 @@ def relabel_sequential(label_field, offset=1):
     else:
         out_vals = np.arange(offset, offset+len(in_vals))
     input_type = label_field.dtype
+    if input_type.kind not in "iu":
+        raise TypeError("label_field must have an integer dtype")
 
     # Some logic to determine the output type:
     #  - we don't want to return a smaller output type than the input type,
@@ -142,7 +145,7 @@ def relabel_sequential(label_field, offset=1):
     if input_type.itemsize < required_type.itemsize:
         output_type = required_type
     else:
-        if input_type.type(out_vals[-1]) == out_vals[-1]:
+        if out_vals[-1] < np.iinfo(input_type).max:
             output_type = input_type
         else:
             output_type = required_type
