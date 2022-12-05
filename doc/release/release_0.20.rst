@@ -438,11 +438,37 @@ Backported 0.19.x (remove before merging!)
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-58 authors added to this release [alphabetical by first name or login]
+To do
+-----
+- Add solidification demo (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_)
+- Update pyproject.toml for Python 3.11 support and to fix 32-bit Windows pinnings (`#6519 <https://github.com/scikit-image/scikit-image/pull/6519>`_)
+- Start deprecation of inconsistency in phase_cross_correlation output count (`#6543 <https://github.com/scikit-image/scikit-image/pull/6543>`_)
+- Complete deprecations targeting release 0.20 or 1.0 (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_)
+- Improve SSIM documentation and warn about data range. (`#6595 <https://github.com/scikit-image/scikit-image/pull/6595>`_)
+- Reduce memory consumption in blob_* functions with preallocation (`#6597 <https://github.com/scikit-image/scikit-image/pull/6597>`_)
+- Fix intensity autoscaling in animated imshow. (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_)
+- Add dev.py usage instructions (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_)
+- Set `check: true` for `run_command` (`#6606 <https://github.com/scikit-image/scikit-image/pull/6606>`_)
+- Update OpenBLAS to v0.3.17 (`#6607 <https://github.com/scikit-image/scikit-image/pull/6607>`_)
+- Fixes for Meson on windows; synced with SciPy (`#6609 <https://github.com/scikit-image/scikit-image/pull/6609>`_)
+- Fixes for #6607 (`#6610 <https://github.com/scikit-image/scikit-image/pull/6610>`_)
+- Emit error in structural_similarity when data_range is not specified in case of floating point data. (`#6612 <https://github.com/scikit-image/scikit-image/pull/6612>`_)
+- MAINT: Add +1 to warning stacklevel of decorated function. (`#6613 <https://github.com/scikit-image/scikit-image/pull/6613>`_)
+- Docs: Update install instructions for [data] and pooch. (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_)
+- pin setuptools in GHA MacOS workflow and azure-pipelines.yml (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_)
+- Pin to latest meson-python (`#6627 <https://github.com/scikit-image/scikit-image/pull/6627>`_)
+- Fix lengths of docstring heading underline (`#6628 <https://github.com/scikit-image/scikit-image/pull/6628>`_)
+- Organize commands into sections (`#6629 <https://github.com/scikit-image/scikit-image/pull/6629>`_)
+- don't require ninja in pyproject.toml (`#6634 <https://github.com/scikit-image/scikit-image/pull/6634>`_)
+- Handle new warnings introduced in NumPy 1.24 (`#6637 <https://github.com/scikit-image/scikit-image/pull/6637>`_)
+- update primary email address in mailmap entry for grlee77 (`#6639 <https://github.com/scikit-image/scikit-image/pull/6639>`_)
+
+65 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
 - AleixBP
+- Alex (sashashura)
 - Alexandr Kalinin
 - Alexandre de Siqueira
 - Antony Lee
@@ -454,10 +480,12 @@ Backported 0.19.x (remove before merging!)
 - Dave Mellert
 - Dudu Lasry
 - Elena Pascal
+- Eli Schwartz
 - Fabian Schneider
 - forgeRW
 - Frank A. Krueger
 - Gregory Lee
+- Gus Becker
 - Hande Gözükan
 - Jacob Rosenthal
 - James Gao
@@ -475,17 +503,20 @@ Backported 0.19.x (remove before merging!)
 - Larry Bradley
 - Lars Grüter
 - Lucas Johnson
-- maldil (maldil)
+- maldil
 - Marianne Corvellec
 - Mark Harfouche
+- Martijn Courteaux
 - Marvin Albert
-- Matthew Brett
+- Matthias Bussonnier
 - Miles Lucas
 - Naveen
 - Oren Amsalem
 - Preston Buscay
+- Peter Sobolewski
 - Peter Bell
 - Ray Bell
+- Riadh
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
@@ -500,11 +531,11 @@ Backported 0.19.x (remove before merging!)
 - Tim-Oliver Buchholz
 - Tyler Reddy
 
-
-32 reviewers added to this release [alphabetical by first name or login]
+37 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Abhijeet Parida
 - Albert Y. Shih
+- Alex (sashashura)
 - Alexandre de Siqueira
 - Antony Lee
 - Ben Greiner
@@ -514,6 +545,7 @@ Backported 0.19.x (remove before merging!)
 - Eli Schwartz
 - François Boulogne
 - Gregory Lee
+- Gus Becker
 - Jacob Rosenthal
 - James Gao
 - Jan-Hendrik Müller
@@ -524,6 +556,7 @@ Backported 0.19.x (remove before merging!)
 - maldil
 - Marianne Corvellec
 - Mark Harfouche
+- Martijn Courteaux
 - Marvin Albert
 - Oren Amsalem
 - Ralf Gommers
