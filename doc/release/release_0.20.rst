@@ -37,7 +37,7 @@ New features and improvements
   (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_).
 - Add the new parameter ``use_gaussian_derivatives`` to ``skimage.feature.hessian_matrix`` which allows the computation of the Hessian matrix by convolving with Gaussian derivatives
   (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_).
-- Add new parameters ``squared_butterworth`` and ``npad`` to ``skimage.filters.butterworth``, which add support for squaring the filter and edge padding
+- Add new parameters ``squared_butterworth`` and ``npad`` to ``skimage.filters.butterworth``, which support traditional or squared filtering and edge padding, respectively
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Support the construction of ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
   (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
@@ -113,7 +113,7 @@ Changes and new deprecations
 
 Completed deprecations
 ----------------------
-- Remove ``skimage.viewer`` which was scheduled for the postponed version 1.0
+- Remove ``skimage.viewer`` which was scheduled for removal in the postponed version 1.0
   (`#6160 <https://github.com/scikit-image/scikit-image/pull/6160>`_).
 - Remove deprecated parameter ``indices`` from ``skimage.feature.peak_local_max``
   (`#6161 <https://github.com/scikit-image/scikit-image/pull/6161>`_).
@@ -160,8 +160,6 @@ Documentation
 
 New
 ~~~
-- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
-  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 - Add a gallery example on decomposing flat footprints
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add a new and gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
@@ -175,7 +173,7 @@ New
 
 Improved & updated
 ~~~~~~~~~~~~~~~~~~
-- Improve the the gallery example "Measure perimeters with different estimators"
+- Improve the gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt the gallery example "Build image pyramids" to more diversified shaped images and downsample factors
   (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
@@ -437,6 +435,8 @@ Backported 0.19.x (remove before merging!)
 - Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (`#6242 <https://github.com/scikit-image/scikit-image/pull/6242>`_)
 - Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
 - Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
+- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
+  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
 58 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
