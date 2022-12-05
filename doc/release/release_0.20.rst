@@ -28,12 +28,12 @@ New features and improvements
   See the respective docstrings for more details
   (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_).
 - Add the isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
-  These function return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
+  These functions return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
   (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
 - Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
-- Added two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``
+- Add two datasets ``skimage.data.protein_transport`` and ``skimage.data.nickel_solidification``
   (`#6087 <https://github.com/scikit-image/scikit-image/pull/6087>`_).
 - Add the new parameter ``use_gaussian_derivatives`` to ``skimage.feature.hessian_matrix`` which allows the computation of the Hessian matrix by convolving with Gaussian derivatives
   (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_).
@@ -43,7 +43,7 @@ New features and improvements
   (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
 - Add new parameter ``alpha`` to ``skimage.metrics.adapted_rand_error`` allowing control over the weight given to precision and recall
   (`#6472 <https://github.com/scikit-image/scikit-image/pull/6472>`_).
-- Add new parameter ``binarize`` to ``skimage.measure.grid_points_in_poly`` to optionally return labels that tell whether a pixel is inside, outside or on the border of the polygon
+- Add new parameter ``binarize`` to ``skimage.measure.grid_points_in_poly`` to optionally return labels that tell whether a pixel is inside, outside, or on the border of the polygon
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
 - Add new parameter ``include_borders`` to ``skimage.measure.convex_hull_image`` to optionally exclude vertices or edges from the final hull mask
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
@@ -74,11 +74,11 @@ Performance
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
 - Reduce the memory footprint of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
   (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_).
-- Use the minimal required unsigned integer internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
+- Use the minimal required unsigned integer size internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
   Previously, int32 was used.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 - Use the minimal required unsigned integer size in ``skimage.filters.rank_order`` which allows to operate the function with higher precision or on larger arrays.
-  Previously, the returned ``labels`` and and ``original_values`` were always of type uint32.
+  Previously, the returned ``labels`` and ``original_values`` were always of type uint32.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 
 Changes and new deprecations
@@ -87,7 +87,7 @@ Changes and new deprecations
   ``skimage.filters.frangi``, and ``skimage.filters.hessian`` to match the published algorithms more closely.
   This change is backward incompatible and will lead to different output values compared to the previous implementation.
   The Hessian matrix calculation is now done more accurately.
-  The filters will now correctly be set to zero whenever one of the hessian eigenvalues has a sign which is incompatible with a ridge of the desired polarity.
+  The filters will now be correctly set to zero whenever one of the Hessian eigenvalues has a sign which is incompatible with a ridge of the desired polarity.
   The gamma constant of the Frangi filter is now set adaptively based on the maximum Hessian norm
   (`#6446 <https://github.com/scikit-image/scikit-image/pull/6446>`_).
 - Return ``False`` in ``skimage.measure.LineModelND.estimate`` instead of raising an error if the model is under-determined
@@ -162,13 +162,13 @@ New
 ~~~
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
-- Add new gallery example on decomposing flat footprints
+- Add a gallery example on decomposing flat footprints
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add a new and gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Add a new gallery example "Render text onto an image"
   (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
-- Add support page (``.github/SUPPORT.md``)to help users from GitHub find appropriate support resources
+- Add support page (``.github/SUPPORT.md``) to help users from GitHub find appropriate support resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
   (`#6195 <https://github.com/scikit-image/scikit-image/pull/6195>`_).
