@@ -116,6 +116,8 @@ Changes and new deprecations
   Starting with the next release this function will always return a tuple of three (shift vector, error, phase difference).
   Use ``return_error="always"`` to silence this warning and switch to this new behavior
   (`#6543 <https://github.com/scikit-image/scikit-image/pull/6543>`_).
+- Warn in ``skimage.metrics.structural_similarity``, if ``data_range`` is not specified in case of floating point data
+  (`#6612 <https://github.com/scikit-image/scikit-image/pull/6612>`_).
 
 Completed deprecations
 ----------------------
@@ -158,7 +160,8 @@ Bug fixes
   (`#6584 <https://github.com/scikit-image/scikit-image/pull/6584>`_).
 - Avoid errors in ``skimage.feature.ORB.detect_and_extract`` by breaking early if the octave image is too small
   (`#6590 <https://github.com/scikit-image/scikit-image/pull/6590>`_).
-- Fix ``skimage.restoration.inpaint_biharmonic`` for images with Fortran-ordered memory layout (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_)
+- Fix ``skimage.restoration.inpaint_biharmonic`` for images with Fortran-ordered memory layout
+  (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_).
 
 Documentation
 -------------
@@ -178,6 +181,8 @@ New
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
   (`#6195 <https://github.com/scikit-image/scikit-image/pull/6195>`_).
+- Add usage instructions for new Meson-based build system with ``dev.py``
+  (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
 
 Improved & updated
 ~~~~~~~~~~~~~~~~~~
@@ -219,6 +224,8 @@ Improved & updated
   (`#6595 <https://github.com/scikit-image/scikit-image/pull/6595>`_).
 - Fix intensity autoscaling in animated ``imshow`` in gallery example "Measure fluorescence intensity at the nuclear envelope"
   (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_).
+- Clarify dependency on ``scikit-image[data]`` and pooch in ``INSTALL.rst``
+  (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_).
 
 Fixes, spelling & minor tweaks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -264,6 +271,8 @@ Fixes, spelling & minor tweaks
   (`#6537 <https://github.com/scikit-image/scikit-image/pull/6537>`_).
 - Add missing space in math directive in normalized_mutual_information's docstring
   (`#6549 <https://github.com/scikit-image/scikit-image/pull/6549>`_).
+- Fix lengths of docstring heading underline in ``skimage.morphology.isotropic_`` functions
+  (`#6628 <https://github.com/scikit-image/scikit-image/pull/6628>`_).
 
 Other and development related updates
 -------------------------------------
@@ -352,8 +361,28 @@ Maintenance
   (`#6577 <https://github.com/scikit-image/scikit-image/pull/6577>`_).
 - Update sphinx configuration
   (`#6579 <https://github.com/scikit-image/scikit-image/pull/6579>`_).
-- Update pyproject.toml to support Python 3.11 and to fix 32-bit pinned packages on Windows
+- Update ``pyproject.toml`` to support Python 3.11 and to fix 32-bit pinned packages on Windows
   (`#6519 <https://github.com/scikit-image/scikit-image/pull/6519>`_).
+- Update primary email address in mailmap entry for grlee77
+  (`#6639 <https://github.com/scikit-image/scikit-image/pull/6639>`_).
+- Handle new warnings introduced in NumPy 1.24
+  (`#6637 <https://github.com/scikit-image/scikit-image/pull/6637>`_).
+- Remove unnecessary dependency on ninja in ``pyproject.toml``
+  (`#6634 <https://github.com/scikit-image/scikit-image/pull/6634>`_).
+- Pin to latest meson-python ``>=0.11.0``
+  (`#6627 <https://github.com/scikit-image/scikit-image/pull/6627>`_).
+- Increase warning stacklevel by 1 in ``skimage.color.lab2xyz``
+  (`#6613 <https://github.com/scikit-image/scikit-image/pull/6613>`_).
+- Update OpenBLAS to v0.3.17
+  (`#6607 <https://github.com/scikit-image/scikit-image/pull/6607>`_, `#6610 <https://github.com/scikit-image/scikit-image/pull/6610>`_).
+- Fix Meson build on windows in sync with SciPy
+  (`#6609 <https://github.com/scikit-image/scikit-image/pull/6609>`_).
+- Set ``check: true`` for ``run_command`` in ``skimage/meson.build``
+  (`#6606 <https://github.com/scikit-image/scikit-image/pull/6606>`_).
+- Add ``dev.py`` and setup commands
+  (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
+- Organize ``dev.py`` commands into sections
+  (`#6629 <https://github.com/scikit-image/scikit-image/pull/6629>`_).
 
 Benchmarks
 ~~~~~~~~~~
@@ -400,6 +429,8 @@ CI & automation
   (`#6567 <https://github.com/scikit-image/scikit-image/pull/6567>`_).
 - Test optional Py 3.10  dependencies on MacOS
   (`#6580 <https://github.com/scikit-image/scikit-image/pull/6580>`_).
+- Pin setuptools in GHA MacOS workflow and ``azure-pipelines.yml``
+  (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
@@ -455,21 +486,6 @@ Backported 0.19.x (remove before merging!)
 To do
 -----
 - Complete deprecations targeting release 0.20 or 1.0 (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_)
-- Add dev.py usage instructions (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_)
-- Set `check: true` for `run_command` (`#6606 <https://github.com/scikit-image/scikit-image/pull/6606>`_)
-- Update OpenBLAS to v0.3.17 (`#6607 <https://github.com/scikit-image/scikit-image/pull/6607>`_)
-- Fixes for Meson on windows; synced with SciPy (`#6609 <https://github.com/scikit-image/scikit-image/pull/6609>`_)
-- Fixes for #6607 (`#6610 <https://github.com/scikit-image/scikit-image/pull/6610>`_)
-- Emit error in structural_similarity when data_range is not specified in case of floating point data. (`#6612 <https://github.com/scikit-image/scikit-image/pull/6612>`_)
-- MAINT: Add +1 to warning stacklevel of decorated function. (`#6613 <https://github.com/scikit-image/scikit-image/pull/6613>`_)
-- Docs: Update install instructions for [data] and pooch. (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_)
-- pin setuptools in GHA MacOS workflow and azure-pipelines.yml (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_)
-- Pin to latest meson-python (`#6627 <https://github.com/scikit-image/scikit-image/pull/6627>`_)
-- Fix lengths of docstring heading underline (`#6628 <https://github.com/scikit-image/scikit-image/pull/6628>`_)
-- Organize commands into sections (`#6629 <https://github.com/scikit-image/scikit-image/pull/6629>`_)
-- don't require ninja in pyproject.toml (`#6634 <https://github.com/scikit-image/scikit-image/pull/6634>`_)
-- Handle new warnings introduced in NumPy 1.24 (`#6637 <https://github.com/scikit-image/scikit-image/pull/6637>`_)
-- update primary email address in mailmap entry for grlee77 (`#6639 <https://github.com/scikit-image/scikit-image/pull/6639>`_)
 
 65 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
