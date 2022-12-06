@@ -27,7 +27,7 @@ New features and improvements
   The new properties ``num_pixels`` and ``coords_scaled`` are available as well.
   See the respective docstrings for more details
   (`#6296 <https://github.com/scikit-image/scikit-image/pull/6296>`_).
-- Add the isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
+- Add isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
   These functions return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
   (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
 - Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
@@ -39,7 +39,7 @@ New features and improvements
   (`#6149 <https://github.com/scikit-image/scikit-image/pull/6149>`_).
 - Add new parameters ``squared_butterworth`` and ``npad`` to ``skimage.filters.butterworth``, which support traditional or squared filtering and edge padding, respectively
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
-- Support the construction of ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
+- Support construction of a ``skimage.io.ImageCollection`` from a ``load_pattern`` with an arbitrary sequence as long as a matching ``load_func`` is provided
   (`#6276 <https://github.com/scikit-image/scikit-image/pull/6276>`_).
 - Add new parameter ``alpha`` to ``skimage.metrics.adapted_rand_error`` allowing control over the weight given to precision and recall
   (`#6472 <https://github.com/scikit-image/scikit-image/pull/6472>`_).
@@ -72,14 +72,14 @@ Performance
   (`#6046 <https://github.com/scikit-image/scikit-image/pull/6046>`_).
 - Improve histogram matching performance on unsigned integer data with ``skimage.exposure.match_histograms``.
   (`#6209 <https://github.com/scikit-image/scikit-image/pull/6209>`_, `#6354 <https://github.com/scikit-image/scikit-image/pull/6354>`_).
-- Reduce the memory consumption of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
+- Reduce memory consumption of the ridge filters ``meijering``, ``sato``, ``frangi``, and ``hessian`` in ``skimage.filters``
   (`#6509 <https://github.com/scikit-image/scikit-image/pull/6509>`_).
-- Reduce the memory consumption of ``blob_dog``, ``blob_log``, and ``blob_doh`` in ``skimage.feature``
+- Reduce memory consumption of ``blob_dog``, ``blob_log``, and ``blob_doh`` in ``skimage.feature``
   (`#6597 <https://github.com/scikit-image/scikit-image/pull/6597>`_).
-- Use the minimal required unsigned integer size internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
+- Use minimal required unsigned integer size internally in ``skimage.morphology.reconstruction`` which allows to operate the function with higher precision or on larger arrays.
   Previously, int32 was used.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
-- Use the minimal required unsigned integer size in ``skimage.filters.rank_order`` which allows to operate the function with higher precision or on larger arrays.
+- Use minimal required unsigned integer size in ``skimage.filters.rank_order`` which allows to operate the function with higher precision or on larger arrays.
   Previously, the returned ``labels`` and ``original_values`` were always of type uint32.
   (`#6342 <https://github.com/scikit-image/scikit-image/pull/6342>`_).
 
@@ -169,13 +169,13 @@ Documentation
 
 New
 ~~~
-- Add a gallery example on decomposing flat footprints
+- Add gallery example "Decompose flat footprints (structuring elements)"
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
   (`#6251 <https://github.com/scikit-image/scikit-image/pull/6251>`_).
 - Add gallery example "Render text onto an image"
   (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
-- Add a new gallery example "Track solidification of a metallic alloy"
+- Add gallery example "Track solidification of a metallic alloy"
   (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_).
 - Add support page (``.github/SUPPORT.md``) to help users from GitHub find appropriate support resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
@@ -186,11 +186,11 @@ New
 
 Improved & updated
 ~~~~~~~~~~~~~~~~~~
-- Improve the gallery example "Measure perimeters with different estimators"
+- Improve gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt gallery example "Build image pyramids" to more diversified shaped images and downsample factors
   (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
-- Clarify the meaning of the ``weights`` term and rewrite docstrings of ``skimage.restoration.denoise_tv_bregman`` and ``skimage.restoration.denoise_tv_chambolle``
+- Clarify meaning of the ``weights`` term and rewrite docstrings of ``skimage.restoration.denoise_tv_bregman`` and ``skimage.restoration.denoise_tv_chambolle``
   (`#6544 <https://github.com/scikit-image/scikit-image/pull/6544>`_).
 - Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
   (`#6290 <https://github.com/scikit-image/scikit-image/pull/6290>`_, `#6292 <https://github.com/scikit-image/scikit-image/pull/6292>`_).
@@ -208,7 +208,7 @@ Improved & updated
   (`#6375 <https://github.com/scikit-image/scikit-image/pull/6375>`_).
 - Show original unlabeled image as well in the gallery example "Expand segmentation labels without overlap"
   (`#6396 <https://github.com/scikit-image/scikit-image/pull/6396>`_).
-- Document the refactoring of ``grey*`` to ``skimage.feature.graymatrix`` and ``skimage.feature.graycoprops`` in the release 0.19
+- Document refactoring of ``grey*`` to ``skimage.feature.graymatrix`` and ``skimage.feature.graycoprops`` in the release 0.19
   (`#6420 <https://github.com/scikit-image/scikit-image/pull/6420>`_).
 - Document inclusion criteria for new functionality in core developer guide
   (`#6488 <https://github.com/scikit-image/scikit-image/pull/6488>`_).
@@ -285,7 +285,7 @@ Governance & planning
 
 Maintenance
 ~~~~~~~~~~~
-- Add and test an alternative build system based on Meson as an alternative to the deprecated distutils system
+- Add and test alternative build system based on Meson as an alternative to the deprecated distutils system
   (`#6536 <https://github.com/scikit-image/scikit-image/pull/6536>`_).
 - Use ``cnp.float32_t`` and ``cnp.float64_t`` over ``float`` and ``double`` in Cython code
   (`#6303 <https://github.com/scikit-image/scikit-image/pull/6303>`_).
