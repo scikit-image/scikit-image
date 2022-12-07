@@ -424,19 +424,19 @@ class channel_as_last_axis:
 
 
 class deprecate_func(_DecoratorBaseClass):
-    """Decorator a deprecated functions and warn when it is called.
+    """Decorate a deprecated function and warn when it is called.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
 
     Parameters
     ----------
     deprecated_version : str
-        The package version during which the deprecation was introduced.
+        The package version when the deprecation was introduced.
     removed_version : str
         The package version in which the deprecated function will be removed.
     hint : str, optional
-        A hint on how to address this deprecation.
-        E.g. "Use `skimage.submodule.alternative_func` instead."
+        A hint on how to address this deprecation,
+        e.g., "Use `skimage.submodule.alternative_func` instead."
     """
 
     def __init__(self, *, deprecated_version, removed_version=None, hint=None):
@@ -449,7 +449,7 @@ class deprecate_func(_DecoratorBaseClass):
             f"`{func.__name__}` is deprecated since version "
             f"{self.deprecated_version}"
         )
-        if self.deprecated_version:
+        if self.removed_version:
             message += f" and will be removed in version {self.removed_version}."
         if self.hint:
             # Prepend space and make sure it closes with "."
@@ -467,7 +467,7 @@ class deprecate_func(_DecoratorBaseClass):
             )
             return func(*args, **kwargs)
 
-        # modify doc string to display deprecation warning
+        # modify docstring to display deprecation warning
         doc = f'**Deprecated:** {message}'
         if wrapped.__doc__ is None:
             wrapped.__doc__ = doc

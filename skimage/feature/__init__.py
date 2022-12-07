@@ -31,7 +31,7 @@ from ._basic_features import multiscale_basic_features
 
 
 @deprecate_func(hint='Use `skimage.feature.graycomatrix` instead.',
-                deprecated_version="0.19",
+                deprecated_version='0.19',
                 removed_version='1.0')
 def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                  normed=False):
@@ -39,7 +39,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
 
 @deprecate_func(hint='Use `skimage.feature.graycoprops` instead.',
-                deprecated_version="0.19",
+                deprecated_version='0.19',
                 removed_version='1.0')
 def greycoprops(P, prop='contrast'):
     return graycoprops(P, prop)
