@@ -31,7 +31,7 @@ from skimage.filters.thresholding import (_cross_entropy, _mean_std,
 
 
 class TestSimpleImage():
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[0, 0, 1, 3, 5],
                                [0, 1, 4, 3, 4],
                                [1, 2, 5, 4, 1],
@@ -531,13 +531,6 @@ def test_threshold_minimum_histogram():
     hist = histogram(camera.ravel(), 256, source_range='image')
     threshold = threshold_minimum(hist=hist)
     assert_equal(threshold, 85)
-
-
-def test_threshold_minimum_deprecated_max_iter_kwarg():
-    camera = util.img_as_ubyte(data.camera())
-    hist = histogram(camera.ravel(), 256, source_range='image')
-    with expected_warnings(["`max_iter` is a deprecated argument"]):
-        threshold_minimum(hist=hist, max_iter=5000)
 
 
 def test_threshold_minimum_counts():

@@ -59,8 +59,8 @@ ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
 ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
-class TestRank():
-    def setup(self):
+class TestRank:
+    def setup_method(self):
         np.random.seed(0)
         # This image is used along with @test_parallel
         # to ensure that the same seed is used for each thread.
@@ -124,12 +124,6 @@ class TestRank():
         with pytest.raises(ValueError):
             getattr(rank, filter)(self.image.astype(np.uint8),
                                   footprint_sequence)
-
-    @pytest.mark.parametrize('filter', all_rank_filters)
-    def test_rank_filter_selem_kwarg_deprecation(self, filter):
-        with expected_warnings(["`selem` is a deprecated argument name"]):
-            getattr(rank, filter)(self.image.astype(np.uint8),
-                                  selem=self.footprint)
 
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize(

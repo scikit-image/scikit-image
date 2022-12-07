@@ -114,7 +114,6 @@ def test_2d_cg(dtype):
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
-    return data, labels_cg
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -136,7 +135,6 @@ def test_2d_cg_mg(dtype):
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
-    return data, labels_cg_mg
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -167,7 +165,6 @@ def test_types():
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels_cg_mg
 
 
 def test_reorder_labels():
@@ -179,7 +176,6 @@ def test_reorder_labels():
         labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels_bf
 
 
 def test_2d_inactive():
@@ -192,7 +188,6 @@ def test_2d_inactive():
         labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    return data, labels
 
 
 def test_2d_laplacian_size():
@@ -210,7 +205,6 @@ def test_2d_laplacian_size():
                                   [1, 1, -1]])
     labels = random_walker(data, markers, beta=10)
     np.testing.assert_array_equal(labels, expected_labels)
-    return data, labels
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])
@@ -224,7 +218,6 @@ def test_3d(dtype):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
-    return data, labels
 
 
 def test_3d_inactive():
@@ -239,7 +232,6 @@ def test_3d_inactive():
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
-    return data, labels, old_labels, after_labels
 
 
 @testing.parametrize('channel_axis', [0, 1, -1])
@@ -264,38 +256,6 @@ def test_multispectral_2d(dtype, channel_axis):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
-
-
-def test_multispectral_2d_deprecated():
-    lx, ly = 70, 100
-    data, labels = make_2d_syntheticdata(lx, ly)
-    data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-
-    # checking for multichannel kwarg warning
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "`multichannel` is a deprecated argument",
-                            NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
-        multi_labels = random_walker(data, labels, mode='cg',
-                                     multichannel=True)
-    assert data[..., 0].shape == labels.shape
-
-    # checking for positional multichannel warning
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                           "Providing the `multichannel` argument",
-                            NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
-        multi_labels = random_walker(data, labels, 130, 'cg', 1.e-3, True,
-                                     True)
-    assert data[..., 0].shape == labels.shape
-
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
-        single_labels = random_walker(data[..., 0], labels, mode='cg')
-    assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
-    assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])
@@ -315,7 +275,6 @@ def test_multispectral_3d(dtype):
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data[..., 0].shape == labels.shape
-    return data, multi_labels, single_labels, labels
 
 
 def test_spacing_0():
@@ -581,7 +540,6 @@ def test_umfpack_import():
         assert UmfpackContext is not None
     except ImportError:
         assert UmfpackContext is None
-    return
 
 
 def test_empty_labels():

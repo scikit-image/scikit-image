@@ -50,7 +50,3 @@ def test_default_edge_func():
             g[0, 1], 0.78 * np.abs(image[0, 0] - image[0, 1])
             )
     np.testing.assert_array_equal(n, np.arange(image.size))
-
-
-if __name__ == '__main__':
-    test_edge_function()

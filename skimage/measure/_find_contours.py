@@ -1,5 +1,4 @@
 import numpy as np
-from skimage._shared.utils import deprecate_kwarg
 
 from ._find_contours_cy import _get_contour_segments
 

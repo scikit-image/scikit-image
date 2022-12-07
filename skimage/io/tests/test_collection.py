@@ -9,6 +9,15 @@ from skimage.io import reset_plugins
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose, fetch
 
+import pytest
+
+
+try:
+    import pooch
+    has_pooch = True
+except ModuleNotFoundError:
+    has_pooch = False
+
 
 def test_string_split():
     test_string = 'z23a'
@@ -95,6 +104,7 @@ class TestImageCollection():
         with testing.raises(AttributeError):
             set_files('newfiles')
 
+    @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
     def test_custom_load_func_sequence(self):
         filename = fetch('data/no_time_for_that_tiny.gif')
 
@@ -108,6 +118,7 @@ class TestImageCollection():
         # GIF file has frames of size 25x14 with 4 channels (RGBA)
         assert ic[0].shape == (25, 14, 4)
 
+    @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
     def test_custom_load_func_w_kwarg(self):
         load_pattern = fetch('data/no_time_for_that_tiny.gif')
 

@@ -2,7 +2,7 @@ import functools
 import numpy as np
 import pytest
 
-from skimage._shared.testing import assert_, expected_warnings
+from skimage._shared.testing import assert_
 from skimage._shared.utils import _supported_float_type
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
@@ -39,18 +39,6 @@ def test_invariant_denoise_color(dtype):
     original_mse = mse(noisy_img_color, test_img_color)
     assert denoised_mse < original_mse
     assert denoised_img_color.dtype == _supported_float_type(dtype)
-
-
-def test_invariant_denoise_color_deprecated():
-
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        denoised_img_color = _invariant_denoise(
-            noisy_img_color, _denoise_wavelet,
-            denoiser_kwargs=dict(multichannel=True))
-
-    denoised_mse = mse(denoised_img_color, test_img_color)
-    original_mse = mse(noisy_img_color, test_img_color)
-    assert_(denoised_mse < original_mse)
 
 
 def test_invariant_denoise_3d():
