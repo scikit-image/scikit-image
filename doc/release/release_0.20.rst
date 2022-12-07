@@ -118,6 +118,8 @@ Changes and new deprecations
   (`#6543 <https://github.com/scikit-image/scikit-image/pull/6543>`_).
 - Warn in ``skimage.metrics.structural_similarity``, if ``data_range`` is not specified in case of floating point data
   (`#6612 <https://github.com/scikit-image/scikit-image/pull/6612>`_).
+- Automatic detection of the color channel is deprecated in ``skimage.filters.gaussian`` and a warning is emitted if the parameter ``channel_axis`` is not set explicitly
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
 
 Completed deprecations
 ----------------------
@@ -133,6 +135,46 @@ Completed deprecations
   (`#6164 <https://github.com/scikit-image/scikit-image/pull/6164>`_).
 - Remove deprecated parameter value ``method='_lorensen'`` in ``skimage.measure.marching_cubes``
   (`#6230 <https://github.com/scikit-image/scikit-image/pull/6230>`_).
+- Remove deprecated parameter ``multichannel``; use ``channel_axis`` instead.
+  This affects ``skimage.draw.random_shapes``, ``skimage.exposure.match_histograms``, ``skimage.feature.multiscale_basic_features``, ``skimage.feature.hog``, ``skimage.feature.difference_of_gaussians``, ``skimage.filters.unsharp_mask``, and ``skimage.metrics.structural_similarity``.
+  In ``skimage.restoration``, this affects ``cycle_spin``, ``denoise_bilateral``, ``denoise_tv_bregman``, ``denoise_tv_chambolle``, ``denoise_wavelet``, ``estimate_sigma``, ``inpaint_biharmonic``, and ``denoise_nl_means``.
+  In ``skimage.segmentation``, this affects ``felzenszwalb``, ``random_walker``, and ``slic``.
+  In ``skimage.transform``, this affects ``rescale``, ``warp_polar``, ``pyramid_reduce``, ``pyramid_expand``, ``pyramid_gaussian``, and ``pyramid_laplacian``.
+  In ``skimage.util``, this affects ``montage`` and ``apply_parallel``
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``selem``; use ``footprint`` instead.
+  In ``skimage.filters``, this affects ``median``, ``autolevel_percentile``, ``gradient_percentile``, ``mean_percentile``, ``subtract_mean_percentile``, ``enhance_contrast_percentile``, ``percentile``, ``pop_percentile``, ``sum_percentile``, ``threshold_percentile``, ``mean_bilateral``, ``pop_bilateral``, ``sum_bilateral``, ``autolevel``, ``equalize``, ``gradient``, ``maximum``, ``mean``, ``geometric_mean``, ``subtract_mean``, ``median``, ``minimum``, ``modal``, ``enhance_contrast``, ``pop``, ``sum``, ``threshold``, ``noise_filter``, ``entropy``, ``otsu``, ``windowed_histogram``, and ``majority``.
+  In ``skimage.morphology``, this affects ``flood_fill``, ``flood``, ``binary_erosion``, ``binary_dilation``, ``binary_opening``, ``binary_closing``, ``h_maxima``, ``h_minima``, ``local_maxima``, ``local_minima``, ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, ``black_tophat``, and ``reconstruction``
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``max_iter`` from ``skimage.filters.threshold_minimum``, ``skimage.morphology.thin``, and ``skimage.segmentation.chan_vese``;
+  use ``max_num_iter`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``max_iterations`` from ``skimage.segmentation.active_contour``;
+  use ``max_num_iter`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``input`` from ``skimage.measure.label``;
+  use ``label_image`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``coordinates`` from ``skimage.measure.regionprops`` and ``skimage.segmentation.active_contour``
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``neighbourhood`` from ``skimage.measure.perimeter``;
+  use ``neighborhood`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameters ``height`` and ``width`` from ``skimage.morphology.rectangle``;
+  use ``ncols`` and ``nrows`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``in_place`` from ``skimage.morphology.remove_small_objects``, ``skimage.morphology.remove_small_holes``, and ``skimage.segmentation.clear_border``; use ``out`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated parameter ``iterations`` from ``skimage.restoration.richardson_lucy``, ``skimage.segmentation.morphological_chan_vese``, and ``skimage.segmentation.morphological_geodesic_active_contour``; use ``num_iter`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove support for deprecated keys ``"min_iter"`` and ``"max_iter"`` in ``skimage.restoration.unsupervised_wiener``'s parameter ``user_params``; use ``"min_num_iter"`` and ``"max_num_iter"`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated functions ``greycomatrix`` and ``greycoprops`` from ``skimage.feature``
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated submodules ``skimage.morphology.grey`` and ``skimage.morphology.greyreconstruct``; use ``skimage.morphology`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated submodule ``skimage.morphology.selem``; use ``skimage.morphology.footprints`` instead
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
 
 Bug fixes
 ---------
@@ -162,6 +204,8 @@ Bug fixes
   (`#6590 <https://github.com/scikit-image/scikit-image/pull/6590>`_).
 - Fix ``skimage.restoration.inpaint_biharmonic`` for images with Fortran-ordered memory layout
   (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_).
+- Fix automatic detection of the color channel in ``skimage.filters.gaussian`` (this behavior is deprecated, see new deprecations)
+  (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
 
 Documentation
 -------------
@@ -482,10 +526,6 @@ Backported 0.19.x (remove before merging!)
 - Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
-
-To do
------
-- Complete deprecations targeting release 0.20 or 1.0 (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_)
 
 65 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
