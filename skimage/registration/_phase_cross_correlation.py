@@ -8,7 +8,6 @@ import itertools
 import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 from scipy import ndimage as ndi
-from scipy import stats
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
@@ -162,7 +161,7 @@ def _disambiguate_shift(reference_image, moving_image, shifts):
         moving_tile = np.reshape(shifted[test_slice], -1)
         corr = -1.0
         if reference_tile.size > 2:
-            corr, _ = stats.pearsonr(reference_tile, moving_tile)
+            corr = np.corrcoef(reference_tile, moving_tile)[0, 1]
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
