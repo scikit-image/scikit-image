@@ -1,4 +1,4 @@
-#!python3
+#!python
 """ Platform independent file copier script
 """
 

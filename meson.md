@@ -2,6 +2,35 @@
 
 ### Developer build
 
+Install the `dev.py` tool:
+
+```
+pip install -r requirements/developer.txt
+```
+
+Then build `skimage`:
+
+```
+./dev.py build
+./dev.py test
+```
+
+To run a specific test:
+
+```
+./dev.py test -- skimage/io/tests/test_imageio.py
+```
+
+Or to try the new version in IPython:
+
+```
+./dev.py ipython
+```
+
+Run `./dev.py --help` for more commands.
+
+### Developer build (explicit)
+
 **Install build tools:** `pip install -r requirements/build.txt`
 
 **Generate ninja make files:** `meson build --prefix=$PWD/build`

@@ -34,7 +34,7 @@ if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
 fi
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   echo Build docs
-  export SPHINXCACHE=${HOME}/.cache/sphinx; make html
+  export SPHINXCACHE=${HOME}/.cache/sphinx; make -C doc html
 elif [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Test examples
   for f in doc/examples/*/*.py; do

@@ -110,12 +110,10 @@ def test_unsupervised_wiener_deprecated_user_param():
     data = convolve2d(test_img, psf, 'same')
     otf = uft.ir2tf(psf, data.shape, is_real=False)
     _, laplacian = uft.laplacian(2, data.shape)
-    with expected_warnings(["`max_iter` is a deprecated key",
-                            "`min_iter` is a deprecated key"]):
-        restoration.unsupervised_wiener(
-            data, otf, reg=laplacian, is_real=False,
-            user_params={"max_iter": 200, "min_iter": 30}, random_state=5
-        )
+    restoration.unsupervised_wiener(
+        data, otf, reg=laplacian, is_real=False,
+        user_params={"min_num_iter": 30}, random_state=5
+    )
 
 
 def test_image_shape():
@@ -156,15 +154,6 @@ def test_richardson_lucy(ndim):
     if ndim == 2:
         path = fetch('restoration/tests/camera_rl.npy')
         np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
-
-
-def test_richardson_lucy_deprecated_iterations_kwarg():
-    psf = np.ones((5, 5)) / 25
-    data = convolve2d(test_img, psf, 'same')
-    np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    with expected_warnings(["`iterations` is a deprecated argument"]):
-        restoration.richardson_lucy(data, psf, iterations=5)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64])

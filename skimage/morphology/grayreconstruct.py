@@ -1,12 +1,10 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type, deprecate_kwarg
+from .._shared.utils import _supported_float_type
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """Perform a morphological reconstruction of an image.
 

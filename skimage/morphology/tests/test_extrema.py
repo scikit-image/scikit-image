@@ -636,14 +636,3 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result, np.zeros((2, 0), dtype=np.intp))
         assert result[0].dtype == np.intp
         assert result[1].dtype == np.intp
-
-
-@pytest.mark.parametrize(
-    'function',
-    ['local_maxima', 'local_minima', 'h_minima', 'h_maxima']
-)
-def test_selem_kwarg_deprecation(function):
-    img = np.zeros((16, 16))
-    args = (20,) if function.startswith('h_') else ()
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        getattr(extrema, function)(img, *args, selem=np.ones((3, 3)))
