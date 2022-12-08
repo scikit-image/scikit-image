@@ -42,7 +42,7 @@ download = "https://pypi.org/project/scikit-image/#files"
 tracker = "https://github.com/scikit-image/scikit-image/issues"
 
 [build-system]
-build-backend = 'mesonpy'
+build-backend = "mesonpy"
 requires = [
     "meson-python>=0.11.0",
     # `wheel` is needed for non-isolated builds, given that `meson-python`
@@ -56,7 +56,7 @@ requires = [
     "lazy_loader>=0.1",
 
     # We follow scipy for much of these pinnings
-    # https://github.com/scipy/scipy/blob/master/pyproject.toml
+    # https://github.com/scipy/scipy/blob/main/pyproject.toml
 
     # On Windows we need to avoid 1.21.6, 1.22.0 and 1.22.1 because they were
     # built with vc142. 1.22.3 is the first version that has 32-bit Windows
@@ -66,7 +66,7 @@ requires = [
     # default numpy requirements
     "numpy==1.21.1; python_version=='3.8' and platform_python_implementation != 'PyPy'",
     "numpy==1.21.1; python_version=='3.9' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.4; python_version=='3.10' and platform_python_implementation != 'PyPy'",
+    "numpy==1.21.6; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
 
     # For Python versions which aren't yet officially supported,
