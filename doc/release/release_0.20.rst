@@ -475,6 +475,8 @@ CI & automation
   (`#6580 <https://github.com/scikit-image/scikit-image/pull/6580>`_).
 - Pin setuptools in GHA MacOS workflow and ``azure-pipelines.yml``
   (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_).
+- Build Python 3.11 wheels
+  (`#6581 <https://github.com/scikit-image/scikit-image/pull/6581>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
