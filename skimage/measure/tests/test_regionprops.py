@@ -670,8 +670,7 @@ def test_perimeter():
     per = regionprops(SAMPLE, spacing=(2, 2))[0].perimeter
     assert_almost_equal(per, 2 * target_per)
 
-    with expected_warnings(["`neighbourhood` is a deprecated argument name"]):
-        per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    per = perimeter(SAMPLE.astype('double'), neighborhood=8)
     assert_almost_equal(per, 46.8284271247)
 
     with testing.raises(NotImplementedError):
@@ -1085,13 +1084,6 @@ def test_column_dtypes_correct():
             assert False, (
                 f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
             )
-
-
-def test_deprecated_coords_argument():
-    with expected_warnings(['coordinates keyword argument']):
-        regionprops(SAMPLE, coordinates='rc')
-    with pytest.raises(ValueError):
-        regionprops(SAMPLE, coordinates='xy')
 
 
 def pixelcount(regionmask):

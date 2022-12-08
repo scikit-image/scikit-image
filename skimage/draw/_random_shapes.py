@@ -3,7 +3,7 @@ import numpy as np
 
 from . import (polygon as draw_polygon, disk as draw_disk,
                ellipse as draw_ellipse)
-from .._shared.utils import deprecate_multichannel_kwarg, warn
+from .._shared.utils import warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -291,13 +291,11 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
-@deprecate_multichannel_kwarg(multichannel_position=5)
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,
                   min_size=2,
                   max_size=None,
-                  multichannel=True,
                   num_channels=3,
                   shape=None,
                   intensity_range=None,
@@ -330,10 +328,6 @@ def random_shapes(image_shape,
         The minimum dimension of each shape to fit into the image.
     max_size : int, optional
         The maximum dimension of each shape to fit into the image.
-    multichannel : bool, optional
-        If True, the generated image has ``num_channels`` color channels,
-        otherwise generates grayscale image. This argument is deprecated:
-        specify `channel_axis` instead.
     num_channels : int, optional
         Number of channels in the generated image. If 1, generate monochrome
         images, else color images with multiple channels. Ignored if
