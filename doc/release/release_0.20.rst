@@ -317,6 +317,8 @@ Fixes, spelling & minor tweaks
   (`#6549 <https://github.com/scikit-image/scikit-image/pull/6549>`_).
 - Fix lengths of docstring heading underline in ``skimage.morphology.isotropic_`` functions
   (`#6628 <https://github.com/scikit-image/scikit-image/pull/6628>`_).
+- Fix plot order due to duplicate examples with the file name ``plot_thresholding.py``
+  (`#6644 <https://github.com/scikit-image/scikit-image/pull/6644>`_).
 
 Other and development related updates
 -------------------------------------
