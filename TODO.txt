@@ -41,5 +41,3 @@ Other
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When sphinx-gallery>=0.9.0, remove the thumbnail_size in
   doc/source/conf.py as the default value will be comparable (#4801).
-* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
-  ``skimage/morphology/convex_hull.py``.
