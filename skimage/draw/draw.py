@@ -434,7 +434,7 @@ def line_aa(r0, c0, r1, c1):
     return _line_aa(r0, c0, r1, c1)
 
 
-def polygon(r, c, shape=None):
+def polygon(r, c, shape=None, offset=None):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -449,6 +449,12 @@ def polygon(r, c, shape=None):
         size. If None, the full extent of the polygon is used.  Must be at
         least length 2. Only the first two values are used to determine the
         extent of the input image.
+    offset: tuple
+        Pixel offset of that returned coordinates will exceed. This is
+        useful for polygons that span a very large number of pixels,
+        when getting all pixels at once would use too much memory.
+        If None, default to using larger of 0 and the minimum vertex
+        coordinate of the polygon
 
     Returns
     -------
@@ -478,7 +484,7 @@ def polygon(r, c, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    return _polygon(r, c, shape)
+    return _polygon(r, c, shape, offset)
 
 
 def circle_perimeter(r, c, radius, method='bresenham', shape=None):

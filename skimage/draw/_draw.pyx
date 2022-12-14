@@ -192,7 +192,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             1. - np.array(val, dtype=float))
 
 
-def _polygon(r, c, shape):
+def _polygon(r, c, shape, offset):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -205,6 +205,13 @@ def _polygon(r, c, shape):
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
         size. If None, the full extent of the polygon is used.
+    offset: tuple
+        Pixel offset of that returned coordinates will exceed. This is
+        useful for polygons that span a very large number of pixels,
+        when getting all pixels at once would use too much memory.
+        If None, default to using larger of 0 and the minimum vertex
+        coordinate of the polygon
+
 
     Returns
     -------
@@ -217,15 +224,15 @@ def _polygon(r, c, shape):
     c = np.atleast_1d(c)
 
     cdef Py_ssize_t nr_verts = c.shape[0]
-    cdef Py_ssize_t minr = int(max(0, r.min()))
+    cdef Py_ssize_t minr = int(max(offset[0] if offset is not None else 0, max(0, r.min())))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
-    cdef Py_ssize_t minc = int(max(0, c.min()))
+    cdef Py_ssize_t minc = int(max(offset[1] if offset is not None else 0, max(0, c.min())))
     cdef Py_ssize_t maxc = int(ceil(c.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
-        maxr = min(shape[0] - 1, maxr)
-        maxc = min(shape[1] - 1, maxc)
+        maxr = min((offset[0] if offset is not None else 0) + shape[0] - 1, maxr)
+        maxc = min((offset[1] if offset is not None else 0) + shape[1] - 1, maxc)
 
     # make contiguous arrays for r, c coordinates
     cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
