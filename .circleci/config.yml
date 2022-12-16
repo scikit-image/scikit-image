@@ -7,16 +7,27 @@ jobs:
     steps:
       - checkout
       - run:
-          name: concatenate requirement files
+          name: Install apt packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install ccache
+      - run:
+          name: Concatenate requirement files
           command: cat requirements/*.txt > requirements/all_requirements
       - restore_cache:
+          name: restore cached data files
           keys:
             - data-v1-{{ checksum "skimage/data/_registry.py" }}
       - restore_cache:
+          name: Restore cached pip dependencies
           keys:
             - packages-v1-{{ checksum "requirements/all_requirements" }}
+      - restore_cache:
+          name: Restore cached build files (ccache)
+          keys:
+            - ccache-v2-{{ .Branch }}
       - run:
-          name: install dependencies and package
+          name: Install dependencies and build package
           command: |
             python3 -m pip install --upgrade pip
             python3 -m pip install -r requirements/build.txt
@@ -25,17 +36,24 @@ jobs:
             python3 -m pip install -r requirements/default.txt
             python3 -m pip install -r requirements/docs.txt
       - save_cache:
+          name: Cache pip dependencies
           key: packages-v1-{{ checksum "requirements/all_requirements" }}
           paths:
-            - skimage_venv
+            - ~/.cache/pip
+      - save_cache:
+          name: Cache build files (ccache)
+          key: ccache-v2-{{ .Branch }}
+          paths:
+            - ~/.cache/ccache
       - run:
-          name: build doc
+          name: Build doc
           no_output_timeout: 50m
           command: |
             cd doc
             PYTHON=python3 make clean
             PYTHON=python3 SPHINXOPTS="-j 1" make html
       - save_cache:
+          name: Cache data files
           key: data-v1-{{ checksum "skimage/data/_registry.py" }}
           paths:
             - /home/circleci/.cache/scikit-image/master
