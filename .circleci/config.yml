@@ -3,7 +3,7 @@ version: 2
 jobs:
   doc:
     machine:
-      image: ubuntu-2204
+      image: ubuntu-2204:current
     steps:
       - checkout
       - run:
@@ -18,14 +18,12 @@ jobs:
       - run:
           name: install dependencies and package
           command: |
-            python -m venv skimage_venv
-            source skimage_venv/bin/activate
-            python -m pip install --upgrade pip
-            python -m pip install -r requirements/build.txt
-            python -m pip install -vv --no-build-isolation .
-            python -m pip install -r requirements/default.txt
-            python -m pip install -r requirements/docs.txt
-            export
+            python3 -m pip install --upgrade pip
+            python3 -m pip install -r requirements/build.txt
+            python3 -m pip install -vv --no-build-isolation .
+            # Ensure build succeeds without runtime requirements
+            python3 -m pip install -r requirements/default.txt
+            python3 -m pip install -r requirements/docs.txt
       - save_cache:
           key: packages-v1-{{ checksum "requirements/all_requirements" }}
           paths:
@@ -34,10 +32,9 @@ jobs:
           name: build doc
           no_output_timeout: 50m
           command: |
-            source skimage_venv/bin/activate
             cd doc
-            make clean
-            SPHINXOPTS="-j 1" make html
+            PYTHON=python3 make clean
+            PYTHON=python3 SPHINXOPTS="-j 1" make html
       - save_cache:
           key: data-v1-{{ checksum "skimage/data/_registry.py" }}
           paths:
