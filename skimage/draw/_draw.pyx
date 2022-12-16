@@ -206,11 +206,13 @@ def _polygon(r, c, shape, offset):
         pixel coordinates. This is useful for polygons that exceed the image
         size. If None, the full extent of the polygon is used.
     offset: tuple
-        Pixel offset of that returned coordinates will exceed. This is
-        useful for polygons that span a very large number of pixels,
-        when getting all pixels at once would use too much memory.
-        If None, default to using larger of 0 and the minimum vertex
-        coordinate of the polygon
+        Pixel offset of returned coordinates. This is useful for polygons
+        that span a very large number of pixels, when getting all pixels
+        at once would use too much memory. Note that a non-zero or non-None
+        offsets will shift the values of the returned rr and cc,
+        all else being equal. Offsets less than 0 or greater than the
+        maximum coordinate of the polygon vertices will be clipped to
+        lie in this range.
 
 
     Returns
@@ -223,6 +225,11 @@ def _polygon(r, c, shape, offset):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
+    if offset is not None:
+        # enforce offsets >= 0
+        offset[0] = max(0, offset[0])
+        offset[1] = max(0, offset[1])
+
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(offset[0] if offset is not None else 0, max(0, r.min())))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
@@ -233,6 +240,10 @@ def _polygon(r, c, shape, offset):
     if shape is not None:
         maxr = min((offset[0] if offset is not None else 0) + shape[0] - 1, maxr)
         maxc = min((offset[1] if offset is not None else 0) + shape[1] - 1, maxc)
+    elif shape is None and offset is not None:
+        # offsets should not exceed maximum coordinates of polygon
+        maxr = min(offset[0], maxr)
+        maxc = min(offset[1], maxc)
 
     # make contiguous arrays for r, c coordinates
     cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
@@ -249,7 +260,15 @@ def _polygon(r, c, shape, offset):
                 rr.append(r_i)
                 cc.append(c_i)
 
-    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
+    rr = np.array(rr, dtype=np.intp)
+    cc = np.array(cc, dtype=np.intp)
+
+    if offset is not None:
+        # returned coordinates should be relative to offset
+        rr = (rr - offset[0]).astype(np.intp)
+        cc = (cc - offset[1]).astype(np.intp)
+
+    return rr, cc
 
 
 def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,

@@ -13,7 +13,7 @@ def polygon2mask(image_shape, polygon, offset=None):
     polygon : array_like.
         The polygon coordinates of shape (N, 2) where N is
         the number of points.
-    offset : tuple of size 2.
+    offset : tuple  of ints of size 2.
         The pixel offset of the mask.
 
     Returns
