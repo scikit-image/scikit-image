@@ -449,12 +449,14 @@ def polygon(r, c, shape=None, offset=None):
         size. If None, the full extent of the polygon is used.  Must be at
         least length 2. Only the first two values are used to determine the
         extent of the input image.
-    offset: tuple
+    offset: tuple of int, optional
         Pixel offset of that returned coordinates will exceed. This is
         useful for polygons that span a very large number of pixels,
         when getting all pixels at once would use too much memory.
         If None, default to using larger of 0 and the minimum vertex
-        coordinate of the polygon
+        coordinate of the polygon. Must be at least length 2. Only
+        the first two values are used to determine the extent of the input
+        image.
 
     Returns
     -------
@@ -483,6 +485,17 @@ def polygon(r, c, shape=None, offset=None):
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
+    >>> from skimage.draw import polygon
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> r = np.array([1, 2, 8])
+    >>> c = np.array([1, 7, 4])
+    >>> rr, cc = polygon(r, c, shape=(4,4), offset=(2,2))
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[1, 1, 1, 1],
+           [1, 1, 1, 1],
+           [0, 1, 1, 1],
+           [0, 1, 1, 1]], dtype=uint8)
     """
     return _polygon(r, c, shape, offset)
 
