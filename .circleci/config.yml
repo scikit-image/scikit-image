@@ -35,6 +35,10 @@ jobs:
             # Ensure build succeeds without runtime requirements
             python3 -m pip install -r requirements/default.txt
             python3 -m pip install -r requirements/docs.txt
+      - run:
+          name: Print ccache performance
+          command: |
+            ccache -s
       - save_cache:
           name: Cache pip dependencies
           key: packages-v1-{{ checksum "requirements/all_requirements" }}
