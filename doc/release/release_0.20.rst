@@ -319,6 +319,8 @@ Fixes, spelling & minor tweaks
   (`#6628 <https://github.com/scikit-image/scikit-image/pull/6628>`_).
 - Fix plot order due to duplicate examples with the file name ``plot_thresholding.py``
   (`#6644 <https://github.com/scikit-image/scikit-image/pull/6644>`_).
+- Get rid of numpy dep warning in gallery example ``plot_equalize``
+  (`#6650 <https://github.com/scikit-image/scikit-image/pull/6650>`_).
 
 Other and development related updates
 -------------------------------------
