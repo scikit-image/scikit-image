@@ -32,6 +32,7 @@ fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4),
                                sharex=True, sharey=True)
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
+plt.show()
 
 ######################################################################
 # In many cases, dealing with RGB values may not be ideal. Because of that,
