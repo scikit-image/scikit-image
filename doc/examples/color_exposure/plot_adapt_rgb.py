@@ -58,6 +58,7 @@ ax_each.set_title("Sobel filter computed\n on individual RGB channels")
 ax_hsv.imshow(rescale_intensity(1 - sobel_hsv(image)))
 ax_hsv.set_xticks([]), ax_hsv.set_yticks([])
 ax_hsv.set_title("Sobel filter computed\n on (V)alue converted image (HSV)")
+plt.show()
 
 ######################################################################
 # Notice that the result for the value-filtered image preserves the color of
