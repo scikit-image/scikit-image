@@ -20,7 +20,7 @@ only the red and green channels, which combine to form yellow.
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage import color
-from skimage import img_as_float
+from skimage import img_as_float, img_as_ubyte
 
 grayscale_image = img_as_float(data.camera()[::2, ::2])
 image = color.gray2rgb(grayscale_image)
@@ -126,7 +126,7 @@ sliced_image[top_left] = colorize(image[top_left], 0.82, saturation=0.5)
 sliced_image[bottom_right] = colorize(image[bottom_right], 0.5, saturation=0.5)
 
 # Create a mask selecting regions with interesting texture.
-noisy = rank.entropy(grayscale_image, np.ones((9, 9)))
+noisy = rank.entropy(img_as_ubyte(grayscale_image), np.ones((9, 9)))
 textured_regions = noisy > 4.25
 # Note that using `colorize` here is a bit more difficult, since `rgb2hsv`
 # expects an RGB image (height x width x channel), but fancy-indexing returns
