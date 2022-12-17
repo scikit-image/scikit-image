@@ -227,8 +227,7 @@ def _polygon(r, c, shape, offset):
 
     if offset is not None:
         # enforce offsets >= 0
-        offset[0] = max(0, offset[0])
-        offset[1] = max(0, offset[1])
+        offset = (max(0, offset[0]), max(0, offset[1]))
 
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(offset[0] if offset is not None else 0, max(0, r.min())))
