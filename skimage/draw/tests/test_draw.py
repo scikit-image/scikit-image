@@ -198,16 +198,16 @@ def test_polygon_rectangle_angular_offset_no_shape():
     assert_array_equal(img, img_)
 
 def test_polygon_rectangle_angular_offset_and_shape():
-    img = np.zeros((3, 3), 'uint8')
+    img = np.zeros((3, 4), 'uint8')
     poly = np.array(((0, 3), (4, 7), (7, 4), (3, 0), (0, 3)))
 
-    rr, cc = polygon(poly[:, 0], poly[:, 1], shape=img.shape, offset=(2, 2))
+    rr, cc = polygon(poly[:, 0], poly[:, 1], shape=img.shape, offset=(3, 2))
     img[rr, cc] = 1
 
     img_ = np.array(
-        [[1, 1, 1],
-         [1, 1, 1],
-         [1, 1, 1]], 'uint8'
+        [[1, 1, 1, 1],
+         [1, 1, 1, 1],
+         [1, 1, 1, 1]], 'uint8'
     )
 
     assert_array_equal(img, img_)
