@@ -228,21 +228,26 @@ def _polygon(r, c, shape, offset):
     if offset is not None:
         # enforce offsets >= 0
         offset = (max(0, offset[0]), max(0, offset[1]))
+    else:
+        offset = (0, 0)
 
+    # these are coordinates of the shape
     cdef Py_ssize_t nr_verts = c.shape[0]
-    cdef Py_ssize_t minr = int(max(offset[0], max(0, r.min())))
+    cdef Py_ssize_t minr = int(max(0, r.min()))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
-    cdef Py_ssize_t minc = int(max(offset[1], max(0, c.min())))
+    cdef Py_ssize_t minc = int(max(0, c.min()))
     cdef Py_ssize_t maxc = int(ceil(c.max()))
 
-    # make sure output coordinates do not exceed image size
-    if shape is not None:
-        maxr = min((offset[0] if offset is not None else 0) + shape[0] - 1, maxr)
-        maxc = min((offset[1] if offset is not None else 0) + shape[1] - 1, maxc)
-    elif shape is None and offset is not None:
-        # offsets should not exceed maximum coordinates of polygon
-        maxr = min(offset[0], maxr)
-        maxc = min(offset[1], maxc)
+    # these are coordinates of the requested image
+    # clip the calculation if the offset exceeds the minimum coordinate
+    cdef Py_ssize_t minr_image = max(offset[0], minr)
+    cdef Py_ssize_t minc_image = max(offset[1], minc)
+    # max extent is determined by shape if supplied, otherwise determined by polygon vertices
+    cdef Py_ssize_t maxr_image = offset[0] + shape[0] - 1 is shape is not None else maxr
+    cdef Py_ssize_t maxc_image = offset[1] + shape[1] - 1 is shape is not None else maxr
+    # image max cant be less than min
+    maxr_image = max(maxr_image, minr_image)
+    maxc_image = max(maxc_image, minc_image)
 
     # make contiguous arrays for r, c coordinates
     cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
@@ -253,8 +258,8 @@ def _polygon(r, c, shape, offset):
     rr = list()
     cc = list()
 
-    for r_i in range(minr, maxr+1):
-        for c_i in range(minc, maxc+1):
+    for r_i in range(minr_image, maxr_image+1):
+        for c_i in range(minc_image, maxc_image+1):
             if point_in_polygon(cptr, rptr, c_i, r_i):
                 rr.append(r_i)
                 cc.append(c_i)
@@ -262,10 +267,9 @@ def _polygon(r, c, shape, offset):
     rr = np.array(rr, dtype=np.intp)
     cc = np.array(cc, dtype=np.intp)
 
-    if offset is not None:
-        # returned coordinates should be relative to offset
-        rr = (rr - offset[0]).astype(np.intp)
-        cc = (cc - offset[1]).astype(np.intp)
+    # returned coordinates should be relative to offset
+    rr = (rr - offset[0]).astype(np.intp)
+    cc = (cc - offset[1]).astype(np.intp)
 
     return rr, cc
 
