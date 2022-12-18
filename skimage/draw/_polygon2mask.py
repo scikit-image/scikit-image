@@ -38,6 +38,9 @@ def polygon2mask(image_shape, polygon, offset=None):
     vertex_row_coords, vertex_col_coords = polygon.T
     fill_row_coords, fill_col_coords = draw.polygon(
         vertex_row_coords, vertex_col_coords, image_shape, offset)
+    if offset is not None:
+        image_shape = (image_shape[0] - max(offset[0], 0),
+                       image_shape[1] - max(offset[1], 0))
     mask = np.zeros(image_shape, dtype=bool)
     mask[fill_row_coords, fill_col_coords] = True
     return mask
