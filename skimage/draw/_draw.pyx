@@ -243,8 +243,8 @@ def _polygon(r, c, shape, offset):
     cdef Py_ssize_t minr_image = max(offset[0], minr)
     cdef Py_ssize_t minc_image = max(offset[1], minc)
     # max extent is determined by shape if supplied, otherwise determined by polygon vertices
-    cdef Py_ssize_t maxr_image = offset[0] + shape[0] - 1 is shape is not None else maxr
-    cdef Py_ssize_t maxc_image = offset[1] + shape[1] - 1 is shape is not None else maxr
+    cdef Py_ssize_t maxr_image = offset[0] + shape[0] - 1 if shape is not None else maxr
+    cdef Py_ssize_t maxc_image = offset[1] + shape[1] - 1 if shape is not None else maxr
     # image max cant be less than min
     maxr_image = max(maxr_image, minr_image)
     maxc_image = max(maxc_image, minc_image)
