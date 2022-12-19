@@ -8,9 +8,20 @@ for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
-
 https://scikit-image.org
 
+With this release, many of the functions in ``skimage.measure`` now support anisotropic images  with different voxel spacings which can be specified with the new parameter ``spacing``.
+
+Support for footprint decomposition  was added to several functions in ``skimage.morphology``.
+By decomposing a footprint into several smaller ones with the new ``decomposition`` parameter, morphological operations can potentially be sped up.
+
+In addition a good number of performance improvements have been included.
+
+4 new gallery examples were added to our documentation; checkout the new interactive example "Track solidification of a metallic alloy".
+
+This release also completes the transition to indicating multi-channel images with the more flexible ``channel_axis`` parameter as well as a many other deprecations to make scikit-image's API more consistent and expressive.
+
+This release now supports Python 3.8-3.11.
 
 New features and improvements
 -----------------------------
