@@ -323,6 +323,8 @@ Fixes, spelling & minor tweaks
   (`#6650 <https://github.com/scikit-image/scikit-image/pull/6650>`_).
 - Fix swapping of opening and closing in gallery example ``plot_rank_filters``
   (`#6652 <https://github.com/scikit-image/scikit-image/pull/6652>`_).
+- Get rid of numpy deprecation warning in gallery example ``in plot_log_gamma.py``
+  (`#6655 <https://github.com/scikit-image/scikit-image/pull/6655>`_).
 
 Other and development related updates
 -------------------------------------
@@ -535,7 +537,7 @@ Backported 0.19.x (remove before merging!)
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-65 authors added to this release [alphabetical by first name or login]
+66 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
@@ -574,6 +576,7 @@ Backported 0.19.x (remove before merging!)
 - kwikwag
 - Larry Bradley
 - Lars Grüter
+- lihaitao (li1127217ye)
 - Lucas Johnson
 - maldil
 - Marianne Corvellec
