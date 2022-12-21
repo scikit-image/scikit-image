@@ -146,9 +146,7 @@ def denoise_invariant(image, denoise_function, *, stride=4,
     >>> from skimage.restoration import denoise_invariant, denoise_wavelet
     >>> image = skimage.util.img_as_float(skimage.data.chelsea())
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
-    >>> denoised = denoise_invariant(
-    ...     image=noisy, denoise_function=denoise_wavelet
-    )
+    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_wavelet)
     """
     image = img_as_float(image)
 
