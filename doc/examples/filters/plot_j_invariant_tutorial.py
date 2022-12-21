@@ -95,7 +95,7 @@ for ax, img, title in zip(axes,
 # blue line) have the same shape and the same minimizer.
 #
 
-from skimage.restoration.j_invariant import _invariant_denoise
+from skimage.restoration import denoise_invariant
 
 sigma_range = np.arange(sigma/2, 1.5*sigma, 0.025)
 
@@ -103,8 +103,8 @@ parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
                       'channel_axis': -1}
                      for sigma in sigma_range]
 
-denoised_invariant = [_invariant_denoise(noisy, _denoise_wavelet,
-                                         denoiser_kwargs=params)
+denoised_invariant = [denoise_invariant(noisy, _denoise_wavelet,
+                                        denoiser_kwargs=params)
                       for params in parameters_tested]
 
 self_supervised_loss = [mse(img, noisy) for img in denoised_invariant]
@@ -224,8 +224,8 @@ _, (parameters_tested_tv, losses_tv) = calibrate_denoiser(
 print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
-denoised_calibrated_tv = _invariant_denoise(noisy, denoise_tv_chambolle,
-                                            denoiser_kwargs=best_parameters_tv)
+denoised_calibrated_tv = denoise_invariant(noisy, denoise_tv_chambolle,
+                                           denoiser_kwargs=best_parameters_tv)
 denoised_default_tv = denoise_tv_chambolle(noisy, **best_parameters_tv)
 
 psnr_calibrated_tv = psnr(image, denoised_calibrated_tv)
@@ -240,7 +240,7 @@ _, (parameters_tested_wavelet, losses_wavelet) = calibrate_denoiser(
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
-denoised_calibrated_wavelet = _invariant_denoise(
+denoised_calibrated_wavelet = denoise_invariant(
         noisy, _denoise_wavelet,
         denoiser_kwargs=best_parameters_wavelet)
 denoised_default_wavelet = _denoise_wavelet(noisy, **best_parameters_wavelet)
@@ -261,8 +261,8 @@ _, (parameters_tested_nl, losses_nl) = calibrate_denoiser(noisy,
 print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
-denoised_calibrated_nl = _invariant_denoise(noisy, denoise_nl_means,
-                                            denoiser_kwargs=best_parameters_nl)
+denoised_calibrated_nl = denoise_invariant(noisy, denoise_nl_means,
+                                           denoiser_kwargs=best_parameters_nl)
 denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 
 psnr_calibrated_nl = psnr(image, denoised_calibrated_nl)
