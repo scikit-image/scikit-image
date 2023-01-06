@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import gaussian
 from skimage.exposure import equalize_adapthist
-from skimage.measure import simple_metrics
+from skimage.metrics import simple_metrics
 
 img_gray = data.camera()
 img_rgb = data.astronaut()

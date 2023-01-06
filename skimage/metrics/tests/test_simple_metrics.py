@@ -4,8 +4,11 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import assert_less
 from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
-                             mean_squared_error, normalized_mutual_information)
+                             mean_squared_error, normalized_mutual_information,
+                             enhancement_measure)
+from skimage.exposure import equalize_hist, adjust_gamma
 
 
 np.random.seed(5)
@@ -137,3 +140,23 @@ def test_nmi_random_3d():
         1,
         decimal=2,
     )
+
+
+def test_EME_greyscale():
+    orig = cam
+    enhanced = equalize_hist(orig)
+    assert_less(enhancement_measure(orig),
+                enhancement_measure(enhanced))
+    assert_less(enhancement_measure(orig, size=5),
+                enhancement_measure(enhanced, size=5))
+    assert_less(enhancement_measure(orig, size=11),
+                enhancement_measure(enhanced, size=11))
+
+
+def test_EME_color():
+    orig = data.astronaut()
+    enhanced = adjust_gamma(orig, gamma=5)
+    assert_less(enhancement_measure(orig, size=3),
+                enhancement_measure(enhanced, size=3, eps=1))
+    assert_less(enhancement_measure(orig, size=7),
+                enhancement_measure(enhanced, size=7))

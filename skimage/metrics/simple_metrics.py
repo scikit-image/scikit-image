@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.stats import entropy
+from scipy.ndimage import maximum_filter, minimum_filter
 
+from ..exposure import rescale_intensity
+from ..util import img_as_float
 from ..util.dtype import dtype_range
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
@@ -8,6 +11,7 @@ __all__ = ['mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
            'normalized_mutual_information',
+           'enhancement_measure',
            ]
 
 
@@ -259,3 +263,53 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     H01 = entropy(np.reshape(hist, -1))
 
     return (H0 + H1) / H01
+
+
+def enhancement_measure(image: np.ndarray,
+                        size: int = 3,
+                        eps: float = 1e-6) -> float:
+    """ The image enhancement measure called EME based on [1]_.
+    It is a way of quantifying improvement of the image after enhancement.
+
+    The function uses a sliding window of user-provided size to measure
+    the mean of log of maximal and minimal intensity ratio
+    within the window.
+
+    Parameters
+    ----------
+    image : array
+        Input image of which the quality should be assessed.
+        Can be either 3-channel RGB or 1-channel grayscale.
+    size : int, optional
+        Size of the window.
+    eps : float, optional
+        Parameter to avoid division by zero.
+
+    Returns
+    -------
+    eme : float
+        The number describing image quality.
+
+    References
+    ----------
+    .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan.
+            "A new measure of image enhancement.",
+            IASTED International Conference on Signal Processing
+            & Communication, Citeseer, 2000,
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> from skimage.exposure import equalize_hist
+    >>> img = camera()
+    >>> before = enhancement_measure(img)
+    >>> after = enhancement_measure(equalize_hist(img))
+    >>> before < after
+    True
+    """
+    image = img_as_float(image)
+    image = rescale_intensity(image, out_range=(0., 1.))
+    eme = np.divide(maximum_filter(image, size=size),
+                    minimum_filter(image, size=size) + eps)
+    eme = np.mean(20 * np.log(eme + eps))
+    return eme
