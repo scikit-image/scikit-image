@@ -32,7 +32,8 @@ cdef class MCP:
     cdef OFFSETS_INDEX_T [:] traceback_offsets
     cdef EDGE_T [:,:] flat_pos_edge_map
     cdef EDGE_T [:,:] flat_neg_edge_map
-    cdef OFFSET_T [:,:] offsets
+    # offsets is part of public API. Used to interpret traceback result of find_costs()
+    cdef public OFFSET_T [:,:] offsets
     cdef INDEX_T [:] flat_offsets
     cdef FLOAT_T [:] offset_lengths
 
@@ -41,4 +42,3 @@ cdef class MCP:
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, FLOAT_T offset_length)
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
     cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
-

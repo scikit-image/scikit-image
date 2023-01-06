@@ -7,6 +7,8 @@ import numpy as np
 cimport numpy as cnp
 from .._shared.geometry cimport point_in_polygon, points_in_polygon
 
+cnp.import_array()
+
 
 def _grid_points_in_poly(shape, verts):
     """Test whether points on a specified grid are inside a polygon.
@@ -33,12 +35,10 @@ def _grid_points_in_poly(shape, verts):
         True where the grid falls inside the polygon.
 
     """
-    cdef double[:] vx, vy
     verts = np.asarray(verts)
 
-    vx = verts[:, 0].astype(np.double)
-    vy = verts[:, 1].astype(np.double)
-    cdef Py_ssize_t V = vx.shape[0]
+    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.float64)
 
     cdef Py_ssize_t M = shape[0]
     cdef Py_ssize_t N = shape[1]
@@ -50,9 +50,9 @@ def _grid_points_in_poly(shape, verts):
     with nogil:
         for m in range(M):
             for n in range(N):
-                out[m, n] = point_in_polygon(V, &vx[0], &vy[0], m, n)
+                out[m, n] = point_in_polygon(vx, vy, m, n)
 
-    return out.view(bool)
+    return out
 
 
 def _points_in_poly(points, verts):
@@ -76,22 +76,17 @@ def _points_in_poly(points, verts):
         True if corresponding point is inside the polygon.
 
     """
-    cdef double[:] x, y, vx, vy
-
     points = np.asarray(points)
     verts = np.asarray(verts)
 
-    x = points[:, 0].astype(np.double)
-    y = points[:, 1].astype(np.double)
+    cdef cnp.float64_t[::1] x = points[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] y = points[:, 1].astype(np.float64)
 
-    vx = verts[:, 0].astype(np.double)
-    vy = verts[:, 1].astype(np.double)
+    cdef cnp.float64_t[::1] vx = verts[:, 0].astype(np.float64)
+    cdef cnp.float64_t[::1] vy = verts[:, 1].astype(np.float64)
 
-    cdef cnp.ndarray[cnp.uint8_t, ndim=1] out = \
-         np.zeros(x.shape[0], dtype=np.uint8)
+    cdef unsigned char[::1] out = np.zeros(x.shape[0], dtype=bool)
 
-    points_in_polygon(vx.shape[0], &vx[0], &vy[0],
-                      x.shape[0], &x[0], &y[0],
-                      <unsigned char*>out.data)
+    points_in_polygon(vx, vy, x, y, out)
 
-    return out.astype(bool)
+    return np.asarray(out)

@@ -1,7 +1,6 @@
-import numpy as np
-
 import skimage.data as data
 from skimage.feature import Cascade
+
 
 
 def test_detector_astronaut():

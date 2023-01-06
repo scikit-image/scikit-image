@@ -5,6 +5,7 @@
 import numpy as np
 
 cimport numpy as cnp
+cnp.import_array()
 
 
 def possible_hull(cnp.uint8_t[:, ::1] img):
@@ -64,7 +65,7 @@ def possible_hull(cnp.uint8_t[:, ::1] img):
                     if nonzero[rows_c, 1] == -1:
                         nonzero[rows_c, 0] = r
                         nonzero[rows_c, 1] = c
-  
+
                     # Bottom check
                     elif nonzero[rows_2_cols_c, 0] < r:
                         nonzero[rows_2_cols_c, 0] = r

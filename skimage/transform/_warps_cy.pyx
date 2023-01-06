@@ -4,12 +4,13 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from .._shared.interpolation cimport (nearest_neighbour_interpolation,
+from .._shared.interpolation cimport (nearest_neighbor_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)
 from .._shared.fused_numerics cimport np_floats
 
+cnp.import_array()
 
 cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
                                    np_floats *x_, np_floats *y_) nogil:
@@ -162,7 +163,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
                              np_floats, np_floats, char, np_floats,
                              np_floats*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation[np_floats, np_floats,
+        interp_func = nearest_neighbor_interpolation[np_floats, np_floats,
                                                       np_floats]
     elif order == 1:
         interp_func = bilinear_interpolation[np_floats, np_floats, np_floats]

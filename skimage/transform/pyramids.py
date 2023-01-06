@@ -1,19 +1,25 @@
 import math
+
 import numpy as np
-from scipy import ndimage as ndi
+
+from .._shared.filters import gaussian
+from .._shared.utils import convert_to_float
 from ..transform import resize
-from ..util import img_as_float
 
 
-def _smooth(image, sigma, mode, cval, multichannel=None):
+def _smooth(image, sigma, mode, cval, channel_axis):
     """Return image with each channel smoothed by the Gaussian filter."""
-    smoothed = np.empty(image.shape, dtype=np.double)
+    smoothed = np.empty_like(image)
 
     # apply Gaussian filter to all channels independently
-    if multichannel:
-        sigma = (sigma, )*(image.ndim - 1) + (0, )
-    ndi.gaussian_filter(image, sigma, output=smoothed,
-                        mode=mode, cval=cval)
+    if channel_axis is not None:
+        # can rely on gaussian to insert a 0 entry at channel_axis
+        channel_axis = channel_axis % image.ndim
+        sigma = (sigma,) * (image.ndim - 1)
+    else:
+        channel_axis = None
+    gaussian(image, sigma, output=smoothed, mode=mode, cval=cval,
+             channel_axis=channel_axis)
     return smoothed
 
 
@@ -23,7 +29,8 @@ def _check_factor(factor):
 
 
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False):
+                   mode='reflect', cval=0,
+                   preserve_range=False, *, channel_axis=None):
     """Smooth and then downsample image.
 
     Parameters
@@ -44,9 +51,17 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -55,22 +70,26 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(downscale)
 
-    image = img_as_float(image)
-
-    out_shape = tuple([math.ceil(d / float(downscale)) for d in image.shape])
-    if multichannel:
-        out_shape = out_shape[:-1]
+    image = convert_to_float(image, preserve_range)
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        out_shape = tuple(
+            math.ceil(d / float(downscale)) if ax != channel_axis else d
+            for ax, d in enumerate(image.shape)
+        )
+    else:
+        out_shape = tuple(math.ceil(d / float(downscale)) for d in image.shape)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * downscale / 6.0
 
-    smoothed = _smooth(image, sigma, mode, cval, multichannel)
+    smoothed = _smooth(image, sigma, mode, cval, channel_axis)
     out = resize(smoothed, out_shape, order=order, mode=mode, cval=cval,
                  anti_aliasing=False)
 
@@ -78,7 +97,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False):
+                   mode='reflect', cval=0,
+                   preserve_range=False, *, channel_axis=None):
     """Upsample and then smooth image.
 
     Parameters
@@ -99,9 +119,17 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -110,16 +138,19 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(upscale)
-
-    image = img_as_float(image)
-
-    out_shape = tuple([math.ceil(upscale * d) for d in image.shape])
-    if multichannel:
-        out_shape = out_shape[:-1]
+    image = convert_to_float(image, preserve_range)
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        out_shape = tuple(
+            math.ceil(upscale * d) if ax != channel_axis else d
+            for ax, d in enumerate(image.shape)
+        )
+    else:
+        out_shape = tuple(math.ceil(upscale * d) for d in image.shape)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
@@ -127,13 +158,14 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     resized = resize(image, out_shape, order=order,
                      mode=mode, cval=cval, anti_aliasing=False)
-    out = _smooth(resized, sigma, mode, cval, multichannel)
+    out = _smooth(resized, sigma, mode, cval, channel_axis)
 
     return out
 
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=False):
+                     mode='reflect', cval=0,
+                     preserve_range=False, *, channel_axis=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -165,9 +197,17 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -176,13 +216,13 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
 
     """
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     layer = 0
     current_shape = image.shape
@@ -196,21 +236,22 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         layer += 1
 
         layer_image = pyramid_reduce(prev_layer_image, downscale, sigma, order,
-                                     mode, cval, multichannel=multichannel)
+                                     mode, cval, channel_axis=channel_axis)
 
-        prev_shape = np.asarray(current_shape)
+        prev_shape = current_shape
         prev_layer_image = layer_image
-        current_shape = np.asarray(layer_image.shape)
+        current_shape = layer_image.shape
 
         # no change to previous pyramid layer
-        if np.all(current_shape == prev_shape):
+        if current_shape == prev_shape:
             break
 
         yield layer_image
 
 
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0, multichannel=False):
+                      mode='reflect', cval=0,
+                      preserve_range=False, *, channel_axis=None):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
@@ -245,9 +286,17 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -256,14 +305,14 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://persci.mit.edu/pub_pdfs/pyramid83.pdf
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
 
     """
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid
-    image = img_as_float(image)
+    image = convert_to_float(image, preserve_range)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
@@ -271,26 +320,37 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     current_shape = image.shape
 
-    smoothed_image = _smooth(image, sigma, mode, cval, multichannel)
+    smoothed_image = _smooth(image, sigma, mode, cval, channel_axis)
     yield image - smoothed_image
+
+    if channel_axis is not None:
+        channel_axis = channel_axis % image.ndim
+        shape_without_channels = list(current_shape)
+        shape_without_channels.pop(channel_axis)
+        shape_without_channels = tuple(shape_without_channels)
+    else:
+        shape_without_channels = current_shape
 
     # build downsampled images until max_layer is reached or downscale process
     # does not change image size
     if max_layer == -1:
-        max_layer = int(np.ceil(math.log(np.max(current_shape), downscale)))
+        max_layer = math.ceil(math.log(max(shape_without_channels), downscale))
 
     for layer in range(max_layer):
 
-        out_shape = tuple(
-            [math.ceil(d / float(downscale)) for d in current_shape])
-
-        if multichannel:
-            out_shape = out_shape[:-1]
+        if channel_axis is not None:
+            out_shape = tuple(
+                math.ceil(d / float(downscale)) if ax != channel_axis else d
+                for ax, d in enumerate(current_shape)
+            )
+        else:
+            out_shape = tuple(math.ceil(d / float(downscale))
+                              for d in current_shape)
 
         resized_image = resize(smoothed_image, out_shape, order=order,
                                mode=mode, cval=cval, anti_aliasing=False)
         smoothed_image = _smooth(resized_image, sigma, mode, cval,
-                                 multichannel)
-        current_shape = np.asarray(resized_image.shape)
+                                 channel_axis)
+        current_shape = resized_image.shape
 
         yield resized_image - smoothed_image

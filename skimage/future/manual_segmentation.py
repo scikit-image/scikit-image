@@ -1,6 +1,7 @@
 from functools import reduce
 import numpy as np
 from ..draw import polygon
+from .._shared.version_requirements import require
 
 
 LEFT_CLICK = 1
@@ -16,6 +17,7 @@ def _mask_from_vertices(vertices, shape, label):
     return mask
 
 
+@require("matplotlib", ">=3.3")
 def _draw_polygon(ax, vertices, alpha=0.4):
     from matplotlib.patches import Polygon
     from matplotlib.collections import PatchCollection
@@ -28,6 +30,7 @@ def _draw_polygon(ax, vertices, alpha=0.4):
     return polygon_object
 
 
+@require("matplotlib", ">=3.3")
 def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on polygon selections made with the mouse.
 
@@ -64,8 +67,6 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     >>> io.show()  # doctest: +SKIP
     """
     import matplotlib
-    from matplotlib.patches import Polygon
-    from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
 
     list_of_vertex_lists = []
@@ -92,7 +93,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             fig.canvas.draw_idle()
 
     undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
-    undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
+    undo_button = matplotlib.widgets.Button(undo_pos, '\u27F2')
     undo_button.on_clicked(_undo)
 
     def _extend_polygon(event):
@@ -100,7 +101,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         if event.inaxes is None or event.inaxes is undo_pos:
             return
         # Do not record click events when toolbar is active
-        if fig.canvas.manager.toolbar._active is not None:
+        if ax.get_navigate_mode():
             return
 
         if event.button == LEFT_CLICK:  # Select vertex
@@ -144,6 +145,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
 
 
+@require("matplotlib", ">=3.3")
 def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on freeform selections made with the mouse.
 
@@ -179,8 +181,6 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     >>> io.show()  # doctest: +SKIP
     """
     import matplotlib
-    from matplotlib.patches import Polygon
-    from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
 
     list_of_vertex_lists = []
@@ -204,7 +204,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
             fig.canvas.draw_idle()
 
     undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
-    undo_button = matplotlib.widgets.Button(undo_pos, u'\u27F2')
+    undo_button = matplotlib.widgets.Button(undo_pos, '\u27F2')
     undo_button.on_clicked(_undo)
 
     def _on_lasso_selection(vertices):
@@ -215,7 +215,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
         polygons_drawn.append(polygon_object)
         plt.draw()
 
-    lasso = matplotlib.widgets.LassoSelector(ax, _on_lasso_selection)
+    matplotlib.widgets.LassoSelector(ax, _on_lasso_selection)
 
     plt.show(block=True)
 

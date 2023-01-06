@@ -2,26 +2,18 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 from scipy.constants import golden_ratio
+from scipy.fft import fft, ifft, fftfreq, fftshift
 from ._warps import warp
 from ._radon_transform import sart_projection_update
-from .._shared.fft import fftmodule
 from .._shared.utils import convert_to_float
 from warnings import warn
 from functools import partial
-
-if fftmodule is np.fft:
-    # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
-    # (fftpack preserves single precision while numpy.fft does not)
-    from scipy.fftpack import fft, ifft
-else:
-    fft = fftmodule.fft
-    ifft = fftmodule.ifft
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, *, preserve_range=None):
+def radon(image, theta=None, circle=True, *, preserve_range=False):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -69,22 +61,14 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
     if theta is None:
         theta = np.arange(180)
 
-    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. By default radon will assume '
-             'you want to preserve the range of your image '
-             '(preserve_range=True). In scikit-image 0.18 this behavior will '
-             'change to preserve_range=False. To avoid this warning, '
-             'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
-        preserve_range = True
-
     image = convert_to_float(image, preserve_range)
 
     if circle:
         shape_min = min(image.shape)
         radius = shape_min // 2
         img_shape = np.array(image.shape)
-        coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]])
+        coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]],
+                          dtype=object)
         dist = ((coords - img_shape // 2) ** 2).sum(0)
         outside_reconstruction_circle = dist > radius ** 2
         if np.any(image[outside_reconstruction_circle]):
@@ -110,7 +94,8 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
     if padded_image.shape[0] != padded_image.shape[1]:
         raise ValueError('padded_image must be a square')
     center = padded_image.shape[0] // 2
-    radon_image = np.zeros((padded_image.shape[0], len(theta)))
+    radon_image = np.zeros((padded_image.shape[0], len(theta)),
+                           dtype=image.dtype)
 
     for i, angle in enumerate(np.deg2rad(theta)):
         cos_a, sin_a = np.cos(angle), np.sin(angle)
@@ -140,9 +125,9 @@ def _get_fourier_filter(size, filter_name):
 
     Parameters
     ----------
-    size: int
+    size : int
         filter size. Must be even.
-    filter_name: str
+    filter_name : str
         Filter used in frequency domain filtering. Filters available:
         ramp, shepp-logan, cosine, hamming, hann. Assign None to use
         no filter.
@@ -158,8 +143,8 @@ def _get_fourier_filter(size, filter_name):
            Imaging", IEEE Press 1988.
 
     """
-    n = np.concatenate((np.arange(1, size / 2 + 1, 2, dtype=np.int),
-                        np.arange(size / 2 - 1, 0, -2, dtype=np.int)))
+    n = np.concatenate((np.arange(1, size / 2 + 1, 2, dtype=int),
+                        np.arange(size / 2 - 1, 0, -2, dtype=int)))
     f = np.zeros(size)
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n) ** 2
@@ -172,16 +157,16 @@ def _get_fourier_filter(size, filter_name):
         pass
     elif filter_name == "shepp-logan":
         # Start from first element to avoid divide by zero
-        omega = np.pi * fftmodule.fftfreq(size)[1:]
+        omega = np.pi * fftfreq(size)[1:]
         fourier_filter[1:] *= np.sin(omega) / omega
     elif filter_name == "cosine":
         freq = np.linspace(0, np.pi, size, endpoint=False)
-        cosine_filter = fftmodule.fftshift(np.sin(freq))
+        cosine_filter = fftshift(np.sin(freq))
         fourier_filter *= cosine_filter
     elif filter_name == "hamming":
-        fourier_filter *= fftmodule.fftshift(np.hamming(size))
+        fourier_filter *= fftshift(np.hamming(size))
     elif filter_name == "hann":
-        fourier_filter *= fftmodule.fftshift(np.hanning(size))
+        fourier_filter *= fftshift(np.hanning(size))
     elif filter_name is None:
         fourier_filter[:] = 1
 
@@ -189,7 +174,8 @@ def _get_fourier_filter(size, filter_name):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=True):
+           filter_name="ramp", interpolation="linear", circle=True,
+           preserve_range=True):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -197,18 +183,18 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Parameters
     ----------
-    radon_image : array_like, dtype=float
+    radon_image : array
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different
         angle. The tomography rotation axis should lie at the pixel
         index ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : array_like, dtype=float, optional
+    theta : array_like, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int, optional
         Number of rows and columns in the reconstruction.
-    filter : str, optional
+    filter_name : str, optional
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
         Assign None to use no filter.
@@ -219,6 +205,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -226,6 +216,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Reconstructed image. The rotation axis will be located in the pixel
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+
+    .. versionchanged:: 0.19
+        In ``iradon``, ``filter`` argument is deprecated in favor of
+        ``filter_name``.
 
     References
     ----------
@@ -255,11 +249,14 @@ def iradon(radon_image, theta=None, output_size=None,
 
     interpolation_types = ('linear', 'nearest', 'cubic')
     if interpolation not in interpolation_types:
-        raise ValueError("Unknown interpolation: %s" % interpolation)
+        raise ValueError(f"Unknown interpolation: {interpolation}")
 
     filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
-    if filter not in filter_types:
-        raise ValueError("Unknown filter: %s" % filter)
+    if filter_name not in filter_types:
+        raise ValueError(f"Unknown filter: {filter_name}")
+
+    radon_image = convert_to_float(radon_image, preserve_range)
+    dtype = radon_image.dtype
 
     img_shape = radon_image.shape[0]
     if output_size is None:
@@ -280,12 +277,13 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Apply filter in Fourier domain
-    fourier_filter = _get_fourier_filter(projection_size_padded, filter)
+    fourier_filter = _get_fourier_filter(projection_size_padded, filter_name)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
     # Reconstruct image by interpolation
-    reconstructed = np.zeros((output_size, output_size))
+    reconstructed = np.zeros((output_size, output_size),
+                             dtype=dtype)
     radius = output_size // 2
     xpr, ypr = np.mgrid[:output_size, :output_size] - radius
     x = np.arange(img_shape) - img_shape // 2
@@ -366,7 +364,7 @@ def order_angles_golden_ratio(theta):
 
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
-                clip=None, relaxation=0.15):
+                clip=None, relaxation=0.15, dtype=None):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using a single iteration of
@@ -374,20 +372,20 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
 
     Parameters
     ----------
-    radon_image : 2D array, dtype=float
+    radon_image : 2D array
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different angle. The
         tomography rotation axis should lie at the pixel index
         ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : 1D array, dtype=float, optional
+    theta : 1D array, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    image : 2D array, dtype=float, optional
+    image : 2D array, optional
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
-    projection_shifts : 1D array, dtype=float, optional
+    projection_shifts : 1D array, optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
@@ -398,6 +396,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         Relaxation parameter for the update step. A higher value can
         improve the convergence rate, but one runs the risk of instabilities.
         Values close to or higher than 1 are not recommended.
+    dtype : dtype, optional
+        Output data type, must be floating point. By default, if input
+        data type is not float, input is cast to double, otherwise
+        dtype is set to input data type.
 
     Returns
     -------
@@ -440,30 +442,55 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')
+
+    if dtype is None:
+        if radon_image.dtype.char in 'fd':
+            dtype = radon_image.dtype
+        else:
+            warn("Only floating point data type are valid for SART inverse "
+                 "radon transform. Input data is cast to float. To disable "
+                 "this warning, please cast image_radon to float.")
+            dtype = np.dtype(float)
+    elif np.dtype(dtype).char not in 'fd':
+        raise ValueError("Only floating point data type are valid for inverse "
+                         "radon transform.")
+
+    dtype = np.dtype(dtype)
+    radon_image = radon_image.astype(dtype, copy=False)
+
     reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
+
     if theta is None:
-        theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
-    elif theta.shape != (radon_image.shape[1],):
-        raise ValueError('Shape of theta (%s) does not match the '
-                         'number of projections (%d)'
-                         % (projection_shifts.shape, radon_image.shape[1]))
+        theta = np.linspace(0, 180, radon_image.shape[1],
+                            endpoint=False, dtype=dtype)
+    elif len(theta) != radon_image.shape[1]:
+        raise ValueError(f'Shape of theta ({len(theta)}) does not match the '
+                         f'number of projections ({radon_image.shape[1]})')
+    else:
+        theta = np.asarray(theta, dtype=dtype)
+
     if image is None:
-        image = np.zeros(reconstructed_shape, dtype=np.float)
+        image = np.zeros(reconstructed_shape, dtype=dtype)
     elif image.shape != reconstructed_shape:
-        raise ValueError('Shape of image (%s) does not match first dimension '
-                         'of radon_image (%s)'
-                         % (image.shape, reconstructed_shape))
+        raise ValueError(f'Shape of image ({image.shape}) does not match first dimension '
+                         f'of radon_image ({reconstructed_shape})')
+    elif image.dtype != dtype:
+        warn(f'image dtype does not match output dtype: '
+             f'image is cast to {dtype}')
+
+    image = np.asarray(image, dtype=dtype)
+
     if projection_shifts is None:
-        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
-    elif projection_shifts.shape != (radon_image.shape[1],):
-        raise ValueError('Shape of projection_shifts (%s) does not match the '
-                         'number of projections (%d)'
-                         % (projection_shifts.shape, radon_image.shape[1]))
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=dtype)
+    elif len(projection_shifts) != radon_image.shape[1]:
+        raise ValueError(f'Shape of projection_shifts ({len(projection_shifts)}) does not match the '
+                         f'number of projections ({radon_image.shape[1]})')
+    else:
+        projection_shifts = np.asarray(projection_shifts, dtype=dtype)
     if clip is not None:
         if len(clip) != 2:
             raise ValueError('clip must be a length-2 sequence')
-        clip = (float(clip[0]), float(clip[1]))
-    relaxation = float(relaxation)
+        clip = np.asarray(clip, dtype=dtype)
 
     for angle_index in order_angles_golden_ratio(theta):
         image_update = sart_projection_update(image, theta[angle_index],

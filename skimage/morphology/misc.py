@@ -3,7 +3,6 @@ import numpy as np
 import functools
 from scipy import ndimage as ndi
 from .._shared.utils import warn
-from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
@@ -16,8 +15,8 @@ funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
 skimage2ndimage.update({x: x for x in funcs})
 
 
-def default_selem(func):
-    """Decorator to add a default structuring element to morphology functions.
+def default_footprint(func):
+    """Decorator to add a default footprint to morphology functions.
 
     Parameters
     ----------
@@ -28,15 +27,15 @@ def default_selem(func):
     Returns
     -------
     func_out : function
-        The function, using a default structuring element of same dimension
+        The function, using a default footprint of same dimension
         as the input image with connectivity 1.
 
     """
     @functools.wraps(func)
-    def func_out(image, selem=None, *args, **kwargs):
-        if selem is None:
-            selem = _default_selem(image.ndim)
-        return func(image, selem=selem, *args, **kwargs)
+    def func_out(image, footprint=None, *args, **kwargs):
+        if footprint is None:
+            footprint = ndi.generate_binary_structure(image.ndim, 1)
+        return func(image, footprint=footprint, *args, **kwargs)
 
     return func_out
 
@@ -45,10 +44,10 @@ def _check_dtype_supported(ar):
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
         raise TypeError("Only bool or integer image types are supported. "
-                        "Got %s." % ar.dtype)
+                        f"Got {ar.dtype}.")
 
 
-def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
+def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     """Remove objects smaller than the specified size.
 
     Expects ar to be an array with labeled objects, and removes objects
@@ -66,9 +65,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel. Used during
         labelling if `ar` is bool.
-    in_place : bool, optional (default: False)
-        If ``True``, remove the objects in the input array itself.
-        Otherwise, make a copy.
+    out : ndarray
+        Array of the same shape as `ar`, into which the output is
+        placed. By default, a new array is created.
 
     Raises
     ------
@@ -98,7 +97,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> d = morphology.remove_small_objects(a, 6, in_place=True)
+    >>> d = morphology.remove_small_objects(a, 6, out=a)
     >>> d is a
     True
 
@@ -106,18 +105,18 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     # Raising type error if not int or bool
     _check_dtype_supported(ar)
 
-    if in_place:
-        out = ar
-    else:
+    if out is None:
         out = ar.copy()
+    else:
+        out[:] = ar
 
     if min_size == 0:  # shortcut for efficiency
         return out
 
     if out.dtype == bool:
-        selem = ndi.generate_binary_structure(ar.ndim, connectivity)
+        footprint = ndi.generate_binary_structure(ar.ndim, connectivity)
         ccs = np.zeros_like(ar, dtype=np.int32)
-        ndi.label(ar, selem, output=ccs)
+        ndi.label(ar, footprint, output=ccs)
     else:
         ccs = out
 
@@ -139,7 +138,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
+def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
@@ -151,9 +150,9 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
         Replaces `min_size`.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
-    in_place : bool, optional (default: False)
-        If `True`, remove the connected components in the input array itself.
-        Otherwise, make a copy.
+    out : ndarray
+        Array of the same shape as `ar` and bool dtype, into which the
+        output is placed. By default, a new array is created.
 
     Raises
     ------
@@ -186,7 +185,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> d = morphology.remove_small_holes(a, 2, in_place=True)
+    >>> d = morphology.remove_small_holes(a, 2, out=a)
     >>> d is a
     True
 
@@ -205,23 +204,18 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
         warn("Any labeled images will be returned as a boolean array. "
              "Did you mean to use a boolean array?", UserWarning)
 
-    if in_place:
-        out = ar
+    if out is not None:
+        if out.dtype != bool:
+            raise TypeError("out dtype must be bool")
     else:
-        out = ar.copy()
+        out = ar.astype(bool, copy=True)
 
     # Creating the inverse of ar
-    if in_place:
-        out = np.logical_not(out, out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, in_place)
+    out = remove_small_objects(out, area_threshold, connectivity, out=out)
 
-    if in_place:
-        out = np.logical_not(out, out)
-    else:
-        out = np.logical_not(out)
+    np.logical_not(out, out=out)
 
     return out

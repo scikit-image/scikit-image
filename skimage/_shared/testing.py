@@ -20,13 +20,14 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 import warnings
 
 from .. import data, io
+from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
-import pytest
 from ._warnings import expected_warnings
 
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
+import pytest
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
@@ -39,15 +40,26 @@ fixture = pytest.fixture
 arch32 = struct.calcsize("P") * 8 == 32
 
 
+_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
+if _error_on_warnings.lower() == 'true':
+    _error_on_warnings = True
+elif _error_on_warnings.lower() == 'false':
+    _error_on_warnings = False
+else:
+    try:
+        _error_on_warnings = bool(int(_error_on_warnings))
+    except ValueError:
+        _error_on_warnings = False
+
 def assert_less(a, b, msg=None):
-    message = "%r is not lower than %r" % (a, b)
+    message = f"{a!r} is not lower than {b!r}"
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
 def assert_greater(a, b, msg=None):
-    message = "%r is not greater than %r" % (a, b)
+    message = f"{a!r} is not greater than {b!r}"
     if msg is not None:
         message += ": " + msg
     assert a > b, message
@@ -104,9 +116,8 @@ def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     if '.' not in suffix:
         suffix = '.' + suffix
-    temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
-    fname = temp_file.name
-    temp_file.close()
+    with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
+        fname = temp_file.name
     io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
@@ -128,7 +139,7 @@ def color_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -160,7 +171,7 @@ def mono_check(plugin, fmt='png'):
 
     img2 = img > 128
     r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2.astype(np.uint8), r2)
+    testing.assert_allclose(img2, r2.astype(bool))
 
     img3 = img_as_float(img)
     r3 = roundtrip(img3, plugin, fmt)
@@ -193,13 +204,66 @@ def setup_test():
     """
     warnings.simplefilter('default')
 
-    from scipy import signal, ndimage, special, optimize, linalg
-    from scipy.io import loadmat
-    from skimage import viewer
+    if _error_on_warnings:
+        from scipy import signal, ndimage, special, optimize, linalg
+        from scipy.io import loadmat
 
-    np.random.seed(0)
+        np.random.seed(0)
 
-    warnings.simplefilter('error')
+        warnings.simplefilter('error')
+
+        warnings.filterwarnings(
+            'default', message='unclosed file', category=ResourceWarning
+        )
+
+        # Ignore other warnings only seen when using older versions of
+        # dependencies.
+        warnings.filterwarnings(
+            'default',
+            message='Conversion of the second argument of issubdtype',
+            category=FutureWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='the matrix subclass is not the recommended way',
+            category=PendingDeprecationWarning, module='numpy'
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='Your installed pillow version',
+            category=UserWarning,
+            module='skimage.io'
+        )
+
+        # ignore warning from cycle_spin about Dask not being installed
+        warnings.filterwarnings(
+            'default',
+            message='The optional dask dependency is not installed.',
+            category=UserWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='numpy.ufunc size changed',
+            category=RuntimeWarning
+        )
+
+        warnings.filterwarnings(
+            'default',
+            message='\n\nThe scipy.sparse array containers',
+            category=DeprecationWarning
+        )
+
+        # ignore dtype deprecation warning from NumPy arising from use of SciPy
+        # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
+        # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
+        warnings.filterwarnings(
+            'default',
+            message=('`np.int0` is a deprecated alias for `np.intp`'),
+            category=DeprecationWarning
+        )
 
 
 def teardown_test():
@@ -207,9 +271,21 @@ def teardown_test():
 
     Restore warnings to default behavior
     """
-    warnings.simplefilter('default')
+    if _error_on_warnings:
+        warnings.resetwarnings()
+        warnings.simplefilter('default')
 
 
+def fetch(data_filename):
+    """Attempt to fetch data, but if unavailable, skip the tests."""
+    try:
+        return _fetch(data_filename)
+    except (ConnectionError, ModuleNotFoundError):
+        pytest.skip(f'Unable to download {data_filename}',
+                    allow_module_level=True)
+
+
+@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
@@ -248,15 +324,6 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.join()
 
-                return result
-
         return inner
 
     return wrapper
-
-
-if __name__ == '__main__':
-    color_check('pil')
-    mono_check('pil')
-    mono_check('pil', 'bmp')
-    mono_check('pil', 'tiff')

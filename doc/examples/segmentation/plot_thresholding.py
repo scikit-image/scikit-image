@@ -9,7 +9,7 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 .. seealso::
     A more comprehensive presentation on
-    :ref:`sphx_glr_auto_examples_applications_plot_thresholding.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_thresholding_guide.py`
 
 """
 
@@ -66,7 +66,5 @@ from skimage.filters import try_all_threshold
 
 img = data.page()
 
-# Here, we specify a radius for local thresholding algorithms.
-# If it is not specified, only global algorithms are called.
 fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
 plt.show()

@@ -13,13 +13,17 @@ __pycache__
 *.new
 *.md5
 *.old
+*.lprof
+.DS_Store
 .pytest_cache
+.mypy_cache/
 temp.tif
 .ropeproject
 doc/source/api
 doc/build
 source/api
 build
+build-install
 dist
 skimage/version.py
 *.swp
@@ -34,3 +38,4 @@ wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
 .vscode/
+.mesonpy-native-file.ini

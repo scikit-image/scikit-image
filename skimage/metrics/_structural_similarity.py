@@ -1,10 +1,13 @@
-from warnings import warn
-import numpy as np
-from scipy.ndimage import uniform_filter, gaussian_filter
+import functools
 
-from ..util.dtype import dtype_range
+import numpy as np
+from scipy.ndimage import uniform_filter
+
+from .._shared import utils
+from .._shared.filters import gaussian
+from .._shared.utils import _supported_float_type, check_shape_equality, warn
 from ..util.arraycrop import crop
-from .._shared.utils import warn, check_shape_equality
+from ..util.dtype import dtype_range
 
 __all__ = ['structural_similarity']
 
@@ -12,10 +15,11 @@ __all__ = ['structural_similarity']
 def structural_similarity(im1, im2,
                           *,
                           win_size=None, gradient=False, data_range=None,
-                          multichannel=False, gaussian_weights=False,
-                          full=False, **kwargs):
+                          channel_axis=None,
+                          gaussian_weights=False, full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
+    Please pay attention to the `data_range` parameter with floating-point images.
 
     Parameters
     ----------
@@ -30,10 +34,16 @@ def structural_similarity(im1, im2,
     data_range : float, optional
         The data range of the input image (distance between minimum and
         maximum possible values). By default, this is estimated from the image
-        data-type.
-    multichannel : bool, optional
-        If True, treat the last dimension of the array as channels. Similarity
-        calculations are done independently for each channel then averaged.
+        data type. This estimate may be wrong for floating-point image data.
+        Therefore it is recommended to always pass this value explicitly
+        (see note below).
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
+
+        .. versionadded:: 0.19
+           ``channel_axis`` was added in 0.19.
     gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
@@ -64,8 +74,20 @@ def structural_similarity(im1, im2,
 
     Notes
     -----
-    To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
-    to True, `sigma` to 1.5, and `use_sample_covariance` to False.
+    If `data_range` is not specified, the range is automatically guessed
+    based on the image data type. However for floating-point image data, this
+    estimate yields a result double the value of the desired range, as the
+    `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
+    +1. This yields an estimate of 2, instead of 1, which is most often
+    required when working with image data (as negative light intentsities are
+    nonsensical). In case of working with YCbCr-like color data, note that
+    these ranges are different per channel (Cb and Cr have double the range
+    of Y), so one cannot calculate a channel-averaged SSIM with a single call
+    to this function, as identical ranges are assumed for each channel.
+
+    To match the implementation of Wang et al. [1]_, set `gaussian_weights`
+    to True, `sigma` to 1.5, `use_sample_covariance` to False, and
+    specify the `data_range` argument.
 
     .. versionchanged:: 0.16
         This function was renamed from ``skimage.measure.compare_ssim`` to
@@ -87,33 +109,37 @@ def structural_similarity(im1, im2,
 
     """
     check_shape_equality(im1, im2)
+    float_type = _supported_float_type(im1.dtype)
 
-    if multichannel:
+    if channel_axis is not None:
         # loop over channels
         args = dict(win_size=win_size,
                     gradient=gradient,
                     data_range=data_range,
-                    multichannel=False,
+                    channel_axis=None,
                     gaussian_weights=gaussian_weights,
                     full=full)
         args.update(kwargs)
-        nch = im1.shape[-1]
-        mssim = np.empty(nch)
+        nch = im1.shape[channel_axis]
+        mssim = np.empty(nch, dtype=float_type)
+
         if gradient:
-            G = np.empty(im1.shape)
+            G = np.empty(im1.shape, dtype=float_type)
         if full:
-            S = np.empty(im1.shape)
+            S = np.empty(im1.shape, dtype=float_type)
+        channel_axis = channel_axis % im1.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[..., ch],
-                                              im2[..., ch], **args)
+            ch_result = structural_similarity(im1[_at(ch)],
+                                              im2[_at(ch)], **args)
             if gradient and full:
-                mssim[..., ch], G[..., ch], S[..., ch] = ch_result
+                mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
-                mssim[..., ch], G[..., ch] = ch_result
+                mssim[ch], G[_at(ch)] = ch_result
             elif full:
-                mssim[..., ch], S[..., ch] = ch_result
+                mssim[ch], S[_at(ch)] = ch_result
             else:
-                mssim[..., ch] = ch_result
+                mssim[ch] = ch_result
         mssim = mssim.mean()
         if gradient and full:
             return mssim, G, S
@@ -150,31 +176,48 @@ def structural_similarity(im1, im2,
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
-            "win_size exceeds image extent.  If the input is a multichannel "
-            "(color) image, set multichannel=True.")
+            'win_size exceeds image extent. '
+            'Either ensure that your images are '
+            'at least 7x7; or pass win_size explicitly '
+            'in the function call, with an odd value '
+            'less than or equal to the smaller side of your '
+            'images. If your images are multichannel '
+            '(with color channels), set channel_axis to '
+            'the axis number corresponding to the channels.')
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
 
     if data_range is None:
+        if (np.issubdtype(im1.dtype, np.floating) or
+            np.issubdtype(im2.dtype, np.floating)):
+            raise ValueError(
+                'Since image dtype is floating point, you must specify '
+                'the data_range parameter. Please read the documentation '
+                'carefully (including the note). It is recommended that '
+                'you always specify the data_range anyway.')
         if im1.dtype != im2.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im1.dtype.", stacklevel=2)
+            warn("Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
+                 stacklevel=2)
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
+        if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
+            warn("Setting data_range based on im1.dtype. " +
+                 ("data_range = %.0f. " % data_range) +
+                 "Please specify data_range explicitly to avoid mistakes.", stacklevel=2)
 
     ndim = im1.ndim
 
     if gaussian_weights:
-        filter_func = gaussian_filter
-        filter_args = {'sigma': sigma, 'truncate': truncate}
+        filter_func = gaussian
+        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
 
     # ndimage filters need floating point data
-    im1 = im1.astype(np.float64)
-    im2 = im2.astype(np.float64)
+    im1 = im1.astype(float_type, copy=False)
+    im2 = im2.astype(float_type, copy=False)
 
     NP = win_size ** ndim
 
@@ -210,8 +253,8 @@ def structural_similarity(im1, im2,
     # to avoid edge effects will ignore filter radius strip around edges
     pad = (win_size - 1) // 2
 
-    # compute (weighted) mean of ssim
-    mssim = crop(S, pad).mean()
+    # compute (weighted) mean of ssim. Use float64 for accuracy.
+    mssim = crop(S, pad).mean(dtype=np.float64)
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.

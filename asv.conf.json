@@ -1,25 +1,24 @@
 {
-    // The version of the config file format.  Do not change, unless
-    // you know what you are doing.
     "version": 1,
-    // For other options, see the documentation
-    // https://asv.readthedocs.io/en/stable/reference.html
 
     "project": "scikit-image",
     "project_url": "https://scikit-image.org/",
     "repo": ".",
 
-    "branches": ["master"],
+    "branches": ["main"],
     "dvcs": "git",
-    "environment_type": "conda",
+    "environment_type": "virtualenv",
     "install_timeout": 1200,
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
-    "pythons": ["3.7"],
+    "pythons": ["3.10"],
     "matrix": {
+         "virtualenv": [],
          "cython": [],
-         "numpy": ["1.15", "1.16"],
-         "scipy": []
+         "pythran": [],
+         "numpy": ["1.23"],
+         "scipy": [],
+         "pooch": []
     },
 
     "env_dir": ".asv/env",

@@ -7,7 +7,7 @@ export GH_TOKEN=<your-gh-api-token>
 
 Then, for a major release:
 ```
-python /path/to/generate_release_notes.py v0.14.0 master --version 0.15.0
+python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
 ```
 
 For a minor release:
@@ -89,7 +89,7 @@ all_commits = list(tqdm(repository.get_commits(sha=args.to_commit,
                                                since=previous_tag_date),
                         desc=f'Getting all commits between {args.from_commit} '
                              f'and {args.to_commit}'))
-all_hashes = set(c.sha for c in all_commits)
+all_hashes = {c.sha for c in all_commits}
 
 authors = set()
 reviewers = set()
@@ -129,7 +129,7 @@ def add_to_users(users, new_user):
     else:
         users[new_user.login] = new_user.name
 
-for commit in tqdm(all_commits, desc='Getting commiters and authors'):
+for commit in tqdm(all_commits, desc='Getting committers and authors'):
     committer, author = find_author_info(commit)
     if committer is not None:
         committers.add(committer)
@@ -141,7 +141,7 @@ for commit in tqdm(all_commits, desc='Getting commiters and authors'):
         add_to_users(users, commit.author)
     authors.add(author)
 
-# this gets found as a commiter
+# this gets found as a committer
 committers.discard('GitHub Web Flow')
 authors.discard('Azure Pipelines Bot')
 
@@ -188,18 +188,18 @@ announcement_title = f'Announcement: scikit-image {args.version}'
 print(announcement_title)
 print('=' * len(announcement_title))
 
-print(f"""
+print(f'''
 We're happy to announce the release of scikit-image v{args.version}!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-""")
+''')
 
 print("""
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 """
 )

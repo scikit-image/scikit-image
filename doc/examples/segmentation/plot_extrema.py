@@ -7,8 +7,6 @@ We detect local maxima in a galaxy image. The image is corrupted by noise,
 generating many local maxima. To keep only those maxima with sufficient
 local contrast, we use h-maxima.
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
 
 from skimage.measure import label
@@ -77,6 +75,6 @@ ax[1].set_title('Local Maxima')
 ax[1].axis('off')
 
 ax[2].imshow(overlay_h)
-ax[2].set_title('h maxima for h = %.2f' % h)
+ax[2].set_title(f'h maxima for h = {h:.2f}')
 ax[2].axis('off')
 plt.show()

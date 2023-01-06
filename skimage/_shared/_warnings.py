@@ -29,12 +29,12 @@ def all_warnings():
 
     >>> with warnings.catch_warnings():
     ...     warnings.simplefilter('once')
-    ...     foo()
+    ...     foo()                         # doctest: +SKIP
 
     We can now run ``foo()`` without a warning being raised:
 
     >>> from numpy.testing import assert_warns
-    >>> foo()
+    >>> foo()                             # doctest: +SKIP
 
     To catch the warning, we call in the help of ``all_warnings``:
 
@@ -45,7 +45,7 @@ def all_warnings():
     # Since this is a testing only function, we lazy import inspect.
     import inspect
     # Whenever a warning is triggered, Python adds a __warningregistry__
-    # member to the *calling* module.  The exercize here is to find
+    # member to the *calling* module.  The exercise here is to find
     # and eradicate all those breadcrumbs that were left lying around.
     #
     # We proceed by first searching all parent calling frames and explicitly
@@ -83,7 +83,8 @@ def expected_warnings(matching):
     Examples
     --------
     >>> import numpy as np
-    >>> image = np.random.randint(0, 2**16, size=(100, 100), dtype=np.uint16)
+    >>> rng = np.random.default_rng()
+    >>> image = rng.integers(0, 2**16, size=(100, 100), dtype=np.uint16)
     >>> # rank filters are slow when bit-depth exceeds 10 bits
     >>> from skimage import filters
     >>> with expected_warnings(['Bad rank filter performance']):
@@ -139,7 +140,7 @@ def expected_warnings(matching):
                     if match in remaining:
                         remaining.remove(match)
             if strict_warnings and not found:
-                raise ValueError('Unexpected warning: %s' % str(warn.message))
+                raise ValueError(f'Unexpected warning: {str(warn.message)}')
         if strict_warnings and (len(remaining) > 0):
-            msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
+            msg = f"No warning raised matching:\n{{'\n'.join(remaining)}}"
             raise ValueError(msg)

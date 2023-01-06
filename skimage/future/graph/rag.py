@@ -1,10 +1,11 @@
 import networkx as nx
 import numpy as np
-from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
+
 from ... import measure, segmentation, util, color
+from ..._shared.version_requirements import require
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -29,7 +30,7 @@ def _edge_generator_from_csr(csr_matrix):
     Examples
     --------
 
-    >>> dense = np.eye(2, dtype=np.float)
+    >>> dense = np.eye(2, dtype=float)
     >>> csr = sparse.csr_matrix(dense)
     >>> edges = _edge_generator_from_csr(csr)
     >>> list(edges)
@@ -132,7 +133,7 @@ class RAG(nx.Graph):
 
     def __init__(self, label_image=None, connectivity=1, data=None, **attr):
 
-        super(RAG, self).__init__(data, **attr)
+        super().__init__(data, **attr)
         if self.number_of_nodes() == 0:
             self.max_id = 0
         else:
@@ -147,14 +148,14 @@ class RAG(nx.Graph):
             # output, without this, a float array of the same shape as the
             # input image will be created and that could be expensive in
             # memory consumption.
+            output = np.broadcast_to(1., label_image.shape)
+            output.setflags(write=True)
             ndi.generic_filter(
                 label_image,
                 function=_add_edge_filter,
                 footprint=fp,
                 mode='nearest',
-                output=as_strided(np.empty((1,), dtype=np.float_),
-                                  shape=label_image.shape,
-                                  strides=((0,) * label_image.ndim)),
+                output=output,
                 extra_arguments=(self,))
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
@@ -227,7 +228,7 @@ class RAG(nx.Graph):
             attr_dict = attr
         else:
             attr_dict.update(attr)
-        super(RAG, self).add_node(n, **attr_dict)
+        super().add_node(n, **attr_dict)
         self.max_id = max(n, self.max_id)
 
     def add_edge(self, u, v, attr_dict=None, **attr):
@@ -238,14 +239,14 @@ class RAG(nx.Graph):
             attr_dict = attr
         else:
             attr_dict.update(attr)
-        super(RAG, self).add_edge(u, v, **attr_dict)
+        super().add_edge(u, v, **attr_dict)
         self.max_id = max(u, v, self.max_id)
 
     def copy(self):
         """Copy the graph with its max node id.
 
         .. seealso:: :func:`networkx.Graph.copy`."""
-        g = super(RAG, self).copy()
+        g = super().copy()
         g.max_id = self.max_id
         return g
 
@@ -289,7 +290,7 @@ class RAG(nx.Graph):
         This is a convenience method used internally.
 
         .. seealso:: :func:`networkx.Graph.add_node`."""
-        super(RAG, self).add_node(n)
+        super().add_node(n)
 
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
@@ -358,7 +359,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.nodes[n].update({'labels': [n],
                                'pixel count': 0,
                                'total color': np.array([0, 0, 0],
-                                                      dtype=np.double)})
+                                                       dtype=np.float64)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
@@ -377,7 +378,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         elif mode == 'distance':
             d['weight'] = diff
         else:
-            raise ValueError("The mode '%s' is not recognised" % mode)
+            raise ValueError(f"The mode '{mode}' is not recognised")
 
     return graph
 
@@ -401,7 +402,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
         Pixels with a squared distance less than `connectivity` from each other
         are considered adjacent. It can range from 1 to `labels.ndim`. Its
         behavior is the same as `connectivity` parameter in
-        `scipy.ndimage.filters.generate_binary_structure`.
+        `scipy.ndimage.generate_binary_structure`.
 
     Examples
     --------
@@ -424,10 +425,9 @@ def rag_boundary(labels, edge_map, connectivity=2):
     n = np.max(labels_large) + 1
 
     # use a dummy broadcast array as data for RAG
-    ones = as_strided(np.ones((1,), dtype=np.float), shape=labels_small.shape,
-                      strides=(0,))
+    ones = np.broadcast_to(1., labels_small.shape)
     count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
-                                     dtype=np.int_, shape=(n, n)).tocsr()
+                                     dtype=int, shape=(n, n)).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
     data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
@@ -446,6 +446,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
+@require("matplotlib", ">=3.3")
 def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
              edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
     """Show a Region Adjacency Graph on an image.
@@ -482,7 +483,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     Returns
     -------
     lc : :py:class:`matplotlib.collections.LineCollection`
-         A colection of lines that represent the edges of the graph. It can be
+         A collection of lines that represent the edges of the graph. It can be
          passed to the :meth:`matplotlib.figure.Figure.colorbar` function.
 
     Examples
@@ -497,7 +498,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     >>> lc = graph.show_rag(labels, g, img)
     >>> cbar = plt.colorbar(lc)
     """
-    from matplotlib import colors, cm
+    from matplotlib import colors
     from matplotlib import pyplot as plt
     from matplotlib.collections import LineCollection
 
@@ -515,12 +516,12 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
         # Ignore the alpha channel
         out = image[:, :, :3]
     else:
-        img_cmap = cm.get_cmap(img_cmap)
+        img_cmap = plt.get_cmap(img_cmap)
         out = color.rgb2gray(image)
         # Ignore the alpha channel
         out = img_cmap(out)[:, :, :3]
 
-    edge_cmap = cm.get_cmap(edge_cmap)
+    edge_cmap = plt.get_cmap(edge_cmap)
 
     # Handling the case where one node has multiple labels
     # offset is 1 so that regionprops does not ignore 0

@@ -1,49 +1,74 @@
-from warnings import warn
+from tifffile import imread as tifffile_imread
+from tifffile import imwrite as tifffile_imwrite
 
-try:
-    from tifffile import TiffFile, imsave, parse_kwargs
-except ImportError:
-    from ...external.tifffile import TiffFile, imsave, parse_kwargs
+__all__ = ['imread', 'imsave']
 
 
-def imread(fname, dtype=None, **kwargs):
+def imsave(fname, arr, **kwargs):
+    """Load a tiff image to file.
+
+    Parameters
+    ----------
+    fname : str or file
+        File name or file-like object.
+    arr : ndarray
+        The array to write.
+    kwargs : keyword pairs, optional
+        Additional keyword arguments to pass through (see ``tifffile``'s
+        ``imwrite`` function).
+
+    Notes
+    -----
+    Provided by the tifffile library [1]_, and supports many
+    advanced image types including multi-page and floating-point.
+
+    This implementation will set ``photometric='RGB'`` when writing if the first
+    or last axis of `arr` has length 3 or 4. To override this, explicitly
+    pass the ``photometric`` kwarg.
+
+    This implementation will set ``planarconfig='SEPARATE'`` when writing if the
+    first axis of arr has length 3 or 4. To override this, explicitly
+    specify the ``planarconfig`` kwarg.
+
+    References
+    ----------
+    .. [1] https://pypi.org/project/tifffile/
+
+    """
+    if arr.shape[0] in [3, 4]:
+        if 'planarconfig' not in kwargs:
+            kwargs['planarconfig'] = 'SEPARATE'
+        rgb = True
+    else:
+        rgb = arr.shape[-1] in [3, 4]
+    if rgb and 'photometric' not in kwargs:
+        kwargs['photometric'] = 'RGB'
+
+    return tifffile_imwrite(fname, arr, **kwargs)
+
+
+def imread(fname, **kwargs):
     """Load a tiff image from file.
 
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
-    dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
-       Will be removed from version 0.17.
+        File name or file-like-object.
     kwargs : keyword pairs, optional
         Additional keyword arguments to pass through (see ``tifffile``'s
         ``imread`` function).
 
     Notes
     -----
-    Provided by Christophe Golhke's tifffile.py [1]_, and supports many
+    Provided by the tifffile library [1]_, and supports many
     advanced image types including multi-page and floating point.
 
     References
     ----------
-    .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py
+    .. [1] https://pypi.org/project/tifffile/
 
     """
-    if dtype is not None:
-        warn('The dtype argument was always silently ignored. It will be '
-             'removed from scikit-image version 0.17. To avoid this '
-             'warning, do not specify it in your function call.',
-             UserWarning, stacklevel=2)
-
     if 'img_num' in kwargs:
         kwargs['key'] = kwargs.pop('img_num')
 
-    # parse_kwargs will extract keyword arguments intended for the TiffFile
-    # class and remove them from the kwargs dictionary in-place
-    tiff_keys = ['multifile', 'multifile_close', 'fastij', 'is_ome']
-    kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
-
-    # read and return tiff as numpy array
-    with TiffFile(fname, **kwargs_tiff) as tif:
-        return tif.asarray(**kwargs)
+    return tifffile_imread(fname, **kwargs)

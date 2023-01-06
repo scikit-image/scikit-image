@@ -1,8 +1,10 @@
 import numpy as np
+
 from ..measure import label
 
 
-def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
+def clear_border(labels, buffer_size=0, bgval=0, mask=None,
+                 *, out=None):
     """Clear objects connected to the label image border.
 
     Parameters
@@ -14,12 +16,14 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
         that touch the outside of the image are removed.
     bgval : float or int, optional
         Cleared objects are set to this value.
-    in_place : bool, optional
-        Whether or not to manipulate the labels array in-place.
     mask : ndarray of bool, same shape as `image`, optional.
         Image data mask. Objects in labels image overlapping with
-        False pixels of mask will be removed. If defined, the 
+        False pixels of mask will be removed. If defined, the
         argument buffer_size will be ignored.
+    out : ndarray
+        Array of the same shape as `labels`, into which the
+        output is placed. By default, a new array is created.
+
     Returns
     -------
     out : (M[, N[, ..., P]]) array
@@ -47,7 +51,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
     ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(bool)
     >>> clear_border(labels, mask=mask)
     array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 1, 0, 0, 1, 0],
@@ -57,36 +61,38 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
     """
-    image = labels
-
-    if any((buffer_size >= s for s in image.shape)) and mask is None:
+    if any(buffer_size >= s for s in labels.shape) and mask is None:
         # ignore buffer_size if mask
-        raise ValueError("buffer size may not be greater than image size")
+        raise ValueError("buffer size may not be greater than labels size")
+
+    if out is None:
+        out = labels.copy()
 
     if mask is not None:
-        err_msg = "image and mask should have the same shape but are {} and {}"
-        assert image.shape == mask.shape, \
-               err_msg.format(image.shape, mask.shape)
-        if mask.dtype != np.bool_:
+        err_msg = (f'labels and mask should have the same shape but '
+                   f'are {out.shape} and {mask.shape}')
+        if out.shape != mask.shape:
+            raise(ValueError, err_msg)
+        if mask.dtype != bool:
             raise TypeError("mask should be of type bool.")
         borders = ~mask
     else:
         # create borders with buffer_size
-        borders = np.zeros_like(image, dtype=np.bool_)
+        borders = np.zeros_like(out, dtype=bool)
         ext = buffer_size + 1
         slstart = slice(ext)
         slend = slice(-ext, None)
-        slices = [slice(s) for s in image.shape]
-        for d in range(image.ndim):
-            slicedim = list(slices)
-            slicedim[d] = slstart
-            borders[tuple(slicedim)] = True
-            slicedim[d] = slend
-            borders[tuple(slicedim)] = True
-    # Re-label, in case we are dealing with a binary image
+        slices = [slice(None) for _ in out.shape]
+        for d in range(out.ndim):
+            slices[d] = slstart
+            borders[tuple(slices)] = True
+            slices[d] = slend
+            borders[tuple(slices)] = True
+            slices[d] = slice(None)
+
+    # Re-label, in case we are dealing with a binary out
     # and to get consistent labeling
-    labels = label(image, background=0)
-    number = np.max(labels) + 1
+    labels, number = label(out, background=0, return_num=True)
 
     # determine all objects that are connected to borders
     borders_indices = np.unique(labels[borders])
@@ -94,12 +100,9 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
     # mask all label indices that are connected to borders
     label_mask = np.in1d(indices, borders_indices)
     # create mask for pixels to clear
-    mask = label_mask[labels.ravel()].reshape(labels.shape)
-
-    if not in_place:
-        image = image.copy()
+    mask = label_mask[labels.reshape(-1)].reshape(labels.shape)
 
     # clear border pixels
-    image[mask] = bgval
+    out[mask] = bgval
 
-    return image
+    return out

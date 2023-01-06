@@ -4,7 +4,7 @@ Visual image comparison
 =======================
 
 Image comparison is particularly useful when performing image processing tasks
-such as exposure manipulations, filtering, and restauration.
+such as exposure manipulations, filtering, and restoration.
 
 This example shows how to easily compare two images with various approaches.
 
@@ -18,7 +18,7 @@ from skimage.util import compare_images
 
 img1 = data.coins()
 img1_equalized = exposure.equalize_hist(img1)
-img2 = transform.rotate(img1, 5)
+img2 = transform.rotate(img1, 2)
 
 
 comp_equalized = compare_images(img1, img1_equalized, method='checkerboard')
@@ -66,7 +66,7 @@ ax2 = fig.add_subplot(gs[1:, :])
 
 ax0.imshow(img1, cmap='gray')
 ax0.set_title('Original')
-ax1.imshow(img1_equalized, cmap='gray')
+ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(diff_rotated, cmap='gray')
 ax2.set_title('Diff comparison')
@@ -90,7 +90,7 @@ ax2 = fig.add_subplot(gs[1:, :])
 
 ax0.imshow(img1, cmap='gray')
 ax0.set_title('Original')
-ax1.imshow(img1_equalized, cmap='gray')
+ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(blend_rotated, cmap='gray')
 ax2.set_title('Blend comparison')

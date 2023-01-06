@@ -1,10 +1,19 @@
+import inspect
+
 import numpy as np
 
 from scipy import ndimage as ndi
 from skimage.feature import peak_local_max
 
+# Inspect signature to automatically handle API changes across versions.
+# `indices` currently defaults to True, but will be removed in the future.
+peak_kwargs = {}
+parameters = inspect.signature(peak_local_max).parameters
+if 'indices' in parameters and parameters['indices'].default:
+    peak_kwargs = {'indices': False}
 
-class PeakLocalMaxSuite(object):
+
+class PeakLocalMaxSuite:
 
     def setup(self):
         mask = np.zeros([500, 500], dtype=bool)
@@ -21,4 +30,4 @@ class PeakLocalMaxSuite(object):
     def time_peak_local_max(self):
         local_max = peak_local_max(
             self.dist, labels=self.labels,
-            min_distance=20, indices=False, exclude_border=False)
+            min_distance=20, exclude_border=False, **peak_kwargs)

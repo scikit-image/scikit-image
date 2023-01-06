@@ -15,18 +15,15 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
-import sys
-
-from configparser import ConfigParser
 import os.path
+import warnings
+from configparser import ConfigParser
 from glob import glob
 
 from .collection import imread_collection_wrapper
 
-
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
-
 
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
@@ -41,7 +38,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['imageio', 'pil', 'matplotlib', 'qt'],
+    'all': ['imageio', 'pil', 'matplotlib'],
     'imshow': ['matplotlib'],
     'imshow_collection': ['matplotlib']
 }
@@ -49,7 +46,6 @@ preferred_plugins = {
 
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
-
     """
     global plugin_store
     plugin_store = {'imread': [],
@@ -107,22 +103,22 @@ def _parse_config_file(filename):
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
     to gather plugin meta-data.
-
     """
     pd = os.path.dirname(__file__)
     config_files = glob(os.path.join(pd, '_plugins', '*.ini'))
 
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
+        if 'provides' not in meta_data:
+            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
+            continue
         plugin_meta_data[name] = meta_data
-
         provides = [s.strip() for s in meta_data['provides'].split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 
         for p in provides:
             if p not in plugin_store:
-                print("Plugin `%s` wants to provide non-existent `%s`."
-                      " Ignoring." % (name, p))
+                print(f"Plugin `{name}` wants to provide non-existent `{p}`. Ignoring.")
 
         # Add plugins that provide 'imread' as provider of 'imread_collection'.
         need_to_add_collection = ('imread_collection' not in valid_provides and
@@ -186,15 +182,15 @@ def call_plugin(kind, *args, **kwargs):
 
     """
     if kind not in plugin_store:
-        raise ValueError('Invalid function (%s) requested.' % kind)
+        raise ValueError(f'Invalid function ({kind}) requested.')
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        msg = ("No suitable plugin registered for %s.\n\n"
+        msg = (f"No suitable plugin registered for {kind}.\n\n"
                "You may load I/O plugins with the `skimage.io.use_plugin` "
                "command.  A list of all available plugins are shown in the "
                "`skimage.io` docstring.")
-        raise RuntimeError(msg % kind)
+        raise RuntimeError(msg)
 
     plugin = kwargs.pop('plugin', None)
     if plugin is None:
@@ -204,8 +200,7 @@ def call_plugin(kind, *args, **kwargs):
         try:
             func = [f for (p, f) in plugin_funcs if p == plugin][0]
         except IndexError:
-            raise RuntimeError('Could not find the plugin "%s" for %s.' %
-                               (plugin, kind))
+            raise RuntimeError(f'Could not find the plugin "{plugin}" for {kind}.')
 
     return func(*args, **kwargs)
 
@@ -228,7 +223,6 @@ def use_plugin(name, kind=None):
 
     Examples
     --------
-
     To use Matplotlib as the default image reader, you would write:
 
     >>> from skimage import io
@@ -243,8 +237,7 @@ def use_plugin(name, kind=None):
         kind = plugin_store.keys()
     else:
         if kind not in plugin_provides[name]:
-            raise RuntimeError("Plugin %s does not support `%s`." %
-                               (name, kind))
+            raise RuntimeError(f"Plugin {name} does not support `{kind}`.")
 
         if kind == 'imshow':
             kind = [kind, '_app_show']
@@ -255,7 +248,7 @@ def use_plugin(name, kind=None):
 
     for k in kind:
         if k not in plugin_store:
-            raise RuntimeError("'%s' is not a known plugin function." % k)
+            raise RuntimeError(f"'{k}' is not a known plugin function.")
 
         funcs = plugin_store[k]
 
@@ -291,7 +284,7 @@ def _load(plugin):
     if plugin in find_available_plugins(loaded=True):
         return
     if plugin not in plugin_module_name:
-        raise ValueError("Plugin %s not found." % plugin)
+        raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
         plugin_module = __import__('skimage.io._plugins.' + modname,
@@ -302,8 +295,7 @@ def _load(plugin):
         if p == 'imread_collection':
             _inject_imread_collection_if_needed(plugin_module)
         elif not hasattr(plugin_module, p):
-            print("Plugin %s does not provide %s as advertised.  Ignoring." %
-                  (plugin, p))
+            print(f"Plugin {plugin} does not provide {p} as advertised.  Ignoring.")
             continue
 
         store = plugin_store[p]
@@ -329,7 +321,7 @@ def plugin_info(plugin):
     try:
         return plugin_meta_data[plugin]
     except KeyError:
-        raise ValueError('No information on plugin "%s"' % plugin)
+        raise ValueError(f'No information on plugin "{plugin}"')
 
 
 def plugin_order():

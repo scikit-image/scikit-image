@@ -13,9 +13,6 @@ The present class of ridge filters relies on the eigenvalues of
 the Hessian matrix of image intensities to detect ridge structures where the
 intensity changes perpendicular but not along the structure.
 
-Note that, due to edge effects, results for Meijering and Frangi filters
-are cropped by 4 pixels on each edge to get a proper rendering.
-
 References
 ----------
 
@@ -49,7 +46,7 @@ from skimage.filters import meijering, sato, frangi, hessian
 import matplotlib.pyplot as plt
 
 
-def identity(image, **kwargs):
+def original(image, **kwargs):
     """Return the original image, ignoring any kwargs."""
     return image
 
@@ -57,24 +54,29 @@ def identity(image, **kwargs):
 image = color.rgb2gray(data.retina())[300:700, 700:900]
 cmap = plt.cm.gray
 
-kwargs = {}
-kwargs['sigmas'] = [1]
-
-fig, axes = plt.subplots(2, 5)
-for i, black_ridges in enumerate([1, 0]):
-    for j, func in enumerate([identity, meijering, sato, frangi, hessian]):
-        kwargs['black_ridges'] = black_ridges
-        result = func(image, **kwargs)
-        if func in (meijering, frangi):
-            # Crop by 4 pixels for rendering purpose.
-            result = result[4:-4, 4:-4]
-        axes[i, j].imshow(result, cmap=cmap, aspect='auto')
+plt.rcParams["axes.titlesize"] = "medium"
+axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
+for i, black_ridges in enumerate([True, False]):
+    for j, (func, sigmas) in enumerate([
+            (original, None),
+            (meijering, [1]),
+            (meijering, range(1, 5)),
+            (sato, [1]),
+            (sato, range(1, 5)),
+            (frangi, [1]),
+            (frangi, range(1, 5)),
+            (hessian, [1]),
+            (hessian, range(1, 5)),
+    ]):
+        result = func(image, black_ridges=black_ridges, sigmas=sigmas)
+        axes[i, j].imshow(result, cmap=cmap)
         if i == 0:
-            axes[i, j].set_title(['Original\nimage', 'Meijering\nneuriteness',
-                                  'Sato\ntubeness', 'Frangi\nvesselness',
-                                  'Hessian\nvesselness'][j])
+            title = func.__name__
+            if sigmas:
+                title += f"\n\N{GREEK SMALL LETTER SIGMA} = {list(sigmas)}"
+            axes[i, j].set_title(title)
         if j == 0:
-            axes[i, j].set_ylabel('black_ridges = ' + str(bool(black_ridges)))
+            axes[i, j].set_ylabel(f'{black_ridges = }')
         axes[i, j].set_xticks([])
         axes[i, j].set_yticks([])
 

@@ -1,10 +1,8 @@
-import warnings
-
 import numpy as np
 import itertools
 from skimage import (img_as_float, img_as_float32, img_as_float64,
                      img_as_int, img_as_uint, img_as_ubyte)
-from skimage.util.dtype import convert
+from skimage.util.dtype import _convert
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
@@ -47,11 +45,11 @@ def test_range(dtype, f_and_dt):
         omin = 0
         imin = 0
 
-    _verify_range("From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
+    _verify_range(f"From {np.dtype(dtype)} to {np.dtype(dt)}",
                   y, omin, omax, np.dtype(dt))
 
 
-# Add non-standard data types that are allowed by the `convert` function.
+# Add non-standard data types that are allowed by the `_convert` function.
 dtype_range_extra = dtype_range.copy()
 dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
                           np.uint32: (0, 4294967295)})
@@ -71,10 +69,10 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    y = convert(x, dt)
+    y = _convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
-    _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
+    _verify_range(f"From {np.dtype(dtype_in)} to {np.dtype(dt)}",
                   y, omin, omax, np.dtype(dt))
 
 
@@ -110,8 +108,8 @@ def test_copy():
 
 
 def test_bool():
-    img_ = np.zeros((10, 10), np.bool_)
-    img8 = np.zeros((10, 10), np.bool8)
+    img_ = np.zeros((10, 10), bool)
+    img8 = np.zeros((10, 10), np.bool_)
     img_[1, 1] = True
     img8[1, 1] = True
     for (func, dt) in [(img_as_int, np.int16),
@@ -149,21 +147,37 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+float_dtype_list = [float, float, np.float64, np.single, np.float32,
                     np.float64, 'float32', 'float64']
 
 
 def test_float_conversion_dtype():
-    """Test any convertion from a float dtype to an other."""
+    """Test any conversion from a float dtype to an other."""
     x = np.array([-1, 1])
 
-    # Test all combinations of dtypes convertions
+    # Test all combinations of dtypes conversions
     dtype_combin = np.array(np.meshgrid(float_dtype_list,
                                         float_dtype_list)).T.reshape(-1, 2)
 
     for dtype_in, dtype_out in dtype_combin:
         x = x.astype(dtype_in)
-        y = convert(x, dtype_out)
+        y = _convert(x, dtype_out)
+        assert y.dtype == np.dtype(dtype_out)
+
+
+def test_float_conversion_dtype_warns():
+    """Test that convert issues a warning when called"""
+    from skimage.util.dtype import convert
+    x = np.array([-1, 1])
+
+    # Test all combinations of dtypes conversions
+    dtype_combin = np.array(np.meshgrid(float_dtype_list,
+                                        float_dtype_list)).T.reshape(-1, 2)
+
+    for dtype_in, dtype_out in dtype_combin:
+        x = x.astype(dtype_in)
+        with expected_warnings(["The use of this function is discouraged"]):
+            y = convert(x, dtype_out)
         assert y.dtype == np.dtype(dtype_out)
 
 
@@ -173,5 +187,19 @@ def test_subclass_conversion():
 
     for dtype in float_dtype_list:
         x = x.astype(dtype)
-        y = convert(x, np.floating)
+        y = _convert(x, np.floating)
         assert y.dtype == x.dtype
+
+
+def test_int_to_float():
+    """Check Normalization when casting img_as_float from int types to float"""
+    int_list = np.arange(9, dtype=np.int64)
+    converted = img_as_float(int_list)
+    assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
+
+    ii32 = np.iinfo(np.int32)
+    ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
+    floats = img_as_float(ii_list)
+
+    assert_equal(floats.max(), 1)
+    assert_equal(floats.min(), -1)

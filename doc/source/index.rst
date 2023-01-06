@@ -2,10 +2,10 @@
 scikit-image |version| docs
 ****************************
 
-scikit-image is an image processing toolbox for SciPy_.  View the latest
-`release notes here <release_notes_and_installation.html>`_.
+scikit-image is an image processing toolbox for SciPy_. View the
+`release notes <release_notes.html>`_ for |version|.
 
-.. _SciPy: http://www.scipy.org
+.. _SciPy: https://www.scipy.org
 
 
 Sections
@@ -16,14 +16,13 @@ Sections
 
    overview
    api/api
-   api_changes
    install
    user_guide
    glossary
    contribute
    license
    auto_examples/index
-   release_notes_and_installation
+   release_notes
    core_developer
    skips/index
    values
@@ -36,19 +35,19 @@ Sections
 
        Introduction to scikit-image.
 
-     - `API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
+     - `API Reference <api/api.html>`_ (`changes <release_notes.html>`_)
 
        Documentation for the functions included in scikit-image.
 
-   * - `Mission statement <values.html>`_
+   * - `Mission Statement <values.html>`_
 
-       Our mission, vision and values.
+       Our mission, vision, and values.
 
      - `Governance <skips/1-governance.html>`_
 
        How decisions are made in scikit-image.
 
-   * - `Installation Steps <install.html>`_
+   * - `Installation <install.html>`_
 
        How to install scikit-image.
 
@@ -66,9 +65,9 @@ Sections
        <core_developer.html>`_.
 
 
-   * - `Examples <auto_examples/index.html>`_
+   * - `Gallery <auto_examples/index.html>`_
 
-       Introductory examples
+       Introductory generic and domain-specific examples.
 
      - `License Info <license.html>`_
 
@@ -76,16 +75,13 @@ Sections
 
    * - `SKIPs <skips/index.html>`_
 
-     - 
-
-       SciKit-Image Proposals, documents describing major changes to the
+       **s**\ ci\ **k**\ it-\ **i**\ mage **p**\ roposals, documents describing major changes to the
        library.
 
-   * - `Code of Conduct <conduct/code_of_conduct.html>`_
-
-     -
+     - `Code of Conduct <conduct/code_of_conduct.html>`_
 
        Community interaction guidelines.
+
 
 Indices
 =======

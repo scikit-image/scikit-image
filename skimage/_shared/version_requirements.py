@@ -1,5 +1,7 @@
 import sys
 
+from packaging import version as _version
+
 
 def ensure_python_version(min_version):
     if not isinstance(min_version, tuple):
@@ -14,8 +16,8 @@ def ensure_python_version(min_version):
 You are running scikit-image on an unsupported version of Python.
 
 Unfortunately, scikit-image 0.15 and above no longer work with your installed
-version of Python (%s).  You therefore have two options: either upgrade to
-Python %s, or install an older version of scikit-image.
+version of Python ({}).  You therefore have two options: either upgrade to
+Python {}, or install an older version of scikit-image.
 
 For Python 2.7 or Python 3.4, use
 
@@ -27,7 +29,7 @@ Please also consider updating `pip` and `setuptools`:
 
 Newer versions of these tools avoid installing packages incompatible
 with your version of Python.
-""" % (python_version(), '.'.join([str(v) for v in min_version])))
+""".format(python_version(), '.'.join([str(v) for v in min_version])))
 
 
 def _check_version(actver, version, cmp_op):
@@ -38,24 +40,16 @@ def _check_version(actver, version, cmp_op):
     it is assumed that the dependency is satisfied.
     Users on dev branches are responsible for keeping their own packages up to
     date.
-
-    Copyright (C) 2013  The IPython Development Team
-
-    Distributed under the terms of the BSD License.
     """
-    # since version_requirements.py is in the critical import path, we
-    # lazy import it
-    from distutils.version import LooseVersion
-
     try:
         if cmp_op == '>':
-            return LooseVersion(actver) > LooseVersion(version)
+            return _version.parse(actver) > _version.parse(version)
         elif cmp_op == '>=':
-            return LooseVersion(actver) >= LooseVersion(version)
+            return _version.parse(actver) >= _version.parse(version)
         elif cmp_op == '=':
-            return LooseVersion(actver) == LooseVersion(version)
+            return _version.parse(actver) == _version.parse(version)
         elif cmp_op == '<':
-            return LooseVersion(actver) < LooseVersion(version)
+            return _version.parse(actver) < _version.parse(version)
         else:
             return False
     except TypeError:
@@ -86,11 +80,6 @@ def is_installed(name, version=None):
     -------
     out : bool
         True if `name` is installed matching the optional version.
-
-    Notes
-    -----
-    Original Copyright (C) 2009-2011 Pierre Raybaut
-    Licensed under the terms of the MIT License.
     """
     if name.lower() == 'python':
         actver = sys.version[:6]
@@ -112,7 +101,7 @@ def is_installed(name, version=None):
         if not symb:
             symb = '='
         assert symb in ('>=', '>', '=', '<'),\
-            "Invalid version condition '%s'" % symb
+            f"Invalid version condition '{symb}'"
         version = version[match.start():]
         return _check_version(actver, version, symb)
 
@@ -146,10 +135,9 @@ def require(name, version=None):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
             else:
-                msg = '"%s" in "%s" requires "%s'
-                msg = msg % (obj, obj.__module__, name)
+                msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
                 if not version is None:
-                    msg += " %s" % version
+                    msg += f" {version}"
                 raise ImportError(msg + '"')
         return func_wrapped
     return decorator

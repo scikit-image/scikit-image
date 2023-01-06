@@ -6,6 +6,7 @@
 """Cython code used in extrema.py."""
 
 cimport numpy as cnp
+cnp.import_array()
 
 
 # Must be defined to use QueueWithHistory
@@ -97,10 +98,10 @@ def _local_maxima(dtype_t[::1] image not None,
 cdef inline void _mark_candidates_in_last_dimension(
         dtype_t[::1] image, unsigned char[::1] flags) nogil:
     """Mark local maxima in last dimension.
-    
-    This function considers only the last dimension of the image and marks 
-    pixels with the "CANDIDATE" flag if it is a local maximum. 
-    
+
+    This function considers only the last dimension of the image and marks
+    pixels with the "CANDIDATE" flag if it is a local maximum.
+
     Parameters
     ----------
     image :
@@ -108,15 +109,15 @@ cdef inline void _mark_candidates_in_last_dimension(
     flags :
         An array of flags that is used to store the state of each pixel during
         evaluation.
-    
+
     Notes
     -----
     By evaluating this necessary but not sufficient condition first, usually a
     significant amount of pixels can be rejected without having to evaluate the
-    entire neighborhood of their plateau. This can reduces the number of 
-    candidates that need to be evaluated with the more expensive flood-fill 
+    entire neighborhood of their plateau. This can reduces the number of
+    candidates that need to be evaluated with the more expensive flood-fill
     performed in `_fill_plateaus`.
-    
+
     However this is only possible if the adjacent pixels in the last dimension
     are part of the defined neighborhood (see argument `neighbor_offsets`
     in `_local_maxima`).
@@ -144,10 +145,10 @@ cdef inline void _mark_candidates_in_last_dimension(
 
 cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
     """Mark all pixels as potential maxima, exclude border pixels.
-    
+
     This function marks pixels with the "CANDIDATE" flag if they aren't the
-    first or last index in any dimension (not flagged with "BORDER_INDEX"). 
-    
+    first or last index in any dimension (not flagged with "BORDER_INDEX").
+
     Parameters
     ----------
     flags :
@@ -166,7 +167,7 @@ cdef inline void _fill_plateau(
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index) nogil:
     """Fill with 1 if plateau is local maximum else with 0.
-    
+
     Parameters
     ----------
     image :

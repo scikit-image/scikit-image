@@ -5,10 +5,12 @@
 import numpy as np
 
 cimport numpy as cnp
+cnp.import_array()
 
 
-cdef inline float tri_max(float a, float b, float c):
-    cdef float MAX
+cdef inline cnp.float32_t tri_max(cnp.float32_t a, cnp.float32_t b,
+                                  cnp.float32_t c):
+    cdef cnp.float32_t MAX
 
     if a > b:
         MAX = a
@@ -49,14 +51,14 @@ def histograms(cnp.ndarray[cnp.uint8_t, ndim=3] img, int nbins):
     v = np.zeros((nbins,), dtype=np.int32)
 
     cdef int i, j, k, rbin, gbin, bbin, vbin
-    cdef float bin_width = 255./ nbins
-    cdef float R, G, B, V
+    cdef cnp.float32_t bin_width = 255./ nbins
+    cdef cnp.float32_t R, G, B, V
 
     for i in range(height):
         for j in range(width):
-            R = <float>img[i, j, 0]
-            G = <float>img[i, j, 1]
-            B = <float>img[i, j, 2]
+            R = <cnp.float32_t>img[i, j, 0]
+            G = <cnp.float32_t>img[i, j, 1]
+            B = <cnp.float32_t>img[i, j, 2]
             V = tri_max(R, G, B)
 
             rbin = <int>(R / bin_width)

@@ -1,33 +1,29 @@
 __all__ = ['imread', 'imread_collection']
 
 import skimage.io as io
-from warnings import warn
 
 try:
     from astropy.io import fits
 except ImportError:
     raise ImportError(
         "Astropy could not be found. It is needed to read FITS files.\n"
-        "Please refer to http://www.astropy.org for installation\n"
+        "Please refer to https://www.astropy.org for installation\n"
         "instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from a FITS file.
 
     Parameters
     ----------
     fname : string
         Image file name, e.g. ``test.fits``.
-    dtype : dtype, optional
-        Was always silently ignored.
-        Will be removed from version 0.17.
 
     Returns
     -------
     img_array : ndarray
         Unlike plugins such as PIL, where different color bands/channels are
-        stored in the third dimension, FITS images are greyscale-only and can
+        stored in the third dimension, FITS images are grayscale-only and can
         be N-dimensional, so an array of the native FITS dimensionality is
         returned, without color channels.
 
@@ -35,30 +31,22 @@ def imread(fname, dtype=None):
 
     Notes
     -----
-
     Currently FITS ``imread()`` always returns the first image extension when
     given a Multi-Extension FITS file; use ``imread_collection()`` (which does
     lazy loading) to get all the extensions at once.
 
     """
-    if dtype is not None:
-        warn('The dtype argument was always silently ignored. It will be '
-             'removed from scikit-image version 0.17. To avoid this '
-             'warning, do not specify it in your function call.',
-             UserWarning, stacklevel=2)
 
-    hdulist = fits.open(fname)
-
-    # Iterate over FITS image extensions, ignoring any other extension types
-    # such as binary tables, and get the first image data array:
-    img_array = None
-    for hdu in hdulist:
-        if isinstance(hdu, fits.ImageHDU) or \
-           isinstance(hdu, fits.PrimaryHDU):
-            if hdu.data is not None:
-                img_array = hdu.data
-                break
-    hdulist.close()
+    with fits.open(fname) as hdulist:
+        # Iterate over FITS image extensions, ignoring any other extension types
+        # such as binary tables, and get the first image data array:
+        img_array = None
+        for hdu in hdulist:
+            if isinstance(hdu, fits.ImageHDU) or \
+               isinstance(hdu, fits.PrimaryHDU):
+                if hdu.data is not None:
+                    img_array = hdu.data
+                    break
 
     return img_array
 
@@ -66,20 +54,19 @@ def imread(fname, dtype=None):
 def imread_collection(load_pattern, conserve_memory=True):
     """Load a collection of images from one or more FITS files
 
-       Parameters
-       ----------
-       load_pattern : str or list
-           List of extensions to load. Filename globbing is currently
-           unsupported.
-       converve_memory : bool
-           If True, never keep more than one in memory at a specific
-           time. Otherwise, images will be cached once they are loaded.
+    Parameters
+    ----------
+    load_pattern : str or list
+        List of extensions to load. Filename globbing is currently
+        unsupported.
+    conserve_memory : bool
+        If True, never keep more than one in memory at a specific
+        time. Otherwise, images will be cached once they are loaded.
 
-       Returns
-       -------
-
-       ic : ImageCollection
-           Collection of images.
+    Returns
+    -------
+    ic : ImageCollection
+        Collection of images.
 
     """
 
@@ -95,19 +82,18 @@ def imread_collection(load_pattern, conserve_memory=True):
     # files and finding the image extensions in each one:
     ext_list = []
     for filename in load_pattern:
-        hdulist = fits.open(filename)
-        for n, hdu in zip(range(len(hdulist)), hdulist):
-            if isinstance(hdu, fits.ImageHDU) or \
-               isinstance(hdu, fits.PrimaryHDU):
-                # Ignore (primary) header units with no data (use '.size'
-                # rather than '.data' to avoid actually loading the image):
-                try:
-                    data_size = hdu.size  # size is int in Astropy 3.1.2
-                except TypeError:
-                    data_size = hdu.size()
-                if data_size > 0:
-                    ext_list.append((filename, n))
-        hdulist.close()
+        with fits.open(filename) as hdulist:
+            for n, hdu in zip(range(len(hdulist)), hdulist):
+                if isinstance(hdu, fits.ImageHDU) or \
+                   isinstance(hdu, fits.PrimaryHDU):
+                    # Ignore (primary) header units with no data (use '.size'
+                    # rather than '.data' to avoid actually loading the image):
+                    try:
+                        data_size = hdu.size  # size is int in Astropy 3.1.2
+                    except TypeError:
+                        data_size = hdu.size()
+                    if data_size > 0:
+                        ext_list.append((filename, n))
 
     return io.ImageCollection(ext_list, load_func=FITSFactory,
                               conserve_memory=conserve_memory)
@@ -118,7 +104,6 @@ def FITSFactory(image_ext):
 
     Parameters
     ----------
-
     image_ext : tuple
         FITS extension to load, in the format ``(filename, ext_num)``.
         The FITS ``(extname, extver)`` format is unsupported, since this
@@ -141,14 +126,12 @@ def FITSFactory(image_ext):
     if type(filename) is not str or type(extnum) is not int:
         raise ValueError("Expected a (filename, extension) tuple")
 
-    hdulist = fits.open(filename)
-
-    data = hdulist[extnum].data
-
-    hdulist.close()
+    with fits.open(filename) as hdulist:
+        data = hdulist[extnum].data
 
     if data is None:
         raise RuntimeError(
-            "Extension %d of %s has no data" % (extnum, filename))
+            f"Extension {extnum} of {filename} has no data"
+        )
 
     return data

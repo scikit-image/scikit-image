@@ -1,7 +1,5 @@
 from collections import namedtuple
 import numpy as np
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
 from ..._shared.utils import warn
@@ -115,7 +113,7 @@ def _get_display_range(image):
 def imshow(image, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
-    By default, the image is displayed in greyscale, rather than
+    By default, the image is displayed in grayscale, rather than
     the matplotlib default colormap.
 
     Images are assumed to have standard range for their type. For
@@ -133,9 +131,9 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
     ----------
     image : array, shape (M, N[, 3])
         The image to display.
-    ax: `matplotlib.axes.Axes`, optional
+    ax : `matplotlib.axes.Axes`, optional
         The axis to use for the image, defaults to plt.gca().
-    show_cbar: boolean, optional.
+    show_cbar : boolean, optional.
         Whether to show the colorbar (used to override default behavior).
     **kwargs : Keyword arguments
         These are passed directly to `matplotlib.pyplot.imshow`.
@@ -146,6 +144,7 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         The `AxesImage` object returned by `plt.imshow`.
     """
     import matplotlib.pyplot as plt
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     lo, hi, cmap = _get_display_range(image)
 
@@ -200,7 +199,9 @@ def imshow_collection(ic, *args, **kwargs):
     return fig
 
 
-imread = matplotlib.image.imread
+def imread(*args, **kwargs):
+    import matplotlib.image
+    return matplotlib.image.imread(*args, **kwargs)
 
 
 def _app_show():

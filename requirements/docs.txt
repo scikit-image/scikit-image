@@ -1,12 +1,16 @@
-# Sphinx 1.7.8 has a bug when building on cached envs
-# https://github.com/sphinx-doc/sphinx/issues/5361
-sphinx>=1.3,!=1.7.8
-numpydoc>=0.9
-sphinx-gallery
+sphinx>=5.2
+sphinx-gallery>=0.11
+numpydoc>=1.5
 sphinx-copybutton
 pytest-runner
 scikit-learn
-matplotlib>=3.0.1
-dask[array]>=0.15.0
-# cloudpickle is necessary to provide the 'processes' scheduler for dask
-cloudpickle>=0.2.1
+matplotlib>=3.6
+dask[array]>=2022.9.2
+pandas>=1.5
+seaborn>=0.11
+pooch>=1.6
+tifffile>=2022.8.12
+myst-parser
+ipywidgets
+plotly>=5.10
+kaleido

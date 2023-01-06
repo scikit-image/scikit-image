@@ -1,6 +1,6 @@
 __all__ = ['imread', 'imsave']
 
-from ...util.dtype import convert
+from ...util.dtype import _convert
 
 try:
     import imread as _imread
@@ -21,7 +21,7 @@ def imread(fname, dtype=None):
     """
     im = _imread.imread(fname)
     if dtype is not None:
-        im = convert(im, dtype)
+        im = _convert(im, dtype)
     return im
 
 
@@ -34,7 +34,7 @@ def imsave(fname, arr, format_str=None):
         Name of destination file.
     arr : ndarray of uint8 or uint16
         Array (image) to save.
-    format_str: str,optional
+    format_str : str,optional
         Format to save as.
 
     Notes

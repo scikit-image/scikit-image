@@ -1,6 +1,9 @@
+# We need this file for the numpy.distutils build.  Remove when we
+# no longer support numpy.distutils.
+
 import sys
 import os
-from distutils.version import LooseVersion
+from packaging import version
 from multiprocessing import cpu_count
 
 CYTHON_VERSION = '0.23.4'
@@ -21,9 +24,8 @@ def _compiled_filename(f):
         if os.path.exists(filename):
             return filename
     else:
-        raise RuntimeError('Cython >= %s is required to build '
-                           'scikit-image from git checkout' %
-                           CYTHON_VERSION)
+        raise RuntimeError(f"Cython >= {CYTHON_VERSION} is required to build "
+                           "scikit-image from git checkout")
 
 
 def cython(pyx_files, working_path=''):
@@ -35,14 +37,16 @@ def cython(pyx_files, working_path=''):
         The input .pyx files.
 
     """
+    # We need this file for the numpy.distutils build.  Remove when we
+    # no longer support numpy.distutils.
     # Do not build cython files if target is clean
     if len(sys.argv) >= 2 and sys.argv[1] == 'clean':
         return
 
     try:
         from Cython import __version__
-        if LooseVersion(__version__) < CYTHON_VERSION:
-            raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
+        if version.parse(__version__) < version.parse(CYTHON_VERSION):
+            raise RuntimeError(f'Cython >= {CYTHON_VERSION} needed to build scikit-image')
 
         from Cython.Build import cythonize
     except ImportError:
@@ -51,8 +55,8 @@ def cython(pyx_files, working_path=''):
         c_files_used = [_compiled_filename(os.path.join(working_path, f))
                         for f in pyx_files]
 
-        print("Cython >= %s not found; falling back to pre-built %s" \
-              % (CYTHON_VERSION, " ".join(c_files_used)))
+        print(f"Cython >= {CYTHON_VERSION} not found; "
+              f"falling back to pre-built {' '.join(c_files_used)}")
     else:
         pyx_files = [os.path.join(working_path, f) for f in pyx_files]
         for i, pyxfile in enumerate(pyx_files):
@@ -60,10 +64,13 @@ def cython(pyx_files, working_path=''):
                 process_tempita_pyx(pyxfile)
                 pyx_files[i] = pyxfile.replace('.pyx.in', '.pyx')
 
-        # Cython doesn't automatically choose a number of threads > 1
-        # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
-        cythonize(pyx_files, nthreads=cpu_count(),
-                  compiler_directives={'language_level': 3})
+        # skip cythonize when creating an sdist
+        # (we do not want the large cython-generated sources to be included)
+        if 'sdist' not in sys.argv:
+            # Cython doesn't automatically choose a number of threads > 1
+            # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
+            cythonize(pyx_files, nthreads=cpu_count(),
+                      compiler_directives={'language_level': 3})
 
 
 def process_tempita_pyx(fromfile):
@@ -79,7 +86,7 @@ def process_tempita_pyx(fromfile):
                                               encoding=sys.getdefaultencoding())
     pyxcontent = template.substitute()
     if not fromfile.endswith('.pyx.in'):
-        raise ValueError("Unexpected extension of %s." % fromfile)
+        raise ValueError(f"Unexpected extension of {fromfile}.")
 
     pyxfile = os.path.splitext(fromfile)[0]    # split off the .in ending
     with open(pyxfile, "w") as f:

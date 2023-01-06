@@ -4,6 +4,7 @@ n-dimensional array.
 """
 
 import numpy as np
+from numbers import Integral
 
 __all__ = ['crop']
 
@@ -19,8 +20,8 @@ def crop(ar, crop_width, copy=False, order='K'):
         Number of values to remove from the edges of each axis.
         ``((before_1, after_1),`` ... ``(before_N, after_N))`` specifies
         unique crop widths at the start and end of each axis.
-        ``((before, after),)`` specifies a fixed start and end crop
-        for every axis.
+        ``((before, after),) or (before, after)`` specifies
+        a fixed start and end crop for every axis.
         ``(n,)`` or ``n`` for integer ``n`` is a shortcut for
         before = after = ``n`` for all axes.
     copy : bool, optional
@@ -37,23 +38,32 @@ def crop(ar, crop_width, copy=False, order='K'):
         The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
-    # Since arraycrop is in the critical import path, we lazy import distutils
-    # to check the version of numpy
-    # After numpy 1.15, a new backward compatible function have been
-    # implemented.
-    # See https://github.com/numpy/numpy/pull/11966
-    from distutils.version import LooseVersion as Version
-    old_numpy = Version(np.__version__) < Version('1.16')
-    if old_numpy:
-        from numpy.lib.arraypad import _validate_lengths
-    else:
-        from numpy.lib.arraypad import _as_pairs
-
     ar = np.array(ar, copy=False)
-    if old_numpy:
-        crops = _validate_lengths(ar, crop_width)
+
+    if isinstance(crop_width, Integral):
+        crops = [[crop_width, crop_width]] * ar.ndim
+    elif isinstance(crop_width[0], Integral):
+        if len(crop_width) == 1:
+            crops = [[crop_width[0], crop_width[0]]] * ar.ndim
+        elif len(crop_width) == 2:
+            crops = [crop_width] * ar.ndim
+        else:
+            raise ValueError(
+                f'crop_width has an invalid length: {len(crop_width)}\n'
+                f'crop_width should be a sequence of N pairs, '
+                f'a single pair, or a single integer'
+            )
+    elif len(crop_width) == 1:
+        crops = [crop_width[0]] * ar.ndim
+    elif len(crop_width) == ar.ndim:
+        crops = crop_width
     else:
-        crops = _as_pairs(crop_width, ar.ndim, as_index=True)
+        raise ValueError(
+            f'crop_width has an invalid length: {len(crop_width)}\n'
+            f'crop_width should be a sequence of N pairs, '
+            f'a single pair, or a single integer'
+        )
+
     slices = tuple(slice(a, ar.shape[i] - b)
                    for i, (a, b) in enumerate(crops))
     if copy:

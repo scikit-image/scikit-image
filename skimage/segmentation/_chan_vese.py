@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.ndimage import distance_transform_edt as distance
 
+from .._shared.utils import _supported_float_type
+
 
 def _cv_curvature(phi):
     """Returns the 'curvature' of a level set 'phi'.
@@ -113,15 +115,18 @@ def _cv_reset_level_set(phi):
     return phi
 
 
-def _cv_checkerboard(image_size, square_size):
+def _cv_checkerboard(image_size, square_size, dtype=np.float64):
     """Generates a checkerboard level set function.
 
-    According to Pascal Getreuer, such a level set function has fast convergence.
+    According to Pascal Getreuer, such a level set function has fast
+    convergence.
     """
-    yv = np.arange(image_size[0]).reshape(image_size[0], 1)
-    xv = np.arange(image_size[1])
-    return (np.sin(np.pi/square_size*yv) *
-            np.sin(np.pi/square_size*xv))
+    yv = np.arange(image_size[0], dtype=dtype).reshape(image_size[0], 1)
+    xv = np.arange(image_size[1], dtype=dtype)
+    sf = np.pi / square_size
+    xv *= sf
+    yv *= sf
+    return np.sin(yv) * np.sin(xv)
 
 
 def _cv_large_disk(image_size):
@@ -134,7 +139,7 @@ def _cv_large_disk(image_size):
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
     radius = float(min(centerX, centerY))
-    return (radius-distance(res)) / radius
+    return (radius - distance(res)) / radius
 
 
 def _cv_small_disk(image_size):
@@ -147,15 +152,15 @@ def _cv_small_disk(image_size):
     centerX = int((image_size[1]-1) / 2)
     res[centerY, centerX] = 0.
     radius = float(min(centerX, centerY)) / 2.0
-    return (radius-distance(res)) / (radius*3)
+    return (radius - distance(res)) / (radius * 3)
 
 
-def _cv_init_level_set(init_level_set, image_shape):
+def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
     """Generates an initial level set function conditional on input arguments.
     """
     if type(init_level_set) == str:
         if init_level_set == 'checkerboard':
-            res = _cv_checkerboard(image_shape, 5)
+            res = _cv_checkerboard(image_shape, 5, dtype)
         elif init_level_set == 'disk':
             res = _cv_large_disk(image_shape)
         elif init_level_set == 'small disk':
@@ -164,11 +169,11 @@ def _cv_init_level_set(init_level_set, image_shape):
             raise ValueError("Incorrect name for starting level set preset.")
     else:
         res = init_level_set
-    return res
+    return res.astype(dtype, copy=False)
 
 
-def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
-              dt=0.5, init_level_set='checkerboard',
+def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
+              max_num_iter=500, dt=0.5, init_level_set='checkerboard',
               extended_output=False):
     """Chan-Vese segmentation algorithm.
 
@@ -197,7 +202,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
         iterations normalized by the area of the image is below this
         value, the algorithm will assume that the solution was
         reached.
-    max_iter : uint, optional
+    max_num_iter : uint, optional
         Maximum number of iterations allowed before the algorithm
         interrupts itself.
     dt : float, optional
@@ -297,12 +302,14 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
 
-    phi = _cv_init_level_set(init_level_set, image.shape)
+    float_dtype = _supported_float_type(image.dtype)
+    phi = _cv_init_level_set(init_level_set, image.shape, dtype=float_dtype)
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
         raise ValueError("The dimensions of initial level set do not "
                          "match the dimensions of image.")
 
+    image = image.astype(float_dtype, copy=False)
     image = image - np.min(image)
     if np.max(image) != 0:
         image = image / np.max(image)
@@ -313,7 +320,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     phivar = tol + 1
     segmentation = phi > 0
 
-    while(phivar > tol and i < max_iter):
+    while(phivar > tol and i < max_num_iter):
         # Save old level set values
         oldphi = phi
 

@@ -10,12 +10,10 @@ def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
     config = Configuration('measure', parent_package, top_path)
-    config.add_data_dir('tests')
 
     cython(['_ccomp.pyx',
             '_find_contours_cy.pyx',
             '_moments_cy.pyx',
-            '_marching_cubes_classic_cy.pyx',
             '_marching_cubes_lewiner_cy.pyx',
             '_pnpoly.pyx'], working_path=base_path)
 
@@ -24,9 +22,6 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_find_contours_cy', sources=['_find_contours_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments_cy', sources=['_moments_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_marching_cubes_classic_cy',
-                         sources=['_marching_cubes_classic_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_marching_cubes_lewiner_cy',
                          sources=['_marching_cubes_lewiner_cy.c'],
@@ -39,7 +34,7 @@ def configuration(parent_package='', top_path=None):
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@python.org',
+          maintainer_email='skimage@discuss.scientific-python.org',
           description='Graph-based Image-processing Algorithms',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',

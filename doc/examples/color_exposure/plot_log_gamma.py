@@ -55,7 +55,7 @@ logarithmic_corrected = exposure.adjust_log(img, 1)
 
 # Display results
 fig = plt.figure(figsize=(8, 5))
-axes = np.zeros((2, 3), dtype=np.object)
+axes = np.zeros((2, 3), dtype=object)
 axes[0, 0] = plt.subplot(2, 3, 1)
 axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0])
 axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0])
