@@ -290,10 +290,10 @@ def enhancement_measure(image, size=3, eps=1e-6):
 
     References
     ----------
-    .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan.
-            "A new measure of image enhancement.",
-            IASTED International Conference on Signal Processing
-            & Communication, Citeseer, 2000,
+    .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan. "A new
+           measure of image enhancement.", IASTED International Conference on
+           Signal Processing & Communication, Citeseer, 2000.
+           https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=5adac5932775f089eaace7ebc45a6cba89809134
 
     Examples
     --------
