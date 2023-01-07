@@ -265,15 +265,13 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     return (H0 + H1) / H01
 
 
-def enhancement_measure(image: np.ndarray,
-                        size: int = 3,
-                        eps: float = 1e-6) -> float:
-    """ The image enhancement measure called EME based on [1]_.
-    It is a way of quantifying improvement of the image after enhancement.
+def enhancement_measure(image, size=3, eps=1e-6):
+    """Compute the enhancement measure of an image.
 
-    The function uses a sliding window of user-provided size to measure
-    the mean of log of maximal and minimal intensity ratio
-    within the window.
+    The enhancement measure (EME) of an image, aims to provide a perceptual
+    estimate of image quality, based on the luminance ratio within a sliding
+    window [1]_. The resulting measure is useful when comparing image
+    enhancement algorithms.
 
     Parameters
     ----------
@@ -288,7 +286,7 @@ def enhancement_measure(image: np.ndarray,
     Returns
     -------
     eme : float
-        The number describing image quality.
+        An estimate of the image quality.
 
     References
     ----------

@@ -21,7 +21,7 @@ img_gray = data.camera()
 img_rgb = data.astronaut()
 
 
-def compare_side_by_side(before: np.ndarray, after: np.ndarray):
+def compare_side_by_side(before, after):
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 14))
     for idx, image in enumerate([before, after]):
         ax[idx].imshow(image)
