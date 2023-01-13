@@ -192,7 +192,7 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             1. - np.array(val, dtype=float))
 
 
-def _polygon(r, c, shape, offset):
+def _polygon(r, c, shape):
     """Generate coordinates of pixels within polygon.
 
     Parameters
@@ -205,15 +205,6 @@ def _polygon(r, c, shape, offset):
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
         size. If None, the full extent of the polygon is used.
-    offset: tuple
-        Pixel offset of returned coordinates. This is useful for polygons
-        that span a very large number of pixels, when getting all pixels
-        at once would use too much memory. Note that a non-zero or non-None
-        offsets will shift the values of the returned rr and cc,
-        all else being equal. Offsets less than 0 or greater than the
-        maximum coordinate of the polygon vertices will be clipped to
-        lie in this range.
-
 
     Returns
     -------
@@ -225,29 +216,16 @@ def _polygon(r, c, shape, offset):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    if offset is not None:
-        # enforce offsets >= 0
-        offset = (max(0, offset[0]), max(0, offset[1]))
-    else:
-        offset = (0, 0)
-
-    # these are coordinates of the shape
     cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
     cdef Py_ssize_t minc = int(max(0, c.min()))
     cdef Py_ssize_t maxc = int(ceil(c.max()))
 
-    # these are coordinates of the requested image
-    # clip the calculation if the offset exceeds the minimum coordinate
-    cdef Py_ssize_t minr_image = max(offset[0], minr)
-    cdef Py_ssize_t minc_image = max(offset[1], minc)
-    # max extent is determined by shape if supplied, otherwise determined by polygon vertices
-    cdef Py_ssize_t maxr_image = offset[0] + shape[0] - 1 if shape is not None else maxr
-    cdef Py_ssize_t maxc_image = offset[1] + shape[1] - 1 if shape is not None else maxr
-    # image max cant be less than min
-    maxr_image = max(maxr_image, minr_image)
-    maxc_image = max(maxc_image, minc_image)
+    # make sure output coordinates do not exceed image size
+    if shape is not None:
+        maxr = min(shape[0] - 1, maxr)
+        maxc = min(shape[1] - 1, maxc)
 
     # make contiguous arrays for r, c coordinates
     cdef cnp.float64_t[::1] rptr = np.ascontiguousarray(r, 'float64')
@@ -258,20 +236,13 @@ def _polygon(r, c, shape, offset):
     rr = list()
     cc = list()
 
-    for r_i in range(minr_image, maxr_image+1):
-        for c_i in range(minc_image, maxc_image+1):
+    for r_i in range(minr, maxr+1):
+        for c_i in range(minc, maxc+1):
             if point_in_polygon(cptr, rptr, c_i, r_i):
                 rr.append(r_i)
                 cc.append(c_i)
 
-    rr = np.array(rr, dtype=np.intp)
-    cc = np.array(cc, dtype=np.intp)
-
-    # returned coordinates should be relative to offset
-    rr = (rr - offset[0]).astype(np.intp)
-    cc = (cc - offset[1]).astype(np.intp)
-
-    return rr, cc
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
