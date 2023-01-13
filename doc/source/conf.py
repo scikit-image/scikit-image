@@ -89,7 +89,6 @@ sphinx_gallery_conf = {
     "backreferences_dir": "api",
     "reference_url": {"skimage": None},
     "image_scrapers": ("matplotlib", plotly_sg_scraper),
-    "thumbnail_size": (280, 196),
     "subsection_order": ExplicitOrder(
         [
             "../examples/data",
