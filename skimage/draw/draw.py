@@ -498,7 +498,12 @@ def polygon(r, c, shape=None, offset=None):
            [0, 1, 1, 1],
            [0, 1, 1, 1]], dtype=uint8)
     """
-    return _polygon(r, c, shape, offset)
+    r = np.atleast_1d(r)
+    c = np.atleast_1d(c)
+    if offset is not None:
+        r -= offset[0]
+        c -= offset[1]
+    return _polygon(r, c, shape)
 
 
 def circle_perimeter(r, c, radius, method='bresenham', shape=None):
