@@ -2,8 +2,10 @@ name: Build Wheels and Release
 on:
   push:
     tags:
-      - "v*"
-      - "buildwheels*"
+      - v*
+    branches:
+      - maintenance/**
+
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
