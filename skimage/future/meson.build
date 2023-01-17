@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  'graph.py',
   'manual_segmentation.py',
   'trainable_segmentation.py'
 ]
