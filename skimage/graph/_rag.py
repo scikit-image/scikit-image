@@ -4,8 +4,8 @@ from scipy import ndimage as ndi
 from scipy import sparse
 import math
 
-from ... import measure, segmentation, util, color
-from ..._shared.version_requirements import require
+from .. import measure, segmentation, util, color
+from .._shared.version_requirements import require
 
 
 def _edge_generator_from_csr(csr_matrix):
