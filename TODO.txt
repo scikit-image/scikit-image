@@ -3,7 +3,6 @@ Remember to list any API changes below in `doc/release/release_dev.rst`.
 Version 0.17
 ------------
 
-* Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
 Version 0.21
