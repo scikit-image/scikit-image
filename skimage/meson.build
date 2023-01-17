@@ -51,14 +51,15 @@ use_pythran = run_command(py3,
   check: true
 ).stdout().strip() == '1'
 
-incdir_pythran = run_command(py3,
-  [
-    '-c',
-    'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
-  ],
-  check: true
-).stdout().strip()
-inc_pythran = include_directories(incdir_pythran)
+if use_pythran:
+  incdir_pythran = run_command(py3,
+    [
+      '-c',
+      'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
+    ],
+    check: true
+  ).stdout().strip()
+  inc_pythran = include_directories(incdir_pythran)
 
 cpp_args_pythran = [
   '-DENABLE_PYTHON_MODULE',
