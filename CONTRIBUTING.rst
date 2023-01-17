@@ -51,8 +51,8 @@ Here's the long and short of it:
 
        ::
 
-         # Create a virtualenv named ``skimage-dev`` that lives in a dedicated directory outside
-         # the source tree. One suggestion below is to create an ~/envs folder:
+         # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+         # One convention is to use an ``envs`` directory under the home directory:
          mkdir -p ~/envs
          python -m venv ~/envs/skimage-dev
          # Activate it
