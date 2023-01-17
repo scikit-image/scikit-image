@@ -328,7 +328,7 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install major development and runtime dependencies of scikit-image
-  conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
+  conda install --file requirements/default.txt --file requirements/build.txt --file requirements/test.txt
   # Install scikit-image from source
   pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
