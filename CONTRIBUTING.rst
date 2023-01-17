@@ -52,10 +52,11 @@ Here's the long and short of it:
        ::
 
          # Create a virtualenv named ``skimage-dev`` that lives in the directory of
-         # the same name
-         python -m venv skimage-dev
+         # the same name. Note that ./dev.py breaks when the virtualenv is in the
+         # source tree, so we create it one level up.
+         python -m venv ../skimage-dev
          # Activate it
-         source skimage-dev/bin/activate
+         source ../skimage-dev/bin/activate
          # Install main development and runtime dependencies
          pip install -r requirements.txt
          # Install build dependencies of scikit-image
