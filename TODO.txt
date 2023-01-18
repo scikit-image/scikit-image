@@ -39,5 +39,3 @@ Other
 -----
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
-* When ``scipy`` is set to >= 1.8.0, remove conditional import of QhullError in
-  ``skimage/morphology/convex_hull.py``.
