@@ -1,6 +1,5 @@
 python_sources = [
   '__init__.py',
-  'graph.py',
   'manual_segmentation.py',
   'trainable_segmentation.py'
 ]
@@ -11,4 +10,5 @@ py3.install_sources(
   subdir: 'skimage/future'  # Folder relative to site-packages to install to
 )
 
+subdir('graph')
 subdir('tests')

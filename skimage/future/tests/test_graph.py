@@ -1,3 +1,5 @@
+# Remove this file in the release after v0.20
+
 import pytest
 
 

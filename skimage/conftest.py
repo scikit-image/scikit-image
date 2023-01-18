@@ -1,7 +1,7 @@
 from skimage._shared.testing import setup_test, teardown_test
 
 # List of files that pytest should ignore
-collect_ignore = ["io/_plugins",]
+collect_ignore = ["io/_plugins", "future/graph"]
 
 
 def pytest_runtest_setup(item):

@@ -19,7 +19,8 @@ Version 0.21
   ``skimage.registration.phase_cross_correlation``. The function should always
   return a tuple of (shift, error, phasediff).
   Update ``test_phase_cross_correlation_deprecation``, too.
-* Remove ``skimage/future/graph`` and ``skimage/future/tests/test_graph``.
+* Remove ``skimage/future/graph`` and ``skimage/future/tests/test_graph` as well
+  as the `"future/graph"` entry in ``skimage/conftest.py::collect_ignore``.
 
 Other (2022)
 ------------
