@@ -14,7 +14,7 @@ The example below also shows how to use a custom function to select the larger
 weight instead.
 
 """
-from skimage.future.graph import rag
+import skimage as ski
 import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np
@@ -59,7 +59,7 @@ def display(g, title):
     nx.draw_networkx_edge_labels(g, pos, font_size=20)
 
 
-g = rag.RAG()
+g = ski.graph.RAG()
 g.add_edge(1, 2, weight=10)
 g.add_edge(2, 3, weight=20)
 g.add_edge(3, 4, weight=30)

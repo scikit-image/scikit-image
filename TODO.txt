@@ -3,7 +3,6 @@ Remember to list any API changes below in `doc/release/release_dev.rst`.
 Version 0.17
 ------------
 
-* Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 
 Version 0.21
@@ -20,6 +19,11 @@ Version 0.21
   ``skimage.registration.phase_cross_correlation``. The function should always
   return a tuple of (shift, error, phasediff).
   Update ``test_phase_cross_correlation_deprecation``, too.
+* Remove ``skimage/future/graph`` and ``skimage/future/tests/test_graph`.
+  Remove the ``future/graph`` entry in ``skimage/conftest.py::collect_ignore``.
+  Remove the ``r'\.future.graph$'`` entry added to
+  ``docwriter.package_skip_patterns`` in
+  ``doc/tools/build_modref_templates.py``.
 
 Other (2022)
 ------------

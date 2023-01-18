@@ -1,6 +1,6 @@
 from numpy.testing import assert_array_equal
 import numpy as np
-from skimage.future import graph
+from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
 
@@ -13,7 +13,7 @@ def max_edge(g, src, dst, n):
 
 
 def test_rag_merge():
-    g = graph.rag.RAG()
+    g = graph.RAG()
 
     for i in range(5):
         g.add_node(i, {'labels': [i]})
