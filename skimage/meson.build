@@ -61,7 +61,7 @@ if use_pythran
   ).stdout().strip()
   inc_pythran = include_directories(incdir_pythran)
 else
-  incdir_pythran = ""
+  incdir_pythran = ''
 endif
 
 cpp_args_pythran = [
