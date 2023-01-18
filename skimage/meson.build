@@ -51,7 +51,7 @@ use_pythran = run_command(py3,
   check: true
 ).stdout().strip() == '1'
 
-if use_pythran:
+if use_pythran
   incdir_pythran = run_command(py3,
     [
       '-c',
