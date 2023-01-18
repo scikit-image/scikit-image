@@ -5,6 +5,7 @@ on:
       - v*
     branches:
       - maintenance/**
+      - "!main"
 
 env:
   CIBW_BUILD_VERBOSITY: 2
