@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.lib import NumpyVersion
 import scipy
 from scipy import ndimage as ndi
 
@@ -184,56 +183,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                     cval=cval, mode=ndi_mode)
 
-    if NumpyVersion(scipy.__version__) >= '1.6.0':
-        # The grid_mode kwarg was introduced in SciPy 1.6.0
-        zoom_factors = [1 / f for f in factors]
-        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
-                       cval=cval, grid_mode=True)
-
-    # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
-
-    # 2-dimensional interpolation
-    elif len(output_shape) == 2 or (len(output_shape) == 3 and
-                                    output_shape[2] == input_shape[2]):
-        rows = output_shape[0]
-        cols = output_shape[1]
-        input_rows = input_shape[0]
-        input_cols = input_shape[1]
-        if rows == 1 and cols == 1:
-            tform = AffineTransform(translation=(input_cols / 2.0 - 0.5,
-                                                 input_rows / 2.0 - 0.5))
-        else:
-            # 3 control points necessary to estimate exact AffineTransform
-            src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
-            # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
-
-            tform = AffineTransform()
-            tform.estimate(src_corners, dst_corners)
-
-        # Make sure the transform is exactly metric, to ensure fast warping.
-        tform.params[2] = (0, 0, 1)
-        tform.params[0, 1] = 0
-        tform.params[1, 0] = 0
-
-        # clip outside of warp to clip w.r.t input values, not filtered values.
-        out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=False,
-                   preserve_range=preserve_range)
-
-    else:  # n-dimensional interpolation
-
-        coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
-                        for i, d in enumerate(output_shape)]
-
-        coord_map = np.array(np.meshgrid(*coord_arrays,
-                                         sparse=False,
-                                         indexing='ij'))
-
-        out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=ndi_mode, cval=cval)
+    zoom_factors = [1 / f for f in factors]
+    out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
+                   cval=cval, grid_mode=True)
 
     _clip_warp_output(img_bounds, out, mode, cval, clip)
 

@@ -28,13 +28,6 @@ Other (2022)
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
 
-Other (2023)
-------------
-* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
-  ``skimage.transform.resize``.
-* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
-  ``skimage._shared.utils._fix_ndimage_mode``
-
 Other
 -----
 * Check whether imread wheels are available, then re-enable testing imread
