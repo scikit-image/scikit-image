@@ -166,11 +166,18 @@ def test_hessian_matrix_3d():
     Hs = hessian_matrix(cube, sigma=0.1, order='rc',
                         use_gaussian_derivatives=False)
     assert len(Hs) == 6, (f"incorrect number of Hessian images ({len(Hs)}) for 3D")
+    # This test didn't catch the fix in gh-6624 (passes with and without) ...
     assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
                                                   [0,  1,  0, -1,  0],
                                                   [0,  0,  0,  0,  0],
                                                   [0, -1,  0,  1,  0],
                                                   [0,  0,  0,  0,  0]]))
+    # ... so we add another test that fails for the not-fixed hessian_matrix
+    assert_almost_equal(Hs[0][:, 2, :], np.array([[0,  0,  2,  0,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0,  0, -2,  0,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0,  0,  2,  0,  0]]))
 
 
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
