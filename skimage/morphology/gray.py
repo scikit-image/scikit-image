@@ -450,23 +450,6 @@ def closing(image, footprint=None, out=None):
     return out
 
 
-def _white_tophat_seqence(image, footprints, out):
-    """Return white top hat for a sequence of footprints.
-
-    Like SciPy's implementation, but with ``ndi.grey_erosion`` and
-    ``ndi.grey_dilation`` wrapped with ``_iterate_gray_func``.
-    """
-    tmp = _iterate_gray_func(ndi.grey_erosion, image, footprints, out)
-    tmp = _iterate_gray_func(ndi.grey_dilation, tmp.copy(), footprints, out)
-    if tmp is None:
-        tmp = out
-    if image.dtype == np.bool_ and tmp.dtype == np.bool_:
-        np.bitwise_xor(image, tmp, out=tmp)
-    else:
-        np.subtract(image, tmp, out=tmp)
-    return tmp
-
-
 @default_footprint
 def white_tophat(image, footprint=None, out=None):
     """Return white top hat of an image.
@@ -532,27 +515,20 @@ def white_tophat(image, footprint=None, out=None):
 
     """
     if out is image:
+        # We need a temporary image
         opened = opening(image, footprint)
         if np.issubdtype(opened.dtype, bool):
             np.logical_xor(out, opened, out=out)
         else:
             out -= opened
         return out
-    elif out is None:
-        out = np.empty_like(image)
-    # promote bool to a type that allows arithmetic operations
-    if isinstance(image, np.ndarray) and image.dtype == bool:
-        image_ = image.view(dtype=np.uint8)
+
+    # Else write intermediate result into output image
+    out = opening(image, footprint, out=out)
+    if np.issubdtype(out.dtype, bool):
+        np.logical_xor(image, out, out=out)
     else:
-        image_ = image
-    if isinstance(out, np.ndarray) and out.dtype == bool:
-        out_ = out.view(dtype=np.uint8)
-    else:
-        out_ = out
-    if _footprint_is_sequence(footprint):
-        return _white_tophat_seqence(image_, footprint, out_)
-    footprint = np.array(footprint)
-    out_ = ndi.white_tophat(image_, footprint=footprint, output=out_)
+        np.subtract(image, out, out=out)
     return out
 
 
@@ -622,12 +598,17 @@ def black_tophat(image, footprint=None, out=None):
 
     """
     if out is image:
-        original = image.copy()
-    else:
-        original = image
+        # We need a temporary image
+        closed = closing(image, footprint)
+        if np.issubdtype(closed.dtype, bool):
+            np.logical_xor(closed, out, out=out)
+        else:
+            np.subtract(closed, out, out=out)
+        return out
+
     out = closing(image, footprint, out=out)
     if np.issubdtype(out.dtype, np.bool_):
-        np.logical_xor(out, original, out=out)
+        np.logical_xor(out, image, out=out)
     else:
-        out -= original
+        out -= image
     return out
