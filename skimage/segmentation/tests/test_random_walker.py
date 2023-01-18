@@ -1,6 +1,5 @@
 import numpy as np
 import scipy
-from packaging import version
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -13,11 +12,7 @@ from skimage.transform import resize
 SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
-
-if version.parse(scipy.__version__) < version.parse('1.3'):
-    NUMPY_MATRIX_WARNING = 'matrix subclass'
-else:
-    NUMPY_MATRIX_WARNING = None
+NUMPY_MATRIX_WARNING = None
 
 
 def make_2d_syntheticdata(lx, ly=None):
