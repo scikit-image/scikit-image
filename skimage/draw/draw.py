@@ -435,14 +435,14 @@ def line_aa(r0, c0, r1, c1):
 
 
 def polygon(r, c, shape=None):
-    """Generate coordinates of pixels within polygon.
+    """Generate coordinates of pixels inside a polygon.
 
     Parameters
     ----------
-    r : (N,) ndarray
-        Row coordinates of vertices of polygon.
-    c : (N,) ndarray
-        Column coordinates of vertices of polygon.
+    r : (N,) array_like
+        Row coordinates of the polygon's vertices.
+    c : (N,) array_like
+        Column coordinates of the polygon's vertices.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
@@ -457,13 +457,23 @@ def polygon(r, c, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
+    See Also
+    --------
+    polygon2mask:
+        Create a binary mask from a polygon.
+
+    Notes
+    -----
+    This function ensures that `rr` and `cc` don't contain negative values.
+    Pixels of the polygon that whose coordinates are smaller 0, are not drawn.
+
     Examples
     --------
-    >>> from skimage.draw import polygon
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> import skimage as ski
     >>> r = np.array([1, 2, 8])
     >>> c = np.array([1, 7, 4])
-    >>> rr, cc = polygon(r, c)
+    >>> rr, cc = ski.draw.polygon(r, c)
+    >>> img = np.zeros((10, 10), dtype=int)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -475,8 +485,27 @@ def polygon(r, c, shape=None):
            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
+    If the image `shape` is defined and vertices / points of the `polygon` are
+    outside this coordinate space, only a part (or none at all) of the polygon's
+    pixels is returned.
+
+    >>> offset = (2, -4)
+    >>> rr, cc = ski.draw.polygon(r - offset[0], c - offset[1], shape=img.shape)
+    >>> img = np.zeros((10, 10), dtype=int)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     """
     return _polygon(r, c, shape)
 

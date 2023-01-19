@@ -193,18 +193,20 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
 
 
 def _polygon(r, c, shape):
-    """Generate coordinates of pixels within polygon.
+    """Generate coordinates of pixels inside a polygon.
 
     Parameters
     ----------
-    r : (N,) ndarray
-        Row coordinates of vertices of polygon.
-    c : (N,) ndarray
-        Column coordinates of vertices of polygon.
-    shape : tuple
+    r : (N,) array_like
+        Row coordinates of the polygon's vertices.
+    c : (N,) array_like
+        Column coordinates of the polygon's vertices.
+    shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
-        size. If None, the full extent of the polygon is used.
+        size. If None, the full extent of the polygon is used.  Must be at
+        least length 2. Only the first two values are used to determine the
+        extent of the input image.
 
     Returns
     -------
@@ -212,6 +214,11 @@ def _polygon(r, c, shape):
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
+    Notes
+    -----
+    This function ensures that `rr` and `cc` don't contain negative values.
+    Pixels of the polygon that whose coordinates are smaller 0, are not drawn.
     """
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
