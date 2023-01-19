@@ -1058,7 +1058,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Notes
     -----
-    By default, Observer="2", Illuminant="D65". CIE XYZ tristimulus values x_ref
+    By default, observer="2", illuminant="D65". CIE XYZ tristimulus values x_ref
     = 95.047, y_ref = 100., z_ref = 108.883. See function `get_xyz_coords` for
     a list of supported illuminants.
 
