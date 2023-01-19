@@ -1027,7 +1027,8 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     ----------
     lab : (..., 3, ...) array_like
         The input image in CIE-LAB color space.
-        Unless `channel_axis` is set, the final dimension denotes the LAB channels.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
         The range of L* values is 0 to 100;
         the range of a* values and b* values is -128 to 127.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1149,7 +1150,8 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     ----------
     lab : (..., 3, ...) array_like
         The input image in CIE-LAB color space.
-        By default, the final dimension denotes channels.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
         The range of L* values is 0 to 100;
         the range of a* values and b* values is -128 to 127.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1176,7 +1178,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     Notes
     -----
     This function uses lab2xyz and xyz2rgb.
-    By default, observer="2", illuminant="D65". CIE XYZ tristimulus values
+    By default, ``observer="2"``, ``illuminant="D65"``. CIE XYZ tristimulus values
     x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
     a list of supported illuminants.
 
