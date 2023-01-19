@@ -27,8 +27,6 @@ Version 0.21
 
 Other (2022)
 ------------
-* Remove pillow version related warning for CVE when pillow > 8.1.2 in
-  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
 
