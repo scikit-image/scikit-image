@@ -1029,8 +1029,8 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
         The input image in CIE-LAB color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
-        The range of L* values is 0 to 100;
-        the range of a* values and b* values is -128 to 127.
+        The L* values range from 0 to 100;
+        the a* and b* values range from -128 to 127.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10", "R"}, optional
@@ -1152,8 +1152,8 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
         The input image in CIE-LAB color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
-        The range of L* values is 0 to 100;
-        the range of a* values and b* values is -128 to 127.
+        The L* values range from 0 to 100;
+        the a* and b* values range from -128 to 127.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10", "R"}, optional
