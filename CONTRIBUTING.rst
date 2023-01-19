@@ -51,11 +51,12 @@ Here's the long and short of it:
 
        ::
 
-         # Create a virtualenv named ``skimage-dev`` that lives in the directory of
-         # the same name
-         python -m venv skimage-dev
+         # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+         # One common convention is to place it inside an ``envs`` directory under your home directory:
+         mkdir ~/envs
+         python -m venv ~/envs/skimage-dev
          # Activate it
-         source skimage-dev/bin/activate
+         source ~/envs/skimage-dev/bin/activate
          # Install main development and runtime dependencies
          pip install -r requirements.txt
          # Install build dependencies of scikit-image
