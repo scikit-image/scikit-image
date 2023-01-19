@@ -2,5 +2,6 @@
 
 raise ModuleNotFoundError(
     "The `skimage.future.graph` submodule was moved to `skimage.graph` in "
-    "v0.20. Please update your import paths accordingly."
+    "v0.20. `ncut` was removed in favor of the identical function "
+    "`cut_normalized`. Please update your import paths accordingly."
 )
