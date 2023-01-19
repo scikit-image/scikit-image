@@ -70,38 +70,6 @@ def _shift_footprint(footprint, shift_x, shift_y):
     return footprint
 
 
-def _invert_footprint(footprint):
-    """Change the order of the values in `footprint`.
-
-    This is a patch for the *weird* footprint inversion in
-    `ndi.grey_morphology` [1]_.
-
-    Parameters
-    ----------
-    footprint : array
-        The input footprint.
-
-    Returns
-    -------
-    inverted : array, same shape and type as `footprint`
-        The footprint, in opposite order.
-
-    Examples
-    --------
-    >>> footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
-    >>> _invert_footprint(footprint)
-    array([[1, 1, 0],
-           [1, 1, 0],
-           [0, 0, 0]], dtype=uint8)
-
-    References
-    ----------
-    .. [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
-    """
-    inverted = footprint[(slice(None, None, -1),) * footprint.ndim]
-    return inverted
-
-
 def pad_for_eccentric_footprints(func):
     """Pad input images for certain morphological operations.
 
@@ -156,7 +124,7 @@ def pad_for_eccentric_footprints(func):
 
 
 @default_footprint
-def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
+def erosion(image, footprint=None, out=None, shift_x=True, shift_y=True):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -234,7 +202,7 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
 
 
 @default_footprint
-def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
+def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -303,21 +271,12 @@ def dilation(image, footprint=None, out=None, shift_x=False, shift_y=False):
 
     if _footprint_is_sequence(footprint):
         # shift and invert (see comment below) each footprint
-        footprints = tuple(
-            (_invert_footprint(_shift_footprint(fp, shift_x, shift_y)), n)
-            for fp, n in footprint
-        )
+        footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
+                           for fp, n in footprint)
         return _iterate_gray_func(ndi.grey_dilation, image, footprints, out)
 
     footprint = np.array(footprint)
     footprint = _shift_footprint(footprint, shift_x, shift_y)
-    # Inside ndi.grey_dilation, the footprint is inverted,
-    # e.g. `footprint = footprint[::-1, ::-1]` for 2D [1]_, for reasons unknown
-    # to this author (@jni). To "patch" this behaviour, we invert our own
-    # footprint before passing it to `ndi.grey_dilation`.
-    # [1] https://github.com/scipy/scipy/blob/ec20ababa400e39ac3ffc9148c01ef86d5349332/scipy/ndimage/morphology.py#L1285  # noqa
-    footprint = _invert_footprint(footprint)
-
     ndi.grey_dilation(image, footprint=footprint, output=out)
     return out
 
@@ -381,8 +340,7 @@ def opening(image, footprint=None, out=None):
 
     """
     eroded = erosion(image, footprint)
-    # note: shift_x, shift_y do nothing if footprint side length is odd
-    out = dilation(eroded, footprint, out=out, shift_x=True, shift_y=True)
+    out = dilation(eroded, footprint, out=out)
     return out
 
 
@@ -445,8 +403,7 @@ def closing(image, footprint=None, out=None):
 
     """
     dilated = dilation(image, footprint)
-    # note: shift_x, shift_y do nothing if footprint side length is odd
-    out = erosion(dilated, footprint, out=out, shift_x=True, shift_y=True)
+    out = erosion(dilated, footprint, out=out)
     return out
 
 
