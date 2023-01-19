@@ -29,8 +29,3 @@ Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
-
-Other
------
-* Check whether imread wheels are available, then re-enable testing imread
-  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
