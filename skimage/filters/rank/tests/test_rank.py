@@ -59,6 +59,19 @@ ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
 ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
+@pytest.mark.parametrize(
+    'func', ['autolevel', 'equalize', 'gradient', 'maximum',
+            'mean', 'geometric_mean', 'geometric_mean', 'subtract_mean',
+            'median', 'minimum', 'modal', 'enhance_contrast', 'pop',
+            'sum', 'threshold', 'noise_filter', 'entropy', 'otsu', 'majority'
+    ])
+def test_1d_input_raises_error(func):
+    footprint = disk(3)
+    with pytest.raises(ValueError,
+            match='input image should be a 2-dimensional or 3-dimensional array;'):
+        getattr(rank, func)(np.arange(10), footprint)
+
+
 class TestRank:
     def setup_method(self):
         np.random.seed(0)
