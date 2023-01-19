@@ -8,8 +8,6 @@
   Documentation requirements
 - [optional.txt](optional.txt)
   Optional requirements. All of these are installable without a compiler through pypi.
-- [extras.txt](extras.txt)
-  Optional requirements that require a compiler to install.
 - [test.txt](test.txt)
   Requirements for running test suite
 - [build.txt](build.txt)
@@ -38,5 +36,4 @@ $ pip install -U -r requirements/test.txt
 - pillow 7.1.0 fails on png files, See https://github.com/scikit-image/scikit-image/issues/4548
 - pillow 7.1.1 fails due to https://github.com/python-pillow/Pillow/issues/4518
 - pillow 8.3.0 broke array coercion when dtype was specified https://github.com/python-pillow/Pillow/pull/5572
-- imread 0.7.2 fails due to build failure https://github.com/luispedro/imread/issues/36
 - sphinx-gallery 0.8.0 is banned due to bug introduced on binder: https://github.com/scikit-image/scikit-image/pull/4959#issuecomment-687653537

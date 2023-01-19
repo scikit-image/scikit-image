@@ -504,18 +504,6 @@ functionality is only available with the following installed:
   :literal:
 
 
-**Extra Requirements**
-
-These requirements have been included as a convenience, but are not widely
-installable through PyPI on our supported platforms. As such, we keep them in
-a separate list for more advanced members of our community to install.
-
-* `imread <https://pythonhosted.org/imread/>`__
-    Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
-
-.. include:: ../../requirements/extras.txt
-  :literal:
-
 Help with contributor installation
 ------------------------------------------------------------------------------
 
