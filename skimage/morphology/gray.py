@@ -14,21 +14,22 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'black_tophat']
 
 
-def _iterate_gray_func(gray_func, image, footprints, out):
+def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
     """Helper to call `binary_func` for each footprint in a sequence.
 
-    binary_func is a binary morphology function that accepts "structure",
-    "output" and "iterations" keyword arguments
-    (e.g. `scipy.ndimage.binary_erosion`).
+    binary_func is a binary morphology function that accepts "footprint",
+    "output" and "mode" keyword arguments
+    (e.g. `scipy.ndimage.grey_erosion`).
     """
     fp, num_iter = footprints[0]
     gray_func(image, footprint=fp, output=out)
     for _ in range(1, num_iter):
-        gray_func(out.copy(), footprint=fp, output=out)
+        gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     for fp, num_iter in footprints[1:]:
         # Note: out.copy() because the computation cannot be in-place!
         for _ in range(num_iter):
-            gray_func(out.copy(), footprint=fp, output=out)
+            gray_func(out.copy(), footprint=fp, output=out, mode=mode,
+                      cval=cval)
     return out
 
 
@@ -72,7 +73,8 @@ def _shift_footprint(footprint, shift_x, shift_y):
 
 
 @default_footprint
-def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None):
+def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
+            mode=None, cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -95,6 +97,14 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None):
         Shift footprint about center point. This only affects 2D footprints
         with even-numbered sides. These two parameters are deprecated, see the
         note below.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        maximum for the image's dtype, which causes them to not influence the
+        result. Default is `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -143,19 +153,31 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None):
     if out is None:
         out = np.empty_like(image)
 
+    if mode is None:
+        mode = "constant"
+        if np.issubdtype(out.dtype, bool):
+            cval = True
+        elif np.issubdtype(out.dtype, np.integer):
+            cval = np.iinfo(image.dtype).max
+        else:
+            cval = np.inf
+
     if _footprint_is_sequence(footprint):
         footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
                            for fp, n in footprint)
-        return _iterate_gray_func(ndi.grey_erosion, image, footprints, out)
+        return _iterate_gray_func(ndi.grey_erosion, image, footprints, out,
+                                  mode, cval)
 
     footprint = np.array(footprint)
     footprint = _shift_footprint(footprint, shift_x, shift_y)
-    ndi.grey_erosion(image, footprint=footprint, output=out)
+    ndi.grey_erosion(image, footprint=footprint, output=out, mode=mode,
+                     cval=cval)
     return out
 
 
 @default_footprint
-def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None):
+def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
+             mode=None, cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -179,6 +201,14 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None):
         Shift footprint about center point. This only affects 2D footprints
         with even-numbered sides. These two parameters are deprecated, see the
         note below.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        minimum for the image's dtype, which causes them to not influence the
+        result. Default is `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -227,19 +257,30 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None):
     if out is None:
         out = np.empty_like(image)
 
+    if mode is None:
+        mode = "constant"
+        if np.issubdtype(out.dtype, bool):
+            cval = False
+        elif np.issubdtype(out.dtype, np.integer):
+            cval = np.iinfo(image.dtype).min
+        else:
+            cval = -np.inf
+
     if _footprint_is_sequence(footprint):
         footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
                            for fp, n in footprint)
-        return _iterate_gray_func(ndi.grey_dilation, image, footprints, out)
+        return _iterate_gray_func(ndi.grey_dilation, image, footprints, out,
+                                  mode, cval)
 
     footprint = np.array(footprint)
     footprint = _shift_footprint(footprint, shift_x, shift_y)
-    ndi.grey_dilation(image, footprint=footprint, output=out)
+    ndi.grey_dilation(image, footprint=footprint, output=out, mode=mode,
+                      cval=cval)
     return out
 
 
 @default_footprint
-def opening(image, footprint=None, out=None):
+def opening(image, footprint=None, out=None, mode=None, cval=0.0):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
@@ -259,6 +300,15 @@ def opening(image, footprint=None, out=None):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        maximum for the image's dtype in the erosion, and minimum in the
+        dilation, which causes them to not influence the result. Default is
+        `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -295,13 +345,13 @@ def opening(image, footprint=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    eroded = erosion(image, footprint)
-    out = dilation(eroded, footprint, out=out)
+    eroded = erosion(image, footprint, mode=mode, cval=cval)
+    out = dilation(eroded, footprint, out=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def closing(image, footprint=None, out=None):
+def closing(image, footprint=None, out=None, mode=None, cval=0.0):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
@@ -321,6 +371,15 @@ def closing(image, footprint=None, out=None):
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        maximum for the image's dtype in the erosion, and minimum in the
+        dilation, which causes them to not influence the result. Default is
+        `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -357,13 +416,13 @@ def closing(image, footprint=None, out=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    dilated = dilation(image, footprint)
-    out = erosion(dilated, footprint, out=out)
+    dilated = dilation(image, footprint, mode=mode, cval=cval)
+    out = erosion(dilated, footprint, out=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def white_tophat(image, footprint=None, out=None):
+def white_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -382,6 +441,15 @@ def white_tophat(image, footprint=None, out=None):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        maximum for the image's dtype in the erosion, and minimum in the
+        dilation, which causes them to not influence the result. Default is
+        `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -428,7 +496,7 @@ def white_tophat(image, footprint=None, out=None):
     """
     if out is image:
         # We need a temporary image
-        opened = opening(image, footprint)
+        opened = opening(image, footprint, mode=mode, cval=cval)
         if np.issubdtype(opened.dtype, bool):
             np.logical_xor(out, opened, out=out)
         else:
@@ -436,7 +504,7 @@ def white_tophat(image, footprint=None, out=None):
         return out
 
     # Else write intermediate result into output image
-    out = opening(image, footprint, out=out)
+    out = opening(image, footprint, out=out, mode=mode, cval=cval)
     if np.issubdtype(out.dtype, bool):
         np.logical_xor(image, out, out=out)
     else:
@@ -445,7 +513,7 @@ def white_tophat(image, footprint=None, out=None):
 
 
 @default_footprint
-def black_tophat(image, footprint=None, out=None):
+def black_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -465,6 +533,15 @@ def black_tophat(image, footprint=None, out=None):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are handled.
+        If `None`, pixels outside the image domain are assumed to be the
+        maximum for the image's dtype in the erosion, and minimum in the
+        dilation, which causes them to not influence the result. Default is
+        `None`.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
 
     Returns
     -------
@@ -511,14 +588,14 @@ def black_tophat(image, footprint=None, out=None):
     """
     if out is image:
         # We need a temporary image
-        closed = closing(image, footprint)
+        closed = closing(image, footprint, mode=mode, cval=cval)
         if np.issubdtype(closed.dtype, bool):
             np.logical_xor(closed, out, out=out)
         else:
             np.subtract(closed, out, out=out)
         return out
 
-    out = closing(image, footprint, out=out)
+    out = closing(image, footprint, out=out, mode=mode, cval=cval)
     if np.issubdtype(out.dtype, np.bool_):
         np.logical_xor(out, image, out=out)
     else:
