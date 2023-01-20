@@ -395,14 +395,15 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
     """
 
     ndim = image.ndim
-    p = np.zeros((image.ndim, ) + image.shape, dtype=image.dtype)
-    g = np.zeros_like(p)
-    d = np.zeros_like(image)
+    xp  = utils.get_namespace(image)
+    p = xp.zeros((image.ndim, ) + image.shape, dtype=image.dtype)
+    g = xp.zeros_like(p)
+    d = xp.zeros_like(image)
     i = 0
     while i < max_num_iter:
         if i > 0:
             # d will be the (negative) divergence of p
-            d = -p.sum(0)
+            d = xp.sum(-p, axis=0)
             slices_d = [slice(None), ] * ndim
             slices_p = [slice(None), ] * (ndim + 1)
             for ax in range(ndim):
@@ -415,7 +416,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
             out = image + d
         else:
             out = image
-        E = (d ** 2).sum()
+        E = xp.sum(d * d)
 
         # g stores the gradients of out along each axis
         # e.g. g[0] is the first order finite difference along axis 0
@@ -423,11 +424,17 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
         for ax in range(ndim):
             slices_g[ax+1] = slice(0, -1)
             slices_g[0] = ax
-            g[tuple(slices_g)] = np.diff(out, axis=ax)
+
+            # first order difference along the axis (np.diff not in array API)
+            _at = functools.partial(utils.slice_at_axis, axis=ax)
+            g[tuple(slices_g)] = (
+                out[_at(slice(1, None))] - out[_at(slice(0, -1))]
+            )
+
             slices_g[ax+1] = slice(None)
 
-        norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
-        E += weight * norm.sum()
+        norm = xp.expand_dims(xp.sqrt(xp.sum(g * g, axis=0)), axis=0)
+        E += weight * xp.sum(norm)
         tau = 1. / (2.*ndim)
         norm *= tau / weight
         norm += 1.
@@ -438,7 +445,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, max_num_iter=200):
             E_init = E
             E_previous = E
         else:
-            if np.abs(E_previous - E) < eps * E_init:
+            if abs(E_previous - E) < eps * E_init:
                 break
             else:
                 E_previous = E
@@ -543,18 +550,35 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, max_num_iter=200,
 
     """
 
+    xp = utils.get_namespace(image)
     im_type = image.dtype
     if not im_type.kind == 'f':
-        image = img_as_float(image)
+        if xp is not np:
+            raise NotImplementedError(
+                "img_as_float doesn't currently have Array API support.")
+            # for numpy.array_api could do
+            # image = xp.asarray(img_as_float(image._array))
+        else:
+            image = img_as_float(image)
 
     # enforce float16->float32 and float128->float64
     float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
+    if hasattr(xp, 'astype'):
+        # array API has an astype function
+        image = xp.astype(image, float_dtype, copy=False)
+    elif hasattr(image, 'astype'):
+        # numpy has this astype as a method on the array
+        image = image.astype(float_dtype, copy=False)
+
+    # Note: instead of the if/else above, also tried
+    #     image = xp.asarray(image, dtype=xp.float32, copy=False)
+    #     but array_api raises:
+    #         NotImplementedError: copy=False is not yet implemented
 
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
-        out = np.zeros_like(image)
+        out = xp.zeros_like(image)
         for c in range(image.shape[channel_axis]):
             out[_at(c)] = _denoise_tv_chambolle_nd(image[_at(c)], weight, eps,
                                                    max_num_iter)
