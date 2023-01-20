@@ -46,6 +46,28 @@ def test_rag_merge():
     assert list(g.edges()) == []
 
 
+def test_rag_merge_gh5360():
+    # Add another test case covering the gallery example plot_rag.py.
+    # See bug report at gh-5360.
+    g = graph.RAG()
+    g.add_edge(1, 2, weight=10)
+    g.add_edge(2, 3, weight=20)
+    g.add_edge(3, 4, weight=30)
+    g.add_edge(4, 1, weight=40)
+    g.add_edge(1, 3, weight=50)
+    for n in g.nodes():
+        g.nodes[n]['labels'] = [n]
+    gc = g.copy()
+
+    g.merge_nodes(1, 3)
+    assert g.adj[3][2]['weight'] == 10
+    assert g.adj[3][4]['weight'] == 30
+
+    gc.merge_nodes(1, 3, weight_func=max_edge, in_place=False)
+    assert gc.adj[5][2]['weight'] == 20
+    assert gc.adj[5][4]['weight'] == 40
+
+
 def test_threshold_cut():
 
     img = np.zeros((100, 100, 3), dtype='uint8')
