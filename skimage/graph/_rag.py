@@ -207,7 +207,7 @@ class RAG(nx.Graph):
             self.add_node(new)
 
         for neighbor in neighbors:
-            data = weight_func(self, src, new, neighbor, *extra_arguments,
+            data = weight_func(self, src, dst, neighbor, *extra_arguments,
                                **extra_keywords)
             self.add_edge(neighbor, new, attr_dict=data)
 
