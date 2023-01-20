@@ -1186,6 +1186,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+    .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
     """
     return xyz2rgb(lab2xyz(lab, illuminant, observer))
 
