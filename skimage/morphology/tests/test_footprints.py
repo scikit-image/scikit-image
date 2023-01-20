@@ -12,7 +12,7 @@ from skimage._shared.testing import fetch
 from skimage.morphology import footprints
 
 
-class TestSElem():
+class TestFootprints:
 
     def test_square_footprint(self):
         """Test square footprints"""

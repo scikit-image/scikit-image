@@ -49,8 +49,7 @@ def test_two_connectivity():
 
 def test_in_place():
     image = test_image.copy()
-    with expected_warnings(["in_place argument is deprecated"]):
-        observed = remove_small_objects(image, min_size=6, in_place=True)
+    observed = remove_small_objects(image, min_size=6, out=image)
     assert_equal(observed is image, True,
                  "remove_small_objects in_place argument failed.")
 
@@ -158,8 +157,7 @@ def test_two_connectivity_holes():
 
 def test_in_place_holes():
     image = test_holes_image.copy()
-    with expected_warnings(["in_place argument is deprecated"]):
-        observed = remove_small_holes(image, area_threshold=3, in_place=True)
+    observed = remove_small_holes(image, area_threshold=3, out=image)
     assert_equal(observed is image, True,
                  "remove_small_holes in_place argument failed.")
 

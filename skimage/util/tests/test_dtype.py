@@ -109,7 +109,7 @@ def test_copy():
 
 def test_bool():
     img_ = np.zeros((10, 10), bool)
-    img8 = np.zeros((10, 10), np.bool8)
+    img8 = np.zeros((10, 10), np.bool_)
     img_[1, 1] = True
     img8[1, 1] = True
     for (func, dt) in [(img_as_int, np.int16),

@@ -1,13 +1,7 @@
-from .graph_cut import cut_threshold, cut_normalized
-from .rag import rag_mean_color, RAG, show_rag, rag_boundary
-from .graph_merge import merge_hierarchical
-ncut = cut_normalized
+# Remove this package in the release after v0.20
 
-__all__ = ['rag_mean_color',
-           'cut_threshold',
-           'cut_normalized',
-           'ncut',
-           'show_rag',
-           'merge_hierarchical',
-           'rag_boundary',
-           'RAG']
+raise ModuleNotFoundError(
+    "The `skimage.future.graph` submodule was moved to `skimage.graph` in "
+    "v0.20. `ncut` was removed in favor of the identical function "
+    "`cut_normalized`. Please update your import paths accordingly."
+)

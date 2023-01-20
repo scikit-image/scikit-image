@@ -109,11 +109,8 @@ def _get_grid_centroids(image, n_centroids):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=6)
-@utils.deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                       deprecated_version="0.19")
 def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
-         spacing=None, multichannel=True, convert2lab=None,
+         spacing=None, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False, start_label=1, mask=None, *,
          channel_axis=-1):
@@ -151,10 +148,6 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         each spatial dimension).
         This parameter controls the weights of the distances along the
         spatial dimensions during k-means clustering.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. The input image *must* be RGB. Highly recommended.

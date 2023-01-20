@@ -85,12 +85,12 @@ jobs:
           set -ex
           source tools/github/before_install.sh
           set -ex
-          python setup.py sdist
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-              pip uninstall cython -y;
-              pip install dist/scikit-image-*.tar.gz;
+              pip uninstall cython -y
+              python setup.py sdist
+              pip install dist/scikit-image-*.tar.gz
           else
-              pip install -vv -e .;
+              pip install -vv --no-build-isolation .;
           fi
 
       - name: Run tests
@@ -115,11 +115,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              if [[ "${EXTRA_DEPS}" == "1" ]]; then
-              # Extra deps need compilation, and it may not always be possible to
-              # compile them easily on all platforms
-                  pip install -r ./requirements/extras.txt
-              fi
           fi
           source tools/github/script.sh
 
@@ -181,9 +176,9 @@ jobs:
         run: |
           set -ex
           source tools/github/before_install.sh
-          pip install -U pip setuptools wheel
+          pip install -U pip setuptools<=65.5 wheel
           python setup.py sdist
-          pip install -vv --no-build-isolation -e .;
+          pip install -vv --no-build-isolation .;
 
       - name: Run tests
         env:
@@ -198,7 +193,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              pip install -r ./requirements/extras.txt
           fi
           source tools/github/script.sh
 
