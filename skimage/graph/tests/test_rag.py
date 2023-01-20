@@ -1,3 +1,4 @@
+import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
 from skimage import graph
@@ -46,7 +47,10 @@ def test_rag_merge():
     assert list(g.edges()) == []
 
 
-def test_rag_merge_gh5360():
+@pytest.mark.parametrize(
+    "in_place", [True, False],
+)
+def test_rag_merge_gh5360(in_place):
     # Add another test case covering the gallery example plot_rag.py.
     # See bug report at gh-5360.
     g = graph.RAG()
@@ -59,13 +63,16 @@ def test_rag_merge_gh5360():
         g.nodes[n]['labels'] = [n]
     gc = g.copy()
 
-    g.merge_nodes(1, 3)
-    assert g.adj[3][2]['weight'] == 10
-    assert g.adj[3][4]['weight'] == 30
+    # New node ID is chosen if in_place=False
+    merged_id = 3 if in_place is True else 5
 
-    gc.merge_nodes(1, 3, weight_func=max_edge, in_place=False)
-    assert gc.adj[5][2]['weight'] == 20
-    assert gc.adj[5][4]['weight'] == 40
+    g.merge_nodes(1, 3, in_place=in_place)
+    assert g.adj[merged_id][2]['weight'] == 10
+    assert g.adj[merged_id][4]['weight'] == 30
+
+    gc.merge_nodes(1, 3, weight_func=max_edge, in_place=in_place)
+    assert gc.adj[merged_id][2]['weight'] == 20
+    assert gc.adj[merged_id][4]['weight'] == 40
 
 
 def test_threshold_cut():
