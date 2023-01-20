@@ -489,7 +489,9 @@ def polygon(r, c, shape=None):
 
     If the image `shape` is defined and vertices / points of the `polygon` are
     outside this coordinate space, only a part (or none at all) of the polygon's
-    pixels is returned.
+    pixels is returned. Shifting the polygon's vertices by an offset can be used
+    to move the polygon around and potentially draw an arbitrary sub-region of
+    the polygon.
 
     >>> offset = (2, -4)
     >>> rr, cc = ski.draw.polygon(r - offset[0], c - offset[1], shape=img.shape)
