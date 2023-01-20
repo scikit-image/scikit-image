@@ -175,7 +175,6 @@ def test_2d_cropped_camera_image():
     a_black = crop(camera(), ((200, 212), (100, 312)))
     a_white = invert(a_black)
 
-    zeros = np.zeros((100, 100))
     ones = np.ones((100, 100))
 
     assert_allclose(meijering(a_black, black_ridges=True),
@@ -200,23 +199,35 @@ def test_ridge_output_dtype(func, dtype):
     assert func(img).dtype == _supported_float_type(img.dtype)
 
 
-def test_3d_cropped_camera_image():
+@pytest.mark.parametrize('uniform_stack', [False, True])
+def test_3d_cropped_camera_image(uniform_stack):
 
     a_black = crop(camera(), ((200, 212), (100, 312)))
-    a_black = np.stack([a_black] * 5, axis=-1)
+    if uniform_stack:
+        # Hessian along last axis will be 0 due to identical image content
+        a_black = np.stack([a_black] * 5, axis=-1)
+        # in this uniform_stack case, numerical error seems to be higher
+        tol = 1e-5
+    else:
+        # stack using shift to give a non-zero Hessian on the last axis
+        a_black = np.stack(
+            [np.roll(a_black, shift=n, axis=0) for n in range(5)],
+            axis=-1
+        )
+        tol = 1e-10
     a_white = invert(a_black)
 
-    zeros = np.zeros(a_black.shape)
     ones = np.ones(a_black.shape)
 
     assert_allclose(meijering(a_black, black_ridges=True),
-                    meijering(a_white, black_ridges=False))
+                    meijering(a_white, black_ridges=False), atol=tol, rtol=tol)
 
     assert_allclose(sato(a_black, black_ridges=True, mode='reflect'),
-                    sato(a_white, black_ridges=False, mode='reflect'))
+                    sato(a_white, black_ridges=False, mode='reflect'),
+                    atol=tol, rtol=tol)
 
     assert_allclose(frangi(a_black, black_ridges=True),
-                    frangi(a_white, black_ridges=False))
+                    frangi(a_white, black_ridges=False), atol=tol, rtol=tol)
 
     assert_allclose(hessian(a_black, black_ridges=True, mode='reflect'),
                     ones, atol=1 - 1e-7)

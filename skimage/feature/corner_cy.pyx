@@ -5,12 +5,258 @@
 import numpy as np
 cimport numpy as cnp
 from libc.float cimport DBL_MAX
-from libc.math cimport atan2, fabs
+from libc.math cimport M_PI, atan, atan2, cos, fabs, fmax, sqrt
 
 from .._shared.fused_numerics cimport np_floats
 from ..util import img_as_float64
 
 cnp.import_array()
+
+def _real_symmetric_2x2_evs(
+    np_floats[:, ::1] M00, np_floats[:, ::1] M01, np_floats[:, ::1] M11,
+    bint ascending=False, bint abs_sort=False,
+):
+    """Analytical eigenvalues of a symmetric 2 x 2 matrix."""
+    # use double-precision intermediate variables for accuracy
+    cdef:
+        cnp.float64_t m00, m01, m11, tmp1, tmp2, lam1, lam2, stmp;
+        Py_ssize_t rows = M00.shape[0];
+        Py_ssize_t cols = M00.shape[1];
+        Py_ssize_t r, c;
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+
+    cdef np_floats[:, :, ::1] evals = np.empty((2, rows, cols), dtype=dtype)
+
+    with nogil:
+        for r in range(rows):
+            for c in range(cols):
+                m00 = <cnp.float64_t>(M00[r, c])
+                m01 = <cnp.float64_t>(M01[r, c])
+                m11 = <cnp.float64_t>(M11[r, c])
+                tmp1 = 4 * m01 * m01
+
+                tmp2 = m00 - m11
+                tmp2 *= tmp2
+                tmp2 += tmp1
+                tmp2 = sqrt(tmp2) / 2
+
+                tmp1 = (m00 + m11) / 2
+                if ascending:
+                    lam1 = tmp1 - tmp2
+                    lam2 = tmp1 + tmp2
+                    if abs_sort and (fabs(lam1) > fabs(lam2)):
+                        stmp = lam1
+                        lam1 = lam2
+                        lam2 = stmp
+                else:
+                    lam1 = tmp1 + tmp2
+                    lam2 = tmp1 - tmp2
+                    if abs_sort and (fabs(lam1) < fabs(lam2)):
+                        stmp = lam1
+                        lam1 = lam2
+                        lam2 = stmp
+                evals[0, r, c] = lam1
+                evals[1, r, c] = lam2
+    return np.asarray(evals)
+
+
+def _real_symmetric_3x3_evs(
+    np_floats[:, :, ::1] M00, np_floats[:, :, ::1] M01, np_floats[:, :, ::1] M02,
+    np_floats[:, :, ::1] M11, np_floats[:, :, ::1] M12, np_floats[:, :, ::1] M22,
+    bint ascending=False, bint abs_sort=False,
+):
+    """Analytical eigenvalues of a symmetric 3 x 3 matrix.
+
+    Follows the expressions given for hermitian symmetric 3 x 3 matrices in
+    [1]_, but simplified to handle real-valued matrices only.
+
+    Parameters
+    ----------
+    M00, M01, M02, M11, M12, M22 : cp.ndarray
+        Images corresponding to the individual components of the symmteric,
+        real-valued matrix M. `M01`, for instance, represents entry ``M[0, 1]``
+        (equivalent to ``M[1, 0]`` by symmetry).
+    sort : {"ascending", "descending"}, optional
+        Eigenvalues should be sorted in the specified order.
+    abs_sort : boolean, optional
+        If ``True``, sort based on the absolute values.
+
+    References
+    ----------
+    .. [1] C. Deledalle, L. Denis, S. Tabti, F. Tupin. Closed-form expressions
+        of the eigen decomposition of 2 x 2 and 3 x 3 Hermitian matrices.
+        [Research Report] Université de Lyon. 2017.
+        https://hal.archives-ouvertes.fr/hal-01501221/file/matrix_exp_and_log_formula.pdf
+    """  # noqa
+    cdef:
+        # use double-precision intermediate variables for accuracy
+        cnp.float64_t a, b, c, d, e, f, d_sq, e_sq, f_sq;
+        cnp.float64_t x1, x2, phi, tmpa, tmpb, tmpc, arg, x1_term, abc;
+        cnp.float64_t lam1, lam2, lam3, stmp;
+        cnp.float64_t abs_lam1, abs_lam2, abs_lam3;
+        Py_ssize_t planes = M00.shape[0];
+        Py_ssize_t rows = M00.shape[1];
+        Py_ssize_t cols = M00.shape[2];
+        Py_ssize_t pln, row, col;
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+
+    cdef np_floats[:, :, :, ::1] evals = np.empty((3, planes, rows, cols),
+                                                  dtype=dtype)
+
+    with nogil:
+        for pln in range(planes):
+            for row in range(rows):
+                for col in range(cols):
+                    # M = [[a, d, f],
+                    #      [d, b, e],
+                    #      [f, e, c]]
+                    # so d = M01, etc.
+                    a = <cnp.float64_t>(M00[pln, row, col])
+                    b = <cnp.float64_t>(M11[pln, row, col])
+                    c = <cnp.float64_t>(M22[pln, row, col])
+                    d = <cnp.float64_t>(M01[pln, row, col])
+                    e = <cnp.float64_t>(M12[pln, row, col])
+                    f = <cnp.float64_t>(M02[pln, row, col])
+                    d_sq = d * d
+                    e_sq = e * e
+                    f_sq = f * f
+                    tmpa = 2 * a - b - c
+                    tmpb = 2 * b - a - c
+                    tmpc = 2 * c - a - b
+                    x2 = - tmpa * tmpb * tmpc
+                    x2 += 9 * (tmpc * d_sq + tmpb * f_sq + tmpa * e_sq)
+                    x2 -= 54 * d * e * f
+                    x1 = a*a + b*b + c*c - a*b - a*c - b*c + 3 * (d_sq + e_sq + f_sq)
+                    x1 = fmax(x1, 0.0)
+
+                    if x2 == 0.0:
+                        phi = M_PI / 2.0
+                    else:
+                        # added max() here for numerical stability
+                        # (avoid NaN values in test_hessian_matrix_eigvals_3d)
+                        arg = fmax(4*x1*x1*x1 - x2*x2, 0.0)
+                        phi = atan(sqrt(arg)/x2)
+                        if x2 < 0:
+                            phi += M_PI
+                    x1_term = (2.0 / 3.0) * sqrt(x1)
+                    abc = (a + b + c) / 3.0
+                    lam1 = abc - x1_term * cos(phi/3.0)
+                    lam2 = abc + x1_term * cos((phi - M_PI)/3.0)
+                    lam3 = abc + x1_term * cos((phi + M_PI)/3.0)
+                    if abs_sort:
+                        abs_lam1 = fabs(lam1)
+                        abs_lam2 = fabs(lam2)
+                        abs_lam3 = fabs(lam3)
+                    else:
+                        # reuse abs_lam variables without abs to avoid
+                        # duplicate code below
+                        abs_lam1 = lam1
+                        abs_lam2 = lam2
+                        abs_lam3 = lam3
+
+                    if ascending:
+                        if (abs_lam1 > abs_lam2):
+                            stmp = lam1
+                            lam1 = lam2
+                            lam2 = stmp
+                        if (abs_lam1 > abs_lam3):
+                            stmp = lam3
+                            lam3 = lam1
+                            lam1 = stmp
+                        if (abs_lam2 > abs_lam3):
+                            stmp = lam3
+                            lam3 = lam2
+                            lam2 = stmp
+                    else:
+                        if (abs_lam3 > abs_lam2):
+                            stmp = lam3
+                            lam3 = lam2
+                            lam2 = stmp
+                        if (abs_lam3 > abs_lam1):
+                            stmp = lam1
+                            lam1 = lam3
+                            lam3 = stmp
+                        if (abs_lam2 > abs_lam1):
+                            stmp = lam1
+                            lam1 = lam2
+                            lam2 = stmp
+                    evals[0, pln, row, col] = lam1
+                    evals[1, pln, row, col] = lam2
+                    evals[2, pln, row, col] = lam3
+    return np.asarray(evals)
+
+
+def _real_symmetric_2x2_det(
+    np_floats[:, ::1] M00, np_floats[:, ::1] M01, np_floats[:, ::1] M11
+):
+    """Determinant for real, symmetric 2 x 2 matrices."""
+    cdef:
+        cnp.float64_t m00, m01, m11;
+        Py_ssize_t rows = M00.shape[0];
+        Py_ssize_t cols = M00.shape[1];
+        Py_ssize_t r, c;
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+
+    cdef np_floats[:, ::1] det = np.zeros((rows, cols), dtype=dtype)
+
+    with nogil:
+        for r in range(rows):
+            for c in range(cols):
+                m00 = <cnp.float64_t>(M00[r, c])
+                m01 = <cnp.float64_t>(M01[r, c])
+                m11 = <cnp.float64_t>(M11[r, c])
+                det[r, c] = m00 * m11 - m01 * m01;
+    return np.asarray(det)
+
+
+def _real_symmetric_3x3_det(
+    np_floats[:, :, ::1] M00, np_floats[:, :, ::1] M01, np_floats[:, :, ::1] M02,
+    np_floats[:, :, ::1] M11, np_floats[:, :, ::1] M12, np_floats[:, :, ::1] M22,
+):
+    """Determinant for real, symmetric 3 x 3 matrices."""
+    cdef:
+        cnp.float64_t m00, m01, m02, m11, m12, m22;
+        Py_ssize_t planes = M00.shape[0];
+        Py_ssize_t rows = M00.shape[1];
+        Py_ssize_t cols = M00.shape[2];
+        Py_ssize_t pln, row, col;
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+
+    cdef np_floats[:, :, ::1] det = np.zeros((planes, rows, cols), dtype=dtype)
+
+    with nogil:
+
+        for pln in range(planes):
+            for row in range(rows):
+                for col in range(cols):
+                    m00 = <cnp.float64_t>(M00[pln, row, col])
+                    m01 = <cnp.float64_t>(M01[pln, row, col])
+                    m02 = <cnp.float64_t>(M02[pln, row, col])
+                    m11 = <cnp.float64_t>(M11[pln, row, col])
+                    m12 = <cnp.float64_t>(M12[pln, row, col])
+                    m22 = <cnp.float64_t>(M22[pln, row, col])
+                    det[pln, row, col] = (
+                        m00 * (m11 * m22 - m12 * m12)
+                        - m01 * (m01 * m22 - m12 * m02)
+                        + m02 * (m01 * m12 - m11 * m02)
+                    )
+    return np.asarray(det)
 
 
 def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
